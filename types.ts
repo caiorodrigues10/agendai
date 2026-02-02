@@ -48,6 +48,7 @@ export interface DaySchedule {
 
 export interface ShopSettings {
   shopName: string;
+  whatsapp: string;
   schedule: DaySchedule[];
   logoUrl?: string;
 }

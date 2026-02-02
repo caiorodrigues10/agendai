@@ -129,8 +129,8 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     if (!isManual) {
       const serviceName = services.find(s => s.id === serviceId)?.name || 'Serviço';
-      const msg = `*Novo Cliente na Fila*\nNome: ${name}\nServiço: ${serviceName}\nContato: ${whatsapp}`;
-      notifyBarberBot(msg);
+      const msg = `*Novo Cliente na Fila*\n\n💈 *${settings.shopName}*\n👤 Nome: ${name}\n✂️ Serviço: ${serviceName}\n📱 Contato: ${whatsapp}`;
+      notifyBarberBot(settings.whatsapp, msg);
     }
   };
 
@@ -141,8 +141,8 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     await api.queue.save(newQueue);
 
     if (itemLeaving && !itemLeaving.addedByStaff) {
-      const msg = `*Cliente Saiu da Fila*\nNome: ${itemLeaving.customerName}\nMotivo: Cancelamento pelo usuário`;
-      notifyBarberBot(msg);
+      const msg = `*Cliente Saiu da Fila*\n\n👤 Nome: ${itemLeaving.customerName}\n⚠️ Motivo: Cancelamento pelo usuário`;
+      notifyBarberBot(settings.whatsapp, msg);
     }
   };
 
@@ -232,8 +232,9 @@ export const ShopProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     await api.appointments.save(newAppts);
 
     const staffName = staff.find(s => s.id === data.staffId)?.name || 'Qualquer';
-    const msg = `*Novo Agendamento*\nCliente: ${data.customerName}\nData: ${data.date} às ${data.time}\nProfissional: ${staffName}`;
-    notifyBarberBot(msg);
+    const dateFormatted = new Date(data.date + 'T12:00:00').toLocaleDateString('pt-BR');
+    const msg = `*Novo Agendamento*\n\n📅 Data: ${dateFormatted}\n⏰ Hora: ${data.time}\n👤 Cliente: ${data.customerName}\n💈 Profissional: ${staffName}`;
+    notifyBarberBot(settings.whatsapp, msg);
   };
 
   const cancelAppointment = async (id: string) => {

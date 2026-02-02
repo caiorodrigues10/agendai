@@ -44,3 +44,15 @@ export const TeamMemberSchema = z.object({
 });
 
 export type TeamMemberFormData = z.infer<typeof TeamMemberSchema>;
+
+// --- Appointment Schema ---
+export const AppointmentSchema = z.object({
+  serviceId: z.string().min(1, "Selecione um serviço"),
+  staffId: z.string().min(1, "Selecione um profissional"),
+  date: z.string().min(1, "Selecione uma data"),
+  time: z.string().min(1, "Selecione um horário"),
+  customerName: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
+  whatsapp: z.string().min(11, "Telefone inválido (mínimo 11 dígitos)")
+});
+
+export type AppointmentFormData = z.infer<typeof AppointmentSchema>;

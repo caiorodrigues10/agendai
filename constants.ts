@@ -1,7 +1,7 @@
 import { Service, ShopSettings } from './types';
 
-// Substitua pelo número real do dono da barbearia
-export const BARBER_PHONE = '5511999999999'; 
+// Valor padrão caso não configurado
+export const BARBER_PHONE_DEFAULT = '5511999999999'; 
 
 const DEFAULT_SCHEDULE = [
   { dayName: 'Domingo', isOpen: false, openTime: '09:00', closeTime: '13:00' },
@@ -15,6 +15,7 @@ const DEFAULT_SCHEDULE = [
 
 export const DEFAULT_SHOP_SETTINGS: ShopSettings = {
   shopName: 'Reis Barbearia',
+  whatsapp: BARBER_PHONE_DEFAULT,
   schedule: DEFAULT_SCHEDULE
 };
 
@@ -50,5 +51,5 @@ export const DEFAULT_SERVICES: Service[] = [
 ];
 
 export const MOCK_QUEUE_INITIAL: any[] = [
-  // Intentionally empty for fresh start
+  // Intentemente vazio para novo começo
 ];

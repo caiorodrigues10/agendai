@@ -1,14 +1,15 @@
-import { BARBER_PHONE } from '../constants';
-
-// Em um cenário real, isso seria uma chamada para uma API Backend (Node.js/Python)
-// que integraria com Twilio, WPPConnect ou Evolution API.
-export const notifyBarberBot = async (message: string): Promise<boolean> => {
-  console.log(`[BOT MOCK] Enviando para ${BARBER_PHONE}:`, message);
+export const notifyBarberBot = async (targetPhone: string, message: string): Promise<boolean> => {
+  // Limpa o número de telefone (remove caracteres não numéricos)
+  const cleanPhone = targetPhone.replace(/\D/g, '');
   
-  // Simulando delay de rede/processamento do bot
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(true);
-    }, 1500);
-  });
+  // Se o número for curto, assume que falta o DDI 55 (Brasil)
+  const finalPhone = cleanPhone.length === 11 ? `55${cleanPhone}` : cleanPhone;
+
+  const url = `https://wa.me/${finalPhone}?text=${encodeURIComponent(message)}`;
+  
+  // Abre o WhatsApp em uma nova aba
+  // Nota: Isso funciona melhor se acionado diretamente por um gesto do usuário.
+  window.open(url, '_blank');
+  
+  return true;
 };

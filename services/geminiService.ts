@@ -40,39 +40,6 @@ const QUEUE_MESSAGES = [
   "Trinta ou mais! A fila tá quilométrica. Só venha se tiver paciência de monge." // 30+
 ];
 
-export const generateShopLogo = async (
-  shopName: string, 
-  palette: string = 'Dark background (hex #0a0a0a), Neon Cyan (hex #06b6d4) and White accents',
-  extraInstructions: string = ''
-): Promise<string | null> => {
-  try {
-    const prompt = `
-      A professional, minimalist vector logo icon for a barber shop named "${shopName}".
-      Style: Modern, sleek, flat design, high quality vector art.
-      Colors: ${palette}.
-      Elements: Abstract scissors, razor, or barber pole integrated geometrically.
-      Additional Instructions: ${extraInstructions || 'Clean composition, suitable for an app icon'}.
-      Composition: Centered, symmetric, high contrast.
-      No realistic photos, only vector graphic style.
-    `;
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
-      contents: { parts: [{ text: prompt }] },
-    });
-
-    for (const part of response.candidates?.[0]?.content?.parts || []) {
-      if (part.inlineData) {
-        return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-      }
-    }
-    return null;
-  } catch (error) {
-    console.error("Error generating logo:", error);
-    return null;
-  }
-};
-
 export const getQueueInsight = async (
   queue: QueueItem[], 
   services: Service[]
