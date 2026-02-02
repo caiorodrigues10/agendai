@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { StaffMember } from '../types';
+import { TeamMemberSchema, TeamMemberFormData } from '../schemas';
 import { v4 as uuidv4 } from 'uuid';
-import { Trash2, UserPlus, Shield, User, X, Check } from 'lucide-react';
+import { Trash2, UserPlus, Shield, User, X, Check, AlertCircle } from 'lucide-react';
 
 interface TeamManagerProps {
   staff: StaffMember[];
@@ -10,25 +13,23 @@ interface TeamManagerProps {
 }
 
 export const TeamManager: React.FC<TeamManagerProps> = ({ staff, onUpdateTeam, currentAdminId }) => {
-  const [newName, setNewName] = useState('');
-  const [newPin, setNewPin] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const handleAddMember = (e: React.FormEvent) => {
-    e.preventDefault();
-    if(!newName || !newPin) return;
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<TeamMemberFormData>({
+    resolver: zodResolver(TeamMemberSchema)
+  });
 
+  const handleAddMember = (data: TeamMemberFormData) => {
     const newMember: StaffMember = {
         id: uuidv4(),
-        name: newName,
-        pin: newPin,
-        role: 'barber' // Default to barber, only the main account is admin usually
+        name: data.name,
+        pin: data.pin,
+        role: 'barber' // Default to barber
     };
 
     onUpdateTeam([...staff, newMember]);
-    setNewName('');
-    setNewPin('');
+    reset();
     setIsAdding(false);
   };
 
@@ -50,25 +51,29 @@ export const TeamManager: React.FC<TeamManagerProps> = ({ staff, onUpdateTeam, c
       </div>
 
       {isAdding && (
-          <form onSubmit={handleAddMember} className="bg-neutral-900 p-4 rounded-xl border border-neutral-800 mb-4 animate-fade-in-down">
+          <form onSubmit={handleSubmit(handleAddMember)} className="bg-neutral-900 p-4 rounded-xl border border-neutral-800 mb-4 animate-fade-in-down">
               <h4 className="text-sm font-bold text-white mb-3">Novo Membro</h4>
               <div className="space-y-3">
-                  <input 
-                    type="text" 
-                    placeholder="Nome (ex: Carlos)" 
-                    value={newName}
-                    onChange={e => setNewName(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-white text-sm focus:ring-1 focus:ring-cyan-500 outline-none"
-                    required
-                  />
-                  <input 
-                    type="tel" 
-                    placeholder="PIN de Acesso (4-6 dígitos)" 
-                    value={newPin}
-                    onChange={e => setNewPin(e.target.value.replace(/\D/g,'').slice(0,6))}
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded px-3 py-2 text-white text-sm focus:ring-1 focus:ring-cyan-500 outline-none"
-                    required
-                  />
+                  <div>
+                    <input 
+                        type="text" 
+                        placeholder="Nome (ex: Carlos)" 
+                        className={`w-full bg-neutral-950 border rounded px-3 py-2 text-white text-sm focus:ring-1 focus:ring-cyan-500 outline-none ${errors.name ? 'border-red-500' : 'border-neutral-800'}`}
+                        {...register('name')}
+                    />
+                    {errors.name && <span className="text-red-500 text-[10px] flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.name.message}</span>}
+                  </div>
+                  
+                  <div>
+                    <input 
+                        type="tel" 
+                        placeholder="PIN de Acesso (4-6 dígitos)" 
+                        className={`w-full bg-neutral-950 border rounded px-3 py-2 text-white text-sm focus:ring-1 focus:ring-cyan-500 outline-none ${errors.pin ? 'border-red-500' : 'border-neutral-800'}`}
+                        {...register('pin')}
+                    />
+                    {errors.pin && <span className="text-red-500 text-[10px] flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.pin.message}</span>}
+                  </div>
+
                   <div className="flex gap-2">
                       <button type="button" onClick={() => setIsAdding(false)} className="flex-1 py-2 text-xs text-neutral-400 bg-neutral-800 rounded hover:bg-neutral-700">Cancelar</button>
                       <button type="submit" className="flex-1 py-2 text-xs text-white font-bold bg-cyan-600 rounded hover:bg-cyan-500">Cadastrar</button>

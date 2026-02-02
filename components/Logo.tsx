@@ -3,6 +3,7 @@ import React from 'react';
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
   customImageUrl?: string;
+  showText?: boolean;
 }
 
 const CustomBarberIcon = ({ size, className }: { size: number, className?: string }) => (
@@ -74,7 +75,7 @@ const CustomBarberIcon = ({ size, className }: { size: number, className?: strin
   </svg>
 );
 
-export const Logo: React.FC<LogoProps> = ({ size = 'md', customImageUrl }) => {
+export const Logo: React.FC<LogoProps> = ({ size = 'md', customImageUrl, showText = true }) => {
   const sizeClasses = {
     sm: { icon: 24, text: 'text-lg', sub: 'text-[0.6rem]', img: 'w-8 h-8' },
     md: { icon: 40, text: 'text-3xl', sub: 'text-xs', img: 'w-12 h-12' },
@@ -84,7 +85,7 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', customImageUrl }) => {
   const s = sizeClasses[size];
 
   return (
-    <div className="flex items-center gap-3 select-none">
+    <div className={`flex items-center ${showText ? 'gap-3' : ''} select-none`}>
       <div className="relative group">
         {/* Subtle Glow */}
         <div className="absolute inset-0 bg-cyan-500 blur-xl opacity-10 rounded-full group-hover:opacity-25 transition-opacity duration-500"></div>
@@ -100,17 +101,19 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', customImageUrl }) => {
         )}
       </div>
       
-      <div className="flex flex-col justify-center h-full">
-        <h1 className={`${s.text} font-black tracking-tighter text-white leading-none flex items-center`}>
-          BARBER<span className="text-cyan-400">QUEUE</span>
-        </h1>
-        <div className="flex items-center gap-2 mt-0.5">
-           <div className="h-[2px] w-3 bg-cyan-600 rounded-full"></div>
-           <span className={`${s.sub} text-neutral-500 font-bold tracking-[0.2em] uppercase`}>
-             SYSTEM
-           </span>
+      {showText && (
+        <div className="flex flex-col justify-center h-full">
+            <h1 className={`${s.text} font-black tracking-tighter text-white leading-none flex items-center`}>
+            BARBER<span className="text-cyan-400">QUEUE</span>
+            </h1>
+            <div className="flex items-center gap-2 mt-0.5">
+            <div className="h-[2px] w-3 bg-cyan-600 rounded-full"></div>
+            <span className={`${s.sub} text-neutral-500 font-bold tracking-[0.2em] uppercase`}>
+                SYSTEM
+            </span>
+            </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

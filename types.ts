@@ -18,21 +18,25 @@ export interface QueueItem {
   customerName: string;
   whatsapp: string; 
   serviceId: string;
-  joinedAt: number; // Timestamp
+  joinedAt: number;
   status: 'waiting' | 'in_chair' | 'completed' | 'cancelled';
   estimatedStartTime?: number;
-  addedByStaff?: boolean; // New: to track walk-ins
-  
-  // Historical Data for Dashboard
+  addedByStaff?: boolean;
   completedAt?: number;
-  completedBy?: string; // Staff ID who finished the service
-  finalPrice?: number; // Snapshot of price at time of completion
+  completedBy?: string;
+  finalPrice?: number;
 }
 
-export interface ShopStats {
-  totalServedToday: number;
-  totalRevenue: number;
-  avgWaitTime: number;
+export interface Appointment {
+  id: string;
+  customerName: string;
+  whatsapp: string;
+  serviceId: string;
+  staffId: string;
+  date: string;
+  time: string;
+  createdAt: number;
+  status: 'confirmed' | 'cancelled' | 'completed';
 }
 
 export interface DaySchedule {
@@ -44,8 +48,8 @@ export interface DaySchedule {
 
 export interface ShopSettings {
   shopName: string;
-  schedule: DaySchedule[]; // Index 0 = Sunday, 6 = Saturday
-  logoUrl?: string; // New: Generated AI Logo
+  schedule: DaySchedule[];
+  logoUrl?: string;
 }
 
 export interface AIInsight {
@@ -54,23 +58,66 @@ export interface AIInsight {
   busyLevel: 'low' | 'medium' | 'high';
 }
 
-// New Types for Staff/Auth
 export type StaffRole = 'admin' | 'barber';
 
 export interface StaffMember {
   id: string;
   name: string;
-  pin: string; // Simple 4-6 digit pin for login
+  pin: string;
   role: StaffRole;
 }
 
-// Feed Types
 export interface FeedPost {
   id: string;
   type: 'haircut' | 'beard' | 'announcement';
-  content: string; // Text description
+  title?: string;
+  content: string;
   imageUrl?: string;
   createdAt: number;
   likes: number;
   authorName?: string;
+}
+
+// Data Context Interface
+export interface ShopContextType {
+  // State
+  currentUser: StaffMember | null;
+  queue: QueueItem[];
+  services: Service[];
+  settings: ShopSettings;
+  staff: StaffMember[];
+  feed: FeedPost[];
+  appointments: Appointment[];
+  ownedIds: string[];
+  aiInsight: AIInsight | null;
+  loading: boolean;
+
+  // Actions
+  login: (pin: string) => Promise<boolean>;
+  logout: () => void;
+  joinQueue: (name: string, whatsapp: string, serviceId: string, isManual?: boolean) => Promise<void>;
+  leaveQueue: (id: string) => Promise<void>;
+  updateQueueStatus: (id: string, status: QueueItem['status']) => Promise<void>;
+  deleteHistoryItem: (id: string) => Promise<void>;
+  
+  // CRUD Actions
+  addService: (data: Omit<Service, 'id'>) => Promise<void>;
+  editService: (id: string, data: Omit<Service, 'id'>) => Promise<void>;
+  deleteService: (id: string) => Promise<void>;
+  
+  saveSettings: (settings: ShopSettings) => Promise<void>;
+  updateTeam: (team: StaffMember[]) => Promise<void>;
+  
+  // Feed & Appointments
+  addPost: (post: FeedPost) => Promise<void>;
+  deletePost: (id: string) => Promise<void>;
+  likePost: (id: string) => Promise<void>;
+  
+  bookAppointment: (data: any) => Promise<void>;
+  cancelAppointment: (id: string) => Promise<void>;
+  checkInAppointment: (appt: Appointment) => Promise<void>;
+  
+  // Utils
+  isShopOpen: () => boolean;
+  getTodayScheduleDisplay: () => string;
 }

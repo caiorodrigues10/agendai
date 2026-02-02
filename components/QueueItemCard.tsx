@@ -90,15 +90,15 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
             {getStatusLabel(item.status)}
           </span>
           
-          {/* User Option to Leave Queue */}
+          {/* User Option to Leave Queue - Improved Button */}
           {isCurrentUser && item.status === 'waiting' && !isAdmin && (
               <button 
                 onClick={() => {
                     if(confirm("Deseja realmente sair da fila?")) onLeaveQueue(item.id);
                 }}
-                className="flex items-center gap-1 text-xs text-red-500 hover:text-red-400 underline transition-colors"
+                className="mt-1 px-3 py-1.5 rounded-lg bg-red-950/30 border border-red-900/50 hover:bg-red-900/50 text-red-400 text-xs font-bold transition-all flex items-center gap-2 group hover:shadow-[0_0_10px_rgba(239,68,68,0.1)]"
               >
-                <LogOut size={10} />
+                <LogOut size={12} className="group-hover:-translate-x-0.5 transition-transform" />
                 Sair da fila
               </button>
           )}

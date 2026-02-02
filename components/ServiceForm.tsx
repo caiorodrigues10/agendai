@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Service } from '../types';
 import { DynamicIcon, ICON_OPTIONS } from './DynamicIcon';
-import { Save, X } from 'lucide-react';
+import { ServiceSchema, ServiceFormData } from '../schemas';
+import { Save, AlertCircle } from 'lucide-react';
 
 interface ServiceFormProps {
   initialService?: Service;
@@ -10,20 +13,22 @@ interface ServiceFormProps {
 }
 
 export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave, onCancel }) => {
-  const [name, setName] = useState(initialService?.name || '');
-  const [price, setPrice] = useState(initialService?.price.toString() || '');
-  const [time, setTime] = useState(initialService?.avgTimeMinutes.toString() || '30');
-  const [icon, setIcon] = useState(initialService?.icon || 'Scissors');
+  const [selectedIcon, setSelectedIcon] = useState(initialService?.icon || 'Scissors');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name || !price || !time) return;
+  const { register, handleSubmit, formState: { errors } } = useForm<ServiceFormData>({
+    resolver: zodResolver(ServiceSchema),
+    defaultValues: {
+      name: initialService?.name || '',
+      price: initialService?.price || 0,
+      avgTimeMinutes: initialService?.avgTimeMinutes || 30,
+      icon: initialService?.icon || 'Scissors'
+    }
+  });
 
+  const onSubmit = (data: ServiceFormData) => {
     onSave({
-      name,
-      price: parseFloat(price),
-      avgTimeMinutes: parseInt(time),
-      icon
+      ...data,
+      icon: selectedIcon
     });
   };
 
@@ -34,17 +39,16 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
           {initialService ? 'Editar Serviço' : 'Novo Serviço'}
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-neutral-400 mb-1.5">Nome do Serviço</label>
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500 outline-none transition-all placeholder-neutral-700"
+              className={`w-full bg-neutral-950 border rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500 outline-none transition-all placeholder-neutral-700 ${errors.name ? 'border-red-500' : 'border-neutral-800'}`}
               placeholder="Ex: Corte Degrade"
-              required
+              {...register('name')}
             />
+            {errors.name && <span className="text-red-500 text-xs flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.name.message}</span>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -53,23 +57,21 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
               <input
                 type="number"
                 step="0.01"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500 outline-none transition-all placeholder-neutral-700"
+                className={`w-full bg-neutral-950 border rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500 outline-none transition-all placeholder-neutral-700 ${errors.price ? 'border-red-500' : 'border-neutral-800'}`}
                 placeholder="0.00"
-                required
+                {...register('price', { valueAsNumber: true })}
               />
+               {errors.price && <span className="text-red-500 text-xs flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.price.message}</span>}
             </div>
             <div>
               <label className="block text-sm font-medium text-neutral-400 mb-1.5">Tempo (min)</label>
               <input
                 type="number"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500 outline-none transition-all placeholder-neutral-700"
+                className={`w-full bg-neutral-950 border rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500 outline-none transition-all placeholder-neutral-700 ${errors.avgTimeMinutes ? 'border-red-500' : 'border-neutral-800'}`}
                 placeholder="30"
-                required
+                {...register('avgTimeMinutes', { valueAsNumber: true })}
               />
+              {errors.avgTimeMinutes && <span className="text-red-500 text-xs flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.avgTimeMinutes.message}</span>}
             </div>
           </div>
 
@@ -81,9 +83,9 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
                   <button
                     key={i}
                     type="button"
-                    onClick={() => setIcon(i)}
+                    onClick={() => setSelectedIcon(i)}
                     className={`aspect-square rounded-lg flex items-center justify-center transition-all ${
-                      icon === i 
+                      selectedIcon === i 
                         ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20 scale-105' 
                         : 'bg-neutral-900 text-neutral-500 hover:bg-neutral-800 hover:text-neutral-300'
                     }`}

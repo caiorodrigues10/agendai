@@ -1,43 +1,53 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Service } from '../types';
 import { ServiceCard } from './ServiceCard';
-import { X, Loader2, UserCheck } from 'lucide-react';
+import { CustomerQueueSchema, CustomerQueueFormData } from '../schemas';
+import { X, Loader2, UserCheck, AlertCircle } from 'lucide-react';
 
 interface AddCustomerFormProps {
   services: Service[];
   onJoin: (name: string, whatsapp: string, serviceId: string, isManualEntry?: boolean) => void;
   onCancel: () => void;
-  isStaffMode?: boolean; // New prop to indicate staff is adding
+  isStaffMode?: boolean;
 }
 
 export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({ services, onJoin, onCancel, isStaffMode = false }) => {
-  const [name, setName] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
-  const [selectedServiceId, setSelectedServiceId] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (services.length > 0) {
-      setSelectedServiceId(services[0].id);
+  // Adapta o schema dinamicamente: se for staff, whatsapp pode ser opcional (ou um placeholder)
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<CustomerQueueFormData>({
+    resolver: zodResolver(CustomerQueueSchema),
+    defaultValues: {
+      whatsapp: isStaffMode ? '00000000000' : '', // Placeholder válido para staff
+      serviceId: services.length > 0 ? services[0].id : ''
     }
-  }, [services]);
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !selectedServiceId) return;
-    
-    // For regular users, whatsapp is required. For staff, it's optional (walk-in).
-    if (!isStaffMode && !whatsapp.trim()) return;
+  const selectedServiceId = watch('serviceId');
+  const whatsappValue = watch('whatsapp');
 
+  useEffect(() => {
+    if (services.length > 0 && !selectedServiceId) {
+      setValue('serviceId', services[0].id);
+    }
+  }, [services, setValue, selectedServiceId]);
+
+  const onSubmit = (data: CustomerQueueFormData) => {
     setLoading(true);
     setTimeout(() => {
-        onJoin(name, whatsapp || '00000000000', selectedServiceId, isStaffMode);
+        onJoin(data.name, data.whatsapp, data.serviceId, isStaffMode);
         setLoading(false);
     }, 600);
   };
 
   const formatPhone = (val: string) => {
     return val.replace(/\D/g, '').replace(/^(\d{2})(\d)/g, '($1) $2').replace(/(\d)(\d{4})$/, '$1-$2').slice(0, 15);
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue('whatsapp', formatPhone(e.target.value), { shouldValidate: true });
   };
 
   return (
@@ -55,32 +65,32 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({ services, onJo
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-neutral-400 mb-2">Nome do Cliente</label>
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
               placeholder="Ex: João Silva"
-              className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all placeholder-neutral-700"
+              className={`w-full bg-neutral-950 border rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500 outline-none transition-all placeholder-neutral-700 ${errors.name ? 'border-red-500' : 'border-neutral-800'}`}
               autoFocus
-              required
+              {...register('name')}
             />
+            {errors.name && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle size={10} /> {errors.name.message}</p>}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-neutral-400 mb-2">
-                WhatsApp {isStaffMode ? '(Opcional)' : '(para aviso)'}
+                WhatsApp {isStaffMode ? '(Opcional / Placeholder)' : '(para aviso)'}
             </label>
             <input
               type="tel"
-              value={whatsapp}
-              onChange={(e) => setWhatsapp(formatPhone(e.target.value))}
               placeholder="(11) 99999-9999"
-              className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all placeholder-neutral-700"
-              required={!isStaffMode}
+              className={`w-full bg-neutral-950 border rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500 outline-none transition-all placeholder-neutral-700 ${errors.whatsapp ? 'border-red-500' : 'border-neutral-800'}`}
+              value={whatsappValue}
+              onChange={handlePhoneChange}
             />
+             {errors.whatsapp && !isStaffMode && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle size={10} /> {errors.whatsapp.message}</p>}
+             
              {!isStaffMode && <p className="text-xs text-neutral-500 mt-1">
               *O dono será notificado e te avisaremos quando faltar 15min.
             </p>}
@@ -99,19 +109,20 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({ services, onJo
                     key={service.id}
                     service={service}
                     selected={selectedServiceId === service.id}
-                    onSelect={() => setSelectedServiceId(service.id)}
+                    onSelect={() => setValue('serviceId', service.id, { shouldValidate: true })}
                     />
                 ))}
                 </div>
             )}
+            {errors.serviceId && <p className="text-red-500 text-xs mt-1">Selecione um serviço</p>}
           </div>
 
           <div className="pt-4">
             <button
               type="submit"
-              disabled={!name.trim() || (!isStaffMode && !whatsapp.trim()) || !selectedServiceId || loading}
+              disabled={loading}
               className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition-all ${
-                !name.trim() || (!isStaffMode && !whatsapp.trim()) || !selectedServiceId || loading
+                loading
                   ? 'bg-neutral-800 text-neutral-600 cursor-not-allowed'
                   : 'bg-cyan-600 text-white hover:bg-cyan-500 hover:shadow-cyan-500/20'
               }`}

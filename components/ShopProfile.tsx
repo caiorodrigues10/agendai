@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ShopSettings, FeedPost, StaffMember } from '../types';
 import { Logo } from './Logo';
-import { Camera, Type, Send, Trash2, Heart, Image as ImageIcon, MapPin, Star, Scissors } from 'lucide-react';
+import { Camera, Type, Send, Trash2, Heart, Image as ImageIcon, MapPin, Star, Scissors, MoreHorizontal } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 interface ShopProfileProps {
@@ -23,6 +23,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
 }) => {
   // New Post State
   const [newPostContent, setNewPostContent] = useState('');
+  const [newPostTitle, setNewPostTitle] = useState('');
   const [newPostType, setNewPostType] = useState<'haircut' | 'beard' | 'announcement'>('haircut');
   const [newPostImage, setNewPostImage] = useState<string | null>(null);
   const [isPosting, setIsPosting] = useState(false);
@@ -40,13 +41,14 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
 
   const handleSubmitPost = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPostContent && !newPostImage) return;
+    if (!newPostContent && !newPostImage && !newPostTitle) return;
 
     setIsPosting(true);
 
     const post: FeedPost = {
       id: uuidv4(),
       type: newPostType,
+      title: newPostTitle,
       content: newPostContent,
       imageUrl: newPostImage || undefined,
       createdAt: Date.now(),
@@ -58,6 +60,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
     setTimeout(() => {
         onAddPost(post);
         setNewPostContent('');
+        setNewPostTitle('');
         setNewPostImage(null);
         setIsPosting(false);
     }, 500);
@@ -129,6 +132,14 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
                 ))}
              </div>
 
+             <input
+                type="text"
+                value={newPostTitle}
+                onChange={(e) => setNewPostTitle(e.target.value)}
+                placeholder="Título (Opcional - ex: Degradê Navalhado)"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white focus:border-cyan-500 outline-none placeholder-neutral-700"
+             />
+
              <textarea 
                 value={newPostContent}
                 onChange={(e) => setNewPostContent(e.target.value)}
@@ -165,7 +176,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
 
              <button
                 type="submit"
-                disabled={isPosting || (!newPostContent && !newPostImage)}
+                disabled={isPosting || (!newPostContent && !newPostImage && !newPostTitle)}
                 className="w-full py-2 bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold rounded-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50"
              >
                 <Send size={14} /> {isPosting ? 'Publicando...' : 'Publicar no Feed'}
@@ -182,61 +193,86 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
                 <p className="text-neutral-500 text-sm">O feed está vazio por enquanto.</p>
             </div>
          ) : (
-            posts.map((post) => (
-                <div key={post.id} className="bg-neutral-900 rounded-xl border border-neutral-800 overflow-hidden shadow-sm">
-                    {/* Header */}
-                    <div className="p-3 flex justify-between items-center border-b border-neutral-800/50">
-                        <div className="flex items-center gap-2">
-                             <div className="w-8 h-8 rounded-full bg-cyan-900/30 flex items-center justify-center border border-cyan-900/50">
-                                <Logo size="sm" />
-                             </div>
-                             <div>
-                                <h4 className="text-sm font-bold text-white leading-tight">{settings.shopName}</h4>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[10px] text-neutral-500 uppercase tracking-wide">
-                                        {getPostTypeLabel(post.type)}
-                                    </span>
-                                    <span className="text-[10px] text-neutral-600">• {new Date(post.createdAt).toLocaleDateString('pt-BR')}</span>
+            posts.map((post) => {
+                return (
+                    <div key={post.id} className="bg-neutral-900 rounded-xl border border-neutral-800 overflow-hidden shadow-sm">
+                        {/* Header */}
+                        <div className="p-4 flex justify-between items-start border-b border-neutral-800/50">
+                            <div className="flex items-center gap-3">
+                                {/* Avatar/Logo Icon Only */}
+                                <div className="w-10 h-10 rounded-full bg-neutral-800/50 flex items-center justify-center border border-neutral-800 overflow-hidden">
+                                    <div className="scale-75">
+                                        <Logo size="sm" customImageUrl={settings.logoUrl} showText={false} />
+                                    </div>
                                 </div>
-                             </div>
+                                
+                                {/* Text Info */}
+                                <div className="flex flex-col">
+                                    <h4 className="text-sm font-bold text-white leading-tight">{settings.shopName}</h4>
+                                    <div className="flex items-center gap-1.5 mt-1">
+                                        <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border
+                                            ${post.type === 'announcement' 
+                                                ? 'bg-purple-900/20 text-purple-300 border-purple-800/30' 
+                                                : 'bg-cyan-900/20 text-cyan-300 border-cyan-800/30'}
+                                        `}>
+                                            {getPostTypeLabel(post.type)}
+                                        </span>
+                                        <span className="text-[10px] text-neutral-500">• {new Date(post.createdAt).toLocaleDateString('pt-BR')}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {currentUser?.role === 'admin' && (
+                                <button 
+                                    onClick={() => onDeletePost(post.id)}
+                                    className="p-1 text-neutral-600 hover:text-red-500 hover:bg-red-500/10 rounded transition-all"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+                            )}
                         </div>
-                        {currentUser?.role === 'admin' && (
-                            <button 
-                                onClick={() => onDeletePost(post.id)}
-                                className="text-neutral-600 hover:text-red-500 transition-colors"
-                            >
-                                <Trash2 size={16} />
-                            </button>
+
+                        {/* Content - Image (Natural Aspect Ratio) */}
+                        {post.imageUrl && (
+                            <div className="w-full bg-neutral-950 relative border-y border-neutral-800/50">
+                                <img 
+                                    src={post.imageUrl} 
+                                    alt="Post" 
+                                    className="w-full h-auto max-h-[800px] object-contain mx-auto" 
+                                />
+                            </div>
                         )}
-                    </div>
 
-                    {/* Content - Image */}
-                    {post.imageUrl && (
-                        <div className="w-full aspect-square sm:aspect-video bg-neutral-950 relative">
-                             <img src={post.imageUrl} alt="Post" className="w-full h-full object-cover" />
+                        {/* Content - Text & Actions */}
+                        <div className={`p-4 ${post.type === 'announcement' ? 'bg-gradient-to-br from-neutral-900 to-purple-900/10' : ''}`}>
+                            
+                            {post.title && (
+                                <h4 className="text-lg font-bold text-white mb-2 leading-tight">
+                                    {post.title}
+                                </h4>
+                            )}
+
+                            {post.content && (
+                                <p className={`text-sm mb-4 leading-relaxed ${post.type === 'announcement' ? 'text-white font-medium' : 'text-neutral-300'}`}>
+                                    {post.content}
+                                </p>
+                            )}
+
+                            <div className="flex items-center justify-between pt-2">
+                                <button 
+                                    onClick={() => onLikePost(post.id)}
+                                    className="flex items-center gap-2 text-neutral-400 hover:text-pink-500 transition-colors group"
+                                >
+                                    <div className="p-2 rounded-full group-hover:bg-pink-500/10 transition-colors">
+                                        <Heart size={20} className="group-active:scale-75 transition-transform" />
+                                    </div>
+                                    <span className="text-xs font-bold">{post.likes}</span>
+                                </button>
+                            </div>
                         </div>
-                    )}
-
-                    {/* Content - Text & Actions */}
-                    <div className={`p-4 ${post.type === 'announcement' ? 'bg-cyan-900/5' : ''}`}>
-                        {post.content && (
-                            <p className={`text-sm mb-3 ${post.type === 'announcement' ? 'text-cyan-100 font-medium text-center py-2' : 'text-neutral-300'}`}>
-                                {post.content}
-                            </p>
-                        )}
-
-                        <div className="flex items-center gap-4 pt-2">
-                             <button 
-                                onClick={() => onLikePost(post.id)}
-                                className="flex items-center gap-1.5 text-neutral-400 hover:text-pink-500 transition-colors group"
-                             >
-                                <Heart size={20} className="group-active:scale-75 transition-transform" />
-                                <span className="text-xs font-bold">{post.likes}</span>
-                             </button>
-                        </div>
                     </div>
-                </div>
-            ))
+                );
+            })
          )}
       </div>
     </div>
