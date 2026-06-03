@@ -1,0 +1,116 @@
+{
+  "barbershops": [
+    {
+      "id": "shop-1",
+      "name": "Reis Barbearia",
+      "whatsapp": "5511999999999",
+      "logoUrl": "",
+      "schedule": [
+        {
+          "dayName": "Domingo",
+          "isOpen": false,
+          "openTime": "09:00",
+          "closeTime": "13:00"
+        },
+        {
+          "dayName": "Segunda-feira",
+          "isOpen": true,
+          "openTime": "09:00",
+          "closeTime": "20:00"
+        },
+        {
+          "dayName": "Terça-feira",
+          "isOpen": true,
+          "openTime": "09:00",
+          "closeTime": "20:00"
+        },
+        {
+          "dayName": "Quarta-feira",
+          "isOpen": true,
+          "openTime": "09:00",
+          "closeTime": "20:00"
+        },
+        {
+          "dayName": "Quinta-feira",
+          "isOpen": true,
+          "openTime": "09:00",
+          "closeTime": "20:00"
+        },
+        {
+          "dayName": "Sexta-feira",
+          "isOpen": true,
+          "openTime": "09:00",
+          "closeTime": "20:00"
+        },
+        {
+          "dayName": "Sábado",
+          "isOpen": true,
+          "openTime": "09:00",
+          "closeTime": "18:00"
+        }
+      ]
+    }
+  ],
+  "services": [
+    {
+      "id": "s1",
+      "barbershopId": "shop-1",
+      "name": "Corte de Cabelo",
+      "price": 35,
+      "avgTimeMinutes": 30,
+      "icon": "Scissors"
+    },
+    {
+      "id": "s2",
+      "barbershopId": "shop-1",
+      "name": "Barba",
+      "price": 25,
+      "avgTimeMinutes": 20,
+      "icon": "Anchor"
+    },
+    {
+      "id": "s3",
+      "barbershopId": "shop-1",
+      "name": "Cabelo + Barba",
+      "price": 50,
+      "avgTimeMinutes": 45,
+      "icon": "Crown"
+    },
+    {
+      "id": "s4",
+      "barbershopId": "shop-1",
+      "name": "Sobrancelha",
+      "price": 15,
+      "avgTimeMinutes": 10,
+      "icon": "Eye"
+    }
+  ],
+  "users": [
+    {
+      "id": "admin-1",
+      "name": "Admin Plataforma",
+      "email": "admin@barberqueue.com",
+      "password": "admin",
+      "role": "admin"
+    },
+    {
+      "id": "owner-1",
+      "name": "Dono Barbearia",
+      "email": "owner@barberqueue.com",
+      "password": "owner",
+      "role": "owner",
+      "barbershopId": "shop-1"
+    },
+    {
+      "id": "employee-1",
+      "name": "Funcionário 01",
+      "email": "func@barberqueue.com",
+      "password": "func",
+      "role": "employee",
+      "barbershopId": "shop-1"
+    }
+  ],
+  "queue": [],
+  "appointments": [],
+  "feed": []
+}
