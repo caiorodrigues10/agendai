@@ -1,139 +1,463 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate } from 'react-router-dom';
-import { LoginSchema, LoginFormData } from '../schemas';
-import { useAuth } from '../contexts/AuthContext';
-import { authStorage } from '../infra/authStorage';
-import { Logo } from '../components/ui/Logo';
-import { ArrowRight, LockKeyhole, AlertCircle, Mail, Key, Eye, EyeOff } from 'lucide-react';
+import React, { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useNavigate } from 'react-router-dom'
+import {
+	LoginSchema,
+	LoginFormData,
+	RegisterSchema,
+	RegisterFormData,
+} from '../schemas'
+import { useAuth } from '../contexts/AuthContext'
+import { authStorage } from '../infra/authStorage'
+import { Logo } from '../components/ui/Logo'
+import { ThemeToggle } from '../components/ui/ThemeToggle'
+import { PasswordInput } from '../components/ui/PasswordInput'
+import {
+	ArrowRight,
+	LockKeyhole,
+	AlertCircle,
+	Mail,
+	Loader2,
+	User,
+	Store,
+	Smartphone,
+	CreditCard,
+	Building2,
+} from 'lucide-react'
+import {
+	normalizeDocument,
+	maskCpf,
+	maskCnpj,
+	isValidDocument,
+} from '../utils/documentUtils'
+
+type Tab = 'login' | 'register'
+
+const inputClass = (hasError: boolean) =>
+	`w-full bg-bg border rounded-xl py-3 pl-10 pr-4 text-text-primary text-sm
+   outline-none transition-all placeholder:text-text-muted
+   focus:shadow-[0_0_15px_rgba(16,185,129,0.15)]
+   ${
+			hasError
+				? 'border-danger/40 text-danger focus:border-danger'
+				: 'border-border focus:border-accent/50 hover:border-border-strong'
+		}`
 
 export const LoginPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { login } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
+	const navigate = useNavigate()
+	const { user, login, register: registerUser } = useAuth()
+	const [tab, setTab] = useState<Tab>('login')
+	const [showPassword, setShowPassword] = useState(false)
+	const [submitting, setSubmitting] = useState(false)
+	const [formError, setFormError] = useState<string | null>(null)
 
-  const { register, handleSubmit, formState: { errors }, setError } = useForm<LoginFormData>({
-    resolver: zodResolver(LoginSchema)
-  });
+	const loginForm = useForm<LoginFormData>({
+		resolver: zodResolver(LoginSchema),
+	})
 
-  const onSubmit = async (data: LoginFormData) => {
-    const ok = await login(data.email, data.password);
-    if (!ok) {
-      setError('root', { type: 'manual', message: 'E-mail ou senha inválidos' });
-      return;
-    }
-    const loggedUser = authStorage.getUser();
-    if (loggedUser) {
-      const role = loggedUser.role.toUpperCase();
-      if (role === 'MASTER_ADMIN' || role === 'ADMIN') {
-        navigate('/master/dashboard');
-        return;
-      }
-    }
-    navigate('/app/queue');
-  };
+	const registerForm = useForm<RegisterFormData>({
+		resolver: zodResolver(RegisterSchema),
+		defaultValues: { cnpj: '' },
+	})
 
-  return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="w-full max-w-[380px] bg-neutral-900/80 border border-neutral-800 rounded-3xl shadow-2xl relative overflow-hidden flex flex-col">
-        <div className="h-1 w-full bg-linear-to-r from-neutral-800 via-cyan-600 to-neutral-800 opacity-50"></div>
-        <div className="p-10 flex flex-col items-center">
-          <div className="mb-8 flex flex-col items-center gap-4">
-            <Logo size="md" />
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-950 border border-neutral-800">
-               <LockKeyhole size={10} className="text-neutral-500" />
-               <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
-                 Acesso Restrito
-               </span>
-            </div>
-          </div>
+	const handleLogoClick = () => {
+		if (!user) {
+			navigate('/')
+			return
+		}
+		const role = user.role.toUpperCase()
+		if (role === 'MASTER_ADMIN' || role === 'ADMIN') {
+			navigate('/master/dashboard')
+			return
+		}
+		navigate('/app/queue')
+	}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6">
-            <div className="space-y-4">
+	const navigateAfterAuth = () => {
+		const loggedUser = authStorage.getUser()
+		if (loggedUser) {
+			const role = loggedUser.role.toUpperCase()
+			if (role === 'MASTER_ADMIN' || role === 'ADMIN') {
+				navigate('/master/dashboard')
+				return
+			}
+		}
+		navigate('/app/queue')
+	}
 
-              {/* Email */}
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-cyan-500 uppercase tracking-wider">E-mail</label>
-                <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail size={16} className="text-neutral-500 group-focus-within:text-cyan-500 transition-colors" />
-                    </div>
-                    <input
-                      type="email"
-                      className={`
-                          w-full bg-black/50 border rounded-xl py-3 pl-10 pr-4 text-white text-sm
-                          outline-none transition-all placeholder-neutral-700
-                          focus:shadow-[0_0_15px_rgba(6,182,212,0.1)]
-                          ${errors.email
-                              ? 'border-red-900/50 text-red-400 focus:border-red-500'
-                              : 'border-neutral-800 focus:border-cyan-500/50 hover:border-neutral-700'}
-                      `}
-                      placeholder="seu@email.com"
-                      autoFocus
-                      {...register('email')}
-                    />
-                </div>
-                {errors.email && (
-                    <span className="text-[10px] font-medium text-red-500 flex items-center gap-1">
-                      <AlertCircle size={10} /> {errors.email.message}
-                    </span>
-                )}
-              </div>
+	const handleLogin = async (data: LoginFormData) => {
+		setFormError(null)
+		setSubmitting(true)
+		const result = await login(data.email, data.password)
+		setSubmitting(false)
+		if (!result.ok) {
+			setFormError(result.message)
+			return
+		}
+		navigateAfterAuth()
+	}
 
-              {/* Password */}
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-cyan-500 uppercase tracking-wider">Senha</label>
-                <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Key size={16} className="text-neutral-500 group-focus-within:text-cyan-500 transition-colors" />
-                    </div>
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      className={`
-                          w-full bg-black/50 border rounded-xl py-3 pl-10 pr-10 text-white text-sm
-                          outline-none transition-all placeholder-neutral-700
-                          focus:shadow-[0_0_15px_rgba(6,182,212,0.1)]
-                          ${errors.password
-                              ? 'border-red-900/50 text-red-400 focus:border-red-500'
-                              : 'border-neutral-800 focus:border-cyan-500/50 hover:border-neutral-700'}
-                      `}
-                      placeholder="••••••••"
-                      {...register('password')}
-                    />
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="text-neutral-500 hover:text-cyan-400 transition-colors focus:outline-none"
-                      >
-                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                    </div>
-                </div>
-                {errors.password && (
-                    <span className="text-[10px] font-medium text-red-500 flex items-center gap-1">
-                      <AlertCircle size={10} /> {errors.password.message}
-                    </span>
-                )}
-              </div>
-            </div>
+	const handleRegister = async (data: RegisterFormData) => {
+		setFormError(null)
+		const cpf = normalizeDocument(data.cpf)
+		if (!isValidDocument('CPF', cpf)) {
+			setFormError('CPF inválido. Confira o número digitado.')
+			return
+		}
+		setSubmitting(true)
+		const result = await registerUser({
+			ownerName: data.ownerName.trim(),
+			email: data.email.trim(),
+			password: data.password,
+			cpf,
+			barbershopName: data.barbershopName.trim(),
+			whatsapp: normalizeDocument(data.whatsapp),
+			cnpj: data.cnpj ? normalizeDocument(data.cnpj) : undefined,
+		})
+		setSubmitting(false)
+		if (!result.ok) {
+			setFormError(result.message)
+			return
+		}
+		navigateAfterAuth()
+	}
 
-            {errors.root && (
-               <div className="p-3 bg-red-900/20 border border-red-900/50 rounded-lg flex items-center justify-center gap-2 text-red-400 text-xs font-medium">
-                  <AlertCircle size={14} /> {errors.root.message}
-               </div>
-            )}
+	const registerPassword = registerForm.watch('password') ?? ''
 
-            <button
-              type="submit"
-              className="w-full py-4 bg-cyan-950 border border-cyan-800 text-cyan-400 hover:bg-cyan-900 hover:border-cyan-600 hover:text-white shadow-lg shadow-cyan-900/20 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 mt-2"
-            >
-              Entrar <ArrowRight size={14} />
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
-};
+	const switchTab = (next: Tab) => {
+		setTab(next)
+		setFormError(null)
+	}
+
+	return (
+		<div className="min-h-screen bg-bg flex items-center justify-center p-4 relative">
+			<div className="absolute top-4 right-4">
+				<ThemeToggle />
+			</div>
+			<div className="w-full max-w-[420px] bg-surface border border-border rounded-3xl shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+				<div
+					className="h-1 w-full opacity-80"
+					style={{
+						background:
+							'linear-gradient(to right, transparent, #00c2b3, transparent)',
+					}}
+				/>
+				<div className="p-8 flex flex-col items-center overflow-y-auto flex-1">
+					<div className="mb-6 flex flex-col items-center gap-4 shrink-0">
+						<button type="button" onClick={handleLogoClick} className="cursor-pointer">
+							<Logo size="md" />
+						</button>
+						<div className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg border border-border">
+							<LockKeyhole size={10} className="text-text-muted" />
+							<span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
+								{tab === 'login' ? 'Acesso Restrito' : 'Novo Salão'}
+							</span>
+						</div>
+					</div>
+
+					<div className="flex w-full border-b border-border mb-6 shrink-0">
+						{(
+							[
+								{ id: 'login' as const, label: 'Entrar' },
+								{ id: 'register' as const, label: 'Criar conta' },
+							] as const
+						).map((t) => (
+							<button
+								key={t.id}
+								type="button"
+								onClick={() => switchTab(t.id)}
+								className={`flex-1 pb-3 text-xs font-bold uppercase tracking-wider transition-colors ${
+									tab === t.id
+										? 'text-accent border-b-2 border-accent'
+										: 'text-text-muted hover:text-text-secondary'
+								}`}
+							>
+								{t.label}
+							</button>
+						))}
+					</div>
+
+					{formError && (
+						<div className="w-full mb-4 p-3 bg-danger/10 border border-danger/30 rounded-lg flex items-center gap-2 text-danger text-xs font-medium">
+							<AlertCircle size={14} className="shrink-0" />
+							{formError}
+						</div>
+					)}
+
+					{tab === 'login' && (
+						<form
+							onSubmit={loginForm.handleSubmit(handleLogin)}
+							className="w-full space-y-6"
+						>
+							<div className="space-y-4">
+								<div className="space-y-1">
+									<label className="text-[10px] font-bold uppercase tracking-wider text-accent">
+										E-mail
+									</label>
+									<div className="relative group">
+										<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+											<Mail
+												size={16}
+												className="text-text-muted group-focus-within:text-accent transition-colors"
+											/>
+										</div>
+										<input
+											type="email"
+											className={inputClass(!!loginForm.formState.errors.email)}
+											placeholder="seu@email.com"
+											autoFocus
+											{...loginForm.register('email')}
+										/>
+									</div>
+									{loginForm.formState.errors.email && (
+										<span className="text-[10px] font-medium text-danger flex items-center gap-1">
+											<AlertCircle size={10} />{' '}
+											{loginForm.formState.errors.email.message}
+										</span>
+									)}
+								</div>
+
+								<div className="space-y-1">
+									<label className="text-[10px] font-bold uppercase tracking-wider text-accent">
+										Senha
+									</label>
+									<PasswordInput
+										showPassword={showPassword}
+										onToggleShow={() => setShowPassword((v) => !v)}
+										error={loginForm.formState.errors.password?.message}
+										placeholder="••••••••"
+										{...loginForm.register('password')}
+									/>
+								</div>
+							</div>
+
+							<button
+								type="submit"
+								disabled={submitting}
+								className="w-full py-4 bg-accent text-accent-fg hover:bg-accent-hover shadow-lg shadow-accent/20 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 disabled:opacity-60"
+							>
+								{submitting ? (
+									<Loader2 size={14} className="animate-spin" />
+								) : (
+									<>
+										Entrar <ArrowRight size={14} />
+									</>
+								)}
+							</button>
+						</form>
+					)}
+
+					{tab === 'register' && (
+						<form
+							onSubmit={registerForm.handleSubmit(handleRegister)}
+							className="w-full space-y-4"
+						>
+							<p className="text-[11px] text-text-muted text-center leading-relaxed">
+								Crie seu salão e comece com{' '}
+								<strong className="text-text-secondary">30 dias grátis</strong>{' '}
+								para testar.
+							</p>
+
+							<div className="space-y-1">
+								<label className="text-[10px] font-bold uppercase tracking-wider text-accent">
+									Seu nome
+								</label>
+								<div className="relative group">
+									<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+										<User
+											size={16}
+											className="text-text-muted group-focus-within:text-accent transition-colors"
+										/>
+									</div>
+									<input
+										className={inputClass(
+											!!registerForm.formState.errors.ownerName,
+										)}
+										placeholder="João Silva"
+										autoFocus
+										{...registerForm.register('ownerName')}
+									/>
+								</div>
+								{registerForm.formState.errors.ownerName && (
+									<span className="text-[10px] font-medium text-danger flex items-center gap-1">
+										<AlertCircle size={10} />{' '}
+										{registerForm.formState.errors.ownerName.message}
+									</span>
+								)}
+							</div>
+
+							<div className="space-y-1">
+								<label className="text-[10px] font-bold uppercase tracking-wider text-accent">
+									E-mail
+								</label>
+								<div className="relative group">
+									<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+										<Mail
+											size={16}
+											className="text-text-muted group-focus-within:text-accent transition-colors"
+										/>
+									</div>
+									<input
+										type="email"
+										className={inputClass(
+											!!registerForm.formState.errors.email,
+										)}
+										placeholder="seu@email.com"
+										{...registerForm.register('email')}
+									/>
+								</div>
+								{registerForm.formState.errors.email && (
+									<span className="text-[10px] font-medium text-danger flex items-center gap-1">
+										<AlertCircle size={10} />{' '}
+										{registerForm.formState.errors.email.message}
+									</span>
+								)}
+							</div>
+
+							<div className="space-y-1">
+								<label className="text-[10px] font-bold uppercase tracking-wider text-accent">
+									CPF
+								</label>
+								<div className="relative group">
+									<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+										<CreditCard
+											size={16}
+											className="text-text-muted group-focus-within:text-accent transition-colors"
+										/>
+									</div>
+									<input
+										className={inputClass(!!registerForm.formState.errors.cpf)}
+										placeholder="000.000.000-00"
+										value={registerForm.watch('cpf') ?? ''}
+										onChange={(e) =>
+											registerForm.setValue('cpf', maskCpf(e.target.value), {
+												shouldValidate: true,
+											})
+										}
+									/>
+								</div>
+								{registerForm.formState.errors.cpf && (
+									<span className="text-[10px] font-medium text-danger flex items-center gap-1">
+										<AlertCircle size={10} />{' '}
+										{registerForm.formState.errors.cpf.message}
+									</span>
+								)}
+							</div>
+
+							<div className="space-y-1">
+								<label className="text-[10px] font-bold uppercase tracking-wider text-accent">
+									Nome do salão
+								</label>
+								<div className="relative group">
+									<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+										<Store
+											size={16}
+											className="text-text-muted group-focus-within:text-accent transition-colors"
+										/>
+									</div>
+									<input
+										className={inputClass(
+											!!registerForm.formState.errors.barbershopName,
+										)}
+										placeholder="Salão Beleza & Estilo"
+										{...registerForm.register('barbershopName')}
+									/>
+								</div>
+								{registerForm.formState.errors.barbershopName && (
+									<span className="text-[10px] font-medium text-danger flex items-center gap-1">
+										<AlertCircle size={10} />{' '}
+										{registerForm.formState.errors.barbershopName.message}
+									</span>
+								)}
+							</div>
+
+							<div className="space-y-1">
+								<label className="text-[10px] font-bold uppercase tracking-wider text-accent">
+									WhatsApp do salão
+								</label>
+								<div className="relative group">
+									<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+										<Smartphone
+											size={16}
+											className="text-text-muted group-focus-within:text-accent transition-colors"
+										/>
+									</div>
+									<input
+										className={inputClass(
+											!!registerForm.formState.errors.whatsapp,
+										)}
+										placeholder="(11) 99999-9999"
+										{...registerForm.register('whatsapp')}
+									/>
+								</div>
+								{registerForm.formState.errors.whatsapp && (
+									<span className="text-[10px] font-medium text-danger flex items-center gap-1">
+										<AlertCircle size={10} />{' '}
+										{registerForm.formState.errors.whatsapp.message}
+									</span>
+								)}
+							</div>
+
+							<div className="space-y-1">
+								<label className="text-[10px] font-bold uppercase tracking-wider text-accent">
+									CNPJ{' '}
+									<span className="text-text-muted font-normal normal-case">
+										(opcional)
+									</span>
+								</label>
+								<div className="relative group">
+									<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+										<Building2
+											size={16}
+											className="text-text-muted group-focus-within:text-accent transition-colors"
+										/>
+									</div>
+									<input
+										className={inputClass(false)}
+										placeholder="00.000.000/0000-00"
+										value={registerForm.watch('cnpj') ?? ''}
+										onChange={(e) =>
+											registerForm.setValue('cnpj', maskCnpj(e.target.value), {
+												shouldValidate: true,
+											})
+										}
+									/>
+								</div>
+							</div>
+
+							<div className="space-y-1">
+								<label className="text-[10px] font-bold uppercase tracking-wider text-accent">
+									Senha
+								</label>
+								<PasswordInput
+									showStrength
+									showPassword={showPassword}
+									onToggleShow={() => setShowPassword((v) => !v)}
+									error={registerForm.formState.errors.password?.message}
+									placeholder="Crie uma senha segura"
+									value={registerPassword}
+									{...registerForm.register('password')}
+								/>
+							</div>
+
+							<button
+								type="submit"
+								disabled={submitting}
+								className="w-full py-4 bg-accent text-accent-fg hover:bg-accent-hover shadow-lg shadow-accent/20 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 disabled:opacity-60 mt-2"
+							>
+								{submitting ? (
+									<Loader2 size={14} className="animate-spin" />
+								) : (
+									<>
+										Criar conta <ArrowRight size={14} />
+									</>
+								)}
+							</button>
+						</form>
+					)}
+				</div>
+			</div>
+		</div>
+	)
+}

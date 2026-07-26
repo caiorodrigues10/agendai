@@ -34,50 +34,50 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
 
   return (
     <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
-      <div className="bg-neutral-900 w-full max-w-md rounded-2xl p-6 shadow-2xl border border-neutral-800 max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold text-white mb-6">
+      <div className="bg-surface w-full max-w-md rounded-2xl p-6 shadow-2xl border border-border max-h-[90vh] overflow-y-auto">
+        <h2 className="text-xl font-bold text-text-primary mb-6">
           {initialService ? 'Editar Serviço' : 'Novo Serviço'}
         </h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-neutral-400 mb-1.5">Nome do Serviço</label>
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">Nome do Serviço</label>
             <input
               type="text"
-              className={`w-full bg-neutral-950 border rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500 outline-none transition-all placeholder-neutral-700 ${errors.name ? 'border-red-500' : 'border-neutral-800'}`}
+              className={`w-full bg-bg border rounded-lg px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all placeholder:text-text-muted ${errors.name ? 'border-danger' : 'border-border'}`}
               placeholder="Ex: Corte Degrade"
               {...register('name')}
             />
-            {errors.name && <span className="text-red-500 text-xs flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.name.message}</span>}
+            {errors.name && <span className="text-danger text-xs flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.name.message}</span>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-neutral-400 mb-1.5">Preço (R$)</label>
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">Preço (R$)</label>
               <input
                 type="number"
                 step="0.01"
-                className={`w-full bg-neutral-950 border rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500 outline-none transition-all placeholder-neutral-700 ${errors.price ? 'border-red-500' : 'border-neutral-800'}`}
+                className={`w-full bg-bg border rounded-lg px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all placeholder:text-text-muted ${errors.price ? 'border-danger' : 'border-border'}`}
                 placeholder="0.00"
                 {...register('price', { valueAsNumber: true })}
               />
-               {errors.price && <span className="text-red-500 text-xs flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.price.message}</span>}
+               {errors.price && <span className="text-danger text-xs flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.price.message}</span>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-400 mb-1.5">Tempo (min)</label>
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">Tempo (min)</label>
               <input
                 type="number"
-                className={`w-full bg-neutral-950 border rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500 outline-none transition-all placeholder-neutral-700 ${errors.avgTimeMinutes ? 'border-red-500' : 'border-neutral-800'}`}
+                className={`w-full bg-bg border rounded-lg px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all placeholder:text-text-muted ${errors.avgTimeMinutes ? 'border-danger' : 'border-border'}`}
                 placeholder="30"
                 {...register('avgTimeMinutes', { valueAsNumber: true })}
               />
-              {errors.avgTimeMinutes && <span className="text-red-500 text-xs flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.avgTimeMinutes.message}</span>}
+              {errors.avgTimeMinutes && <span className="text-danger text-xs flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.avgTimeMinutes.message}</span>}
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-neutral-400 mb-2">Ícone</label>
-            <div className="bg-neutral-950 p-3 rounded-xl border border-neutral-800 max-h-48 overflow-y-auto custom-scrollbar">
+            <label className="block text-sm font-medium text-text-secondary mb-2">Ícone</label>
+            <div className="bg-bg p-3 rounded-xl border border-border max-h-48 overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-5 gap-2">
                 {ICON_OPTIONS.map((i) => (
                   <button
@@ -86,8 +86,8 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
                     onClick={() => setSelectedIcon(i)}
                     className={`aspect-square rounded-lg flex items-center justify-center transition-all ${
                       selectedIcon === i 
-                        ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20 scale-105' 
-                        : 'bg-neutral-900 text-neutral-500 hover:bg-neutral-800 hover:text-neutral-300'
+                        ? 'bg-accent text-accent-fg shadow-lg shadow-accent/20 scale-105' 
+                        : 'bg-surface text-text-muted hover:bg-surface-2 hover:text-text-secondary'
                     }`}
                   >
                     <DynamicIcon name={i} size={20} />
@@ -97,17 +97,17 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t border-neutral-800 mt-6">
+          <div className="flex gap-3 pt-4 border-t border-border mt-6">
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 py-3 rounded-xl font-bold text-neutral-400 bg-neutral-800 hover:bg-neutral-700 transition-colors"
+              className="flex-1 py-3 rounded-xl font-bold text-text-secondary bg-surface-2 hover:bg-border-strong transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 rounded-xl font-bold text-white bg-cyan-600 hover:bg-cyan-500 shadow-lg shadow-cyan-500/20 transition-colors"
+              className="flex-1 py-3 rounded-xl font-bold text-text-primary bg-accent hover:bg-accent-hover shadow-lg shadow-accent/20 transition-colors"
             >
               Salvar
             </button>

@@ -1,7 +1,93 @@
 @import "tailwindcss";
 
-html {
-  scroll-behavior: smooth;
+/*
+ * Variante manual de dark mode (Tailwind v4).
+ * A classe `.dark` é aplicada em <html> pelo ThemeContext (e pelo script
+ * anti-flash em index.html antes do primeiro paint).
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Design tokens semânticos — tema CLARO (padrão em :root).
+ * O tema escuro sobrescreve os mesmos tokens em `.dark`, mapeando os tons
+ * neutral-950/900/800 e emerald usados historicamente no app.
+ */
+:root {
+  --bq-bg: #f5f5f5;
+  --bq-surface: #ffffff;
+  --bq-surface-2: #e5e5e5;
+  --bq-border: #e5e5e5;
+  --bq-border-strong: #d4d4d4;
+  --bq-text-primary: #171717;
+  --bq-text-secondary: #525252;
+  --bq-text-muted: #737373;
+  /* emerald-700/800: contraste AA sobre superfícies claras */
+  --bq-accent: #047857;
+  --bq-accent-hover: #065f46;
+  --bq-accent-fg: #ffffff;
+  --bq-danger: #dc2626;
+  --bq-success: #16a34a;
+  --bq-warning: #b45309;
+  /* shadcn/recharts — séries alinhadas ao tema */
+  --chart-1: #047857;
+  --chart-2: #7c3aed;
+  --chart-3: #0891b2;
+  --chart-4: #b45309;
+  --chart-5: #525252;
+}
+
+/* Paleta inspirada no dark mode do YouTube: fundo #0f0f0f com superfícies
+   e bordas em cinzas mais claros (#212121/#3f3f3f), evitando o visual
+   "preto total" dos tons neutral-950/900. */
+.dark {
+  --bq-bg: #0f0f0f;
+  --bq-surface: #212121;
+  --bq-surface-2: #2f2f2f;
+  --bq-border: #303030;
+  --bq-border-strong: #3f3f3f;
+  --bq-text-primary: #f1f1f1;
+  --bq-text-secondary: #aaaaaa;
+  --bq-text-muted: #808080;
+  /* emerald-500/400: cor de marca sobre superfícies escuras */
+  --bq-accent: #10b981;
+  --bq-accent-hover: #34d399;
+  /* texto escuro sobre accent claro garante contraste AA nos botões */
+  --bq-accent-fg: #052e1f;
+  --bq-danger: #ef4444;
+  --bq-success: #22c55e;
+  --bq-warning: #f59e0b;
+  --chart-1: #10b981;
+  --chart-2: #a78bfa;
+  --chart-3: #22d3ee;
+  --chart-4: #f59e0b;
+  --chart-5: #aaaaaa;
+}
+
+/*
+ * Expõe os tokens como cores do Tailwind v4 (`@theme inline` referencia as
+ * custom properties em runtime), gerando utilities como `bg-bg`, `bg-surface`,
+ * `text-text-primary`, `border-border`, `bg-accent/10`, etc.
+ */
+@theme inline {
+  --color-bg: var(--bq-bg);
+  --color-surface: var(--bq-surface);
+  --color-surface-2: var(--bq-surface-2);
+  --color-border: var(--bq-border);
+  --color-border-strong: var(--bq-border-strong);
+  --color-text-primary: var(--bq-text-primary);
+  --color-text-secondary: var(--bq-text-secondary);
+  --color-text-muted: var(--bq-text-muted);
+  --color-accent: var(--bq-accent);
+  --color-accent-hover: var(--bq-accent-hover);
+  --color-accent-fg: var(--bq-accent-fg);
+  --color-danger: var(--bq-danger);
+  --color-success: var(--bq-success);
+  --color-warning: var(--bq-warning);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
 }
 
 @theme {
@@ -19,11 +105,37 @@ html {
   }
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bq-bg);
+  color: var(--bq-text-primary);
+}
+
 /* Fix for Webkit autocomplete background */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
   transition: background-color 5000s ease-in-out 0s;
-  -webkit-text-fill-color: white !important;
+  -webkit-text-fill-color: var(--bq-text-primary) !important;
+}
+
+/* Discrete Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--bq-text-primary) 18%, transparent);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--bq-text-primary) 32%, transparent);
 }

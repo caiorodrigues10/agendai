@@ -66,9 +66,9 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
 
   const getPostTypeLabel = (type: string) => {
     switch(type) {
-      case 'haircut': return 'Corte da Semana';
-      case 'beard': return 'Barba de Respeito';
-      case 'announcement': return 'Aviso Oficial';
+      case 'haircut': return 'Look da Semana';
+      case 'beard': return 'Barba / Acabamento';
+      case 'announcement': return 'Aviso';
       default: return 'Post';
     }
   };
@@ -76,22 +76,22 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
   const getPostTypeStyle = (type: string) => {
     switch(type) {
       case 'announcement':
-        return 'bg-purple-500/10 text-purple-400 border-purple-500/20';
+        return 'bg-teal-500/10 text-teal-400 border-teal-500/20';
       case 'beard':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+        return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20';
       case 'haircut':
       default:
-        return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20';
+        return 'bg-accent/10 text-accent border-accent/20';
     }
   };
 
   return (
     <div className="animate-fade-in space-y-6 pb-20">
 
-      <div className="bg-neutral-900 rounded-2xl overflow-hidden border border-neutral-800 shadow-2xl relative">
-        <div className="h-40 bg-gradient-to-b from-neutral-900 via-cyan-950/20 to-neutral-900 relative flex items-center justify-center overflow-hidden">
+      <div className="bg-surface rounded-2xl overflow-hidden border border-border shadow-2xl relative">
+        <div className="h-40 bg-gradient-to-b from-surface via-accent/10 to-surface relative flex items-center justify-center overflow-hidden">
             <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle, #06b6d4 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
-            <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
 
             <div className="relative z-10 flex flex-col items-center">
                  <div className="mb-2 transform scale-125">
@@ -101,29 +101,34 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
         </div>
 
         <div className="px-6 pb-8 relative text-center">
-            <h1 className="text-2xl font-bold text-white mb-2">{settings.shopName}</h1>
-            <p className="text-neutral-400 text-sm max-w-xs mx-auto mb-6 leading-relaxed">
-              Estilo, tradição e modernidade. O melhor lugar para o seu visual.
-            </p>
+            <h1 className="text-2xl font-bold text-text-primary mb-2">{settings.shopName}</h1>
+            {settings.whatsapp && (
+              <p className="text-text-secondary text-sm max-w-xs mx-auto mb-4 leading-relaxed">
+                WhatsApp: {settings.whatsapp}
+              </p>
+            )}
 
-            <div className="flex justify-center gap-6 text-xs font-bold text-neutral-500">
-                <span className="flex items-center gap-1.5"><MapPin size={14} className="text-cyan-500" /> Centro da Cidade</span>
-                <span className="flex items-center gap-1.5"><Star size={14} className="text-yellow-500 fill-yellow-500/20" /> 4.9 (120 Reviews)</span>
-            </div>
+            {settings.address && (
+              <div className="flex justify-center text-xs font-bold text-text-muted">
+                <span className="flex items-center gap-1.5">
+                  <MapPin size={14} className="text-accent" /> {settings.address}
+                </span>
+              </div>
+            )}
         </div>
       </div>
 
       {currentUser && (
-        <div className="bg-neutral-900 p-4 rounded-xl border border-neutral-800">
-          <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
-            <Scissors size={16} className="text-cyan-400" /> Novo Post
+        <div className="bg-surface p-4 rounded-xl border border-border">
+          <h3 className="text-sm font-bold text-text-primary mb-3 flex items-center gap-2">
+            <Scissors size={16} className="text-accent" /> Novo Post
           </h3>
 
           <form onSubmit={handleSubmitPost} className="space-y-3">
              <div className="flex gap-2 mb-2 overflow-x-auto pb-1 no-scrollbar">
                 {[
-                  { id: 'haircut', label: 'Corte', icon: Scissors },
-                  { id: 'beard', label: 'Barba', icon: Star },
+                  { id: 'haircut', label: 'Look', icon: Scissors },
+                  { id: 'beard', label: 'Acabamento', icon: Star },
                   { id: 'announcement', label: 'Aviso', icon: Type }
                 ].map((type) => (
                     <button
@@ -131,7 +136,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
                       type="button"
                       onClick={() => setNewPostType(type.id as any)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 border transition-all
-                        ${newPostType === type.id ? 'bg-cyan-600 border-cyan-500 text-white' : 'bg-neutral-950 border-neutral-800 text-neutral-500'}
+                        ${newPostType === type.id ? 'bg-accent border-accent text-accent-fg' : 'bg-bg border-border text-text-muted'}
                       `}
                     >
                       <type.icon size={14} /> {type.label}
@@ -144,25 +149,25 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
                   type="text"
                   value={newPostTitle}
                   onChange={(e) => setNewPostTitle(e.target.value)}
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-cyan-500"
+                  className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent"
                   placeholder="Título do post (opcional)"
                 />
                 <textarea
                   value={newPostContent}
                   onChange={(e) => setNewPostContent(e.target.value)}
-                  className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-cyan-500 min-h-[90px]"
+                  className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent min-h-[90px]"
                   placeholder="Escreva algo para seus clientes..."
                 />
              </div>
 
              {newPostImage && (
-                <div className="relative rounded-xl overflow-hidden border border-neutral-800">
+                <div className="relative rounded-xl overflow-hidden border border-border">
                   <img src={newPostImage} alt="Preview" className="w-full h-40 object-cover" />
                 </div>
              )}
 
              <div className="flex items-center justify-between">
-                <label className="px-3 py-2 text-xs bg-neutral-950 text-neutral-400 rounded-lg border border-neutral-800 cursor-pointer hover:bg-neutral-900 flex items-center gap-2">
+                <label className="px-3 py-2 text-xs bg-bg text-text-secondary rounded-lg border border-border cursor-pointer hover:bg-surface flex items-center gap-2">
                     <ImageIcon size={14} /> Adicionar imagem
                     <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </label>
@@ -170,7 +175,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
                   type="submit"
                   disabled={isPosting}
                   className={`px-4 py-2 text-xs font-bold rounded-lg flex items-center gap-2 ${
-                    isPosting ? 'bg-neutral-800 text-neutral-500' : 'bg-cyan-600 text-white hover:bg-cyan-500'
+                    isPosting ? 'bg-surface-2 text-text-muted' : 'bg-accent text-accent-fg hover:bg-accent-hover'
                   }`}
                 >
                   <Send size={14} /> Publicar
@@ -182,44 +187,44 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
 
       <div className="space-y-4">
         {posts.length === 0 && (
-          <div className="text-center py-8 text-neutral-500 text-sm bg-neutral-900 border border-neutral-800 rounded-xl">
+          <div className="text-center py-8 text-text-muted text-sm bg-surface border border-border rounded-xl">
             Nenhuma postagem ainda.
           </div>
         )}
 
         {posts.map(post => (
-          <div key={post.id} className="bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden shadow-lg">
+          <div key={post.id} className="bg-surface border border-border rounded-2xl overflow-hidden shadow-lg">
             <div className="p-5">
               <div className="flex items-center justify-between mb-3">
                 <span className={`text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded-md border ${getPostTypeStyle(post.type)}`}>
                     {getPostTypeLabel(post.type)}
                 </span>
                 {currentUser && (
-                  <button className="text-neutral-500 hover:text-white">
+                  <button className="text-text-muted hover:text-text-primary">
                     <MoreHorizontal size={16} />
                   </button>
                 )}
                 {!currentUser && (
-                     <span className="text-[10px] text-neutral-600 font-bold">{new Date(post.createdAt).toLocaleDateString('pt-BR')}</span>
+                     <span className="text-[10px] text-text-muted font-bold">{new Date(post.createdAt).toLocaleDateString('pt-BR')}</span>
                 )}
               </div>
-              {post.title && <h3 className="text-white font-bold mb-2 text-lg">{post.title}</h3>}
-              <p className="text-neutral-300 text-sm leading-relaxed">{post.content}</p>
+              {post.title && <h3 className="text-text-primary font-bold mb-2 text-lg">{post.title}</h3>}
+              <p className="text-text-secondary text-sm leading-relaxed">{post.content}</p>
             </div>
             {post.imageUrl && (
               <img src={post.imageUrl} alt="Post" className="w-full h-56 object-cover" />
             )}
-            <div className="p-4 flex items-center justify-between border-t border-neutral-800">
+            <div className="p-4 flex items-center justify-between border-t border-border">
               <button
                 onClick={() => onLikePost(post.id)}
-                className="flex items-center gap-1 text-xs text-neutral-400 hover:text-red-400"
+                className="flex items-center gap-1 text-xs text-text-secondary hover:text-danger"
               >
                 <Heart size={14} /> {post.likes}
               </button>
               {currentUser && (
                 <button
                   onClick={() => onDeletePost(post.id)}
-                  className="flex items-center gap-1 text-xs text-neutral-500 hover:text-red-400"
+                  className="flex items-center gap-1 text-xs text-text-muted hover:text-danger"
                 >
                   <Trash2 size={14} /> Excluir
                 </button>

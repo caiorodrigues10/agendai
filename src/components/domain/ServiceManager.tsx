@@ -18,10 +18,10 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ services, onAdd,
   return (
     <div className="mt-6">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-bold text-white">Gerenciar Serviços</h3>
+        <h3 className="text-lg font-bold text-text-primary">Gerenciar Serviços</h3>
         <button
           onClick={() => setIsAdding(true)}
-          className="px-3 py-1.5 bg-cyan-500/10 text-cyan-400 border border-cyan-500/50 rounded-lg text-xs font-bold hover:bg-cyan-500 hover:text-black transition-all flex items-center gap-1"
+          className="px-3 py-1.5 bg-accent/10 text-accent border border-accent/50 rounded-lg text-xs font-bold hover:bg-accent-hover hover:text-black transition-all flex items-center gap-1"
         >
           <Plus size={14} /> Novo Serviço
         </button>
@@ -29,14 +29,14 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ services, onAdd,
 
       <div className="space-y-3">
         {services.map((service) => (
-          <div key={service.id} className="bg-neutral-900 p-3 rounded-lg border border-neutral-800 flex items-center justify-between hover:border-neutral-700 transition-all">
+          <div key={service.id} className="bg-surface p-3 rounded-lg border border-border flex items-center justify-between hover:border-border-strong transition-all">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400">
+              <div className="w-10 h-10 rounded-full bg-surface-2 flex items-center justify-center text-text-secondary">
                 <DynamicIcon name={service.icon} size={20} />
               </div>
               <div>
-                <h4 className="font-medium text-neutral-200">{service.name}</h4>
-                <p className="text-xs text-neutral-400">
+                <h4 className="font-medium text-text-primary">{service.name}</h4>
+                <p className="text-xs text-text-secondary">
                   {service.avgTimeMinutes} min • R$ {service.price.toFixed(2)}
                 </p>
               </div>
@@ -44,7 +44,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ services, onAdd,
             <div className="flex gap-2">
               <button
                 onClick={() => setEditingId(service.id)}
-                className="p-2 text-neutral-400 hover:text-cyan-400 transition-colors"
+                className="p-2 text-text-secondary hover:text-accent transition-colors"
                 title="Editar"
               >
                 <Pencil size={18} />
@@ -55,7 +55,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ services, onAdd,
                         onDelete(service.id);
                     }
                 }}
-                className="p-2 text-neutral-400 hover:text-red-400 transition-colors"
+                className="p-2 text-text-secondary hover:text-danger transition-colors"
                 title="Excluir"
               >
                 <Trash2 size={18} />

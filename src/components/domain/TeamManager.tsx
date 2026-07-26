@@ -8,86 +8,127 @@ import { Trash2, UserPlus, Shield, User, X, Check, AlertCircle } from 'lucide-re
 
 interface TeamManagerProps {
   staff: StaffMember[];
-  onUpdateTeam: (newTeam: StaffMember[]) => void;
+  onUpdateTeam: (newTeam: StaffMember[]) => Promise<void> | void;
   currentAdminId: string;
 }
 
 export const TeamManager: React.FC<TeamManagerProps> = ({ staff, onUpdateTeam, currentAdminId }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<TeamMemberFormData>({
     resolver: zodResolver(TeamMemberSchema)
   });
 
-  const handleAddMember = (data: TeamMemberFormData) => {
-    const newMember: StaffMember = {
+  const handleAddMember = async (data: TeamMemberFormData) => {
+    setSaving(true);
+    setFormError(null);
+    const newMember: StaffMember & { cpf: string; password: string } = {
         id: uuidv4(),
         name: data.name,
         email: data.email,
         password: data.password,
-        role: 'employee'
+        cpf: data.cpf,
+        role: 'EMPLOYEE'
     };
 
-    onUpdateTeam([...staff, newMember]);
-    reset();
-    setIsAdding(false);
+    try {
+      await onUpdateTeam([...staff, newMember]);
+      reset();
+      setIsAdding(false);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Não foi possível cadastrar o funcionário';
+      setFormError(message);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const confirmDelete = (id: string) => {
-      onUpdateTeam(staff.filter(m => m.id !== id));
-      setDeleteConfirmId(null);
+  const confirmDelete = async (id: string) => {
+      setFormError(null);
+      try {
+        await onUpdateTeam(staff.filter(m => m.id !== id));
+        setDeleteConfirmId(null);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Não foi possível remover o membro';
+        setFormError(message);
+      }
   };
 
   return (
     <div className="mt-6 animate-fade-in">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-bold text-white">Equipe & Acessos</h3>
+        <h3 className="text-lg font-bold text-text-primary">Equipe & Acessos</h3>
         <button
-          onClick={() => setIsAdding(!isAdding)}
-          className="px-3 py-1.5 bg-cyan-500/10 text-cyan-400 border border-cyan-500/50 rounded-lg text-xs font-bold hover:bg-cyan-500 hover:text-black transition-all flex items-center gap-1"
+          onClick={() => { setIsAdding(!isAdding); setFormError(null); }}
+          className="px-3 py-1.5 bg-accent/10 text-accent border border-accent/50 rounded-lg text-xs font-bold hover:bg-accent-hover hover:text-black transition-all flex items-center gap-1"
         >
           <UserPlus size={14} /> Adicionar
         </button>
       </div>
 
+      {formError && !isAdding && (
+        <div className="mb-3 text-xs text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2 flex items-center gap-1">
+          <AlertCircle size={12} /> {formError}
+        </div>
+      )}
+
       {isAdding && (
-          <form onSubmit={handleSubmit(handleAddMember)} className="bg-neutral-900 p-4 rounded-xl border border-neutral-800 mb-4 animate-fade-in-down">
-              <h4 className="text-sm font-bold text-white mb-3">Novo Membro</h4>
+          <form onSubmit={handleSubmit(handleAddMember)} className="bg-surface p-4 rounded-xl border border-border mb-4 animate-fade-in-down">
+              <h4 className="text-sm font-bold text-text-primary mb-3">Novo Membro</h4>
+              {formError && (
+                <div className="mb-3 text-xs text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2 flex items-center gap-1">
+                  <AlertCircle size={12} /> {formError}
+                </div>
+              )}
               <div className="space-y-3">
                   <div>
                     <input
                         type="text"
                         placeholder="Nome (ex: Carlos)"
-                        className={`w-full bg-neutral-950 border rounded px-3 py-2 text-white text-sm focus:ring-1 focus:ring-cyan-500 outline-none ${errors.name ? 'border-red-500' : 'border-neutral-800'}`}
+                        className={`w-full bg-bg border rounded px-3 py-2 text-text-primary text-sm focus:ring-1 focus:ring-accent outline-none ${errors.name ? 'border-danger' : 'border-border'}`}
                         {...register('name')}
                     />
-                    {errors.name && <span className="text-red-500 text-[10px] flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.name.message}</span>}
+                    {errors.name && <span className="text-danger text-[10px] flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.name.message}</span>}
                   </div>
 
                   <div>
                     <input
                         type="email"
                         placeholder="E-mail"
-                        className={`w-full bg-neutral-950 border rounded px-3 py-2 text-white text-sm focus:ring-1 focus:ring-cyan-500 outline-none ${errors.email ? 'border-red-500' : 'border-neutral-800'}`}
+                        className={`w-full bg-bg border rounded px-3 py-2 text-text-primary text-sm focus:ring-1 focus:ring-accent outline-none ${errors.email ? 'border-danger' : 'border-border'}`}
                         {...register('email')}
                     />
-                    {errors.email && <span className="text-red-500 text-[10px] flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.email.message}</span>}
+                    {errors.email && <span className="text-danger text-[10px] flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.email.message}</span>}
+                  </div>
+
+                  <div>
+                    <input
+                        type="text"
+                        placeholder="CPF (somente números)"
+                        className={`w-full bg-bg border rounded px-3 py-2 text-text-primary text-sm focus:ring-1 focus:ring-accent outline-none ${errors.cpf ? 'border-danger' : 'border-border'}`}
+                        {...register('cpf')}
+                    />
+                    {errors.cpf && <span className="text-danger text-[10px] flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.cpf.message}</span>}
                   </div>
 
                   <div>
                     <input
                         type="password"
                         placeholder="Senha"
-                        className={`w-full bg-neutral-950 border rounded px-3 py-2 text-white text-sm focus:ring-1 focus:ring-cyan-500 outline-none ${errors.password ? 'border-red-500' : 'border-neutral-800'}`}
+                        className={`w-full bg-bg border rounded px-3 py-2 text-text-primary text-sm focus:ring-1 focus:ring-accent outline-none ${errors.password ? 'border-danger' : 'border-border'}`}
                         {...register('password')}
                     />
-                    {errors.password && <span className="text-red-500 text-[10px] flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.password.message}</span>}
+                    {errors.password && <span className="text-danger text-[10px] flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.password.message}</span>}
                   </div>
 
                   <div className="flex gap-2">
-                      <button type="button" onClick={() => setIsAdding(false)} className="flex-1 py-2 text-xs text-neutral-400 bg-neutral-800 rounded hover:bg-neutral-700">Cancelar</button>
-                      <button type="submit" className="flex-1 py-2 text-xs text-white font-bold bg-cyan-600 rounded hover:bg-cyan-500">Cadastrar</button>
+                      <button type="button" onClick={() => setIsAdding(false)} className="flex-1 py-2 text-xs text-text-secondary bg-surface-2 rounded hover:bg-border-strong">Cancelar</button>
+                      <button type="submit" disabled={saving} className="flex-1 py-2 text-xs text-accent-fg font-bold bg-accent rounded hover:bg-accent-hover disabled:opacity-60">
+                        {saving ? 'Salvando…' : 'Cadastrar'}
+                      </button>
                   </div>
               </div>
           </form>
@@ -95,52 +136,42 @@ export const TeamManager: React.FC<TeamManagerProps> = ({ staff, onUpdateTeam, c
 
       <div className="space-y-2">
         {staff.map((member) => (
-          <div key={member.id} className="bg-neutral-900 p-3 rounded-lg border border-neutral-800 flex items-center justify-between">
+          <div key={member.id} className="bg-surface p-3 rounded-lg border border-border flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${member.role === 'admin' ? 'bg-amber-500/20 text-amber-400' : 'bg-neutral-800 text-neutral-400'}`}>
-                {member.role === 'admin' ? <Shield size={16} /> : <User size={16} />}
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${member.role === 'OWNER' || member.role === 'MASTER_ADMIN' || member.role === 'owner' ? 'bg-accent/20 text-accent' : 'bg-surface-2 text-text-secondary'}`}>
+                {member.role === 'OWNER' || member.role === 'MASTER_ADMIN' || member.role === 'owner' ? <Shield size={16} /> : <User size={16} />}
               </div>
               <div>
-                <h4 className="font-medium text-sm text-neutral-200">{member.name} {member.id === currentAdminId && '(Você)'}</h4>
-                <p className="text-xs text-neutral-500 flex items-center gap-1">
-                   {member.email} <span className="uppercase text-[0.6rem] border border-neutral-800 px-1 rounded bg-neutral-950">
-                     {member.role === 'admin' ? 'Admin' : member.role === 'owner' ? 'Dono' : 'Funcionário'}
+                <h4 className="font-medium text-sm text-text-primary">{member.name} {member.id === currentAdminId && '(Você)'}</h4>
+                <p className="text-xs text-text-muted flex items-center gap-1">
+                   {member.email} <span className="uppercase text-[0.6rem] border border-border px-1 rounded bg-bg">
+                     {member.role === 'MASTER_ADMIN' || member.role === 'admin' ? 'Admin' : member.role === 'OWNER' || member.role === 'owner' ? 'Dono' : 'Funcionário'}
                    </span>
                 </p>
               </div>
             </div>
 
-            {member.role !== 'admin' && (
-                <div>
-                   {deleteConfirmId === member.id ? (
-                        <div className="flex items-center gap-2 bg-neutral-950 p-1 rounded-lg border border-red-900/50">
-                            <span className="text-[10px] text-red-400 pl-2 font-bold">Excluir?</span>
-                            <button
-                                onClick={() => confirmDelete(member.id)}
-                                className="p-1 bg-red-600 text-white rounded hover:bg-red-500"
-                            >
-                                <Check size={14} />
-                            </button>
-                            <button
-                                onClick={() => setDeleteConfirmId(null)}
-                                className="p-1 bg-neutral-800 text-neutral-400 rounded hover:bg-neutral-700"
-                                title="Cancelar"
-                            >
-                                <X size={14} />
-                            </button>
-                        </div>
-                   ) : (
-                        <button
-                            onClick={() => setDeleteConfirmId(member.id)}
-                            className="p-2 text-neutral-500 hover:text-red-400 transition-colors"
-                        >
-                            <Trash2 size={16} />
-                        </button>
-                   )}
+            {member.id !== currentAdminId && (member.role === 'EMPLOYEE' || member.role === 'employee') && (
+              deleteConfirmId === member.id ? (
+                <div className="flex items-center gap-2 animate-fade-in">
+                   <span className="text-[10px] text-danger font-bold">Excluir?</span>
+                   <button onClick={() => confirmDelete(member.id)} className="p-1.5 bg-danger text-white rounded hover:bg-danger/80"><Check size={14}/></button>
+                   <button onClick={() => setDeleteConfirmId(null)} className="p-1.5 bg-surface-2 text-text-secondary rounded hover:bg-border-strong"><X size={14}/></button>
                 </div>
+              ) : (
+                <button
+                  onClick={() => setDeleteConfirmId(member.id)}
+                  className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors"
+                >
+                  <Trash2 size={16} />
+                </button>
+              )
             )}
           </div>
         ))}
+        {staff.length === 0 && (
+            <p className="text-center text-text-muted text-sm py-4">Nenhum membro na equipe.</p>
+        )}
       </div>
     </div>
   );

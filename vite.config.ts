@@ -9,8 +9,13 @@ export default defineConfig(({ mode }) => {
         port: 3002,
         host: '0.0.0.0',
         proxy: {
-          '/api': 'http://localhost:3333'
-        }
+          '/api': 'http://127.0.0.1:3333'
+        },
+				allowedHosts: [
+					'ngrok.com',
+					'ngrok-free.app',
+					'9429-2001-12b4-604-9700-3408-16b6-8813-bba4.ngrok-free.app'
+				]
       },
       plugins: [react()],
       define: {

@@ -1,17 +1,18 @@
-import React, { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState, useCallback, useRef, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Appointment, QueueItem, AIInsight } from '../types';
 import { schedulingApi } from '../infra/schedulingApi';
 import { useBarbershopFilters } from './BarbershopFiltersContext';
 import { useAuth } from './AuthContext';
 import { getQueueInsight } from '../services/geminiService';
-import { notifyBarberBot } from '../services/notificationService';
 import { useBarbershop } from './BarbershopContext';
+import { AvailabilitySlot, mapAppointmentFromApi } from '../utils/schedulingUtils';
 
 interface SchedulingContextValue {
   loading: boolean;
   queue: QueueItem[];
   appointments: Appointment[];
+  availability: AvailabilitySlot[];
   aiInsight: AIInsight | null;
   clientId: string;
   completedCount: number;
@@ -22,9 +23,14 @@ interface SchedulingContextValue {
   bookAppointment: (data: any) => Promise<void>;
   cancelAppointment: (id: string) => Promise<void>;
   checkInAppointment: (appt: Appointment) => Promise<void>;
+  refreshAppointments: (date?: string) => Promise<void>;
+  loadAvailability: (date: string, staffId?: string) => Promise<void>;
 }
 
 const SchedulingContext = createContext<SchedulingContextValue | undefined>(undefined);
+
+/** Intervalo de polling da fila e agendamentos (ms). */
+const POLLING_INTERVAL_MS = 15_000;
 
 export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { barbershopId } = useBarbershopFilters();
@@ -33,6 +39,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [availability, setAvailability] = useState<AvailabilitySlot[]>([]);
   const [aiInsight, setAiInsight] = useState<AIInsight | null>(null);
   const [clientId, setClientId] = useState('');
   const [completedCount, setCompletedCount] = useState(0);
@@ -46,6 +53,50 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     setClientId(cid);
   }, []);
 
+  const loadAvailability = useCallback(async (date: string, staffId?: string) => {
+    if (!barbershopId) return;
+    try {
+      const slots = await schedulingApi.getAvailability(barbershopId, date, staffId);
+      setAvailability(slots);
+    } catch {
+      setAvailability([]);
+    }
+  }, [barbershopId]);
+
+  const refreshQueue = useCallback(async (options?: { silent?: boolean }) => {
+    if (!barbershopId) return;
+    try {
+      const queueData = await schedulingApi.listQueue(barbershopId);
+      setQueue(queueData as QueueItem[]);
+    } catch (error) {
+      if (options?.silent) return; // polling: mantém dados anteriores
+      console.error('Falha ao carregar fila', error);
+      setQueue([]);
+    }
+  }, [barbershopId]);
+
+  const refreshAppointments = useCallback(async (date?: string, options?: { silent?: boolean }) => {
+    if (!barbershopId) return;
+    try {
+      const params: { barbershopId: string; date?: string; from?: string; to?: string } = { barbershopId };
+      if (date) {
+        params.date = date;
+      } else {
+        const today = new Date();
+        const from = today.toISOString().split('T')[0];
+        const toDate = new Date(today);
+        toDate.setDate(toDate.getDate() + 30);
+        params.from = from;
+        params.to = toDate.toISOString().split('T')[0];
+      }
+      const data = await schedulingApi.listAppointments(params);
+      setAppointments((data ?? []).map(mapAppointmentFromApi));
+    } catch {
+      if (options?.silent) return; // polling: mantém dados anteriores
+      setAppointments([]);
+    }
+  }, [barbershopId]);
+
   useEffect(() => {
     const load = async () => {
       if (!barbershopId) {
@@ -54,13 +105,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       }
       setLoading(true);
 
-      try {
-        const queueData = await schedulingApi.listQueue(barbershopId);
-        setQueue(queueData as QueueItem[]);
-      } catch (error) {
-        console.error('Falha ao carregar fila', error);
-        setQueue([]);
-      }
+      await refreshQueue();
 
       try {
         const metrics = await schedulingApi.getQueueMetrics(barbershopId);
@@ -69,15 +114,53 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
         console.error('Falha ao carregar métricas', error);
       }
 
-      try {
-        const appointmentData = await schedulingApi.listAppointments(barbershopId);
-        setAppointments(appointmentData as Appointment[]);
-      } catch {
-        setAppointments([]);
-      }
+      await refreshAppointments();
+
+      const today = new Date().toISOString().split('T')[0];
+      await loadAvailability(today);
+
       setLoading(false);
     };
     load();
+  }, [barbershopId, refreshQueue, refreshAppointments, loadAvailability]);
+
+  // Polling: refetch periódico da fila e agendamentos, pausado com a aba oculta.
+  const isPollingFetchInFlight = useRef(false);
+  const pollRef = useRef<() => Promise<void>>(async () => {});
+  pollRef.current = async () => {
+    if (isPollingFetchInFlight.current) return; // não empilha requisições
+    isPollingFetchInFlight.current = true;
+    try {
+      await Promise.all([
+        refreshQueue({ silent: true }),
+        refreshAppointments(undefined, { silent: true })
+      ]);
+    } finally {
+      isPollingFetchInFlight.current = false;
+    }
+  };
+
+  useEffect(() => {
+    if (!barbershopId) return;
+
+    const tick = () => {
+      if (document.visibilityState !== 'visible') return;
+      void pollRef.current();
+    };
+
+    const interval = setInterval(tick, POLLING_INTERVAL_MS);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        void pollRef.current();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [barbershopId]);
 
   useEffect(() => {
@@ -98,7 +181,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       whatsapp,
       serviceId,
       barbershopId,
-      customerId: clientId
+      sessionId: clientId,
     };
 
     try {
@@ -107,12 +190,6 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     } catch (error) {
         console.error('Falha ao entrar na fila', error);
         throw error;
-    }
-
-    if (!user && settings?.whatsapp) {
-      const serviceName = services.find(s => s.id === serviceId)?.name || 'Serviço';
-      const msg = `*Novo Cliente na Fila*\n\n💈 *${settings.shopName}*\n👤 Nome: ${name}\n✂️ Serviço: ${serviceName}\n📱 Contato: ${whatsapp}`;
-      notifyBarberBot(settings.whatsapp, msg);
     }
   };
 
@@ -151,9 +228,15 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const bookAppointment = async (data: any) => {
     if (!barbershopId) return;
-    const payload = { ...data, barbershopId };
+    const payload = {
+      ...data,
+      barbershopId,
+      staffId: data.staffId === 'any' ? null : data.staffId
+    };
     const created = await schedulingApi.bookAppointment(payload);
-    setAppointments(prev => [...prev, created]);
+    const mapped = mapAppointmentFromApi(created);
+    setAppointments(prev => [...prev, mapped]);
+    await loadAvailability(data.date, data.staffId !== 'any' ? data.staffId : undefined);
   };
 
   const cancelAppointment = async (id: string) => {
@@ -170,6 +253,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     loading,
     queue,
     appointments,
+    availability,
     aiInsight,
     clientId,
     completedCount,
@@ -179,8 +263,10 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     deleteHistoryItem,
     bookAppointment,
     cancelAppointment,
-    checkInAppointment
-  }), [loading, queue, appointments, aiInsight, clientId]);
+    checkInAppointment,
+    refreshAppointments,
+    loadAvailability
+  }), [loading, queue, appointments, availability, aiInsight, clientId, completedCount, refreshAppointments, loadAvailability]);
 
   return <SchedulingContext.Provider value={value}>{children}</SchedulingContext.Provider>;
 };

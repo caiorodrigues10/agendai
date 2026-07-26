@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
 import { barbershopApi } from '../infra/barbershopApi';
 import { StaffMember, Service, ShopSettings, FeedPost } from '../types';
+import { mapScheduleFromApi, mapStaffFromApi } from '../utils/schedulingUtils';
 import { useBarbershopFilters } from './BarbershopFiltersContext';
 import { useAuth } from './AuthContext';
 
@@ -24,49 +25,67 @@ interface BarbershopContextValue {
 
 const BarbershopContext = createContext<BarbershopContextValue | undefined>(undefined);
 
+function isShopStaffRole(role?: string) {
+  const normalized = (role || '').toUpperCase();
+  return normalized === 'OWNER' || normalized === 'EMPLOYEE';
+}
+
 export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { barbershopId, setBarbershopId } = useBarbershopFilters();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [services, setServices] = useState<Service[]>([]);
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [settings, setSettingsState] = useState<ShopSettings | null>(null);
   const [feed, setFeed] = useState<FeedPost[]>([]);
 
+  // Owner/employee always bind to their own tenant — never pick the first public shop.
   useEffect(() => {
-    if (user?.barbershopId && !barbershopId) {
-      setBarbershopId(user.barbershopId);
-    }
-  }, [user, barbershopId, setBarbershopId]);
+    if (authLoading) return;
 
-  useEffect(() => {
-    const ensureDefaultShop = async () => {
-      if (barbershopId) return;
-      try {
-        const shops = await barbershopApi.listBarbershops();
-        if (shops?.[0]?.id) {
-          setBarbershopId(shops[0].id);
-        } else {
-          setLoading(false);
-        }
-      } catch {
-        setLoading(false);
+    if (user?.barbershopId && isShopStaffRole(user.role)) {
+      if (barbershopId !== user.barbershopId) {
+        setBarbershopId(user.barbershopId);
       }
-    };
-    ensureDefaultShop();
-  }, [barbershopId, setBarbershopId]);
+      return;
+    }
+
+    // Anonymous / master: do not auto-select a shop here.
+    // PublicHome sets barbershopId from the URL; staff pages require a tenant.
+  }, [user, authLoading, barbershopId, setBarbershopId]);
 
   useEffect(() => {
     const load = async () => {
+      if (authLoading) {
+        setLoading(true);
+        return;
+      }
+
+      // Staff user still waiting for tenant sync
+      if (!barbershopId && user?.barbershopId && isShopStaffRole(user.role)) {
+        setLoading(true);
+        return;
+      }
+
       if (!barbershopId) {
+        setServices([]);
+        setStaff([]);
+        setFeed([]);
+        setSettingsState(null);
         setLoading(false);
         return;
       }
+
       setLoading(true);
+      // Avoid flashing the previous tenant while switching shops
+      setSettingsState(null);
+      setServices([]);
+      setStaff([]);
+      setFeed([]);
 
       try {
         const servicesData = await barbershopApi.listServices(barbershopId);
-        setServices(servicesData as Service[]);
+        setServices(Array.isArray(servicesData) ? servicesData as Service[] : []);
       } catch (e) {
         console.error('Falha ao carregar serviços', e);
         setServices([]);
@@ -74,7 +93,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
 
       try {
         const staffData = await barbershopApi.listStaff(barbershopId);
-        setStaff(staffData as StaffMember[]);
+        setStaff(Array.isArray(staffData) ? staffData.map(mapStaffFromApi) : []);
       } catch (e) {
         console.error('Falha ao carregar equipe', e);
         setStaff([]);
@@ -82,41 +101,62 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
 
       try {
         const feedData = await barbershopApi.listFeed(barbershopId);
-        setFeed(feedData as FeedPost[]);
+        setFeed(Array.isArray(feedData) ? feedData as FeedPost[] : []);
       } catch (e) {
         console.error('Falha ao carregar feed', e);
         setFeed([]);
       }
 
       try {
-        const shopData = await barbershopApi.getBarbershop(barbershopId);
+        const shopData = await barbershopApi.getBarbershop(barbershopId) as {
+          name?: string;
+          whatsapp?: string;
+          address?: string | null;
+          logoUrl?: string | null;
+        } | null;
+        let schedule = mapScheduleFromApi(null);
+        try {
+          const scheduleData = await barbershopApi.getSchedule(barbershopId) as
+            | Array<{ dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }>
+            | { schedule?: Array<{ dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }> }
+            | null;
+          schedule = mapScheduleFromApi(Array.isArray(scheduleData) ? scheduleData : scheduleData?.schedule);
+        } catch (e) {
+          console.error('Falha ao carregar horários', e);
+        }
+
         if (shopData) {
           setSettingsState({
-            shopName: shopData.name,
-            whatsapp: shopData.whatsapp,
-            schedule: shopData.schedule,
-            logoUrl: shopData.logoUrl
+            shopName: shopData.name ?? 'Salão',
+            whatsapp: shopData.whatsapp ?? '',
+            address: shopData.address ?? undefined,
+            schedule,
+            logoUrl: shopData.logoUrl ?? undefined,
           });
+        } else {
+          setSettingsState(null);
         }
       } catch (e) {
-        console.error('Falha ao carregar configurações da barbearia', e);
-        // Não usar mock settings
+        console.error('Falha ao carregar configurações do salão', e);
+        setSettingsState(null);
       }
 
       setLoading(false);
     };
     load();
-  }, [barbershopId]);
+  }, [barbershopId, authLoading, user]);
 
   const setSettings = async (newSettings: ShopSettings) => {
     if (!barbershopId) return;
-    const payload = {
+    const shopPayload: Record<string, string | undefined> = {
       name: newSettings.shopName,
       whatsapp: newSettings.whatsapp,
-      schedule: newSettings.schedule,
-      logoUrl: newSettings.logoUrl
     };
-    await barbershopApi.updateBarbershop(barbershopId, payload);
+    if (newSettings.logoUrl && !newSettings.logoUrl.startsWith('data:')) {
+      shopPayload.logoUrl = newSettings.logoUrl;
+    }
+    await barbershopApi.updateBarbershop(barbershopId, shopPayload);
+    await barbershopApi.updateSchedule(barbershopId, newSettings.schedule);
     setSettingsState(newSettings);
   };
 
@@ -143,10 +183,20 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
     const toAdd = team.filter(member => !currentIds.has(member.id));
     const toRemove = staff.filter(member => !newIds.has(member.id));
     await Promise.all([
-      ...toAdd.map(member => barbershopApi.addStaff({ ...member, barbershopId })),
+      ...toAdd.map(member =>
+        barbershopApi.addStaff({
+          name: member.name,
+          email: member.email,
+          password: member.password,
+          cpf: (member as StaffMember & { cpf?: string }).cpf,
+          role: 'EMPLOYEE',
+          barbershopId,
+        })
+      ),
       ...toRemove.map(member => barbershopApi.deleteStaff(member.id))
     ]);
-    setStaff(team.map(member => ({ ...member, barbershopId })));
+    const staffData = await barbershopApi.listStaff(barbershopId);
+    setStaff(Array.isArray(staffData) ? staffData.map(mapStaffFromApi) : []);
   };
 
   const addPost = async (post: FeedPost) => {

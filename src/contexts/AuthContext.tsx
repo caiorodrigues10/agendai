@@ -1,12 +1,16 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
-import { authApi } from '../infra/authApi';
+import { authApi, RegisterPayload } from '../infra/authApi';
 import { authStorage } from '../infra/authStorage';
+import { ApiError } from '../infra/apiClient';
 import { StaffMember } from '../types';
+
+type AuthResult = { ok: true } | { ok: false; message: string };
 
 interface AuthContextValue {
   user: StaffMember | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<AuthResult>;
+  register: (data: RegisterPayload) => Promise<AuthResult>;
   logout: () => void;
   hasRole: (roles: StaffMember['role'][]) => boolean;
 }
@@ -20,6 +24,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const init = async () => {
       const token = authStorage.getAccessToken();
+      const cachedUser = authStorage.getUser();
       let success = false;
 
       if (token) {
@@ -28,8 +33,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setUser(me.user as StaffMember);
           authStorage.setUser(me.user);
           success = true;
-        } catch {
-          // Token inválido ou expirado, tentar refresh abaixo
+        } catch (err) {
+          // Rate limit / rede: mantém sessão local em vez de forçar logout
+          if (err instanceof ApiError && (err.statusCode === 429 || err.statusCode >= 500)) {
+            if (cachedUser) {
+              setUser(cachedUser as StaffMember);
+              success = true;
+            }
+          }
+          // Token inválido ou expirado → tentar refresh abaixo
         }
       }
 
@@ -41,11 +53,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             authStorage.setTokens(resp.accessToken, resp.refreshToken);
             authStorage.setUser(resp.user);
             setUser(resp.user as StaffMember);
-          } catch {
-            authStorage.clearTokens();
-            authStorage.clearUser();
-            setUser(null);
+          } catch (err) {
+            if (err instanceof ApiError && (err.statusCode === 429 || err.statusCode >= 500) && cachedUser) {
+              setUser(cachedUser as StaffMember);
+            } else {
+              authStorage.clearTokens();
+              authStorage.clearUser();
+              setUser(null);
+            }
           }
+        } else if (!token) {
+          authStorage.clearTokens();
+          authStorage.clearUser();
+          setUser(null);
+        } else if (cachedUser) {
+          // Token presente mas /me falhou sem refresh — mantém usuário em cache se possível
+          setUser(cachedUser as StaffMember);
         } else {
           authStorage.clearTokens();
           authStorage.clearUser();
@@ -57,21 +80,43 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     init();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const persistSession = (resp: { user: any; accessToken: string; refreshToken: string }) => {
+    authStorage.setTokens(resp.accessToken, resp.refreshToken);
+    authStorage.setUser(resp.user);
+    setUser(resp.user as StaffMember);
+    sessionStorage.removeItem('bq:access-block-info');
+  };
+
+  const login = async (email: string, password: string): Promise<AuthResult> => {
     try {
       const resp = await authApi.login(email, password);
-      authStorage.setTokens(resp.accessToken, resp.refreshToken);
-      authStorage.setUser(resp.user);
-      setUser(resp.user as StaffMember);
-      return true;
-    } catch {
-      return false;
+      persistSession(resp);
+      return { ok: true };
+    } catch (err) {
+      if (err instanceof ApiError && err.isAccessBlocked) {
+        // AccessBlockedListener redireciona — modal pode fechar
+        return { ok: false, message: err.message };
+      }
+      const message = err instanceof ApiError ? err.message : 'E-mail ou senha inválidos';
+      return { ok: false, message };
+    }
+  };
+
+  const register = async (data: RegisterPayload): Promise<AuthResult> => {
+    try {
+      const resp = await authApi.register(data);
+      persistSession(resp);
+      return { ok: true };
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'Não foi possível criar sua conta. Tente novamente.';
+      return { ok: false, message };
     }
   };
 
   const logout = () => {
     authStorage.clearTokens();
     authStorage.clearUser();
+    sessionStorage.removeItem('bq:access-block-info');
     setUser(null);
   };
 
@@ -82,7 +127,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return normalizedRoles.includes(normalizedUserRole);
   };
 
-  const value = useMemo(() => ({ user, loading, login, logout, hasRole }), [user, loading]);
+  const value = useMemo(() => ({ user, loading, login, register, logout, hasRole }), [user, loading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

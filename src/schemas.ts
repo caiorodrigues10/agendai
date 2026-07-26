@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isValidCpf, normalizeDocument } from './utils/documentUtils';
 
 // --- Login Schema ---
 export const LoginSchema = z.object({
@@ -7,6 +8,19 @@ export const LoginSchema = z.object({
 });
 
 export type LoginFormData = z.infer<typeof LoginSchema>;
+
+// --- Register Schema (cadastro owner + salão) ---
+export const RegisterSchema = z.object({
+  ownerName: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
+  email: z.string().email('E-mail inválido'),
+  password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
+  cpf: z.string().min(11, 'CPF inválido'),
+  barbershopName: z.string().min(3, 'Nome do salão é obrigatório'),
+  whatsapp: z.string().min(10, 'WhatsApp inválido (mínimo 10 dígitos)'),
+  cnpj: z.string().optional(),
+});
+
+export type RegisterFormData = z.infer<typeof RegisterSchema>;
 
 // --- Customer/Queue Schema ---
 export const CustomerQueueSchema = z.object({
@@ -36,7 +50,11 @@ export type ServiceFormData = z.infer<typeof ServiceSchema>;
 export const TeamMemberSchema = z.object({
   name: z.string().min(3, "Nome deve ter no mínimo 3 caracteres"),
   email: z.string().email("E-mail inválido"),
-  password: z.string().min(4, "Senha deve ter no mínimo 4 caracteres")
+  password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
+  cpf: z
+    .string()
+    .transform((v) => normalizeDocument(v))
+    .refine((v) => isValidCpf(v), { message: "CPF inválido" }),
 });
 
 export type TeamMemberFormData = z.infer<typeof TeamMemberSchema>;

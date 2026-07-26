@@ -41,41 +41,41 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSa
 
   return (
     <div className="mt-6 space-y-6 animate-fade-in">
-      <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5">
-        <h3 className="text-lg font-bold text-white mb-4">Configurações Gerais</h3>
+      <div className="bg-surface border border-border rounded-xl p-5">
+        <h3 className="text-lg font-bold text-text-primary mb-4">Configurações Gerais</h3>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-neutral-400 mb-1.5">Nome da Barbearia</label>
+            <label className="block text-sm text-text-secondary mb-1.5">Nome do Salão</label>
             <input
               type="text"
               value={shopName}
               onChange={(e) => setShopName(e.target.value)}
-              className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-3 text-white outline-none focus:ring-2 focus:ring-cyan-500"
+              className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-neutral-400 mb-1.5">WhatsApp de Avisos</label>
+            <label className="block text-sm text-text-secondary mb-1.5">WhatsApp de Avisos</label>
             <div className="relative">
               <input
                 type="tel"
                 value={whatsapp}
                 onChange={(e) => setWhatsapp(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-lg pl-10 pr-4 py-3 text-white outline-none focus:ring-2 focus:ring-cyan-500"
+                className="w-full bg-bg border border-border rounded-lg pl-10 pr-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
                 placeholder="(11) 99999-9999"
               />
-              <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" size={16} />
+              <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm text-neutral-400 mb-2">Logo da Barbearia</label>
+            <label className="block text-sm text-text-secondary mb-2">Logo do Salão</label>
             <div className="flex items-center gap-3">
-              <div className="w-16 h-16 rounded-lg bg-neutral-950 border border-neutral-800 flex items-center justify-center overflow-hidden">
-                {logoUrl ? <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" /> : <Upload className="text-neutral-600" size={20} />}
+              <div className="w-16 h-16 rounded-lg bg-bg border border-border flex items-center justify-center overflow-hidden">
+                {logoUrl ? <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" /> : <Upload className="text-text-muted" size={20} />}
               </div>
-              <label className="px-3 py-2 text-xs bg-neutral-800 text-neutral-300 rounded-lg border border-neutral-700 cursor-pointer hover:bg-neutral-700">
+              <label className="px-3 py-2 text-xs bg-surface-2 text-text-secondary rounded-lg border border-border-strong cursor-pointer hover:bg-border-strong">
                 Escolher arquivo
                 <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
               </label>
@@ -84,21 +84,21 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSa
         </div>
       </div>
 
-      <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5">
-        <h3 className="text-lg font-bold text-white mb-4">Horários de Funcionamento</h3>
+      <div className="bg-surface border border-border rounded-xl p-5">
+        <h3 className="text-lg font-bold text-text-primary mb-4">Horários de Funcionamento</h3>
 
         <div className="space-y-3">
           {schedule.map((day, index) => (
-            <div key={day.dayName} className="bg-neutral-950 border border-neutral-800 rounded-lg p-3">
+            <div key={day.dayName} className="bg-bg border border-border rounded-lg p-3">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <CalendarDays className="text-neutral-500" size={16} />
-                  <span className="text-sm font-bold text-white">{day.dayName}</span>
+                  <CalendarDays className="text-text-muted" size={16} />
+                  <span className="text-sm font-bold text-text-primary">{day.dayName}</span>
                 </div>
                 <button
                   onClick={() => handleDayChange(index, 'isOpen', !day.isOpen)}
                   className={`px-2 py-1 text-[10px] rounded-full font-bold ${
-                    day.isOpen ? 'bg-green-900/40 text-green-400' : 'bg-red-900/40 text-red-400'
+                    day.isOpen ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'
                   }`}
                 >
                   {day.isOpen ? 'Aberto' : 'Fechado'}
@@ -108,21 +108,21 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSa
               {day.isOpen && (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="relative">
-                    <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500" size={14} />
+                    <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" size={14} />
                     <input
                       type="time"
                       value={day.openTime}
                       onChange={(e) => handleDayChange(index, 'openTime', e.target.value)}
-                      className="w-full bg-neutral-900 border border-neutral-800 rounded-lg pl-8 pr-2 py-2 text-white text-xs outline-none"
+                      className="w-full bg-surface border border-border rounded-lg pl-8 pr-2 py-2 text-text-primary text-xs outline-none"
                     />
                   </div>
                   <div className="relative">
-                    <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-500" size={14} />
+                    <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" size={14} />
                     <input
                       type="time"
                       value={day.closeTime}
                       onChange={(e) => handleDayChange(index, 'closeTime', e.target.value)}
-                      className="w-full bg-neutral-900 border border-neutral-800 rounded-lg pl-8 pr-2 py-2 text-white text-xs outline-none"
+                      className="w-full bg-surface border border-border rounded-lg pl-8 pr-2 py-2 text-text-primary text-xs outline-none"
                     />
                   </div>
                 </div>
@@ -134,7 +134,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSa
 
       <button
         onClick={handleSave}
-        className="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20"
+        className="w-full py-3 bg-accent hover:bg-accent-hover text-accent-fg font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-accent/20"
       >
         <Save size={16} /> Salvar Configurações
       </button>

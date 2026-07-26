@@ -1,7 +1,7 @@
 export enum ServiceType {
-  HAIRCUT = 'Corte de Cabelo',
+  HAIRCUT = 'Corte',
   BEARD = 'Barba',
-  FULL_SERVICE = 'Cabelo + Barba',
+  FULL_SERVICE = 'Corte + Escova',
   EYEBROW = 'Sobrancelha'
 }
 
@@ -41,6 +41,9 @@ export interface Appointment {
   time: string;
   createdAt: number;
   status: 'confirmed' | 'cancelled' | 'completed';
+  serviceName?: string;
+  staffName?: string;
+  serviceDurationMinutes?: number;
 }
 
 export interface DaySchedule {
@@ -55,6 +58,7 @@ export interface ShopSettings {
   whatsapp: string;
   schedule: DaySchedule[];
   logoUrl?: string;
+  address?: string;
 }
 
 export interface AIInsight {

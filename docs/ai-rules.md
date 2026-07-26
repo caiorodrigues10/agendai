@@ -1,5 +1,8 @@
 ## Diretrizes universais para IAs
 
+> **Contexto completo do projeto:** leia [`../../AGENTS.md`](../../AGENTS.md) na raiz do monorepo antes de qualquer tarefa (arquitetura, rotas, bugs conhecidos, o que já existe no backend).
+
+
 ### Convenções de commits
 - Padrão: conventional-changelog
 - Formato: tipo(escopo): mensagem

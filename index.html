@@ -3,30 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BarberQueue Pro AI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>AGENDAI — Gestão para salões, barbearias e studios</title>
+    <meta name="description" content="Fila digital, agenda e gestão para salões de beleza e barbearias — atendimento feminino, masculino e unissex." />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: #0a0a0a; /* Neutral 950 */
-        color: #f5f5f5; /* Neutral 50 */
-      }
-      /* Custom Scrollbar */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #171717;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #404040;
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #525252;
-      }
-    </style>
+    <script>
+      // Anti-flash: aplica o tema salvo (ou preferência do SO) antes do primeiro paint.
+      (function () {
+        var theme = 'dark';
+        try {
+          var saved = localStorage.getItem('bq:theme');
+          theme = saved === 'light' || saved === 'dark'
+            ? saved
+            : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        } catch (e) { /* localStorage indisponível — mantém dark */ }
+        var root = document.documentElement;
+        root.classList.toggle('dark', theme === 'dark');
+        root.style.colorScheme = theme;
+        // Cor de fundo pré-CSS para evitar flash enquanto o bundle carrega
+        root.style.backgroundColor = theme === 'dark' ? '#0a0a0a' : '#f5f5f5';
+      })();
+    </script>
+  </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/index.tsx"></script>

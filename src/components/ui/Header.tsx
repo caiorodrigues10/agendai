@@ -2,6 +2,7 @@ import React from 'react';
 import { Logo } from './Logo';
 import { Lock, LogOut } from 'lucide-react';
 import { StaffMember } from '../../types';
+import { ThemeToggle } from './ThemeToggle';
 
 interface HeaderProps {
   currentUser: StaffMember | null;
@@ -12,19 +13,20 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogout, logoUrl }) => {
   return (
-    <header className="sticky top-0 z-50 bg-neutral-950/95 backdrop-blur-sm border-b border-cyan-900/30 shadow-lg shadow-cyan-900/10">
+    <header className="sticky top-0 z-50 bg-bg/95 backdrop-blur-sm border-b border-accent/20 shadow-lg shadow-accent/5">
       <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
         <Logo size="sm" customImageUrl={logoUrl} />
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           {currentUser ? (
-            <div className="flex items-center gap-2 bg-neutral-900 rounded-lg p-1 pr-3 border border-neutral-800">
-              <div className="px-2 py-1 bg-cyan-900/30 rounded text-xs font-bold text-cyan-400 uppercase">
+            <div className="flex items-center gap-2 bg-surface rounded-lg p-1 pr-3 border border-border">
+              <div className="px-2 py-1 bg-accent/15 rounded text-xs font-bold text-accent uppercase">
                 {currentUser.role === 'admin' ? 'Admin' : currentUser.role === 'owner' ? 'Dono' : 'Funcionário'}
               </div>
-              <span className="text-xs font-medium text-white hidden sm:block">{currentUser.name}</span>
+              <span className="text-xs font-medium text-text-primary hidden sm:block">{currentUser.name}</span>
               <button
                 onClick={onLogout}
-                className="ml-2 text-neutral-500 hover:text-red-400 transition-colors"
+                className="ml-2 text-text-muted hover:text-danger transition-colors"
                 title="Sair"
               >
                 <LogOut size={16} />
@@ -33,7 +35,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
           ) : (
             <button
               onClick={onOpenLogin}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-neutral-900 text-neutral-400 border border-neutral-800 hover:text-cyan-400 hover:border-cyan-900"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-surface text-text-secondary border border-border hover:text-accent hover:border-accent/40"
             >
               <Lock size={14} />
               Área da Equipe

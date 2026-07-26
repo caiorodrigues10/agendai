@@ -50,55 +50,55 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({ services, onJo
   };
 
   return (
-    <div className="fixed inset-0 bg-black/90 z-50 flex items-end sm:items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
-      <div className={`bg-neutral-900 w-full max-w-md rounded-2xl p-6 shadow-2xl border ${isStaffMode ? 'border-cyan-800' : 'border-neutral-800'} max-h-[90vh] overflow-y-auto`}>
+    <div className="fixed inset-0 bg-black/80 z-50 flex items-end sm:items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+      <div className={`bg-surface w-full max-w-md rounded-2xl p-6 shadow-2xl border ${isStaffMode ? 'border-accent/40' : 'border-border'} max-h-[90vh] overflow-y-auto`}>
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-2">
-             {isStaffMode && <UserCheck className="text-cyan-400" size={24} />}
-             <h2 className="text-2xl font-bold text-white">
+             {isStaffMode && <UserCheck className="text-accent" size={24} />}
+             <h2 className="text-2xl font-bold text-text-primary">
                 {isStaffMode ? 'Adicionar Cliente Manual' : 'Entrar na Fila'}
              </h2>
           </div>
-          <button onClick={onCancel} className="text-neutral-500 hover:text-white transition-colors">
+          <button onClick={onCancel} className="text-text-muted hover:text-text-primary transition-colors">
             <X size={24} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-neutral-400 mb-2">Nome do Cliente</label>
+            <label className="block text-sm font-medium text-text-secondary mb-2">Nome do Cliente</label>
             <input
               type="text"
               placeholder="Ex: João Silva"
-              className={`w-full bg-neutral-950 border rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500 outline-none transition-all placeholder-neutral-700 ${errors.name ? 'border-red-500' : 'border-neutral-800'}`}
+              className={`w-full bg-bg border rounded-xl px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all placeholder:text-text-muted ${errors.name ? 'border-danger' : 'border-border'}`}
               autoFocus
               {...register('name')}
             />
-            {errors.name && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle size={10} /> {errors.name.message}</p>}
+            {errors.name && <p className="text-danger text-xs mt-1 flex items-center gap-1"><AlertCircle size={10} /> {errors.name.message}</p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-neutral-400 mb-2">
+            <label className="block text-sm font-medium text-text-secondary mb-2">
                 WhatsApp {isStaffMode ? '(Opcional / Placeholder)' : '(para aviso)'}
             </label>
             <input
               type="tel"
               placeholder="(11) 99999-9999"
-              className={`w-full bg-neutral-950 border rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-cyan-500 outline-none transition-all placeholder-neutral-700 ${errors.whatsapp ? 'border-red-500' : 'border-neutral-800'}`}
+              className={`w-full bg-bg border rounded-xl px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all placeholder:text-text-muted ${errors.whatsapp ? 'border-danger' : 'border-border'}`}
               value={whatsappValue}
               onChange={handlePhoneChange}
             />
-             {errors.whatsapp && !isStaffMode && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle size={10} /> {errors.whatsapp.message}</p>}
+             {errors.whatsapp && !isStaffMode && <p className="text-danger text-xs mt-1 flex items-center gap-1"><AlertCircle size={10} /> {errors.whatsapp.message}</p>}
              
-             {!isStaffMode && <p className="text-xs text-neutral-500 mt-1">
+             {!isStaffMode && <p className="text-xs text-text-muted mt-1">
               *O dono será notificado e te avisaremos quando faltar 15min.
             </p>}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-neutral-400 mb-2">Serviço</label>
+            <label className="block text-sm font-medium text-text-secondary mb-2">Serviço</label>
             {services.length === 0 ? (
-                <div className="text-center p-4 bg-neutral-950 rounded-xl text-neutral-500">
+                <div className="text-center p-4 bg-bg rounded-xl text-text-muted">
                     Nenhum serviço disponível no momento.
                 </div>
             ) : (
@@ -113,7 +113,7 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({ services, onJo
                 ))}
                 </div>
             )}
-            {errors.serviceId && <p className="text-red-500 text-xs mt-1">Selecione um serviço</p>}
+            {errors.serviceId && <p className="text-danger text-xs mt-1">Selecione um serviço</p>}
           </div>
 
           <div className="pt-4">
@@ -122,8 +122,8 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({ services, onJo
               disabled={loading}
               className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition-all ${
                 loading
-                  ? 'bg-neutral-800 text-neutral-600 cursor-not-allowed'
-                  : 'bg-cyan-600 text-white hover:bg-cyan-500 hover:shadow-cyan-500/20'
+                  ? 'bg-surface-2 text-text-muted cursor-not-allowed'
+                  : 'bg-accent text-accent-fg hover:bg-accent-hover hover:shadow-accent/20'
               }`}
             >
               {loading ? (
@@ -135,8 +135,8 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({ services, onJo
                 isStaffMode ? 'Adicionar à Fila' : 'Confirmar e Avisar Dono'
               )}
             </button>
-            {!isStaffMode && <p className="text-center text-xs text-neutral-500 mt-4">
-              Ao entrar, você será redirecionado para o WhatsApp do barbeiro.
+            {!isStaffMode && <p className="text-center text-xs text-text-muted mt-4">
+              Ao entrar, você será redirecionado para o WhatsApp do salão.
             </p>}
           </div>
         </form>

@@ -6,6 +6,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import { BarbershopProvider } from './contexts/BarbershopContext';
 import { BarbershopFiltersProvider } from './contexts/BarbershopFiltersContext';
 import { SchedulingProvider } from './contexts/SchedulingContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { SubscriptionProvider } from './contexts/SubscriptionContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -15,14 +17,18 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <BarbershopFiltersProvider>
-      <AuthProvider>
-        <BarbershopProvider>
-          <SchedulingProvider>
-            <App />
-          </SchedulingProvider>
-        </BarbershopProvider>
-      </AuthProvider>
-    </BarbershopFiltersProvider>
+    <ThemeProvider>
+      <BarbershopFiltersProvider>
+        <AuthProvider>
+          <SubscriptionProvider>
+            <BarbershopProvider>
+              <SchedulingProvider>
+                <App />
+              </SchedulingProvider>
+            </BarbershopProvider>
+          </SubscriptionProvider>
+        </AuthProvider>
+      </BarbershopFiltersProvider>
+    </ThemeProvider>
   </React.StrictMode>
 );

@@ -1,16 +1,20 @@
+import { apiClient } from '../infra/apiClient';
+import { authStorage } from '../infra/authStorage';
+
+/** Envia WhatsApp via backend (requer staff autenticado). */
 export const notifyBarberBot = async (targetPhone: string, message: string): Promise<boolean> => {
-  // Limpa o número de telefone (remove caracteres não numéricos)
-  const cleanPhone = targetPhone.replace(/\D/g, '');
+  const token = authStorage.getAccessToken();
+  if (!token) return false;
 
-  // Se o número for curto, assume que falta o DDI 55 (Brasil)
-  const finalPhone = cleanPhone.length === 11 ? `55${cleanPhone}` : cleanPhone;
-
-  // Em um ambiente de produção real, isso seria uma chamada de API para o backend
-  // enviar a mensagem via WhatsApp Business API ou Gateway (ex: Twilio, Z-API).
-  // Exemplo: await apiClient.post('/api/notifications/whatsapp', { phone: finalPhone, message });
-
-  console.log(`[SIMULAÇÃO BACKEND] Enviando WhatsApp para ${finalPhone}:`, message);
-
-  // NÃO abrimos mais a janela do cliente. O envio é "silencioso" (server-side).
-  return true;
+  try {
+    const res = await apiClient<{ success: boolean; data: { sent: boolean } }>(
+      '/api/notifications/whatsapp',
+      'POST',
+      { phone: targetPhone, message },
+      token
+    );
+    return res.data?.sent ?? false;
+  } catch {
+    return false;
+  }
 };

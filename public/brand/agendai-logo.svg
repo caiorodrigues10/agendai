@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400">
+  <defs>
+    <style>
+      .word {
+        font-family: Arial Black, Arial, Helvetica, sans-serif;
+        font-weight: 900;
+      }
+    </style>
+  </defs>
+
+  <!-- Badge maior; AGEND branco sobrescreve a borda esquerda -->
+  <rect x="780" y="55" width="320" height="290" rx="52" ry="52" fill="#00c2b3"/>
+  <text
+    x="940"
+    y="200"
+    class="word"
+    text-anchor="middle"
+    dominant-baseline="central"
+    fill="#0a0f18"
+    font-size="168"
+    letter-spacing="-6"
+  >AI</text>
+
+  <text
+    x="36"
+    y="200"
+    class="word"
+    dominant-baseline="central"
+    fill="#ffffff"
+    font-size="180"
+    letter-spacing="-10"
+  >AGEND</text>
+</svg>
