@@ -17,9 +17,9 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <ThemeProvider>
-      <BarbershopFiltersProvider>
-        <AuthProvider>
+    <BarbershopFiltersProvider>
+      <AuthProvider>
+        <ThemeProvider>
           <SubscriptionProvider>
             <BarbershopProvider>
               <SchedulingProvider>
@@ -27,8 +27,8 @@ root.render(
               </SchedulingProvider>
             </BarbershopProvider>
           </SubscriptionProvider>
-        </AuthProvider>
-      </BarbershopFiltersProvider>
-    </ThemeProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </BarbershopFiltersProvider>
   </React.StrictMode>
 );

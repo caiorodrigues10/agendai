@@ -18,7 +18,7 @@ export interface PixQrCode {
   expirationDate: string;
 }
 
-export type PaymentProvider = 'MERCADOPAGO' | 'ABACATEPAY';
+export type PaymentProvider = 'MERCADOPAGO' | 'ABACATEPAY' | 'ASAAS';
 
 export interface Payment {
   id: string;
@@ -28,7 +28,7 @@ export interface Payment {
   checkoutUrl?: string | null;
   status: PaymentStatus;
   statusDetail: string;
-  paymentMethod: 'credit_card' | 'debit_card' | 'pix' | 'payment_link';
+  paymentMethod: 'credit_card' | 'debit_card' | 'pix' | 'payment_link' | 'asaas';
   transactionAmount: number;
   currency: string;
   description: string;
@@ -37,6 +37,21 @@ export interface Payment {
   createdAt: string;
   updatedAt: string;
   pixQrCode: PixQrCode | null;
+}
+
+export interface Refund {
+  id: string;
+  paymentId: string;
+  barbershopId: string;
+  amount: number;
+  reason: string;
+  status: 'PENDING' | 'SUCCEEDED' | 'FAILED';
+  provider: 'ABACATEPAY' | 'MERCADOPAGO' | 'ASAAS';
+  providerRefundId: string | null;
+  requestedById: string | null;
+  errorMessage: string | null;
+  createdAt: string;
+  completedAt: string | null;
 }
 
 function unwrap<T>(res: any): T {
@@ -57,5 +72,23 @@ export const paymentsApi = {
       'GET',
       undefined,
       token()
-    )
+    ),
+  refundPayment: (paymentId: string, reason: string) =>
+    apiClient<any>(`/api/payments/${paymentId}/refund`, 'POST', { reason }, token()).then(res =>
+      unwrap<Refund>(res)
+    ),
+  listRefunds: async (params?: { barbershopId?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.barbershopId) qs.set('barbershopId', params.barbershopId);
+    const query = qs.toString();
+    const res = await apiClient<any>(
+      `/api/refunds${query ? `?${query}` : ''}`,
+      'GET',
+      undefined,
+      token()
+    );
+    const body = unwrap<any>(res);
+    const data = Array.isArray(body) ? body : Array.isArray(body?.data) ? body.data : [];
+    return { data: data as Refund[], meta: body?.meta ?? (res as any)?.meta };
+  }
 };

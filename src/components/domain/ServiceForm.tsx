@@ -29,7 +29,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
     onSave({
       ...data,
       icon: selectedIcon
-    });
+    } as Omit<Service, 'id'>);
   };
 
   return (

@@ -3,15 +3,23 @@ import { Service } from '../../types';
 import { ServiceForm } from './ServiceForm';
 import { DynamicIcon } from '../ui/DynamicIcon';
 import { Pencil, Trash2, Plus } from 'lucide-react';
+import { PackageCatalog } from './PackageCatalog';
 
 interface ServiceManagerProps {
   services: Service[];
   onAdd: (service: Omit<Service, 'id'>) => void;
   onEdit: (id: string, service: Omit<Service, 'id'>) => void;
   onDelete: (id: string) => void;
+  canManagePackages?: boolean;
 }
 
-export const ServiceManager: React.FC<ServiceManagerProps> = ({ services, onAdd, onEdit, onDelete }) => {
+export const ServiceManager: React.FC<ServiceManagerProps> = ({
+  services,
+  onAdd,
+  onEdit,
+  onDelete,
+  canManagePackages = true,
+}) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -85,6 +93,8 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ services, onAdd,
           onCancel={() => setEditingId(null)}
         />
       )}
+
+      <PackageCatalog services={services} canManage={canManagePackages} />
     </div>
   );
 };

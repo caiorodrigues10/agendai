@@ -21,6 +21,7 @@ interface SchedulingContextValue {
   updateQueueStatus: (id: string, status: QueueItem['status']) => Promise<void>;
   deleteHistoryItem: (id: string) => Promise<void>;
   bookAppointment: (data: any) => Promise<void>;
+  bookAppointmentPublic: (data: any) => Promise<void>;
   cancelAppointment: (id: string) => Promise<void>;
   checkInAppointment: (appt: Appointment) => Promise<void>;
   refreshAppointments: (date?: string) => Promise<void>;
@@ -239,6 +240,21 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     await loadAvailability(data.date, data.staffId !== 'any' ? data.staffId : undefined);
   };
 
+  // Public booking (no auth) – used on the public barbershop page.
+  const bookAppointmentPublic = useCallback(async (data: any) => {
+    if (!barbershopId) throw new Error('Barbearia não selecionada');
+
+    await schedulingApi.bookAppointmentPublic({
+      ...data,
+      barbershopId,
+      staffId: data.staffId === 'any' ? null : data.staffId
+    });
+    await loadAvailability(
+      data.date,
+      data.staffId !== 'any' ? data.staffId : undefined
+    );
+  }, [barbershopId, loadAvailability]);
+
   const cancelAppointment = async (id: string) => {
     await schedulingApi.deleteAppointment(id);
     setAppointments(prev => prev.filter(a => a.id !== id));
@@ -249,24 +265,36 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     await cancelAppointment(appt.id);
   };
 
-  const value = useMemo(() => ({
-    loading,
-    queue,
-    appointments,
-    availability,
-    aiInsight,
-    clientId,
-    completedCount,
-    joinQueue,
-    leaveQueue,
-    updateQueueStatus,
-    deleteHistoryItem,
-    bookAppointment,
-    cancelAppointment,
-    checkInAppointment,
-    refreshAppointments,
-    loadAvailability
-  }), [loading, queue, appointments, availability, aiInsight, clientId, completedCount, refreshAppointments, loadAvailability]);
+const value = useMemo(() => ({
+        loading,
+        queue,
+        appointments,
+        availability,
+        aiInsight,
+        clientId,
+        completedCount,
+        joinQueue,
+        leaveQueue,
+        updateQueueStatus,
+        deleteHistoryItem,
+        bookAppointment,
+        cancelAppointment,
+        checkInAppointment,
+        refreshAppointments,
+        loadAvailability,
+        bookAppointmentPublic
+    }), [
+        loading,
+        queue,
+        appointments,
+        availability,
+        aiInsight,
+        clientId,
+        completedCount,
+        refreshAppointments,
+        loadAvailability,
+        bookAppointmentPublic
+    ]);
 
   return <SchedulingContext.Provider value={value}>{children}</SchedulingContext.Provider>;
 };

@@ -14,11 +14,13 @@ export interface RegisterPayload {
   barbershopName: string;
   whatsapp: string;
   cnpj?: string;
+  referralCode?: string;
 }
 
 export const authApi = {
   login: (email: string, password: string) => apiClient<AuthResponse>('/api/auth/login', 'POST', { email, password }),
   register: (payload: RegisterPayload) => apiClient<AuthResponse>('/api/auth/register', 'POST', payload),
   refresh: (refreshToken: string) => apiClient<AuthResponse>('/api/auth/refresh', 'POST', { refreshToken }),
-  me: (token: string) => apiClient<{ user: any }>('/api/auth/me', 'GET', undefined, token)
+  me: (token: string) => apiClient<{ user: any }>('/api/auth/me', 'GET', undefined, token),
+  googleLogin: (idToken: string) => apiClient<AuthResponse>('/api/auth/google', 'POST', { idToken }),
 };

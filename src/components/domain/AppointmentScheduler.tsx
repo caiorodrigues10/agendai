@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Service, StaffMember, ShopSettings } from '../../types';
 import { AppointmentSchema, AppointmentFormData } from '../../schemas';
 import { AvailabilitySlot, generateTimeSlots, getDaySchedule, isSlotAvailable, formatDateISO } from '../../utils/schedulingUtils';
+import { maskPhone } from '../../utils/documentUtils';
 import { Calendar, Clock, User, CheckCircle, Smartphone, ChevronRight, ChevronLeft, Mail, AlertCircle } from 'lucide-react';
 import { DynamicIcon } from '../ui/DynamicIcon';
 
@@ -289,7 +290,10 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({ serv
                                 type="tel"
                                 className={`w-full bg-bg border rounded-xl px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all ${errors.whatsapp ? 'border-danger' : 'border-border'}`}
                                 placeholder="WhatsApp (11) 99999-9999"
-                                {...register('whatsapp')}
+                                value={watch('whatsapp') ?? ''}
+                                onChange={(e) =>
+                                    setValue('whatsapp', maskPhone(e.target.value), { shouldValidate: true })
+                                }
                             />
                             <Smartphone className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
                         </div>

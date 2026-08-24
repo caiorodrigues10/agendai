@@ -20,10 +20,25 @@ import {
   User,
   CheckCircle,
   Trash2,
-  Phone
+  Phone,
+  ChevronDown
 } from 'lucide-react';
 
 type AgendaView = 'salon' | 'professional';
+
+const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const MONTH_NAMES = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+];
+
+function getDaysInMonth(year: number, month: number) {
+  return new Date(year, month + 1, 0).getDate();
+}
+
+function getFirstDayOfMonth(year: number, month: number) {
+  return new Date(year, month, 1).getDay();
+}
 
 interface AppointmentCalendarProps {
   appointments: Appointment[];
@@ -62,12 +77,34 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   const [showBooking, setShowBooking] = useState(false);
   const [selectedAppt, setSelectedAppt] = useState<Appointment | null>(null);
 
+  const [showStaffDropdown, setShowStaffDropdown] = useState(false);
+  const staffDropdownRef = useRef<HTMLDivElement>(null);
+
+  const [showCalendar, setShowCalendar] = useState(false);
+  const calendarRef = useRef<HTMLDivElement>(null);
+  const today = useMemo(() => new Date(), []);
+  const [calendarMonth, setCalendarMonth] = useState(() => today.getMonth());
+  const [calendarYear, setCalendarYear] = useState(() => today.getFullYear());
+
   const onDateChangeRef = useRef(onDateChange);
   onDateChangeRef.current = onDateChange;
 
   useEffect(() => {
     onDateChangeRef.current?.(selectedDate);
   }, [selectedDate]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (staffDropdownRef.current && !staffDropdownRef.current.contains(e.target as Node)) {
+        setShowStaffDropdown(false);
+      }
+      if (calendarRef.current && !calendarRef.current.contains(e.target as Node)) {
+        setShowCalendar(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const dateObj = useMemo(() => new Date(selectedDate + 'T12:00:00'), [selectedDate]);
   const daySchedule = getDaySchedule(dateObj, settings.schedule);
@@ -116,6 +153,32 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
     month: 'long'
   });
 
+  const selectedStaffName = useMemo(() => {
+    if (selectedStaffId === 'any') return 'Qualquer profissional';
+    return staff.find((s) => s.id === selectedStaffId)?.name ?? 'Profissional';
+  }, [selectedStaffId, staff]);
+
+  const calendarDays = useMemo(() => {
+    const daysInMonth = getDaysInMonth(calendarYear, calendarMonth);
+    const firstDay = getFirstDayOfMonth(calendarYear, calendarMonth);
+    const days: (number | null)[] = [];
+    for (let i = 0; i < firstDay; i++) days.push(null);
+    for (let d = 1; d <= daysInMonth; d++) days.push(d);
+    return days;
+  }, [calendarYear, calendarMonth]);
+
+  const navigateCalendarMonth = (delta: number) => {
+    const newDate = new Date(calendarYear, calendarMonth + delta, 1);
+    setCalendarMonth(newDate.getMonth());
+    setCalendarYear(newDate.getFullYear());
+  };
+
+  const selectCalendarDay = (day: number) => {
+    const iso = formatDateISO(new Date(calendarYear, calendarMonth, day));
+    setSelectedDate(iso);
+    setShowCalendar(false);
+  };
+
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -151,34 +214,140 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
       </div>
 
       {view === 'professional' && (
-        <select
-          value={selectedStaffId}
-          onChange={(e) => setSelectedStaffId(e.target.value)}
-          className="w-full bg-surface border border-border rounded-xl px-4 py-2.5 text-text-primary text-sm"
-        >
-          {currentUserRole !== 'employee' && <option value="any">Qualquer profissional</option>}
-          {staff.map((s) => (
-            <option key={s.id} value={s.id}>{s.name}</option>
-          ))}
-        </select>
+        <div ref={staffDropdownRef} className="relative">
+          <button
+            onClick={() => setShowStaffDropdown(!showStaffDropdown)}
+            className="w-full bg-surface border border-border rounded-xl px-4 py-2.5 text-text-primary text-sm flex items-center justify-between hover:border-accent/50 transition-colors"
+          >
+            <span className="flex items-center gap-2">
+              <User size={14} className="text-text-muted" />
+              {selectedStaffName}
+            </span>
+            <ChevronDown
+              size={16}
+              className={`text-text-muted transition-transform ${showStaffDropdown ? 'rotate-180' : ''}`}
+            />
+          </button>
+
+          {showStaffDropdown && (
+            <div className="absolute z-30 w-full mt-1 bg-surface border border-border rounded-xl shadow-2xl overflow-hidden animate-fade-in">
+              {currentUserRole !== 'employee' && (
+                <button
+                  onClick={() => {
+                    setSelectedStaffId('any');
+                    setShowStaffDropdown(false);
+                  }}
+                  className={`w-full px-4 py-2.5 text-sm text-left flex items-center gap-2 transition-colors ${
+                    selectedStaffId === 'any'
+                      ? 'bg-accent/10 text-accent'
+                      : 'text-text-primary hover:bg-surface-2'
+                  }`}
+                >
+                  <Users size={14} className={selectedStaffId === 'any' ? 'text-accent' : 'text-text-muted'} />
+                  Qualquer profissional
+                  {selectedStaffId === 'any' && <CheckCircle size={14} className="ml-auto text-accent" />}
+                </button>
+              )}
+              {currentUserRole !== 'employee' && <div className="h-px bg-border" />}
+              {staff.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => {
+                    setSelectedStaffId(s.id);
+                    setShowStaffDropdown(false);
+                  }}
+                  className={`w-full px-4 py-2.5 text-sm text-left flex items-center gap-2 transition-colors ${
+                    selectedStaffId === s.id
+                      ? 'bg-accent/10 text-accent'
+                      : 'text-text-primary hover:bg-surface-2'
+                  }`}
+                >
+                  <div className={`w-2 h-2 rounded-full ${selectedStaffId === s.id ? 'bg-accent' : 'bg-text-muted'}`} />
+                  {s.name}
+                  {selectedStaffId === s.id && <CheckCircle size={14} className="ml-auto text-accent" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
-      <div className="flex items-center justify-between bg-surface border border-border rounded-xl p-3">
-        <button onClick={() => navigateDate(-1)} className="p-2 text-text-secondary hover:text-text-primary rounded-lg">
-          <ChevronLeft size={20} />
-        </button>
-        <div className="text-center">
-          <button
-            onClick={() => setSelectedDate(formatDateISO(new Date()))}
-            className="text-xs text-accent font-bold hover:underline mb-0.5"
-          >
-            Hoje
+      <div className="relative" ref={calendarRef}>
+        <div className="flex items-center justify-between bg-surface border border-border rounded-xl p-3">
+          <button onClick={() => navigateDate(-1)} className="p-2 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors">
+            <ChevronLeft size={20} />
           </button>
-          <p className="text-sm font-bold text-text-primary capitalize">{dateLabel}</p>
+          <div className="text-center">
+            <button
+              onClick={() => setSelectedDate(formatDateISO(new Date()))}
+              className="text-xs text-accent font-bold hover:underline mb-0.5"
+            >
+              Hoje
+            </button>
+            <button
+              onClick={() => {
+                setCalendarMonth(dateObj.getMonth());
+                setCalendarYear(dateObj.getFullYear());
+                setShowCalendar(!showCalendar);
+              }}
+              className="text-sm font-bold text-text-primary capitalize flex items-center gap-1 mx-auto hover:text-accent transition-colors"
+            >
+              <CalendarDays size={14} className="text-accent" />
+              {dateLabel}
+            </button>
+          </div>
+          <button onClick={() => navigateDate(1)} className="p-2 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors">
+            <ChevronRight size={20} />
+          </button>
         </div>
-        <button onClick={() => navigateDate(1)} className="p-2 text-text-secondary hover:text-text-primary rounded-lg">
-          <ChevronRight size={20} />
-        </button>
+
+        {showCalendar && (
+          <div className="absolute z-30 left-1/2 -translate-x-1/2 mt-2 w-72 bg-surface border border-border rounded-xl shadow-2xl p-3 animate-fade-in">
+            <div className="flex items-center justify-between mb-3">
+              <button onClick={() => navigateCalendarMonth(-1)} className="p-1.5 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors">
+                <ChevronLeft size={16} />
+              </button>
+              <span className="text-sm font-bold text-text-primary">
+                {MONTH_NAMES[calendarMonth]} {calendarYear}
+              </span>
+              <button onClick={() => navigateCalendarMonth(1)} className="p-1.5 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors">
+                <ChevronRight size={16} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-7 gap-0.5 mb-1">
+              {WEEKDAYS.map((d) => (
+                <div key={d} className="text-[10px] font-bold text-text-muted text-center py-1">
+                  {d}
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-7 gap-0.5">
+              {calendarDays.map((day, i) => {
+                if (day === null) return <div key={`empty-${i}`} />;
+                const iso = formatDateISO(new Date(calendarYear, calendarMonth, day));
+                const isSelected = iso === selectedDate;
+                const isToday = iso === formatDateISO(new Date());
+                return (
+                  <button
+                    key={day}
+                    onClick={() => selectCalendarDay(day)}
+                    className={`aspect-square text-xs font-medium rounded-lg flex items-center justify-center transition-all ${
+                      isSelected
+                        ? 'bg-accent text-accent-fg font-bold'
+                        : isToday
+                          ? 'bg-accent/10 text-accent font-bold'
+                          : 'text-text-primary hover:bg-surface-2'
+                    }`}
+                  >
+                    {day}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {isClosed ? (

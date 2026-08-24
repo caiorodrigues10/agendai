@@ -1,4 +1,4 @@
-import { Appointment, Service, ShopSettings, StaffMember, DaySchedule } from '../../types';
+import { Appointment, Service, ShopSettings, StaffMember, DaySchedule } from '../types';
 
 export interface AvailabilitySlot {
   time: string;
@@ -103,6 +103,10 @@ export function isSlotAvailable(
   occupancy: AvailabilitySlot[],
   staffCount: number
 ): boolean {
+  if (!staffId || staffId === 'any') {
+    if (staffCount <= 0) return false;
+  }
+
   const slotStart = timeToMinutes(time);
 
   const conflicts = occupancy.filter((slot) => {
@@ -163,6 +167,8 @@ export function mapAppointmentFromApi(raw: any): Appointment {
     status: raw.status ?? 'confirmed',
     serviceName: raw.serviceName,
     staffName: raw.staffName,
-    serviceDurationMinutes: raw.serviceDurationMinutes
+    serviceDurationMinutes: raw.serviceDurationMinutes,
+    clientId: raw.clientId ?? null,
+    clientPackageId: raw.clientPackageId ?? null,
   };
 }

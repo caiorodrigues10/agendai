@@ -1,10 +1,12 @@
 /**
- * Utilitários de CPF/CNPJ para o checkout.
- * Validação de CPF portada de BarberQueue-back-end/src/shared/utils/cpfUtils.ts
+ * Utilitários de CPF/CNPJ/Telefone para o frontend.
+ * Validação de CPF/CNPJ portada de agendai-back-end/src/shared/utils/cpfUtils.ts
  * (algoritmo oficial dos dígitos verificadores).
  */
 
 export const normalizeDocument = (value: string): string => value.replace(/\D/g, '');
+
+// --- Máscaras ---
 
 export const maskCpf = (value: string): string => {
   const d = normalizeDocument(value).slice(0, 11);
@@ -22,6 +24,21 @@ export const maskCnpj = (value: string): string => {
     .replace(/^(\d{2})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3/$4')
     .replace(/^(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d)/, '$1.$2.$3/$4-$5');
 };
+
+/** (00) 00000-0000 ou (00) 0000-0000 — máscara BR */
+export const maskPhone = (value: string): string => {
+  const d = normalizeDocument(value).slice(0, 11);
+  if (d.length <= 10) {
+    return d
+      .replace(/^(\d{2})(\d)/, '($1) $2')
+      .replace(/(\d{4})(\d)/, '$1-$2');
+  }
+  return d
+    .replace(/^(\d{2})(\d)/, '($1) $2')
+    .replace(/(\d{5})(\d)/, '$1-$2');
+};
+
+// --- Validações ---
 
 export const isValidCpf = (raw: string): boolean => {
   const cpf = normalizeDocument(raw);
@@ -56,6 +73,17 @@ export const isValidCnpj = (raw: string): boolean => {
   if (d1 !== parseInt(cnpj[12])) return false;
   const d2 = calcDigit(cnpj, [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
   return d2 === parseInt(cnpj[13]);
+};
+
+/** Valida telefone BR: 10-11 dígitos (DDD + 8 ou 9 dígitos) */
+export const isValidPhoneBR = (raw: string): boolean => {
+  const digits = normalizeDocument(raw);
+  if (digits.length < 10 || digits.length > 11) return false;
+  // DDD não pode ser 00
+  if (digits.startsWith('00')) return false;
+  // Celular (11 dígitos) deve começar com 9
+  if (digits.length === 11 && digits[2] !== '9') return false;
+  return true;
 };
 
 export const isValidDocument = (type: 'CPF' | 'CNPJ', raw: string): boolean =>

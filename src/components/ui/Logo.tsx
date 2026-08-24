@@ -40,8 +40,7 @@ export const Logo: React.FC<LogoProps> = ({
 }) => {
 	const s = sizeMap[size]
 	const font = {
-		fontFamily:
-			'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
+		fontFamily: "'Syne', ui-sans-serif, system-ui, sans-serif",
 	}
 
 	if (customImageUrl) {

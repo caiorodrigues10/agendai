@@ -18,21 +18,29 @@ import {
   Clock,
   PartyPopper,
   ExternalLink,
-  RefreshCcw
+  RefreshCcw,
+  Landmark
 } from 'lucide-react';
 import { plansApi, Plan } from '../infra/plansApi';
 import { subscriptionsApi, SubscribePayload } from '../infra/subscriptionsApi';
 import { paymentsApi, Payment } from '../infra/paymentsApi';
 import { ensureMercadoPago } from '../infra/mercadoPago';
-import { ApiError } from '../infra/apiClient';
+import { getErrorMessage } from '../utils/errorMessage';
+import { trialCampaign } from '../marketing/trialCampaign';
 import { useAuth } from '../contexts/AuthContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { Logo } from '../components/ui/Logo';
-import { normalizeDocument, maskCpf, maskCnpj, isValidDocument } from '../utils/documentUtils';
+import {
+  normalizeDocument,
+  maskCpf,
+  maskCnpj,
+  maskPhone,
+  isValidDocument
+} from '../utils/documentUtils';
 
-type PayMethod = 'pix' | 'credit_card' | 'payment_link';
+type PayMethod = 'pix' | 'credit_card' | 'payment_link' | 'asaas';
 
 const PIX_POLL_INTERVAL_MS = 5_000;
 
@@ -61,22 +69,104 @@ const inputClass =
   'w-full bg-bg border border-border rounded-xl py-3 px-4 text-text-primary text-sm outline-none transition-colors placeholder:text-text-muted focus:border-accent/60 hover:border-border-strong';
 
 const secureFieldContainerClass =
-  'w-full bg-bg border border-border rounded-xl px-4 text-sm transition-colors focus-within:border-accent/60 hover:border-border-strong h-[46px]';
+  'mp-secure-field w-full bg-bg border border-border rounded-xl px-4 text-sm transition-colors focus-within:border-accent/60 hover:border-border-strong h-[46px] overflow-hidden flex items-center';
+
+type SecureFieldStyle = {
+  color: string;
+  placeholderColor: string;
+  fontSize: string;
+  fontFamily: string;
+  height: string;
+  paddingTop: string;
+  paddingBottom: string;
+};
+
+/**
+ * Isola os Secure Fields do MP.
+ * O SDK remonta (e apaga o valor) se `onBinChange`/`style` mudarem de referência —
+ * por isso o handler é estável via ref e o componente é memoizado.
+ */
+const MercadoPagoCardFields = React.memo(function MercadoPagoCardFields({
+  style,
+  onPaymentMethodId,
+}: {
+  style: SecureFieldStyle;
+  onPaymentMethodId: (id: string | null) => void;
+}) {
+  const onPaymentMethodIdRef = useRef(onPaymentMethodId);
+  onPaymentMethodIdRef.current = onPaymentMethodId;
+
+  const handleBinChange = useCallback(
+    async ({ bin }: { bin: string | null }) => {
+      if (!bin) {
+        onPaymentMethodIdRef.current(null);
+        return;
+      }
+      try {
+        const methods = await getPaymentMethods({ bin });
+        onPaymentMethodIdRef.current(methods?.results?.[0]?.id ?? null);
+      } catch {
+        onPaymentMethodIdRef.current(null);
+      }
+    },
+    []
+  );
+
+  return (
+    <>
+      <div>
+        <label className="text-xs font-bold text-text-secondary block mb-1">
+          Número do cartão *
+        </label>
+        <div className={secureFieldContainerClass}>
+          <CardNumber
+            placeholder="0000 0000 0000 0000"
+            style={style}
+            onBinChange={handleBinChange}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs font-bold text-text-secondary block mb-1">
+            Validade *
+          </label>
+          <div className={secureFieldContainerClass}>
+            <ExpirationDate placeholder="MM/AA" mode="short" style={style} />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs font-bold text-text-secondary block mb-1">
+            CVV *
+          </label>
+          <div className={secureFieldContainerClass}>
+            <SecurityCode placeholder="123" style={style} />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+});
 
 export const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const planId = searchParams.get('planId');
   const returnStatus = searchParams.get('status');
+  const isTrialSetup = searchParams.get('setup') === 'trial';
   const { user } = useAuth();
   const { refresh: refreshSubscription, data: subscriptionData } = useSubscription();
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
 
   const mpReady = useMemo(() => ensureMercadoPago(), []);
 
   const [plan, setPlan] = useState<Plan | null>(null);
   const [loadingPlan, setLoadingPlan] = useState(true);
-  const [method, setMethod] = useState<PayMethod>('payment_link');
+  const [method, setMethod] = useState<PayMethod>(isTrialSetup ? 'asaas' : 'payment_link');
+  const [asaasBillingType, setAsaasBillingType] = useState<'PIX' | 'CREDIT_CARD'>(
+    isTrialSetup ? 'CREDIT_CARD' : 'PIX'
+  );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -93,6 +183,15 @@ export const CheckoutPage: React.FC = () => {
   // Cartão
   const [cardholderName, setCardholderName] = useState('');
   const [cardPaymentMethodId, setCardPaymentMethodId] = useState<string | null>(null);
+
+  // Cartão Asaas (tokenizado no navegador — nunca passa pelo backend)
+  const [asaasCardName, setAsaasCardName] = useState('');
+  const [asaasCardNumber, setAsaasCardNumber] = useState('');
+  const [asaasCardExpiry, setAsaasCardExpiry] = useState('');
+  const [asaasCardCvv, setAsaasCardCvv] = useState('');
+  const [asaasPostalCode, setAsaasPostalCode] = useState('');
+  const [asaasAddressNumber, setAsaasAddressNumber] = useState('');
+  const [asaasPhone, setAsaasPhone] = useState('');
 
   // PIX
   const [pixPayment, setPixPayment] = useState<Payment | null>(null);
@@ -144,7 +243,7 @@ export const CheckoutPage: React.FC = () => {
         if (me.subscription?.status === 'ACTIVE') {
           setSuccess(true);
           setAwaitingLinkConfirm(false);
-          sessionStorage.removeItem('bq:access-block-info');
+          sessionStorage.removeItem('agendai:access-block-info');
         }
       } catch {
         // Mantém tela de aguardando — usuário pode atualizar manualmente
@@ -162,9 +261,22 @@ export const CheckoutPage: React.FC = () => {
     if (awaitingLinkConfirm && subscriptionData?.subscription?.status === 'ACTIVE') {
       setSuccess(true);
       setAwaitingLinkConfirm(false);
-      sessionStorage.removeItem('bq:access-block-info');
+      sessionStorage.removeItem('agendai:access-block-info');
     }
   }, [awaitingLinkConfirm, subscriptionData?.subscription?.status]);
+
+  // Polling automático de confirmação (Asaas volta sem ?status=success)
+  useEffect(() => {
+    if (!awaitingLinkConfirm) return;
+    const t = setInterval(async () => {
+      try {
+        await refreshSubscription();
+      } catch {
+        // Falha transitória — o próximo tick tenta de novo
+      }
+    }, PIX_POLL_INTERVAL_MS);
+    return () => clearInterval(t);
+  }, [awaitingLinkConfirm, refreshSubscription]);
 
   const stopPolling = useCallback(() => {
     if (pollRef.current) {
@@ -176,7 +288,7 @@ export const CheckoutPage: React.FC = () => {
   const handleApproved = useCallback(() => {
     stopPolling();
     setSuccess(true);
-    sessionStorage.removeItem('bq:access-block-info');
+    sessionStorage.removeItem('agendai:access-block-info');
     refreshSubscription();
   }, [stopPolling, refreshSubscription]);
 
@@ -222,12 +334,35 @@ export const CheckoutPage: React.FC = () => {
 
   const validatePayerForm = (): string | null => {
     if (!payerEmail || !/\S+@\S+\.\S+/.test(payerEmail)) return 'Informe um e-mail válido.';
+    const asaasCard = method === 'asaas' && asaasBillingType === 'CREDIT_CARD';
     const doc = normalizeDocument(docNumber);
-    if (method === 'credit_card' || doc) {
+    if (method === 'credit_card' || asaasCard || doc) {
       if (!isValidDocument(docType, doc)) return `${docType} inválido. Confira o número.`;
     }
     if (method === 'credit_card' && !cardholderName.trim()) {
       return 'Informe o nome impresso no cartão.';
+    }
+    return null;
+  };
+
+  const validateAsaasCard = (): string | null => {
+    if (!asaasCardName.trim()) return 'Informe o nome impresso no cartão.';
+    const digits = asaasCardNumber.replace(/\D/g, '');
+    if (digits.length < 13 || digits.length > 19) return 'Número do cartão inválido. Confira os dados.';
+    const m = /^(\d{2})\s*\/\s*(\d{2})$/.exec(asaasCardExpiry.trim());
+    if (!m) return 'Validade inválida. Use o formato MM/AA.';
+    const month = Number(m[1]);
+    const year = 2000 + Number(m[2]);
+    const now = new Date();
+    if (month < 1 || month > 12 || year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth() + 1)) {
+      return 'Validade do cartão vencida. Confira os dados.';
+    }
+    if (!/^\d{3,4}$/.test(asaasCardCvv.trim())) return 'Código de segurança (CVV) inválido.';
+    if (normalizeDocument(asaasPostalCode).length !== 8) return 'Informe um CEP válido (8 dígitos).';
+    if (!asaasAddressNumber.trim()) return 'Informe o número do endereço do titular.';
+    const phoneDigits = normalizeDocument(asaasPhone);
+    if (phoneDigits.length < 10 || phoneDigits.length > 11) {
+      return 'Informe um telefone válido com DDD.';
     }
     return null;
   };
@@ -261,7 +396,7 @@ export const CheckoutPage: React.FC = () => {
       setPixExpired(false);
       setPixPayment(payment);
     } catch (err: any) {
-      setError(err instanceof ApiError ? err.message : err?.message ?? 'Erro ao gerar o PIX.');
+      setError(getErrorMessage(err, 'Erro ao gerar o PIX.'));
     } finally {
       setSubmitting(false);
     }
@@ -319,7 +454,7 @@ export const CheckoutPage: React.FC = () => {
         setError('O pagamento não foi aprovado. Tente novamente ou use PIX.');
       }
     } catch (err: any) {
-      setError(err instanceof ApiError ? err.message : err?.message ?? 'Erro ao processar o cartão.');
+      setError(getErrorMessage(err, 'Erro ao processar o cartão.'));
     } finally {
       setSubmitting(false);
     }
@@ -346,11 +481,94 @@ export const CheckoutPage: React.FC = () => {
       }
       window.location.assign(payment.checkoutUrl);
     } catch (err: any) {
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : err?.message ?? 'Erro ao gerar o link de pagamento.'
-      );
+      setError(getErrorMessage(err, 'Erro ao gerar o link de pagamento.'));
+      setSubmitting(false);
+    }
+  };
+
+  const submitAsaasPix = async () => {
+    const validationError = validatePayerForm();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    setError(null);
+    setSubmitting(true);
+    try {
+      const subscription = await subscriptionsApi.subscribe({
+        ...buildBasePayload(),
+        paymentMethod: 'asaas',
+        asaasBillingType: 'PIX'
+      });
+      const payment = (subscription as any).payment as Payment | undefined;
+      if (!payment?.pixQrCode?.qrCode) {
+        throw new Error('O pagamento PIX foi criado, mas o QR Code não foi retornado. Tente novamente.');
+      }
+      setPixExpired(false);
+      setPixPayment(payment);
+    } catch (err: any) {
+      setError(getErrorMessage(err, 'Erro ao gerar o PIX.'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const submitAsaasCard = async () => {
+    const validationError = validatePayerForm() || validateAsaasCard();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    setError(null);
+    setSubmitting(true);
+    try {
+      const [mm, yy] = asaasCardExpiry.split('/');
+      const card = {
+        holderName: asaasCardName.trim(),
+        number: asaasCardNumber.replace(/\D/g, ''),
+        expiryMonth: mm.trim(),
+        expiryYear: `20${yy.trim()}`,
+        ccv: asaasCardCvv.trim(),
+        postalCode: normalizeDocument(asaasPostalCode),
+        addressNumber: asaasAddressNumber.trim(),
+        phone: normalizeDocument(asaasPhone)
+      };
+      const doc = normalizeDocument(docNumber);
+
+      if (isTrialSetup) {
+        if (!doc || !isValidDocument(docType, doc)) {
+          setError(`${docType} inválido. Confira o número.`);
+          setSubmitting(false);
+          return;
+        }
+        const sub = await subscriptionsApi.setupTrialCard({
+          planId: planId!,
+          payerEmail: payerEmail.trim(),
+          payerFirstName: firstName.trim() || undefined,
+          payerLastName: lastName.trim() || undefined,
+          payerIdentification: { type: docType, number: doc },
+          asaasCreditCard: card
+        });
+        await refreshSubscription();
+        if (sub.hasPaymentMethod || sub.status === 'TRIALING') {
+          setSuccess(true);
+          sessionStorage.removeItem('agendai:access-block-info');
+        } else {
+          setError('Cartão não foi salvo. Tente novamente.');
+        }
+        return;
+      }
+
+      await subscriptionsApi.subscribe({
+        ...buildBasePayload(),
+        paymentMethod: 'asaas',
+        asaasBillingType: 'CREDIT_CARD',
+        asaasCreditCard: card
+      });
+      setAwaitingLinkConfirm(true);
+    } catch (err: any) {
+      setError(getErrorMessage(err, 'Erro ao processar o cartão.'));
+    } finally {
       setSubmitting(false);
     }
   };
@@ -364,14 +582,14 @@ export const CheckoutPage: React.FC = () => {
       if (me.subscription?.status === 'ACTIVE') {
         setSuccess(true);
         setAwaitingLinkConfirm(false);
-        sessionStorage.removeItem('bq:access-block-info');
+        sessionStorage.removeItem('agendai:access-block-info');
       } else {
         setError(
           'Pagamento ainda não confirmado. Se você já pagou, aguarde alguns segundos e tente de novo.'
         );
       }
     } catch (err: any) {
-      setError(err instanceof ApiError ? err.message : 'Não foi possível verificar o status.');
+      setError(getErrorMessage(err, 'Não foi possível verificar o status.'));
     } finally {
       setCheckingReturn(false);
     }
@@ -384,13 +602,17 @@ export const CheckoutPage: React.FC = () => {
     setTimeout(() => setPixCopied(false), 2500);
   };
 
-  const secureFieldStyle = useMemo(
+  const secureFieldStyle = useMemo<SecureFieldStyle>(
     () => ({
-      color: theme === 'dark' ? '#fafafa' : '#171717',
-      placeholderColor: '#737373',
-      fontSize: '14px'
+      color: resolvedTheme === 'dark' ? '#fafafa' : '#171717',
+      placeholderColor: resolvedTheme === 'dark' ? '#737373' : '#a3a3a3',
+      fontSize: '14px',
+      fontFamily: 'inherit',
+      height: '40px',
+      paddingTop: '10px',
+      paddingBottom: '10px',
     }),
-    [theme]
+    [resolvedTheme]
   );
 
   const formatCountdown = (total: number) => {
@@ -430,10 +652,21 @@ export const CheckoutPage: React.FC = () => {
         {!loadingPlan && plan && success && (
           <div className="bg-surface border border-success/40 rounded-2xl p-10 text-center">
             <PartyPopper size={48} className="mx-auto text-success mb-4" />
-            <h1 className="text-2xl font-bold mb-2">Assinatura ativa!</h1>
+            <h1 className="text-2xl font-bold mb-2">
+              {isTrialSetup ? 'Trial liberado!' : 'Assinatura ativa!'}
+            </h1>
             <p className="text-text-secondary text-sm mb-8">
-              O plano <span className="font-bold text-text-primary">{plan.name}</span> foi ativado com
-              sucesso. Bom trabalho!
+              {isTrialSetup ? (
+                <>
+                  Plano <span className="font-bold text-text-primary">{plan.name}</span> com 30 dias
+                  de Pro. Experimente o painel completo e veja se faz sentido para o seu negócio.
+                </>
+              ) : (
+                <>
+                  O plano <span className="font-bold text-text-primary">{plan.name}</span> foi ativado
+                  com sucesso. Bom trabalho!
+                </>
+              )}
             </p>
             <button
               onClick={() => navigate('/app/queue')}
@@ -449,7 +682,7 @@ export const CheckoutPage: React.FC = () => {
             <Loader2 size={40} className="mx-auto text-accent mb-4 animate-spin" />
             <h1 className="text-xl font-bold mb-2">Confirmando pagamento…</h1>
             <p className="text-text-secondary text-sm mb-6">
-              Se você concluiu o pagamento no link, a assinatura será liberada em instantes.
+              Se você concluiu o pagamento, a assinatura será liberada em instantes.
             </p>
             {error && (
               <div className="mb-4 p-3 bg-warning/10 border border-warning/30 rounded-xl text-warning text-sm">
@@ -480,6 +713,9 @@ export const CheckoutPage: React.FC = () => {
               <div>
                 <p className="text-xs text-text-muted uppercase tracking-wider font-bold mb-1">Plano escolhido</p>
                 <h1 className="text-lg font-bold">{plan.name}</h1>
+                <p className="mt-1 text-[11px] text-text-secondary leading-relaxed max-w-sm">
+                  {trialCampaign.checkoutHint}
+                </p>
               </div>
               <div className="text-right">
                 <span className="text-2xl font-bold text-accent">{formatPrice(plan.price)}</span>
@@ -487,13 +723,25 @@ export const CheckoutPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Abas: Link / PIX / Cartão */}
+            {isTrialSetup && (
+              <div className="mb-6 p-4 bg-accent/10 border border-accent/30 rounded-xl text-sm text-text-secondary">
+                <p className="font-bold text-accent mb-1">{trialCampaign.eyebrow}</p>
+                <p>
+                  {trialCampaign.checkoutHint} Cadastre um cartão para liberar o painel; a
+                  cobrança só acontece depois do trial.
+                </p>
+              </div>
+            )}
+
+            {/* Abas: no trial setup só cartão Asaas (vault) */}
+            {!isTrialSetup && (
             <div className="flex bg-surface p-1 rounded-xl mb-6 border border-border gap-0.5">
               {(
                 [
                   { id: 'payment_link', label: 'Link', icon: ExternalLink },
                   { id: 'pix', label: 'PIX', icon: QrCode },
-                  { id: 'credit_card', label: 'Cartão', icon: CreditCard }
+                  { id: 'credit_card', label: 'Cartão', icon: CreditCard },
+                  { id: 'asaas', label: 'Asaas', icon: Landmark }
                 ] as const
               ).map(tab => (
                 <button
@@ -513,6 +761,15 @@ export const CheckoutPage: React.FC = () => {
                 </button>
               ))}
             </div>
+            )}
+
+            {isTrialSetup && (
+              <div className="flex bg-surface p-1 rounded-xl mb-6 border border-border">
+                <div className="flex-1 py-2.5 text-sm font-bold rounded-lg bg-accent/15 text-accent flex items-center justify-center gap-2">
+                  <CreditCard size={16} /> Cartão (sem cobrança agora)
+                </div>
+              </div>
+            )}
 
             {error && (
               <div className="mb-6 p-4 bg-danger/10 border border-danger/30 rounded-xl flex items-start gap-2 text-danger text-sm">
@@ -520,8 +777,8 @@ export const CheckoutPage: React.FC = () => {
               </div>
             )}
 
-            {/* Tela do QR Code PIX gerado */}
-            {method === 'pix' && pixPayment?.pixQrCode && !pixExpired && (
+            {/* Tela do QR Code PIX gerado (Mercado Pago ou Asaas) */}
+            {['pix', 'asaas'].includes(method) && pixPayment?.pixQrCode && !pixExpired && (
               <div className="bg-surface border border-border rounded-2xl p-6 text-center">
                 <h2 className="font-bold mb-1">Escaneie para pagar</h2>
                 <p className="text-xs text-text-muted mb-4">
@@ -563,7 +820,7 @@ export const CheckoutPage: React.FC = () => {
             )}
 
             {/* PIX expirado */}
-            {method === 'pix' && pixExpired && (
+            {['pix', 'asaas'].includes(method) && pixExpired && (
               <div className="bg-surface border border-warning/40 rounded-2xl p-8 text-center">
                 <Clock size={40} className="mx-auto text-warning mb-3" />
                 <h2 className="font-bold mb-1">QR Code expirado</h2>
@@ -585,7 +842,7 @@ export const CheckoutPage: React.FC = () => {
             )}
 
             {/* Formulário (dados do pagador + cartão) */}
-            {!(method === 'pix' && pixPayment && !pixExpired) && !pixExpired && (
+            {!(['pix', 'asaas'].includes(method) && pixPayment && !pixExpired) && !pixExpired && (
               <div className="bg-surface border border-border rounded-2xl p-6 space-y-4">
                 <h2 className="font-bold text-sm uppercase tracking-wider text-text-secondary">
                   Dados do pagador
@@ -623,25 +880,44 @@ export const CheckoutPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-[110px_1fr] gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-[148px_1fr]">
                   <div>
-                    <label className="text-xs font-bold text-text-secondary block mb-1">Documento</label>
-                    <select
-                      className={inputClass}
-                      value={docType}
-                      onChange={e => {
-                        setDocType(e.target.value as 'CPF' | 'CNPJ');
-                        setDocNumber('');
-                      }}
+                    <label className="text-xs font-bold text-text-secondary block mb-1">
+                      Documento
+                    </label>
+                    <div
+                      role="group"
+                      aria-label="Tipo de documento"
+                      className="flex h-[46px] rounded-xl border border-border bg-bg p-1 gap-0.5"
                     >
-                      <option value="CPF">CPF</option>
-                      <option value="CNPJ">CNPJ</option>
-                    </select>
+                      {(['CPF', 'CNPJ'] as const).map((type) => {
+                        const active = docType === type;
+                        return (
+                          <button
+                            key={type}
+                            type="button"
+                            aria-pressed={active}
+                            onClick={() => {
+                              if (docType === type) return;
+                              setDocType(type);
+                              setDocNumber('');
+                            }}
+                            className={`flex-1 rounded-lg text-sm font-bold transition-all ${
+                              active
+                                ? 'bg-accent text-accent-fg shadow-sm shadow-accent/20'
+                                : 'text-text-muted hover:text-text-primary hover:bg-surface-2'
+                            }`}
+                          >
+                            {type}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                   <div>
                     <label className="text-xs font-bold text-text-secondary block mb-1">
                       Número{' '}
-                      {method === 'credit_card'
+                      {method === 'credit_card' || (method === 'asaas' && asaasBillingType === 'CREDIT_CARD')
                         ? '*'
                         : method === 'payment_link'
                           ? '(recomendado)'
@@ -657,6 +933,154 @@ export const CheckoutPage: React.FC = () => {
                     />
                   </div>
                 </div>
+
+                {method === 'asaas' && !isTrialSetup && (
+                  <>
+                    <div className="flex bg-bg/60 p-1 rounded-xl border border-border gap-0.5">
+                      {(
+                        [
+                          { id: 'PIX', label: 'PIX', icon: QrCode },
+                          { id: 'CREDIT_CARD', label: 'Cartão', icon: CreditCard }
+                        ] as const
+                      ).map(opt => (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          onClick={() => {
+                            setAsaasBillingType(opt.id);
+                            setError(null);
+                          }}
+                          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                            asaasBillingType === opt.id
+                              ? 'bg-accent/15 text-accent'
+                              : 'text-text-muted hover:text-text-secondary'
+                          }`}
+                        >
+                          <opt.icon size={13} /> {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-text-muted">
+                      Pagamento processado pelo Asaas {asaasBillingType === 'PIX' ? 'via PIX — o QR Code é gerado aqui mesmo.' : 'via cartão — o pagamento é aprovado em instantes.'}
+                    </p>
+                  </>
+                )}
+
+                {method === 'asaas' && isTrialSetup && (
+                  <p className="text-xs text-text-muted">
+                    Cartão tokenizado pelo Asaas — sem cobrança até o fim dos 30 dias.
+                  </p>
+                )}
+
+                {method === 'asaas' && asaasBillingType === 'CREDIT_CARD' && (
+                  <>
+                    <h2 className="font-bold text-sm uppercase tracking-wider text-text-secondary pt-2">
+                      Dados do cartão
+                    </h2>
+                    <p className="text-[11px] text-text-muted -mt-2">
+                      Os dados do cartão são enviados de forma criptografada à nossa API e processados
+                      pelo Asaas — não armazenamos o número do cartão.
+                    </p>
+
+                    <div>
+                      <label className="text-xs font-bold text-text-secondary block mb-1">Número do cartão *</label>
+                      <input
+                        className={inputClass}
+                        placeholder="0000 0000 0000 0000"
+                        inputMode="numeric"
+                        value={asaasCardNumber}
+                        onChange={e =>
+                          setAsaasCardNumber(
+                            e.target.value
+                              .replace(/\D/g, '')
+                              .slice(0, 16)
+                              .replace(/(\d{4})(?=\d)/g, '$1 ')
+                          )
+                        }
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-bold text-text-secondary block mb-1">Validade *</label>
+                        <input
+                          className={inputClass}
+                          placeholder="MM/AA"
+                          inputMode="numeric"
+                          value={asaasCardExpiry}
+                          onChange={e => {
+                            const v = e.target.value.replace(/\D/g, '').slice(0, 4);
+                            setAsaasCardExpiry(v.length > 2 ? `${v.slice(0, 2)}/${v.slice(2)}` : v);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-text-secondary block mb-1">CVV *</label>
+                        <input
+                          className={inputClass}
+                          placeholder="123"
+                          inputMode="numeric"
+                          value={asaasCardCvv}
+                          onChange={e => setAsaasCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-text-secondary block mb-1">
+                        Nome impresso no cartão *
+                      </label>
+                      <input
+                        className={inputClass}
+                        placeholder="Como aparece no cartão"
+                        value={asaasCardName}
+                        onChange={e => setAsaasCardName(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-bold text-text-secondary block mb-1">CEP *</label>
+                        <input
+                          className={inputClass}
+                          placeholder="00000-000"
+                          inputMode="numeric"
+                          value={asaasPostalCode}
+                          onChange={e => {
+                            const d = normalizeDocument(e.target.value).slice(0, 8);
+                            setAsaasPostalCode(
+                              d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d
+                            );
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-text-secondary block mb-1">
+                          Nº endereço *
+                        </label>
+                        <input
+                          className={inputClass}
+                          placeholder="123"
+                          value={asaasAddressNumber}
+                          onChange={e => setAsaasAddressNumber(e.target.value.slice(0, 20))}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-text-secondary block mb-1">
+                        Telefone do titular *
+                      </label>
+                      <input
+                        className={inputClass}
+                        placeholder="(00) 00000-0000"
+                        inputMode="numeric"
+                        value={asaasPhone}
+                        onChange={e => setAsaasPhone(maskPhone(e.target.value))}
+                      />
+                    </div>
+                  </>
+                )}
 
                 {method === 'payment_link' && (
                   <p className="text-xs text-text-muted">
@@ -683,44 +1107,10 @@ export const CheckoutPage: React.FC = () => {
                       nossos servidores.
                     </p>
 
-                    <div>
-                      <label className="text-xs font-bold text-text-secondary block mb-1">
-                        Número do cartão *
-                      </label>
-                      <div className={secureFieldContainerClass}>
-                        <CardNumber
-                          placeholder="0000 0000 0000 0000"
-                          style={secureFieldStyle}
-                          onBinChange={async ({ bin }) => {
-                            if (!bin) {
-                              setCardPaymentMethodId(null);
-                              return;
-                            }
-                            try {
-                              const methods = await getPaymentMethods({ bin });
-                              setCardPaymentMethodId(methods?.results?.[0]?.id ?? null);
-                            } catch {
-                              setCardPaymentMethodId(null);
-                            }
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-xs font-bold text-text-secondary block mb-1">Validade *</label>
-                        <div className={secureFieldContainerClass}>
-                          <ExpirationDate placeholder="MM/AA" mode="short" style={secureFieldStyle} />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="text-xs font-bold text-text-secondary block mb-1">CVV *</label>
-                        <div className={secureFieldContainerClass}>
-                          <SecurityCode placeholder="123" style={secureFieldStyle} />
-                        </div>
-                      </div>
-                    </div>
+                    <MercadoPagoCardFields
+                      style={secureFieldStyle}
+                      onPaymentMethodId={setCardPaymentMethodId}
+                    />
 
                     <div>
                       <label className="text-xs font-bold text-text-secondary block mb-1">
@@ -731,6 +1121,7 @@ export const CheckoutPage: React.FC = () => {
                         placeholder="Como aparece no cartão"
                         value={cardholderName}
                         onChange={e => setCardholderName(e.target.value)}
+                        autoComplete="cc-name"
                       />
                     </div>
                   </>
@@ -742,7 +1133,11 @@ export const CheckoutPage: React.FC = () => {
                       ? submitPix
                       : method === 'payment_link'
                         ? submitPaymentLink
-                        : submitCard
+                        : method === 'asaas'
+                          ? asaasBillingType === 'CREDIT_CARD'
+                            ? submitAsaasCard
+                            : submitAsaasPix
+                          : submitCard
                   }
                   disabled={submitting || (method === 'credit_card' && !mpReady)}
                   className="w-full py-4 rounded-xl bg-accent text-accent-fg font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-accent-hover transition-colors disabled:opacity-60"
@@ -751,7 +1146,11 @@ export const CheckoutPage: React.FC = () => {
                     <>
                       <Loader2 size={16} className="animate-spin" /> Processando...
                     </>
-                  ) : method === 'pix' ? (
+                  ) : isTrialSetup ? (
+                    <>
+                      <CreditCard size={16} /> Cadastrar cartão e começar trial
+                    </>
+                  ) : method === 'pix' || (method === 'asaas' && asaasBillingType === 'PIX') ? (
                     <>
                       <QrCode size={16} /> Gerar QR Code PIX
                     </>

@@ -1,3 +1,5 @@
+import { authStorage } from './authStorage';
+
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 const RATE_LIMIT_MAX = 500;
@@ -8,7 +10,10 @@ let calls: number[] = [];
 export const ACCESS_BLOCKED_CODES = ['SUBSCRIPTION_REQUIRED', 'CPF_BLOCKED'] as const;
 export type AccessBlockedCode = (typeof ACCESS_BLOCKED_CODES)[number];
 
-export const ACCESS_BLOCKED_EVENT = 'bq:access-blocked';
+export const ACCESS_BLOCKED_EVENT = 'agendai:access-blocked';
+
+/** Rotas em que 401 NÃO deve disparar refresh (login/refresh). */
+const NO_REFRESH_PATHS = ['/api/auth/login', '/api/auth/register', '/api/auth/refresh'];
 
 export class ApiError extends Error {
   statusCode: number;
@@ -26,6 +31,51 @@ export class ApiError extends Error {
   get isAccessBlocked(): boolean {
     return ACCESS_BLOCKED_CODES.includes(this.code as AccessBlockedCode);
   }
+}
+
+/** Um único refresh em voo — evita rajada de 401 renovando N vezes. */
+let refreshInFlight: Promise<string | null> | null = null;
+
+/**
+ * Renova o access token via fetch direto (não usa apiClient → sem recursão).
+ * Retorna o novo access token ou null se a sessão morreu.
+ */
+async function refreshAccessToken(): Promise<string | null> {
+  if (refreshInFlight) return refreshInFlight;
+
+  refreshInFlight = (async () => {
+    const refreshToken = authStorage.getRefreshToken();
+    if (!refreshToken) return null;
+
+    try {
+      const res = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      });
+      if (!res.ok) {
+        authStorage.clearTokens();
+        return null;
+      }
+      const json = await res.json();
+      const data = json?.data ?? json;
+      const accessToken = data?.accessToken as string | undefined;
+      const nextRefresh = data?.refreshToken as string | undefined;
+      if (!accessToken || !nextRefresh) {
+        authStorage.clearTokens();
+        return null;
+      }
+      authStorage.setTokens(accessToken, nextRefresh);
+      if (data.user) authStorage.setUser(data.user);
+      return accessToken;
+    } catch {
+      return null;
+    } finally {
+      refreshInFlight = null;
+    }
+  })();
+
+  return refreshInFlight;
 }
 
 const sanitize = (payload: any) => {
@@ -105,7 +155,8 @@ export const apiClient = async <T>(
   url: string,
   method: HttpMethod = 'GET',
   body?: any,
-  token?: string
+  token?: string,
+  _retried = false
 ): Promise<T> => {
   checkRateLimit();
   const headers: Record<string, string> = {
@@ -113,12 +164,36 @@ export const apiClient = async <T>(
   };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(url, {
-    method,
-    headers,
-    body: body ? JSON.stringify(sanitize(body)) : undefined
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method,
+      headers,
+      body: body ? JSON.stringify(sanitize(body)) : undefined
+    });
+  } catch (err) {
+    throw new ApiError(
+      'Não foi possível conectar ao servidor. Verifique se a API está no ar e tente de novo.',
+      0,
+      'NETWORK_ERROR',
+      { cause: err instanceof Error ? err.message : err }
+    );
+  }
+
   if (!res.ok) {
+    const shouldRefresh =
+      res.status === 401 &&
+      Boolean(token) &&
+      !_retried &&
+      !NO_REFRESH_PATHS.some((p) => url.startsWith(p));
+
+    if (shouldRefresh) {
+      const nextToken = await refreshAccessToken();
+      if (nextToken) {
+        return apiClient<T>(url, method, body, nextToken, true);
+      }
+    }
+
     const text = await res.text();
     const error = buildApiError(res.status, text);
     notifyIfAccessBlocked(error);

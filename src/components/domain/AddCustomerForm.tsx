@@ -1,9 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Service } from '../../types';
 import { ServiceCard } from './ServiceCard';
-import { CustomerQueueSchema, CustomerQueueFormData } from '../../schemas';
+import {
+  CustomerQueueSchema,
+  CustomerQueueStaffSchema,
+  CustomerQueueFormData,
+  CustomerQueueStaffFormData,
+} from '../../schemas';
+
+/** Enviado ao backend quando o staff não informa WhatsApp do cliente. */
+const STAFF_PLACEHOLDER_WHATSAPP = '00000000000';
+import { maskPhone, normalizeDocument } from '../../utils/documentUtils';
 import { X, Loader2, UserCheck, AlertCircle } from 'lucide-react';
 
 interface AddCustomerFormProps {
@@ -14,18 +23,19 @@ interface AddCustomerFormProps {
 }
 
 export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({ services, onJoin, onCancel, isStaffMode = false }) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = React.useState(false);
 
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<CustomerQueueFormData>({
-    resolver: zodResolver(CustomerQueueSchema),
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<
+    CustomerQueueFormData | CustomerQueueStaffFormData
+  >({
+    resolver: zodResolver(isStaffMode ? CustomerQueueStaffSchema : CustomerQueueSchema),
     defaultValues: {
-      whatsapp: isStaffMode ? '00000000000' : '',
-      serviceId: services.length > 0 ? services[0].id : ''
-    }
+      whatsapp: '',
+      serviceId: services.length > 0 ? services[0].id : '',
+    },
   });
 
   const selectedServiceId = watch('serviceId');
-  const whatsappValue = watch('whatsapp');
 
   useEffect(() => {
     if (services.length > 0 && !selectedServiceId) {
@@ -33,20 +43,22 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({ services, onJo
     }
   }, [services, setValue, selectedServiceId]);
 
-  const onSubmit = (data: CustomerQueueFormData) => {
+  const onSubmit = async (data: CustomerQueueFormData | CustomerQueueStaffFormData) => {
     setLoading(true);
-    setTimeout(() => {
-        onJoin(data.name, data.whatsapp, data.serviceId, isStaffMode);
-        setLoading(false);
-    }, 600);
-  };
-
-  const formatPhone = (val: string) => {
-    return val.replace(/\D/g, '').replace(/^(\d{2})(\d)/g, '($1) $2').replace(/(\d)(\d{4})$/, '$1-$2').slice(0, 15);
+    try {
+      const raw = data.whatsapp.trim();
+      const whatsapp =
+        isStaffMode && !raw
+          ? STAFF_PLACEHOLDER_WHATSAPP
+          : normalizeDocument(raw);
+      await onJoin(data.name, whatsapp, data.serviceId, isStaffMode);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setValue('whatsapp', formatPhone(e.target.value), { shouldValidate: true });
+    setValue('whatsapp', maskPhone(e.target.value), { shouldValidate: true });
   };
 
   return (
@@ -79,13 +91,13 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({ services, onJo
 
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-2">
-                WhatsApp {isStaffMode ? '(Opcional / Placeholder)' : '(para aviso)'}
+                WhatsApp {isStaffMode ? '(opcional)' : '(para aviso)'}
             </label>
             <input
               type="tel"
               placeholder="(11) 99999-9999"
               className={`w-full bg-bg border rounded-xl px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all placeholder:text-text-muted ${errors.whatsapp ? 'border-danger' : 'border-border'}`}
-              value={whatsappValue}
+              value={watch('whatsapp')}
               onChange={handlePhoneChange}
             />
              {errors.whatsapp && !isStaffMode && <p className="text-danger text-xs mt-1 flex items-center gap-1"><AlertCircle size={10} /> {errors.whatsapp.message}</p>}

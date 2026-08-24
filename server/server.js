@@ -13,7 +13,7 @@ const server = jsonServer.create();
 const router = jsonServer.router(path.join(__dirname, 'db.json'));
 const middlewares = jsonServer.defaults();
 
-const SECRET = process.env.JWT_SECRET || 'barberqueue_dev_secret';
+const SECRET = process.env.JWT_SECRET || 'agendai_dev_secret';
 const ACCESS_TTL = '15m';
 const REFRESH_TTL = '7d';
 

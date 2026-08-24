@@ -1,201 +1,375 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
 import {
-  Mail,
-  MapPin,
-  Clock,
-  Send,
   AlertCircle,
+  ArrowRight,
   CheckCircle2,
-  User,
-  MessageSquare
+  Clock,
+  Loader2,
+  Mail,
+  MessageSquare,
+  Phone,
 } from 'lucide-react';
 import { MarketingNav } from '../../components/marketing/MarketingNav';
 import { MarketingFooter } from '../../components/marketing/MarketingFooter';
+import { contactApi, type ContactTopic } from '../../infra/contactApi';
+import { maskPhone } from '../../utils/documentUtils';
+import { getErrorMessage } from '../../utils/errorMessage';
+import { trialCampaign } from '../../marketing/trialCampaign';
 
-const CONTACT_EMAIL = 'contato@agendaai.com.br';
+const CONTACT_EMAIL = 'contato@agendai.com.br';
+
+const topics: { value: ContactTopic; label: string; hint: string }[] = [
+  { value: 'planos', label: 'Planos e preços', hint: 'Trial, Essencial, Pro, anual' },
+  { value: 'suporte', label: 'Suporte', hint: 'Conta, fila, pagamentos' },
+  { value: 'parceria', label: 'Parceria', hint: 'Franquia, indicação, imprensa' },
+  { value: 'outro', label: 'Outro', hint: 'Qualquer outra dúvida' },
+];
 
 const ContactSchema = z.object({
-  name: z.string().min(2, 'Informe seu nome completo'),
+  name: z.string().min(2, 'Informe seu nome'),
   email: z.string().email('E-mail inválido'),
-  subject: z.string().min(3, 'Conte brevemente o assunto'),
-  message: z.string().min(10, 'Escreva uma mensagem com pelo menos 10 caracteres')
+  phone: z.string().optional(),
+  topic: z.enum(['planos', 'suporte', 'parceria', 'outro'], {
+    required_error: 'Escolha um assunto',
+  }),
+  message: z.string().min(10, 'Escreva pelo menos 10 caracteres'),
 });
 
 type ContactFormData = z.infer<typeof ContactSchema>;
 
-const inputClass = (hasError: boolean) =>
-  `w-full bg-neutral-900/60 border rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-600
-   outline-none transition-all
-   focus:ring-1 focus:ring-emerald-500/50
-   ${hasError ? 'border-red-500/40 focus:border-red-500' : 'border-white/10 focus:border-emerald-500/50 hover:border-white/20'}`;
+const fieldClass = (hasError: boolean) =>
+  `w-full rounded-2xl border bg-black/40 px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-neutral-600 focus:ring-1 focus:ring-emerald-400/40 ${
+    hasError
+      ? 'border-red-500/40 focus:border-red-500'
+      : 'border-white/10 hover:border-white/20 focus:border-emerald-400/50'
+  }`;
 
 export const ContactPage: React.FC = () => {
-  const [sent, setSent] = useState(false);
+  const navigate = useNavigate();
+  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors }
-  } = useForm<ContactFormData>({ resolver: zodResolver(ContactSchema) });
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<ContactFormData>({
+    resolver: zodResolver(ContactSchema),
+    defaultValues: { topic: 'planos', phone: '' },
+  });
 
-  const onSubmit = (data: ContactFormData) => {
-    const body = `Nome: ${data.name}\nE-mail: ${data.email}\n\n${data.message}`;
-    const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(data.subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailto;
-    setSent(true);
-    reset();
+  const topic = watch('topic');
+  const phoneValue = watch('phone') ?? '';
+
+  const onSubmit = async (data: ContactFormData) => {
+    setSubmitting(true);
+    setServerError(null);
+    setStatus('idle');
+    try {
+      const phoneDigits = (data.phone ?? '').replace(/\D/g, '');
+      await contactApi.submit({
+        name: data.name.trim(),
+        email: data.email.trim(),
+        phone: phoneDigits.length >= 8 ? phoneDigits : undefined,
+        topic: data.topic,
+        message: data.message.trim(),
+      });
+      setStatus('success');
+      reset({ topic: data.topic, name: '', email: '', phone: '', message: '' });
+    } catch (err) {
+      setStatus('error');
+      setServerError(getErrorMessage(err, 'Não foi possível enviar. Tente de novo em instantes.'));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-black text-neutral-100 selection:bg-emerald-500/30 font-sans overflow-x-hidden">
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-900/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-teal-900/10 rounded-full blur-[120px]" />
+    <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-emerald-500/30">
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div className="absolute -left-[15%] top-[-12%] h-[50%] w-[50%] rounded-full bg-emerald-900/25 blur-[140px]" />
+        <div className="absolute -right-[10%] bottom-[-10%] h-[45%] w-[45%] rounded-full bg-teal-900/15 blur-[120px]" />
       </div>
 
       <MarketingNav />
 
-      <section className="relative pt-40 pb-20 md:pt-52 md:pb-24 px-6 overflow-hidden">
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-block px-4 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em] mb-8"
-          >
-            Contato
-          </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-black tracking-tighter mb-8 bg-gradient-to-b from-white via-white to-white/30 bg-clip-text text-transparent"
-          >
-            Vamos conversar sobre o seu salão.
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg md:text-xl text-neutral-400 max-w-2xl mx-auto font-light leading-relaxed"
-          >
-            Dúvidas sobre planos, suporte técnico ou parcerias para franquias — nossa equipe responde em até 1 dia útil.
-          </motion.p>
+      <section className="relative z-10 px-6 pb-12 pt-36 md:px-10 md:pt-44 xl:px-12">
+        <div className="mx-auto max-w-375">
+          <div className="max-w-3xl">
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-400/90"
+            >
+              Contato
+            </motion.p>
+            <motion.h1
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              className="mt-4 text-5xl font-black tracking-[-0.05em] text-white md:text-7xl"
+            >
+              Fala com a gente.
+              <br />
+              <span className="text-emerald-400">Resposta em 1 dia útil.</span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-neutral-400"
+            >
+              Planos, suporte ou parceria — a mensagem cai no painel da equipe AgendAI.
+              Sem mailto, sem caixa de spam perdida.
+            </motion.p>
+          </div>
         </div>
       </section>
 
-      <section className="pb-32 px-6 relative z-10">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-8 items-start">
-          {/* Contact info */}
-          <div className="md:col-span-2 space-y-6">
-            {[
-              { icon: Mail, title: 'E-mail', value: CONTACT_EMAIL, href: `mailto:${CONTACT_EMAIL}` },
-              { icon: MapPin, title: 'Sede', value: 'Bebedouro, São Paulo — Brasil' },
-              { icon: Clock, title: 'Atendimento', value: 'Segunda a sexta, 9h às 18h' }
-            ].map((item) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="flex items-start gap-4 bg-neutral-900/40 backdrop-blur-xl rounded-3xl p-6 border border-white/10"
+      <section className="relative z-10 px-6 pb-28 md:px-10 xl:px-12">
+        <div className="mx-auto grid max-w-375 gap-8 lg:grid-cols-12 lg:gap-10">
+          {/* Side rail */}
+          <div className="space-y-4 lg:col-span-4">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="rounded-4xl border border-white/10 bg-[#0d110e] p-6"
+            >
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-500">
+                Canal direto
+              </p>
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                className="mt-3 inline-flex items-center gap-2 text-lg font-bold text-white transition hover:text-emerald-300"
               >
-                <div className="w-12 h-12 shrink-0 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-xl flex items-center justify-center text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-                  <item.icon className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 mb-1">{item.title}</div>
-                  {item.href ? (
-                    <a href={item.href} className="text-white font-medium hover:text-emerald-400 transition-colors">{item.value}</a>
-                  ) : (
-                    <span className="text-white font-medium">{item.value}</span>
-                  )}
-                </div>
-              </motion.div>
-            ))}
+                <Mail className="h-5 w-5 text-emerald-400" />
+                {CONTACT_EMAIL}
+              </a>
+              <p className="mt-3 text-sm font-medium text-neutral-500">
+                Prefere e-mail clássico? Também funciona.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.05 }}
+              className="rounded-4xl border border-white/10 bg-[#0d110e] p-6"
+            >
+              <div className="flex items-center gap-2 text-emerald-300">
+                <Clock className="h-4 w-4" />
+                <span className="text-xs font-black uppercase tracking-wider">Horário</span>
+              </div>
+              <p className="mt-3 text-base font-semibold text-white">
+                Seg–sex · 9h às 18h (Brasília)
+              </p>
+              <p className="mt-2 text-sm text-neutral-500">
+                Mensagens fora do horário entram na fila e respondemos no próximo dia útil.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.08 }}
+              className="rounded-4xl border border-emerald-400/20 bg-emerald-400/8 p-6"
+            >
+              <p className="text-sm font-bold text-emerald-200">{trialCampaign.eyebrow}?</p>
+              <p className="mt-2 text-sm font-medium leading-relaxed text-neutral-300">
+                {trialCampaign.body} {trialCampaign.afterTrial}
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate('/planos')}
+                className="group mt-4 inline-flex items-center gap-2 text-sm font-black text-white transition hover:text-emerald-300"
+              >
+                Ver planos
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </button>
+            </motion.div>
           </div>
 
-          {/* Contact form */}
+          {/* Form */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="md:col-span-3 bg-neutral-900/40 backdrop-blur-xl rounded-[2.5rem] p-8 md:p-10 border border-white/10"
+            className="rounded-4xl border border-white/10 bg-[#0a100c] p-7 md:p-10 lg:col-span-8"
           >
-            {sent && (
-              <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center gap-3 text-emerald-400 text-sm font-medium">
-                <CheckCircle2 size={18} className="shrink-0" />
-                Seu cliente de e-mail foi aberto com a mensagem pronta. Basta enviar!
+            {status === 'success' && (
+              <div className="mb-8 flex items-start gap-3 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 p-4 text-sm font-medium text-emerald-200">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
+                <div>
+                  <p className="font-bold text-emerald-100">Mensagem recebida.</p>
+                  <p className="mt-1 text-emerald-200/80">
+                    Nossa equipe já foi notificada. Retorno em até 1 dia útil.
+                  </p>
+                </div>
               </div>
             )}
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div className="space-y-1">
-                  <label htmlFor="contact-name" className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Nome</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <User size={16} className="text-neutral-500" />
-                    </div>
-                    <input id="contact-name" className={inputClass(!!errors.name)} placeholder="Seu nome" {...register('name')} />
-                  </div>
+            {status === 'error' && serverError && (
+              <div className="mb-8 flex items-start gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm font-medium text-red-300">
+                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+                {serverError}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
+              <div>
+                <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-neutral-500">
+                  Assunto
+                </p>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {topics.map((item) => {
+                    const active = topic === item.value;
+                    return (
+                      <button
+                        key={item.value}
+                        type="button"
+                        onClick={() =>
+                          setValue('topic', item.value, { shouldValidate: true })
+                        }
+                        className={`rounded-2xl border px-3 py-3 text-left transition ${
+                          active
+                            ? 'border-emerald-400/40 bg-emerald-400/12 text-white'
+                            : 'border-white/8 bg-black/30 text-neutral-400 hover:border-white/15 hover:text-neutral-200'
+                        }`}
+                      >
+                        <span className="block text-sm font-bold">{item.label}</span>
+                        <span className="mt-0.5 block text-[10px] font-medium opacity-70">
+                          {item.hint}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {errors.topic && (
+                  <p className="mt-2 flex items-center gap-1 text-[11px] text-red-400">
+                    <AlertCircle size={10} />
+                    {errors.topic.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="contact-name" className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500">
+                    Nome
+                  </label>
+                  <input
+                    id="contact-name"
+                    className={fieldClass(!!errors.name)}
+                    placeholder="Como te chamamos"
+                    autoComplete="name"
+                    {...register('name')}
+                  />
                   {errors.name && (
-                    <span className="text-[11px] text-red-400 flex items-center gap-1"><AlertCircle size={10} />{errors.name.message}</span>
+                    <p className="mt-1.5 flex items-center gap-1 text-[11px] text-red-400">
+                      <AlertCircle size={10} />
+                      {errors.name.message}
+                    </p>
                   )}
                 </div>
-
-                <div className="space-y-1">
-                  <label htmlFor="contact-email" className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">E-mail</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <Mail size={16} className="text-neutral-500" />
-                    </div>
-                    <input id="contact-email" type="email" className={inputClass(!!errors.email)} placeholder="seu@email.com" {...register('email')} />
-                  </div>
+                <div>
+                  <label htmlFor="contact-email" className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500">
+                    E-mail
+                  </label>
+                  <input
+                    id="contact-email"
+                    type="email"
+                    className={fieldClass(!!errors.email)}
+                    placeholder="seu@email.com"
+                    autoComplete="email"
+                    {...register('email')}
+                  />
                   {errors.email && (
-                    <span className="text-[11px] text-red-400 flex items-center gap-1"><AlertCircle size={10} />{errors.email.message}</span>
+                    <p className="mt-1.5 flex items-center gap-1 text-[11px] text-red-400">
+                      <AlertCircle size={10} />
+                      {errors.email.message}
+                    </p>
                   )}
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label htmlFor="contact-subject" className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Assunto</label>
+              <div>
+                <label htmlFor="contact-phone" className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500">
+                  WhatsApp <span className="normal-case tracking-normal text-neutral-600">(opcional)</span>
+                </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <MessageSquare size={16} className="text-neutral-500" />
-                  </div>
-                  <input id="contact-subject" className={inputClass(!!errors.subject)} placeholder="Sobre o que você quer falar?" {...register('subject')} />
+                  <Phone className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
+                  <input
+                    id="contact-phone"
+                    className={`${fieldClass(!!errors.phone)} pl-11`}
+                    placeholder="(11) 99999-9999"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    value={phoneValue}
+                    onChange={(e) =>
+                      setValue('phone', maskPhone(e.target.value), {
+                        shouldValidate: true,
+                      })
+                    }
+                  />
                 </div>
-                {errors.subject && (
-                  <span className="text-[11px] text-red-400 flex items-center gap-1"><AlertCircle size={10} />{errors.subject.message}</span>
-                )}
               </div>
 
-              <div className="space-y-1">
-                <label htmlFor="contact-message" className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Mensagem</label>
-                <textarea
-                  id="contact-message"
-                  rows={5}
-                  className={`w-full bg-neutral-900/60 border rounded-xl py-3 px-4 text-sm text-white placeholder:text-neutral-600 outline-none transition-all resize-none focus:ring-1 focus:ring-emerald-500/50 ${errors.message ? 'border-red-500/40 focus:border-red-500' : 'border-white/10 focus:border-emerald-500/50 hover:border-white/20'}`}
-                  placeholder="Conte com detalhes o que você precisa..."
-                  {...register('message')}
-                />
+              <div>
+                <label htmlFor="contact-message" className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500">
+                  Mensagem
+                </label>
+                <div className="relative">
+                  <MessageSquare className="pointer-events-none absolute left-4 top-4 h-4 w-4 text-neutral-500" />
+                  <textarea
+                    id="contact-message"
+                    rows={6}
+                    className={`${fieldClass(!!errors.message)} resize-none pl-11`}
+                    placeholder="Conte o contexto: salão, plano, o que travou…"
+                    {...register('message')}
+                  />
+                </div>
                 {errors.message && (
-                  <span className="text-[11px] text-red-400 flex items-center gap-1"><AlertCircle size={10} />{errors.message.message}</span>
+                  <p className="mt-1.5 flex items-center gap-1 text-[11px] text-red-400">
+                    <AlertCircle size={10} />
+                    {errors.message.message}
+                  </p>
                 )}
               </div>
 
-              <button
-                type="submit"
-                className="w-full sm:w-auto bg-emerald-500 text-white px-8 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.3)]"
-              >
-                Enviar mensagem
-                <Send className="w-4 h-4" />
-              </button>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs font-medium text-neutral-500">
+                  Seus dados só são usados para responder este contato.
+                </p>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-emerald-400 px-8 py-4 text-sm font-black text-black transition hover:-translate-y-0.5 hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Enviando…
+                    </>
+                  ) : (
+                    <>
+                      Enviar mensagem
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </>
+                  )}
+                </button>
+              </div>
             </form>
           </motion.div>
         </div>

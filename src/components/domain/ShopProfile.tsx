@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShopSettings, FeedPost, StaffMember } from '../../types';
 import { Logo } from '../ui/Logo';
 import { Camera, Type, Send, Trash2, Heart, Image as ImageIcon, MapPin, Star, Scissors, MoreHorizontal } from 'lucide-react';
@@ -21,6 +22,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
   onDeletePost,
   onLikePost
 }) => {
+  const navigate = useNavigate();
   const [newPostContent, setNewPostContent] = useState('');
   const [newPostTitle, setNewPostTitle] = useState('');
   const [newPostType, setNewPostType] = useState<'haircut' | 'beard' | 'announcement'>('haircut');
@@ -76,12 +78,12 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
   const getPostTypeStyle = (type: string) => {
     switch(type) {
       case 'announcement':
-        return 'bg-teal-500/10 text-teal-400 border-teal-500/20';
+        return 'bg-accent/10 text-accent border-accent/20';
       case 'beard':
-        return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20';
+        return 'bg-warning/10 text-warning border-warning/20';
       case 'haircut':
       default:
-        return 'bg-accent/10 text-accent border-accent/20';
+        return 'bg-success/10 text-success border-success/20';
     }
   };
 
@@ -213,6 +215,16 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
             </div>
             {post.imageUrl && (
               <img src={post.imageUrl} alt="Post" className="w-full h-56 object-cover" />
+            )}
+            {(post.postMode || post.ctaText) && post.barbershopId && (
+              <div className="p-4 pb-0">
+                <button
+                  onClick={() => navigate(`/queue/${post.barbershopId}${post.postMode === 'appointments' ? '?tab=appointments' : ''}`)}
+                  className="w-full bg-accent text-accent-fg rounded-xl text-sm font-bold py-3 hover:bg-accent-hover transition-all"
+                >
+                  {post.ctaText || 'Agendar'}
+                </button>
+              </div>
             )}
             <div className="p-4 flex items-center justify-between border-t border-border">
               <button

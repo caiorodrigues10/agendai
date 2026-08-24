@@ -14,13 +14,22 @@ import { MasterAdminDashboard } from './pages/MasterAdmin/MasterAdminDashboard';
 import { PlansPage } from './pages/PlansPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { AccessBlockedPage } from './pages/AccessBlockedPage';
+import { EmailVerifiedPage } from './pages/EmailVerifiedPage';
 import { PrivateRoute } from './components/infra/PrivateRoute';
 import { AccessBlockedListener } from './components/infra/AccessBlockedListener';
+import { CookieConsent } from './components/infra/CookieConsent';
+import { ScrollToTop } from './components/infra/ScrollToTop';
+import { PrivacyPolicyPage } from './pages/marketing/PrivacyPolicyPage';
+import { TermsPage } from './pages/marketing/TermsPage';
+import { ReferralRefCapture } from './components/infra/ReferralRefCapture';
 
 const App: React.FC = () => {
   return (
     <BrowserRouter>
+      <ScrollToTop />
+      <ReferralRefCapture />
       <AccessBlockedListener />
+      <CookieConsent />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/funcionalidades" element={<FeaturesPage />} />
@@ -29,9 +38,12 @@ const App: React.FC = () => {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/sobre" element={<AboutPage />} />
         <Route path="/contato" element={<ContactPage />} />
+        <Route path="/privacidade" element={<PrivacyPolicyPage />} />
+        <Route path="/termos" element={<TermsPage />} />
         <Route path="/queue" element={<PublicHome />} />
         <Route path="/queue/:id" element={<PublicHome />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/email-verificado" element={<EmailVerifiedPage />} />
         {/* Tela de bloqueio: também acessível sem sessão (bloqueio pode ocorrer no login) */}
         <Route path="/bloqueado" element={<AccessBlockedPage />} />
         {/* Planos são públicos: qualquer visitante pode ver preços antes de logar.
@@ -40,12 +52,12 @@ const App: React.FC = () => {
         <Route
           path="/checkout"
           element={
-            <PrivateRoute roles={['OWNER', 'MASTER_ADMIN', 'ADMIN']} fallback={<Navigate to="/login" replace />}>
+            <PrivateRoute roles={['OWNER', 'MASTER_ADMIN']} fallback={<Navigate to="/login" replace />}>
               <CheckoutPage />
             </PrivateRoute>
           }
         />
-        <Route path="/master/*" element={<PrivateRoute roles={['MASTER_ADMIN', 'ADMIN']} fallback={<Navigate to="/login" replace />}> <MasterAdminDashboard /> </PrivateRoute>} />
+        <Route path="/master/*" element={<PrivateRoute roles={['MASTER_ADMIN']} fallback={<Navigate to="/login" replace />}> <MasterAdminDashboard /> </PrivateRoute>} />
         <Route
           path="/app/:tab"
           element={

@@ -9,15 +9,29 @@ import {
   TrendingDown,
   Calendar,
   ArrowRight,
-  XCircle
+  XCircle,
+  X,
+  Users,
+  Banknote,
+  CalendarCheck,
+  Megaphone,
+  Clock,
+  ListOrdered,
+  MessageCircle,
+  Sparkles,
+  Wallet,
+  ArrowRightLeft,
+  HeartHandshake
 } from 'lucide-react';
 import { useSubscription } from '../../contexts/SubscriptionContext';
 import {
   subscriptionsApi,
   PlanEconomics,
-  MySubscription
+  MySubscription,
+  CancellationContext
 } from '../../infra/subscriptionsApi';
-import { ApiError } from '../../infra/apiClient';
+import { getErrorMessage } from '../../utils/errorMessage';
+import { trialCampaign } from '../../marketing/trialCampaign';
 
 const brl = (n: number) =>
   n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -30,39 +44,83 @@ const STATUS_LABEL: Record<string, string> = {
   UNPAID: 'Não paga'
 };
 
+const CANCEL_REASONS: { value: string; label: string }[] = [
+  { value: 'price', label: 'Preço alto / quero pagar menos' },
+  { value: 'low_usage', label: 'Não uso o suficiente' },
+  { value: 'migrating', label: 'Vou migrar para outro sistema' },
+  { value: 'missing_features', label: 'Faltam funcionalidades' },
+  { value: 'technical_issues', label: 'Problemas técnicos' },
+  { value: 'closing', label: 'Vou encerrar o salão' },
+  { value: 'other', label: 'Outro' }
+];
+
+const RETENTION_BENEFITS = [
+  {
+    icon: <ListOrdered size={18} />,
+    title: 'Fila digital',
+    desc: 'Seus clientes entram na fila pelo celular, sem baixar app.'
+  },
+  {
+    icon: <MessageCircle size={18} />,
+    title: 'Lembretes no WhatsApp',
+    desc: 'Agendamentos confirmados automaticamente e menos faltas.'
+  },
+  {
+    icon: <Sparkles size={18} />,
+    title: 'Insights com IA',
+    desc: 'Previsão de movimento e dicas para encaixar mais serviços.'
+  },
+  {
+    icon: <Megaphone size={18} />,
+    title: 'Posts automáticos',
+    desc: 'Divulgue o salão sem gastar tempo criando conteúdo.'
+  },
+  {
+    icon: <Wallet size={18} />,
+    title: 'Financeiro e fiado',
+    desc: 'Controle de caixa, despesas e fiado dos clientes em um só lugar.'
+  },
+  {
+    icon: <ArrowRightLeft size={18} />,
+    title: 'Comparativo mensal vs anual',
+    desc: 'Veja quanto o plano anual economiza frente ao mensal.'
+  }
+];
+
 export const OwnerSubscriptionPanel: React.FC = () => {
   const navigate = useNavigate();
   const { data, loading: ctxLoading, refresh } = useSubscription();
   const [detail, setDetail] = useState<MySubscription | null>(data);
-  const [loading, setLoading] = useState(!data);
+  const [loading, setLoading] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelStep, setCancelStep] = useState<1 | 2>(1);
+  const [cancelReason, setCancelReason] = useState<string | null>(null);
+  const [cancelCtx, setCancelCtx] = useState<CancellationContext | null>(null);
+  const [cancelCtxLoading, setCancelCtxLoading] = useState(false);
+  const [pixKey, setPixKey] = useState('');
+  const [pixKeyType, setPixKeyType] = useState<
+    'CPF' | 'CNPJ' | 'PHONE' | 'EMAIL' | 'RANDOM'
+  >('EMAIL');
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const me = await subscriptionsApi.me();
-        if (!cancelled) setDetail(me);
-      } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof ApiError ? err.message : 'Falha ao carregar assinatura.');
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const needsPixKey =
+    cancelCtx?.proratedRefundAvailable &&
+    cancelCtx?.refundProvider === 'ABACATEPAY';
 
   useEffect(() => {
     if (data) setDetail(data);
   }, [data]);
+
+  useEffect(() => {
+    if (!showCancelModal) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowCancelModal(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showCancelModal]);
 
   const economics: PlanEconomics | undefined = detail?.economics;
   const sub = detail?.subscription;
@@ -70,23 +128,58 @@ export const OwnerSubscriptionPanel: React.FC = () => {
   const onYearly = economics?.currentBillingCycle === 'YEARLY';
   const onMonthly = economics?.currentBillingCycle === 'MONTHLY';
 
-  const handleCancel = async () => {
+  const closeCancelModal = () => {
+    setShowCancelModal(false);
+    setCancelStep(1);
+    setCancelReason(null);
+    setCancelCtx(null);
+    setPixKey('');
+    setPixKeyType('EMAIL');
+  };
+
+  const openCancelModal = async () => {
     if (!sub || sub.status === 'CANCELED') return;
-    const ok = window.confirm(
-      'Cancelar a assinatura? Você perderá o acesso ao fim do período já pago / trial.'
-    );
-    if (!ok) return;
+    setShowCancelModal(true);
+    setCancelStep(1);
+    setCancelReason(null);
+    setError(null);
+    setSuccess(null);
+    setCancelCtx(null);
+    setPixKey('');
+    setPixKeyType('EMAIL');
+    setCancelCtxLoading(true);
+    try {
+      const ctx = await subscriptionsApi.getCancellationContext();
+      setCancelCtx(ctx);
+    } catch {
+      setCancelCtx(null);
+    } finally {
+      setCancelCtxLoading(false);
+    }
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!cancelReason) return;
     setCancelling(true);
     setError(null);
     setSuccess(null);
     try {
-      await subscriptionsApi.cancel();
-      setSuccess('Assinatura cancelada.');
+      const res = await subscriptionsApi.cancel({
+        cancelReason,
+        ...(pixKey ? { pixKey, pixKeyType } : {}),
+      });
+      const pr = (res as any)?.proratedRefund;
+      setSuccess(
+        pr?.status === 'SUCCEEDED'
+          ? `Assinatura cancelada. Reembolso proporcional de ${brl(pr.amount)} (com multa de 20%) devolvido automaticamente.`
+          : 'Assinatura cancelada.'
+      );
+      setShowCancelModal(false);
       await refresh();
       const me = await subscriptionsApi.me();
       setDetail(me);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Não foi possível cancelar.');
+      setError(getErrorMessage(err, 'Não foi possível cancelar.'));
     } finally {
       setCancelling(false);
     }
@@ -109,6 +202,13 @@ export const OwnerSubscriptionPanel: React.FC = () => {
         <p className="text-sm text-text-secondary mt-1">
           Gerencie seu plano e veja a economia do anual frente ao mensal.
         </p>
+        <button
+          type="button"
+          onClick={() => navigate('/app/referrals')}
+          className="mt-3 text-xs font-bold text-accent hover:underline"
+        >
+          Indique um salão e ganhe dias grátis →
+        </button>
       </div>
 
       {error && (
@@ -140,6 +240,18 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                 {STATUS_LABEL[sub.status] ?? sub.status}
               </span>
             </div>
+            {trial && !trial.isExpired && (
+              <div className="rounded-xl border border-accent/25 bg-accent/10 px-3 py-2.5">
+                <p className="text-xs font-bold text-accent">
+                  Trial Pro · {trial.daysRemainingInTrial} dia(s) restantes
+                </p>
+                <p className="mt-0.5 text-[11px] text-text-secondary">
+                  Acesso Pro completo até{' '}
+                  {new Date(trial.trialEndsAt).toLocaleDateString('pt-BR')}.{' '}
+                  {trialCampaign.ownerEvaluate} Depois segue o plano {sub.planName}.
+                </p>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-3 text-xs text-text-secondary">
               <div className="flex items-center gap-1.5">
                 <Calendar size={13} className="text-accent" />
@@ -161,7 +273,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
         ) : trial ? (
           <div>
             <p className="text-[10px] uppercase tracking-wider text-text-muted font-bold">
-              Período de trial
+              Trial Pro · 30 dias
             </p>
             <p className="text-lg font-bold mt-1">
               {trial.isExpired
@@ -169,7 +281,8 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                 : `${trial.daysRemainingInTrial} dia(s) restantes`}
             </p>
             <p className="text-xs text-text-secondary mt-1">
-              Termina em {new Date(trial.trialEndsAt).toLocaleDateString('pt-BR')}
+              Pro completo até {new Date(trial.trialEndsAt).toLocaleDateString('pt-BR')}.{' '}
+              {trialCampaign.ownerEvaluate} {trialCampaign.afterTrial}
             </p>
           </div>
         ) : (
@@ -185,7 +298,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
           </button>
           {sub && sub.status !== 'CANCELED' && (
             <button
-              onClick={handleCancel}
+              onClick={openCancelModal}
               disabled={cancelling}
               className="px-4 py-2.5 rounded-xl border border-danger/40 text-danger text-sm font-bold flex items-center gap-2 hover:bg-danger/10 disabled:opacity-60"
             >
@@ -275,6 +388,276 @@ export const OwnerSubscriptionPanel: React.FC = () => {
               {brl(economics.yearlyPlan.price)}/ano.
             </p>
           )}
+        </div>
+      )}
+
+      {showCancelModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={closeCancelModal}
+        >
+          <div
+            className="bg-surface border border-border rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto relative"
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              onClick={closeCancelModal}
+              className="absolute right-4 top-4 text-text-muted hover:text-text-primary transition-colors"
+              aria-label="Fechar"
+            >
+              <X size={20} />
+            </button>
+
+            {cancelStep === 1 ? (
+              <>
+                <div className="text-center mb-6">
+                  <div className="w-12 h-12 mx-auto rounded-2xl bg-accent/10 text-accent flex items-center justify-center mb-3">
+                    <HeartHandshake size={24} />
+                  </div>
+                  <h3 className="text-xl font-bold text-text-primary">Sentimos muito em ver você ir</h3>
+                  <p className="text-sm text-text-secondary mt-1">
+                    Antes de ir, veja o que você construiu até aqui.
+                  </p>
+                </div>
+
+                {cancelCtxLoading ? (
+                  <div className="flex justify-center py-12 text-accent">
+                    <Loader2 className="animate-spin" size={28} />
+                  </div>
+                ) : cancelCtx?.hasUsage ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {[
+                        {
+                          icon: <Users size={17} />,
+                          value: String(cancelCtx.uniqueCustomers),
+                          label: 'clientes atendidos'
+                        },
+                        {
+                          icon: <Banknote size={17} />,
+                          value: brl(cancelCtx.revenue),
+                          label: 'em serviços'
+                        },
+                        {
+                          icon: <CalendarCheck size={17} />,
+                          value: String(cancelCtx.appointmentsCompleted),
+                          label: 'agendamentos'
+                        },
+                        ...(cancelCtx.savingsSoFar > 0
+                          ? [
+                              {
+                                icon: <PiggyBank size={17} />,
+                                value: brl(cancelCtx.savingsSoFar),
+                                label: 'economizados no anual'
+                              }
+                            ]
+                          : []),
+                        ...(cancelCtx.postsPublished > 0
+                          ? [
+                              {
+                                icon: <Megaphone size={17} />,
+                                value: String(cancelCtx.postsPublished),
+                                label: 'posts publicados'
+                              }
+                            ]
+                          : []),
+                        {
+                          icon: <Clock size={17} />,
+                          value: String(cancelCtx.usageDays),
+                          label: 'dias com a gente'
+                        }
+                      ].map(m => (
+                        <div
+                          key={m.label}
+                          className="bg-bg/50 border border-border rounded-xl p-4 text-center"
+                        >
+                          <div className="w-8 h-8 mx-auto rounded-lg bg-accent/10 text-accent flex items-center justify-center mb-2">
+                            {m.icon}
+                          </div>
+                          <p className="text-lg font-black text-text-primary leading-tight">{m.value}</p>
+                          <p className="text-[10px] text-text-muted uppercase tracking-wider font-semibold mt-0.5">
+                            {m.label}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="rounded-xl bg-accent/5 border border-accent/15 px-4 py-3 flex items-center gap-2">
+                      <Sparkles size={15} className="text-accent shrink-0" />
+                      <p className="text-xs text-text-secondary">
+                        Esses resultados são seus — não perca tudo isso agora.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {RETENTION_BENEFITS.map(b => (
+                        <div key={b.title} className="flex gap-3 bg-bg/50 border border-border rounded-xl p-4">
+                          <div className="w-9 h-9 shrink-0 rounded-lg bg-accent/10 text-accent flex items-center justify-center">
+                            {b.icon}
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-text-primary">{b.title}</p>
+                            <p className="text-xs text-text-secondary mt-0.5">{b.desc}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="rounded-xl bg-accent/5 border border-accent/15 px-4 py-3 flex items-center gap-2">
+                      <Sparkles size={15} className="text-accent shrink-0" />
+                      <p className="text-xs text-text-secondary">
+                        Tudo isso ainda espera por você no AgendAI.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                  {cancelCtx && !cancelCtx.hasUsage && (
+                    <button
+                      onClick={() => {
+                        closeCancelModal();
+                        navigate('/app');
+                      }}
+                      className="flex-1 py-2.5 rounded-xl bg-accent text-accent-fg text-sm font-bold flex items-center justify-center gap-2 hover:bg-accent-hover"
+                    >
+                      Explorar recursos <ArrowRight size={15} />
+                    </button>
+                  )}
+                  {!cancelCtxLoading && (
+                    <button
+                      onClick={closeCancelModal}
+                      className="flex-1 py-2.5 rounded-xl bg-accent text-accent-fg text-sm font-bold hover:bg-accent-hover"
+                    >
+                      Continuar com meu plano
+                    </button>
+                  )}
+                  {!cancelCtxLoading && (
+                    <button
+                      onClick={() => setCancelStep(2)}
+                      className="px-5 py-2.5 rounded-xl border border-danger/40 text-danger text-sm font-bold hover:bg-danger/10"
+                    >
+                      Cancelar mesmo assim
+                    </button>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mb-5">
+                  <h3 className="text-xl font-bold text-text-primary">Nos conte o motivo</h3>
+                  <p className="text-sm text-text-secondary mt-1">
+                    Sua opinião nos ajuda a melhorar.
+                  </p>
+                </div>
+
+                {error && (
+                  <div className="p-3 rounded-xl bg-danger/10 border border-danger/30 text-danger text-sm flex gap-2 mb-4">
+                    <AlertCircle size={16} className="shrink-0 mt-0.5" /> {error}
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  {CANCEL_REASONS.map(r => (
+                    <label
+                      key={r.value}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all ${
+                        cancelReason === r.value
+                          ? 'border-accent bg-accent/10'
+                          : 'border-border bg-bg/40 hover:border-border-strong'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="cancel-reason"
+                        value={r.value}
+                        checked={cancelReason === r.value}
+                        onChange={() => setCancelReason(r.value)}
+                        className="accent-accent w-4 h-4 shrink-0"
+                      />
+                      <span className="text-sm font-medium text-text-primary">{r.label}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {cancelCtx?.proratedRefundAvailable && (
+                  <div className="rounded-xl bg-success/10 border border-success/30 px-4 py-3 flex gap-2 mt-5">
+                    <Banknote size={15} className="text-success shrink-0 mt-0.5" />
+                    <p className="text-xs text-success">
+                      Você receberá automaticamente o valor proporcional do período já
+                      pago e não utilizado, com multa de 20% sobre o valor do
+                      reembolso. O acesso continua até o fim do seu período.
+                    </p>
+                  </div>
+                )}
+
+                {needsPixKey && (
+                  <div className="mt-5 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Wallet size={15} className="text-accent shrink-0" />
+                      <p className="text-sm font-bold text-text-primary">
+                        Chave PIX para devolução
+                      </p>
+                    </div>
+                    <p className="text-xs text-text-secondary -mt-2">
+                      Seu pagamento foi feito pelo AbacatePay, que só reembolsa o total.
+                      Para devolvermos apenas o proporcional, enviamos um PIX para sua
+                      chave. Informe a chave onde deseja receber.
+                    </p>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={pixKey}
+                        onChange={e => setPixKey(e.target.value)}
+                        placeholder="Chave PIX (ex.: email, CPF, celular)"
+                        className="flex-1 px-3 py-2.5 rounded-xl bg-bg border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
+                      />
+                      <select
+                        value={pixKeyType}
+                        onChange={e => setPixKeyType(e.target.value as any)}
+                        className="px-3 py-2.5 rounded-xl bg-bg border border-border text-sm text-text-primary focus:outline-none focus:border-accent"
+                      >
+                        <option value="EMAIL">E-mail</option>
+                        <option value="CPF">CPF</option>
+                        <option value="CNPJ">CNPJ</option>
+                        <option value="PHONE">Celular</option>
+                        <option value="RANDOM">Aleatória</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                <div className="rounded-xl bg-warning/10 border border-warning/30 px-4 py-3 flex gap-2 mt-5">
+                  <AlertCircle size={15} className="text-warning shrink-0 mt-0.5" />
+                  <p className="text-xs text-warning">
+                    Ao cancelar você perde o acesso aos recursos no fim do período já
+                    pago.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 mt-5">
+                  <button
+                    onClick={() => setCancelStep(1)}
+                    className="flex-1 py-2.5 rounded-xl border border-border text-text-secondary text-sm font-bold hover:bg-surface-2"
+                  >
+                    Voltar
+                  </button>
+                  <button
+                    onClick={handleConfirmCancel}
+                    disabled={!cancelReason || (needsPixKey && !pixKey.trim()) || cancelling}
+                    className="flex-1 py-2.5 rounded-xl bg-danger text-white text-sm font-bold flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-40"
+                  >
+                    {cancelling ? (
+                      <Loader2 size={15} className="animate-spin" />
+                    ) : (
+                      <XCircle size={15} />
+                    )}
+                    Cancelar assinatura
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>

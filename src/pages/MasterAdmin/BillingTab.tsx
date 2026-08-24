@@ -18,6 +18,9 @@ import {
   QrCode,
   Bell,
   ExternalLink,
+  RotateCcw,
+  X,
+  Landmark,
 } from 'lucide-react';
 import {
   adminApi,
@@ -31,7 +34,8 @@ import {
   BlockedEntityItem,
   ListMeta,
 } from '../../infra/adminApi';
-import { ApiError } from '../../infra/apiClient';
+import { paymentsApi, Refund } from '../../infra/paymentsApi';
+import { getErrorMessage } from '../../utils/errorMessage';
 
 // ─────────────────────────────────────────────
 // Helpers
@@ -45,8 +49,7 @@ const formatDate = (value: string | null | undefined) =>
 const formatDateTime = (value: string | null | undefined) =>
   value ? new Date(value).toLocaleString('pt-BR') : '—';
 
-const errorMessage = (err: unknown): string =>
-  err instanceof ApiError ? err.message : 'Erro inesperado. Tente novamente.';
+const errorMessage = (err: unknown): string => getErrorMessage(err);
 
 const EMPTY_META: ListMeta = { total: 0, page: 1, limit: 10, totalPages: 1 };
 
@@ -206,6 +209,17 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
   debit_card: 'Débito',
   pix: 'PIX',
   payment_link: 'Link',
+  asaas: 'Asaas',
+};
+
+const CANCEL_REASON_LABELS: Record<string, string> = {
+  price: 'Preço alto / quero pagar menos',
+  low_usage: 'Não uso o suficiente',
+  migrating: 'Vou migrar para outro sistema',
+  missing_features: 'Faltam funcionalidades',
+  technical_issues: 'Problemas técnicos',
+  closing: 'Vou encerrar o salão',
+  other: 'Outro',
 };
 
 function paymentRefLabel(p: PaymentListItem): string {
@@ -217,8 +231,93 @@ function paymentRefLabel(p: PaymentListItem): string {
 function PaymentMethodIcon({ method }: { method: string }) {
   if (method === 'pix') return <QrCode size={12} />;
   if (method === 'payment_link') return <ExternalLink size={12} />;
+  if (method === 'asaas') return <Landmark size={12} />;
   return <CreditCard size={12} />;
 }
+
+interface RefundModalProps {
+  payment: PaymentListItem;
+  onClose: () => void;
+  onSubmit: (reason: string) => Promise<void>;
+  busy: boolean;
+  error: string | null;
+}
+
+const RefundModal: React.FC<RefundModalProps> = ({ payment, onClose, onSubmit, busy, error }) => {
+  const [reason, setReason] = useState('');
+  const valid = reason.trim().length >= 3;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-surface border border-border rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div>
+            <h3 className="text-lg font-bold text-text-primary">Reembolsar pagamento</h3>
+            <p className="text-xs text-text-muted mt-1">
+              {formatDateTime(payment.createdAt)} ·{' '}
+              {PAYMENT_METHOD_LABELS[payment.paymentMethod] ?? payment.paymentMethod}
+            </p>
+          </div>
+          <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors">
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="bg-bg/50 border border-border rounded-xl px-4 py-3 flex items-center justify-between mb-4">
+          <span className="text-xs text-text-secondary font-medium">Valor do pagamento</span>
+          <span className="text-lg font-black text-text-primary">{brl.format(payment.transactionAmount)}</span>
+        </div>
+
+        {error && (
+          <div className="bg-red-500/5 border border-red-500/20 text-red-400 text-xs rounded-xl px-4 py-2.5 mb-4">
+            {error}
+          </div>
+        )}
+
+        <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+          Motivo do reembolso
+        </label>
+        <textarea
+          rows={3}
+          maxLength={500}
+          value={reason}
+          onChange={e => setReason(e.target.value)}
+          placeholder="Ex: cobrança indevida, solicitação do cliente..."
+          className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-all resize-none"
+        />
+        <p className="text-[10px] text-text-muted text-right mt-1">{reason.length}/500</p>
+
+        <div className="rounded-xl bg-yellow-500/10 border border-yellow-500/20 px-4 py-3 flex gap-2 mt-3">
+          <AlertCircle size={15} className="text-yellow-400 shrink-0 mt-0.5" />
+          <p className="text-xs text-yellow-400">Reembolso TOTAL — a assinatura do salão será cancelada.</p>
+        </div>
+
+        <div className="flex gap-3 mt-5">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 border border-border text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-xl text-sm font-bold transition-all"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={() => onSubmit(reason.trim())}
+            disabled={!valid || busy}
+            className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-400 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+          >
+            {busy ? <RefreshCcw size={14} className="animate-spin" /> : <RotateCcw size={14} />}
+            Confirmar reembolso
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const EXPENSE_TYPE_LABELS: Record<string, string> = {
   FIXED: 'Fixa',
@@ -381,6 +480,10 @@ const PaymentsSection: React.FC<{ shopNames: Map<string, string> }> = ({ shopNam
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [refundTarget, setRefundTarget] = useState<PaymentListItem | null>(null);
+  const [refunding, setRefunding] = useState(false);
+  const [refundError, setRefundError] = useState<string | null>(null);
+  const [refundNotice, setRefundNotice] = useState<string | null>(null);
 
   const fetchPayments = useCallback(async () => {
     setLoading(true);
@@ -400,10 +503,31 @@ const PaymentsSection: React.FC<{ shopNames: Map<string, string> }> = ({ shopNam
     fetchPayments();
   }, [fetchPayments]);
 
+  const handleRefund = async (reason: string) => {
+    if (!refundTarget) return;
+    setRefunding(true);
+    setRefundError(null);
+    try {
+      await paymentsApi.refundPayment(refundTarget.id, reason);
+      setRefundNotice(`Reembolso de ${brl.format(refundTarget.transactionAmount)} solicitado com sucesso.`);
+      setRefundTarget(null);
+      await fetchPayments();
+    } catch (err) {
+      setRefundError(errorMessage(err));
+    } finally {
+      setRefunding(false);
+    }
+  };
+
   if (error) return <SectionError message={error} onRetry={fetchPayments} />;
 
   return (
     <div className="bg-surface border border-border rounded-2xl overflow-hidden">
+      {refundNotice && (
+        <div className="mx-4 mt-4 bg-green-500/10 border border-green-500/20 text-green-400 text-xs rounded-xl px-4 py-2.5 flex items-center gap-2">
+          <CheckCircle2 size={14} className="shrink-0" /> {refundNotice}
+        </div>
+      )}
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="bg-bg text-text-muted uppercase text-[10px] font-bold tracking-widest border-b border-border">
@@ -414,13 +538,14 @@ const PaymentsSection: React.FC<{ shopNames: Map<string, string> }> = ({ shopNam
               <th className="px-6 py-3.5">Método</th>
               <th className="px-6 py-3.5">Status</th>
               <th className="px-6 py-3.5 hidden lg:table-cell">Data</th>
+              <th className="px-6 py-3.5">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/40">
             {loading ? (
-              <TableSkeleton cols={6} />
+              <TableSkeleton cols={7} />
             ) : payments.length === 0 ? (
-              <EmptyRow cols={6} message="Nenhum pagamento encontrado." />
+              <EmptyRow cols={7} message="Nenhum pagamento encontrado." />
             ) : (
               payments.map(p => (
                 <tr key={p.id} className="hover:bg-surface-2/20 transition-colors">
@@ -448,6 +573,22 @@ const PaymentsSection: React.FC<{ shopNames: Map<string, string> }> = ({ shopNam
                   <td className="px-6 py-4 hidden lg:table-cell">
                     <span className="text-xs text-text-secondary">{formatDateTime(p.createdAt)}</span>
                   </td>
+                  <td className="px-6 py-4">
+                    {p.status === 'approved' ? (
+                      <button
+                        onClick={() => {
+                          setRefundError(null);
+                          setRefundTarget(p);
+                        }}
+                        className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-yellow-400 border border-yellow-500/20 hover:bg-yellow-500/10 rounded-lg px-2.5 py-1.5 transition-all"
+                      >
+                        <RotateCcw size={11} />
+                        Reembolsar
+                      </button>
+                    ) : (
+                      <span className="text-[10px] text-text-muted">—</span>
+                    )}
+                  </td>
                 </tr>
               ))
             )}
@@ -455,6 +596,18 @@ const PaymentsSection: React.FC<{ shopNames: Map<string, string> }> = ({ shopNam
         </table>
       </div>
       <PaginationBar meta={meta} page={page} loading={loading} onPageChange={setPage} />
+      {refundTarget && (
+        <RefundModal
+          payment={refundTarget}
+          onClose={() => {
+            setRefundTarget(null);
+            setRefundError(null);
+          }}
+          onSubmit={handleRefund}
+          busy={refunding}
+          error={refundError}
+        />
+      )}
     </div>
   );
 };
@@ -633,6 +786,11 @@ const SubscriptionsSection: React.FC = () => {
                       </td>
                       <td className="px-6 py-4">
                         <SubscriptionStatusBadge status={s.status} />
+                        {s.cancelReason && (
+                          <div className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border border-yellow-500/20 bg-yellow-500/10 text-yellow-400">
+                            Motivo: {CANCEL_REASON_LABELS[s.cancelReason] ?? s.cancelReason}
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4 hidden lg:table-cell">
                         <span className="text-xs text-text-secondary">{formatDate(s.startDate)}</span>
@@ -1207,6 +1365,7 @@ const NOTIFICATION_TYPE_LABELS: Record<string, string> = {
   UNBLOCK_MANUAL: 'Desbloqueio manual',
   SUBSCRIPTION_EXPIRED: 'Assinatura expirada',
   PAYMENT_RECEIVED: 'Pagamento recebido',
+  CONTACT_MESSAGE: 'Mensagem de contato',
 };
 
 const NotificationsSection: React.FC = () => {
@@ -1364,14 +1523,128 @@ const NotificationsSection: React.FC = () => {
 };
 
 // ─────────────────────────────────────────────
+// Seção: Reembolsos
+// ─────────────────────────────────────────────
+
+const REFUND_STATUS_CONFIG: Record<string, { label: string; className: string }> = {
+  SUCCEEDED: { label: 'Concluído', className: 'bg-green-500/10 text-green-400 border-green-500/20' },
+  FAILED: { label: 'Falhou', className: 'bg-red-500/10 text-red-400 border-red-500/20' },
+  PENDING: { label: 'Pendente', className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
+};
+
+const RefundStatusBadge: React.FC<{ status: string }> = ({ status }) => {
+  const cfg = REFUND_STATUS_CONFIG[status] ?? {
+    label: status,
+    className: 'bg-surface-2 text-text-muted border-border-strong',
+  };
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${cfg.className}`}>
+      {cfg.label}
+    </span>
+  );
+};
+
+const RefundsSection: React.FC<{ shopNames: Map<string, string> }> = ({ shopNames }) => {
+  const [refunds, setRefunds] = useState<Refund[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchRefunds = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await paymentsApi.listRefunds();
+      setRefunds(res.data);
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchRefunds();
+  }, [fetchRefunds]);
+
+  if (error) return <SectionError message={error} onRetry={fetchRefunds} />;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-text-muted">
+          Estornos solicitados sobre pagamentos aprovados. Status atualizado pelo provedor.
+        </p>
+        <button
+          onClick={fetchRefunds}
+          disabled={loading}
+          className="p-2 rounded-lg border border-border text-text-muted hover:text-text-primary hover:bg-surface-2 transition-all disabled:opacity-50"
+          aria-label="Atualizar"
+        >
+          <RefreshCcw size={14} className={loading ? 'animate-spin' : ''} />
+        </button>
+      </div>
+      <div className="bg-surface border border-border rounded-2xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-bg text-text-muted uppercase text-[10px] font-bold tracking-widest border-b border-border">
+              <tr>
+                <th className="px-6 py-3.5">Valor</th>
+                <th className="px-6 py-3.5 hidden md:table-cell">Motivo</th>
+                <th className="px-6 py-3.5 hidden lg:table-cell">Salão</th>
+                <th className="px-6 py-3.5">Provedor</th>
+                <th className="px-6 py-3.5">Status</th>
+                <th className="px-6 py-3.5 hidden lg:table-cell">Data</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/40">
+              {loading ? (
+                <TableSkeleton cols={6} />
+              ) : refunds.length === 0 ? (
+                <EmptyRow cols={6} message="Nenhum reembolso encontrado." />
+              ) : (
+                refunds.map(r => (
+                  <tr key={r.id} className="hover:bg-surface-2/20 transition-colors">
+                    <td className="px-6 py-4">
+                      <span className="font-bold text-text-primary">{brl.format(r.amount)}</span>
+                    </td>
+                    <td className="px-6 py-4 hidden md:table-cell">
+                      <span className="text-xs text-text-secondary max-w-[240px] truncate block">{r.reason || '—'}</span>
+                    </td>
+                    <td className="px-6 py-4 hidden lg:table-cell">
+                      <span className="text-xs text-text-secondary max-w-[160px] truncate block">
+                        {shopNames.get(r.barbershopId) ?? r.barbershopId}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-xs text-text-secondary font-medium">{r.provider}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <RefundStatusBadge status={r.status} />
+                    </td>
+                    <td className="px-6 py-4 hidden lg:table-cell">
+                      <span className="text-xs text-text-secondary">{formatDate(r.createdAt)}</span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────
 // BillingTab (raiz)
 // ─────────────────────────────────────────────
 
-type BillingSection = 'revenue' | 'payments' | 'subscriptions' | 'plans' | 'blocked' | 'notifications';
+type BillingSection = 'revenue' | 'payments' | 'refunds' | 'subscriptions' | 'plans' | 'blocked' | 'notifications';
 
 const SECTION_OPTIONS: { value: BillingSection; icon: React.ReactNode; label: string }[] = [
   { value: 'revenue', icon: <Wallet size={14} />, label: 'Receita' },
   { value: 'payments', icon: <CreditCard size={14} />, label: 'Pagamentos' },
+  { value: 'refunds', icon: <RotateCcw size={14} />, label: 'Reembolsos' },
   { value: 'subscriptions', icon: <Receipt size={14} />, label: 'Assinaturas' },
   { value: 'plans', icon: <Layers size={14} />, label: 'Planos' },
   { value: 'blocked', icon: <Ban size={14} />, label: 'Bloqueios' },
@@ -1419,6 +1692,7 @@ export const BillingTab: React.FC = () => {
 
       {section === 'revenue' && <RevenueSection />}
       {section === 'payments' && <PaymentsSection shopNames={shopNames} />}
+      {section === 'refunds' && <RefundsSection shopNames={shopNames} />}
       {section === 'subscriptions' && <SubscriptionsSection />}
       {section === 'plans' && <PlansSection />}
       {section === 'blocked' && <BlockedSection />}

@@ -1,10 +1,3 @@
-export enum ServiceType {
-  HAIRCUT = 'Corte',
-  BEARD = 'Barba',
-  FULL_SERVICE = 'Corte + Escova',
-  EYEBROW = 'Sobrancelha'
-}
-
 export interface Service {
   id: string;
   name: string;
@@ -44,6 +37,8 @@ export interface Appointment {
   serviceName?: string;
   staffName?: string;
   serviceDurationMinutes?: number;
+  clientId?: string | null;
+  clientPackageId?: string | null;
 }
 
 export interface DaySchedule {
@@ -88,4 +83,88 @@ export interface FeedPost {
   createdAt: number;
   likes: number;
   authorName?: string;
+  status?: 'draft' | 'scheduled' | 'published';
+  scheduledFor?: number | null;
+  publishedAt?: number | null;
+  postMode?: 'queue' | 'appointments' | 'both';
+  ctaText?: string | null;
+}
+
+export type PostMode = 'queue' | 'appointments' | 'both';
+
+export interface PostConfig {
+  autoPostEnabled: boolean;
+}
+
+export type PackagePaymentMethod = 'cash' | 'pix' | 'card' | 'other';
+export type ClientPackageStatus = 'ACTIVE' | 'DEPLETED' | 'EXPIRED' | 'CANCELLED';
+
+export interface ServicePackage {
+  id: string;
+  barbershopId: string;
+  serviceId: string;
+  serviceName: string | null;
+  servicePrice: number | null;
+  name: string;
+  sessionCount: number;
+  price: number;
+  validityDays: number | null;
+  active: boolean;
+}
+
+export interface ClientPackage {
+  id: string;
+  barbershopId: string;
+  clientId: string;
+  clientName: string | null;
+  clientWhatsapp: string | null;
+  packageId: string;
+  packageName: string | null;
+  serviceId: string;
+  serviceName: string | null;
+  serviceDurationMinutes: number | null;
+  totalSessions: number;
+  remainingSessions: number;
+  pricePaid: number;
+  paymentMethod: PackagePaymentMethod;
+  status: ClientPackageStatus;
+  purchasedAt: string;
+  expiresAt: string | null;
+}
+
+export interface SalonClientPackageSummary {
+  id: string;
+  packageId: string;
+  packageName: string | null;
+  serviceId: string;
+  serviceName: string | null;
+  totalSessions: number;
+  remainingSessions: number;
+  status: string;
+  purchasedAt: string;
+  expiresAt: string | null;
+  pricePaid: number;
+  paymentMethod: string;
+}
+
+export interface SalonClientAppointment {
+  id: string;
+  serviceId: string;
+  serviceName: string | null;
+  date: string;
+  time: string;
+  status: string;
+  clientPackageId: string | null;
+}
+
+export interface SalonClient {
+  id: string;
+  barbershopId: string;
+  name: string;
+  whatsapp: string;
+  notes: string | null;
+  remainingSessions: number;
+  activePackageCount: number;
+  packages?: SalonClientPackageSummary[];
+  appointments?: SalonClientAppointment[];
 }

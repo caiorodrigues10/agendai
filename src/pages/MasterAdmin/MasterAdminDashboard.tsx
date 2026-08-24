@@ -26,7 +26,7 @@ import {
   Ban,
   Mail,
   Shield,
-  ExternalLink,
+  Gift,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -54,13 +54,14 @@ import {
   UserListItem,
   AuditLog,
 } from '../../infra/adminApi';
-import { ApiError } from '../../infra/apiClient';
+import { getErrorMessage } from '../../utils/errorMessage';
 import { BillingTab } from './BillingTab';
+import { ReferralsTab } from './ReferralsTab';
 
 // ─────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────
-type Tab = 'overview' | 'barbershops' | 'users' | 'billing';
+type Tab = 'overview' | 'barbershops' | 'users' | 'billing' | 'referrals';
 
 const PERIOD_OPTIONS: { value: DashboardPeriod; label: string }[] = [
   { value: 'day', label: '1D' },
@@ -495,7 +496,7 @@ const ManageBarbershopModal: React.FC<ManageBarbershopModalProps> = ({ shop, onC
       onUpdated();
       onClose();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Erro ao atualizar o salão. Tente novamente.');
+      setError(getErrorMessage(err, 'Erro ao atualizar o salão. Tente novamente.'));
     } finally {
       setSaving(false);
     }
@@ -1321,6 +1322,7 @@ export const MasterAdminDashboard: React.FC = () => {
     { tab: 'barbershops', icon: <Scissors size={17} />, label: 'Salões' },
     { tab: 'users', icon: <Users size={17} />, label: 'Usuários' },
     { tab: 'billing', icon: <CreditCard size={17} />, label: 'Faturamento' },
+    { tab: 'referrals', icon: <Gift size={17} />, label: 'Indicações' },
   ];
 
   return (
@@ -1458,6 +1460,17 @@ export const MasterAdminDashboard: React.FC = () => {
                 transition={{ duration: 0.2 }}
               >
                 <BillingTab />
+              </motion.div>
+            )}
+            {activeTab === 'referrals' && (
+              <motion.div
+                key="referrals"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ReferralsTab />
               </motion.div>
             )}
           </AnimatePresence>

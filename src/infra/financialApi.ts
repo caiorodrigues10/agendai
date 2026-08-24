@@ -36,6 +36,10 @@ export interface FinancialSummary {
     overdueCount: number;
     overdueAmount: number;
   };
+  packages?: {
+    count: number;
+    totalPaid: number;
+  };
 }
 
 export interface ExpenseItem {
@@ -115,7 +119,7 @@ export interface ExpenseCategory {
 export interface CreateExpenseBody {
   title: string;
   amount: number;
-  type: 'FIXED' | 'VARIABLE';
+  type: ExpenseType;
   referenceDate: string;
   categoryId?: string | null;
   description?: string | null;

@@ -142,6 +142,7 @@ export interface SubscriptionListItem {
   startDate: string | null;
   endDate: string | null;
   cancelDate: string | null;
+  cancelReason?: string | null;
   trialEndsAt: string;
   latestInvoice: { id: string; status: string; amount: number; createdAt: string } | null;
 }
@@ -192,6 +193,22 @@ export interface AdminNotificationItem {
   metadata: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ReferralPlatformStats {
+  totalReferrals: number;
+  converted: number;
+  rejected: number;
+  pending: number;
+  conversionRate: number;
+  totalCreditDays: number;
+  topReferrers: {
+    barbershopId: string;
+    barbershopName: string;
+    totalReferrals: number;
+    creditDays: number;
+  }[];
+  monthlyEvolution: { month: string; count: number }[];
 }
 
 export interface ListMeta {
@@ -483,4 +500,17 @@ export const adminApi = {
       undefined,
       getAuthHeader()
     ),
+
+  getReferralStats: async () => {
+    const res = await apiClient<{ success: boolean; data: ReferralPlatformStats }>(
+      '/api/admin/referrals',
+      'GET',
+      undefined,
+      getAuthHeader()
+    );
+    if (res && typeof res === 'object' && 'data' in res) {
+      return (res as { data: ReferralPlatformStats }).data;
+    }
+    return res as unknown as ReferralPlatformStats;
+  },
 };

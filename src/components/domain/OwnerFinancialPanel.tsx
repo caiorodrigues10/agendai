@@ -14,7 +14,8 @@ import {
   Wallet,
   X,
 } from 'lucide-react';
-import { ApiError } from '../../infra/apiClient';
+import { maskPhone } from '../../utils/documentUtils';
+import { getErrorMessage } from '../../utils/errorMessage';
 import {
   ExpenseItem,
   FiadoItem,
@@ -31,8 +32,7 @@ const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' 
 const formatDate = (value: string | null | undefined) =>
   value ? new Date(value).toLocaleDateString('pt-BR') : '—';
 
-const errorMessage = (err: unknown): string =>
-  err instanceof ApiError ? err.message : 'Erro inesperado. Tente novamente.';
+const errorMessage = (err: unknown): string => getErrorMessage(err);
 
 const EMPTY_META: ListMeta = { total: 0, page: 1, limit: 20, totalPages: 1 };
 
@@ -75,7 +75,7 @@ export const OwnerFinancialPanel: React.FC = () => {
   const [expenseForm, setExpenseForm] = useState({
     title: '',
     amount: '',
-    type: 'VARIABLE' as 'FIXED' | 'VARIABLE',
+    type: 'VARIABLE' as 'FIXED' | 'VARIABLE' | 'INVESTMENT',
     referenceDate: todayIso(),
   });
   const [expenseSubmitting, setExpenseSubmitting] = useState(false);
@@ -106,7 +106,7 @@ export const OwnerFinancialPanel: React.FC = () => {
         setExpenses(result.data);
         setExpensesMeta(result.meta ?? EMPTY_META);
       } else {
-        const result = await financialApi.listFiados({ page: fiadosPage, limit: 20 });
+        const result = await financialApi.listFiados({ page: fiadosPage });
         setFiados(result.data);
         setFiadosMeta(result.meta ?? EMPTY_META);
       }
@@ -323,6 +323,26 @@ export const OwnerFinancialPanel: React.FC = () => {
                 />
               </div>
 
+              {summary.packages && (
+                <>
+                  <p className="text-xs text-text-muted uppercase font-bold tracking-wider pt-2">Pacotes vendidos</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <SummaryCard
+                      icon={<CreditCard size={48} />}
+                      label="Vendas"
+                      value={String(summary.packages.count)}
+                      isCount
+                    />
+                    <SummaryCard
+                      icon={<Wallet size={48} />}
+                      label="Recebido"
+                      value={brl.format(summary.packages.totalPaid)}
+                      tone="positive"
+                    />
+                  </div>
+                </>
+              )}
+
               {summary.expenses.byType.length > 0 && (
                 <div className="bg-surface p-5 rounded-xl border border-border">
                   <h3 className="text-sm font-bold text-text-primary mb-4">Despesas por tipo</h3>
@@ -374,11 +394,12 @@ export const OwnerFinancialPanel: React.FC = () => {
               />
               <select
                 value={expenseForm.type}
-                onChange={e => setExpenseForm(f => ({ ...f, type: e.target.value as 'FIXED' | 'VARIABLE' }))}
+                onChange={e => setExpenseForm(f => ({ ...f, type: e.target.value as 'FIXED' | 'VARIABLE' | 'INVESTMENT' }))}
                 className="bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent"
               >
                 <option value="VARIABLE">Variável</option>
                 <option value="FIXED">Fixa</option>
+                <option value="INVESTMENT">Investimento</option>
               </select>
               <input
                 type="date"
@@ -495,7 +516,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                 type="text"
                 placeholder="WhatsApp"
                 value={fiadoForm.whatsapp}
-                onChange={e => setFiadoForm(f => ({ ...f, whatsapp: e.target.value }))}
+                onChange={e => setFiadoForm(f => ({ ...f, whatsapp: maskPhone(e.target.value) }))}
                 className="bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
                 required
               />

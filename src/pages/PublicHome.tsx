@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate, useParams, Navigate } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams, Navigate } from 'react-router-dom';
 import { QueueItemCard } from '../components/domain/QueueItemCard';
 import { AddCustomerForm } from '../components/domain/AddCustomerForm';
 import { ShopProfile } from '../components/domain/ShopProfile';
 import { AppointmentScheduler } from '../components/domain/AppointmentScheduler';
 import { Toast } from '../components/ui/Toast';
-import { Header } from '../components/ui/Header';
 import { useAuth } from '../contexts/AuthContext';
 import { useBarbershop } from '../contexts/BarbershopContext';
 import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
@@ -16,10 +15,11 @@ import { List, CalendarDays, Store, Coffee, Loader2, Clock } from 'lucide-react'
 export const PublicHome: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, logout } = useAuth();
   const { barbershopId, setBarbershopId } = useBarbershopFilters();
   const { services, settings, staff, feed, addPost, deletePost, likePost, isShopOpen, loading: shopLoading } = useBarbershop();
-  const { queue, availability, aiInsight, joinQueue, leaveQueue, bookAppointment, loadAvailability, clientId, loading: schedulingLoading } = useScheduling();
+  const { queue, availability, aiInsight, joinQueue, leaveQueue, bookAppointmentPublic, loadAvailability, clientId, loading: schedulingLoading } = useScheduling();
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [activeTab, setActiveTab] = useState<'queue' | 'profile' | 'appointments'>('queue');
   const [toast, setToast] = useState<{message: string, type: 'success' | 'bot'} | null>(null);
@@ -29,6 +29,13 @@ export const PublicHome: React.FC = () => {
       setBarbershopId(id);
     }
   }, [id, barbershopId, setBarbershopId]);
+
+  // Suporte a ?tab=appointments vindo do CTA de posts
+  React.useEffect(() => {
+    if (searchParams.get('tab') === 'appointments') {
+      setActiveTab('appointments');
+    }
+  }, [searchParams]);
 
   const showToast = (msg: string, type: 'success' | 'bot' = 'success') => {
     setToast({ message: msg, type });
@@ -120,7 +127,16 @@ export const PublicHome: React.FC = () => {
                 staff={staff}
                 settings={settings}
                 occupancy={availability}
-                onBook={async (d) => { await bookAppointment(d); showToast('Agendado com sucesso!'); }}
+                onBook={async (d) => {
+                  try {
+                    await bookAppointmentPublic(d);
+                    showToast('Agendado com sucesso!');
+                  } catch (err) {
+                    const { getErrorMessage } = await import('../utils/errorMessage');
+                    showToast(getErrorMessage(err, 'Não foi possível agendar. Tente outro horário.'), 'bot');
+                    throw err;
+                  }
+                }}
                 onDateChange={(date, staffId) => loadAvailability(date, staffId)}
             />
         )}
@@ -191,7 +207,7 @@ export const PublicHome: React.FC = () => {
                         onClick={() => setShowJoinForm(true)}
                         className="w-full bg-accent hover:bg-accent-hover text-accent-fg font-bold text-lg py-4 rounded-xl shadow-lg shadow-accent/30 hover:shadow-accent/50 transition-all transform hover:scale-[1.02] active:scale-[0.98] mb-8 flex items-center justify-center gap-3 border border-accent/20 relative overflow-hidden group"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                        <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 group-hover:translate-x-full"></div>
                         <span className="relative flex items-center gap-3">
                            <DynamicIcon name="Scissors" size={24} />
                            Entrar na Fila
