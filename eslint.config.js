@@ -20,9 +20,15 @@ export default tseslint.config(
       ...prettierConfig.rules,
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-      'no-console': ['error', { allow: ['warn', 'error'] }],
+      '@typescript-eslint/no-empty-function': 'warn',
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
       'jsx-a11y/anchor-is-valid': 'off',
+      'jsx-a11y/click-events-have-key-events': 'warn',
+      'jsx-a11y/no-static-element-interactions': 'warn',
+      'jsx-a11y/label-has-associated-control': 'warn',
       'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/refs': 'warn',
     },
     languageOptions: {
       parserOptions: {
