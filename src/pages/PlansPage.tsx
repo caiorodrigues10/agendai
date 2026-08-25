@@ -552,3 +552,5 @@ export const PlansPage: React.FC = () => {
     </div>
   );
 };
+
+export default PlansPage;

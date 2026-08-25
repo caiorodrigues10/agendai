@@ -1651,3 +1651,5 @@ export const MasterAdminDashboard: React.FC = () => {
     </div>
   );
 };
+
+export default MasterAdminDashboard;

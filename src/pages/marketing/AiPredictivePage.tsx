@@ -882,3 +882,5 @@ export const AiPredictivePage: React.FC = () => {
     </div>
   );
 };
+
+export default AiPredictivePage;

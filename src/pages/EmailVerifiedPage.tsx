@@ -49,3 +49,5 @@ export const EmailVerifiedPage: React.FC = () => {
     </div>
   );
 };
+
+export default EmailVerifiedPage;

@@ -353,3 +353,5 @@ export const PublicHome: React.FC = () => {
     </div>
   );
 };
+
+export default PublicHome;

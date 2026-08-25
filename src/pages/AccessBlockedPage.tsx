@@ -161,3 +161,5 @@ export const AccessBlockedPage: React.FC = () => {
     </div>
   );
 };
+
+export default AccessBlockedPage;

@@ -1047,3 +1047,5 @@ export const FeaturesPage: React.FC = () => {
     </div>
   );
 };
+
+export default FeaturesPage;

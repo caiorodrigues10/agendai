@@ -493,3 +493,5 @@ export const StaffDashboard: React.FC = () => {
     </div>
   );
 };
+
+export default StaffDashboard;

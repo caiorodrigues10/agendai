@@ -741,3 +741,5 @@ export const SchedulingPage: React.FC = () => {
     </div>
   );
 };
+
+export default SchedulingPage;
