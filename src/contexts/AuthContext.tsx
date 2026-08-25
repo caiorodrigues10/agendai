@@ -93,6 +93,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setLoading(false);
     };
     init();
+
+    // Escuta evento disparado pelo apiClient quando refresh falha
+    const onSessionExpired = () => {
+      authStorage.clearTokens();
+      authStorage.clearUser();
+      setUser(null);
+    };
+    window.addEventListener('agendai:session-expired', onSessionExpired);
+    return () => window.removeEventListener('agendai:session-expired', onSessionExpired);
   }, []);
 
   const persistSession = (resp: { user: any; accessToken: string; refreshToken: string }) => {

@@ -2,7 +2,7 @@ const KEY = 'agendai:referral-code'
 /** Mantém o código entre visitas (indicação dono→dono costuma ser multi-dia). */
 const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
 
-type Stored = { code: string; savedAt: number }
+interface Stored { code: string; savedAt: number }
 
 function readRaw(): Stored | null {
 	try {

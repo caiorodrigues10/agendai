@@ -57,16 +57,15 @@ export const MarketingNav: React.FC = () => {
           <Logo size="md" className="text-white" />
         </Link>
 
-        <div className="hidden items-center gap-6 text-[11px] font-bold uppercase tracking-widest text-neutral-400 lg:flex xl:gap-8">
+        <div className="hidden items-center gap-6 lg:flex xl:gap-8">
           {sectionLinks.map((link) => (
             <button
               key={link.id}
               type="button"
               onClick={() => goToSection(link.id)}
-              className="relative cursor-pointer transition-colors hover:text-white"
+              className="relative cursor-pointer text-[11px] font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
             >
               {link.label}
-              <span className="absolute -bottom-2 left-0 h-0.5 w-0 bg-emerald-500 transition-all group-hover:w-full hover:w-full" />
             </button>
           ))}
           <span className="h-3 w-px bg-white/10" aria-hidden />
@@ -74,7 +73,7 @@ export const MarketingNav: React.FC = () => {
             <Link
               key={link.to}
               to={link.to}
-              className="relative transition-colors hover:text-white"
+              className="text-[11px] font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
             >
               {link.label}
             </Link>

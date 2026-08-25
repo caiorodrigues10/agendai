@@ -7,6 +7,7 @@ import { useAuth } from './AuthContext';
 import { getQueueInsight } from '../services/geminiService';
 import { useBarbershop } from './BarbershopContext';
 import { AvailabilitySlot, mapAppointmentFromApi } from '../utils/schedulingUtils';
+import { logger } from '../utils/logger';
 
 interface SchedulingContextValue {
   loading: boolean;
@@ -71,7 +72,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       setQueue(queueData as QueueItem[]);
     } catch (error) {
       if (options?.silent) return; // polling: mantém dados anteriores
-      console.error('Falha ao carregar fila', error);
+      logger.error('Falha ao carregar fila', error);
       setQueue([]);
     }
   }, [barbershopId]);
@@ -112,7 +113,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
         const metrics = await schedulingApi.getQueueMetrics(barbershopId);
         setCompletedCount(metrics.completedCount);
       } catch (error) {
-        console.error('Falha ao carregar métricas', error);
+        logger.error('Falha ao carregar métricas', error);
       }
 
       await refreshAppointments();
@@ -189,7 +190,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
         const newItem = await schedulingApi.joinQueue(payload);
         setQueue(prev => [...prev, newItem]);
     } catch (error) {
-        console.error('Falha ao entrar na fila', error);
+        logger.error('Falha ao entrar na fila', error);
         throw error;
     }
   };
@@ -217,7 +218,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
         const metrics = await schedulingApi.getQueueMetrics(barbershopId);
         setCompletedCount(metrics.completedCount);
       } catch (e) {
-        console.error('Erro ao atualizar contagem', e);
+        logger.error('Erro ao atualizar contagem', e);
       }
     }
   };

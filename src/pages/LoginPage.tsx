@@ -14,6 +14,7 @@ import { authStorage } from '../infra/authStorage'
 import { Logo } from '../components/ui/Logo'
 import { PasswordInput } from '../components/ui/PasswordInput'
 import { Toast } from '../components/ui/Toast'
+import { ConsentCheckbox } from '../components/ui/ConsentCheckbox'
 import {
 	ArrowRight,
 	ArrowLeft,
@@ -268,7 +269,6 @@ export const LoginPage: React.FC = () => {
 	}
 
 	const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string
-	const googleBtnRef = useRef<HTMLDivElement>(null)
 	const [googleError, setGoogleError] = useState<string | null>(null)
 	const googleRenderedRef = useRef(false)
 	const [googleLoaded, setGoogleLoaded] = useState(false)
@@ -299,7 +299,7 @@ export const LoginPage: React.FC = () => {
 	}, [googleClientId])
 
 	useEffect(() => {
-		if (!googleClientId || !googleLoaded || tab !== 'login' || googleRenderedRef.current || !googleBtnRef.current) return
+		if (!googleClientId || !googleLoaded || tab !== 'login' || googleRenderedRef.current) return
 		try {
 			const google = window.google!
 			google.accounts!.id!.initialize({
@@ -308,15 +308,20 @@ export const LoginPage: React.FC = () => {
 				auto_select: false,
 				cancel_on_tap_outside: true,
 			})
-			google.accounts!.id!.renderButton(googleBtnRef.current, {
-				type: 'standard', size: 'large', text: 'continue_with',
-				shape: 'rectangular', theme: 'outline', width: 300,
-			})
 			googleRenderedRef.current = true
 		} catch {
 			setGoogleError('Erro ao inicializar botão Google.')
 		}
 	}, [googleClientId, googleLoaded, tab])
+
+	const handleGoogleClick = () => {
+		if (!window.google?.accounts?.id) return
+		window.google.accounts.id.prompt((notification) => {
+			if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+				setGoogleError('Não foi possível abrir o login com Google. Tente novamente.')
+			}
+		})
+	}
 
 	React.useEffect(() => {
 		const ref = searchParams.get('ref')
@@ -344,6 +349,10 @@ export const LoginPage: React.FC = () => {
 			barbershopName: '',
 			whatsapp: '',
 			cnpj: '',
+			termsVersion: '1.0',
+			termsAccepted: false,
+			marketingOptIn: false,
+			lgpdConsent: false,
 		},
 		mode: 'onTouched',
 	})
@@ -434,6 +443,10 @@ export const LoginPage: React.FC = () => {
 			whatsapp: normalizeDocument(data.whatsapp),
 			cnpj: data.cnpj ? normalizeDocument(data.cnpj) : undefined,
 			referralCode,
+			termsVersion: data.termsVersion,
+			termsAccepted: data.termsAccepted,
+			marketingOptIn: data.marketingOptIn,
+			lgpdConsent: data.lgpdConsent,
 		})
 		setSubmitting(false)
 		if (result.ok === false) {
@@ -463,12 +476,16 @@ export const LoginPage: React.FC = () => {
 				barbershopName: '',
 				whatsapp: '',
 				cnpj: '',
+				termsVersion: '1.0',
+				termsAccepted: false,
+				marketingOptIn: false,
+				lgpdConsent: false,
 			})
 		}
 	}
 
 	const primaryBtn =
-		'relative w-full py-3.5 bg-accent text-accent-fg hover:bg-accent-hover shadow-lg shadow-accent/25 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 disabled:opacity-60 overflow-hidden group/btn active:scale-[0.98]'
+		'relative w-full py-3.5 bg-accent text-accent-fg hover:bg-accent-hover shadow-lg shadow-accent/25 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 disabled:opacity-60 overflow-hidden group/btn active:scale-[0.98] cursor-pointer'
 
 	return (
 		<div className="min-h-screen bg-bg grid lg:grid-cols-2">
@@ -534,7 +551,7 @@ export const LoginPage: React.FC = () => {
 									key={t.id}
 									type="button"
 									onClick={() => switchTab(t.id)}
-									className="relative flex-1 py-2.5 text-[11px] font-bold uppercase tracking-wider transition-colors"
+									className="relative flex-1 py-2.5 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
 								>
 									{tab === t.id && (
 										<motion.span
@@ -582,20 +599,6 @@ export const LoginPage: React.FC = () => {
 							</p>
 						)}
 
-						{tab === 'login' && googleClientId && (
-							<div className="w-full space-y-3 mb-2">
-								<div ref={googleBtnRef} className="w-full flex justify-center" />
-								{googleError && (
-									<p className="text-[11px] text-center text-danger">{googleError}</p>
-								)}
-								<div className="flex items-center gap-3">
-									<div className="flex-1 h-px bg-border" />
-									<span className="text-[10px] text-text-muted uppercase">ou</span>
-									<div className="flex-1 h-px bg-border" />
-								</div>
-							</div>
-						)}
-
 						<AnimatePresence mode="wait" initial={false}>
 							{tab === 'login' ? (
 								<motion.form
@@ -605,35 +608,38 @@ export const LoginPage: React.FC = () => {
 									exit={{ opacity: 0, x: 16 }}
 									transition={{ duration: 0.2 }}
 									onSubmit={loginForm.handleSubmit(handleLogin)}
+									autoComplete="off"
 									className="w-full space-y-4"
 								>
-									<Field
-										label="E-mail"
-										icon={Mail}
-										error={loginForm.formState.errors.email?.message}
-									>
-										<input
-											type="email"
-											className={inputClass(
-												!!loginForm.formState.errors.email,
-											)}
-											placeholder="seu@email.com"
-											autoFocus
-											{...loginForm.register('email')}
-										/>
+								<Field
+									label="E-mail"
+									icon={Mail}
+									error={loginForm.formState.errors.email?.message}
+								>
+									<input
+										type="email"
+										autoComplete="new-email"
+										className={inputClass(
+											!!loginForm.formState.errors.email,
+										)}
+										placeholder="seu@email.com"
+										autoFocus
+										{...loginForm.register('email')}
+									/>
 									</Field>
 
 									<div className="space-y-1">
 										<label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
 											Senha
 										</label>
-										<PasswordInput
-											showPassword={showPassword}
-											onToggleShow={() => setShowPassword((v) => !v)}
-											error={loginForm.formState.errors.password?.message}
-											placeholder="••••••••"
-											{...loginForm.register('password')}
-										/>
+									<PasswordInput
+										showPassword={showPassword}
+										onToggleShow={() => setShowPassword((v) => !v)}
+										error={loginForm.formState.errors.password?.message}
+										placeholder="••••••••"
+										autoComplete="new-password"
+										{...loginForm.register('password')}
+									/>
 									</div>
 
 									<button
@@ -832,13 +838,39 @@ export const LoginPage: React.FC = () => {
 												/>
 											</Field>
 
+<div className="space-y-3 pt-2 border-t border-border">
+                                            <p className="text-[11px] text-text-muted text-center">
+                                                Ao criar sua conta, você concorda com nossos termos e políticas.
+                                            </p>
+                                            <ConsentCheckbox
+                                                label="Li e aceito os Termos de Uso"
+                                                checked={registerForm.watch('termsAccepted')}
+                                                onChange={(v) => registerForm.setValue('termsAccepted', v, { shouldValidate: true })}
+                                                required
+                                                helpLink={{ label: 'Ler Termos de Uso', href: '/termos' }}
+                                            />
+                                            <ConsentCheckbox
+                                                label="Consinto com o tratamento dos meus dados pessoais conforme a LGPD (Lei nº 13.709/2018)"
+                                                checked={registerForm.watch('lgpdConsent')}
+                                                onChange={(v) => registerForm.setValue('lgpdConsent', v, { shouldValidate: true })}
+                                                required
+                                                helpLink={{ label: 'Política de Privacidade', href: '/privacidade' }}
+                                            />
+                                            <ConsentCheckbox
+													label="Desejo receber comunicações de marketing, novidades e ofertas por e-mail"
+													checked={registerForm.watch('marketingOptIn')}
+													onChange={(v) => registerForm.setValue('marketingOptIn', v)}
+													helpText="Você pode cancelar a inscrição a qualquer momento."
+												/>
+											</div>
+
 											<div className="flex gap-2 pt-1">
 												<button
 													type="button"
 													onClick={() => {
 														setRegisterStep(1)
 													}}
-													className="flex-1 py-3.5 rounded-xl border border-border bg-bg text-text-secondary hover:text-text-primary hover:border-border-strong font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-colors"
+													className="flex-1 py-3.5 rounded-xl border border-border bg-bg text-text-secondary hover:text-text-primary hover:border-border-strong font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-colors cursor-pointer"
 												>
 													<ArrowLeft size={14} />
 													Voltar
@@ -866,6 +898,33 @@ export const LoginPage: React.FC = () => {
 								</motion.form>
 							)}
 						</AnimatePresence>
+
+						{tab === 'login' && googleClientId && (
+							<div className="w-full mt-4">
+								<div className="flex items-center gap-3 mb-4">
+									<div className="flex-1 h-px bg-border" />
+									<span className="text-[10px] text-text-muted uppercase">ou</span>
+									<div className="flex-1 h-px bg-border" />
+								</div>
+								<button
+									type="button"
+									onClick={handleGoogleClick}
+									disabled={submitting}
+									className="w-full py-3 rounded-xl border border-border bg-bg hover:bg-surface hover:border-border-strong text-text-primary text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-200 disabled:opacity-60 cursor-pointer"
+								>
+									<svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+										<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+										<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+										<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+										<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+									</svg>
+									Entrar com Google
+								</button>
+								{googleError && (
+									<p className="text-[11px] text-center text-danger mt-2">{googleError}</p>
+								)}
+							</div>
+						)}
 
 						<p className="mt-5 text-[10px] text-text-muted flex items-center gap-1.5">
 							<ShieldCheck size={12} className="text-accent" />

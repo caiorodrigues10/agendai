@@ -282,8 +282,6 @@ export const SchedulingPage: React.FC = () => {
           </div>
 
           <div className="relative grid gap-4 md:grid-cols-3 md:gap-0">
-            <div className="pointer-events-none absolute left-[16.6%] right-[16.6%] top-10 hidden h-px bg-linear-to-r from-emerald-400/40 via-cyan-400/40 to-amber-300/40 md:block" />
-
             {flowSteps.map((item, i) => {
               const border =
                 item.accent === 'emerald'

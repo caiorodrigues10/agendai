@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import FocusLock from 'react-focus-lock';
 import {
   CreditCard,
   Loader2,
@@ -104,6 +105,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
   const [pixKeyType, setPixKeyType] = useState<
     'CPF' | 'CNPJ' | 'PHONE' | 'EMAIL' | 'RANDOM'
   >('EMAIL');
+  const cancelTriggerRef = useRef<HTMLButtonElement>(null);
 
   const needsPixKey =
     cancelCtx?.proratedRefundAvailable &&
@@ -135,6 +137,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
     setCancelCtx(null);
     setPixKey('');
     setPixKeyType('EMAIL');
+    cancelTriggerRef.current?.focus();
   };
 
   const openCancelModal = async () => {
@@ -168,7 +171,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
         cancelReason,
         ...(pixKey ? { pixKey, pixKeyType } : {}),
       });
-      const pr = (res as any)?.proratedRefund;
+      const pr = res?.proratedRefund;
       setSuccess(
         pr?.status === 'SUCCEEDED'
           ? `Assinatura cancelada. Reembolso proporcional de ${brl(pr.amount)} (com multa de 20%) devolvido automaticamente.`
@@ -298,6 +301,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
           </button>
           {sub && sub.status !== 'CANCELED' && (
             <button
+              ref={cancelTriggerRef}
               onClick={openCancelModal}
               disabled={cancelling}
               className="px-4 py-2.5 rounded-xl border border-danger/40 text-danger text-sm font-bold flex items-center gap-2 hover:bg-danger/10 disabled:opacity-60"
@@ -396,10 +400,15 @@ export const OwnerSubscriptionPanel: React.FC = () => {
           className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={closeCancelModal}
         >
-          <div
-            className="bg-surface border border-border rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto relative"
-            onClick={e => e.stopPropagation()}
+          <FocusLock
+            autoFocus
+            returnFocus
+            onDeactivation={closeCancelModal}
           >
+            <div
+              className="bg-surface border border-border rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto relative"
+              onClick={e => e.stopPropagation()}
+            >
             <button
               onClick={closeCancelModal}
               className="absolute right-4 top-4 text-text-muted hover:text-text-primary transition-colors"
@@ -655,9 +664,10 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                     Cancelar assinatura
                   </button>
                 </div>
-              </>
-            )}
-          </div>
+</>
+              )}
+            </div>
+          </FocusLock>
         </div>
       )}
     </div>

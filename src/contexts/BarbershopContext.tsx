@@ -4,6 +4,7 @@ import { StaffMember, Service, ShopSettings, FeedPost } from '../types';
 import { mapScheduleFromApi, mapStaffFromApi } from '../utils/schedulingUtils';
 import { useBarbershopFilters } from './BarbershopFiltersContext';
 import { useAuth } from './AuthContext';
+import { logger } from '../utils/logger';
 
 interface BarbershopContextValue {
   loading: boolean;
@@ -87,7 +88,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
         const servicesData = await barbershopApi.listServices(barbershopId);
         setServices(Array.isArray(servicesData) ? servicesData as Service[] : []);
       } catch (e) {
-        console.error('Falha ao carregar serviços', e);
+        logger.error('Falha ao carregar serviços', e);
         setServices([]);
       }
 
@@ -95,7 +96,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
         const staffData = await barbershopApi.listStaff(barbershopId);
         setStaff(Array.isArray(staffData) ? staffData.map(mapStaffFromApi) : []);
       } catch (e) {
-        console.error('Falha ao carregar equipe', e);
+        logger.error('Falha ao carregar equipe', e);
         setStaff([]);
       }
 
@@ -103,7 +104,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
         const feedData = await barbershopApi.listFeed(barbershopId);
         setFeed(Array.isArray(feedData) ? feedData as FeedPost[] : []);
       } catch (e) {
-        console.error('Falha ao carregar feed', e);
+        logger.error('Falha ao carregar feed', e);
         setFeed([]);
       }
 
@@ -117,12 +118,12 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
         let schedule = mapScheduleFromApi(null);
         try {
           const scheduleData = await barbershopApi.getSchedule(barbershopId) as
-            | Array<{ dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }>
-            | { schedule?: Array<{ dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }> }
+            | { dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }[]
+            | { schedule?: { dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }[] }
             | null;
           schedule = mapScheduleFromApi(Array.isArray(scheduleData) ? scheduleData : scheduleData?.schedule);
         } catch (e) {
-          console.error('Falha ao carregar horários', e);
+          logger.error('Falha ao carregar horários', e);
         }
 
         if (shopData) {
@@ -137,7 +138,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
           setSettingsState(null);
         }
       } catch (e) {
-        console.error('Falha ao carregar configurações do salão', e);
+        logger.error('Falha ao carregar configurações do salão', e);
         setSettingsState(null);
       }
 

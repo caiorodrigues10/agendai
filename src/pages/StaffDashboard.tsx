@@ -19,7 +19,7 @@ import { useBarbershop } from '../contexts/BarbershopContext';
 import { useScheduling } from '../contexts/SchedulingContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
-import { Clock, Settings, Scissors, Users, BarChart3, Store, List, CalendarDays, Coffee, Loader2, CreditCard, Gift, Megaphone, Contact } from 'lucide-react';
+import { Settings, Scissors, Users, BarChart3, Store, List, CalendarDays, Coffee, Loader2, CreditCard, Gift, Megaphone, Contact } from 'lucide-react';
 import { ClientsManager } from '../components/domain/ClientsManager';
 
 export const StaffDashboard: React.FC = () => {
@@ -49,6 +49,7 @@ export const StaffDashboard: React.FC = () => {
       { id: 'queue', label: 'Fila', icon: List },
       { id: 'appointments', label: 'Agenda', icon: CalendarDays },
       { id: 'clients', label: 'Clientes', icon: Contact },
+      { id: 'settings', label: 'Configurações', icon: Settings },
     ];
     if ((user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && hasDashboard) {
         t.push({ id: 'reports', label: 'Relatórios', icon: BarChart3 });
@@ -60,7 +61,7 @@ export const StaffDashboard: React.FC = () => {
 
   useEffect(() => {
     if (!user) return;
-    const restrictedTabs = ['services', 'settings', 'team'];
+    const restrictedTabs = ['services', 'team'];
     if (restrictedTabs.includes(activeTab) && !(user.role === 'MASTER_ADMIN' || user.role === 'OWNER')) {
       navigate('/app/queue');
     }
@@ -174,9 +175,6 @@ export const StaffDashboard: React.FC = () => {
                     >
                         <Megaphone size={16} /> Posts
                     </button>
-                    <button onClick={() => navigate('/app/settings')} className={`w-12 py-2 flex items-center justify-center rounded-md transition-all ${activeTab === 'settings' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}>
-                        <Settings size={18} />
-                    </button>
                 </>
             )}
           </div>
@@ -215,9 +213,15 @@ export const StaffDashboard: React.FC = () => {
             </div>
         )}
 
-        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'settings' && settings && (
+{(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'settings' && settings && (
             <SettingsManager settings={settings} barbershopId={barbershopId || undefined} onSave={(s) => { setSettings(s); showToast('Salvo!'); }} />
-        )}
+          )}
+
+          {user && activeTab === 'settings' && !((user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && settings) && (
+            <div className="text-center py-12 bg-surface rounded-xl border border-border border-dashed">
+                <p className="text-text-muted">Carregando configurações...</p>
+            </div>
+          )}
 
         {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'services' && (
             <ServiceManager services={services} onAdd={addService} onEdit={editService} onDelete={deleteService} />

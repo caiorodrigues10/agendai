@@ -135,7 +135,7 @@ export const AccessBlockedPage: React.FC = () => {
                   ))}
                 </ul>
                 <button
-                  onClick={() => navigate(`/checkout?planId=${plan.id}`)}
+                  onClick={() => navigate(`/checkout?planId=${plan.id}&setup=trial`)}
                   className="w-full py-2.5 rounded-xl bg-accent text-accent-fg font-bold text-xs hover:bg-accent-hover transition-colors"
                 >
                   Assinar

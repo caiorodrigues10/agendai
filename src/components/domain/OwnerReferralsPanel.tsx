@@ -39,7 +39,7 @@ export const OwnerReferralsPanel: React.FC = () => {
 
 	useEffect(() => {
 		void load()
-		// eslint-disable-next-line react-hooks/exhaustive-deps -- mount only
+		 
 	}, [])
 
 	if (loading) {

@@ -157,10 +157,11 @@ export const AboutPage: React.FC = () => {
           >
             <p className="text-3xl font-black leading-[1.15] tracking-tight text-white md:text-5xl md:leading-[1.1]">
               A gente não quer transformar o salão num call center.
-              <span className="text-neutral-500">
-                {' '}
-                Quer devolver tempo para o que importa: olhar no olho, fazer o serviço
-                certo e manter a amizade que sustenta o negócio.
+              <span className="bg-gradient-to-r from-emerald-300 via-teal-200 to-white bg-clip-text text-transparent">
+                {' '}Quer devolver tempo para o que importa:{' '}
+              </span>
+              <span className="text-white">
+                olhar no olho, fazer o serviço certo e manter a amizade que sustenta o negócio.
               </span>
             </p>
           </motion.blockquote>
@@ -408,18 +409,23 @@ export const AboutPage: React.FC = () => {
           <div className="overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#0d110e] md:rounded-[3rem]">
             <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
               <div className="p-8 md:p-12 lg:p-16">
-                <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-400/90">
-                  De onde viemos
-                </p>
-                <h2 className="mt-4 text-4xl font-black tracking-tight text-white md:text-5xl">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="h-px w-10 bg-gradient-to-r from-emerald-400 to-transparent" />
+                  <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-emerald-400/90">
+                    De onde viemos
+                  </p>
+                </div>
+                <h2 className="text-4xl font-black tracking-tight text-white md:text-5xl">
                   Bebedouro, São Paulo.
                   <br />
-                  <span className="text-neutral-500">Pé no chão, olho no salão.</span>
+                  <span className="bg-gradient-to-r from-emerald-300 via-teal-200 to-white bg-clip-text text-transparent">
+                    Pé no chão, olho no salão.
+                  </span>
                 </h2>
                 <p className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-neutral-400">
                   O AgendAI não nasceu num pitch de Silicon Valley. Nasceu da observação
                   próxima: barbearias e salões onde o profissional é quase da família —
-                  e onde o celular ainda era o “sistema”.
+                  e onde o celular ainda era o "sistema".
                 </p>
                 <p className="mt-4 max-w-xl text-lg font-medium leading-relaxed text-neutral-400">
                   Queremos que cada estabelecimento, do studio pequeno à casa cheia no
@@ -427,13 +433,18 @@ export const AboutPage: React.FC = () => {
                   que já funciona entre pessoas.
                 </p>
               </div>
-              <div className="relative flex flex-col justify-end border-t border-white/8 bg-black/40 p-8 md:p-12 lg:border-l lg:border-t-0 lg:p-16">
-                <p className="text-6xl font-black tracking-tighter text-white/10 md:text-8xl">
-                  desde
+              <div className="relative flex flex-col justify-end border-t border-white/8 bg-gradient-to-br from-white/[0.03] to-transparent p-8 md:p-12 lg:border-l lg:border-t-0 lg:p-16">
+                <div className="absolute top-8 right-8 w-32 h-32 rounded-full blur-[80px] pointer-events-none opacity-40" style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.5), transparent 70%)' }} />
+                <p className="relative text-6xl font-black tracking-tighter md:text-8xl">
+                  <span className="text-white/50">
+                    desde
+                  </span>
                   <br />
-                  o vínculo
+                  <span className="text-emerald-400/70">
+                    o vínculo
+                  </span>
                 </p>
-                <p className="mt-6 text-base font-semibold text-neutral-300">
+                <p className="relative mt-6 text-base font-semibold text-neutral-300">
                   Multi-tenant, fila, agenda, financeiro e lembretes — construídos para o
                   dia a dia brasileiro de salão, barbearia e studio.
                 </p>

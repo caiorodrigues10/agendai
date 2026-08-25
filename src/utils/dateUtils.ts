@@ -30,7 +30,7 @@ export const isWithinHorizon = (dateStr: string, maxDays = 60): boolean => {
 };
 
 /** Checa se HH:MM é um horário válido. */
-export const isValidTime = (timeStr: string): boolean => {
+const isValidTime = (timeStr: string): boolean => {
   if (!/^\d{2}:\d{2}$/.test(timeStr)) return false;
   const [h, m] = timeStr.split(':').map(Number);
   return h >= 0 && h <= 23 && m >= 0 && m <= 59;
@@ -44,20 +44,4 @@ export const isBusinessHour = (timeStr: string): boolean => {
   return minutes >= 420 && minutes <= 1320;
 };
 
-/** Formata Date para YYYY-MM-DD. */
-export const toISODate = (date: Date): string => {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-};
 
-/** Formata Date para DD/MM/YYYY. */
-export const formatDateBR = (dateStr: string): string => {
-  if (!isValidDate(dateStr)) return dateStr;
-  const [y, m, d] = dateStr.split('-');
-  return `${d}/${m}/${y}`;
-};
-
-/** Formata HH:MM para exibição. */
-export const formatTimeBR = (timeStr: string): string => timeStr;

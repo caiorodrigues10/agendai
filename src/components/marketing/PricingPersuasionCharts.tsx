@@ -23,9 +23,9 @@ const ESSENTIAL_YEARLY = 140;
 const PRO_YEARLY = 200;
 const LOST_NOSHOWS_MONTH = 3;
 
-type PricingPersuasionChartsProps = {
+interface PricingPersuasionChartsProps {
   variant?: 'dark' | 'app';
-};
+}
 
 export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = ({
   variant = 'dark',

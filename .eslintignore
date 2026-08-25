@@ -1,0 +1,8 @@
+dist/
+node_modules/
+graphify-out/
+*.config.js
+*.config.ts
+coverage/
+.vite/
+*.stackdump

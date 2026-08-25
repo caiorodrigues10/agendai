@@ -31,6 +31,10 @@ export const RegisterSchema = z.object({
     .optional()
     .refine((v) => !v || isValidCnpj(v), { message: 'CNPJ inválido (dígitos verificadores incorretos)' })
     .transform((v) => (v ? normalizeDocument(v) : v)),
+  termsVersion: z.string().min(1),
+  termsAccepted: z.boolean().refine(v => v === true, 'É necessário aceitar os Termos de Uso'),
+  marketingOptIn: z.boolean().optional().default(false),
+  lgpdConsent: z.boolean().refine(v => v === true, 'É necessário consentir com o tratamento de dados (LGPD)'),
 });
 
 export type RegisterFormData = z.infer<typeof RegisterSchema>;

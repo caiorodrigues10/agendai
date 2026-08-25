@@ -96,7 +96,7 @@ export const packagesApi = {
 
   book: async (
     id: string,
-    slots: Array<{ date: string; time: string; staffId?: string | null }>
+    slots: { date: string; time: string; staffId?: string | null }[]
   ) => {
     const res = await apiClient<{ success: boolean; data: unknown[] }>(
       `/api/client-packages/${id}/book`,

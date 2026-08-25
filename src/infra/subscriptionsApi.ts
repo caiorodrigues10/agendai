@@ -121,37 +121,44 @@ export interface SubscribePayload {
   payerIdentification?: PayerIdentification;
 }
 
-export type SetupTrialCardPayload = {
+export interface SetupTrialCardPayload {
   planId: string;
   payerEmail: string;
   payerFirstName?: string;
   payerLastName?: string;
   payerIdentification: PayerIdentification;
   asaasCreditCard: NonNullable<SubscribePayload['asaasCreditCard']>;
-};
+}
 
-function unwrap<T>(res: any): T {
-  if (res && typeof res === 'object' && 'data' in res) return res.data as T;
+function unwrap<T>(res: unknown): T {
+  if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
   return res as T;
+}
+
+interface CancelResponse {
+  proratedRefund?: {
+    status: 'SUCCEEDED' | 'PENDING' | 'FAILED';
+    amount: number;
+  };
 }
 
 const token = () => authStorage.getAccessToken() || '';
 
 export const subscriptionsApi = {
   me: () =>
-    apiClient<any>('/api/subscriptions/me', 'GET', undefined, token()).then(res =>
+    apiClient<{ success: boolean; data: MySubscription }>('/api/subscriptions/me', 'GET', undefined, token()).then(res =>
       unwrap<MySubscription>(res)
     ),
   subscribe: (payload: SubscribePayload) =>
-    apiClient<any>('/api/subscriptions', 'POST', payload, token()).then(res =>
+    apiClient<{ success: boolean; data: Subscription }>('/api/subscriptions', 'POST', payload, token()).then(res =>
       unwrap<Subscription>(res)
     ),
   setupTrialCard: (payload: SetupTrialCardPayload) =>
-    apiClient<any>('/api/subscriptions/setup-trial-card', 'POST', payload, token()).then(res =>
+    apiClient<{ success: boolean; data: Subscription }>('/api/subscriptions/setup-trial-card', 'POST', payload, token()).then(res =>
       unwrap<Subscription>(res)
     ),
   cancel: (payload?: { cancelReason?: string; pixKey?: string; pixKeyType?: string }) =>
-    apiClient<any>(
+    apiClient<CancelResponse>(
       '/api/subscriptions/me',
       'DELETE',
       payload?.cancelReason || payload?.pixKey
@@ -164,7 +171,7 @@ export const subscriptionsApi = {
       token()
     ),
   getCancellationContext: () =>
-    apiClient<any>('/api/subscriptions/cancellation-context', 'GET', undefined, token()).then(res =>
+    apiClient<{ success: boolean; data: CancellationContext }>('/api/subscriptions/cancellation-context', 'GET', undefined, token()).then(res =>
       unwrap<CancellationContext>(res)
     )
 };

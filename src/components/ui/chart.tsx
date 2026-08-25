@@ -16,7 +16,7 @@ export type ChartConfig = Record<
   )
 >
 
-type ChartContextProps = {
+interface ChartContextProps {
   config: ChartConfig
 }
 
@@ -117,7 +117,7 @@ function ChartTooltipContent({
     indicator?: 'line' | 'dot' | 'dashed'
     nameKey?: string
     labelKey?: string
-    payload?: Array<any>
+    payload?: any[]
     label?: any
     labelFormatter?: (label: any, payload: any[]) => React.ReactNode
     formatter?: (...args: any[]) => React.ReactNode

@@ -5,7 +5,7 @@ const NETWORK_PATTERN =
 
 const TECHNICAL_PATTERN = /^HTTP\s*\d+$/i;
 
-export function isNetworkError(err: unknown): boolean {
+function isNetworkError(err: unknown): boolean {
   if (err instanceof ApiError) {
     return err.code === 'NETWORK_ERROR' || err.statusCode === 0;
   }

@@ -18,9 +18,9 @@ const NO_REFRESH_PATHS = ['/api/auth/login', '/api/auth/register', '/api/auth/re
 export class ApiError extends Error {
   statusCode: number;
   code?: string;
-  data?: any;
+  data?: unknown;
 
-  constructor(message: string, statusCode: number, code?: string, data?: any) {
+  constructor(message: string, statusCode: number, code?: string, data?: unknown) {
     super(message);
     this.name = 'ApiError';
     this.statusCode = statusCode;
@@ -55,6 +55,8 @@ async function refreshAccessToken(): Promise<string | null> {
       });
       if (!res.ok) {
         authStorage.clearTokens();
+        authStorage.clearUser();
+        window.dispatchEvent(new Event('agendai:session-expired'));
         return null;
       }
       const json = await res.json();
@@ -63,12 +65,17 @@ async function refreshAccessToken(): Promise<string | null> {
       const nextRefresh = data?.refreshToken as string | undefined;
       if (!accessToken || !nextRefresh) {
         authStorage.clearTokens();
+        authStorage.clearUser();
+        window.dispatchEvent(new Event('agendai:session-expired'));
         return null;
       }
       authStorage.setTokens(accessToken, nextRefresh);
       if (data.user) authStorage.setUser(data.user);
       return accessToken;
     } catch {
+      authStorage.clearTokens();
+      authStorage.clearUser();
+      window.dispatchEvent(new Event('agendai:session-expired'));
       return null;
     } finally {
       refreshInFlight = null;
@@ -78,17 +85,17 @@ async function refreshAccessToken(): Promise<string | null> {
   return refreshInFlight;
 }
 
-const sanitize = (payload: any) => {
+const sanitize = (payload: unknown): unknown => {
   if (!payload || typeof payload !== 'object') return payload;
   if (Array.isArray(payload)) return payload.map(sanitize);
-  return Object.entries(payload).reduce((acc, [k, v]) => {
+  return Object.entries(payload as Record<string, unknown>).reduce((acc, [k, v]) => {
     if (typeof v === 'string') {
       acc[k] = v.replace(/[<>]/g, '').trim();
     } else {
       acc[k] = sanitize(v);
     }
     return acc;
-  }, {} as any);
+  }, {} as Record<string, unknown>);
 };
 
 const checkRateLimit = () => {
@@ -100,7 +107,7 @@ const checkRateLimit = () => {
   calls.push(now);
 };
 
-const tryParseJson = (text: string): any | null => {
+const tryParseJson = (text: string): unknown => {
   try {
     const parsed = JSON.parse(text);
     return typeof parsed === 'object' && parsed !== null ? parsed : null;
@@ -123,16 +130,16 @@ const buildApiError = (status: number, rawBody: string): ApiError => {
 
   let message: string = typeof body.message === 'string' ? body.message : `HTTP ${status}`;
   let code: string | undefined = typeof body.code === 'string' ? body.code : undefined;
-  let data: any = { ...body };
+  let data: unknown = { ...(body as Record<string, unknown>) };
 
   // Compat: `message` pode ser um JSON serializado com { code, message, ... }
   const nested = typeof body.message === 'string' ? tryParseJson(body.message) : null;
-  if (nested && typeof nested.code === 'string') {
-    code = nested.code;
+  if (nested && typeof nested === 'object' && nested !== null && 'code' in nested) {
+    code = String(nested.code);
     message = typeof nested.message === 'string' ? nested.message : message;
-    data = { ...data, ...nested };
+    data = { ...(data as Record<string, unknown>), ...(nested as Record<string, unknown>) };
   }
-  data.message = message;
+  (data as Record<string, unknown>).message = message;
 
   return new ApiError(message, status, code, data);
 };
@@ -145,7 +152,7 @@ const notifyIfAccessBlocked = (error: ApiError) => {
         code: error.code,
         statusCode: error.statusCode,
         message: error.message,
-        ...error.data
+        ...(error.data as Record<string, unknown>)
       }
     })
   );
@@ -154,7 +161,7 @@ const notifyIfAccessBlocked = (error: ApiError) => {
 export const apiClient = async <T>(
   url: string,
   method: HttpMethod = 'GET',
-  body?: any,
+  body?: unknown,
   token?: string,
   _retried = false
 ): Promise<T> => {
@@ -176,7 +183,7 @@ export const apiClient = async <T>(
       'Não foi possível conectar ao servidor. Verifique se a API está no ar e tente de novo.',
       0,
       'NETWORK_ERROR',
-      { cause: err instanceof Error ? err.message : err }
+      { cause: err instanceof Error ? err.message : String(err) }
     );
   }
 

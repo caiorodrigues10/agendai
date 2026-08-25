@@ -17,12 +17,12 @@ export interface Plan {
   createdAt?: string;
 }
 
-function unwrap<T>(res: any): T {
-  if (res && typeof res === 'object' && 'data' in res) return res.data as T;
+function unwrap<T>(res: unknown): T {
+  if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
   return res as T;
 }
 
 export const plansApi = {
-  list: () => apiClient<any>('/api/plans').then(res => unwrap<Plan[]>(res)),
-  get: (id: string) => apiClient<any>(`/api/plans/${id}`).then(res => unwrap<Plan>(res))
+  list: () => apiClient<{ success: boolean; data: Plan[] }>('/api/plans').then(res => unwrap<Plan[]>(res)),
+  get: (id: string) => apiClient<{ success: boolean; data: Plan }>(`/api/plans/${id}`).then(res => unwrap<Plan>(res))
 };

@@ -54,18 +54,24 @@ export interface Refund {
   completedAt: string | null;
 }
 
-function unwrap<T>(res: any): T {
-  if (res && typeof res === 'object' && 'data' in res) return res.data as T;
+function unwrap<T>(res: unknown): T {
+  if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
   return res as T;
 }
+
+interface ListMeta { total: number; page: number; limit: number; totalPages: number }
+type RefundListResponse = { success: boolean; data: Refund[]; meta: ListMeta } | Refund[];
 
 const token = () => authStorage.getAccessToken() || '';
 
 export const paymentsApi = {
   getStatus: (id: string, sync = false) =>
-    apiClient<any>(`/api/payments/${id}${sync ? '?sync=true' : ''}`, 'GET', undefined, token()).then(res =>
-      unwrap<Payment>(res)
-    ),
+    apiClient<{ success: boolean; data: Payment }>(
+      `/api/payments/${id}${sync ? '?sync=true' : ''}`,
+      'GET',
+      undefined,
+      token()
+    ).then(res => unwrap<Payment>(res)),
   list: (page = 1, limit = 20) =>
     apiClient<{ success: boolean; data: Payment[]; meta: { total: number; page: number; limit: number; totalPages: number } }>(
       `/api/payments?page=${page}&limit=${limit}`,
@@ -74,21 +80,25 @@ export const paymentsApi = {
       token()
     ),
   refundPayment: (paymentId: string, reason: string) =>
-    apiClient<any>(`/api/payments/${paymentId}/refund`, 'POST', { reason }, token()).then(res =>
-      unwrap<Refund>(res)
-    ),
+    apiClient<{ success: boolean; data: Refund }>(
+      `/api/payments/${paymentId}/refund`,
+      'POST',
+      { reason },
+      token()
+    ).then(res => unwrap<Refund>(res)),
   listRefunds: async (params?: { barbershopId?: string }) => {
     const qs = new URLSearchParams();
     if (params?.barbershopId) qs.set('barbershopId', params.barbershopId);
     const query = qs.toString();
-    const res = await apiClient<any>(
+    const res = await apiClient<RefundListResponse>(
       `/api/refunds${query ? `?${query}` : ''}`,
       'GET',
       undefined,
       token()
     );
-    const body = unwrap<any>(res);
-    const data = Array.isArray(body) ? body : Array.isArray(body?.data) ? body.data : [];
-    return { data: data as Refund[], meta: body?.meta ?? (res as any)?.meta };
+    const body = unwrap<Refund[]>(res);
+    const data = Array.isArray(body) ? body : Array.isArray((body as { data?: Refund[] })?.data) ? (body as { data: Refund[] }).data : [];
+    const meta = !Array.isArray(res) ? (res as { meta?: ListMeta }).meta : (body as { meta?: ListMeta })?.meta;
+    return { data: data as Refund[], meta };
   }
 };

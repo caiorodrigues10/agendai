@@ -1,6 +1,6 @@
 export type PasswordStrengthLevel = 'empty' | 'weak' | 'fair' | 'good' | 'strong';
 
-export interface PasswordStrengthResult {
+interface PasswordStrengthResult {
   score: 0 | 1 | 2 | 3 | 4;
   level: PasswordStrengthLevel;
   label: string;
@@ -49,5 +49,4 @@ export function getPasswordStrength(password: string): PasswordStrengthResult {
   return { score: 2, level: 'fair', label: LABELS.fair, checks };
 }
 
-export const isPasswordStrongEnough = (password: string): boolean =>
-  getPasswordStrength(password).score >= 2;
+

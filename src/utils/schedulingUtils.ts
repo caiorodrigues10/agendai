@@ -8,7 +8,7 @@ export interface AvailabilitySlot {
 
 const DAY_NAMES = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
-export const DEFAULT_SCHEDULE: DaySchedule[] = DAY_NAMES.map((dayName) => ({
+const DEFAULT_SCHEDULE: DaySchedule[] = DAY_NAMES.map((dayName) => ({
   dayName,
   isOpen: dayName !== 'Domingo',
   openTime: '09:00',
@@ -16,7 +16,7 @@ export const DEFAULT_SCHEDULE: DaySchedule[] = DAY_NAMES.map((dayName) => ({
 }));
 
 export function mapScheduleFromApi(
-  items?: Array<{ dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }> | null
+  items?: { dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }[] | null
 ): DaySchedule[] {
   if (!items?.length) return DEFAULT_SCHEDULE;
 
@@ -34,7 +34,7 @@ export function mapScheduleFromApi(
 
 export function mapScheduleToApi(
   schedule: DaySchedule[]
-): Array<{ dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }> {
+): { dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }[] {
   return schedule.map((day, index) => ({
     dayOfWeek: index,
     isOpen: day.isOpen,
@@ -146,11 +146,6 @@ export function getStaffName(staffId: string | null | undefined, staff: StaffMem
 
 export function getServiceName(serviceId: string, services: Service[]): string {
   return services.find((s) => s.id === serviceId)?.name ?? 'Serviço';
-}
-
-export function normalizeStaffId(staffId?: string | null): string | null {
-  if (!staffId || staffId === 'any') return null;
-  return staffId;
 }
 
 export function mapAppointmentFromApi(raw: any): Appointment {
