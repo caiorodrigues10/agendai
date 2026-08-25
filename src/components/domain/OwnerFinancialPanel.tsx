@@ -160,7 +160,13 @@ export const OwnerFinancialPanel: React.FC = () => {
   const handleCreateFiado = async (e: React.FormEvent) => {
     e.preventDefault();
     const amount = parseFloat(fiadoForm.amount.replace(',', '.'));
-    if (!fiadoForm.customerName.trim() || !fiadoForm.whatsapp.trim() || !fiadoForm.description.trim() || !amount || amount <= 0) {
+    if (
+      !fiadoForm.customerName.trim() ||
+      !fiadoForm.whatsapp.trim() ||
+      !fiadoForm.description.trim() ||
+      !amount ||
+      amount <= 0
+    ) {
       return;
     }
 
@@ -233,9 +239,11 @@ export const OwnerFinancialPanel: React.FC = () => {
               key={t.id}
               onClick={() => setTab(t.id)}
               className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider border transition-all whitespace-nowrap flex items-center gap-2
-                ${tab === t.id
-                  ? 'bg-accent border-accent text-accent-fg'
-                  : 'bg-bg border-border text-text-muted hover:border-border-strong'}
+                ${
+                  tab === t.id
+                    ? 'bg-accent border-accent text-accent-fg'
+                    : 'bg-bg border-border text-text-muted hover:border-border-strong'
+                }
               `}
             >
               {t.icon}
@@ -294,7 +302,9 @@ export const OwnerFinancialPanel: React.FC = () => {
                 />
               </div>
 
-              <p className="text-xs text-text-muted uppercase font-bold tracking-wider pt-2">Fiado</p>
+              <p className="text-xs text-text-muted uppercase font-bold tracking-wider pt-2">
+                Fiado
+              </p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <SummaryCard
                   icon={<Users size={48} />}
@@ -325,7 +335,9 @@ export const OwnerFinancialPanel: React.FC = () => {
 
               {summary.packages && (
                 <>
-                  <p className="text-xs text-text-muted uppercase font-bold tracking-wider pt-2">Pacotes vendidos</p>
+                  <p className="text-xs text-text-muted uppercase font-bold tracking-wider pt-2">
+                    Pacotes vendidos
+                  </p>
                   <div className="grid grid-cols-2 gap-3">
                     <SummaryCard
                       icon={<CreditCard size={48} />}
@@ -394,7 +406,12 @@ export const OwnerFinancialPanel: React.FC = () => {
               />
               <select
                 value={expenseForm.type}
-                onChange={e => setExpenseForm(f => ({ ...f, type: e.target.value as 'FIXED' | 'VARIABLE' | 'INVESTMENT' }))}
+                onChange={e =>
+                  setExpenseForm(f => ({
+                    ...f,
+                    type: e.target.value as 'FIXED' | 'VARIABLE' | 'INVESTMENT',
+                  }))
+                }
                 className="bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:border-accent"
               >
                 <option value="VARIABLE">Variável</option>
@@ -414,7 +431,11 @@ export const OwnerFinancialPanel: React.FC = () => {
               disabled={expenseSubmitting}
               className="px-4 py-2 bg-accent text-accent-fg rounded-lg text-xs font-bold uppercase tracking-wider hover:brightness-110 transition-all disabled:opacity-50 flex items-center gap-2"
             >
-              {expenseSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+              {expenseSubmitting ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Plus size={14} />
+              )}
               Adicionar
             </button>
           </form>
@@ -432,7 +453,9 @@ export const OwnerFinancialPanel: React.FC = () => {
                   <Loader2 size={16} className="animate-spin" /> Carregando...
                 </div>
               ) : expenses.length === 0 ? (
-                <div className="p-8 text-center text-text-muted text-sm">Nenhuma despesa registrada.</div>
+                <div className="p-8 text-center text-text-muted text-sm">
+                  Nenhuma despesa registrada.
+                </div>
               ) : (
                 <table className="w-full text-left border-collapse">
                   <thead className="bg-bg text-text-muted text-[10px] uppercase tracking-wider sticky top-0">
@@ -450,7 +473,9 @@ export const OwnerFinancialPanel: React.FC = () => {
                         <td className="p-3 whitespace-nowrap">{formatDate(item.referenceDate)}</td>
                         <td className="p-3">{item.title}</td>
                         <td className="p-3">{EXPENSE_TYPE_LABEL[item.type] ?? item.type}</td>
-                        <td className="p-3 text-right text-danger font-medium">{brl.format(item.amount)}</td>
+                        <td className="p-3 text-right text-danger font-medium">
+                          {brl.format(item.amount)}
+                        </td>
                         <td className="p-3 text-center">
                           {deleteExpenseId === item.id ? (
                             <div className="flex items-center justify-center gap-2">
@@ -544,7 +569,11 @@ export const OwnerFinancialPanel: React.FC = () => {
               disabled={fiadoSubmitting}
               className="px-4 py-2 bg-accent text-accent-fg rounded-lg text-xs font-bold uppercase tracking-wider hover:brightness-110 transition-all disabled:opacity-50 flex items-center gap-2"
             >
-              {fiadoSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+              {fiadoSubmitting ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Plus size={14} />
+              )}
               Registrar fiado
             </button>
           </form>
@@ -562,7 +591,9 @@ export const OwnerFinancialPanel: React.FC = () => {
                   <Loader2 size={16} className="animate-spin" /> Carregando...
                 </div>
               ) : fiados.length === 0 ? (
-                <div className="p-8 text-center text-text-muted text-sm">Nenhum fiado registrado.</div>
+                <div className="p-8 text-center text-text-muted text-sm">
+                  Nenhum fiado registrado.
+                </div>
               ) : (
                 <table className="w-full text-left border-collapse">
                   <thead className="bg-bg text-text-muted text-[10px] uppercase tracking-wider sticky top-0">
@@ -636,7 +667,11 @@ export const OwnerFinancialPanel: React.FC = () => {
                                   disabled={paymentSubmitting}
                                   className="px-3 py-2 bg-accent text-accent-fg rounded-lg text-xs font-bold flex items-center gap-1 disabled:opacity-50"
                                 >
-                                  {paymentSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                                  {paymentSubmitting ? (
+                                    <Loader2 size={14} className="animate-spin" />
+                                  ) : (
+                                    <Check size={14} />
+                                  )}
                                   Confirmar
                                 </button>
                                 <button
@@ -679,7 +714,13 @@ const SummaryCard: React.FC<{
   isCount?: boolean;
 }> = ({ icon, label, value, hint, tone, isCount }) => {
   const valueClass =
-    tone === 'positive' ? 'text-success' : tone === 'negative' ? 'text-danger' : isCount ? 'text-text-primary' : 'text-accent';
+    tone === 'positive'
+      ? 'text-success'
+      : tone === 'negative'
+        ? 'text-danger'
+        : isCount
+          ? 'text-text-primary'
+          : 'text-accent';
 
   return (
     <div className="bg-surface p-3 rounded-xl border border-border shadow-lg relative overflow-hidden">
@@ -691,10 +732,15 @@ const SummaryCard: React.FC<{
   );
 };
 
-const StatusBadge: React.FC<{ status: FiadoStatus; isOverdue?: boolean }> = ({ status, isOverdue }) => {
+const StatusBadge: React.FC<{ status: FiadoStatus; isOverdue?: boolean }> = ({
+  status,
+  isOverdue,
+}) => {
   const cfg = FIADO_STATUS[status];
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${cfg.className}`}>
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${cfg.className}`}
+    >
       {cfg.label}
       {isOverdue && status !== 'PAID' && status !== 'FORGIVEN' && (
         <span className="text-red-400 normal-case">· vencido</span>

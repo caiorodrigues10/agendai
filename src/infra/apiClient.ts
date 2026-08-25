@@ -88,14 +88,17 @@ async function refreshAccessToken(): Promise<string | null> {
 const sanitize = (payload: unknown): unknown => {
   if (!payload || typeof payload !== 'object') return payload;
   if (Array.isArray(payload)) return payload.map(sanitize);
-  return Object.entries(payload as Record<string, unknown>).reduce((acc, [k, v]) => {
-    if (typeof v === 'string') {
-      acc[k] = v.replace(/[<>]/g, '').trim();
-    } else {
-      acc[k] = sanitize(v);
-    }
-    return acc;
-  }, {} as Record<string, unknown>);
+  return Object.entries(payload as Record<string, unknown>).reduce(
+    (acc, [k, v]) => {
+      if (typeof v === 'string') {
+        acc[k] = v.replace(/[<>]/g, '').trim();
+      } else {
+        acc[k] = sanitize(v);
+      }
+      return acc;
+    },
+    {} as Record<string, unknown>
+  );
 };
 
 const checkRateLimit = () => {
@@ -152,8 +155,8 @@ const notifyIfAccessBlocked = (error: ApiError) => {
         code: error.code,
         statusCode: error.statusCode,
         message: error.message,
-        ...(error.data as Record<string, unknown>)
-      }
+        ...(error.data as Record<string, unknown>),
+      },
     })
   );
 };
@@ -167,7 +170,7 @@ export const apiClient = async <T>(
 ): Promise<T> => {
   checkRateLimit();
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -176,7 +179,7 @@ export const apiClient = async <T>(
     res = await fetch(url, {
       method,
       headers,
-      body: body ? JSON.stringify(sanitize(body)) : undefined
+      body: body ? JSON.stringify(sanitize(body)) : undefined,
     });
   } catch (err) {
     throw new ApiError(
@@ -192,7 +195,7 @@ export const apiClient = async <T>(
       res.status === 401 &&
       Boolean(token) &&
       !_retried &&
-      !NO_REFRESH_PATHS.some((p) => url.startsWith(p));
+      !NO_REFRESH_PATHS.some(p => url.startsWith(p));
 
     if (shouldRefresh) {
       const nextToken = await refreshAccessToken();

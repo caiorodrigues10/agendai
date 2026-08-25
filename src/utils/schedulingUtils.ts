@@ -8,11 +8,11 @@ export interface AvailabilitySlot {
 
 const DAY_NAMES = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
-const DEFAULT_SCHEDULE: DaySchedule[] = DAY_NAMES.map((dayName) => ({
+const DEFAULT_SCHEDULE: DaySchedule[] = DAY_NAMES.map(dayName => ({
   dayName,
   isOpen: dayName !== 'Domingo',
   openTime: '09:00',
-  closeTime: '18:00'
+  closeTime: '18:00',
 }));
 
 export function mapScheduleFromApi(
@@ -21,13 +21,13 @@ export function mapScheduleFromApi(
   if (!items?.length) return DEFAULT_SCHEDULE;
 
   return DEFAULT_SCHEDULE.map((day, index) => {
-    const item = items.find((entry) => entry.dayOfWeek === index);
+    const item = items.find(entry => entry.dayOfWeek === index);
     if (!item) return day;
     return {
       dayName: DAY_NAMES[index],
       isOpen: item.isOpen,
       openTime: item.openTime,
-      closeTime: item.closeTime
+      closeTime: item.closeTime,
     };
   });
 }
@@ -91,7 +91,10 @@ export function generateTimeSlots(openTime?: string, closeTime?: string, interva
   return slots;
 }
 
-export function getDaySchedule(date: Date, schedule?: ShopSettings['schedule'] | null): DaySchedule {
+export function getDaySchedule(
+  date: Date,
+  schedule?: ShopSettings['schedule'] | null
+): DaySchedule {
   const safeSchedule = schedule?.length ? schedule : DEFAULT_SCHEDULE;
   const dayOfWeek = date.getDay();
   return safeSchedule[dayOfWeek] ?? DEFAULT_SCHEDULE[dayOfWeek];
@@ -109,7 +112,7 @@ export function isSlotAvailable(
 
   const slotStart = timeToMinutes(time);
 
-  const conflicts = occupancy.filter((slot) => {
+  const conflicts = occupancy.filter(slot => {
     const occupiedStart = timeToMinutes(slot.time);
     const occupiedEnd = occupiedStart + slot.durationMinutes;
     const checkEnd = slotStart + 30;
@@ -126,7 +129,7 @@ export function isSlotAvailable(
     return conflicts.length === 0;
   }
 
-  const busyAtTime = occupancy.filter((slot) => {
+  const busyAtTime = occupancy.filter(slot => {
     const occupiedStart = timeToMinutes(slot.time);
     const occupiedEnd = occupiedStart + slot.durationMinutes;
     return slotStart < occupiedEnd && occupiedStart < slotStart + 30;
@@ -136,16 +139,16 @@ export function isSlotAvailable(
 }
 
 export function getServiceDuration(serviceId: string, services: Service[]): number {
-  return services.find((s) => s.id === serviceId)?.avgTimeMinutes ?? 30;
+  return services.find(s => s.id === serviceId)?.avgTimeMinutes ?? 30;
 }
 
 export function getStaffName(staffId: string | null | undefined, staff: StaffMember[]): string {
   if (!staffId || staffId === 'any') return 'Qualquer';
-  return staff.find((s) => s.id === staffId)?.name ?? 'Profissional';
+  return staff.find(s => s.id === staffId)?.name ?? 'Profissional';
 }
 
 export function getServiceName(serviceId: string, services: Service[]): string {
-  return services.find((s) => s.id === serviceId)?.name ?? 'Serviço';
+  return services.find(s => s.id === serviceId)?.name ?? 'Serviço';
 }
 
 export function mapAppointmentFromApi(raw: any): Appointment {

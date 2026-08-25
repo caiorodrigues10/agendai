@@ -3,9 +3,25 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Service, StaffMember, ShopSettings } from '../../types';
 import { AppointmentSchema, AppointmentFormData } from '../../schemas';
-import { AvailabilitySlot, generateTimeSlots, getDaySchedule, isSlotAvailable, formatDateISO } from '../../utils/schedulingUtils';
+import {
+  AvailabilitySlot,
+  generateTimeSlots,
+  getDaySchedule,
+  isSlotAvailable,
+  formatDateISO,
+} from '../../utils/schedulingUtils';
 import { maskPhone } from '../../utils/documentUtils';
-import { Calendar, Clock, User, CheckCircle, Smartphone, ChevronRight, ChevronLeft, Mail, AlertCircle } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  User,
+  CheckCircle,
+  Smartphone,
+  ChevronRight,
+  ChevronLeft,
+  Mail,
+  AlertCircle,
+} from 'lucide-react';
 import { DynamicIcon } from '../ui/DynamicIcon';
 
 interface AppointmentSchedulerProps {
@@ -17,11 +33,25 @@ interface AppointmentSchedulerProps {
   onDateChange?: (date: string, staffId?: string) => void;
 }
 
-export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({ services, staff, settings, occupancy = [], onBook, onDateChange }) => {
+export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
+  services,
+  staff,
+  settings,
+  occupancy = [],
+  onBook,
+  onDateChange,
+}) => {
   const [bookingComplete, setBookingComplete] = useState(false);
   const dateInputRef = React.useRef<HTMLInputElement>(null);
 
-  const { register, handleSubmit, setValue, watch, trigger, formState: { errors } } = useForm<AppointmentFormData>({
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    trigger,
+    formState: { errors },
+  } = useForm<AppointmentFormData>({
     resolver: zodResolver(AppointmentSchema),
     defaultValues: {
       staffId: 'any',
@@ -29,8 +59,8 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({ serv
       date: '',
       time: '',
       customerName: '',
-      whatsapp: ''
-    }
+      whatsapp: '',
+    },
   });
 
   const { ref: dateRef, ...dateRest } = register('date');
@@ -64,9 +94,7 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({ serv
     if (!daySchedule?.isOpen) return [];
 
     const slots = generateTimeSlots(daySchedule.openTime, daySchedule.closeTime);
-    return slots.filter((slot) =>
-      isSlotAvailable(slot, selectedStaffId, occupancy, staff.length)
-    );
+    return slots.filter(slot => isSlotAvailable(slot, selectedStaffId, occupancy, staff.length));
   }, [date, isDateClosed, settings.schedule, selectedStaffId, occupancy, staff.length]);
 
   const onSubmit = (data: AppointmentFormData) => {
@@ -77,22 +105,22 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({ serv
   const selectedStaff = staff.find(s => s.id === selectedStaffId);
 
   const getEventDetails = () => {
-     if (!selectedService || !date || !time) return null;
-     const startTime = new Date(`${date}T${time}`);
-     const endTime = new Date(startTime.getTime() + (selectedService.avgTimeMinutes * 60000));
-     return {
-         start: startTime,
-         end: endTime,
-         title: `${selectedService.name} - ${settings.shopName}`,
-         details: `Agendamento na ${settings.shopName}. Serviço: ${selectedService.name}`,
-         location: settings.shopName
-     };
+    if (!selectedService || !date || !time) return null;
+    const startTime = new Date(`${date}T${time}`);
+    const endTime = new Date(startTime.getTime() + selectedService.avgTimeMinutes * 60000);
+    return {
+      start: startTime,
+      end: endTime,
+      title: `${selectedService.name} - ${settings.shopName}`,
+      details: `Agendamento na ${settings.shopName}. Serviço: ${selectedService.name}`,
+      location: settings.shopName,
+    };
   };
 
   const generateGoogleLink = () => {
     const evt = getEventDetails();
     if (!evt) return '#';
-    const fmt = (d: Date) => d.toISOString().replace(/-|:|\.\d\d\d/g, "");
+    const fmt = (d: Date) => d.toISOString().replace(/-|:|\.\d\d\d/g, '');
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(evt.title)}&dates=${fmt(evt.start)}/${fmt(evt.end)}&details=${encodeURIComponent(evt.details)}&location=${encodeURIComponent(evt.location)}`;
   };
 
@@ -104,13 +132,28 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({ serv
         </div>
         <h2 className="text-2xl font-bold text-text-primary mb-2">Agendamento Confirmado!</h2>
         <p className="text-text-secondary mb-6">
-          Te esperamos dia <span className="text-text-primary font-bold">{new Date(date + 'T12:00:00').toLocaleDateString('pt-BR')}</span> às <span className="text-text-primary font-bold">{time}</span>.
+          Te esperamos dia{' '}
+          <span className="text-text-primary font-bold">
+            {new Date(date + 'T12:00:00').toLocaleDateString('pt-BR')}
+          </span>{' '}
+          às <span className="text-text-primary font-bold">{time}</span>.
         </p>
         <div className="space-y-3">
-          <a href={generateGoogleLink()} target="_blank" rel="noopener noreferrer" className="w-full py-3 bg-surface-2 hover:bg-border-strong text-text-primary text-xs font-bold rounded-xl flex items-center justify-center gap-2 border border-border-strong">
+          <a
+            href={generateGoogleLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full py-3 bg-surface-2 hover:bg-border-strong text-text-primary text-xs font-bold rounded-xl flex items-center justify-center gap-2 border border-border-strong"
+          >
             <Calendar size={16} className="text-blue-400" /> Adicionar ao Google Agenda
           </a>
-          <button onClick={() => { setBookingComplete(false); setValue('serviceId', ''); }} className="mt-4 text-accent text-sm font-bold hover:underline">
+          <button
+            onClick={() => {
+              setBookingComplete(false);
+              setValue('serviceId', '');
+            }}
+            className="mt-4 text-accent text-sm font-bold hover:underline"
+          >
             Realizar novo agendamento
           </button>
         </div>
@@ -122,189 +165,236 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({ serv
     <div className="bg-surface border border-border rounded-xl overflow-hidden shadow-2xl animate-fade-in">
       <div className="p-6">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            {/* SEÇÃO 1: SERVIÇOS */}
-            <div className="space-y-4 animate-fade-in">
-                <h3 className="text-lg font-bold text-text-primary mb-2 flex items-center gap-2">
-                    <CheckCircle size={18} className="text-accent" /> Selecione o Serviço
-                </h3>
-                <div className="grid grid-cols-1 gap-3">
-                    {services.map(service => (
-                        <div
-                            key={service.id}
-                            onClick={() => setValue('serviceId', service.id, { shouldValidate: true })}
-                            className={`cursor-pointer p-4 rounded-xl border transition-all relative overflow-hidden group flex items-center gap-4
-                                ${selectedServiceId === service.id
+          {/* SEÇÃO 1: SERVIÇOS */}
+          <div className="space-y-4 animate-fade-in">
+            <h3 className="text-lg font-bold text-text-primary mb-2 flex items-center gap-2">
+              <CheckCircle size={18} className="text-accent" /> Selecione o Serviço
+            </h3>
+            <div className="grid grid-cols-1 gap-3">
+              {services.map(service => (
+                <div
+                  key={service.id}
+                  onClick={() => setValue('serviceId', service.id, { shouldValidate: true })}
+                  className={`cursor-pointer p-4 rounded-xl border transition-all relative overflow-hidden group flex items-center gap-4
+                                ${
+                                  selectedServiceId === service.id
                                     ? 'bg-surface-2 border-accent/50 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
-                                    : 'bg-bg border-border hover:border-border-strong hover:bg-surface'}
+                                    : 'bg-bg border-border hover:border-border-strong hover:bg-surface'
+                                }
                             `}
-                        >
-                            <div className={`p-2.5 rounded-lg transition-colors ${selectedServiceId === service.id ? 'bg-accent/20 text-accent' : 'bg-surface text-text-muted group-hover:text-text-secondary'}`}>
-                                <DynamicIcon name={service.icon} size={24} />
-                            </div>
-                            <div className="flex-1">
-                                <h4 className="font-bold text-text-primary text-base">{service.name}</h4>
-                                <p className="text-xs text-text-muted font-medium">~{service.avgTimeMinutes} min • <span className="text-text-secondary">R$ {service.price.toFixed(2)}</span></p>
-                            </div>
-                            {selectedServiceId === service.id && (
-                                <div className="absolute right-0 top-0 bottom-0 w-1 bg-accent"></div>
-                            )}
-                        </div>
-                    ))}
+                >
+                  <div
+                    className={`p-2.5 rounded-lg transition-colors ${selectedServiceId === service.id ? 'bg-accent/20 text-accent' : 'bg-surface text-text-muted group-hover:text-text-secondary'}`}
+                  >
+                    <DynamicIcon name={service.icon} size={24} />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-text-primary text-base">{service.name}</h4>
+                    <p className="text-xs text-text-muted font-medium">
+                      ~{service.avgTimeMinutes} min •{' '}
+                      <span className="text-text-secondary">R$ {service.price.toFixed(2)}</span>
+                    </p>
+                  </div>
+                  {selectedServiceId === service.id && (
+                    <div className="absolute right-0 top-0 bottom-0 w-1 bg-accent"></div>
+                  )}
                 </div>
-                {errors.serviceId && <p className="text-danger text-xs mt-1 flex items-center gap-1"><AlertCircle size={12} /> {errors.serviceId.message}</p>}
+              ))}
             </div>
+            {errors.serviceId && (
+              <p className="text-danger text-xs mt-1 flex items-center gap-1">
+                <AlertCircle size={12} /> {errors.serviceId.message}
+              </p>
+            )}
+          </div>
 
-            <div className="border-t border-border"></div>
+          <div className="border-t border-border"></div>
 
-            {/* SEÇÃO 2: PROFISSIONAL */}
-            <div className="space-y-4 animate-fade-in">
-                 <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
-                    <User size={18} className="text-accent" /> Profissional
-                 </h3>
-                 <div className="grid grid-cols-2 gap-3">
-                    <div
-                        onClick={() => setValue('staffId', 'any', { shouldValidate: true })}
-                        className={`cursor-pointer p-3 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all text-center
+          {/* SEÇÃO 2: PROFISSIONAL */}
+          <div className="space-y-4 animate-fade-in">
+            <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
+              <User size={18} className="text-accent" /> Profissional
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div
+                onClick={() => setValue('staffId', 'any', { shouldValidate: true })}
+                className={`cursor-pointer p-3 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all text-center
                             ${selectedStaffId === 'any' ? 'bg-accent/15 border-accent' : 'bg-bg border-border hover:border-border-strong'}
                         `}
-                    >
-                        <User size={20} className="text-text-secondary" />
-                        <span className="font-bold text-xs text-text-primary">Qualquer</span>
-                    </div>
-                    {staff.map(member => (
-                        <div
-                            key={member.id}
-                            onClick={() => setValue('staffId', member.id, { shouldValidate: true })}
-                            className={`cursor-pointer p-3 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all text-center
+              >
+                <User size={20} className="text-text-secondary" />
+                <span className="font-bold text-xs text-text-primary">Qualquer</span>
+              </div>
+              {staff.map(member => (
+                <div
+                  key={member.id}
+                  onClick={() => setValue('staffId', member.id, { shouldValidate: true })}
+                  className={`cursor-pointer p-3 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all text-center
                                 ${selectedStaffId === member.id ? 'bg-accent/15 border-accent' : 'bg-bg border-border hover:border-border-strong'}
                             `}
-                        >
-                            <span className="text-base font-bold text-text-primary">{member.name.charAt(0)}</span>
-                            <span className="font-bold text-xs text-text-primary">{member.name}</span>
-                        </div>
-                    ))}
-                 </div>
+                >
+                  <span className="text-base font-bold text-text-primary">
+                    {member.name.charAt(0)}
+                  </span>
+                  <span className="font-bold text-xs text-text-primary">{member.name}</span>
+                </div>
+              ))}
             </div>
+          </div>
 
-            <div className="border-t border-border"></div>
+          <div className="border-t border-border"></div>
 
-            {/* SEÇÃO 3: DATA E HORA */}
-            <div className="space-y-4 animate-fade-in">
-                <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
-                    <Calendar size={18} className="text-accent" /> Data e Horário
-                </h3>
-                <div className="grid grid-cols-1 gap-4">
-                    <div className="space-y-2">
-                        <label className="text-xs text-text-secondary font-bold uppercase tracking-wider">Data</label>
-                        <div
-                            className="relative cursor-pointer group"
-                            onClick={() => {
-                                try {
-                                    dateInputRef.current?.showPicker();
-                                } catch (e) {
-                                    console.warn('showPicker not supported', e);
-                                }
-                            }}
-                        >
-                            <input
-                                type="date"
-                                min={today}
-                                max={maxDate}
-                                className={`w-full bg-bg border rounded-xl px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all cursor-pointer ${errors.date ? 'border-danger' : 'border-border'}`}
-                                {...dateRest}
-                                ref={(e) => {
-                                    dateRef(e);
-                                    dateInputRef.current = e;
-                                }}
-                                onClick={(e) => {
-                                    try {
-                                        (e.target as HTMLInputElement).showPicker();
-                                    } catch (e) {}
-                                }}
-                            />
-                            <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted group-hover:text-accent transition-colors pointer-events-none" size={18} />
-                        </div>
-                        {errors.date && <p className="text-danger text-xs mt-1 flex items-center gap-1"><AlertCircle size={12} /> {errors.date.message}</p>}
-                    </div>
+          {/* SEÇÃO 3: DATA E HORA */}
+          <div className="space-y-4 animate-fade-in">
+            <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
+              <Calendar size={18} className="text-accent" /> Data e Horário
+            </h3>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                <label className="text-xs text-text-secondary font-bold uppercase tracking-wider">
+                  Data
+                </label>
+                <div
+                  className="relative cursor-pointer group"
+                  onClick={() => {
+                    try {
+                      dateInputRef.current?.showPicker();
+                    } catch (e) {
+                      console.warn('showPicker not supported', e);
+                    }
+                  }}
+                >
+                  <input
+                    type="date"
+                    min={today}
+                    max={maxDate}
+                    className={`w-full bg-bg border rounded-xl px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all cursor-pointer ${errors.date ? 'border-danger' : 'border-border'}`}
+                    {...dateRest}
+                    ref={e => {
+                      dateRef(e);
+                      dateInputRef.current = e;
+                    }}
+                    onClick={e => {
+                      try {
+                        (e.target as HTMLInputElement).showPicker();
+                      } catch (e) {}
+                    }}
+                  />
+                  <Calendar
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted group-hover:text-accent transition-colors pointer-events-none"
+                    size={18}
+                  />
+                </div>
+                {errors.date && (
+                  <p className="text-danger text-xs mt-1 flex items-center gap-1">
+                    <AlertCircle size={12} /> {errors.date.message}
+                  </p>
+                )}
+              </div>
 
-                    <div className="space-y-2">
-                        <label className="text-xs text-text-secondary font-bold uppercase tracking-wider">Horários Disponíveis</label>
-                        <div className="grid grid-cols-4 gap-2">
-                            {timeSlots.length === 0 ? (
-                                <div className={`col-span-4 text-center py-4 bg-bg rounded-xl text-xs border border-dashed transition-colors
+              <div className="space-y-2">
+                <label className="text-xs text-text-secondary font-bold uppercase tracking-wider">
+                  Horários Disponíveis
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {timeSlots.length === 0 ? (
+                    <div
+                      className={`col-span-4 text-center py-4 bg-bg rounded-xl text-xs border border-dashed transition-colors
                                     ${isDateClosed ? 'border-danger/50 text-danger bg-danger/5' : 'border-border text-text-muted'}
-                                `}>
-                                    {isDateClosed ? (
-                                        <span className="flex items-center justify-center gap-2">
-                                            <AlertCircle size={14} /> Fechado neste dia. Escolha outra data.
-                                        </span>
-                                    ) : (
-                                        "Selecione uma data para ver os horários"
-                                    )}
-                                </div>
-                            ) : (
-                                timeSlots.map(slot => (
-                                    <button
-                                        key={slot}
-                                        type="button"
-                                        onClick={() => setValue('time', slot, { shouldValidate: true })}
-                                        className={`py-2 rounded-lg text-xs font-bold transition-all border ${
-                                            time === slot
-                                                ? 'bg-accent text-accent-fg border-accent'
-                                                : 'bg-bg text-text-secondary border-border hover:border-border-strong hover:bg-surface'
-                                        }`}
-                                    >
-                                        {slot}
-                                    </button>
-                                ))
-                            )}
-                        </div>
-                        {errors.time && <p className="text-danger text-xs mt-1 flex items-center gap-1"><AlertCircle size={12} /> {errors.time.message}</p>}
+                                `}
+                    >
+                      {isDateClosed ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <AlertCircle size={14} /> Fechado neste dia. Escolha outra data.
+                        </span>
+                      ) : (
+                        'Selecione uma data para ver os horários'
+                      )}
                     </div>
+                  ) : (
+                    timeSlots.map(slot => (
+                      <button
+                        key={slot}
+                        type="button"
+                        onClick={() => setValue('time', slot, { shouldValidate: true })}
+                        className={`py-2 rounded-lg text-xs font-bold transition-all border ${
+                          time === slot
+                            ? 'bg-accent text-accent-fg border-accent'
+                            : 'bg-bg text-text-secondary border-border hover:border-border-strong hover:bg-surface'
+                        }`}
+                      >
+                        {slot}
+                      </button>
+                    ))
+                  )}
                 </div>
+                {errors.time && (
+                  <p className="text-danger text-xs mt-1 flex items-center gap-1">
+                    <AlertCircle size={12} /> {errors.time.message}
+                  </p>
+                )}
+              </div>
             </div>
+          </div>
 
-            <div className="border-t border-border"></div>
+          <div className="border-t border-border"></div>
 
-            {/* SEÇÃO 4: DADOS PESSOAIS */}
-            <div className="space-y-4 animate-fade-in">
-                <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
-                    <User size={18} className="text-accent" /> Seus Dados
-                </h3>
-                <div className="space-y-3">
-                    <div>
-                        <div className="relative">
-                            <input
-                                type="text"
-                                className={`w-full bg-bg border rounded-xl px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all ${errors.customerName ? 'border-danger' : 'border-border'}`}
-                                placeholder="Seu nome completo"
-                                {...register('customerName')}
-                            />
-                            <User className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
-                        </div>
-                        {errors.customerName && <p className="text-danger text-xs mt-1 flex items-center gap-1"><AlertCircle size={12} /> {errors.customerName.message}</p>}
-                    </div>
-                    <div>
-                        <div className="relative">
-                            <input
-                                type="tel"
-                                className={`w-full bg-bg border rounded-xl px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all ${errors.whatsapp ? 'border-danger' : 'border-border'}`}
-                                placeholder="WhatsApp (11) 99999-9999"
-                                value={watch('whatsapp') ?? ''}
-                                onChange={(e) =>
-                                    setValue('whatsapp', maskPhone(e.target.value), { shouldValidate: true })
-                                }
-                            />
-                            <Smartphone className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
-                        </div>
-                        {errors.whatsapp && <p className="text-danger text-xs mt-1 flex items-center gap-1"><AlertCircle size={12} /> {errors.whatsapp.message}</p>}
-                    </div>
+          {/* SEÇÃO 4: DADOS PESSOAIS */}
+          <div className="space-y-4 animate-fade-in">
+            <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
+              <User size={18} className="text-accent" /> Seus Dados
+            </h3>
+            <div className="space-y-3">
+              <div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    className={`w-full bg-bg border rounded-xl px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all ${errors.customerName ? 'border-danger' : 'border-border'}`}
+                    placeholder="Seu nome completo"
+                    {...register('customerName')}
+                  />
+                  <User
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted"
+                    size={18}
+                  />
                 </div>
+                {errors.customerName && (
+                  <p className="text-danger text-xs mt-1 flex items-center gap-1">
+                    <AlertCircle size={12} /> {errors.customerName.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <div className="relative">
+                  <input
+                    type="tel"
+                    className={`w-full bg-bg border rounded-xl px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all ${errors.whatsapp ? 'border-danger' : 'border-border'}`}
+                    placeholder="WhatsApp (11) 99999-9999"
+                    value={watch('whatsapp') ?? ''}
+                    onChange={e =>
+                      setValue('whatsapp', maskPhone(e.target.value), { shouldValidate: true })
+                    }
+                  />
+                  <Smartphone
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted"
+                    size={18}
+                  />
+                </div>
+                {errors.whatsapp && (
+                  <p className="text-danger text-xs mt-1 flex items-center gap-1">
+                    <AlertCircle size={12} /> {errors.whatsapp.message}
+                  </p>
+                )}
+              </div>
             </div>
+          </div>
 
-            <button type="submit" className="w-full py-4 rounded-xl font-bold text-text-primary bg-accent hover:bg-accent-hover shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 mt-8">
-                <CheckCircle size={20} /> Confirmar Agendamento
-            </button>
+          <button
+            type="submit"
+            className="w-full py-4 rounded-xl font-bold text-text-primary bg-accent hover:bg-accent-hover shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 mt-8"
+          >
+            <CheckCircle size={20} /> Confirmar Agendamento
+          </button>
         </form>
       </div>
     </div>

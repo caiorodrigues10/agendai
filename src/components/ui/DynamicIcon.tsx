@@ -29,7 +29,7 @@ import {
   Scroll,
   Feather,
   CheckCircle,
-  UserPlus
+  UserPlus,
 } from 'lucide-react';
 
 export const ICON_OPTIONS = [
@@ -52,7 +52,7 @@ export const ICON_OPTIONS = [
   'Clock',
   'Armchair',
   'Gift',
-  'Music'
+  'Music',
 ];
 
 interface DynamicIconProps {
@@ -63,36 +63,67 @@ interface DynamicIconProps {
 
 export const DynamicIcon: React.FC<DynamicIconProps> = ({ name, className, size = 24 }) => {
   switch (name) {
-    case 'Scissors': return <Scissors className={className} size={size} />;
-    case 'Zap': return <Zap className={className} size={size} />;
-    case 'Feather': return <Feather className={className} size={size} />;
-    case 'SprayCan': return <SprayCan className={className} size={size} />;
-    case 'Droplets': return <Droplets className={className} size={size} />;
-    case 'Paintbrush': return <Paintbrush className={className} size={size} />;
-    case 'Scroll': return <Scroll className={className} size={size} />;
-    case 'Palette': return <Palette className={className} size={size} />;
-    case 'Crown': return <Crown className={className} size={size} />;
-    case 'Sparkles': return <Sparkles className={className} size={size} />;
-    case 'User': return <User className={className} size={size} />;
-    case 'Clock': return <Clock className={className} size={size} />;
-    case 'Star': return <Star className={className} size={size} />;
-    case 'Smile': return <Smile className={className} size={size} />;
-    case 'Anchor': return <Anchor className={className} size={size} />;
-    case 'Eye': return <Eye className={className} size={size} />;
-    case 'Briefcase': return <Briefcase className={className} size={size} />;
-    case 'Calendar': return <Calendar className={className} size={size} />;
-    case 'CreditCard': return <CreditCard className={className} size={size} />;
-    case 'Banknote': return <Banknote className={className} size={size} />;
-    case 'Music': return <Music className={className} size={size} />;
-    case 'Wifi': return <Wifi className={className} size={size} />;
-    case 'Tv': return <Tv className={className} size={size} />;
-    case 'Armchair': return <Armchair className={className} size={size} />;
-    case 'Gem': return <Gem className={className} size={size} />;
-    case 'Rocket': return <Rocket className={className} size={size} />;
-    case 'Gift': return <Gift className={className} size={size} />;
-    case 'Coffee': return <Coffee className={className} size={size} />;
-    case 'CheckCircle': return <CheckCircle className={className} size={size} />;
-    case 'UserPlus': return <UserPlus className={className} size={size} />;
-    default: return <Scissors className={className} size={size} />;
+    case 'Scissors':
+      return <Scissors className={className} size={size} />;
+    case 'Zap':
+      return <Zap className={className} size={size} />;
+    case 'Feather':
+      return <Feather className={className} size={size} />;
+    case 'SprayCan':
+      return <SprayCan className={className} size={size} />;
+    case 'Droplets':
+      return <Droplets className={className} size={size} />;
+    case 'Paintbrush':
+      return <Paintbrush className={className} size={size} />;
+    case 'Scroll':
+      return <Scroll className={className} size={size} />;
+    case 'Palette':
+      return <Palette className={className} size={size} />;
+    case 'Crown':
+      return <Crown className={className} size={size} />;
+    case 'Sparkles':
+      return <Sparkles className={className} size={size} />;
+    case 'User':
+      return <User className={className} size={size} />;
+    case 'Clock':
+      return <Clock className={className} size={size} />;
+    case 'Star':
+      return <Star className={className} size={size} />;
+    case 'Smile':
+      return <Smile className={className} size={size} />;
+    case 'Anchor':
+      return <Anchor className={className} size={size} />;
+    case 'Eye':
+      return <Eye className={className} size={size} />;
+    case 'Briefcase':
+      return <Briefcase className={className} size={size} />;
+    case 'Calendar':
+      return <Calendar className={className} size={size} />;
+    case 'CreditCard':
+      return <CreditCard className={className} size={size} />;
+    case 'Banknote':
+      return <Banknote className={className} size={size} />;
+    case 'Music':
+      return <Music className={className} size={size} />;
+    case 'Wifi':
+      return <Wifi className={className} size={size} />;
+    case 'Tv':
+      return <Tv className={className} size={size} />;
+    case 'Armchair':
+      return <Armchair className={className} size={size} />;
+    case 'Gem':
+      return <Gem className={className} size={size} />;
+    case 'Rocket':
+      return <Rocket className={className} size={size} />;
+    case 'Gift':
+      return <Gift className={className} size={size} />;
+    case 'Coffee':
+      return <Coffee className={className} size={size} />;
+    case 'CheckCircle':
+      return <CheckCircle className={className} size={size} />;
+    case 'UserPlus':
+      return <UserPlus className={className} size={size} />;
+    default:
+      return <Scissors className={className} size={size} />;
   }
 };

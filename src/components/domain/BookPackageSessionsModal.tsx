@@ -49,7 +49,7 @@ export const BookPackageSessionsModal: React.FC<BookPackageSessionsModalProps> =
     let cancelled = false;
     schedulingApi
       .getAvailability(pkg.barbershopId, date, staffId !== 'any' ? staffId : undefined)
-      .then((slots) => {
+      .then(slots => {
         if (!cancelled) setOccupancy(slots);
       })
       .catch(() => {
@@ -67,7 +67,7 @@ export const BookPackageSessionsModal: React.FC<BookPackageSessionsModalProps> =
   const isDateClosed = !daySchedule.isOpen;
   const timeSlots = useMemo(() => {
     if (isDateClosed) return [];
-    return generateTimeSlots(daySchedule.openTime, daySchedule.closeTime).filter((slot) =>
+    return generateTimeSlots(daySchedule.openTime, daySchedule.closeTime).filter(slot =>
       isSlotAvailable(slot, staffId, occupancy, staff.length)
     );
   }, [isDateClosed, daySchedule, staffId, occupancy, staff.length]);
@@ -76,13 +76,13 @@ export const BookPackageSessionsModal: React.FC<BookPackageSessionsModalProps> =
 
   const toggleSlot = (time: string) => {
     const key = `${date}|${time}|${staffId}`;
-    const exists = picked.find((s) => `${s.date}|${s.time}|${s.staffId}` === key);
+    const exists = picked.find(s => `${s.date}|${s.time}|${s.staffId}` === key);
     if (exists) {
-      setPicked((prev) => prev.filter((s) => `${s.date}|${s.time}|${s.staffId}` !== key));
+      setPicked(prev => prev.filter(s => `${s.date}|${s.time}|${s.staffId}` !== key));
       return;
     }
     if (picked.length >= pkg.remainingSessions) return;
-    setPicked((prev) => [...prev, { date, time, staffId }]);
+    setPicked(prev => [...prev, { date, time, staffId }]);
   };
 
   const handleSubmit = async () => {
@@ -92,7 +92,7 @@ export const BookPackageSessionsModal: React.FC<BookPackageSessionsModalProps> =
     try {
       await packagesApi.book(
         pkg.id,
-        picked.map((s) => ({
+        picked.map(s => ({
           date: s.date,
           time: s.time,
           staffId: s.staffId === 'any' ? null : s.staffId,
@@ -114,7 +114,7 @@ export const BookPackageSessionsModal: React.FC<BookPackageSessionsModalProps> =
     >
       <div
         className="bg-surface border border-border rounded-2xl w-full max-w-md max-h-[min(88dvh,calc(100dvh-2.5rem))] flex flex-col shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       >
         <div className="shrink-0 px-5 pt-5 pb-4 border-b border-border flex items-center justify-between">
           <div>
@@ -123,7 +123,12 @@ export const BookPackageSessionsModal: React.FC<BookPackageSessionsModalProps> =
               {pkg.packageName} · restam {remaining} de {pkg.remainingSessions}
             </p>
           </div>
-          <button type="button" onClick={onClose} className="p-2 text-text-secondary" aria-label="Fechar">
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 text-text-secondary"
+            aria-label="Fechar"
+          >
             <X size={20} />
           </button>
         </div>
@@ -147,7 +152,7 @@ export const BookPackageSessionsModal: React.FC<BookPackageSessionsModalProps> =
             >
               Qualquer
             </button>
-            {staff.map((member) => (
+            {staff.map(member => (
               <button
                 key={member.id}
                 type="button"
@@ -167,21 +172,22 @@ export const BookPackageSessionsModal: React.FC<BookPackageSessionsModalProps> =
             value={date}
             min={today}
             max={maxDate}
-            isDayDisabled={(day) => !getDaySchedule(day, settings.schedule).isOpen}
+            isDayDisabled={day => !getDaySchedule(day, settings.schedule).isOpen}
             onChange={setDate}
           />
 
           <div>
             <label className="text-[11px] text-text-secondary font-bold uppercase tracking-wider flex items-center gap-1.5 mb-2">
-              <Clock size={12} /> Horários de {new Date(date + 'T12:00:00').toLocaleDateString('pt-BR')}
+              <Clock size={12} /> Horários de{' '}
+              {new Date(date + 'T12:00:00').toLocaleDateString('pt-BR')}
             </label>
             {isDateClosed ? (
               <p className="text-sm text-danger">Fechado neste dia.</p>
             ) : (
               <div className="grid grid-cols-4 gap-2">
-                {timeSlots.map((slot) => {
+                {timeSlots.map(slot => {
                   const selected = picked.some(
-                    (s) => s.date === date && s.time === slot && s.staffId === staffId
+                    s => s.date === date && s.time === slot && s.staffId === staffId
                   );
                   return (
                     <button
@@ -204,7 +210,7 @@ export const BookPackageSessionsModal: React.FC<BookPackageSessionsModalProps> =
 
           {picked.length > 0 && (
             <ul className="text-xs text-text-secondary space-y-1">
-              {picked.map((s) => (
+              {picked.map(s => (
                 <li key={`${s.date}-${s.time}-${s.staffId}`}>
                   {new Date(s.date + 'T12:00:00').toLocaleDateString('pt-BR')} às {s.time}
                 </li>

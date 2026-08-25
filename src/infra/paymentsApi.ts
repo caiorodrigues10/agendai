@@ -59,7 +59,12 @@ function unwrap<T>(res: unknown): T {
   return res as T;
 }
 
-interface ListMeta { total: number; page: number; limit: number; totalPages: number }
+interface ListMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 type RefundListResponse = { success: boolean; data: Refund[]; meta: ListMeta } | Refund[];
 
 const token = () => authStorage.getAccessToken() || '';
@@ -73,12 +78,11 @@ export const paymentsApi = {
       token()
     ).then(res => unwrap<Payment>(res)),
   list: (page = 1, limit = 20) =>
-    apiClient<{ success: boolean; data: Payment[]; meta: { total: number; page: number; limit: number; totalPages: number } }>(
-      `/api/payments?page=${page}&limit=${limit}`,
-      'GET',
-      undefined,
-      token()
-    ),
+    apiClient<{
+      success: boolean;
+      data: Payment[];
+      meta: { total: number; page: number; limit: number; totalPages: number };
+    }>(`/api/payments?page=${page}&limit=${limit}`, 'GET', undefined, token()),
   refundPayment: (paymentId: string, reason: string) =>
     apiClient<{ success: boolean; data: Refund }>(
       `/api/payments/${paymentId}/refund`,
@@ -97,8 +101,14 @@ export const paymentsApi = {
       token()
     );
     const body = unwrap<Refund[]>(res);
-    const data = Array.isArray(body) ? body : Array.isArray((body as { data?: Refund[] })?.data) ? (body as { data: Refund[] }).data : [];
-    const meta = !Array.isArray(res) ? (res as { meta?: ListMeta }).meta : (body as { meta?: ListMeta })?.meta;
+    const data = Array.isArray(body)
+      ? body
+      : Array.isArray((body as { data?: Refund[] })?.data)
+        ? (body as { data: Refund[] }).data
+        : [];
+    const meta = !Array.isArray(res)
+      ? (res as { meta?: ListMeta }).meta
+      : (body as { meta?: ListMeta })?.meta;
     return { data: data as Refund[], meta };
-  }
+  },
 };

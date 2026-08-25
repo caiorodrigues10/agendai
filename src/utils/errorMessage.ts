@@ -18,7 +18,7 @@ function formatApiFieldErrors(errors: unknown): string | null {
   if (typeof errors === 'string' && errors.trim()) return errors;
   if (Array.isArray(errors)) {
     const parts = errors
-      .map((item) => {
+      .map(item => {
         if (typeof item === 'string') return item;
         if (item && typeof item === 'object' && 'message' in item) {
           const msg = (item as { message?: unknown }).message;
@@ -31,8 +31,8 @@ function formatApiFieldErrors(errors: unknown): string | null {
   }
   if (typeof errors === 'object') {
     const parts = Object.values(errors as Record<string, unknown>)
-      .flatMap((v) => (Array.isArray(v) ? v : [v]))
-      .map((v) => (typeof v === 'string' ? v : null))
+      .flatMap(v => (Array.isArray(v) ? v : [v]))
+      .map(v => (typeof v === 'string' ? v : null))
       .filter((v): v is string => Boolean(v));
     return parts.length ? parts.join(' · ') : null;
   }
@@ -75,7 +75,7 @@ function messageForStatus(status: number, fallback: string): string {
  */
 export function getErrorMessage(
   err: unknown,
-  fallback = 'Algo deu errado. Tente novamente.',
+  fallback = 'Algo deu errado. Tente novamente.'
 ): string {
   if (isNetworkError(err)) {
     return messageForStatus(0, fallback);

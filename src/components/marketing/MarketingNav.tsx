@@ -58,7 +58,7 @@ export const MarketingNav: React.FC = () => {
         </Link>
 
         <div className="hidden items-center gap-6 lg:flex xl:gap-8">
-          {sectionLinks.map((link) => (
+          {sectionLinks.map(link => (
             <button
               key={link.id}
               type="button"
@@ -69,7 +69,7 @@ export const MarketingNav: React.FC = () => {
             </button>
           ))}
           <span className="h-3 w-px bg-white/10" aria-hidden />
-          {pageLinks.map((link) => (
+          {pageLinks.map(link => (
             <Link
               key={link.to}
               to={link.to}
@@ -97,7 +97,7 @@ export const MarketingNav: React.FC = () => {
           </button>
           <button
             type="button"
-            onClick={() => setMobileOpen((v) => !v)}
+            onClick={() => setMobileOpen(v => !v)}
             className="p-2 -mr-2 text-white lg:hidden"
             aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
             aria-expanded={mobileOpen}
@@ -109,7 +109,7 @@ export const MarketingNav: React.FC = () => {
 
       {mobileOpen && (
         <div className="mx-auto mt-4 flex max-w-400 flex-col gap-0.5 border-t border-white/5 pb-2 pt-4 text-sm font-bold uppercase tracking-widest text-neutral-300 lg:hidden">
-          {sectionLinks.map((link) => (
+          {sectionLinks.map(link => (
             <button
               key={link.id}
               type="button"
@@ -120,7 +120,7 @@ export const MarketingNav: React.FC = () => {
             </button>
           ))}
           <div className="my-2 h-px bg-white/8" />
-          {pageLinks.map((link) => (
+          {pageLinks.map(link => (
             <Link
               key={link.to}
               to={link.to}

@@ -13,54 +13,54 @@
  * neutral-950/900/800 e emerald usados historicamente no app.
  */
 :root {
-	--ag-bg: #f5f5f5;
-	--ag-surface: #ffffff;
-	--ag-surface-2: #e5e5e5;
-	--ag-border: #e5e5e5;
-	--ag-border-strong: #d4d4d4;
-	--ag-text-primary: #171717;
-	--ag-text-secondary: #525252;
-	--ag-text-muted: #737373;
-	/* emerald-700/800: contraste AA sobre superfícies claras */
-	--ag-accent: #047857;
-	--ag-accent-hover: #065f46;
-	--ag-accent-fg: #ffffff;
-	--ag-danger: #dc2626;
-	--ag-success: #16a34a;
-	--ag-warning: #b45309;
-	/* shadcn/recharts — séries alinhadas ao tema */
-	--chart-1: #047857;
-	--chart-2: #7c3aed;
-	--chart-3: #0891b2;
-	--chart-4: #b45309;
-	--chart-5: #525252;
+  --ag-bg: #f5f5f5;
+  --ag-surface: #ffffff;
+  --ag-surface-2: #e5e5e5;
+  --ag-border: #e5e5e5;
+  --ag-border-strong: #d4d4d4;
+  --ag-text-primary: #171717;
+  --ag-text-secondary: #525252;
+  --ag-text-muted: #737373;
+  /* emerald-700/800: contraste AA sobre superfícies claras */
+  --ag-accent: #047857;
+  --ag-accent-hover: #065f46;
+  --ag-accent-fg: #ffffff;
+  --ag-danger: #dc2626;
+  --ag-success: #16a34a;
+  --ag-warning: #b45309;
+  /* shadcn/recharts — séries alinhadas ao tema */
+  --chart-1: #047857;
+  --chart-2: #7c3aed;
+  --chart-3: #0891b2;
+  --chart-4: #b45309;
+  --chart-5: #525252;
 }
 
 /* Paleta inspirada no dark mode do YouTube: fundo #0f0f0f com superfícies
    e bordas em cinzas mais claros (#212121/#3f3f3f), evitando o visual
    "preto total" dos tons neutral-950/900. */
 .dark {
-	--ag-bg: #0f0f0f;
-	--ag-surface: #212121;
-	--ag-surface-2: #2f2f2f;
-	--ag-border: #303030;
-	--ag-border-strong: #3f3f3f;
-	--ag-text-primary: #f1f1f1;
-	--ag-text-secondary: #aaaaaa;
-	--ag-text-muted: #808080;
-	/* emerald-500/400: cor de marca sobre superfícies escuras */
-	--ag-accent: #10b981;
-	--ag-accent-hover: #34d399;
-	/* texto escuro sobre accent claro garante contraste AA nos botões */
-	--ag-accent-fg: #052e1f;
-	--ag-danger: #ef4444;
-	--ag-success: #22c55e;
-	--ag-warning: #f59e0b;
-	--chart-1: #10b981;
-	--chart-2: #a78bfa;
-	--chart-3: #22d3ee;
-	--chart-4: #f59e0b;
-	--chart-5: #aaaaaa;
+  --ag-bg: #0f0f0f;
+  --ag-surface: #212121;
+  --ag-surface-2: #2f2f2f;
+  --ag-border: #303030;
+  --ag-border-strong: #3f3f3f;
+  --ag-text-primary: #f1f1f1;
+  --ag-text-secondary: #aaaaaa;
+  --ag-text-muted: #808080;
+  /* emerald-500/400: cor de marca sobre superfícies escuras */
+  --ag-accent: #10b981;
+  --ag-accent-hover: #34d399;
+  /* texto escuro sobre accent claro garante contraste AA nos botões */
+  --ag-accent-fg: #052e1f;
+  --ag-danger: #ef4444;
+  --ag-success: #22c55e;
+  --ag-warning: #f59e0b;
+  --chart-1: #10b981;
+  --chart-2: #a78bfa;
+  --chart-3: #22d3ee;
+  --chart-4: #f59e0b;
+  --chart-5: #aaaaaa;
 }
 
 /*
@@ -69,54 +69,54 @@
  * `text-text-primary`, `border-border`, `bg-accent/10`, etc.
  */
 @theme inline {
-	--color-bg: var(--ag-bg);
-	--color-surface: var(--ag-surface);
-	--color-surface-2: var(--ag-surface-2);
-	--color-border: var(--ag-border);
-	--color-border-strong: var(--ag-border-strong);
-	--color-text-primary: var(--ag-text-primary);
-	--color-text-secondary: var(--ag-text-secondary);
-	--color-text-muted: var(--ag-text-muted);
-	--color-accent: var(--ag-accent);
-	--color-accent-hover: var(--ag-accent-hover);
-	--color-accent-fg: var(--ag-accent-fg);
-	--color-danger: var(--ag-danger);
-	--color-success: var(--ag-success);
-	--color-warning: var(--ag-warning);
-	--color-chart-1: var(--chart-1);
-	--color-chart-2: var(--chart-2);
-	--color-chart-3: var(--chart-3);
-	--color-chart-4: var(--chart-4);
-	--color-chart-5: var(--chart-5);
+  --color-bg: var(--ag-bg);
+  --color-surface: var(--ag-surface);
+  --color-surface-2: var(--ag-surface-2);
+  --color-border: var(--ag-border);
+  --color-border-strong: var(--ag-border-strong);
+  --color-text-primary: var(--ag-text-primary);
+  --color-text-secondary: var(--ag-text-secondary);
+  --color-text-muted: var(--ag-text-muted);
+  --color-accent: var(--ag-accent);
+  --color-accent-hover: var(--ag-accent-hover);
+  --color-accent-fg: var(--ag-accent-fg);
+  --color-danger: var(--ag-danger);
+  --color-success: var(--ag-success);
+  --color-warning: var(--ag-warning);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
 }
 
 @theme {
-	--font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
-	--font-display: 'Syne', ui-sans-serif, system-ui, sans-serif;
-	--animate-fade-in: fade-in 0.8s ease-out forwards;
+  --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Syne', ui-sans-serif, system-ui, sans-serif;
+  --animate-fade-in: fade-in 0.8s ease-out forwards;
 
-	@keyframes fade-in {
-		from {
-			opacity: 0;
-			transform: translateY(10px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 html {
-	/* Sem smooth global: em SPA o scroll herdado do rodapé “anima” a página
+  /* Sem smooth global: em SPA o scroll herdado do rodapé “anima” a página
 	   nova no lugar errado. Scroll suave fica explícito no JS (scrollIntoView). */
-	scroll-behavior: auto;
+  scroll-behavior: auto;
 }
 
 body {
-	font-family: var(--font-sans);
-	background-color: var(--ag-bg);
-	color: var(--ag-text-primary);
+  font-family: var(--font-sans);
+  background-color: var(--ag-bg);
+  color: var(--ag-text-primary);
 }
 
 /* Fix for Webkit autocomplete background */
@@ -124,55 +124,55 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-	transition: background-color 5000s ease-in-out 0s;
-	-webkit-text-fill-color: var(--ag-text-primary) !important;
+  transition: background-color 5000s ease-in-out 0s;
+  -webkit-text-fill-color: var(--ag-text-primary) !important;
 }
 
 /* Discrete Scrollbar */
 ::-webkit-scrollbar {
-	width: 4px;
-	height: 4px;
+  width: 4px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
-	background: transparent;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-	background: color-mix(in srgb, var(--ag-text-primary) 18%, transparent);
-	border-radius: 10px;
+  background: color-mix(in srgb, var(--ag-text-primary) 18%, transparent);
+  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-	background: color-mix(in srgb, var(--ag-text-primary) 32%, transparent);
+  background: color-mix(in srgb, var(--ag-text-primary) 32%, transparent);
 }
 
 /* Scroll interno de listas (serviços, horários): trilha invisível, thumb fino */
 .ag-scroll {
-	scrollbar-width: thin;
-	scrollbar-color: color-mix(in srgb, var(--ag-text-primary) 28%, transparent) transparent;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--ag-text-primary) 28%, transparent) transparent;
 }
 .ag-scroll::-webkit-scrollbar {
-	width: 6px;
+  width: 6px;
 }
 .ag-scroll::-webkit-scrollbar-track {
-	background: transparent;
-	margin: 6px 0;
+  background: transparent;
+  margin: 6px 0;
 }
 .ag-scroll::-webkit-scrollbar-thumb {
-	background: color-mix(in srgb, var(--ag-text-primary) 22%, transparent);
-	border-radius: 999px;
-	border: 2px solid transparent;
-	background-clip: padding-box;
+  background: color-mix(in srgb, var(--ag-text-primary) 22%, transparent);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 .ag-scroll::-webkit-scrollbar-thumb:hover {
-	background: color-mix(in srgb, var(--ag-accent) 70%, transparent);
-	background-clip: padding-box;
+  background: color-mix(in srgb, var(--ag-accent) 70%, transparent);
+  background-clip: padding-box;
 }
 
 .no-scrollbar {
-	-ms-overflow-style: none;
-	scrollbar-width: none;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 .no-scrollbar::-webkit-scrollbar {
-	display: none;
+  display: none;
 }
 
 /*
@@ -181,17 +181,17 @@ input:-webkit-autofill:active {
  * para fora do box (ex.: sobre a label Validade).
  */
 .mp-secure-field [id$='SecureField_container'] {
-	width: 100%;
-	height: 100%;
-	min-height: 40px;
-	display: block;
-	overflow: hidden;
+  width: 100%;
+  height: 100%;
+  min-height: 40px;
+  display: block;
+  overflow: hidden;
 }
 
 .mp-secure-field [id$='SecureField_container'] iframe {
-	display: block;
-	width: 100% !important;
-	height: 40px !important;
-	border: 0;
-	overflow: hidden;
+  display: block;
+  width: 100% !important;
+  height: 40px !important;
+  border: 0;
+  overflow: hidden;
 }

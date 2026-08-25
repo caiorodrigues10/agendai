@@ -23,6 +23,8 @@ function unwrap<T>(res: unknown): T {
 }
 
 export const plansApi = {
-  list: () => apiClient<{ success: boolean; data: Plan[] }>('/api/plans').then(res => unwrap<Plan[]>(res)),
-  get: (id: string) => apiClient<{ success: boolean; data: Plan }>(`/api/plans/${id}`).then(res => unwrap<Plan>(res))
+  list: () =>
+    apiClient<{ success: boolean; data: Plan[] }>('/api/plans').then(res => unwrap<Plan[]>(res)),
+  get: (id: string) =>
+    apiClient<{ success: boolean; data: Plan }>(`/api/plans/${id}`).then(res => unwrap<Plan>(res)),
 };

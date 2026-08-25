@@ -1,4 +1,13 @@
-import React, { createContext, useContext, useEffect, useMemo, useState, useCallback, useRef, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  useRef,
+  ReactNode,
+} from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Appointment, QueueItem, AIInsight } from '../types';
 import { schedulingApi } from '../infra/schedulingApi';
@@ -53,49 +62,60 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   });
   const [completedCount, setCompletedCount] = useState(0);
 
-  const loadAvailability = useCallback(async (date: string, staffId?: string) => {
-    if (!barbershopId) return;
-    try {
-      const slots = await schedulingApi.getAvailability(barbershopId, date, staffId);
-      setAvailability(slots);
-    } catch {
-      setAvailability([]);
-    }
-  }, [barbershopId]);
-
-  const refreshQueue = useCallback(async (options?: { silent?: boolean }) => {
-    if (!barbershopId) return;
-    try {
-      const queueData = await schedulingApi.listQueue(barbershopId);
-      setQueue(queueData as QueueItem[]);
-    } catch (error) {
-      if (options?.silent) return; // polling: mantém dados anteriores
-      logger.error('Falha ao carregar fila', error);
-      setQueue([]);
-    }
-  }, [barbershopId]);
-
-  const refreshAppointments = useCallback(async (date?: string, options?: { silent?: boolean }) => {
-    if (!barbershopId) return;
-    try {
-      const params: { barbershopId: string; date?: string; from?: string; to?: string } = { barbershopId };
-      if (date) {
-        params.date = date;
-      } else {
-        const today = new Date();
-        const from = today.toISOString().split('T')[0];
-        const toDate = new Date(today);
-        toDate.setDate(toDate.getDate() + 30);
-        params.from = from;
-        params.to = toDate.toISOString().split('T')[0];
+  const loadAvailability = useCallback(
+    async (date: string, staffId?: string) => {
+      if (!barbershopId) return;
+      try {
+        const slots = await schedulingApi.getAvailability(barbershopId, date, staffId);
+        setAvailability(slots);
+      } catch {
+        setAvailability([]);
       }
-      const data = await schedulingApi.listAppointments(params);
-      setAppointments((data ?? []).map(mapAppointmentFromApi));
-    } catch {
-      if (options?.silent) return; // polling: mantém dados anteriores
-      setAppointments([]);
-    }
-  }, [barbershopId]);
+    },
+    [barbershopId]
+  );
+
+  const refreshQueue = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!barbershopId) return;
+      try {
+        const queueData = await schedulingApi.listQueue(barbershopId);
+        setQueue(queueData as QueueItem[]);
+      } catch (error) {
+        if (options?.silent) return; // polling: mantém dados anteriores
+        logger.error('Falha ao carregar fila', error);
+        setQueue([]);
+      }
+    },
+    [barbershopId]
+  );
+
+  const refreshAppointments = useCallback(
+    async (date?: string, options?: { silent?: boolean }) => {
+      if (!barbershopId) return;
+      try {
+        const params: { barbershopId: string; date?: string; from?: string; to?: string } = {
+          barbershopId,
+        };
+        if (date) {
+          params.date = date;
+        } else {
+          const today = new Date();
+          const from = today.toISOString().split('T')[0];
+          const toDate = new Date(today);
+          toDate.setDate(toDate.getDate() + 30);
+          params.from = from;
+          params.to = toDate.toISOString().split('T')[0];
+        }
+        const data = await schedulingApi.listAppointments(params);
+        setAppointments((data ?? []).map(mapAppointmentFromApi));
+      } catch {
+        if (options?.silent) return; // polling: mantém dados anteriores
+        setAppointments([]);
+      }
+    },
+    [barbershopId]
+  );
 
   useEffect(() => {
     const load = async () => {
@@ -134,7 +154,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       try {
         await Promise.all([
           refreshQueue({ silent: true }),
-          refreshAppointments(undefined, { silent: true })
+          refreshAppointments(undefined, { silent: true }),
         ]);
       } finally {
         isPollingFetchInFlight.current = false;
@@ -187,11 +207,11 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     };
 
     try {
-        const newItem = await schedulingApi.joinQueue(payload);
-        setQueue(prev => [...prev, newItem]);
+      const newItem = await schedulingApi.joinQueue(payload);
+      setQueue(prev => [...prev, newItem]);
     } catch (error) {
-        logger.error('Falha ao entrar na fila', error);
-        throw error;
+      logger.error('Falha ao entrar na fila', error);
+      throw error;
     }
   };
 
@@ -211,8 +231,8 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       payload.completedBy = user?.id || undefined;
     }
     const updated = await schedulingApi.updateQueueItem(id, payload);
-    setQueue(prev => prev.map(item => item.id === id ? updated : item));
-    
+    setQueue(prev => prev.map(item => (item.id === id ? updated : item)));
+
     if (status === 'completed') {
       try {
         const metrics = await schedulingApi.getQueueMetrics(barbershopId);
@@ -233,7 +253,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     const payload = {
       ...data,
       barbershopId,
-      staffId: data.staffId === 'any' ? null : data.staffId
+      staffId: data.staffId === 'any' ? null : data.staffId,
     };
     const created = await schedulingApi.bookAppointment(payload);
     const mapped = mapAppointmentFromApi(created);
@@ -242,19 +262,19 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   };
 
   // Public booking (no auth) – used on the public barbershop page.
-  const bookAppointmentPublic = useCallback(async (data: any) => {
-    if (!barbershopId) throw new Error('Barbearia não selecionada');
+  const bookAppointmentPublic = useCallback(
+    async (data: any) => {
+      if (!barbershopId) throw new Error('Barbearia não selecionada');
 
-    await schedulingApi.bookAppointmentPublic({
-      ...data,
-      barbershopId,
-      staffId: data.staffId === 'any' ? null : data.staffId
-    });
-    await loadAvailability(
-      data.date,
-      data.staffId !== 'any' ? data.staffId : undefined
-    );
-  }, [barbershopId, loadAvailability]);
+      await schedulingApi.bookAppointmentPublic({
+        ...data,
+        barbershopId,
+        staffId: data.staffId === 'any' ? null : data.staffId,
+      });
+      await loadAvailability(data.date, data.staffId !== 'any' ? data.staffId : undefined);
+    },
+    [barbershopId, loadAvailability]
+  );
 
   const cancelAppointment = async (id: string) => {
     await schedulingApi.deleteAppointment(id);
@@ -266,36 +286,39 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     await cancelAppointment(appt.id);
   };
 
-const value = useMemo(() => ({
-        loading,
-        queue,
-        appointments,
-        availability,
-        aiInsight,
-        clientId,
-        completedCount,
-        joinQueue,
-        leaveQueue,
-        updateQueueStatus,
-        deleteHistoryItem,
-        bookAppointment,
-        cancelAppointment,
-        checkInAppointment,
-        refreshAppointments,
-        loadAvailability,
-        bookAppointmentPublic
-    }), [
-        loading,
-        queue,
-        appointments,
-        availability,
-        aiInsight,
-        clientId,
-        completedCount,
-        refreshAppointments,
-        loadAvailability,
-        bookAppointmentPublic
-    ]);
+  const value = useMemo(
+    () => ({
+      loading,
+      queue,
+      appointments,
+      availability,
+      aiInsight,
+      clientId,
+      completedCount,
+      joinQueue,
+      leaveQueue,
+      updateQueueStatus,
+      deleteHistoryItem,
+      bookAppointment,
+      cancelAppointment,
+      checkInAppointment,
+      refreshAppointments,
+      loadAvailability,
+      bookAppointmentPublic,
+    }),
+    [
+      loading,
+      queue,
+      appointments,
+      availability,
+      aiInsight,
+      clientId,
+      completedCount,
+      refreshAppointments,
+      loadAvailability,
+      bookAppointmentPublic,
+    ]
+  );
 
   return <SchedulingContext.Provider value={value}>{children}</SchedulingContext.Provider>;
 };

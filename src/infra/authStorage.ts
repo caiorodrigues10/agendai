@@ -22,5 +22,5 @@ export const authStorage = {
   },
   clearUser: () => {
     localStorage.removeItem(USER_KEY);
-  }
+  },
 };

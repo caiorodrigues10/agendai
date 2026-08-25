@@ -80,8 +80,8 @@ export const DashboardPage: React.FC = () => {
               transition={{ delay: 0.12 }}
               className="mx-auto mt-7 max-w-2xl text-lg font-medium leading-relaxed text-neutral-400 md:text-xl"
             >
-              Relatórios, financeiro e insights no mesmo painel. Você vê o que vendeu, o que
-              ficou em fiado e onde a agenda está vazia — sem planilha no fim do mês.
+              Relatórios, financeiro e insights no mesmo painel. Você vê o que vendeu, o que ficou
+              em fiado e onde a agenda está vazia — sem planilha no fim do mês.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -136,11 +136,31 @@ export const DashboardPage: React.FC = () => {
               <div className="grid gap-4 p-5 md:grid-cols-12 md:gap-5 md:p-8">
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:col-span-12">
                   {[
-                    { label: 'Faturamento', value: 'R$ 6.160', meta: '+18% vs sem. ant.', tone: 'text-emerald-300' },
-                    { label: 'Atendimentos', value: '84', meta: '6 dias úteis', tone: 'text-white' },
-                    { label: 'Ticket médio', value: 'R$ 73', meta: 'Corte + barba lidera', tone: 'text-cyan-300' },
-                    { label: 'Fiado aberto', value: 'R$ 320', meta: '3 clientes', tone: 'text-amber-200' },
-                  ].map((kpi) => (
+                    {
+                      label: 'Faturamento',
+                      value: 'R$ 6.160',
+                      meta: '+18% vs sem. ant.',
+                      tone: 'text-emerald-300',
+                    },
+                    {
+                      label: 'Atendimentos',
+                      value: '84',
+                      meta: '6 dias úteis',
+                      tone: 'text-white',
+                    },
+                    {
+                      label: 'Ticket médio',
+                      value: 'R$ 73',
+                      meta: 'Corte + barba lidera',
+                      tone: 'text-cyan-300',
+                    },
+                    {
+                      label: 'Fiado aberto',
+                      value: 'R$ 320',
+                      meta: '3 clientes',
+                      tone: 'text-amber-200',
+                    },
+                  ].map(kpi => (
                     <div
                       key={kpi.label}
                       className="rounded-2xl border border-white/8 bg-black/35 px-4 py-4"
@@ -148,7 +168,9 @@ export const DashboardPage: React.FC = () => {
                       <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
                         {kpi.label}
                       </p>
-                      <p className={`mt-2 text-2xl font-black tracking-tight md:text-3xl ${kpi.tone}`}>
+                      <p
+                        className={`mt-2 text-2xl font-black tracking-tight md:text-3xl ${kpi.tone}`}
+                      >
                         {kpi.value}
                       </p>
                       <p className="mt-1 text-xs text-neutral-500">{kpi.meta}</p>
@@ -167,8 +189,11 @@ export const DashboardPage: React.FC = () => {
                     <p className="text-sm font-bold text-emerald-300">Pico no sábado</p>
                   </div>
                   <div className="flex h-44 items-end gap-2.5 md:h-52">
-                    {weekBars.map((bar) => (
-                      <div key={bar.day} className="flex h-full min-w-0 flex-1 flex-col items-center gap-2">
+                    {weekBars.map(bar => (
+                      <div
+                        key={bar.day}
+                        className="flex h-full min-w-0 flex-1 flex-col items-center gap-2"
+                      >
                         <div className="relative flex w-full flex-1 items-end">
                           <div
                             className="w-full rounded-t-md bg-linear-to-t from-emerald-500/30 to-emerald-400"
@@ -191,7 +216,7 @@ export const DashboardPage: React.FC = () => {
                         { name: 'Corte + barba', pct: 92, value: 'R$ 2.4k' },
                         { name: 'Corte masculino', pct: 70, value: 'R$ 1.8k' },
                         { name: 'Barba', pct: 48, value: 'R$ 960' },
-                      ].map((s) => (
+                      ].map(s => (
                         <div key={s.name}>
                           <div className="mb-1.5 flex justify-between text-sm">
                             <span className="font-semibold text-white">{s.name}</span>
@@ -271,8 +296,8 @@ export const DashboardPage: React.FC = () => {
               </h2>
             </div>
             <p className="max-w-md text-lg font-medium leading-relaxed text-neutral-400">
-              Insights cruzam fila, agenda e financeiro. Você vê pico, ociosidade, serviço que
-              paga a conta e cliente em atraso.
+              Insights cruzam fila, agenda e financeiro. Você vê pico, ociosidade, serviço que paga
+              a conta e cliente em atraso.
             </p>
           </div>
 
@@ -293,8 +318,8 @@ export const DashboardPage: React.FC = () => {
                   Entrada, saída e fiado no mesmo resumo.
                 </h3>
                 <p className="mt-4 max-w-md text-base font-medium leading-relaxed text-neutral-400">
-                  Despesas categorizadas, pagamentos parciais de fiado e saldo do período —
-                  sem caderno paralelo.
+                  Despesas categorizadas, pagamentos parciais de fiado e saldo do período — sem
+                  caderno paralelo.
                 </p>
 
                 <div className="mt-8 grid gap-3 sm:grid-cols-3">
@@ -369,7 +394,7 @@ export const DashboardPage: React.FC = () => {
                 Quem puxa o dia.
               </h3>
               <div className="mt-8 space-y-4">
-                {staffRows.map((person) => (
+                {staffRows.map(person => (
                   <div key={person.name}>
                     <div className="mb-1.5 flex items-center justify-between gap-3">
                       <div>
@@ -408,8 +433,8 @@ export const DashboardPage: React.FC = () => {
                     Crediário com histórico, não papel.
                   </h3>
                   <p className="mt-4 text-base font-medium leading-relaxed text-neutral-400">
-                    Abra, registre pagamento parcial e veja o saldo. O dashboard mostra o que
-                    ainda está na rua.
+                    Abra, registre pagamento parcial e veja o saldo. O dashboard mostra o que ainda
+                    está na rua.
                   </p>
                 </div>
                 <div className="flex flex-col justify-center gap-3 border-t border-white/8 bg-black/35 p-8 lg:border-l lg:border-t-0 lg:p-9">
@@ -417,7 +442,7 @@ export const DashboardPage: React.FC = () => {
                     { name: 'Paulo R.', due: 'R$ 120', status: 'Parcial' },
                     { name: 'Camila S.', due: 'R$ 80', status: 'Aberto' },
                     { name: 'Diego M.', due: 'R$ 120', status: 'Aberto' },
-                  ].map((row) => (
+                  ].map(row => (
                     <div
                       key={row.name}
                       className="flex items-center justify-between rounded-xl border border-white/8 bg-white/4 px-4 py-3"
@@ -460,7 +485,7 @@ export const DashboardPage: React.FC = () => {
               <span className="text-center">Essencial</span>
               <span className="text-center text-emerald-300">Pro</span>
             </div>
-            {comparison.map((row) => (
+            {comparison.map(row => (
               <div
                 key={row.label}
                 className="grid grid-cols-[1.4fr_0.8fr_0.8fr] items-center border-b border-white/6 px-5 py-4 last:border-b-0 md:px-8 md:py-5"
@@ -476,11 +501,7 @@ export const DashboardPage: React.FC = () => {
                   )}
                 </span>
                 <span className="text-center">
-                  {row.pro ? (
-                    <CheckCircle2 className="mx-auto h-5 w-5 text-emerald-400" />
-                  ) : (
-                    '—'
-                  )}
+                  {row.pro ? <CheckCircle2 className="mx-auto h-5 w-5 text-emerald-400" /> : '—'}
                 </span>
               </div>
             ))}

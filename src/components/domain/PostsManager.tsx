@@ -1,5 +1,19 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Megaphone, Scissors, Star, Type, Send, Clock3, Trash2, Loader2, RefreshCw, CalendarDays, List, CheckCheck, Image as ImageIcon } from 'lucide-react';
+import {
+  Megaphone,
+  Scissors,
+  Star,
+  Type,
+  Send,
+  Clock3,
+  Trash2,
+  Loader2,
+  RefreshCw,
+  CalendarDays,
+  List,
+  CheckCheck,
+  Image as ImageIcon,
+} from 'lucide-react';
 import { barbershopApi } from '../../infra/barbershopApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { useBarbershop } from '../../contexts/BarbershopContext';
@@ -9,13 +23,21 @@ import { Toast } from '../ui/Toast';
 
 type PostType = 'haircut' | 'beard' | 'announcement';
 
-const TYPE_OPTIONS: { id: PostType; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+const TYPE_OPTIONS: {
+  id: PostType;
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+}[] = [
   { id: 'haircut', label: 'Corte', icon: Scissors },
   { id: 'beard', label: 'Barba', icon: Star },
   { id: 'announcement', label: 'Divulgação', icon: Type },
 ];
 
-const MODE_OPTIONS: { id: PostMode; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+const MODE_OPTIONS: {
+  id: PostMode;
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+}[] = [
   { id: 'queue', label: 'Fila', icon: List },
   { id: 'appointments', label: 'Agenda', icon: CalendarDays },
   { id: 'both', label: 'Ambos', icon: CheckCheck },
@@ -74,7 +96,10 @@ export const PostsManager: React.FC = () => {
         setAutoPostEnabled(!!config?.autoPostEnabled);
         setScheduled(Array.isArray(posts) ? posts : []);
       } catch (err) {
-        showToast(getErrorMessage(err, 'Não foi possível carregar as configurações de posts.'), 'error');
+        showToast(
+          getErrorMessage(err, 'Não foi possível carregar as configurações de posts.'),
+          'error'
+        );
       } finally {
         setLoadingList(false);
       }
@@ -82,19 +107,22 @@ export const PostsManager: React.FC = () => {
     void load();
   }, [barbershopId, showToast]);
 
-  const regeneratePreview = useCallback(async (mode: PostMode, t: PostType, ti: string, ct: string, id: string | null) => {
-    if (!id) return;
-    setPreviewLoading(true);
-    try {
-      const res = await barbershopApi.getPostPreview(id, mode, t);
-      setPreviewUrl(res?.imageUrl || null);
-    } catch (err) {
-      setPreviewUrl(null);
-      showToast(getErrorMessage(err, 'Não foi possível gerar o preview do post.'), 'error');
-    } finally {
-      setPreviewLoading(false);
-    }
-  }, [showToast]);
+  const regeneratePreview = useCallback(
+    async (mode: PostMode, t: PostType, ti: string, ct: string, id: string | null) => {
+      if (!id) return;
+      setPreviewLoading(true);
+      try {
+        const res = await barbershopApi.getPostPreview(id, mode, t);
+        setPreviewUrl(res?.imageUrl || null);
+      } catch (err) {
+        setPreviewUrl(null);
+        showToast(getErrorMessage(err, 'Não foi possível gerar o preview do post.'), 'error');
+      } finally {
+        setPreviewLoading(false);
+      }
+    },
+    [showToast]
+  );
 
   const previewKey = `${type}|${postMode}|${title}|${ctaText}`;
 
@@ -196,9 +224,11 @@ export const PostsManager: React.FC = () => {
             </h2>
 
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">Tipo do post</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
+                Tipo do post
+              </label>
               <div className="flex gap-2">
-                {TYPE_OPTIONS.map((opt) => (
+                {TYPE_OPTIONS.map(opt => (
                   <button
                     key={opt.id}
                     type="button"
@@ -213,11 +243,13 @@ export const PostsManager: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">Título (opcional)</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
+                Título (opcional)
+              </label>
               <input
                 type="text"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={e => setTitle(e.target.value)}
                 maxLength={80}
                 className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent"
                 placeholder="Ex.: Corte + barba por R$ 40,00"
@@ -225,11 +257,13 @@ export const PostsManager: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">Texto do CTA (opcional)</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
+                Texto do CTA (opcional)
+              </label>
               <input
                 type="text"
                 value={ctaText}
-                onChange={(e) => setCtaText(e.target.value)}
+                onChange={e => setCtaText(e.target.value)}
                 maxLength={40}
                 className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent"
                 placeholder="Ex.: Agende agora"
@@ -237,9 +271,11 @@ export const PostsManager: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">O CTA leva para</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
+                O CTA leva para
+              </label>
               <div className="flex gap-2">
-                {MODE_OPTIONS.map((opt) => (
+                {MODE_OPTIONS.map(opt => (
                   <button
                     key={opt.id}
                     type="button"
@@ -254,7 +290,9 @@ export const PostsManager: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">Publicação</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
+                Publicação
+              </label>
               <div className="flex gap-2 mb-3">
                 <button
                   type="button"
@@ -277,7 +315,7 @@ export const PostsManager: React.FC = () => {
                 <input
                   type="datetime-local"
                   value={scheduledFor}
-                  onChange={(e) => setScheduledFor(e.target.value)}
+                  onChange={e => setScheduledFor(e.target.value)}
                   className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent"
                 />
               )}
@@ -302,7 +340,8 @@ export const PostsManager: React.FC = () => {
                   <Clock3 size={16} className="text-accent" /> Publicação automática
                 </h3>
                 <p className="text-xs text-text-secondary mt-1">
-                  O post é publicado automaticamente quando o salão abre {openingTime ? `(ex: ${openingTime})` : ''}
+                  O post é publicado automaticamente quando o salão abre{' '}
+                  {openingTime ? `(ex: ${openingTime})` : ''}
                 </p>
                 <p className="text-[11px] text-text-muted mt-0.5">
                   O horário vem da agenda do salão (Configurações &gt; Horários)
@@ -329,7 +368,7 @@ export const PostsManager: React.FC = () => {
             </h3>
             {loadingList ? (
               <div className="space-y-3 animate-pulse">
-                {[1, 2].map((i) => (
+                {[1, 2].map(i => (
                   <div key={i} className="h-24 bg-surface-2 rounded-xl" />
                 ))}
               </div>
@@ -339,12 +378,21 @@ export const PostsManager: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                {scheduled.map((post) => (
-                  <div key={post.id} className="bg-surface border border-border rounded-xl p-4 shadow-lg space-y-3">
+                {scheduled.map(post => (
+                  <div
+                    key={post.id}
+                    className="bg-surface border border-border rounded-xl p-4 shadow-lg space-y-3"
+                  >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-text-primary truncate">{post.title || post.content || 'Post sem título'}</p>
-                        {post.ctaText && <p className="text-xs text-text-secondary mt-0.5 truncate">CTA: {post.ctaText} · {MODE_LABEL[post.postMode || 'queue']}</p>}
+                        <p className="text-sm font-bold text-text-primary truncate">
+                          {post.title || post.content || 'Post sem título'}
+                        </p>
+                        {post.ctaText && (
+                          <p className="text-xs text-text-secondary mt-0.5 truncate">
+                            CTA: {post.ctaText} · {MODE_LABEL[post.postMode || 'queue']}
+                          </p>
+                        )}
                       </div>
                       {post.status === 'scheduled' ? (
                         <span className="shrink-0 text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded-md border bg-warning/15 text-warning border-warning/30">
@@ -368,7 +416,11 @@ export const PostsManager: React.FC = () => {
                         disabled={publishingId === post.id}
                         className="flex-1 px-3 py-2 rounded-lg bg-accent text-accent-fg text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-accent-hover transition-all disabled:opacity-50"
                       >
-                        {publishingId === post.id ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                        {publishingId === post.id ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <Send size={14} />
+                        )}
                         Publicar agora
                       </button>
                       <button
@@ -377,7 +429,11 @@ export const PostsManager: React.FC = () => {
                         disabled={deletingId === post.id}
                         className="px-3 py-2 rounded-lg bg-bg border border-border text-text-secondary text-xs font-bold flex items-center justify-center gap-1.5 hover:text-danger transition-all disabled:opacity-50"
                       >
-                        {deletingId === post.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                        {deletingId === post.id ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <Trash2 size={14} />
+                        )}
                         Excluir
                       </button>
                     </div>
@@ -408,7 +464,11 @@ export const PostsManager: React.FC = () => {
                   <Loader2 size={32} className="text-text-muted animate-spin" />
                 </div>
               ) : previewUrl ? (
-                <img src={previewUrl} alt="Preview do post" className="w-full h-full object-cover" />
+                <img
+                  src={previewUrl}
+                  alt="Preview do post"
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 <div className="text-center p-6">
                   <ImageIcon size={32} className="text-text-muted mx-auto mb-2" />
@@ -417,7 +477,10 @@ export const PostsManager: React.FC = () => {
               )}
             </div>
             <p className="text-[11px] text-text-muted mt-3">
-              {settings?.shopName ? `Prévia gerada para ${settings.shopName}.` : 'Prévia gerada pelo sistema.'} Imagem 1080x1080
+              {settings?.shopName
+                ? `Prévia gerada para ${settings.shopName}.`
+                : 'Prévia gerada pelo sistema.'}{' '}
+              Imagem 1080x1080
             </p>
           </div>
         </div>

@@ -36,8 +36,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       </div>
 
       <div className="space-y-3">
-        {services.map((service) => (
-          <div key={service.id} className="bg-surface p-3 rounded-lg border border-border flex items-center justify-between hover:border-border-strong transition-all">
+        {services.map(service => (
+          <div
+            key={service.id}
+            className="bg-surface p-3 rounded-lg border border-border flex items-center justify-between hover:border-border-strong transition-all"
+          >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-surface-2 flex items-center justify-center text-text-secondary">
                 <DynamicIcon name={service.icon} size={20} />
@@ -59,9 +62,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               </button>
               <button
                 onClick={() => {
-                    if(confirm('Tem certeza que deseja excluir este serviço?')) {
-                        onDelete(service.id);
-                    }
+                  if (confirm('Tem certeza que deseja excluir este serviço?')) {
+                    onDelete(service.id);
+                  }
                 }}
                 className="p-2 text-text-secondary hover:text-danger transition-colors"
                 title="Excluir"
@@ -75,7 +78,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
       {isAdding && (
         <ServiceForm
-          onSave={(data) => {
+          onSave={data => {
             onAdd(data);
             setIsAdding(false);
           }}
@@ -86,7 +89,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       {editingId && (
         <ServiceForm
           initialService={services.find(s => s.id === editingId)}
-          onSave={(data) => {
+          onSave={data => {
             onEdit(editingId, data);
             setEditingId(null);
           }}

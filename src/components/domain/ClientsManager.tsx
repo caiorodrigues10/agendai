@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { CalendarDays, Loader2, Package, Plus, Search, UserPlus } from 'lucide-react';
 import {
-  CalendarDays,
-  Loader2,
-  Package,
-  Plus,
-  Search,
-  UserPlus,
-} from 'lucide-react';
-import { ClientPackage, PackagePaymentMethod, SalonClient, Service, ShopSettings, StaffMember } from '../../types';
+  ClientPackage,
+  PackagePaymentMethod,
+  SalonClient,
+  Service,
+  ShopSettings,
+  StaffMember,
+} from '../../types';
 import { clientsApi } from '../../infra/clientsApi';
 import { packagesApi } from '../../infra/packagesApi';
 import { maskPhone } from '../../utils/documentUtils';
@@ -74,7 +74,10 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
   }, [loadList]);
 
   useEffect(() => {
-    packagesApi.listCatalog({ active: true }).then(setCatalog).catch(() => setCatalog([]));
+    packagesApi
+      .listCatalog({ active: true })
+      .then(setCatalog)
+      .catch(() => setCatalog([]));
   }, []);
 
   const openDetail = async (id: string) => {
@@ -168,7 +171,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
     packageName: row.packageName,
     serviceId: row.serviceId,
     serviceName: row.serviceName,
-    serviceDurationMinutes: services.find((s) => s.id === row.serviceId)?.avgTimeMinutes ?? 30,
+    serviceDurationMinutes: services.find(s => s.id === row.serviceId)?.avgTimeMinutes ?? 30,
     totalSessions: row.totalSessions,
     remainingSessions: row.remainingSessions,
     pricePaid: row.pricePaid,
@@ -184,7 +187,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
         <h3 className="text-lg font-bold text-text-primary">Clientes</h3>
         <button
           type="button"
-          onClick={() => setShowCreate((v) => !v)}
+          onClick={() => setShowCreate(v => !v)}
           className="px-3 py-1.5 bg-accent/10 text-accent border border-accent/50 rounded-lg text-xs font-bold flex items-center gap-1"
         >
           <Plus size={14} /> Cadastrar
@@ -194,18 +197,21 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
       {error && <p className="text-sm text-danger">{error}</p>}
 
       {showCreate && (
-        <form onSubmit={handleCreate} className="bg-surface border border-border rounded-xl p-4 space-y-3">
+        <form
+          onSubmit={handleCreate}
+          className="bg-surface border border-border rounded-xl p-4 space-y-3"
+        >
           <input
             className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-sm text-text-primary"
             placeholder="Nome da cliente"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={e => setName(e.target.value)}
           />
           <input
             className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-sm text-text-primary"
             placeholder="WhatsApp"
             value={whatsapp}
-            onChange={(e) => setWhatsapp(maskPhone(e.target.value))}
+            onChange={e => setWhatsapp(maskPhone(e.target.value))}
           />
           <button
             type="submit"
@@ -223,7 +229,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
           className="w-full bg-surface border border-border rounded-xl pl-10 pr-4 py-3 text-sm text-text-primary"
           placeholder="Buscar por nome ou WhatsApp"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={e => setSearch(e.target.value)}
         />
       </div>
 
@@ -236,7 +242,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
         <p className="text-sm text-text-muted text-center py-8">Nenhuma cliente cadastrada.</p>
       ) : (
         <div className="space-y-2">
-          {clients.map((c) => (
+          {clients.map(c => (
             <button
               key={c.id}
               type="button"
@@ -247,7 +253,8 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
             >
               <p className="font-medium text-text-primary">{c.name}</p>
               <p className="text-xs text-text-muted">
-                {maskPhone(c.whatsapp)} · {c.remainingSessions} sessão(ões) · {c.activePackageCount} pacote(s)
+                {maskPhone(c.whatsapp)} · {c.remainingSessions} sessão(ões) · {c.activePackageCount}{' '}
+                pacote(s)
               </p>
             </button>
           ))}
@@ -262,21 +269,23 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
           </div>
 
           <div className="space-y-2">
-            <p className="text-[11px] uppercase font-bold tracking-wider text-text-muted">Vender pacote</p>
+            <p className="text-[11px] uppercase font-bold tracking-wider text-text-muted">
+              Vender pacote
+            </p>
             <select
               className="w-full bg-bg border border-border rounded-xl px-3 py-3 text-sm text-text-primary"
               value={sellPackageId}
-              onChange={(e) => setSellPackageId(e.target.value)}
+              onChange={e => setSellPackageId(e.target.value)}
             >
               <option value="">Escolher pacote</option>
-              {catalog.map((p) => (
+              {catalog.map(p => (
                 <option key={p.id} value={p.id}>
                   {p.name} · {p.sessionCount}x {p.serviceName} · {brl.format(p.price)}
                 </option>
               ))}
             </select>
             <div className="grid grid-cols-4 gap-2">
-              {(Object.keys(PAYMENT_LABEL) as PackagePaymentMethod[]).map((method) => (
+              {(Object.keys(PAYMENT_LABEL) as PackagePaymentMethod[]).map(method => (
                 <button
                   key={method}
                   type="button"
@@ -302,15 +311,18 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
           </div>
 
           <div className="space-y-2">
-            <p className="text-[11px] uppercase font-bold tracking-wider text-text-muted">Pacotes</p>
+            <p className="text-[11px] uppercase font-bold tracking-wider text-text-muted">
+              Pacotes
+            </p>
             {(detail.packages ?? []).length === 0 ? (
               <p className="text-sm text-text-muted">Nenhum pacote vendido.</p>
             ) : (
-              (detail.packages ?? []).map((p) => (
+              (detail.packages ?? []).map(p => (
                 <div key={p.id} className="border border-border rounded-xl p-3 space-y-2">
                   <p className="text-sm font-medium text-text-primary">{p.packageName}</p>
                   <p className="text-xs text-text-muted">
-                    {p.remainingSessions}/{p.totalSessions} sessões · {p.status} · {brl.format(p.pricePaid)}
+                    {p.remainingSessions}/{p.totalSessions} sessões · {p.status} ·{' '}
+                    {brl.format(p.pricePaid)}
                   </p>
                   {p.status === 'ACTIVE' && p.remainingSessions > 0 && (
                     <div className="flex gap-2">
@@ -330,15 +342,17 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
                       </button>
                     </div>
                   )}
-                  {canCancelSale && p.status === 'ACTIVE' && p.remainingSessions === p.totalSessions && (
-                    <button
-                      type="button"
-                      onClick={() => handleCancelSale(p.id)}
-                      className="text-xs text-danger"
-                    >
-                      Cancelar venda
-                    </button>
-                  )}
+                  {canCancelSale &&
+                    p.status === 'ACTIVE' &&
+                    p.remainingSessions === p.totalSessions && (
+                      <button
+                        type="button"
+                        onClick={() => handleCancelSale(p.id)}
+                        className="text-xs text-danger"
+                      >
+                        Cancelar venda
+                      </button>
+                    )}
                 </div>
               ))
             )}
@@ -351,8 +365,8 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
               </p>
               <ul className="text-xs text-text-secondary space-y-1">
                 {(detail.appointments ?? [])
-                  .filter((a) => a.status === 'CONFIRMED')
-                  .map((a) => (
+                  .filter(a => a.status === 'CONFIRMED')
+                  .map(a => (
                     <li key={a.id}>
                       {new Date(a.date).toLocaleDateString('pt-BR')} {a.time} · {a.serviceName}
                     </li>

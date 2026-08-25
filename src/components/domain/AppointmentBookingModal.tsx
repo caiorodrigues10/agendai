@@ -14,15 +14,7 @@ import {
 import { maskPhone } from '../../utils/documentUtils';
 import { clientsApi } from '../../infra/clientsApi';
 import { packagesApi } from '../../infra/packagesApi';
-import {
-  X,
-  Calendar,
-  User,
-  Smartphone,
-  CheckCircle,
-  AlertCircle,
-  Clock,
-} from 'lucide-react';
+import { X, Calendar, User, Smartphone, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { DynamicIcon } from '../ui/DynamicIcon';
 import { ThemedCalendar, toLocalISO } from '../ui/ThemedCalendar';
 
@@ -105,9 +97,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
   const timeSlots = useMemo(() => {
     if (!date || isDateClosed || !daySchedule) return [];
     const slots = generateTimeSlots(daySchedule.openTime, daySchedule.closeTime);
-    return slots.filter((slot) =>
-      isSlotAvailable(slot, selectedStaffId, occupancy, staff.length)
-    );
+    return slots.filter(slot => isSlotAvailable(slot, selectedStaffId, occupancy, staff.length));
   }, [date, isDateClosed, daySchedule, selectedStaffId, occupancy, staff.length]);
 
   useEffect(() => {
@@ -116,9 +106,9 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
     }
   }, [time, timeSlots, setValue]);
 
-  const selectedService = services.find((s) => s.id === selectedServiceId);
+  const selectedService = services.find(s => s.id === selectedServiceId);
   const matchingPackage = clientPackages.find(
-    (p) => p.status === 'ACTIVE' && p.remainingSessions > 0 && p.serviceId === selectedServiceId
+    p => p.status === 'ACTIVE' && p.remainingSessions > 0 && p.serviceId === selectedServiceId
   );
 
   React.useEffect(() => {
@@ -129,7 +119,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
     const t = setTimeout(() => {
       clientsApi
         .list({ search: customerName.trim(), limit: 5 })
-        .then((res) => setClientHits(res.data))
+        .then(res => setClientHits(res.data))
         .catch(() => setClientHits([]));
     }, 300);
     return () => clearTimeout(t);
@@ -153,7 +143,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
   const selectedStaffName =
     selectedStaffId === 'any'
       ? 'Qualquer profissional'
-      : staff.find((m) => m.id === selectedStaffId)?.name ?? 'Profissional';
+      : (staff.find(m => m.id === selectedStaffId)?.name ?? 'Profissional');
 
   const dateLabel = date
     ? new Date(date + 'T12:00:00').toLocaleDateString('pt-BR', {
@@ -191,7 +181,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
     >
       <div
         className="bg-surface border border-border rounded-2xl w-full max-w-md max-h-[min(88dvh,calc(100dvh-2.5rem))] flex flex-col shadow-2xl animate-fade-in"
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       >
         <div className="shrink-0 px-5 pt-5 pb-4 border-b border-border flex items-center justify-between">
           <h3 className="text-lg font-bold text-text-primary">Novo agendamento</h3>
@@ -216,15 +206,13 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
                   services.length > 4 ? 'max-h-56 overflow-y-auto ag-scroll' : ''
                 }`}
               >
-                {services.map((service) => {
+                {services.map(service => {
                   const selected = selectedServiceId === service.id;
                   return (
                     <button
                       key={service.id}
                       type="button"
-                      onClick={() =>
-                        setValue('serviceId', service.id, { shouldValidate: true })
-                      }
+                      onClick={() => setValue('serviceId', service.id, { shouldValidate: true })}
                       className={`p-3.5 rounded-xl border text-left flex items-center gap-3 transition-all min-h-[56px] ${
                         selected ? selectedCard : idleCard
                       }`}
@@ -266,13 +254,11 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
                 >
                   Qualquer
                 </button>
-                {staff.map((member) => (
+                {staff.map(member => (
                   <button
                     key={member.id}
                     type="button"
-                    onClick={() =>
-                      setValue('staffId', member.id, { shouldValidate: true })
-                    }
+                    onClick={() => setValue('staffId', member.id, { shouldValidate: true })}
                     className={`px-3.5 py-2.5 rounded-xl border text-sm font-semibold min-h-[44px] transition-all ${
                       selectedStaffId === member.id ? selectedCard : idleCard
                     }`}
@@ -295,8 +281,8 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
                   value={date}
                   min={today}
                   max={maxDate}
-                  isDayDisabled={(day) => !getDaySchedule(day, settings.schedule).isOpen}
-                  onChange={(iso) => setValue('date', iso, { shouldValidate: true })}
+                  isDayDisabled={day => !getDaySchedule(day, settings.schedule).isOpen}
+                  onChange={iso => setValue('date', iso, { shouldValidate: true })}
                 />
               </div>
               <input type="hidden" {...register('date')} />
@@ -322,7 +308,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
                     timeSlots.length > 12 ? 'max-h-40 overflow-y-auto ag-scroll' : ''
                   }`}
                 >
-                  {timeSlots.map((slot) => (
+                  {timeSlots.map(slot => (
                     <button
                       key={slot}
                       type="button"
@@ -371,7 +357,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
                   placeholder="WhatsApp (11) 99999-9999"
                   className={`${fieldClass(Boolean(errors.whatsapp))} pl-10`}
                   value={watch('whatsapp') ?? ''}
-                  onChange={(e) =>
+                  onChange={e =>
                     setValue('whatsapp', maskPhone(e.target.value), { shouldValidate: true })
                   }
                 />
@@ -379,7 +365,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
               <FieldError message={errors.whatsapp?.message} />
               {clientHits.length > 0 && (
                 <div className="border border-border rounded-xl overflow-hidden bg-bg">
-                  {clientHits.map((c) => (
+                  {clientHits.map(c => (
                     <button
                       key={c.id}
                       type="button"
@@ -402,7 +388,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
                   <input
                     type="checkbox"
                     checked={usePackage}
-                    onChange={(e) => setUsePackage(e.target.checked)}
+                    onChange={e => setUsePackage(e.target.checked)}
                   />
                   Usar pacote ({matchingPackage.remainingSessions} restante
                   {matchingPackage.remainingSessions === 1 ? '' : 's'})

@@ -22,27 +22,26 @@ import {
   Sparkles,
   Wallet,
   ArrowRightLeft,
-  HeartHandshake
+  HeartHandshake,
 } from 'lucide-react';
 import { useSubscription } from '../../contexts/SubscriptionContext';
 import {
   subscriptionsApi,
   PlanEconomics,
   MySubscription,
-  CancellationContext
+  CancellationContext,
 } from '../../infra/subscriptionsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { trialCampaign } from '../../marketing/trialCampaign';
 
-const brl = (n: number) =>
-  n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const brl = (n: number) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 const STATUS_LABEL: Record<string, string> = {
   TRIALING: 'Em trial',
   ACTIVE: 'Ativa',
   PAST_DUE: 'Pagamento pendente',
   CANCELED: 'Cancelada',
-  UNPAID: 'Não paga'
+  UNPAID: 'Não paga',
 };
 
 const CANCEL_REASONS: { value: string; label: string }[] = [
@@ -52,40 +51,40 @@ const CANCEL_REASONS: { value: string; label: string }[] = [
   { value: 'missing_features', label: 'Faltam funcionalidades' },
   { value: 'technical_issues', label: 'Problemas técnicos' },
   { value: 'closing', label: 'Vou encerrar o salão' },
-  { value: 'other', label: 'Outro' }
+  { value: 'other', label: 'Outro' },
 ];
 
 const RETENTION_BENEFITS = [
   {
     icon: <ListOrdered size={18} />,
     title: 'Fila digital',
-    desc: 'Seus clientes entram na fila pelo celular, sem baixar app.'
+    desc: 'Seus clientes entram na fila pelo celular, sem baixar app.',
   },
   {
     icon: <MessageCircle size={18} />,
     title: 'Lembretes no WhatsApp',
-    desc: 'Agendamentos confirmados automaticamente e menos faltas.'
+    desc: 'Agendamentos confirmados automaticamente e menos faltas.',
   },
   {
     icon: <Sparkles size={18} />,
     title: 'Insights com IA',
-    desc: 'Previsão de movimento e dicas para encaixar mais serviços.'
+    desc: 'Previsão de movimento e dicas para encaixar mais serviços.',
   },
   {
     icon: <Megaphone size={18} />,
     title: 'Posts automáticos',
-    desc: 'Divulgue o salão sem gastar tempo criando conteúdo.'
+    desc: 'Divulgue o salão sem gastar tempo criando conteúdo.',
   },
   {
     icon: <Wallet size={18} />,
     title: 'Financeiro e fiado',
-    desc: 'Controle de caixa, despesas e fiado dos clientes em um só lugar.'
+    desc: 'Controle de caixa, despesas e fiado dos clientes em um só lugar.',
   },
   {
     icon: <ArrowRightLeft size={18} />,
     title: 'Comparativo mensal vs anual',
-    desc: 'Veja quanto o plano anual economiza frente ao mensal.'
-  }
+    desc: 'Veja quanto o plano anual economiza frente ao mensal.',
+  },
 ];
 
 export const OwnerSubscriptionPanel: React.FC = () => {
@@ -102,14 +101,13 @@ export const OwnerSubscriptionPanel: React.FC = () => {
   const [cancelCtx, setCancelCtx] = useState<CancellationContext | null>(null);
   const [cancelCtxLoading, setCancelCtxLoading] = useState(false);
   const [pixKey, setPixKey] = useState('');
-  const [pixKeyType, setPixKeyType] = useState<
-    'CPF' | 'CNPJ' | 'PHONE' | 'EMAIL' | 'RANDOM'
-  >('EMAIL');
+  const [pixKeyType, setPixKeyType] = useState<'CPF' | 'CNPJ' | 'PHONE' | 'EMAIL' | 'RANDOM'>(
+    'EMAIL'
+  );
   const cancelTriggerRef = useRef<HTMLButtonElement>(null);
 
   const needsPixKey =
-    cancelCtx?.proratedRefundAvailable &&
-    cancelCtx?.refundProvider === 'ABACATEPAY';
+    cancelCtx?.proratedRefundAvailable && cancelCtx?.refundProvider === 'ABACATEPAY';
 
   useEffect(() => {
     if (data) setDetail(data);
@@ -249,8 +247,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                   Trial Pro · {trial.daysRemainingInTrial} dia(s) restantes
                 </p>
                 <p className="mt-0.5 text-[11px] text-text-secondary">
-                  Acesso Pro completo até{' '}
-                  {new Date(trial.trialEndsAt).toLocaleDateString('pt-BR')}.{' '}
+                  Acesso Pro completo até {new Date(trial.trialEndsAt).toLocaleDateString('pt-BR')}.{' '}
                   {trialCampaign.ownerEvaluate} Depois segue o plano {sub.planName}.
                 </p>
               </div>
@@ -350,7 +347,9 @@ export const OwnerSubscriptionPanel: React.FC = () => {
             <div className="flex items-center gap-2 text-warning mb-2">
               <TrendingDown size={18} />
               <h3 className="font-bold text-sm">
-                {onMonthly ? 'Quanto você deixa de economizar' : 'Receita que a plataforma deixa de cobrar'}
+                {onMonthly
+                  ? 'Quanto você deixa de economizar'
+                  : 'Receita que a plataforma deixa de cobrar'}
               </h3>
             </div>
             {onMonthly ? (
@@ -369,8 +368,8 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                   {brl(economics.platformForegoneRevenueSoFar)}
                 </p>
                 <p className="text-xs text-text-secondary mt-1">
-                  Desconto que o AGENDAI deixou de faturar no seu plano anual neste período
-                  ({brl(economics.platformForegoneRevenuePerYear)}/ano).
+                  Desconto que o AGENDAI deixou de faturar no seu plano anual neste período (
+                  {brl(economics.platformForegoneRevenuePerYear)}/ano).
                 </p>
               </>
             ) : (
@@ -400,271 +399,273 @@ export const OwnerSubscriptionPanel: React.FC = () => {
           className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={closeCancelModal}
         >
-          <FocusLock
-            autoFocus
-            returnFocus
-            onDeactivation={closeCancelModal}
-          >
+          <FocusLock autoFocus returnFocus onDeactivation={closeCancelModal}>
             <div
               className="bg-surface border border-border rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto relative"
               onClick={e => e.stopPropagation()}
             >
-            <button
-              onClick={closeCancelModal}
-              className="absolute right-4 top-4 text-text-muted hover:text-text-primary transition-colors"
-              aria-label="Fechar"
-            >
-              <X size={20} />
-            </button>
+              <button
+                onClick={closeCancelModal}
+                className="absolute right-4 top-4 text-text-muted hover:text-text-primary transition-colors"
+                aria-label="Fechar"
+              >
+                <X size={20} />
+              </button>
 
-            {cancelStep === 1 ? (
-              <>
-                <div className="text-center mb-6">
-                  <div className="w-12 h-12 mx-auto rounded-2xl bg-accent/10 text-accent flex items-center justify-center mb-3">
-                    <HeartHandshake size={24} />
-                  </div>
-                  <h3 className="text-xl font-bold text-text-primary">Sentimos muito em ver você ir</h3>
-                  <p className="text-sm text-text-secondary mt-1">
-                    Antes de ir, veja o que você construiu até aqui.
-                  </p>
-                </div>
-
-                {cancelCtxLoading ? (
-                  <div className="flex justify-center py-12 text-accent">
-                    <Loader2 className="animate-spin" size={28} />
-                  </div>
-                ) : cancelCtx?.hasUsage ? (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {[
-                        {
-                          icon: <Users size={17} />,
-                          value: String(cancelCtx.uniqueCustomers),
-                          label: 'clientes atendidos'
-                        },
-                        {
-                          icon: <Banknote size={17} />,
-                          value: brl(cancelCtx.revenue),
-                          label: 'em serviços'
-                        },
-                        {
-                          icon: <CalendarCheck size={17} />,
-                          value: String(cancelCtx.appointmentsCompleted),
-                          label: 'agendamentos'
-                        },
-                        ...(cancelCtx.savingsSoFar > 0
-                          ? [
-                              {
-                                icon: <PiggyBank size={17} />,
-                                value: brl(cancelCtx.savingsSoFar),
-                                label: 'economizados no anual'
-                              }
-                            ]
-                          : []),
-                        ...(cancelCtx.postsPublished > 0
-                          ? [
-                              {
-                                icon: <Megaphone size={17} />,
-                                value: String(cancelCtx.postsPublished),
-                                label: 'posts publicados'
-                              }
-                            ]
-                          : []),
-                        {
-                          icon: <Clock size={17} />,
-                          value: String(cancelCtx.usageDays),
-                          label: 'dias com a gente'
-                        }
-                      ].map(m => (
-                        <div
-                          key={m.label}
-                          className="bg-bg/50 border border-border rounded-xl p-4 text-center"
-                        >
-                          <div className="w-8 h-8 mx-auto rounded-lg bg-accent/10 text-accent flex items-center justify-center mb-2">
-                            {m.icon}
-                          </div>
-                          <p className="text-lg font-black text-text-primary leading-tight">{m.value}</p>
-                          <p className="text-[10px] text-text-muted uppercase tracking-wider font-semibold mt-0.5">
-                            {m.label}
-                          </p>
-                        </div>
-                      ))}
+              {cancelStep === 1 ? (
+                <>
+                  <div className="text-center mb-6">
+                    <div className="w-12 h-12 mx-auto rounded-2xl bg-accent/10 text-accent flex items-center justify-center mb-3">
+                      <HeartHandshake size={24} />
                     </div>
-                    <div className="rounded-xl bg-accent/5 border border-accent/15 px-4 py-3 flex items-center gap-2">
-                      <Sparkles size={15} className="text-accent shrink-0" />
-                      <p className="text-xs text-text-secondary">
-                        Esses resultados são seus — não perca tudo isso agora.
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {RETENTION_BENEFITS.map(b => (
-                        <div key={b.title} className="flex gap-3 bg-bg/50 border border-border rounded-xl p-4">
-                          <div className="w-9 h-9 shrink-0 rounded-lg bg-accent/10 text-accent flex items-center justify-center">
-                            {b.icon}
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-text-primary">{b.title}</p>
-                            <p className="text-xs text-text-secondary mt-0.5">{b.desc}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="rounded-xl bg-accent/5 border border-accent/15 px-4 py-3 flex items-center gap-2">
-                      <Sparkles size={15} className="text-accent shrink-0" />
-                      <p className="text-xs text-text-secondary">
-                        Tudo isso ainda espera por você no AgendAI.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex flex-col sm:flex-row gap-3 mt-6">
-                  {cancelCtx && !cancelCtx.hasUsage && (
-                    <button
-                      onClick={() => {
-                        closeCancelModal();
-                        navigate('/app');
-                      }}
-                      className="flex-1 py-2.5 rounded-xl bg-accent text-accent-fg text-sm font-bold flex items-center justify-center gap-2 hover:bg-accent-hover"
-                    >
-                      Explorar recursos <ArrowRight size={15} />
-                    </button>
-                  )}
-                  {!cancelCtxLoading && (
-                    <button
-                      onClick={closeCancelModal}
-                      className="flex-1 py-2.5 rounded-xl bg-accent text-accent-fg text-sm font-bold hover:bg-accent-hover"
-                    >
-                      Continuar com meu plano
-                    </button>
-                  )}
-                  {!cancelCtxLoading && (
-                    <button
-                      onClick={() => setCancelStep(2)}
-                      className="px-5 py-2.5 rounded-xl border border-danger/40 text-danger text-sm font-bold hover:bg-danger/10"
-                    >
-                      Cancelar mesmo assim
-                    </button>
-                  )}
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="mb-5">
-                  <h3 className="text-xl font-bold text-text-primary">Nos conte o motivo</h3>
-                  <p className="text-sm text-text-secondary mt-1">
-                    Sua opinião nos ajuda a melhorar.
-                  </p>
-                </div>
-
-                {error && (
-                  <div className="p-3 rounded-xl bg-danger/10 border border-danger/30 text-danger text-sm flex gap-2 mb-4">
-                    <AlertCircle size={16} className="shrink-0 mt-0.5" /> {error}
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  {CANCEL_REASONS.map(r => (
-                    <label
-                      key={r.value}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all ${
-                        cancelReason === r.value
-                          ? 'border-accent bg-accent/10'
-                          : 'border-border bg-bg/40 hover:border-border-strong'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="cancel-reason"
-                        value={r.value}
-                        checked={cancelReason === r.value}
-                        onChange={() => setCancelReason(r.value)}
-                        className="accent-accent w-4 h-4 shrink-0"
-                      />
-                      <span className="text-sm font-medium text-text-primary">{r.label}</span>
-                    </label>
-                  ))}
-                </div>
-
-                {cancelCtx?.proratedRefundAvailable && (
-                  <div className="rounded-xl bg-success/10 border border-success/30 px-4 py-3 flex gap-2 mt-5">
-                    <Banknote size={15} className="text-success shrink-0 mt-0.5" />
-                    <p className="text-xs text-success">
-                      Você receberá automaticamente o valor proporcional do período já
-                      pago e não utilizado, com multa de 20% sobre o valor do
-                      reembolso. O acesso continua até o fim do seu período.
+                    <h3 className="text-xl font-bold text-text-primary">
+                      Sentimos muito em ver você ir
+                    </h3>
+                    <p className="text-sm text-text-secondary mt-1">
+                      Antes de ir, veja o que você construiu até aqui.
                     </p>
                   </div>
-                )}
 
-                {needsPixKey && (
-                  <div className="mt-5 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Wallet size={15} className="text-accent shrink-0" />
-                      <p className="text-sm font-bold text-text-primary">
-                        Chave PIX para devolução
-                      </p>
+                  {cancelCtxLoading ? (
+                    <div className="flex justify-center py-12 text-accent">
+                      <Loader2 className="animate-spin" size={28} />
                     </div>
-                    <p className="text-xs text-text-secondary -mt-2">
-                      Seu pagamento foi feito pelo AbacatePay, que só reembolsa o total.
-                      Para devolvermos apenas o proporcional, enviamos um PIX para sua
-                      chave. Informe a chave onde deseja receber.
-                    </p>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={pixKey}
-                        onChange={e => setPixKey(e.target.value)}
-                        placeholder="Chave PIX (ex.: email, CPF, celular)"
-                        className="flex-1 px-3 py-2.5 rounded-xl bg-bg border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
-                      />
-                      <select
-                        value={pixKeyType}
-                        onChange={e => setPixKeyType(e.target.value as any)}
-                        className="px-3 py-2.5 rounded-xl bg-bg border border-border text-sm text-text-primary focus:outline-none focus:border-accent"
+                  ) : cancelCtx?.hasUsage ? (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {[
+                          {
+                            icon: <Users size={17} />,
+                            value: String(cancelCtx.uniqueCustomers),
+                            label: 'clientes atendidos',
+                          },
+                          {
+                            icon: <Banknote size={17} />,
+                            value: brl(cancelCtx.revenue),
+                            label: 'em serviços',
+                          },
+                          {
+                            icon: <CalendarCheck size={17} />,
+                            value: String(cancelCtx.appointmentsCompleted),
+                            label: 'agendamentos',
+                          },
+                          ...(cancelCtx.savingsSoFar > 0
+                            ? [
+                                {
+                                  icon: <PiggyBank size={17} />,
+                                  value: brl(cancelCtx.savingsSoFar),
+                                  label: 'economizados no anual',
+                                },
+                              ]
+                            : []),
+                          ...(cancelCtx.postsPublished > 0
+                            ? [
+                                {
+                                  icon: <Megaphone size={17} />,
+                                  value: String(cancelCtx.postsPublished),
+                                  label: 'posts publicados',
+                                },
+                              ]
+                            : []),
+                          {
+                            icon: <Clock size={17} />,
+                            value: String(cancelCtx.usageDays),
+                            label: 'dias com a gente',
+                          },
+                        ].map(m => (
+                          <div
+                            key={m.label}
+                            className="bg-bg/50 border border-border rounded-xl p-4 text-center"
+                          >
+                            <div className="w-8 h-8 mx-auto rounded-lg bg-accent/10 text-accent flex items-center justify-center mb-2">
+                              {m.icon}
+                            </div>
+                            <p className="text-lg font-black text-text-primary leading-tight">
+                              {m.value}
+                            </p>
+                            <p className="text-[10px] text-text-muted uppercase tracking-wider font-semibold mt-0.5">
+                              {m.label}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="rounded-xl bg-accent/5 border border-accent/15 px-4 py-3 flex items-center gap-2">
+                        <Sparkles size={15} className="text-accent shrink-0" />
+                        <p className="text-xs text-text-secondary">
+                          Esses resultados são seus — não perca tudo isso agora.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {RETENTION_BENEFITS.map(b => (
+                          <div
+                            key={b.title}
+                            className="flex gap-3 bg-bg/50 border border-border rounded-xl p-4"
+                          >
+                            <div className="w-9 h-9 shrink-0 rounded-lg bg-accent/10 text-accent flex items-center justify-center">
+                              {b.icon}
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-text-primary">{b.title}</p>
+                              <p className="text-xs text-text-secondary mt-0.5">{b.desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="rounded-xl bg-accent/5 border border-accent/15 px-4 py-3 flex items-center gap-2">
+                        <Sparkles size={15} className="text-accent shrink-0" />
+                        <p className="text-xs text-text-secondary">
+                          Tudo isso ainda espera por você no AgendAI.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                    {cancelCtx && !cancelCtx.hasUsage && (
+                      <button
+                        onClick={() => {
+                          closeCancelModal();
+                          navigate('/app');
+                        }}
+                        className="flex-1 py-2.5 rounded-xl bg-accent text-accent-fg text-sm font-bold flex items-center justify-center gap-2 hover:bg-accent-hover"
                       >
-                        <option value="EMAIL">E-mail</option>
-                        <option value="CPF">CPF</option>
-                        <option value="CNPJ">CNPJ</option>
-                        <option value="PHONE">Celular</option>
-                        <option value="RANDOM">Aleatória</option>
-                      </select>
-                    </div>
-                  </div>
-                )}
-
-                <div className="rounded-xl bg-warning/10 border border-warning/30 px-4 py-3 flex gap-2 mt-5">
-                  <AlertCircle size={15} className="text-warning shrink-0 mt-0.5" />
-                  <p className="text-xs text-warning">
-                    Ao cancelar você perde o acesso aos recursos no fim do período já
-                    pago.
-                  </p>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-3 mt-5">
-                  <button
-                    onClick={() => setCancelStep(1)}
-                    className="flex-1 py-2.5 rounded-xl border border-border text-text-secondary text-sm font-bold hover:bg-surface-2"
-                  >
-                    Voltar
-                  </button>
-                  <button
-                    onClick={handleConfirmCancel}
-                    disabled={!cancelReason || (needsPixKey && !pixKey.trim()) || cancelling}
-                    className="flex-1 py-2.5 rounded-xl bg-danger text-white text-sm font-bold flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-40"
-                  >
-                    {cancelling ? (
-                      <Loader2 size={15} className="animate-spin" />
-                    ) : (
-                      <XCircle size={15} />
+                        Explorar recursos <ArrowRight size={15} />
+                      </button>
                     )}
-                    Cancelar assinatura
-                  </button>
-                </div>
-</>
+                    {!cancelCtxLoading && (
+                      <button
+                        onClick={closeCancelModal}
+                        className="flex-1 py-2.5 rounded-xl bg-accent text-accent-fg text-sm font-bold hover:bg-accent-hover"
+                      >
+                        Continuar com meu plano
+                      </button>
+                    )}
+                    {!cancelCtxLoading && (
+                      <button
+                        onClick={() => setCancelStep(2)}
+                        className="px-5 py-2.5 rounded-xl border border-danger/40 text-danger text-sm font-bold hover:bg-danger/10"
+                      >
+                        Cancelar mesmo assim
+                      </button>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="mb-5">
+                    <h3 className="text-xl font-bold text-text-primary">Nos conte o motivo</h3>
+                    <p className="text-sm text-text-secondary mt-1">
+                      Sua opinião nos ajuda a melhorar.
+                    </p>
+                  </div>
+
+                  {error && (
+                    <div className="p-3 rounded-xl bg-danger/10 border border-danger/30 text-danger text-sm flex gap-2 mb-4">
+                      <AlertCircle size={16} className="shrink-0 mt-0.5" /> {error}
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    {CANCEL_REASONS.map(r => (
+                      <label
+                        key={r.value}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all ${
+                          cancelReason === r.value
+                            ? 'border-accent bg-accent/10'
+                            : 'border-border bg-bg/40 hover:border-border-strong'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="cancel-reason"
+                          value={r.value}
+                          checked={cancelReason === r.value}
+                          onChange={() => setCancelReason(r.value)}
+                          className="accent-accent w-4 h-4 shrink-0"
+                        />
+                        <span className="text-sm font-medium text-text-primary">{r.label}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {cancelCtx?.proratedRefundAvailable && (
+                    <div className="rounded-xl bg-success/10 border border-success/30 px-4 py-3 flex gap-2 mt-5">
+                      <Banknote size={15} className="text-success shrink-0 mt-0.5" />
+                      <p className="text-xs text-success">
+                        Você receberá automaticamente o valor proporcional do período já pago e não
+                        utilizado, com multa de 20% sobre o valor do reembolso. O acesso continua
+                        até o fim do seu período.
+                      </p>
+                    </div>
+                  )}
+
+                  {needsPixKey && (
+                    <div className="mt-5 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Wallet size={15} className="text-accent shrink-0" />
+                        <p className="text-sm font-bold text-text-primary">
+                          Chave PIX para devolução
+                        </p>
+                      </div>
+                      <p className="text-xs text-text-secondary -mt-2">
+                        Seu pagamento foi feito pelo AbacatePay, que só reembolsa o total. Para
+                        devolvermos apenas o proporcional, enviamos um PIX para sua chave. Informe a
+                        chave onde deseja receber.
+                      </p>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={pixKey}
+                          onChange={e => setPixKey(e.target.value)}
+                          placeholder="Chave PIX (ex.: email, CPF, celular)"
+                          className="flex-1 px-3 py-2.5 rounded-xl bg-bg border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
+                        />
+                        <select
+                          value={pixKeyType}
+                          onChange={e => setPixKeyType(e.target.value as any)}
+                          className="px-3 py-2.5 rounded-xl bg-bg border border-border text-sm text-text-primary focus:outline-none focus:border-accent"
+                        >
+                          <option value="EMAIL">E-mail</option>
+                          <option value="CPF">CPF</option>
+                          <option value="CNPJ">CNPJ</option>
+                          <option value="PHONE">Celular</option>
+                          <option value="RANDOM">Aleatória</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="rounded-xl bg-warning/10 border border-warning/30 px-4 py-3 flex gap-2 mt-5">
+                    <AlertCircle size={15} className="text-warning shrink-0 mt-0.5" />
+                    <p className="text-xs text-warning">
+                      Ao cancelar você perde o acesso aos recursos no fim do período já pago.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-3 mt-5">
+                    <button
+                      onClick={() => setCancelStep(1)}
+                      className="flex-1 py-2.5 rounded-xl border border-border text-text-secondary text-sm font-bold hover:bg-surface-2"
+                    >
+                      Voltar
+                    </button>
+                    <button
+                      onClick={handleConfirmCancel}
+                      disabled={!cancelReason || (needsPixKey && !pixKey.trim()) || cancelling}
+                      className="flex-1 py-2.5 rounded-xl bg-danger text-white text-sm font-bold flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-40"
+                    >
+                      {cancelling ? (
+                        <Loader2 size={15} className="animate-spin" />
+                      ) : (
+                        <XCircle size={15} />
+                      )}
+                      Cancelar assinatura
+                    </button>
+                  </div>
+                </>
               )}
             </div>
           </FocusLock>

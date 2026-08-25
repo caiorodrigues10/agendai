@@ -146,17 +146,26 @@ const token = () => authStorage.getAccessToken() || '';
 
 export const subscriptionsApi = {
   me: () =>
-    apiClient<{ success: boolean; data: MySubscription }>('/api/subscriptions/me', 'GET', undefined, token()).then(res =>
-      unwrap<MySubscription>(res)
-    ),
+    apiClient<{ success: boolean; data: MySubscription }>(
+      '/api/subscriptions/me',
+      'GET',
+      undefined,
+      token()
+    ).then(res => unwrap<MySubscription>(res)),
   subscribe: (payload: SubscribePayload) =>
-    apiClient<{ success: boolean; data: Subscription }>('/api/subscriptions', 'POST', payload, token()).then(res =>
-      unwrap<Subscription>(res)
-    ),
+    apiClient<{ success: boolean; data: Subscription }>(
+      '/api/subscriptions',
+      'POST',
+      payload,
+      token()
+    ).then(res => unwrap<Subscription>(res)),
   setupTrialCard: (payload: SetupTrialCardPayload) =>
-    apiClient<{ success: boolean; data: Subscription }>('/api/subscriptions/setup-trial-card', 'POST', payload, token()).then(res =>
-      unwrap<Subscription>(res)
-    ),
+    apiClient<{ success: boolean; data: Subscription }>(
+      '/api/subscriptions/setup-trial-card',
+      'POST',
+      payload,
+      token()
+    ).then(res => unwrap<Subscription>(res)),
   cancel: (payload?: { cancelReason?: string; pixKey?: string; pixKeyType?: string }) =>
     apiClient<CancelResponse>(
       '/api/subscriptions/me',
@@ -171,9 +180,12 @@ export const subscriptionsApi = {
       token()
     ),
   getCancellationContext: () =>
-    apiClient<{ success: boolean; data: CancellationContext }>('/api/subscriptions/cancellation-context', 'GET', undefined, token()).then(res =>
-      unwrap<CancellationContext>(res)
-    )
+    apiClient<{ success: boolean; data: CancellationContext }>(
+      '/api/subscriptions/cancellation-context',
+      'GET',
+      undefined,
+      token()
+    ).then(res => unwrap<CancellationContext>(res)),
 };
 
 // Compat: `plans` também aparece embutido nos erros 402 (SUBSCRIPTION_REQUIRED)

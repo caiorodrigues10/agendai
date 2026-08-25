@@ -22,26 +22,33 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
   isCurrentUser,
   shopName = 'salão',
   onStatusChange,
-  onLeaveQueue
+  onLeaveQueue,
 }) => {
-
   const getStatusColor = (status: string) => {
-    switch(status) {
-      case 'in_chair': return 'border-l-4 border-l-success bg-success/5';
-      case 'waiting': return isCurrentUser
+    switch (status) {
+      case 'in_chair':
+        return 'border-l-4 border-l-success bg-success/5';
+      case 'waiting':
+        return isCurrentUser
           ? 'border-l-4 border-l-accent bg-accent/10 border border-accent/30'
           : 'border-l-4 border-l-border-strong bg-surface';
-      case 'completed': return 'border-l-4 border-l-border-strong bg-surface opacity-60';
-      default: return 'bg-surface';
+      case 'completed':
+        return 'border-l-4 border-l-border-strong bg-surface opacity-60';
+      default:
+        return 'bg-surface';
     }
   };
 
   const getStatusLabel = (status: string) => {
-     switch(status) {
-      case 'in_chair': return 'Na Cadeira';
-      case 'waiting': return 'Aguardando';
-      case 'completed': return 'Finalizado';
-      default: return status;
+    switch (status) {
+      case 'in_chair':
+        return 'Na Cadeira';
+      case 'waiting':
+        return 'Aguardando';
+      case 'completed':
+        return 'Finalizado';
+      default:
+        return status;
     }
   };
 
@@ -57,10 +64,13 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
     window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
-  const hasValidPhone = item.whatsapp && item.whatsapp !== '00000000000' && item.whatsapp.replace(/\D/g, '').length > 5;
+  const hasValidPhone =
+    item.whatsapp && item.whatsapp !== '00000000000' && item.whatsapp.replace(/\D/g, '').length > 5;
 
   return (
-    <div className={`rounded-lg p-4 mb-3 border border-border shadow-sm transition-all ${getStatusColor(item.status)}`}>
+    <div
+      className={`rounded-lg p-4 mb-3 border border-border shadow-sm transition-all ${getStatusColor(item.status)}`}
+    >
       <div className="flex justify-between items-start">
         <div className="flex gap-3">
           <div className="flex flex-col items-center justify-center min-w-[2.5rem]">
@@ -72,87 +82,100 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
                 </div>
               </span>
             ) : (
-              <span className={`text-xl font-bold ${isCurrentUser ? 'text-accent' : 'text-text-muted'}`}>#{position}</span>
+              <span
+                className={`text-xl font-bold ${isCurrentUser ? 'text-accent' : 'text-text-muted'}`}
+              >
+                #{position}
+              </span>
             )}
           </div>
           <div>
             <h4 className="font-bold text-lg text-text-primary">
-                {item.customerName} {isCurrentUser && <span className="text-xs text-accent ml-2">(Você)</span>}
+              {item.customerName}{' '}
+              {isCurrentUser && <span className="text-xs text-accent ml-2">(Você)</span>}
             </h4>
             <div className="flex items-center gap-2 text-sm text-text-secondary">
-               {service && <DynamicIcon name={service.icon} size={14} />}
-               <span>{service?.name}</span>
+              {service && <DynamicIcon name={service.icon} size={14} />}
+              <span>{service?.name}</span>
             </div>
             <div className="flex items-center gap-1 text-xs text-text-muted mt-1">
-               <Clock size={10} />
-               <span>Chegou às {new Date(item.joinedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+              <Clock size={10} />
+              <span>
+                Chegou às{' '}
+                {new Date(item.joinedAt).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </span>
             </div>
           </div>
         </div>
 
         <div className="text-right flex flex-col items-end gap-2">
-          <span className={`inline-block px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wide
+          <span
+            className={`inline-block px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wide
             ${item.status === 'in_chair' ? 'text-success bg-success/10' : 'text-text-secondary bg-surface-2'}
-          `}>
+          `}
+          >
             {getStatusLabel(item.status)}
           </span>
 
           {isCurrentUser && item.status === 'waiting' && !isAdmin && (
-              <button
-                onClick={() => {
-                    if(confirm("Deseja realmente sair da fila?")) onLeaveQueue(item.id);
-                }}
-                className="mt-1 px-3 py-1.5 rounded-lg bg-danger/10 border border-danger/30 hover:bg-danger/20 text-danger text-xs font-bold transition-all flex items-center gap-2 group"
-              >
-                <LogOut size={12} className="group-hover:-translate-x-0.5 transition-transform" />
-                Sair da fila
-              </button>
+            <button
+              onClick={() => {
+                if (confirm('Deseja realmente sair da fila?')) onLeaveQueue(item.id);
+              }}
+              className="mt-1 px-3 py-1.5 rounded-lg bg-danger/10 border border-danger/30 hover:bg-danger/20 text-danger text-xs font-bold transition-all flex items-center gap-2 group"
+            >
+              <LogOut size={12} className="group-hover:-translate-x-0.5 transition-transform" />
+              Sair da fila
+            </button>
           )}
         </div>
       </div>
 
       {isAdmin && item.status !== 'completed' && (
         <div className="mt-4 pt-3 border-t border-border flex flex-wrap justify-end gap-2">
-           {item.status === 'waiting' && (
-             <>
-                {hasValidPhone && (
-                  <>
-                    <button
-                      onClick={sendReminder}
-                      className="px-3 py-1.5 text-xs text-success bg-success/10 border border-success/30 hover:bg-success/20 rounded flex items-center gap-1 transition-colors"
-                    >
-                      <MessageCircle size={14} /> Avisar (15m)
-                    </button>
-                    <button
-                      onClick={sendNextNotification}
-                      className="px-3 py-1.5 text-xs text-accent bg-accent/10 border border-accent/30 hover:bg-accent/20 rounded flex items-center gap-1 transition-colors"
-                    >
-                      <MessageCircle size={14} /> É o Próximo
-                    </button>
-                  </>
-                )}
-                <button
-                  onClick={() => onStatusChange(item.id, 'cancelled')}
-                  className="px-3 py-1.5 text-xs text-danger hover:bg-danger/10 rounded flex items-center gap-1 transition-colors"
-                >
-                   <Trash2 size={14} /> Cancelar
-                </button>
-                <button
-                  onClick={() => onStatusChange(item.id, 'in_chair')}
-                  className="px-4 py-1.5 text-xs font-bold text-accent-fg bg-accent hover:bg-accent-hover rounded shadow-lg shadow-accent/20 flex items-center gap-1 transition-colors"
-                >
-                  <Bell size={14} /> Chamar
-                </button>
-             </>
-           )}
-           {item.status === 'in_chair' && (
-             <button
-                onClick={() => onStatusChange(item.id, 'completed')}
-                className="px-4 py-1.5 text-xs font-bold text-text-primary bg-success hover:bg-success/80 rounded shadow-md w-full flex items-center justify-center gap-1 transition-colors"
+          {item.status === 'waiting' && (
+            <>
+              {hasValidPhone && (
+                <>
+                  <button
+                    onClick={sendReminder}
+                    className="px-3 py-1.5 text-xs text-success bg-success/10 border border-success/30 hover:bg-success/20 rounded flex items-center gap-1 transition-colors"
+                  >
+                    <MessageCircle size={14} /> Avisar (15m)
+                  </button>
+                  <button
+                    onClick={sendNextNotification}
+                    className="px-3 py-1.5 text-xs text-accent bg-accent/10 border border-accent/30 hover:bg-accent/20 rounded flex items-center gap-1 transition-colors"
+                  >
+                    <MessageCircle size={14} /> É o Próximo
+                  </button>
+                </>
+              )}
+              <button
+                onClick={() => onStatusChange(item.id, 'cancelled')}
+                className="px-3 py-1.5 text-xs text-danger hover:bg-danger/10 rounded flex items-center gap-1 transition-colors"
               >
-                <CheckCircle size={14} /> Finalizar Serviço
+                <Trash2 size={14} /> Cancelar
               </button>
-           )}
+              <button
+                onClick={() => onStatusChange(item.id, 'in_chair')}
+                className="px-4 py-1.5 text-xs font-bold text-accent-fg bg-accent hover:bg-accent-hover rounded shadow-lg shadow-accent/20 flex items-center gap-1 transition-colors"
+              >
+                <Bell size={14} /> Chamar
+              </button>
+            </>
+          )}
+          {item.status === 'in_chair' && (
+            <button
+              onClick={() => onStatusChange(item.id, 'completed')}
+              className="px-4 py-1.5 text-xs font-bold text-text-primary bg-success hover:bg-success/80 rounded shadow-md w-full flex items-center justify-center gap-1 transition-colors"
+            >
+              <CheckCircle size={14} /> Finalizar Serviço
+            </button>
+          )}
         </div>
       )}
     </div>

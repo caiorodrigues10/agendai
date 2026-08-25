@@ -1,19 +1,7 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  XAxis,
-  YAxis,
-} from 'recharts';
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from '../ui/chart';
+import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '../ui/chart';
 import { trialCampaign } from '../../marketing/trialCampaign';
 
 const AVG_TICKET = 55;
@@ -56,7 +44,7 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
       { name: 'Pro', value: PRO_MONTHLY, fill: mutedBar },
       { name: '3 faltas', value: lostRevenue, fill: red },
     ],
-    [accent, mutedBar, amber, lostRevenue],
+    [accent, mutedBar, amber, lostRevenue]
   );
 
   const yearlyCompareData = useMemo(
@@ -66,7 +54,7 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
       { name: 'Pro 12×', value: PRO_MONTHLY * 12, fill: mutedBar },
       { name: 'Pro anual', value: PRO_YEARLY, fill: violet },
     ],
-    [accent, mutedBar, violet],
+    [accent, mutedBar, violet]
   );
 
   const featureCompareData = useMemo(
@@ -77,7 +65,7 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
       { feature: 'Financeiro', essential: 0, pro: 100 },
       { feature: 'Insights', essential: 10, pro: 100 },
     ],
-    [],
+    []
   );
 
   const lossData = useMemo(
@@ -87,7 +75,7 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
       { name: 'Essencial', value: 45, fill: accent },
       { name: 'Pro', value: 18, fill: violet },
     ],
-    [accent, mutedBar, violet, amber, red],
+    [accent, mutedBar, violet, amber, red]
   );
 
   const valueConfig: ChartConfig = {
@@ -118,8 +106,8 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
           O plano se paga. A falta, não.
         </h3>
         <p className={`text-base font-medium leading-relaxed ${muted}`}>
-          Ticket médio de R$ {AVG_TICKET}. Compare o custo do software com o que some
-          quando o cliente não aparece.
+          Ticket médio de R$ {AVG_TICKET}. Compare o custo do software com o que some quando o
+          cliente não aparece.
         </p>
       </div>
 
@@ -153,14 +141,12 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
               <ChartTooltip
                 content={
                   <ChartTooltipContent
-                    formatter={(value) =>
-                      `R$ ${Number(value).toLocaleString('pt-BR')}`
-                    }
+                    formatter={value => `R$ ${Number(value).toLocaleString('pt-BR')}`}
                   />
                 }
               />
               <Bar dataKey="value" radius={[0, 8, 8, 0]} maxBarSize={28}>
-                {valueCompareData.map((entry) => (
+                {valueCompareData.map(entry => (
                   <Cell key={entry.name} fill={entry.fill} />
                 ))}
               </Bar>
@@ -187,9 +173,7 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
           className={`rounded-3xl border p-8 ${card}`}
         >
           <h4 className={`mb-1.5 text-xl font-black ${title}`}>Mensal vs anual em 12 meses</h4>
-          <p className={`mb-6 text-sm ${faint}`}>
-            Anual = pague 10, use 12. Dois meses de graça.
-          </p>
+          <p className={`mb-6 text-sm ${faint}`}>Anual = pague 10, use 12. Dois meses de graça.</p>
           <ChartContainer config={yearlyConfig} className="aspect-auto h-60 w-full">
             <BarChart data={yearlyCompareData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -204,14 +188,12 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
               <ChartTooltip
                 content={
                   <ChartTooltipContent
-                    formatter={(value) =>
-                      `R$ ${Number(value).toLocaleString('pt-BR')}`
-                    }
+                    formatter={value => `R$ ${Number(value).toLocaleString('pt-BR')}`}
                   />
                 }
               />
               <Bar dataKey="value" radius={[8, 8, 0, 0]} maxBarSize={56}>
-                {yearlyCompareData.map((entry) => (
+                {yearlyCompareData.map(entry => (
                   <Cell key={entry.name} fill={entry.fill} />
                 ))}
               </Bar>
@@ -243,28 +225,30 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
           viewport={{ once: true }}
           className={`rounded-3xl border p-8 ${card}`}
         >
-          <h4 className={`mb-1.5 text-xl font-black ${title}`}>
-            Onde o dinheiro escorre
-          </h4>
+          <h4 className={`mb-1.5 text-xl font-black ${title}`}>Onde o dinheiro escorre</h4>
           <p className={`mb-6 text-sm ${faint}`}>
             Atrito operacional relativo — quanto mais baixo, menos cadeira vazia.
           </p>
           <ChartContainer config={lossConfig} className="aspect-auto h-60 w-full">
             <BarChart data={lossData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
-              <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: isDark ? '#a1a1aa' : undefined, fontWeight: 500 }} />
+              <XAxis
+                dataKey="name"
+                tickLine={false}
+                axisLine={false}
+                tick={{ fontSize: 12, fill: isDark ? '#a1a1aa' : undefined, fontWeight: 500 }}
+              />
               <YAxis hide domain={[0, 100]} />
               <ChartTooltip content={<ChartTooltipContent />} />
               <Bar dataKey="value" radius={[8, 8, 0, 0]} maxBarSize={56}>
-                {lossData.map((entry) => (
+                {lossData.map(entry => (
                   <Cell key={entry.name} fill={entry.fill} />
                 ))}
               </Bar>
             </BarChart>
           </ChartContainer>
           <p className={`mt-4 text-sm leading-relaxed ${muted}`}>
-            Caderno e WhatsApp não lembram o cliente. Pro lembra, mostra risco e recupera
-            horário.
+            Caderno e WhatsApp não lembram o cliente. Pro lembra, mostra risco e recupera horário.
           </p>
         </motion.div>
 
@@ -304,12 +288,7 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
                 radius={[0, 4, 4, 0]}
                 maxBarSize={14}
               />
-              <Bar
-                dataKey="pro"
-                fill="var(--color-pro)"
-                radius={[0, 4, 4, 0]}
-                maxBarSize={14}
-              />
+              <Bar dataKey="pro" fill="var(--color-pro)" radius={[0, 4, 4, 0]} maxBarSize={14} />
             </BarChart>
           </ChartContainer>
           <p

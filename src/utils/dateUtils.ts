@@ -43,5 +43,3 @@ export const isBusinessHour = (timeStr: string): boolean => {
   const minutes = h * 60 + m;
   return minutes >= 420 && minutes <= 1320;
 };
-
-

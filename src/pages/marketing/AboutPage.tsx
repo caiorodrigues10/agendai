@@ -11,8 +11,7 @@ const friendships = [
     who: 'Rafa → Leo',
     years: '4 anos na mesma cadeira',
     line: '“Sempre o Leo. Se ele estiver de folga, eu volto outro dia.”',
-    detail:
-      'Não é só degradê. É a conversa de sábado, o futebol, o “e aí, como tá a família?”.',
+    detail: 'Não é só degradê. É a conversa de sábado, o futebol, o “e aí, como tá a família?”.',
     tone: 'emerald' as const,
   },
   {
@@ -116,9 +115,9 @@ export const AboutPage: React.FC = () => {
                 transition={{ delay: 0.12 }}
                 className="mt-8 max-w-xl text-lg font-medium leading-relaxed text-neutral-400 md:text-xl"
               >
-                Em todo salão e barbearia do Brasil existe uma verdade quieta: o cliente
-                não volta só pelo serviço. Volta pela pessoa. O AgendAI nasceu para
-                proteger essa relação — tirando o caos do caminho.
+                Em todo salão e barbearia do Brasil existe uma verdade quieta: o cliente não volta
+                só pelo serviço. Volta pela pessoa. O AgendAI nasceu para proteger essa relação —
+                tirando o caos do caminho.
               </motion.p>
             </div>
 
@@ -138,8 +137,8 @@ export const AboutPage: React.FC = () => {
                 <span className="text-emerald-300">É um vínculo.</span>
               </p>
               <p className="relative z-10 mt-5 text-base font-medium leading-relaxed text-neutral-400">
-                Preferência de profissional, horário de sempre, conversa que só os dois
-                entendem. Tecnologia boa não compete com isso — ela segura a porta aberta.
+                Preferência de profissional, horário de sempre, conversa que só os dois entendem.
+                Tecnologia boa não compete com isso — ela segura a porta aberta.
               </p>
             </motion.div>
           </div>
@@ -158,7 +157,8 @@ export const AboutPage: React.FC = () => {
             <p className="text-3xl font-black leading-[1.15] tracking-tight text-white md:text-5xl md:leading-[1.1]">
               A gente não quer transformar o salão num call center.
               <span className="bg-gradient-to-r from-emerald-300 via-teal-200 to-white bg-clip-text text-transparent">
-                {' '}Quer devolver tempo para o que importa:{' '}
+                {' '}
+                Quer devolver tempo para o que importa:{' '}
               </span>
               <span className="text-white">
                 olhar no olho, fazer o serviço certo e manter a amizade que sustenta o negócio.
@@ -179,8 +179,8 @@ export const AboutPage: React.FC = () => {
               Histórias que o sistema não inventa — só protege.
             </h2>
             <p className="mt-5 max-w-2xl text-lg font-medium leading-relaxed text-neutral-400">
-              Todo estabelecimento tem essas duplas. São elas que enchem a agenda, indicam
-              o amigo e voltam mesmo quando abre um concorrente na esquina.
+              Todo estabelecimento tem essas duplas. São elas que enchem a agenda, indicam o amigo e
+              voltam mesmo quando abre um concorrente na esquina.
             </p>
           </div>
 
@@ -217,7 +217,9 @@ export const AboutPage: React.FC = () => {
                   <div
                     className={`absolute -right-12 -top-12 h-40 w-40 rounded-full ${glow} blur-[70px] transition duration-700 group-hover:opacity-100`}
                   />
-                  <p className={`relative z-10 text-xs font-bold uppercase tracking-[0.2em] ${accent}`}>
+                  <p
+                    className={`relative z-10 text-xs font-bold uppercase tracking-[0.2em] ${accent}`}
+                  >
                     {item.who}
                   </p>
                   <p className="relative z-10 mt-2 text-sm font-semibold text-neutral-500">
@@ -249,8 +251,8 @@ export const AboutPage: React.FC = () => {
               </h2>
             </div>
             <p className="max-w-xl text-lg font-medium leading-relaxed text-neutral-400 lg:justify-self-end">
-              A gente viu salões ótimos perdendo o essencial: presença. Não por falta de
-              talento — por excesso de barulho operacional.
+              A gente viu salões ótimos perdendo o essencial: presença. Não por falta de talento —
+              por excesso de barulho operacional.
             </p>
           </div>
 
@@ -268,9 +270,7 @@ export const AboutPage: React.FC = () => {
                 } ${i === 2 ? 'rounded-b-[2rem] md:rounded-bl-none' : ''}`}
               >
                 <span className="text-sm font-black text-emerald-400">{beat.n}</span>
-                <h3 className="mt-4 text-2xl font-black tracking-tight text-white">
-                  {beat.title}
-                </h3>
+                <h3 className="mt-4 text-2xl font-black tracking-tight text-white">{beat.title}</h3>
                 <p className="mt-3 text-base font-medium leading-relaxed text-neutral-400">
                   {beat.copy}
                 </p>
@@ -294,9 +294,9 @@ export const AboutPage: React.FC = () => {
                 Mais cadeira ocupada com gente que importa.
               </h2>
               <p className="mt-6 text-lg font-medium leading-relaxed text-neutral-400">
-                Fila pública, agenda que respeita o profissional preferido, lembrete no
-                WhatsApp, financeiro e visão de dono no Pro. Tudo para o salão respirar —
-                e a relação sobreviver ao dia corrido.
+                Fila pública, agenda que respeita o profissional preferido, lembrete no WhatsApp,
+                financeiro e visão de dono no Pro. Tudo para o salão respirar — e a relação
+                sobreviver ao dia corrido.
               </p>
               <ul className="mt-8 space-y-4">
                 {[
@@ -304,7 +304,7 @@ export const AboutPage: React.FC = () => {
                   'O lembrete chega sem o dono virar secretária.',
                   'A equipe vê a fila e a agenda no mesmo lugar.',
                   'O vínculo continua humano. A bagunça, não.',
-                ].map((line) => (
+                ].map(line => (
                   <li key={line} className="flex gap-3 text-base font-semibold text-neutral-200">
                     <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
                     {line}
@@ -337,7 +337,7 @@ export const AboutPage: React.FC = () => {
                     text: 'Ana de novo. Já sei o que ela gosta.',
                     side: 'left' as const,
                   },
-                ].map((msg) => (
+                ].map(msg => (
                   <div
                     key={msg.text}
                     className={`flex px-4 py-3 ${msg.side === 'right' ? 'justify-end' : 'justify-start'}`}
@@ -423,30 +423,31 @@ export const AboutPage: React.FC = () => {
                   </span>
                 </h2>
                 <p className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-neutral-400">
-                  O AgendAI não nasceu num pitch de Silicon Valley. Nasceu da observação
-                  próxima: barbearias e salões onde o profissional é quase da família —
-                  e onde o celular ainda era o "sistema".
+                  O AgendAI não nasceu num pitch de Silicon Valley. Nasceu da observação próxima:
+                  barbearias e salões onde o profissional é quase da família — e onde o celular
+                  ainda era o "sistema".
                 </p>
                 <p className="mt-4 max-w-xl text-lg font-medium leading-relaxed text-neutral-400">
-                  Queremos que cada estabelecimento, do studio pequeno à casa cheia no
-                  sábado, tenha ferramenta digna — sem taxa por cadeira e sem complicar o
-                  que já funciona entre pessoas.
+                  Queremos que cada estabelecimento, do studio pequeno à casa cheia no sábado, tenha
+                  ferramenta digna — sem taxa por cadeira e sem complicar o que já funciona entre
+                  pessoas.
                 </p>
               </div>
               <div className="relative flex flex-col justify-end border-t border-white/8 bg-gradient-to-br from-white/[0.03] to-transparent p-8 md:p-12 lg:border-l lg:border-t-0 lg:p-16">
-                <div className="absolute top-8 right-8 w-32 h-32 rounded-full blur-[80px] pointer-events-none opacity-40" style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.5), transparent 70%)' }} />
+                <div
+                  className="absolute top-8 right-8 w-32 h-32 rounded-full blur-[80px] pointer-events-none opacity-40"
+                  style={{
+                    background: 'radial-gradient(circle, rgba(16,185,129,0.5), transparent 70%)',
+                  }}
+                />
                 <p className="relative text-6xl font-black tracking-tighter md:text-8xl">
-                  <span className="text-white/50">
-                    desde
-                  </span>
+                  <span className="text-white/50">desde</span>
                   <br />
-                  <span className="text-emerald-400/70">
-                    o vínculo
-                  </span>
+                  <span className="text-emerald-400/70">o vínculo</span>
                 </p>
                 <p className="relative mt-6 text-base font-semibold text-neutral-300">
-                  Multi-tenant, fila, agenda, financeiro e lembretes — construídos para o
-                  dia a dia brasileiro de salão, barbearia e studio.
+                  Multi-tenant, fila, agenda, financeiro e lembretes — construídos para o dia a dia
+                  brasileiro de salão, barbearia e studio.
                 </p>
               </div>
             </div>
@@ -466,8 +467,8 @@ export const AboutPage: React.FC = () => {
               Proteja as amizades que pagam o aluguel.
             </h2>
             <p className="mx-auto mt-6 max-w-xl text-lg font-medium leading-relaxed text-neutral-400">
-              {trialCampaign.body} Organize a fila e a agenda — e deixe a cadeira para o que
-              só humanos fazem bem.
+              {trialCampaign.body} Organize a fila e a agenda — e deixe a cadeira para o que só
+              humanos fazem bem.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <button

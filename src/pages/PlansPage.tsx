@@ -1,14 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import {
-  AlertCircle,
-  ArrowRight,
-  Check,
-  CheckCircle2,
-  Loader2,
-  X,
-} from 'lucide-react';
+import { AlertCircle, ArrowRight, Check, CheckCircle2, Loader2, X } from 'lucide-react';
 import { plansApi, Plan } from '../infra/plansApi';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -72,9 +65,7 @@ export const PlansPage: React.FC = () => {
       .list()
       .then(setPlans)
       .catch((err: unknown) => {
-        setError(
-          getErrorMessage(err, 'Não foi possível carregar os planos. Tente novamente.'),
-        );
+        setError(getErrorMessage(err, 'Não foi possível carregar os planos. Tente novamente.'));
       })
       .finally(() => setLoading(false));
   }, []);
@@ -93,17 +84,14 @@ export const PlansPage: React.FC = () => {
 
   const handleSubscribe = (plan: Plan) => {
     const billing = isYearly ? 'YEARLY' : 'MONTHLY';
-    const setupQ = setupTrial || !subscriptionData?.subscription?.hasPaymentMethod
-      ? '&setup=trial'
-      : '';
+    const setupQ =
+      setupTrial || !subscriptionData?.subscription?.hasPaymentMethod ? '&setup=trial' : '';
     if (user) {
       navigate(`/checkout?planId=${plan.id}&billing=${billing}${setupQ}`);
       return;
     }
     // Cadastro na tela original de login — sem modal embutido
-    navigate(
-      `/login?tab=register&planId=${encodeURIComponent(plan.id)}&billing=${billing}`,
-    );
+    navigate(`/login?tab=register&planId=${encodeURIComponent(plan.id)}&billing=${billing}`);
   };
 
   const getDisplayPrice = (plan: Plan) => {
@@ -118,8 +106,8 @@ export const PlansPage: React.FC = () => {
   const isPro = (plan: Plan) => plan.hasDashboard !== false || /pro/i.test(plan.name);
   const isEssential = (plan: Plan) => !isPro(plan);
 
-  const proPlan = plans.find((p) => isPro(p));
-  const essentialPlan = plans.find((p) => isEssential(p));
+  const proPlan = plans.find(p => isPro(p));
+  const essentialPlan = plans.find(p => isEssential(p));
   const displayPlans = [essentialPlan, proPlan].filter(Boolean) as Plan[];
 
   const startPro = () => {
@@ -163,8 +151,8 @@ export const PlansPage: React.FC = () => {
               transition={{ delay: 0.1 }}
               className="mx-auto mt-6 max-w-2xl text-lg font-medium leading-relaxed text-neutral-400 md:text-xl"
             >
-              {trialCampaign.body} {trialCampaign.afterTrial} Anual = 2 meses
-              grátis. Equipe ilimitada nos dois.
+              {trialCampaign.body} {trialCampaign.afterTrial} Anual = 2 meses grátis. Equipe
+              ilimitada nos dois.
             </motion.p>
 
             <motion.div
@@ -177,7 +165,7 @@ export const PlansPage: React.FC = () => {
                 { value: 'R$ 14', label: 'Essencial / mês' },
                 { value: 'R$ 20', label: 'Pro / mês' },
                 { value: '1 corte', label: 'paga o plano' },
-              ].map((item) => (
+              ].map(item => (
                 <div
                   key={item.label}
                   className="rounded-2xl border border-white/8 bg-white/3 px-3 py-4"
@@ -204,9 +192,7 @@ export const PlansPage: React.FC = () => {
                 {trialCampaign.cta}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </button>
-              <p className="mt-3 text-sm text-neutral-500">
-                {trialCampaign.heroSubline}
-              </p>
+              <p className="mt-3 text-sm text-neutral-500">{trialCampaign.heroSubline}</p>
             </motion.div>
           </div>
         </section>
@@ -253,9 +239,7 @@ export const PlansPage: React.FC = () => {
                   type="button"
                   onClick={() => setIsYearly(false)}
                   className={`rounded-full px-5 py-2.5 text-sm font-bold transition ${
-                    !isYearly
-                      ? 'bg-white text-black'
-                      : 'text-neutral-400 hover:text-white'
+                    !isYearly ? 'bg-white text-black' : 'text-neutral-400 hover:text-white'
                   }`}
                 >
                   Mensal
@@ -264,9 +248,7 @@ export const PlansPage: React.FC = () => {
                   type="button"
                   onClick={() => setIsYearly(true)}
                   className={`rounded-full px-5 py-2.5 text-sm font-bold transition ${
-                    isYearly
-                      ? 'bg-emerald-400 text-black'
-                      : 'text-neutral-400 hover:text-white'
+                    isYearly ? 'bg-emerald-400 text-black' : 'text-neutral-400 hover:text-white'
                   }`}
                 >
                   Anual
@@ -296,7 +278,7 @@ export const PlansPage: React.FC = () => {
 
             {!loading && !error && displayPlans.length > 0 && (
               <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2">
-                {displayPlans.map((plan) => {
+                {displayPlans.map(plan => {
                   const currentIsPro = isPro(plan);
                   const isCurrent = plan.id === currentPlanId && isSubscriptionActive;
                   const price = getDisplayPrice(plan);
@@ -364,8 +346,7 @@ export const PlansPage: React.FC = () => {
                         )}
                         {!isYearly && (
                           <p className="mt-2 text-sm text-neutral-500">
-                            Ou{' '}
-                            {formatPrice(currentIsPro ? PRO_YEARLY : ESSENTIAL_YEARLY)}
+                            Ou {formatPrice(currentIsPro ? PRO_YEARLY : ESSENTIAL_YEARLY)}
                             /ano (2 meses grátis)
                           </p>
                         )}
@@ -391,7 +372,7 @@ export const PlansPage: React.FC = () => {
                                 'Serviços, perfil e feed',
                                 'Suporte por e-mail',
                               ]
-                        ).map((feature) => (
+                        ).map(feature => (
                           <li
                             key={feature}
                             className="flex items-start gap-2.5 text-sm text-neutral-300"
@@ -403,9 +384,7 @@ export const PlansPage: React.FC = () => {
                             >
                               <Check
                                 size={12}
-                                className={
-                                  currentIsPro ? 'text-emerald-400' : 'text-neutral-400'
-                                }
+                                className={currentIsPro ? 'text-emerald-400' : 'text-neutral-400'}
                               />
                             </span>
                             {feature}
@@ -470,7 +449,7 @@ export const PlansPage: React.FC = () => {
                 <span className="text-center">Essencial</span>
                 <span className="text-center text-emerald-300">Pro</span>
               </div>
-              {matrix.map((row) => (
+              {matrix.map(row => (
                 <div
                   key={row.label}
                   className="grid grid-cols-[1.5fr_0.75fr_0.75fr] items-center border-b border-white/6 px-5 py-4 last:border-b-0 md:px-8"

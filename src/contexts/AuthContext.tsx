@@ -130,8 +130,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       persistSession(resp);
       return { ok: true };
     } catch (err) {
-      if (err instanceof ApiError && err.statusCode === 404 && err.code === 'GOOGLE_ACCOUNT_NOT_FOUND') {
-        return { ok: false, message: 'Conta não encontrada. Cadastre-se normalmente com e-mail e senha.' };
+      if (
+        err instanceof ApiError &&
+        err.statusCode === 404 &&
+        err.code === 'GOOGLE_ACCOUNT_NOT_FOUND'
+      ) {
+        return {
+          ok: false,
+          message: 'Conta não encontrada. Cadastre-se normalmente com e-mail e senha.',
+        };
       }
       return { ok: false, message: getErrorMessage(err, 'Erro ao autenticar com Google.') };
     }
@@ -164,7 +171,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return normalizedRoles.includes(normalizedUserRole);
   };
 
-  const value = useMemo(() => ({ user, loading, login, loginWithGoogle, register, logout, hasRole }), [user, loading]);
+  const value = useMemo(
+    () => ({ user, loading, login, loginWithGoogle, register, logout, hasRole }),
+    [user, loading]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

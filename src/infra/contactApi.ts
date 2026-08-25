@@ -27,7 +27,7 @@ export const contactApi = {
     const res = await apiClient<{ success: boolean; data: ContactResult }>(
       '/api/contact',
       'POST',
-      payload,
+      payload
     );
     return unwrap<ContactResult>(res);
   },

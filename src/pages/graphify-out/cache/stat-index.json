@@ -1,1 +1,77 @@
-{"D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\AccessBlockedPage.tsx":{"size":6732,"mtime_ns":1784770840187063400,"word_count":567},"D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\CheckoutPage.tsx":{"size":32094,"mtime_ns":1785862016278906800,"word_count":2590},"D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\LandingPage.tsx":{"size":95024,"mtime_ns":1786150121991225600,"word_count":6337},"D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\LoginPage.tsx":{"size":12896,"mtime_ns":1786149094352843800,"word_count":1063},"D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\MasterAdmin\\BillingTab.tsx":{"size":63877,"mtime_ns":1786148825553942600,"word_count":4808},"D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\MasterAdmin\\MasterAdminDashboard.tsx":{"size":63243,"mtime_ns":1785104484155744200,"word_count":4849},"D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\PlansPage.tsx":{"size":24920,"mtime_ns":1786148616133060200,"word_count":1992},"D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\PublicHome.tsx":{"size":13721,"mtime_ns":1786134152298297200,"word_count":1099},"D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\StaffDashboard.tsx":{"size":15486,"mtime_ns":1786035014510797800,"word_count":1286},"D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\marketing\\AboutPage.tsx":{"size":22818,"mtime_ns":1786149157916840400,"word_count":1990},"D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\marketing\\AiPredictivePage.tsx":{"size":36006,"mtime_ns":1786148277677005400,"word_count":3111},"D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\marketing\\ContactPage.tsx":{"size":16318,"mtime_ns":1786148968815065300,"word_count":1210},"D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\marketing\\DashboardPage.tsx":{"size":25625,"mtime_ns":1786148480793968500,"word_count":2026},"D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\marketing\\FeaturesPage.tsx":{"size":41270,"mtime_ns":1786148071606398400,"word_count":3551},"D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\marketing\\SchedulingPage.tsx":{"size":36598,"mtime_ns":1786148383080971100,"word_count":2773}}
+{
+  "D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\AccessBlockedPage.tsx": {
+    "size": 6732,
+    "mtime_ns": 1784770840187063400,
+    "word_count": 567
+  },
+  "D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\CheckoutPage.tsx": {
+    "size": 32094,
+    "mtime_ns": 1785862016278906800,
+    "word_count": 2590
+  },
+  "D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\LandingPage.tsx": {
+    "size": 95024,
+    "mtime_ns": 1786150121991225600,
+    "word_count": 6337
+  },
+  "D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\LoginPage.tsx": {
+    "size": 12896,
+    "mtime_ns": 1786149094352843800,
+    "word_count": 1063
+  },
+  "D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\MasterAdmin\\BillingTab.tsx": {
+    "size": 63877,
+    "mtime_ns": 1786148825553942600,
+    "word_count": 4808
+  },
+  "D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\MasterAdmin\\MasterAdminDashboard.tsx": {
+    "size": 63243,
+    "mtime_ns": 1785104484155744200,
+    "word_count": 4849
+  },
+  "D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\PlansPage.tsx": {
+    "size": 24920,
+    "mtime_ns": 1786148616133060200,
+    "word_count": 1992
+  },
+  "D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\PublicHome.tsx": {
+    "size": 13721,
+    "mtime_ns": 1786134152298297200,
+    "word_count": 1099
+  },
+  "D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\StaffDashboard.tsx": {
+    "size": 15486,
+    "mtime_ns": 1786035014510797800,
+    "word_count": 1286
+  },
+  "D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\marketing\\AboutPage.tsx": {
+    "size": 22818,
+    "mtime_ns": 1786149157916840400,
+    "word_count": 1990
+  },
+  "D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\marketing\\AiPredictivePage.tsx": {
+    "size": 36006,
+    "mtime_ns": 1786148277677005400,
+    "word_count": 3111
+  },
+  "D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\marketing\\ContactPage.tsx": {
+    "size": 16318,
+    "mtime_ns": 1786148968815065300,
+    "word_count": 1210
+  },
+  "D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\marketing\\DashboardPage.tsx": {
+    "size": 25625,
+    "mtime_ns": 1786148480793968500,
+    "word_count": 2026
+  },
+  "D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\marketing\\FeaturesPage.tsx": {
+    "size": 41270,
+    "mtime_ns": 1786148071606398400,
+    "word_count": 3551
+  },
+  "D:\\Programa\u00e7\u00e3o\\agendai\\agendai\\src\\pages\\marketing\\SchedulingPage.tsx": {
+    "size": 36598,
+    "mtime_ns": 1786148383080971100,
+    "word_count": 2773
+  }
+}

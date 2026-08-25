@@ -128,8 +128,8 @@ export const ContactPage: React.FC = () => {
               transition={{ delay: 0.1 }}
               className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-neutral-400"
             >
-              Planos, suporte ou parceria — a mensagem cai no painel da equipe AgendAI.
-              Sem mailto, sem caixa de spam perdida.
+              Planos, suporte ou parceria — a mensagem cai no painel da equipe AgendAI. Sem mailto,
+              sem caixa de spam perdida.
             </motion.p>
           </div>
         </div>
@@ -233,15 +233,13 @@ export const ContactPage: React.FC = () => {
                   Assunto
                 </p>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {topics.map((item) => {
+                  {topics.map(item => {
                     const active = topic === item.value;
                     return (
                       <button
                         key={item.value}
                         type="button"
-                        onClick={() =>
-                          setValue('topic', item.value, { shouldValidate: true })
-                        }
+                        onClick={() => setValue('topic', item.value, { shouldValidate: true })}
                         className={`rounded-2xl border px-3 py-3 text-left transition ${
                           active
                             ? 'border-emerald-400/40 bg-emerald-400/12 text-white'
@@ -266,7 +264,10 @@ export const ContactPage: React.FC = () => {
 
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="contact-name" className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500">
+                  <label
+                    htmlFor="contact-name"
+                    className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500"
+                  >
                     Nome
                   </label>
                   <input
@@ -284,7 +285,10 @@ export const ContactPage: React.FC = () => {
                   )}
                 </div>
                 <div>
-                  <label htmlFor="contact-email" className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500">
+                  <label
+                    htmlFor="contact-email"
+                    className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500"
+                  >
                     E-mail
                   </label>
                   <input
@@ -305,8 +309,12 @@ export const ContactPage: React.FC = () => {
               </div>
 
               <div>
-                <label htmlFor="contact-phone" className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500">
-                  WhatsApp <span className="normal-case tracking-normal text-neutral-600">(opcional)</span>
+                <label
+                  htmlFor="contact-phone"
+                  className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500"
+                >
+                  WhatsApp{' '}
+                  <span className="normal-case tracking-normal text-neutral-600">(opcional)</span>
                 </label>
                 <div className="relative">
                   <Phone className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
@@ -317,7 +325,7 @@ export const ContactPage: React.FC = () => {
                     inputMode="tel"
                     autoComplete="tel"
                     value={phoneValue}
-                    onChange={(e) =>
+                    onChange={e =>
                       setValue('phone', maskPhone(e.target.value), {
                         shouldValidate: true,
                       })
@@ -327,7 +335,10 @@ export const ContactPage: React.FC = () => {
               </div>
 
               <div>
-                <label htmlFor="contact-message" className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500">
+                <label
+                  htmlFor="contact-message"
+                  className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500"
+                >
                   Mensagem
                 </label>
                 <div className="relative">

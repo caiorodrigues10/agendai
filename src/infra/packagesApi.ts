@@ -94,10 +94,7 @@ export const packagesApi = {
     return unwrap<ClientPackage>(res);
   },
 
-  book: async (
-    id: string,
-    slots: { date: string; time: string; staffId?: string | null }[]
-  ) => {
+  book: async (id: string, slots: { date: string; time: string; staffId?: string | null }[]) => {
     const res = await apiClient<{ success: boolean; data: unknown[] }>(
       `/api/client-packages/${id}/book`,
       'POST',

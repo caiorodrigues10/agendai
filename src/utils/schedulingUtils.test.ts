@@ -8,12 +8,7 @@ describe('isSlotAvailable', () => {
 
   it('qualquer profissional: livre se ocupação < staffCount', () => {
     expect(
-      isSlotAvailable(
-        '10:00',
-        'any',
-        [{ time: '10:00', staffId: 's1', durationMinutes: 30 }],
-        2
-      )
+      isSlotAvailable('10:00', 'any', [{ time: '10:00', staffId: 's1', durationMinutes: 30 }], 2)
     ).toBe(true);
   });
 
@@ -33,12 +28,7 @@ describe('isSlotAvailable', () => {
 
   it('profissional específico: bloqueado por booking sem staff', () => {
     expect(
-      isSlotAvailable(
-        '10:00',
-        's1',
-        [{ time: '10:00', staffId: null, durationMinutes: 30 }],
-        3
-      )
+      isSlotAvailable('10:00', 's1', [{ time: '10:00', staffId: null, durationMinutes: 30 }], 3)
     ).toBe(false);
   });
 });

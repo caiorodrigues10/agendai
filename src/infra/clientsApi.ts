@@ -67,10 +67,7 @@ export const clientsApi = {
     return unwrap<SalonClient>(res);
   },
 
-  update: async (
-    id: string,
-    body: { name?: string; whatsapp?: string; notes?: string | null }
-  ) => {
+  update: async (id: string, body: { name?: string; whatsapp?: string; notes?: string | null }) => {
     const res = await apiClient<{ success: boolean; data: SalonClient }>(
       `/api/clients/${id}`,
       'PATCH',

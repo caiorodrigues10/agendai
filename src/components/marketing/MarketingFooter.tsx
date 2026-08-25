@@ -44,7 +44,7 @@ function FooterColumn({
         {title}
       </h3>
       <ul className="mt-5 space-y-3">
-        {links.map((link) => (
+        {links.map(link => (
           <li key={`${title}-${link.label}`}>
             {link.to ? (
               <Link
@@ -97,10 +97,7 @@ export const MarketingFooter: React.FC = () => {
 
           <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-20 xl:gap-28">
             <div className="max-w-md shrink-0">
-              <Link
-                to="/"
-                className="group inline-flex transition duration-300 hover:opacity-100"
-              >
+              <Link to="/" className="group inline-flex transition duration-300 hover:opacity-100">
                 <Logo
                   size="lg"
                   className="text-white transition duration-300 group-hover:text-emerald-100"
@@ -112,8 +109,8 @@ export const MarketingFooter: React.FC = () => {
                   Fila, agenda e caixa no ritmo do seu salão.
                 </p>
                 <p className="max-w-sm text-[13px] font-light leading-relaxed text-neutral-500 md:text-sm">
-                  Para salões de beleza, barbearias e studios — atendimento
-                  feminino, masculino ou unissex.
+                  Para salões de beleza, barbearias e studios — atendimento feminino, masculino ou
+                  unissex.
                 </p>
               </div>
 

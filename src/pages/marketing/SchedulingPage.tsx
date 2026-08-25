@@ -1,14 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import {
-  ArrowRight,
-  Calendar,
-  CalendarCheck,
-  CheckCircle2,
-  Repeat,
-  UserCheck,
-} from 'lucide-react';
+import { ArrowRight, Calendar, CalendarCheck, CheckCircle2, Repeat, UserCheck } from 'lucide-react';
 import { MarketingNav } from '../../components/marketing/MarketingNav';
 import { MarketingFooter } from '../../components/marketing/MarketingFooter';
 import { trialCampaign } from '../../marketing/trialCampaign';
@@ -50,7 +43,8 @@ const flowSteps = [
   {
     step: '03',
     title: 'No dia, entra na fila',
-    description: 'Check-in vira posição na fila. Você não digita o nome de novo nem perde o horário.',
+    description:
+      'Check-in vira posição na fila. Você não digita o nome de novo nem perde o horário.',
     accent: 'amber' as const,
     hint: 'Check-in',
     chips: ['Agendado', '→', '2ª na fila'],
@@ -109,8 +103,8 @@ export const SchedulingPage: React.FC = () => {
               transition={{ duration: 0.55, delay: 0.16 }}
               className="mt-7 max-w-xl text-xl font-medium leading-relaxed text-neutral-300 md:text-2xl"
             >
-              Cliente marca serviço, profissional e horário pelo link do salão. Você vê tudo
-              num calendário só — e no dia o atendimento cai direto na fila.
+              Cliente marca serviço, profissional e horário pelo link do salão. Você vê tudo num
+              calendário só — e no dia o atendimento cai direto na fila.
             </motion.p>
 
             <motion.div
@@ -229,7 +223,9 @@ export const SchedulingPage: React.FC = () => {
                     {slot.status === 'busy' ? (
                       <>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-base font-bold text-neutral-300">{slot.client}</p>
+                          <p className="truncate text-base font-bold text-neutral-300">
+                            {slot.client}
+                          </p>
                           <p className="text-sm text-neutral-500">{slot.pro}</p>
                         </div>
                         <span className="rounded-full bg-white/6 px-3 py-1 text-xs font-black uppercase tracking-wider text-neutral-500">
@@ -334,7 +330,9 @@ export const SchedulingPage: React.FC = () => {
                   transition={{ delay: i * 0.08 }}
                   className={`relative flex flex-col overflow-hidden rounded-[2rem] border bg-[#0a0f0c] p-7 transition-colors md:rounded-none md:border-y md:border-l-0 md:border-r md:border-white/8 md:bg-transparent md:p-8 md:first:rounded-l-[2rem] md:first:border-l md:last:rounded-r-[2rem] md:last:border-r ${border} md:hover:bg-white/2`}
                 >
-                  <div className={`absolute -right-10 -top-10 h-36 w-36 rounded-full ${glow} blur-[60px]`} />
+                  <div
+                    className={`absolute -right-10 -top-10 h-36 w-36 rounded-full ${glow} blur-[60px]`}
+                  />
 
                   <div className="relative z-10 flex items-center gap-3">
                     <span
@@ -342,7 +340,9 @@ export const SchedulingPage: React.FC = () => {
                     >
                       {item.step}
                     </span>
-                    <span className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wider ${pill}`}>
+                    <span
+                      className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wider ${pill}`}
+                    >
                       {item.hint}
                     </span>
                   </div>
@@ -384,8 +384,8 @@ export const SchedulingPage: React.FC = () => {
               </h2>
             </div>
             <p className="max-w-md text-lg font-medium leading-relaxed text-neutral-300 md:text-xl">
-              O agendamento não é um calendário isolado — ele conversa com a fila, com a
-              equipe e com o lembrete do cliente.
+              O agendamento não é um calendário isolado — ele conversa com a fila, com a equipe e
+              com o lembrete do cliente.
             </p>
           </div>
 
@@ -437,13 +437,13 @@ export const SchedulingPage: React.FC = () => {
                         { t: '15:00', s: 'free' },
                       ],
                     },
-                  ].map((row) => (
+                  ].map(row => (
                     <div key={row.pro} className="flex items-center gap-3">
                       <span className="w-16 shrink-0 text-xs font-bold text-neutral-500">
                         {row.pro}
                       </span>
                       <div className="grid min-w-0 flex-1 grid-cols-5 gap-1.5">
-                        {row.slots.map((slot) => (
+                        {row.slots.map(slot => (
                           <div
                             key={`${row.pro}-${slot.t}`}
                             className={`rounded-lg py-2.5 text-center text-[11px] font-black ${
@@ -494,7 +494,7 @@ export const SchedulingPage: React.FC = () => {
                       { n: '01', label: 'Corte masculino', done: true },
                       { n: '02', label: 'Leo', done: true },
                       { n: '03', label: 'Quinta · 14:00', done: false },
-                    ].map((step) => (
+                    ].map(step => (
                       <div
                         key={step.n}
                         className={`rounded-xl px-3 py-2.5 ${
@@ -542,8 +542,7 @@ export const SchedulingPage: React.FC = () => {
               <div
                 className="absolute inset-0 opacity-[0.07]"
                 style={{
-                  backgroundImage:
-                    'radial-gradient(circle at 1px 1px, #fbbf24 1px, transparent 0)',
+                  backgroundImage: 'radial-gradient(circle at 1px 1px, #fbbf24 1px, transparent 0)',
                   backgroundSize: '18px 18px',
                 }}
               />
@@ -697,9 +696,9 @@ export const SchedulingPage: React.FC = () => {
               Cliente marca sozinho. Você para de apagar no caderno.
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-xl font-medium leading-relaxed text-neutral-200 md:text-2xl">
-              Horários livres por profissional, lembretes antes do atendimento e check-in
-              direto na fila do dia — no mesmo sistema. {trialCampaign.eyebrow}, sem
-              cartão. Experimente e veja se faz sentido para o seu modelo de negócio.
+              Horários livres por profissional, lembretes antes do atendimento e check-in direto na
+              fila do dia — no mesmo sistema. {trialCampaign.eyebrow}, sem cartão. Experimente e
+              veja se faz sentido para o seu modelo de negócio.
             </p>
 
             <div className="mx-auto mt-8 flex max-w-xl flex-wrap items-center justify-center gap-x-6 gap-y-3 text-base font-semibold text-emerald-100/90 md:text-lg">

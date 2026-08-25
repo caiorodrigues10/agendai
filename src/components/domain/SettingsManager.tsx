@@ -11,7 +11,11 @@ interface SettingsManagerProps {
   onSave: (settings: ShopSettings) => void;
 }
 
-export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, barbershopId, onSave }) => {
+export const SettingsManager: React.FC<SettingsManagerProps> = ({
+  settings,
+  barbershopId,
+  onSave,
+}) => {
   const [shopName, setShopName] = useState(settings.shopName);
   const [whatsapp, setWhatsapp] = useState(settings.whatsapp || '');
   const [schedule, setSchedule] = useState<DaySchedule[]>(settings.schedule || []);
@@ -32,7 +36,10 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, barb
     setLogoUploading(true);
     setLogoError(null);
     try {
-      const { uploadUrl, publicUrl } = await barbershopApi.getLogoUploadUrl(barbershopId, file.type);
+      const { uploadUrl, publicUrl } = await barbershopApi.getLogoUploadUrl(
+        barbershopId,
+        file.type
+      );
       const putRes = await fetch(uploadUrl, {
         method: 'PUT',
         body: file,
@@ -59,7 +66,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, barb
       shopName,
       whatsapp,
       schedule,
-      logoUrl
+      logoUrl,
     });
   };
 
@@ -74,7 +81,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, barb
             <input
               type="text"
               value={shopName}
-              onChange={(e) => setShopName(e.target.value)}
+              onChange={e => setShopName(e.target.value)}
               className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
             />
           </div>
@@ -85,11 +92,14 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, barb
               <input
                 type="tel"
                 value={whatsapp}
-                onChange={(e) => setWhatsapp(maskPhone(e.target.value))}
+                onChange={e => setWhatsapp(maskPhone(e.target.value))}
                 className="w-full bg-bg border border-border rounded-lg pl-10 pr-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
                 placeholder="(11) 99999-9999"
               />
-              <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
+              <Smartphone
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+                size={16}
+              />
             </div>
           </div>
 
@@ -105,9 +115,17 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, barb
                   <Upload className="text-text-muted" size={20} />
                 )}
               </div>
-              <label className={`px-3 py-2 text-xs bg-surface-2 text-text-secondary rounded-lg border border-border-strong cursor-pointer hover:bg-border-strong ${logoUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+              <label
+                className={`px-3 py-2 text-xs bg-surface-2 text-text-secondary rounded-lg border border-border-strong cursor-pointer hover:bg-border-strong ${logoUploading ? 'opacity-50 pointer-events-none' : ''}`}
+              >
                 {logoUploading ? 'Enviando...' : 'Escolher arquivo'}
-                <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" disabled={logoUploading} />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  disabled={logoUploading}
+                />
               </label>
             </div>
             {logoError && (
@@ -143,20 +161,26 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, barb
               {day.isOpen && (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="relative">
-                    <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" size={14} />
+                    <Clock
+                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted"
+                      size={14}
+                    />
                     <input
                       type="time"
                       value={day.openTime}
-                      onChange={(e) => handleDayChange(index, 'openTime', e.target.value)}
+                      onChange={e => handleDayChange(index, 'openTime', e.target.value)}
                       className="w-full bg-surface border border-border rounded-lg pl-8 pr-2 py-2 text-text-primary text-xs outline-none"
                     />
                   </div>
                   <div className="relative">
-                    <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" size={14} />
+                    <Clock
+                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted"
+                      size={14}
+                    />
                     <input
                       type="time"
                       value={day.closeTime}
-                      onChange={(e) => handleDayChange(index, 'closeTime', e.target.value)}
+                      onChange={e => handleDayChange(index, 'closeTime', e.target.value)}
                       className="w-full bg-surface border border-border rounded-lg pl-8 pr-2 py-2 text-text-primary text-xs outline-none"
                     />
                   </div>

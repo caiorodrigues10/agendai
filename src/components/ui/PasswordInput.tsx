@@ -51,9 +51,11 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           className={`
             rounded-xl border overflow-hidden transition-colors
             focus-within:shadow-[0_0_15px_rgba(16,185,129,0.15)]
-            ${hasError
-              ? 'border-danger/40 focus-within:border-danger'
-              : STRENGTH_BORDER[borderLevel]}
+            ${
+              hasError
+                ? 'border-danger/40 focus-within:border-danger'
+                : STRENGTH_BORDER[borderLevel]
+            }
           `}
         >
           <div className="relative group bg-bg">
@@ -97,14 +99,14 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
                     <div
                       key={segment}
                       className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
-                        segment <= strength.score
-                          ? STRENGTH_BAR[strength.level]
-                          : 'bg-border'
+                        segment <= strength.score ? STRENGTH_BAR[strength.level] : 'bg-border'
                       }`}
                     />
                   ))}
                 </div>
-                <span className={`text-[10px] font-bold uppercase tracking-wide shrink-0 ${STRENGTH_TEXT[strength.level]}`}>
+                <span
+                  className={`text-[10px] font-bold uppercase tracking-wide shrink-0 ${STRENGTH_TEXT[strength.level]}`}
+                >
                   {strength.label}
                 </span>
               </div>
@@ -125,7 +127,11 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
                         met ? 'text-success' : 'text-text-muted'
                       }`}
                     >
-                      {met ? <Check size={10} strokeWidth={3} /> : <span className="w-2.5 h-px bg-border-strong" />}
+                      {met ? (
+                        <Check size={10} strokeWidth={3} />
+                      ) : (
+                        <span className="w-2.5 h-px bg-border-strong" />
+                      )}
                       {label}
                     </li>
                   );

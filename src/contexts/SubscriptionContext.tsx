@@ -1,4 +1,12 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  ReactNode,
+} from 'react';
 import { subscriptionsApi, MySubscription } from '../infra/subscriptionsApi';
 import { ApiError } from '../infra/apiClient';
 import { useAuth } from './AuthContext';
@@ -98,7 +106,7 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
       loading,
       hasDashboard: deriveHasDashboard(data),
       blockInfo,
-      refresh
+      refresh,
     }),
     [data, blockInfo, loading, refresh]
   );

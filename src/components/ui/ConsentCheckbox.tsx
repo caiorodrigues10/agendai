@@ -30,7 +30,7 @@ export const ConsentCheckbox: React.FC<ConsentCheckboxProps> = ({
         <input
           type="checkbox"
           checked={checked}
-          onChange={(e) => !disabled && onChange(e.target.checked)}
+          onChange={e => !disabled && onChange(e.target.checked)}
           disabled={disabled}
           required={required}
           className="sr-only peer"
@@ -52,11 +52,13 @@ export const ConsentCheckbox: React.FC<ConsentCheckboxProps> = ({
       <div className="flex-1 min-w-0 text-sm leading-relaxed">
         <span className="text-text-primary font-medium">
           {label}
-          {required && <span className="text-danger ml-1" aria-hidden="true">*</span>}
+          {required && (
+            <span className="text-danger ml-1" aria-hidden="true">
+              *
+            </span>
+          )}
         </span>
-        {helpText && (
-          <p className="mt-1 text-[11px] text-text-muted">{helpText}</p>
-        )}
+        {helpText && <p className="mt-1 text-[11px] text-text-muted">{helpText}</p>}
         {helpLink && (
           <a
             href={helpLink.href}

@@ -41,7 +41,12 @@ const PredictionPhone = () => {
   const predictions = [
     { client: 'Lucas S.', risk: 'Alto', reason: 'Cancelou 2x nos últimos 30 dias', color: 'red' },
     { client: 'Pedro M.', risk: 'Baixo', reason: 'Fiel, nunca faltou', color: 'emerald' },
-    { client: 'Rafael A.', risk: 'Médio', reason: 'Reagendou ontem, pode desistir', color: 'amber' },
+    {
+      client: 'Rafael A.',
+      risk: 'Médio',
+      reason: 'Reagendou ontem, pode desistir',
+      color: 'amber',
+    },
   ];
 
   return (
@@ -59,18 +64,20 @@ const PredictionPhone = () => {
             key={p.client}
             onClick={() => setActive(i)}
             className={`p-3 rounded-xl border transition-all cursor-pointer ${
-              active === i
-                ? 'bg-emerald-500/10 border-emerald-500/30'
-                : 'bg-white/5 border-white/5'
+              active === i ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-white/5 border-white/5'
             }`}
           >
             <div className="flex items-center justify-between mb-2">
               <div className="text-xs font-semibold text-white">{p.client}</div>
-              <div className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                p.color === 'red' ? 'bg-red-500/20 text-red-400' :
-                p.color === 'amber' ? 'bg-amber-500/20 text-amber-400' :
-                'bg-emerald-500/20 text-emerald-400'
-              }`}>
+              <div
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  p.color === 'red'
+                    ? 'bg-red-500/20 text-red-400'
+                    : p.color === 'amber'
+                      ? 'bg-amber-500/20 text-amber-400'
+                      : 'bg-emerald-500/20 text-emerald-400'
+                }`}
+              >
                 {p.risk}
               </div>
             </div>
@@ -80,9 +87,11 @@ const PredictionPhone = () => {
                 <div className="flex items-center gap-1.5">
                   <Lightbulb className="w-3 h-3 text-amber-400" />
                   <span className="text-[10px] text-neutral-300">
-                    {p.color === 'red' ? 'Enviar WhatsApp reengajamento' :
-                     p.color === 'amber' ? 'Confirmar agendamento amanhã' :
-                     'Não precisa de ação'}
+                    {p.color === 'red'
+                      ? 'Enviar WhatsApp reengajamento'
+                      : p.color === 'amber'
+                        ? 'Confirmar agendamento amanhã'
+                        : 'Não precisa de ação'}
                   </span>
                 </div>
               </div>
@@ -92,9 +101,13 @@ const PredictionPhone = () => {
         <div className="mt-2 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
           <div className="flex items-center gap-2 mb-1">
             <TrendingDown className="w-3 h-3 text-emerald-400" />
-            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Previsão da semana</span>
+            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+              Previsão da semana
+            </span>
           </div>
-          <div className="text-[10px] text-neutral-400">2 cancelamentos prováveis · 1 cliente pode voltar</div>
+          <div className="text-[10px] text-neutral-400">
+            2 cancelamentos prováveis · 1 cliente pode voltar
+          </div>
         </div>
       </div>
     </PhoneMockup>
@@ -115,19 +128,24 @@ const WaitTimePhone = () => {
           <div className="text-xs font-bold text-white tracking-wide">TEMPO ESTIMADO</div>
           <Gauge className="w-4 h-4 text-emerald-400" />
         </div>
-        {bars.map((bar) => (
+        {bars.map(bar => (
           <div key={bar.client} className="space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-[10px] text-neutral-300 font-semibold">{bar.client}</span>
               <span className="text-[10px] text-emerald-400 font-bold">{bar.min} min</span>
             </div>
             <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-              <div className={`h-full ${bar.color} rounded-full`} style={{ width: `${bar.pct}%` }} />
+              <div
+                className={`h-full ${bar.color} rounded-full`}
+                style={{ width: `${bar.pct}%` }}
+              />
             </div>
           </div>
         ))}
         <div className="mt-4 p-3 rounded-xl bg-teal-500/5 border border-teal-500/20">
-          <div className="text-[10px] font-bold text-teal-400 uppercase tracking-wider mb-1">Precisão</div>
+          <div className="text-[10px] font-bold text-teal-400 uppercase tracking-wider mb-1">
+            Precisão
+          </div>
           <div className="text-2xl font-black text-white">92%</div>
           <div className="text-[10px] text-neutral-500">baseado no histórico real</div>
         </div>
@@ -154,14 +172,20 @@ const RevenuePhone = () => {
           <div key={i} className="p-3 rounded-xl bg-white/5 border border-white/5">
             <div className="flex items-center gap-2 mb-1">
               <insight.icon className={`w-3 h-3 text-${insight.color}-400`} />
-              <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Insight #{i + 1}</span>
+              <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                Insight #{i + 1}
+              </span>
             </div>
             <div className="text-xs text-neutral-300">{insight.text}</div>
           </div>
         ))}
         <div className="p-3 rounded-xl bg-violet-500/5 border border-violet-500/20">
-          <div className="text-[10px] font-bold text-violet-400 uppercase tracking-wider mb-1">Ação sugerida</div>
-          <div className="text-[10px] text-neutral-300">Criar promoção de barba nas terças-feiras (dia mais fraco)</div>
+          <div className="text-[10px] font-bold text-violet-400 uppercase tracking-wider mb-1">
+            Ação sugerida
+          </div>
+          <div className="text-[10px] text-neutral-300">
+            Criar promoção de barba nas terças-feiras (dia mais fraco)
+          </div>
         </div>
       </div>
     </PhoneMockup>
@@ -170,7 +194,11 @@ const RevenuePhone = () => {
 
 const EngagementPhone = () => {
   const messages = [
-    { time: 'Ontem 19:00', msg: 'Oi Lucas! Tudo bem? Seu agendamento é amanhã às 14:00. Confirma? ✅', from: 'bot' },
+    {
+      time: 'Ontem 19:00',
+      msg: 'Oi Lucas! Tudo bem? Seu agendamento é amanhã às 14:00. Confirma? ✅',
+      from: 'bot',
+    },
     { time: 'Ontem 19:02', msg: 'Confirmado! Até amanhã.', from: 'user' },
     { time: 'Hoje 12:00', msg: 'Falta 2h! Te esperamos no Barbearia Central 💈', from: 'bot' },
   ];
@@ -196,8 +224,12 @@ const EngagementPhone = () => {
           </div>
         ))}
         <div className="mt-2 p-3 rounded-xl bg-violet-500/5 border border-violet-500/20">
-          <div className="text-[10px] font-bold text-violet-400 uppercase tracking-wider mb-1">Horário otimizado</div>
-          <div className="text-[10px] text-neutral-400">Enviado às 19:00 (horário que Lucas costuma responder)</div>
+          <div className="text-[10px] font-bold text-violet-400 uppercase tracking-wider mb-1">
+            Horário otimizado
+          </div>
+          <div className="text-[10px] text-neutral-400">
+            Enviado às 19:00 (horário que Lucas costuma responder)
+          </div>
         </div>
       </div>
     </PhoneMockup>
@@ -212,20 +244,42 @@ export const AiPredictivePage: React.FC = () => {
     const ctx = gsap.context(() => {
       // Hero entrance
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-      tl.fromTo('.hero-badge', { opacity: 0, y: 20, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.6 })
-        .fromTo('.hero-title', { opacity: 0, y: 40, clipPath: 'inset(100% 0 0 0)' }, { opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)', duration: 1 }, '-=0.3')
+      tl.fromTo(
+        '.hero-badge',
+        { opacity: 0, y: 20, scale: 0.9 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.6 }
+      )
+        .fromTo(
+          '.hero-title',
+          { opacity: 0, y: 40, clipPath: 'inset(100% 0 0 0)' },
+          { opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)', duration: 1 },
+          '-=0.3'
+        )
         .fromTo('.hero-sub', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7 }, '-=0.5')
         .fromTo('.hero-cta', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, '-=0.4');
 
       // Phone parallax on hero
-      gsap.fromTo('.hero-phone', { opacity: 0, y: 80, rotationY: -15, scale: 0.9 }, {
-        opacity: 1, y: 0, rotationY: 0, scale: 1, duration: 1.2, ease: 'power3.out',
-        scrollTrigger: { trigger: '.hero-phone', start: 'top 95%' },
-      });
+      gsap.fromTo(
+        '.hero-phone',
+        { opacity: 0, y: 80, rotationY: -15, scale: 0.9 },
+        {
+          opacity: 1,
+          y: 0,
+          rotationY: 0,
+          scale: 1,
+          duration: 1.2,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: '.hero-phone', start: 'top 95%' },
+        }
+      );
 
       // Floating animation for hero phone
       gsap.to('.hero-phone', {
-        y: -15, duration: 3, ease: 'sine.inOut', repeat: -1, yoyo: true,
+        y: -15,
+        duration: 3,
+        ease: 'sine.inOut',
+        repeat: -1,
+        yoyo: true,
       });
 
       // Feature sections
@@ -241,54 +295,117 @@ export const AiPredictivePage: React.FC = () => {
           scrollTrigger: { trigger: section, start: 'top 75%' },
         });
 
-        if (badge) stl.fromTo(badge, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.7)' });
-        if (title) stl.fromTo(title, { opacity: 0, y: 40, clipPath: 'inset(100% 0 0 0)' }, { opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)', duration: 0.8, ease: 'power4.out' }, '-=0.3');
-        if (text) stl.fromTo(text.querySelectorAll('.section-subtitle, .section-desc'), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 }, '-=0.3');
-        bullets.forEach((b) => {
-          stl.fromTo(b.children, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.4, stagger: 0.1 }, '-=0.2');
+        if (badge)
+          stl.fromTo(
+            badge,
+            { opacity: 0, scale: 0.8 },
+            { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.7)' }
+          );
+        if (title)
+          stl.fromTo(
+            title,
+            { opacity: 0, y: 40, clipPath: 'inset(100% 0 0 0)' },
+            { opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)', duration: 0.8, ease: 'power4.out' },
+            '-=0.3'
+          );
+        if (text)
+          stl.fromTo(
+            text.querySelectorAll('.section-subtitle, .section-desc'),
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 0.6 },
+            '-=0.3'
+          );
+        bullets.forEach(b => {
+          stl.fromTo(
+            b.children,
+            { opacity: 0, x: -20 },
+            { opacity: 1, x: 0, duration: 0.4, stagger: 0.1 },
+            '-=0.2'
+          );
         });
 
         if (visual) {
-          gsap.fromTo(visual, { opacity: 0, x: i % 2 === 0 ? 60 : -60, rotationY: i % 2 === 0 ? 8 : -8, scale: 0.95 }, {
-            opacity: 1, x: 0, rotationY: 0, scale: 1, duration: 1, ease: 'power3.out',
-            scrollTrigger: { trigger: section, start: 'top 75%' },
-          });
+          gsap.fromTo(
+            visual,
+            { opacity: 0, x: i % 2 === 0 ? 60 : -60, rotationY: i % 2 === 0 ? 8 : -8, scale: 0.95 },
+            {
+              opacity: 1,
+              x: 0,
+              rotationY: 0,
+              scale: 1,
+              duration: 1,
+              ease: 'power3.out',
+              scrollTrigger: { trigger: section, start: 'top 75%' },
+            }
+          );
         }
       });
 
       // Phone mockups float
-      gsap.utils.toArray<HTMLElement>('.phone-float').forEach((el) => {
+      gsap.utils.toArray<HTMLElement>('.phone-float').forEach(el => {
         gsap.to(el, {
-          y: -12, duration: 2.5 + Math.random() * 1, ease: 'sine.inOut', repeat: -1, yoyo: true, delay: Math.random() * 2,
+          y: -12,
+          duration: 2.5 + Math.random() * 1,
+          ease: 'sine.inOut',
+          repeat: -1,
+          yoyo: true,
+          delay: Math.random() * 2,
         });
       });
 
       // How it works steps
-      gsap.fromTo('.step-card', { opacity: 0, y: 40, scale: 0.95 }, {
-        opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.2, ease: 'power3.out',
-        scrollTrigger: { trigger: '.step-card', start: 'top 85%' },
-      });
+      gsap.fromTo(
+        '.step-card',
+        { opacity: 0, y: 40, scale: 0.95 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.6,
+          stagger: 0.2,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: '.step-card', start: 'top 85%' },
+        }
+      );
 
       // Stat numbers count up
-      gsap.utils.toArray<HTMLElement>('.stat-number').forEach((el) => {
-        gsap.fromTo(el, { opacity: 0, scale: 0.5 }, {
-          opacity: 1, scale: 1, duration: 0.6, ease: 'back.out(1.4)',
-          scrollTrigger: { trigger: el, start: 'top 85%' },
-        });
+      gsap.utils.toArray<HTMLElement>('.stat-number').forEach(el => {
+        gsap.fromTo(
+          el,
+          { opacity: 0, scale: 0.5 },
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 0.6,
+            ease: 'back.out(1.4)',
+            scrollTrigger: { trigger: el, start: 'top 85%' },
+          }
+        );
       });
 
       // CTA section
-      gsap.fromTo('.cta-section', { opacity: 0, scale: 0.95, y: 30 }, {
-        opacity: 1, scale: 1, y: 0, duration: 0.8, ease: 'power3.out',
-        scrollTrigger: { trigger: '.cta-section', start: 'top 80%' },
-      });
+      gsap.fromTo(
+        '.cta-section',
+        { opacity: 0, scale: 0.95, y: 30 },
+        {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          duration: 0.8,
+          ease: 'power3.out',
+          scrollTrigger: { trigger: '.cta-section', start: 'top 80%' },
+        }
+      );
     }, pageRef);
 
     return () => ctx.revert();
   }, []);
 
   return (
-    <div ref={pageRef} className="min-h-screen bg-black text-neutral-100 selection:bg-emerald-500/30 font-sans overflow-x-hidden">
+    <div
+      ref={pageRef}
+      className="min-h-screen bg-black text-neutral-100 selection:bg-emerald-500/30 font-sans overflow-x-hidden"
+    >
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-900/20 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-teal-900/10 rounded-full blur-[120px]" />
@@ -303,22 +420,35 @@ export const AiPredictivePage: React.FC = () => {
             <div className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em] mb-8 opacity-0">
               <Sparkles className="w-3.5 h-3.5" />
               IA Preditiva
-              <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[8px] font-bold uppercase tracking-wider">Novo</span>
+              <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[8px] font-bold uppercase tracking-wider">
+                Novo
+              </span>
             </div>
             <h1 className="hero-title text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-[1.05] opacity-0">
-              <span className="bg-gradient-to-b from-white via-white to-white/30 bg-clip-text text-transparent">Inteligência que trabalha</span>
+              <span className="bg-gradient-to-b from-white via-white to-white/30 bg-clip-text text-transparent">
+                Inteligência que trabalha
+              </span>
               <br />
-              <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">antes de você perceber o problema.</span>
+              <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                antes de você perceber o problema.
+              </span>
             </h1>
             <p className="hero-sub text-lg md:text-xl text-neutral-400 max-w-2xl mx-auto lg:mx-0 font-light leading-relaxed mb-10 opacity-0">
-              Disponível no plano Pro: analisamos o comportamento da sua fila e agenda para prever gargalos, evitar faltas e sugerir os melhores horários.
+              Disponível no plano Pro: analisamos o comportamento da sua fila e agenda para prever
+              gargalos, evitar faltas e sugerir os melhores horários.
             </p>
             <div className="hero-cta flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 opacity-0">
-              <button onClick={() => navigate('/planos')} className="bg-emerald-500 text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+              <button
+                onClick={() => navigate('/planos')}
+                className="bg-emerald-500 text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
+              >
                 Ver planos
                 <ArrowRight className="w-4 h-4" />
               </button>
-              <button onClick={() => navigate('/queue')} className="bg-transparent border border-white/20 text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-white/10 transition-colors">
+              <button
+                onClick={() => navigate('/queue')}
+                className="bg-transparent border border-white/20 text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-white/10 transition-colors"
+              >
                 Ver demonstração
               </button>
             </div>
@@ -343,7 +473,9 @@ export const AiPredictivePage: React.FC = () => {
               <span className="text-emerald-400">Não chute.</span>
             </h2>
             <p className="section-subtitle text-neutral-400 text-lg leading-relaxed font-light mb-8 max-w-lg">
-              Em vez de "mais ou menos 20 minutos", o cliente recebe um número real. A IA calcula o tempo de cada profissional por tipo de serviço, baseado no histórico real — e atualiza a cada movimentação.
+              Em vez de "mais ou menos 20 minutos", o cliente recebe um número real. A IA calcula o
+              tempo de cada profissional por tipo de serviço, baseado no histórico real — e atualiza
+              a cada movimentação.
             </p>
             <div className="section-desc space-y-4">
               {[
@@ -351,7 +483,7 @@ export const AiPredictivePage: React.FC = () => {
                 { icon: TrendingUp, text: 'Atualizada a cada entrada e saída da fila' },
                 { icon: Target, text: 'Diferente por serviço: corte rápido ≠ barba completa' },
                 { icon: Users, text: 'Cliente acompanha no celular sem perguntar' },
-              ].map((item) => (
+              ].map(item => (
                 <div key={item.text} className="bullet-item flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
                     <item.icon className="w-4 h-4 text-emerald-400" />
@@ -384,7 +516,9 @@ export const AiPredictivePage: React.FC = () => {
               <span className="text-amber-400">você já sabe.</span>
             </h2>
             <p className="section-subtitle text-neutral-400 text-lg leading-relaxed font-light mb-8 max-w-lg">
-              A IA identifica padrões que precedem faltas: horários que o cliente costuma cancelar, intervalos entre agendamentos, frequência de reagendamento. Quando o risco é alto, avisa.
+              A IA identifica padrões que precedem faltas: horários que o cliente costuma cancelar,
+              intervalos entre agendamentos, frequência de reagendamento. Quando o risco é alto,
+              avisa.
             </p>
             <div className="section-desc space-y-4">
               {[
@@ -392,7 +526,7 @@ export const AiPredictivePage: React.FC = () => {
                 { icon: MessageCircleWarning, text: 'Alerta a equipe para agir proativamente' },
                 { icon: CalendarCheck, text: 'Sugere reagendamento em vez de perda total' },
                 { icon: BarChart3, text: 'Histórico de cancelamentos por cliente' },
-              ].map((item) => (
+              ].map(item => (
                 <div key={item.text} className="bullet-item flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
                     <item.icon className="w-4 h-4 text-amber-400" />
@@ -419,15 +553,19 @@ export const AiPredictivePage: React.FC = () => {
               <span className="text-violet-400">no momento certo.</span>
             </h2>
             <p className="section-subtitle text-neutral-400 text-lg leading-relaxed font-light mb-8 max-w-lg">
-              Não é só "envia um WhatsApp". A IA escolhe o melhor horário para cada cliente. Quem responde de manhã, quem precisa de aviso mais tarde. Sem parecer spam.
+              Não é só "envia um WhatsApp". A IA escolhe o melhor horário para cada cliente. Quem
+              responde de manhã, quem precisa de aviso mais tarde. Sem parecer spam.
             </p>
             <div className="section-desc space-y-4">
               {[
                 { icon: Zap, text: 'Horário de envio personalizado por comportamento' },
                 { icon: Repeat, text: 'Tentativa automática se não houver confirmação' },
-                { icon: MessageCircleWarning, text: 'Mensagem contextualizada: agendamento, fila ou lembrete' },
+                {
+                  icon: MessageCircleWarning,
+                  text: 'Mensagem contextualizada: agendamento, fila ou lembrete',
+                },
                 { icon: TrendingUp, text: 'Taxa de confirmação maior que envio genérico' },
-              ].map((item) => (
+              ].map(item => (
                 <div key={item.text} className="bullet-item flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center shrink-0">
                     <item.icon className="w-4 h-4 text-violet-400" />
@@ -460,15 +598,20 @@ export const AiPredictivePage: React.FC = () => {
               <span className="text-cyan-400">o dinheiro.</span>
             </h2>
             <p className="section-subtitle text-neutral-400 text-lg leading-relaxed font-light mb-8 max-w-lg">
-              A IA cruza dados de fila, agenda e financeiro para mostrar o que realmente importa: quais serviços dão mais lucro, quais horários estão subutilizados, e quando escalar ou reduzir equipe.
+              A IA cruza dados de fila, agenda e financeiro para mostrar o que realmente importa:
+              quais serviços dão mais lucro, quais horários estão subutilizados, e quando escalar ou
+              reduzir equipe.
             </p>
             <div className="section-desc space-y-4">
               {[
-                { icon: BarChart3, text: 'Serviços mais lucrativos e ticket médio por profissional' },
+                {
+                  icon: BarChart3,
+                  text: 'Serviços mais lucrativos e ticket médio por profissional',
+                },
                 { icon: Clock, text: 'Horários de pico e ociosos — ajuste escala e preços' },
                 { icon: TrendingUp, text: 'Tendências de faturamento mês a mês' },
                 { icon: Target, text: 'Sugestões de ação: escala, preços, promoções' },
-              ].map((item) => (
+              ].map(item => (
                 <div key={item.text} className="bullet-item flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center shrink-0">
                     <item.icon className="w-4 h-4 text-cyan-400" />
@@ -493,7 +636,8 @@ export const AiPredictivePage: React.FC = () => {
                 Sem configuração complicada.
               </h2>
               <p className="text-lg text-neutral-600 font-light leading-relaxed">
-                A IA Preditiva já vem ativa nos salões do plano Pro. Ela aprende com o histórico de fila, agenda e atendimentos — quanto mais você usa, mais precisa fica.
+                A IA Preditiva já vem ativa nos salões do plano Pro. Ela aprende com o histórico de
+                fila, agenda e atendimentos — quanto mais você usa, mais precisa fica.
               </p>
             </div>
 
@@ -588,7 +732,7 @@ export const AiPredictivePage: React.FC = () => {
                 visual: 'bars' as const,
                 amount: 20,
               },
-            ].map((stat) => {
+            ].map(stat => {
               const stroke =
                 stat.tone === 'emerald'
                   ? '#34d399'
@@ -667,7 +811,7 @@ export const AiPredictivePage: React.FC = () => {
                           />
                         </div>
                         <div className="mt-3 flex gap-1">
-                          {[42, 48, 55, 61, 70, 78, 85].map((h) => (
+                          {[42, 48, 55, 61, 70, 78, 85].map(h => (
                             <div
                               key={h}
                               className="flex-1 rounded-sm bg-violet-400/25"
@@ -717,11 +861,17 @@ export const AiPredictivePage: React.FC = () => {
             Faça upgrade a qualquer momento direto do seu painel, sem burocracia.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button onClick={() => navigate('/planos')} className="bg-emerald-500 text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+            <button
+              onClick={() => navigate('/planos')}
+              className="bg-emerald-500 text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
+            >
               Ver planos
               <ArrowRight className="w-4 h-4" />
             </button>
-            <button onClick={() => navigate('/queue')} className="bg-transparent border border-white/20 text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-white/10 transition-colors">
+            <button
+              onClick={() => navigate('/queue')}
+              className="bg-transparent border border-white/20 text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-white/10 transition-colors"
+            >
               Ver demonstração
             </button>
           </div>

@@ -135,7 +135,7 @@ export const PackageCatalog: React.FC<PackageCatalogProps> = ({ services, canMan
         </p>
       ) : (
         <div className="space-y-3">
-          {packages.map((pkg) => (
+          {packages.map(pkg => (
             <div
               key={pkg.id}
               className="bg-surface p-3 rounded-lg border border-border flex items-center justify-between"
@@ -143,7 +143,8 @@ export const PackageCatalog: React.FC<PackageCatalogProps> = ({ services, canMan
               <div>
                 <h4 className="font-medium text-text-primary">{pkg.name}</h4>
                 <p className="text-xs text-text-secondary">
-                  {pkg.sessionCount} sessões · {pkg.serviceName ?? 'Serviço'} · {brl.format(pkg.price)}
+                  {pkg.sessionCount} sessões · {pkg.serviceName ?? 'Serviço'} ·{' '}
+                  {brl.format(pkg.price)}
                   {pkg.validityDays ? ` · ${pkg.validityDays} dias` : ' · sem validade'}
                   {!pkg.active ? ' · inativo' : ''}
                 </p>
@@ -181,15 +182,15 @@ export const PackageCatalog: React.FC<PackageCatalogProps> = ({ services, canMan
             className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-sm text-text-primary"
             placeholder="Nome (ex.: Pacote 5 cortes)"
             value={form.name}
-            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
           />
           <select
             className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-sm text-text-primary"
             value={form.serviceId}
-            onChange={(e) => setForm((f) => ({ ...f, serviceId: e.target.value }))}
+            onChange={e => setForm(f => ({ ...f, serviceId: e.target.value }))}
           >
             <option value="">Serviço de cada sessão</option>
-            {services.map((s) => (
+            {services.map(s => (
               <option key={s.id} value={s.id}>
                 {s.name}
               </option>
@@ -202,13 +203,13 @@ export const PackageCatalog: React.FC<PackageCatalogProps> = ({ services, canMan
               className="w-full bg-bg border border-border rounded-xl px-3 py-3 text-sm text-text-primary"
               placeholder="Sessões"
               value={form.sessionCount}
-              onChange={(e) => setForm((f) => ({ ...f, sessionCount: e.target.value }))}
+              onChange={e => setForm(f => ({ ...f, sessionCount: e.target.value }))}
             />
             <input
               className="w-full bg-bg border border-border rounded-xl px-3 py-3 text-sm text-text-primary"
               placeholder="Preço"
               value={form.price}
-              onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+              onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
             />
             <input
               type="number"
@@ -216,7 +217,7 @@ export const PackageCatalog: React.FC<PackageCatalogProps> = ({ services, canMan
               className="w-full bg-bg border border-border rounded-xl px-3 py-3 text-sm text-text-primary"
               placeholder="Validade (dias)"
               value={form.validityDays}
-              onChange={(e) => setForm((f) => ({ ...f, validityDays: e.target.value }))}
+              onChange={e => setForm(f => ({ ...f, validityDays: e.target.value }))}
             />
           </div>
           <div className="flex gap-2">

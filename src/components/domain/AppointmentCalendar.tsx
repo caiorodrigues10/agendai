@@ -7,7 +7,7 @@ import {
   getDaySchedule,
   getServiceDuration,
   getServiceName,
-  getStaffName
+  getStaffName,
 } from '../../utils/schedulingUtils';
 import { AppointmentBookingModal } from './AppointmentBookingModal';
 import { AvailabilitySlot } from '../../utils/schedulingUtils';
@@ -21,15 +21,25 @@ import {
   CheckCircle,
   Trash2,
   Phone,
-  ChevronDown
+  ChevronDown,
 } from 'lucide-react';
 
 type AgendaView = 'salon' | 'professional';
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const MONTH_NAMES = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  'Janeiro',
+  'Fevereiro',
+  'Março',
+  'Abril',
+  'Maio',
+  'Junho',
+  'Julho',
+  'Agosto',
+  'Setembro',
+  'Outubro',
+  'Novembro',
+  'Dezembro',
 ];
 
 function getDaysInMonth(year: number, month: number) {
@@ -65,14 +75,14 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   onBook,
   onCancel,
   onCheckIn,
-  onDateChange
+  onDateChange,
 }) => {
   const [selectedDate, setSelectedDate] = useState(() => formatDateISO(new Date()));
   const [view, setView] = useState<AgendaView>(
     currentUserRole === 'employee' ? 'professional' : 'salon'
   );
   const [selectedStaffId, setSelectedStaffId] = useState<string>(
-    currentUserRole === 'employee' && currentUserId ? currentUserId : staff[0]?.id ?? 'any'
+    currentUserRole === 'employee' && currentUserId ? currentUserId : (staff[0]?.id ?? 'any')
   );
   const [showBooking, setShowBooking] = useState(false);
   const [selectedAppt, setSelectedAppt] = useState<Appointment | null>(null);
@@ -117,7 +127,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
 
   const dayAppointments = useMemo(() => {
     return appointments
-      .filter((a) => a.date === selectedDate && a.status !== 'cancelled')
+      .filter(a => a.date === selectedDate && a.status !== 'cancelled')
       .sort((a, b) => a.time.localeCompare(b.time));
   }, [appointments, selectedDate]);
 
@@ -126,13 +136,13 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
       const id = selectedStaffId === 'any' ? null : selectedStaffId;
       return [{ id, label: getStaffName(id, staff) }];
     }
-    const cols = staff.map((s) => ({ id: s.id, label: s.name }));
+    const cols = staff.map(s => ({ id: s.id, label: s.name }));
     cols.push({ id: null as unknown as string, label: 'Sem prof.' });
     return cols;
   }, [view, selectedStaffId, staff]);
 
   const getAppointmentsForColumn = (columnId: string | null) => {
-    return dayAppointments.filter((a) => {
+    return dayAppointments.filter(a => {
       const apptStaff = a.staffId === 'any' ? null : a.staffId;
       if (view === 'professional') {
         const filterId = selectedStaffId === 'any' ? null : selectedStaffId;
@@ -150,12 +160,12 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   const dateLabel = dateObj.toLocaleDateString('pt-BR', {
     weekday: 'long',
     day: 'numeric',
-    month: 'long'
+    month: 'long',
   });
 
   const selectedStaffName = useMemo(() => {
     if (selectedStaffId === 'any') return 'Qualquer profissional';
-    return staff.find((s) => s.id === selectedStaffId)?.name ?? 'Profissional';
+    return staff.find(s => s.id === selectedStaffId)?.name ?? 'Profissional';
   }, [selectedStaffId, staff]);
 
   const calendarDays = useMemo(() => {
@@ -243,13 +253,18 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                       : 'text-text-primary hover:bg-surface-2'
                   }`}
                 >
-                  <Users size={14} className={selectedStaffId === 'any' ? 'text-accent' : 'text-text-muted'} />
+                  <Users
+                    size={14}
+                    className={selectedStaffId === 'any' ? 'text-accent' : 'text-text-muted'}
+                  />
                   Qualquer profissional
-                  {selectedStaffId === 'any' && <CheckCircle size={14} className="ml-auto text-accent" />}
+                  {selectedStaffId === 'any' && (
+                    <CheckCircle size={14} className="ml-auto text-accent" />
+                  )}
                 </button>
               )}
               {currentUserRole !== 'employee' && <div className="h-px bg-border" />}
-              {staff.map((s) => (
+              {staff.map(s => (
                 <button
                   key={s.id}
                   onClick={() => {
@@ -262,9 +277,13 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                       : 'text-text-primary hover:bg-surface-2'
                   }`}
                 >
-                  <div className={`w-2 h-2 rounded-full ${selectedStaffId === s.id ? 'bg-accent' : 'bg-text-muted'}`} />
+                  <div
+                    className={`w-2 h-2 rounded-full ${selectedStaffId === s.id ? 'bg-accent' : 'bg-text-muted'}`}
+                  />
                   {s.name}
-                  {selectedStaffId === s.id && <CheckCircle size={14} className="ml-auto text-accent" />}
+                  {selectedStaffId === s.id && (
+                    <CheckCircle size={14} className="ml-auto text-accent" />
+                  )}
                 </button>
               ))}
             </div>
@@ -274,7 +293,10 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
 
       <div className="relative" ref={calendarRef}>
         <div className="flex items-center justify-between bg-surface border border-border rounded-xl p-3">
-          <button onClick={() => navigateDate(-1)} className="p-2 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors">
+          <button
+            onClick={() => navigateDate(-1)}
+            className="p-2 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors"
+          >
             <ChevronLeft size={20} />
           </button>
           <div className="text-center">
@@ -296,7 +318,10 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
               {dateLabel}
             </button>
           </div>
-          <button onClick={() => navigateDate(1)} className="p-2 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors">
+          <button
+            onClick={() => navigateDate(1)}
+            className="p-2 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors"
+          >
             <ChevronRight size={20} />
           </button>
         </div>
@@ -304,19 +329,25 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
         {showCalendar && (
           <div className="absolute z-30 left-1/2 -translate-x-1/2 mt-2 w-72 bg-surface border border-border rounded-xl shadow-2xl p-3 animate-fade-in">
             <div className="flex items-center justify-between mb-3">
-              <button onClick={() => navigateCalendarMonth(-1)} className="p-1.5 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors">
+              <button
+                onClick={() => navigateCalendarMonth(-1)}
+                className="p-1.5 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors"
+              >
                 <ChevronLeft size={16} />
               </button>
               <span className="text-sm font-bold text-text-primary">
                 {MONTH_NAMES[calendarMonth]} {calendarYear}
               </span>
-              <button onClick={() => navigateCalendarMonth(1)} className="p-1.5 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors">
+              <button
+                onClick={() => navigateCalendarMonth(1)}
+                className="p-1.5 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors"
+              >
                 <ChevronRight size={16} />
               </button>
             </div>
 
             <div className="grid grid-cols-7 gap-0.5 mb-1">
-              {WEEKDAYS.map((d) => (
+              {WEEKDAYS.map(d => (
                 <div key={d} className="text-[10px] font-bold text-text-muted text-center py-1">
                   {d}
                 </div>
@@ -361,7 +392,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
             style={{ gridTemplateColumns: `3.5rem repeat(${columns.length}, 1fr)` }}
           >
             <div className="p-2 text-[10px] text-text-muted font-bold border-r border-border" />
-            {columns.map((col) => (
+            {columns.map(col => (
               <div
                 key={String(col.id)}
                 className="p-2 text-[10px] text-text-secondary font-bold text-center border-r border-border last:border-r-0 truncate"
@@ -372,7 +403,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
           </div>
 
           <div className="max-h-[420px] overflow-y-auto">
-            {timeSlots.map((slot) => (
+            {timeSlots.map(slot => (
               <div
                 key={slot}
                 className="grid border-b border-border/50 min-h-[2.75rem]"
@@ -381,15 +412,17 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                 <div className="p-1.5 text-[10px] text-text-muted font-mono border-r border-border flex items-start pt-2">
                   {slot}
                 </div>
-                {columns.map((col) => {
-                  const colAppts = getAppointmentsForColumn(col.id).filter((a) => a.time === slot);
+                {columns.map(col => {
+                  const colAppts = getAppointmentsForColumn(col.id).filter(a => a.time === slot);
                   return (
                     <div
                       key={String(col.id) + slot}
                       className="p-0.5 border-r border-border/50 last:border-r-0 relative min-h-[2.75rem]"
                     >
-                      {colAppts.map((appt) => {
-                        const duration = appt.serviceDurationMinutes ?? getServiceDuration(appt.serviceId, services);
+                      {colAppts.map(appt => {
+                        const duration =
+                          appt.serviceDurationMinutes ??
+                          getServiceDuration(appt.serviceId, services);
                         const rows = Math.max(1, Math.ceil(duration / 30));
                         return (
                           <button
@@ -398,7 +431,9 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                             className="absolute inset-x-0.5 top-0.5 bg-accent/20 border border-accent/40 rounded-lg p-1.5 text-left hover:bg-accent/30 transition-colors z-10 overflow-hidden"
                             style={{ minHeight: `${rows * 2.5}rem` }}
                           >
-                            <p className="text-[10px] font-bold text-text-primary truncate">{appt.customerName}</p>
+                            <p className="text-[10px] font-bold text-text-primary truncate">
+                              {appt.customerName}
+                            </p>
                             <p className="text-[9px] text-accent truncate">
                               {appt.serviceName ?? getServiceName(appt.serviceId, services)}
                             </p>
@@ -415,7 +450,9 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
       )}
 
       {dayAppointments.length === 0 && !isClosed && (
-        <p className="text-center text-text-muted text-sm py-2">Nenhum agendamento para este dia.</p>
+        <p className="text-center text-text-muted text-sm py-2">
+          Nenhum agendamento para este dia.
+        </p>
       )}
 
       {selectedAppt && (
@@ -423,7 +460,9 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
           <div className="bg-surface border border-border rounded-2xl w-full max-w-sm p-5 space-y-4 animate-fade-in">
             <div>
               <h4 className="text-lg font-bold text-text-primary">{selectedAppt.customerName}</h4>
-              <p className="text-sm text-accent">{getServiceName(selectedAppt.serviceId, services)}</p>
+              <p className="text-sm text-accent">
+                {getServiceName(selectedAppt.serviceId, services)}
+              </p>
               <p className="text-xs text-text-muted mt-1">
                 {selectedAppt.time} • {getStaffName(selectedAppt.staffId, staff)}
               </p>

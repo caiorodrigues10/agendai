@@ -57,7 +57,10 @@ const EMPTY_META: ListMeta = { total: 0, page: 1, limit: 10, totalPages: 1 };
 // Shared UI
 // ─────────────────────────────────────────────
 
-const SectionError: React.FC<{ message: string; onRetry?: () => void }> = ({ message, onRetry }) => (
+const SectionError: React.FC<{ message: string; onRetry?: () => void }> = ({
+  message,
+  onRetry,
+}) => (
   <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-5 flex items-center gap-3">
     <AlertCircle size={18} className="text-red-400 shrink-0" />
     <p className="text-sm text-red-400 flex-1">{message}</p>
@@ -107,8 +110,8 @@ const PaginationBar: React.FC<PaginationBarProps> = ({ meta, page, loading, onPa
       {loading
         ? '...'
         : meta.total === 0
-        ? 'Nenhum registro'
-        : `Exibindo ${(page - 1) * meta.limit + 1}–${Math.min(page * meta.limit, meta.total)} de ${meta.total}`}
+          ? 'Nenhum registro'
+          : `Exibindo ${(page - 1) * meta.limit + 1}–${Math.min(page * meta.limit, meta.total)} de ${meta.total}`}
     </span>
     <div className="flex items-center gap-2">
       <button
@@ -118,7 +121,9 @@ const PaginationBar: React.FC<PaginationBarProps> = ({ meta, page, loading, onPa
       >
         Anterior
       </button>
-      <span className="text-xs text-text-muted font-mono">{page}/{Math.max(1, meta.totalPages)}</span>
+      <span className="text-xs text-text-muted font-mono">
+        {page}/{Math.max(1, meta.totalPages)}
+      </span>
       <button
         onClick={() => onPageChange(Math.min(meta.totalPages, page + 1))}
         disabled={page >= meta.totalPages}
@@ -139,7 +144,11 @@ const BillingKpiCard: React.FC<{
   loading?: boolean;
 }> = ({ icon, value, label, hint, tone = 'default', loading }) => {
   const toneClass =
-    tone === 'positive' ? 'text-green-400' : tone === 'negative' ? 'text-red-400' : 'text-text-primary';
+    tone === 'positive'
+      ? 'text-green-400'
+      : tone === 'negative'
+        ? 'text-red-400'
+        : 'text-text-primary';
   return (
     <div className="bg-surface border border-border p-5 rounded-2xl hover:border-border-strong transition-colors">
       <div className="w-9 h-9 bg-violet-500/10 border border-violet-500/20 rounded-xl flex items-center justify-center text-violet-400 mb-4">
@@ -162,13 +171,28 @@ const BillingKpiCard: React.FC<{
 
 const PAYMENT_STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   approved: { label: 'Aprovado', className: 'bg-green-500/10 text-green-400 border-green-500/20' },
-  authorized: { label: 'Autorizado', className: 'bg-green-500/10 text-green-400 border-green-500/20' },
-  pending: { label: 'Pendente', className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
-  in_process: { label: 'Em análise', className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
-  in_mediation: { label: 'Mediação', className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
+  authorized: {
+    label: 'Autorizado',
+    className: 'bg-green-500/10 text-green-400 border-green-500/20',
+  },
+  pending: {
+    label: 'Pendente',
+    className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+  },
+  in_process: {
+    label: 'Em análise',
+    className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+  },
+  in_mediation: {
+    label: 'Mediação',
+    className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+  },
   rejected: { label: 'Rejeitado', className: 'bg-red-500/10 text-red-400 border-red-500/20' },
   cancelled: { label: 'Cancelado', className: 'bg-surface-2 text-text-muted border-border-strong' },
-  refunded: { label: 'Reembolsado', className: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+  refunded: {
+    label: 'Reembolsado',
+    className: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  },
   charged_back: { label: 'Chargeback', className: 'bg-red-500/10 text-red-400 border-red-500/20' },
 };
 
@@ -178,7 +202,9 @@ const PaymentStatusBadge: React.FC<{ status: string }> = ({ status }) => {
     className: 'bg-surface-2 text-text-muted border-border-strong',
   };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${cfg.className}`}>
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${cfg.className}`}
+    >
       {cfg.label}
     </span>
   );
@@ -187,7 +213,10 @@ const PaymentStatusBadge: React.FC<{ status: string }> = ({ status }) => {
 const SUBSCRIPTION_STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   ACTIVE: { label: 'Ativa', className: 'bg-green-500/10 text-green-400 border-green-500/20' },
   TRIALING: { label: 'Trial', className: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-  PAST_DUE: { label: 'Em atraso', className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
+  PAST_DUE: {
+    label: 'Em atraso',
+    className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+  },
   UNPAID: { label: 'Não paga', className: 'bg-red-500/10 text-red-400 border-red-500/20' },
   CANCELED: { label: 'Cancelada', className: 'bg-surface-2 text-text-muted border-border-strong' },
 };
@@ -198,7 +227,9 @@ const SubscriptionStatusBadge: React.FC<{ status: string }> = ({ status }) => {
     className: 'bg-surface-2 text-text-muted border-border-strong',
   };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${cfg.className}`}>
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${cfg.className}`}
+    >
       {cfg.label}
     </span>
   );
@@ -264,14 +295,19 @@ const RefundModal: React.FC<RefundModalProps> = ({ payment, onClose, onSubmit, b
               {PAYMENT_METHOD_LABELS[payment.paymentMethod] ?? payment.paymentMethod}
             </p>
           </div>
-          <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors">
+          <button
+            onClick={onClose}
+            className="text-text-muted hover:text-text-primary transition-colors"
+          >
             <X size={20} />
           </button>
         </div>
 
         <div className="bg-bg/50 border border-border rounded-xl px-4 py-3 flex items-center justify-between mb-4">
           <span className="text-xs text-text-secondary font-medium">Valor do pagamento</span>
-          <span className="text-lg font-black text-text-primary">{brl.format(payment.transactionAmount)}</span>
+          <span className="text-lg font-black text-text-primary">
+            {brl.format(payment.transactionAmount)}
+          </span>
         </div>
 
         {error && (
@@ -295,7 +331,9 @@ const RefundModal: React.FC<RefundModalProps> = ({ payment, onClose, onSubmit, b
 
         <div className="rounded-xl bg-yellow-500/10 border border-yellow-500/20 px-4 py-3 flex gap-2 mt-3">
           <AlertCircle size={15} className="text-yellow-400 shrink-0 mt-0.5" />
-          <p className="text-xs text-yellow-400">Reembolso TOTAL — a assinatura do salão será cancelada.</p>
+          <p className="text-xs text-yellow-400">
+            Reembolso TOTAL — a assinatura do salão será cancelada.
+          </p>
         </div>
 
         <div className="flex gap-3 mt-5">
@@ -417,7 +455,9 @@ const RevenueSection: React.FC = () => {
                       {EXPENSE_TYPE_LABELS[item.type] ?? item.type}
                       <span className="text-text-muted font-medium ml-2">({item.count})</span>
                     </span>
-                    <span className="text-xs font-bold text-text-primary">{brl.format(item.total)}</span>
+                    <span className="text-xs font-bold text-text-primary">
+                      {brl.format(item.total)}
+                    </span>
                   </div>
                   <div className="h-2 bg-surface-2 rounded-full overflow-hidden">
                     <motion.div
@@ -435,7 +475,9 @@ const RevenueSection: React.FC = () => {
 
         {/* Resumo de fiados */}
         <div className="bg-surface border border-border rounded-2xl p-6 hover:border-border-strong transition-colors">
-          <h3 className="text-sm font-bold text-text-primary mb-4">Fiados (crédito com clientes)</h3>
+          <h3 className="text-sm font-bold text-text-primary mb-4">
+            Fiados (crédito com clientes)
+          </h3>
           {loading ? (
             <div className="space-y-3">
               {Array.from({ length: 4 }).map((_, i) => (
@@ -445,22 +487,36 @@ const RevenueSection: React.FC = () => {
           ) : summary ? (
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-bg/40 border border-border rounded-xl p-4">
-                <p className="text-[10px] text-text-muted uppercase tracking-widest font-semibold mb-1">Total original</p>
-                <p className="text-lg font-black text-text-primary">{brl.format(summary.fiados.totalOriginal)}</p>
+                <p className="text-[10px] text-text-muted uppercase tracking-widest font-semibold mb-1">
+                  Total original
+                </p>
+                <p className="text-lg font-black text-text-primary">
+                  {brl.format(summary.fiados.totalOriginal)}
+                </p>
               </div>
               <div className="bg-bg/40 border border-border rounded-xl p-4">
-                <p className="text-[10px] text-text-muted uppercase tracking-widest font-semibold mb-1">Total pago</p>
-                <p className="text-lg font-black text-green-400">{brl.format(summary.fiados.totalPaid)}</p>
+                <p className="text-[10px] text-text-muted uppercase tracking-widest font-semibold mb-1">
+                  Total pago
+                </p>
+                <p className="text-lg font-black text-green-400">
+                  {brl.format(summary.fiados.totalPaid)}
+                </p>
               </div>
               <div className="bg-bg/40 border border-border rounded-xl p-4">
-                <p className="text-[10px] text-text-muted uppercase tracking-widest font-semibold mb-1">Pendente</p>
-                <p className="text-lg font-black text-yellow-400">{brl.format(summary.fiados.totalPending)}</p>
+                <p className="text-[10px] text-text-muted uppercase tracking-widest font-semibold mb-1">
+                  Pendente
+                </p>
+                <p className="text-lg font-black text-yellow-400">
+                  {brl.format(summary.fiados.totalPending)}
+                </p>
               </div>
               <div className="bg-bg/40 border border-border rounded-xl p-4">
                 <p className="text-[10px] text-text-muted uppercase tracking-widest font-semibold mb-1">
                   Vencido ({summary.fiados.overdueCount})
                 </p>
-                <p className="text-lg font-black text-red-400">{brl.format(summary.fiados.overdueAmount)}</p>
+                <p className="text-lg font-black text-red-400">
+                  {brl.format(summary.fiados.overdueAmount)}
+                </p>
               </div>
             </div>
           ) : null}
@@ -509,7 +565,9 @@ const PaymentsSection: React.FC<{ shopNames: Map<string, string> }> = ({ shopNam
     setRefundError(null);
     try {
       await paymentsApi.refundPayment(refundTarget.id, reason);
-      setRefundNotice(`Reembolso de ${brl.format(refundTarget.transactionAmount)} solicitado com sucesso.`);
+      setRefundNotice(
+        `Reembolso de ${brl.format(refundTarget.transactionAmount)} solicitado com sucesso.`
+      );
       setRefundTarget(null);
       await fetchPayments();
     } catch (err) {
@@ -550,8 +608,12 @@ const PaymentsSection: React.FC<{ shopNames: Map<string, string> }> = ({ shopNam
               payments.map(p => (
                 <tr key={p.id} className="hover:bg-surface-2/20 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="font-bold text-text-primary text-sm max-w-[220px] truncate">{p.description || '—'}</div>
-                    <div className="text-[10px] text-text-muted font-mono">{paymentRefLabel(p)}</div>
+                    <div className="font-bold text-text-primary text-sm max-w-[220px] truncate">
+                      {p.description || '—'}
+                    </div>
+                    <div className="text-[10px] text-text-muted font-mono">
+                      {paymentRefLabel(p)}
+                    </div>
                   </td>
                   <td className="px-6 py-4 hidden md:table-cell">
                     <div className="text-xs text-text-secondary max-w-[160px] truncate">
@@ -559,7 +621,9 @@ const PaymentsSection: React.FC<{ shopNames: Map<string, string> }> = ({ shopNam
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="font-bold text-text-primary">{brl.format(p.transactionAmount)}</span>
+                    <span className="font-bold text-text-primary">
+                      {brl.format(p.transactionAmount)}
+                    </span>
                   </td>
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center gap-1.5 text-xs text-text-secondary font-medium">
@@ -571,7 +635,9 @@ const PaymentsSection: React.FC<{ shopNames: Map<string, string> }> = ({ shopNam
                     <PaymentStatusBadge status={p.status} />
                   </td>
                   <td className="px-6 py-4 hidden lg:table-cell">
-                    <span className="text-xs text-text-secondary">{formatDateTime(p.createdAt)}</span>
+                    <span className="text-xs text-text-secondary">
+                      {formatDateTime(p.createdAt)}
+                    </span>
                   </td>
                   <td className="px-6 py-4">
                     {p.status === 'approved' ? (
@@ -616,7 +682,14 @@ const PaymentsSection: React.FC<{ shopNames: Map<string, string> }> = ({ shopNam
 // Seção: Assinaturas
 // ─────────────────────────────────────────────
 
-const SUBSCRIPTION_FILTERS = ['all', 'ACTIVE', 'TRIALING', 'PAST_DUE', 'CANCELED', 'UNPAID'] as const;
+const SUBSCRIPTION_FILTERS = [
+  'all',
+  'ACTIVE',
+  'TRIALING',
+  'PAST_DUE',
+  'CANCELED',
+  'UNPAID',
+] as const;
 
 const SubscriptionsSection: React.FC = () => {
   const [subs, setSubs] = useState<SubscriptionListItem[]>([]);
@@ -684,33 +757,50 @@ const SubscriptionsSection: React.FC = () => {
       {economics && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <div className="bg-surface border border-border rounded-2xl p-4">
-            <p className="text-[10px] uppercase tracking-wider text-text-muted font-bold">Economia dos salões (acumulada)</p>
-            <p className="text-xl font-bold text-success mt-1">{brl.format(economics.totalTenantSavingsSoFar)}</p>
+            <p className="text-[10px] uppercase tracking-wider text-text-muted font-bold">
+              Economia dos salões (acumulada)
+            </p>
+            <p className="text-xl font-bold text-success mt-1">
+              {brl.format(economics.totalTenantSavingsSoFar)}
+            </p>
             <p className="text-[11px] text-text-muted mt-1">
-              Desconto do anual vs mensal até agora ({economics.activeYearlySubscriptions} anual(is))
+              Desconto do anual vs mensal até agora ({economics.activeYearlySubscriptions}{' '}
+              anual(is))
             </p>
           </div>
           <div className="bg-surface border border-border rounded-2xl p-4">
-            <p className="text-[10px] uppercase tracking-wider text-text-muted font-bold">Receita deixada de ganhar</p>
-            <p className="text-xl font-bold text-warning mt-1">{brl.format(economics.totalPlatformForegoneSoFar)}</p>
+            <p className="text-[10px] uppercase tracking-wider text-text-muted font-bold">
+              Receita deixada de ganhar
+            </p>
+            <p className="text-xl font-bold text-warning mt-1">
+              {brl.format(economics.totalPlatformForegoneSoFar)}
+            </p>
             <p className="text-[11px] text-text-muted mt-1">
               Mesmo desconto, na visão da plataforma
             </p>
           </div>
           <div className="bg-surface border border-border rounded-2xl p-4">
-            <p className="text-[10px] uppercase tracking-wider text-text-muted font-bold">Desconto projetado / ano</p>
-            <p className="text-xl font-bold text-text-primary mt-1">{brl.format(economics.projectedAnnualDiscount)}</p>
+            <p className="text-[10px] uppercase tracking-wider text-text-muted font-bold">
+              Desconto projetado / ano
+            </p>
+            <p className="text-xl font-bold text-text-primary mt-1">
+              {brl.format(economics.projectedAnnualDiscount)}
+            </p>
             <p className="text-[11px] text-text-muted mt-1">
               {brl.format(economics.yearlySavingsPerYear)} por assinatura anual
             </p>
           </div>
           <div className="bg-surface border border-border rounded-2xl p-4">
-            <p className="text-[10px] uppercase tracking-wider text-text-muted font-bold">Mix ativo</p>
+            <p className="text-[10px] uppercase tracking-wider text-text-muted font-bold">
+              Mix ativo
+            </p>
             <p className="text-xl font-bold text-text-primary mt-1">
               {economics.activeMonthlySubscriptions}m / {economics.activeYearlySubscriptions}a
             </p>
             <p className="text-[11px] text-text-muted mt-1">
-              Mensal {economics.monthlyPlanPrice != null ? brl.format(economics.monthlyPlanPrice) : '—'} · Anual{' '}
+              Mensal{' '}
+              {economics.monthlyPlanPrice != null ? brl.format(economics.monthlyPlanPrice) : '—'} ·
+              Anual{' '}
               {economics.yearlyPlanPrice != null ? brl.format(economics.yearlyPlanPrice) : '—'}
             </p>
           </div>
@@ -723,7 +813,10 @@ const SubscriptionsSection: React.FC = () => {
           <input
             type="text"
             value={search}
-            onChange={e => { setSearch(e.target.value); setPage(1); }}
+            onChange={e => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             placeholder="Buscar por salão ou CNPJ..."
             className="w-full bg-surface border border-border text-text-primary text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-text-muted"
           />
@@ -732,14 +825,17 @@ const SubscriptionsSection: React.FC = () => {
           {SUBSCRIPTION_FILTERS.map(s => (
             <button
               key={s}
-              onClick={() => { setStatusFilter(s); setPage(1); }}
+              onClick={() => {
+                setStatusFilter(s);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
                 statusFilter === s
                   ? 'bg-violet-500 text-black'
                   : 'text-text-muted hover:text-text-primary hover:bg-surface-2'
               }`}
             >
-              {s === 'all' ? 'Todas' : SUBSCRIPTION_STATUS_CONFIG[s]?.label ?? s}
+              {s === 'all' ? 'Todas' : (SUBSCRIPTION_STATUS_CONFIG[s]?.label ?? s)}
             </button>
           ))}
         </div>
@@ -776,7 +872,9 @@ const SubscriptionsSection: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-xs text-text-secondary font-medium">{s.planName ?? '—'}</div>
+                        <div className="text-xs text-text-secondary font-medium">
+                          {s.planName ?? '—'}
+                        </div>
                         {s.planPrice != null && (
                           <div className="text-[10px] text-text-muted">
                             {brl.format(s.planPrice)}
@@ -793,13 +891,17 @@ const SubscriptionsSection: React.FC = () => {
                         )}
                       </td>
                       <td className="px-6 py-4 hidden lg:table-cell">
-                        <span className="text-xs text-text-secondary">{formatDate(s.startDate)}</span>
+                        <span className="text-xs text-text-secondary">
+                          {formatDate(s.startDate)}
+                        </span>
                       </td>
                       <td className="px-6 py-4 hidden lg:table-cell">
                         <span className="text-xs text-text-secondary">{formatDate(s.endDate)}</span>
                       </td>
                       <td className="px-6 py-4 hidden xl:table-cell">
-                        <span className="text-xs text-text-secondary">{formatDate(s.trialEndsAt)}</span>
+                        <span className="text-xs text-text-secondary">
+                          {formatDate(s.trialEndsAt)}
+                        </span>
                       </td>
                       <td className="px-6 py-4">
                         {s.status !== 'CANCELED' ? (
@@ -861,12 +963,18 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
       .map(f => f.trim())
       .filter(Boolean);
 
-    if (!price || price <= 0) { setError('Informe um preço válido.'); return; }
+    if (!price || price <= 0) {
+      setError('Informe um preço válido.');
+      return;
+    }
     if (Number.isNaN(maxEmployees) || maxEmployees < 0) {
       setError('Máx. funcionários: 0 = ilimitado.');
       return;
     }
-    if (features.length === 0) { setError('Informe ao menos uma feature (uma por linha).'); return; }
+    if (features.length === 0) {
+      setError('Informe ao menos uma feature (uma por linha).');
+      return;
+    }
 
     setSaving(true);
     setError(null);
@@ -914,7 +1022,10 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
           <h3 className="text-xl font-bold text-text-primary tracking-tight">
             {plan ? 'Editar Plano' : 'Novo Plano'}
           </h3>
-          <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors">
+          <button
+            onClick={onClose}
+            className="text-text-muted hover:text-text-primary transition-colors"
+          >
             <XCircle size={20} />
           </button>
         </div>
@@ -926,7 +1037,9 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
             </div>
           )}
           <div>
-            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">Nome</label>
+            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              Nome
+            </label>
             <input
               type="text"
               required
@@ -938,7 +1051,9 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">Descrição</label>
+            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              Descrição
+            </label>
             <input
               type="text"
               value={form.description}
@@ -963,7 +1078,9 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">Ciclo</label>
+              <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+                Ciclo
+              </label>
               <select
                 value={form.billingCycle}
                 onChange={e =>
@@ -977,7 +1094,9 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">Máx. funcionários (0 = ilimitado)</label>
+            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              Máx. funcionários (0 = ilimitado)
+            </label>
             <input
               type="number"
               required
@@ -989,7 +1108,9 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">Tier</label>
+              <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+                Tier
+              </label>
               <select
                 value={form.tierKey}
                 onChange={e => setForm({ ...form, tierKey: e.target.value })}
@@ -1014,7 +1135,9 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">Features (uma por linha)</label>
+            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              Features (uma por linha)
+            </label>
             <textarea
               required
               rows={4}
@@ -1085,7 +1208,12 @@ const PlansSection: React.FC = () => {
   }, [fetchPlans]);
 
   const handleDeactivate = async (plan: PlanItem) => {
-    if (!confirm(`Desativar o plano "${plan.name}"? Salões que já assinam continuam até o vencimento.`)) return;
+    if (
+      !confirm(
+        `Desativar o plano "${plan.name}"? Salões que já assinam continuam até o vencimento.`
+      )
+    )
+      return;
     try {
       const res = await adminApi.deactivatePlan(plan.id);
       if (res.data?.info) alert(res.data.info);
@@ -1101,7 +1229,10 @@ const PlansSection: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-end">
         <button
-          onClick={() => { setSelectedPlan(null); setModalOpen(true); }}
+          onClick={() => {
+            setSelectedPlan(null);
+            setModalOpen(true);
+          }}
           className="bg-violet-500 hover:bg-violet-400 text-black px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all active:scale-95"
         >
           <Plus size={16} />
@@ -1125,26 +1256,34 @@ const PlansSection: React.FC = () => {
             <div
               key={plan.id}
               className={`bg-surface border rounded-2xl p-5 flex flex-col gap-3 transition-colors ${
-                plan.active ? 'border-border hover:border-border-strong' : 'border-border opacity-60'
+                plan.active
+                  ? 'border-border hover:border-border-strong'
+                  : 'border-border opacity-60'
               }`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <h3 className="font-bold text-text-primary truncate">{plan.name}</h3>
                   {plan.description && (
-                    <p className="text-xs text-text-muted mt-0.5 line-clamp-2">{plan.description}</p>
+                    <p className="text-xs text-text-muted mt-0.5 line-clamp-2">
+                      {plan.description}
+                    </p>
                   )}
                 </div>
-                <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${
-                  plan.active
-                    ? 'bg-green-500/10 text-green-400 border-green-500/20'
-                    : 'bg-surface-2 text-text-muted border-border-strong'
-                }`}>
+                <span
+                  className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${
+                    plan.active
+                      ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                      : 'bg-surface-2 text-text-muted border-border-strong'
+                  }`}
+                >
                   {plan.active ? 'Ativo' : 'Inativo'}
                 </span>
               </div>
               <div>
-                <span className="text-2xl font-black text-text-primary tracking-tighter">{brl.format(plan.price)}</span>
+                <span className="text-2xl font-black text-text-primary tracking-tighter">
+                  {brl.format(plan.price)}
+                </span>
                 <span className="text-xs text-text-muted">
                   /{plan.billingCycle === 'YEARLY' ? 'ano' : 'mês'}
                 </span>
@@ -1166,7 +1305,10 @@ const PlansSection: React.FC = () => {
               </ul>
               <div className="flex gap-2 pt-1">
                 <button
-                  onClick={() => { setSelectedPlan(plan); setModalOpen(true); }}
+                  onClick={() => {
+                    setSelectedPlan(plan);
+                    setModalOpen(true);
+                  }}
                   className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 border border-border rounded-xl text-xs font-bold text-text-secondary hover:text-text-primary hover:bg-surface-2 transition-all"
                 >
                   <Pencil size={12} />
@@ -1191,7 +1333,10 @@ const PlansSection: React.FC = () => {
         <PlanFormModal
           plan={selectedPlan}
           onClose={() => setModalOpen(false)}
-          onSaved={() => { setModalOpen(false); fetchPlans(); }}
+          onSaved={() => {
+            setModalOpen(false);
+            fetchPlans();
+          }}
         />
       )}
     </div>
@@ -1237,7 +1382,12 @@ const BlockedSection: React.FC = () => {
   }, [fetchEntities]);
 
   const handleUnblock = async (entity: BlockedEntityItem) => {
-    if (!confirm(`Desbloquear ${entity.type} ${entity.value}? O acesso será restaurado imediatamente.`)) return;
+    if (
+      !confirm(
+        `Desbloquear ${entity.type} ${entity.value}? O acesso será restaurado imediatamente.`
+      )
+    )
+      return;
     setUnblockingId(entity.id);
     try {
       await adminApi.unblockEntity(entity.id);
@@ -1257,7 +1407,10 @@ const BlockedSection: React.FC = () => {
           <input
             type="text"
             value={search}
-            onChange={e => { setSearch(e.target.value); setPage(1); }}
+            onChange={e => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             placeholder="Buscar por valor ou motivo..."
             className="w-full bg-surface border border-border text-text-primary text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-text-muted"
           />
@@ -1266,7 +1419,10 @@ const BlockedSection: React.FC = () => {
           {(['active', 'inactive', 'all'] as const).map(s => (
             <button
               key={s}
-              onClick={() => { setActiveFilter(s); setPage(1); }}
+              onClick={() => {
+                setActiveFilter(s);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
                 activeFilter === s
                   ? 'bg-violet-500 text-black'
@@ -1314,17 +1470,21 @@ const BlockedSection: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${
-                          entity.isActive
-                            ? 'bg-red-500/10 text-red-400 border-red-500/20'
-                            : 'bg-green-500/10 text-green-400 border-green-500/20'
-                        }`}>
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${
+                            entity.isActive
+                              ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                              : 'bg-green-500/10 text-green-400 border-green-500/20'
+                          }`}
+                        >
                           {entity.isActive ? <Ban size={9} /> : <CheckCircle2 size={9} />}
                           {entity.isActive ? 'Bloqueado' : 'Desbloqueado'}
                         </span>
                       </td>
                       <td className="px-6 py-4 hidden lg:table-cell">
-                        <span className="text-xs text-text-secondary">{formatDateTime(entity.createdAt)}</span>
+                        <span className="text-xs text-text-secondary">
+                          {formatDateTime(entity.createdAt)}
+                        </span>
                       </td>
                       <td className="px-6 py-4 text-right">
                         {entity.isActive && (
@@ -1370,7 +1530,13 @@ const NOTIFICATION_TYPE_LABELS: Record<string, string> = {
 
 const NotificationsSection: React.FC = () => {
   const [items, setItems] = useState<AdminNotificationItem[]>([]);
-  const [meta, setMeta] = useState<{ total: number; page: number; limit: number; totalPages: number; unreadCount: number } | null>(null);
+  const [meta, setMeta] = useState<{
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    unreadCount: number;
+  } | null>(null);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1402,7 +1568,7 @@ const NotificationsSection: React.FC = () => {
     try {
       await adminApi.markNotificationRead(id);
       setItems(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)));
-      setMeta(prev => prev ? { ...prev, unreadCount: Math.max(0, prev.unreadCount - 1) } : prev);
+      setMeta(prev => (prev ? { ...prev, unreadCount: Math.max(0, prev.unreadCount - 1) } : prev));
     } catch {
       /* ignore */
     }
@@ -1412,7 +1578,7 @@ const NotificationsSection: React.FC = () => {
     try {
       await adminApi.markAllNotificationsRead();
       setItems(prev => prev.map(n => ({ ...n, read: true })));
-      setMeta(prev => prev ? { ...prev, unreadCount: 0 } : prev);
+      setMeta(prev => (prev ? { ...prev, unreadCount: 0 } : prev));
     } catch {
       /* ignore */
     }
@@ -1425,14 +1591,19 @@ const NotificationsSection: React.FC = () => {
           {(['all', 'unread'] as const).map(f => (
             <button
               key={f}
-              onClick={() => { setFilter(f); setPage(1); }}
+              onClick={() => {
+                setFilter(f);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
                 filter === f
                   ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
                   : 'text-text-muted hover:text-text-primary hover:bg-surface-2 border border-transparent'
               }`}
             >
-              {f === 'all' ? 'Todas' : `Não lidas${meta?.unreadCount ? ` (${meta.unreadCount})` : ''}`}
+              {f === 'all'
+                ? 'Todas'
+                : `Não lidas${meta?.unreadCount ? ` (${meta.unreadCount})` : ''}`}
             </button>
           ))}
         </div>
@@ -1482,7 +1653,9 @@ const NotificationsSection: React.FC = () => {
                       className={`hover:bg-surface-2/20 transition-colors ${!n.read ? 'bg-violet-500/5' : ''}`}
                     >
                       <td className="px-6 py-4">
-                        <p className={`text-sm ${n.read ? 'text-text-secondary' : 'text-text-primary font-semibold'}`}>
+                        <p
+                          className={`text-sm ${n.read ? 'text-text-secondary' : 'text-text-primary font-semibold'}`}
+                        >
                           {n.title}
                         </p>
                         <p className="text-xs text-text-muted mt-0.5 max-w-md">{n.message}</p>
@@ -1493,11 +1666,15 @@ const NotificationsSection: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 hidden lg:table-cell">
-                        <span className="text-xs text-text-secondary">{formatDateTime(n.createdAt)}</span>
+                        <span className="text-xs text-text-secondary">
+                          {formatDateTime(n.createdAt)}
+                        </span>
                       </td>
                       <td className="px-6 py-4 text-right">
                         {n.read ? (
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Lida</span>
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
+                            Lida
+                          </span>
                         ) : (
                           <button
                             onClick={() => handleMarkRead(n.id)}
@@ -1527,9 +1704,15 @@ const NotificationsSection: React.FC = () => {
 // ─────────────────────────────────────────────
 
 const REFUND_STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  SUCCEEDED: { label: 'Concluído', className: 'bg-green-500/10 text-green-400 border-green-500/20' },
+  SUCCEEDED: {
+    label: 'Concluído',
+    className: 'bg-green-500/10 text-green-400 border-green-500/20',
+  },
   FAILED: { label: 'Falhou', className: 'bg-red-500/10 text-red-400 border-red-500/20' },
-  PENDING: { label: 'Pendente', className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
+  PENDING: {
+    label: 'Pendente',
+    className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+  },
 };
 
 const RefundStatusBadge: React.FC<{ status: string }> = ({ status }) => {
@@ -1538,7 +1721,9 @@ const RefundStatusBadge: React.FC<{ status: string }> = ({ status }) => {
     className: 'bg-surface-2 text-text-muted border-border-strong',
   };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${cfg.className}`}>
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${cfg.className}`}
+    >
       {cfg.label}
     </span>
   );
@@ -1608,7 +1793,9 @@ const RefundsSection: React.FC<{ shopNames: Map<string, string> }> = ({ shopName
                       <span className="font-bold text-text-primary">{brl.format(r.amount)}</span>
                     </td>
                     <td className="px-6 py-4 hidden md:table-cell">
-                      <span className="text-xs text-text-secondary max-w-[240px] truncate block">{r.reason || '—'}</span>
+                      <span className="text-xs text-text-secondary max-w-[240px] truncate block">
+                        {r.reason || '—'}
+                      </span>
                     </td>
                     <td className="px-6 py-4 hidden lg:table-cell">
                       <span className="text-xs text-text-secondary max-w-[160px] truncate block">
@@ -1639,7 +1826,8 @@ const RefundsSection: React.FC<{ shopNames: Map<string, string> }> = ({ shopName
 // BillingTab (raiz)
 // ─────────────────────────────────────────────
 
-type BillingSection = 'revenue' | 'payments' | 'refunds' | 'subscriptions' | 'plans' | 'blocked' | 'notifications';
+type BillingSection =
+  'revenue' | 'payments' | 'refunds' | 'subscriptions' | 'plans' | 'blocked' | 'notifications';
 
 const SECTION_OPTIONS: { value: BillingSection; icon: React.ReactNode; label: string }[] = [
   { value: 'revenue', icon: <Wallet size={14} />, label: 'Receita' },
@@ -1660,7 +1848,9 @@ export const BillingTab: React.FC = () => {
     adminApi
       .listBarbershops({ limit: 100 })
       .then(res => setShopNames(new Map(res.data.map(s => [s.id, s.name]))))
-      .catch(() => { /* fallback: exibe o ID */ });
+      .catch(() => {
+        /* fallback: exibe o ID */
+      });
   }, []);
 
   return (

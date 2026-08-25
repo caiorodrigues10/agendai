@@ -48,5 +48,3 @@ export function getPasswordStrength(password: string): PasswordStrengthResult {
 
   return { score: 2, level: 'fair', label: LABELS.fair, checks };
 }
-
-

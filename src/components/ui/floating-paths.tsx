@@ -27,7 +27,7 @@ export function FloatingPathsBackground({
         width: 0.5 + i * 0.03,
         duration: 22 + (i % 7) * 1.4,
       })),
-    [position],
+    [position]
   );
 
   return (
@@ -39,7 +39,7 @@ export function FloatingPathsBackground({
           fill="none"
           preserveAspectRatio="xMidYMid slice"
         >
-          {paths.map((path) => (
+          {paths.map(path => (
             <motion.path
               key={path.id}
               d={path.d}

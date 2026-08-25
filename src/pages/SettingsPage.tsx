@@ -35,7 +35,7 @@ export const SettingsPage: React.FC = () => {
       const response = await fetch(`/api/users/me/export?format=${format}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token()}`,
+          Authorization: `Bearer ${token()}`,
         },
       });
 
@@ -86,9 +86,7 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-bg">
-      {toast && (
-        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
-      )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       <div className="max-w-3xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
@@ -128,9 +126,7 @@ export const SettingsPage: React.FC = () => {
                 <p className="block text-xs font-bold uppercase tracking-wider text-text-muted mb-1">
                   E-mail verificado
                 </p>
-                <p className="text-text-primary">
-                  {user?.emailVerified ? 'Sim' : 'Não'}
-                </p>
+                <p className="text-text-primary">{user?.emailVerified ? 'Sim' : 'Não'}</p>
               </div>
             </div>
           </div>
@@ -186,10 +182,10 @@ export const SettingsPage: React.FC = () => {
               Excluir Conta (Direito ao Esquecimento)
             </h2>
             <p className="text-text-muted text-sm mb-4">
-              Exclua permanentemente sua conta e dados pessoais. Esta ação é irreversível.
-              Seus dados serão anonimizados (nome → "Usuário Excluído", e-mail →
-              "deleted-{id}@agendai.local"), mas relações com a barbearia, logs de auditoria
-              e pagamentos serão mantidos para conformidade legal e financeira.
+              Exclua permanentemente sua conta e dados pessoais. Esta ação é irreversível. Seus
+              dados serão anonimizados (nome → "Usuário Excluído", e-mail → "deleted-{id}
+              @agendai.local"), mas relações com a barbearia, logs de auditoria e pagamentos serão
+              mantidos para conformidade legal e financeira.
             </p>
 
             {!deleteConfirm ? (
@@ -209,7 +205,7 @@ export const SettingsPage: React.FC = () => {
                   <input
                     type="password"
                     value={deletePassword}
-                    onChange={(e) => setDeletePassword(e.target.value)}
+                    onChange={e => setDeletePassword(e.target.value)}
                     className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
                     placeholder="••••••••"
                     autoComplete="current-password"

@@ -44,11 +44,11 @@ export const ThemedCalendar: React.FC<ThemedCalendarProps> = ({
       defaultMonth={selected}
       startMonth={startMonth}
       endMonth={endMonth}
-      onSelect={(day) => {
+      onSelect={day => {
         if (!day) return;
         onChange(toLocalISO(day));
       }}
-      disabled={(day) => {
+      disabled={day => {
         const iso = toLocalISO(day);
         if (min && iso < min) return true;
         if (max && iso > max) return true;

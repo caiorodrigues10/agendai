@@ -30,8 +30,6 @@ vi.mock('../contexts/SubscriptionContext', () => ({
 describe('AccessBlockedPage', () => {
   it('renderiza mensagem de bloqueio sem crash', () => {
     renderWithProviders(<AccessBlockedPage />, { route: '/bloqueado' });
-    expect(
-      screen.getByRole('heading', { name: /assinatura necessária/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /assinatura necessária/i })).toBeInTheDocument();
   });
 });

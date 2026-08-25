@@ -53,16 +53,30 @@ const App: React.FC = () => {
           <Route
             path="/checkout"
             element={
-              <PrivateRoute roles={['OWNER', 'MASTER_ADMIN']} fallback={<Navigate to="/login" replace />}>
+              <PrivateRoute
+                roles={['OWNER', 'MASTER_ADMIN']}
+                fallback={<Navigate to="/login" replace />}
+              >
                 <CheckoutPage />
               </PrivateRoute>
             }
           />
-          <Route path="/master/*" element={<PrivateRoute roles={['MASTER_ADMIN']} fallback={<Navigate to="/login" replace />}> <MasterAdminDashboard /> </PrivateRoute>} />
+          <Route
+            path="/master/*"
+            element={
+              <PrivateRoute roles={['MASTER_ADMIN']} fallback={<Navigate to="/login" replace />}>
+                {' '}
+                <MasterAdminDashboard />{' '}
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/app/:tab"
             element={
-              <PrivateRoute roles={['OWNER', 'EMPLOYEE']} fallback={<Navigate to="/login" replace />}>
+              <PrivateRoute
+                roles={['OWNER', 'EMPLOYEE']}
+                fallback={<Navigate to="/login" replace />}
+              >
                 <StaffDashboard />
               </PrivateRoute>
             }
@@ -70,7 +84,10 @@ const App: React.FC = () => {
           <Route
             path="/app/settings"
             element={
-              <PrivateRoute roles={['OWNER', 'EMPLOYEE']} fallback={<Navigate to="/login" replace />}>
+              <PrivateRoute
+                roles={['OWNER', 'EMPLOYEE']}
+                fallback={<Navigate to="/login" replace />}
+              >
                 <SettingsPage />
               </PrivateRoute>
             }

@@ -220,16 +220,13 @@ export const financialApi = {
       token()
     ).then(res => ({
       data: unwrap<ExpenseItem[]>(res),
-      meta: res.meta
+      meta: res.meta,
     })),
 
   createExpense: (body: CreateExpenseBody) =>
-    apiClient<{ success: boolean; data: ExpenseItem }>(
-      '/api/expenses',
-      'POST',
-      body,
-      token()
-    ).then(res => unwrap<ExpenseItem>(res)),
+    apiClient<{ success: boolean; data: ExpenseItem }>('/api/expenses', 'POST', body, token()).then(
+      res => unwrap<ExpenseItem>(res)
+    ),
 
   deleteExpense: (id: string) =>
     apiClient<void>(`/api/expenses/${id}`, 'DELETE', undefined, token()),
@@ -250,16 +247,13 @@ export const financialApi = {
       token()
     ).then(res => ({
       data: unwrap<FiadoItem[]>(res),
-      meta: res.meta
+      meta: res.meta,
     })),
 
   createFiado: (body: CreateFiadoBody) =>
-    apiClient<{ success: boolean; data: FiadoItem }>(
-      '/api/fiado',
-      'POST',
-      body,
-      token()
-    ).then(res => unwrap<FiadoItem>(res)),
+    apiClient<{ success: boolean; data: FiadoItem }>('/api/fiado', 'POST', body, token()).then(
+      res => unwrap<FiadoItem>(res)
+    ),
 
   addFiadoPayment: (id: string, body: { amount: number; notes?: string }) =>
     apiClient<{ success: boolean; data: unknown }>(
@@ -269,8 +263,7 @@ export const financialApi = {
       token()
     ).then(res => unwrap(res)),
 
-  deleteFiado: (id: string) =>
-    apiClient<void>(`/api/fiado/${id}`, 'DELETE', undefined, token()),
+  deleteFiado: (id: string) => apiClient<void>(`/api/fiado/${id}`, 'DELETE', undefined, token()),
 
   listExpenseCategories: () =>
     apiClient<{ success: boolean; data: ExpenseCategory[] }>(
@@ -278,5 +271,5 @@ export const financialApi = {
       'GET',
       undefined,
       token()
-    ).then(res => unwrap<ExpenseCategory[]>(res))
+    ).then(res => unwrap<ExpenseCategory[]>(res)),
 };

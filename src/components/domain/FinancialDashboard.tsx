@@ -17,19 +17,8 @@ import {
   UserMinus,
   Scissors,
 } from 'lucide-react';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-} from 'recharts';
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from '../ui/chart';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '../ui/chart';
 import {
   financialApi,
   type BarbershopInsights,
@@ -49,7 +38,10 @@ const brl = (n: number) =>
   n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
 
 const isOwnerLike = (role: StaffMember['role']) =>
-  role === 'OWNER' || role === 'MASTER_ADMIN' || (role as string) === 'owner' || (role as string) === 'admin';
+  role === 'OWNER' ||
+  role === 'MASTER_ADMIN' ||
+  (role as string) === 'owner' ||
+  (role as string) === 'admin';
 
 export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
   queueHistory,
@@ -74,10 +66,10 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
     setInsightsError(null);
     financialApi
       .getInsights(period)
-      .then((data) => {
+      .then(data => {
         if (!cancelled) setInsights(data);
       })
-      .catch((err) => {
+      .catch(err => {
         if (cancelled) return;
         if (err instanceof ApiError && err.code === 'DASHBOARD_REQUIRED') {
           setInsightsError('Insights disponíveis no plano Pro.');
@@ -95,8 +87,9 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
     };
   }, [owner, viewMode, period]);
 
-  const getStaffName = (id?: string) => allStaff.find((s) => s.id === id)?.name || 'Desconhecido';
-  const getServiceName = (id: string) => services.find((s) => s.id === id)?.name || 'Serviço Removido';
+  const getStaffName = (id?: string) => allStaff.find(s => s.id === id)?.name || 'Desconhecido';
+  const getServiceName = (id: string) =>
+    services.find(s => s.id === id)?.name || 'Serviço Removido';
 
   const filteredData = useMemo(() => {
     const now = new Date();
@@ -105,7 +98,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
 
     return queueHistory
-      .filter((item) => {
+      .filter(item => {
         if (item.status !== 'completed' || !item.completedAt) return false;
         if (viewMode === 'personal' && item.completedBy !== currentUser.id) return false;
         if (timeFilter === 'today' && item.completedAt < startOfDay) return false;
@@ -121,7 +114,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
     const totalClients = filteredData.length;
     const avgTicket = totalClients > 0 ? totalRevenue / totalClients : 0;
     const daysCount = [0, 0, 0, 0, 0, 0, 0];
-    filteredData.forEach((item) => {
+    filteredData.forEach(item => {
       if (item.completedAt) {
         daysCount[new Date(item.completedAt).getDay()]++;
       }
@@ -132,7 +125,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
   const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   const weeklyChartData =
     insights && viewMode === 'shop'
-      ? insights.byWeekday.map((d) => ({ day: d.label, volume: d.volume, revenue: d.revenue }))
+      ? insights.byWeekday.map(d => ({ day: d.label, volume: d.volume, revenue: d.revenue }))
       : weekDays.map((day, index) => ({
           day,
           volume: localStats.daysCount[index],
@@ -193,7 +186,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                 { id: '30d' as const, label: '30 dias' },
                 { id: '90d' as const, label: '90 dias' },
               ] as const
-            ).map((t) => (
+            ).map(t => (
               <button
                 key={t.id}
                 onClick={() => setPeriod(t.id)}
@@ -209,7 +202,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
           </div>
         ) : (
           <div className="flex gap-2 overflow-x-auto pb-1">
-            {(['today', 'week', 'month', 'all'] as const).map((t) => (
+            {(['today', 'week', 'month', 'all'] as const).map(t => (
               <button
                 key={t}
                 onClick={() => setTimeFilter(t)}
@@ -248,10 +241,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                 </h3>
                 <ul className="space-y-2">
                   {insights.highlights.map((h, i) => (
-                    <li
-                      key={i}
-                      className="text-sm text-text-secondary leading-relaxed flex gap-2"
-                    >
+                    <li key={i} className="text-sm text-text-secondary leading-relaxed flex gap-2">
                       <span className="text-accent font-bold shrink-0">·</span>
                       {h}
                     </li>
@@ -261,13 +251,36 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
 
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {[
-                  { label: 'Faturamento', value: brl(kpis!.revenue), icon: DollarSign, tone: 'text-success' },
-                  { label: 'Lucro líquido', value: brl(kpis!.netProfit), icon: TrendingUp, tone: kpis!.netProfit >= 0 ? 'text-success' : 'text-danger' },
-                  { label: 'Ticket médio', value: brl(kpis!.avgTicket), icon: Filter, tone: 'text-accent' },
-                  { label: 'Atendimentos', value: String(kpis!.completedServices), icon: Users, tone: 'text-text-primary' },
+                  {
+                    label: 'Faturamento',
+                    value: brl(kpis!.revenue),
+                    icon: DollarSign,
+                    tone: 'text-success',
+                  },
+                  {
+                    label: 'Lucro líquido',
+                    value: brl(kpis!.netProfit),
+                    icon: TrendingUp,
+                    tone: kpis!.netProfit >= 0 ? 'text-success' : 'text-danger',
+                  },
+                  {
+                    label: 'Ticket médio',
+                    value: brl(kpis!.avgTicket),
+                    icon: Filter,
+                    tone: 'text-accent',
+                  },
+                  {
+                    label: 'Atendimentos',
+                    value: String(kpis!.completedServices),
+                    icon: Users,
+                    tone: 'text-text-primary',
+                  },
                   {
                     label: 'Espera média',
-                    value: kpis!.avgWaitMinutes != null ? `${Math.round(kpis!.avgWaitMinutes)} min` : '—',
+                    value:
+                      kpis!.avgWaitMinutes != null
+                        ? `${Math.round(kpis!.avgWaitMinutes)} min`
+                        : '—',
                     icon: Clock,
                     tone: 'text-text-primary',
                   },
@@ -289,7 +302,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                     icon: AlertCircle,
                     tone: kpis!.appointmentCancelRate >= 15 ? 'text-warning' : 'text-text-primary',
                   },
-                ].map((card) => (
+                ].map(card => (
                   <div
                     key={card.label}
                     className="bg-surface p-3 rounded-xl border border-border shadow-sm relative overflow-hidden"
@@ -297,7 +310,9 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                     <div className="absolute -right-2 -top-2 text-border opacity-20">
                       <card.icon size={56} />
                     </div>
-                    <p className="text-[10px] text-text-muted uppercase font-bold mb-1">{card.label}</p>
+                    <p className="text-[10px] text-text-muted uppercase font-bold mb-1">
+                      {card.label}
+                    </p>
                     <h3 className={`text-lg font-bold truncate ${card.tone}`}>{card.value}</h3>
                   </div>
                 ))}
@@ -326,12 +341,26 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                     <Calendar size={16} className="text-accent" /> Volume por dia
                   </h3>
                   <ChartContainer config={weeklyChartConfig} className="aspect-auto h-44 w-full">
-                    <BarChart data={weeklyChartData} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
+                    <BarChart
+                      data={weeklyChartData}
+                      margin={{ top: 8, right: 4, left: 0, bottom: 0 }}
+                    >
                       <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                      <XAxis dataKey="day" tickLine={false} axisLine={false} tickMargin={8} className="text-[10px]" />
+                      <XAxis
+                        dataKey="day"
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={8}
+                        className="text-[10px]"
+                      />
                       <YAxis hide allowDecimals={false} />
                       <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="volume" fill="var(--color-volume)" radius={[4, 4, 0, 0]} maxBarSize={32} />
+                      <Bar
+                        dataKey="volume"
+                        fill="var(--color-volume)"
+                        radius={[4, 4, 0, 0]}
+                        maxBarSize={32}
+                      />
                     </BarChart>
                   </ChartContainer>
                 </div>
@@ -341,12 +370,26 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                     <Clock size={16} className="text-accent" /> Pico por horário
                   </h3>
                   <ChartContainer config={hourConfig} className="aspect-auto h-44 w-full">
-                    <BarChart data={insights.byHour} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
+                    <BarChart
+                      data={insights.byHour}
+                      margin={{ top: 8, right: 4, left: 0, bottom: 0 }}
+                    >
                       <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                      <XAxis dataKey="label" tickLine={false} axisLine={false} interval={1} className="text-[9px]" />
+                      <XAxis
+                        dataKey="label"
+                        tickLine={false}
+                        axisLine={false}
+                        interval={1}
+                        className="text-[9px]"
+                      />
                       <YAxis hide allowDecimals={false} />
                       <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="volume" fill="var(--color-volume)" radius={[4, 4, 0, 0]} maxBarSize={20} />
+                      <Bar
+                        dataKey="volume"
+                        fill="var(--color-volume)"
+                        radius={[4, 4, 0, 0]}
+                        maxBarSize={20}
+                      />
                     </BarChart>
                   </ChartContainer>
                 </div>
@@ -373,13 +416,14 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                           className="text-[10px]"
                         />
                         <ChartTooltip
-                          content={
-                            <ChartTooltipContent
-                              formatter={(v) => brl(Number(v))}
-                            />
-                          }
+                          content={<ChartTooltipContent formatter={v => brl(Number(v))} />}
                         />
-                        <Bar dataKey="revenue" fill="var(--color-revenue)" radius={[0, 4, 4, 0]} maxBarSize={16} />
+                        <Bar
+                          dataKey="revenue"
+                          fill="var(--color-revenue)"
+                          radius={[0, 4, 4, 0]}
+                          maxBarSize={16}
+                        />
                       </BarChart>
                     </ChartContainer>
                   </div>
@@ -407,11 +451,14 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                           className="text-[10px]"
                         />
                         <ChartTooltip
-                          content={
-                            <ChartTooltipContent formatter={(v) => brl(Number(v))} />
-                          }
+                          content={<ChartTooltipContent formatter={v => brl(Number(v))} />}
                         />
-                        <Bar dataKey="revenue" fill="var(--color-revenue)" radius={[0, 4, 4, 0]} maxBarSize={16} />
+                        <Bar
+                          dataKey="revenue"
+                          fill="var(--color-revenue)"
+                          radius={[0, 4, 4, 0]}
+                          maxBarSize={16}
+                        />
                       </BarChart>
                     </ChartContainer>
                   </div>
@@ -427,7 +474,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                     </h3>
                   </div>
                   <div className="max-h-56 overflow-y-auto divide-y divide-border">
-                    {insights.inactiveCustomers.map((c) => (
+                    {insights.inactiveCustomers.map(c => (
                       <div
                         key={c.whatsapp}
                         className="px-4 py-3 flex items-center justify-between gap-3 text-sm"
@@ -489,10 +536,21 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
             <ChartContainer config={weeklyChartConfig} className="aspect-auto h-36 w-full">
               <BarChart data={weeklyChartData} margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
                 <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                <XAxis dataKey="day" tickLine={false} axisLine={false} tickMargin={8} className="text-[10px]" />
+                <XAxis
+                  dataKey="day"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  className="text-[10px]"
+                />
                 <YAxis hide allowDecimals={false} />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="volume" fill="var(--color-volume)" radius={[4, 4, 0, 0]} maxBarSize={32} />
+                <Bar
+                  dataKey="volume"
+                  fill="var(--color-volume)"
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={32}
+                />
               </BarChart>
             </ChartContainer>
           </div>
@@ -527,7 +585,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredData.map((item) => (
+                {filteredData.map(item => (
                   <tr key={item.id} className="text-xs text-text-secondary hover:bg-surface">
                     <td className="p-3 whitespace-nowrap">
                       {new Date(item.completedAt || 0).toLocaleString('pt-BR')}

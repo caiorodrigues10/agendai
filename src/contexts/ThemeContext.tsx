@@ -52,7 +52,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       theme,
       resolvedTheme,
       setTheme,
-      toggleTheme: () => setTheme((t) => (t === 'dark' ? 'light' : 'dark')),
+      toggleTheme: () => setTheme(t => (t === 'dark' ? 'light' : 'dark')),
     }),
     [theme, resolvedTheme]
   );

@@ -34,9 +34,7 @@ vi.mock('../contexts/BarbershopContext', () => ({
       schedule: [],
       logoUrl: undefined,
     },
-    services: [
-      { id: 's1', name: 'Corte', price: 40, avgTimeMinutes: 30, icon: 'scissors' },
-    ],
+    services: [{ id: 's1', name: 'Corte', price: 40, avgTimeMinutes: 30, icon: 'scissors' }],
     staff: [],
     feed: [],
     loading: false,
@@ -74,7 +72,7 @@ describe('PublicHome smoke', () => {
         <Routes>
           <Route path="/queue/:id" element={<PublicHome />} />
         </Routes>
-      </MemoryRouter>,
+      </MemoryRouter>
     );
 
     await waitFor(() => {

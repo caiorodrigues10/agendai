@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React, { useEffect, useMemo, useState } from "react";
-import { CreditCard } from "lucide-react";
+import React, { useEffect, useMemo, useState } from 'react';
+import { CreditCard } from 'lucide-react';
 
 interface CardState {
   number: string;
@@ -37,36 +37,36 @@ interface Props {
 }
 
 function formatNumberSpaces(num: string): string {
-  return num.replace(/\s+/g, "").replace(/(\d{4})(?=\d)/g, "$1 ");
+  return num.replace(/\s+/g, '').replace(/(\d{4})(?=\d)/g, '$1 ');
 }
 
 function clampDigits(value: string, maxLen: number) {
-  return value.replace(/\D/g, "").slice(0, maxLen);
+  return value.replace(/\D/g, '').slice(0, maxLen);
 }
 
 const CreditCardForm = ({
-  defaultNumber = "",
-  defaultHolder = "",
-  defaultMonth = "",
-  defaultYear = "",
-  defaultCVV = "",
+  defaultNumber = '',
+  defaultHolder = '',
+  defaultMonth = '',
+  defaultYear = '',
+  defaultCVV = '',
   maskMiddle = true,
-  ring1 = "#ff6be7",
-  ring2 = "#7288ff",
+  ring1 = '#ff6be7',
+  ring2 = '#7288ff',
   showSubmit = true,
   onChange,
   onSubmit,
-  className = "",
-  submitLabel = "Submit",
+  className = '',
+  submitLabel = 'Submit',
 }: Props) => {
   const [number, setNumber] = useState(clampDigits(defaultNumber, 19));
   const [holder, setHolder] = useState(defaultHolder.toUpperCase());
   const [month, setMonth] = useState(defaultMonth);
   const [year, setYear] = useState(defaultYear);
   const [cvv, setCVV] = useState(clampDigits(defaultCVV, 4));
-  const [focusField, setFocusField] = useState<null | "number" | "holder" | "expire" | "cvv">(null);
+  const [focusField, setFocusField] = useState<null | 'number' | 'holder' | 'expire' | 'cvv'>(null);
 
-  const flip = focusField === "cvv";
+  const flip = focusField === 'cvv';
   const years = useMemo(() => {
     const start = new Date().getFullYear();
     return Array.from({ length: 10 }, (_, i) => String(start + i));
@@ -93,16 +93,16 @@ const CreditCardForm = ({
     onChange?.({ number, holder, month, year, cvv }, validity);
   }, [number, holder, month, year, cvv, validity, onChange]);
 
-  const displayDigits = useMemo(() => number.slice(0, 16).split(""), [number]);
+  const displayDigits = useMemo(() => number.slice(0, 16).split(''), [number]);
 
   const displayedSlots = useMemo(() => {
     const arr: { textTop: string; filed: boolean }[] = [];
     for (let i = 0; i < 16; i++) {
-      let content = "#";
+      let content = '#';
       if (i < displayDigits.length) {
         const d = displayDigits[i];
         const shouldMask = maskMiddle && i >= 4 && i <= 11;
-        content = shouldMask ? "*" : d;
+        content = shouldMask ? '*' : d;
       }
       arr.push({ textTop: content, filed: i < displayDigits.length });
     }
@@ -115,7 +115,7 @@ const CreditCardForm = ({
   };
 
   const inputClass =
-    "w-full bg-bg border border-border rounded-xl py-3 px-4 text-text-primary text-sm outline-none transition-colors placeholder:text-text-muted focus:border-accent/60 hover:border-border-strong";
+    'w-full bg-bg border border-border rounded-xl py-3 px-4 text-text-primary text-sm outline-none transition-colors placeholder:text-text-muted focus:border-accent/60 hover:border-border-strong';
 
   return (
     <section className={`relative ${className}`}>
@@ -277,9 +277,9 @@ const CreditCardForm = ({
 
       <div
         className="cc-card"
-        style={{ ["--cc-ring1" as string]: ring1, ["--cc-ring2" as string]: ring2 }}
+        style={{ ['--cc-ring1' as string]: ring1, ['--cc-ring2' as string]: ring2 }}
       >
-        <div className={`cc-card-inner ${flip ? "cc-flip" : ""}`}>
+        <div className={`cc-card-inner ${flip ? 'cc-flip' : ''}`}>
           {/* FRONT */}
           <section className="cc-front">
             <div className="flex items-center justify-between mb-8 relative z-10 shrink-0">
@@ -290,7 +290,7 @@ const CreditCardForm = ({
             <div className="cc-number-row">
               {displayedSlots.map((slot, idx) => (
                 <span key={idx} className="cc-slot">
-                  <span className={`cc-digit ${slot.filed ? "cc-filed" : ""}`}>
+                  <span className={`cc-digit ${slot.filed ? 'cc-filed' : ''}`}>
                     <span className="cc-row opacity-40">#</span>
                     <span className="cc-row">{slot.textTop}</span>
                   </span>
@@ -301,12 +301,12 @@ const CreditCardForm = ({
             <div className="cc-card-footer">
               <div className="uppercase">
                 <div className="text-[11px] font-semibold opacity-60 mb-1">Card Holder</div>
-                <div className="text-sm font-medium tracking-wide">{holder || "NAME ON CARD"}</div>
+                <div className="text-sm font-medium tracking-wide">{holder || 'NAME ON CARD'}</div>
               </div>
               <div className="text-right">
                 <div className="text-[11px] font-semibold opacity-60 mb-1">Expires</div>
                 <div className="text-sm font-medium">
-                  <span>{month || "MM"}</span>/<span>{year ? year.slice(-2) : "YY"}</span>
+                  <span>{month || 'MM'}</span>/<span>{year ? year.slice(-2) : 'YY'}</span>
                 </div>
               </div>
             </div>
@@ -319,7 +319,7 @@ const CreditCardForm = ({
               <div className="cc-signature" />
               <div className="cc-cvv-row">
                 <span className="cc-cvv-label">CVV</span>
-                <div className="cc-cvv-field">{cvv || ""}</div>
+                <div className="cc-cvv-field">{cvv || ''}</div>
               </div>
             </div>
           </section>
@@ -327,9 +327,16 @@ const CreditCardForm = ({
       </div>
 
       {/* FORM */}
-      <form className="mt-6 grid gap-3 bg-surface border border-border rounded-2xl p-5" onSubmit={handleSubmit} noValidate>
+      <form
+        className="mt-6 grid gap-3 bg-surface border border-border rounded-2xl p-5"
+        onSubmit={handleSubmit}
+        noValidate
+      >
         <div>
-          <label htmlFor="cc-number" className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1 block">
+          <label
+            htmlFor="cc-number"
+            className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1 block"
+          >
             Número do cartão
           </label>
           <input
@@ -339,8 +346,8 @@ const CreditCardForm = ({
             autoComplete="cc-number"
             placeholder="0000 0000 0000 0000"
             value={formatNumberSpaces(number)}
-            onChange={(e) => setNumber(clampDigits(e.target.value, 19))}
-            onFocus={() => setFocusField("number")}
+            onChange={e => setNumber(clampDigits(e.target.value, 19))}
+            onFocus={() => setFocusField('number')}
             onBlur={() => setFocusField(null)}
             aria-invalid={!validity.number}
           />
@@ -350,7 +357,10 @@ const CreditCardForm = ({
         </div>
 
         <div>
-          <label htmlFor="cc-name" className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1 block">
+          <label
+            htmlFor="cc-name"
+            className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1 block"
+          >
             Nome impresso
           </label>
           <input
@@ -360,8 +370,8 @@ const CreditCardForm = ({
             autoComplete="cc-name"
             placeholder="COMO APARECE NO CARTÃO"
             value={holder}
-            onChange={(e) => setHolder(e.target.value.toUpperCase())}
-            onFocus={() => setFocusField("holder")}
+            onChange={e => setHolder(e.target.value.toUpperCase())}
+            onFocus={() => setFocusField('holder')}
             onBlur={() => setFocusField(null)}
             aria-invalid={!validity.holder}
           />
@@ -369,40 +379,54 @@ const CreditCardForm = ({
 
         <div className="grid grid-cols-[2fr_1fr] gap-3">
           <div>
-            <label htmlFor="cc-month" className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1 block">
+            <label
+              htmlFor="cc-month"
+              className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1 block"
+            >
               Validade
             </label>
             <div className="grid grid-cols-2 gap-2">
               <select
                 className={inputClass}
-                value={month || ""}
-                onChange={(e) => setMonth(e.target.value)}
-                onFocus={() => setFocusField("expire")}
+                value={month || ''}
+                onChange={e => setMonth(e.target.value)}
+                onFocus={() => setFocusField('expire')}
                 onBlur={() => setFocusField(null)}
                 aria-invalid={!validity.month}
               >
-                <option value="" disabled>Mês</option>
-                {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")).map((m) => (
-                  <option key={m} value={m}>{m}</option>
+                <option value="" disabled>
+                  Mês
+                </option>
+                {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0')).map(m => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
                 ))}
               </select>
               <select
                 className={inputClass}
-                value={year || ""}
-                onChange={(e) => setYear(e.target.value)}
-                onFocus={() => setFocusField("expire")}
+                value={year || ''}
+                onChange={e => setYear(e.target.value)}
+                onFocus={() => setFocusField('expire')}
                 onBlur={() => setFocusField(null)}
                 aria-invalid={!validity.year}
               >
-                <option value="" disabled>Ano</option>
-                {years.map((y) => (
-                  <option key={y} value={y}>{y}</option>
+                <option value="" disabled>
+                  Ano
+                </option>
+                {years.map(y => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
                 ))}
               </select>
             </div>
           </div>
           <div>
-            <label htmlFor="cc-cvv" className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1 block">
+            <label
+              htmlFor="cc-cvv"
+              className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1 block"
+            >
               CVV
             </label>
             <input
@@ -412,8 +436,8 @@ const CreditCardForm = ({
               autoComplete="cc-csc"
               placeholder="***"
               value={cvv}
-              onChange={(e) => setCVV(clampDigits(e.target.value, 4))}
-              onFocus={() => setFocusField("cvv")}
+              onChange={e => setCVV(clampDigits(e.target.value, 4))}
+              onFocus={() => setFocusField('cvv')}
               onBlur={() => setFocusField(null)}
               aria-invalid={!validity.cvv}
             />
@@ -426,7 +450,7 @@ const CreditCardForm = ({
             disabled={!validity.allValid}
             className="w-full py-3.5 rounded-xl bg-accent text-accent-fg font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-accent-hover transition-colors disabled:opacity-50 cursor-pointer"
           >
-            {validity.allValid ? submitLabel : "Preencha todos os campos"}
+            {validity.allValid ? submitLabel : 'Preencha todos os campos'}
           </button>
         )}
       </form>

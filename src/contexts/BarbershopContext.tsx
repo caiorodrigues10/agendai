@@ -86,7 +86,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
 
       try {
         const servicesData = await barbershopApi.listServices(barbershopId);
-        setServices(Array.isArray(servicesData) ? servicesData as Service[] : []);
+        setServices(Array.isArray(servicesData) ? (servicesData as Service[]) : []);
       } catch (e) {
         logger.error('Falha ao carregar serviços', e);
         setServices([]);
@@ -102,14 +102,14 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
 
       try {
         const feedData = await barbershopApi.listFeed(barbershopId);
-        setFeed(Array.isArray(feedData) ? feedData as FeedPost[] : []);
+        setFeed(Array.isArray(feedData) ? (feedData as FeedPost[]) : []);
       } catch (e) {
         logger.error('Falha ao carregar feed', e);
         setFeed([]);
       }
 
       try {
-        const shopData = await barbershopApi.getBarbershop(barbershopId) as {
+        const shopData = (await barbershopApi.getBarbershop(barbershopId)) as {
           name?: string;
           whatsapp?: string;
           address?: string | null;
@@ -117,11 +117,20 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
         } | null;
         let schedule = mapScheduleFromApi(null);
         try {
-          const scheduleData = await barbershopApi.getSchedule(barbershopId) as
+          const scheduleData = (await barbershopApi.getSchedule(barbershopId)) as
             | { dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }[]
-            | { schedule?: { dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }[] }
+            | {
+                schedule?: {
+                  dayOfWeek: number;
+                  isOpen: boolean;
+                  openTime: string;
+                  closeTime: string;
+                }[];
+              }
             | null;
-          schedule = mapScheduleFromApi(Array.isArray(scheduleData) ? scheduleData : scheduleData?.schedule);
+          schedule = mapScheduleFromApi(
+            Array.isArray(scheduleData) ? scheduleData : scheduleData?.schedule
+          );
         } catch (e) {
           logger.error('Falha ao carregar horários', e);
         }
@@ -169,7 +178,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const editService = async (id: string, data: Omit<Service, 'id'>) => {
     const updated = await barbershopApi.updateService(id, data);
-    setServices(prev => prev.map(s => s.id === id ? updated : s));
+    setServices(prev => prev.map(s => (s.id === id ? updated : s)));
   };
 
   const deleteService = async (id: string) => {
@@ -194,7 +203,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
           barbershopId,
         })
       ),
-      ...toRemove.map(member => barbershopApi.deleteStaff(member.id))
+      ...toRemove.map(member => barbershopApi.deleteStaff(member.id)),
     ]);
     const staffData = await barbershopApi.listStaff(barbershopId);
     setStaff(Array.isArray(staffData) ? staffData.map(mapStaffFromApi) : []);
@@ -215,7 +224,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
     const post = feed.find(p => p.id === id);
     if (!post) return;
     const updated = await barbershopApi.updatePost(id, { likes: post.likes + 1 });
-    setFeed(prev => prev.map(p => p.id === id ? updated : p));
+    setFeed(prev => prev.map(p => (p.id === id ? updated : p)));
   };
 
   const isShopOpen = () => {
@@ -233,23 +242,26 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
     return `${today.openTime} - ${today.closeTime}`;
   };
 
-  const value = useMemo(() => ({
-    loading,
-    services,
-    staff,
-    settings,
-    feed,
-    setSettings,
-    addService,
-    editService,
-    deleteService,
-    updateTeam,
-    addPost,
-    deletePost,
-    likePost,
-    isShopOpen,
-    getTodayScheduleDisplay
-  }), [loading, services, staff, settings, feed]);
+  const value = useMemo(
+    () => ({
+      loading,
+      services,
+      staff,
+      settings,
+      feed,
+      setSettings,
+      addService,
+      editService,
+      deleteService,
+      updateTeam,
+      addPost,
+      deletePost,
+      likePost,
+      isShopOpen,
+      getTodayScheduleDisplay,
+    }),
+    [loading, services, staff, settings, feed]
+  );
 
   return <BarbershopContext.Provider value={value}>{children}</BarbershopContext.Provider>;
 };
