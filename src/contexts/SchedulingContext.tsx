@@ -43,17 +43,15 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [availability, setAvailability] = useState<AvailabilitySlot[]>([]);
   const [aiInsight, setAiInsight] = useState<AIInsight | null>(null);
-  const [clientId, setClientId] = useState('');
-  const [completedCount, setCompletedCount] = useState(0);
-
-  useEffect(() => {
+  const [clientId, setClientId] = useState(() => {
     let cid = localStorage.getItem('barber_customer_id');
     if (!cid) {
       cid = uuidv4();
       localStorage.setItem('barber_customer_id', cid);
     }
-    setClientId(cid);
-  }, []);
+    return cid;
+  });
+  const [completedCount, setCompletedCount] = useState(0);
 
   const loadAvailability = useCallback(async (date: string, staffId?: string) => {
     if (!barbershopId) return;
@@ -128,19 +126,21 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
 
   // Polling: refetch periódico da fila e agendamentos, pausado com a aba oculta.
   const isPollingFetchInFlight = useRef(false);
-  const pollRef = useRef<() => Promise<void>>(async () => {});
-  pollRef.current = async () => {
-    if (isPollingFetchInFlight.current) return; // não empilha requisições
-    isPollingFetchInFlight.current = true;
-    try {
-      await Promise.all([
-        refreshQueue({ silent: true }),
-        refreshAppointments(undefined, { silent: true })
-      ]);
-    } finally {
-      isPollingFetchInFlight.current = false;
-    }
-  };
+  const pollRef = useRef<() => Promise<void>>(() => Promise.resolve());
+  useEffect(() => {
+    pollRef.current = async () => {
+      if (isPollingFetchInFlight.current) return;
+      isPollingFetchInFlight.current = true;
+      try {
+        await Promise.all([
+          refreshQueue({ silent: true }),
+          refreshAppointments(undefined, { silent: true })
+        ]);
+      } finally {
+        isPollingFetchInFlight.current = false;
+      }
+    };
+  });
 
   useEffect(() => {
     if (!barbershopId) return;

@@ -329,10 +329,11 @@ const CreditCardForm = ({
       {/* FORM */}
       <form className="mt-6 grid gap-3 bg-surface border border-border rounded-2xl p-5" onSubmit={handleSubmit} noValidate>
         <div>
-          <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1 block">
+          <label htmlFor="cc-number" className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1 block">
             Número do cartão
           </label>
           <input
+            id="cc-number"
             className={inputClass}
             inputMode="numeric"
             autoComplete="cc-number"
@@ -349,10 +350,11 @@ const CreditCardForm = ({
         </div>
 
         <div>
-          <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1 block">
+          <label htmlFor="cc-name" className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1 block">
             Nome impresso
           </label>
           <input
+            id="cc-name"
             className={inputClass}
             type="text"
             autoComplete="cc-name"
@@ -367,7 +369,7 @@ const CreditCardForm = ({
 
         <div className="grid grid-cols-[2fr_1fr] gap-3">
           <div>
-            <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1 block">
+            <label htmlFor="cc-month" className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1 block">
               Validade
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -400,10 +402,11 @@ const CreditCardForm = ({
             </div>
           </div>
           <div>
-            <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1 block">
+            <label htmlFor="cc-cvv" className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-1 block">
               CVV
             </label>
             <input
+              id="cc-cvv"
               className={inputClass}
               inputMode="numeric"
               autoComplete="cc-csc"

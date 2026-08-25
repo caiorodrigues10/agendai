@@ -76,6 +76,7 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
   }, [user]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refresh();
   }, [refresh]);
 
