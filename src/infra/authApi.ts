@@ -13,7 +13,7 @@ export interface AuthUser {
 export interface AuthResponse {
   user: AuthUser;
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string;
 }
 
 export interface RegisterPayload {
@@ -32,8 +32,8 @@ export const authApi = {
     apiClient<AuthResponse>('/api/auth/login', 'POST', { email, password }),
   register: (payload: RegisterPayload) =>
     apiClient<AuthResponse>('/api/auth/register', 'POST', payload),
-  refresh: (refreshToken: string) =>
-    apiClient<AuthResponse>('/api/auth/refresh', 'POST', { refreshToken }),
+  refresh: () =>
+    apiClient<AuthResponse>('/api/auth/refresh', 'POST'),
   me: (token: string) => apiClient<{ user: AuthUser }>('/api/auth/me', 'GET', undefined, token),
   googleLogin: (idToken: string) =>
     apiClient<AuthResponse>('/api/auth/google', 'POST', { idToken }),

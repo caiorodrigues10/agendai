@@ -44,14 +44,11 @@ async function refreshAccessToken(): Promise<string | null> {
   if (refreshInFlight) return refreshInFlight;
 
   refreshInFlight = (async () => {
-    const refreshToken = authStorage.getRefreshToken();
-    if (!refreshToken) return null;
-
     try {
       const res = await fetch('/api/auth/refresh', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
+        credentials: 'include',
       });
       if (!res.ok) {
         authStorage.clearTokens();
@@ -62,14 +59,13 @@ async function refreshAccessToken(): Promise<string | null> {
       const json = await res.json();
       const data = json?.data ?? json;
       const accessToken = data?.accessToken as string | undefined;
-      const nextRefresh = data?.refreshToken as string | undefined;
-      if (!accessToken || !nextRefresh) {
+      if (!accessToken) {
         authStorage.clearTokens();
         authStorage.clearUser();
         window.dispatchEvent(new Event('agendai:session-expired'));
         return null;
       }
-      authStorage.setTokens(accessToken, nextRefresh);
+      authStorage.setTokens(accessToken);
       if (data.user) authStorage.setUser(data.user);
       return accessToken;
     } catch {

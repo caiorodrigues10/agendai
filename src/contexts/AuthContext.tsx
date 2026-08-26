@@ -54,40 +54,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
       if (!success) {
-        const refreshToken = authStorage.getRefreshToken();
-        if (refreshToken) {
-          try {
-            const resp = await authApi.refresh(refreshToken);
-            authStorage.setTokens(resp.accessToken, resp.refreshToken);
-            authStorage.setUser(resp.user);
-            setUser(resp.user as StaffMember);
-          } catch (err) {
-            if (
-              err instanceof ApiError &&
-              (err.statusCode === 0 ||
-                err.code === 'NETWORK_ERROR' ||
-                err.statusCode === 429 ||
-                err.statusCode >= 500) &&
-              cachedUser
-            ) {
-              setUser(cachedUser as StaffMember);
-            } else {
-              authStorage.clearTokens();
-              authStorage.clearUser();
-              setUser(null);
-            }
+        try {
+          const resp = await authApi.refresh();
+          authStorage.setTokens(resp.accessToken);
+          authStorage.setUser(resp.user);
+          setUser(resp.user as StaffMember);
+        } catch (err) {
+          if (
+            err instanceof ApiError &&
+            (err.statusCode === 0 ||
+              err.code === 'NETWORK_ERROR' ||
+              err.statusCode === 429 ||
+              err.statusCode >= 500) &&
+            cachedUser
+          ) {
+            setUser(cachedUser as StaffMember);
+          } else {
+            authStorage.clearTokens();
+            authStorage.clearUser();
+            setUser(null);
           }
-        } else if (!token) {
-          authStorage.clearTokens();
-          authStorage.clearUser();
-          setUser(null);
-        } else if (cachedUser) {
-          // Token presente mas /me falhou sem refresh — mantém usuário em cache se possível
-          setUser(cachedUser as StaffMember);
-        } else {
-          authStorage.clearTokens();
-          authStorage.clearUser();
-          setUser(null);
         }
       }
       setLoading(false);
@@ -104,8 +90,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return () => window.removeEventListener('agendai:session-expired', onSessionExpired);
   }, []);
 
-  const persistSession = (resp: { user: any; accessToken: string; refreshToken: string }) => {
-    authStorage.setTokens(resp.accessToken, resp.refreshToken);
+  const persistSession = (resp: { user: any; accessToken: string; refreshToken?: string }) => {
+    authStorage.setTokens(resp.accessToken);
     authStorage.setUser(resp.user);
     setUser(resp.user as StaffMember);
     sessionStorage.removeItem('agendai:access-block-info');
