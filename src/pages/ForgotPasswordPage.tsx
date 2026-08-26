@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { authApi } from '../infra/authApi'
-import { Logo } from '../components/ui/Logo'
-import { ThemeToggle } from '../components/ui/ThemeToggle'
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { authApi } from '../infra/authApi';
+import { Logo } from '../components/ui/Logo';
+import { ThemeToggle } from '../components/ui/ThemeToggle';
 import {
   ArrowRight,
   LockKeyhole,
@@ -11,7 +11,7 @@ import {
   MessageCircle,
   Loader2,
   CheckCircle,
-} from 'lucide-react'
+} from 'lucide-react';
 
 const inputClass = (hasError: boolean) =>
   `w-full bg-bg border rounded-xl py-3 pl-10 pr-4 text-text-primary text-sm
@@ -21,53 +21,55 @@ const inputClass = (hasError: boolean) =>
      hasError
        ? 'border-danger/40 text-danger focus:border-danger'
        : 'border-border focus:border-accent/50 hover:border-border-strong'
-   }`
+   }`;
 
 export const ForgotPasswordPage: React.FC = () => {
-  const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
-  const [step, setStep] = useState<'email' | 'choose'>('email')
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [step, setStep] = useState<'email' | 'choose'>('email');
 
-  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!isValidEmail) return
-    setStep('choose')
-  }
+    e.preventDefault();
+    if (!isValidEmail) return;
+    setStep('choose');
+  };
 
   const handleSendEmail = async () => {
-    setSubmitting(true)
-    setError(null)
+    setSubmitting(true);
+    setError(null);
     try {
-      await authApi.forgotPassword(email.trim())
-      setSuccess(true)
+      await authApi.forgotPassword(email.trim());
+      setSuccess(true);
     } catch {
-      setSuccess(true)
+      setSuccess(true);
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   const handleSendWhatsApp = async () => {
-    setSubmitting(true)
-    setError(null)
+    setSubmitting(true);
+    setError(null);
     try {
-      const result = await authApi.requestWhatsAppReset(email.trim())
+      const result = await authApi.requestWhatsAppReset(email.trim());
       if (result.requestId) {
-        navigate(`/verificar-codigo?requestId=${result.requestId}&maskedPhone=${encodeURIComponent(result.maskedPhone ?? '')}`)
+        navigate(
+          `/verificar-codigo?requestId=${result.requestId}&maskedPhone=${encodeURIComponent(result.maskedPhone ?? '')}`
+        );
       } else {
-        setSuccess(true)
+        setSuccess(true);
       }
     } catch {
-      setSuccess(true)
+      setSuccess(true);
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   if (success) {
     return (
@@ -88,9 +90,12 @@ export const ForgotPasswordPage: React.FC = () => {
           <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
             <CheckCircle size={24} className="text-success" />
           </div>
-          <h2 className="text-lg font-bold text-text-primary mb-2">Verifique sua caixa de entrada</h2>
+          <h2 className="text-lg font-bold text-text-primary mb-2">
+            Verifique sua caixa de entrada
+          </h2>
           <p className="text-sm text-text-muted leading-relaxed mb-6">
-            Se o e-mail <strong className="text-text-secondary">{email}</strong> estiver cadastrado, enviaremos instruções para redefinir sua senha.
+            Se o e-mail <strong className="text-text-secondary">{email}</strong> estiver cadastrado,
+            enviaremos instruções para redefinir sua senha.
           </p>
           <button
             type="button"
@@ -101,7 +106,7 @@ export const ForgotPasswordPage: React.FC = () => {
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -113,8 +118,7 @@ export const ForgotPasswordPage: React.FC = () => {
         <div
           className="h-1 w-full opacity-80"
           style={{
-            background:
-              'linear-gradient(to right, transparent, #00c2b3, transparent)',
+            background: 'linear-gradient(to right, transparent, #00c2b3, transparent)',
           }}
         />
         <div className="p-8 flex flex-col items-center">
@@ -160,7 +164,7 @@ export const ForgotPasswordPage: React.FC = () => {
                       placeholder="seu@email.com"
                       autoFocus
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={e => setEmail(e.target.value)}
                     />
                   </div>
                 </div>
@@ -235,7 +239,7 @@ export const ForgotPasswordPage: React.FC = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default ForgotPasswordPage;

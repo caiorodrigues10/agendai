@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { authApi } from '../infra/authApi'
-import { Logo } from '../components/ui/Logo'
-import { ThemeToggle } from '../components/ui/ThemeToggle'
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { authApi } from '../infra/authApi';
+import { Logo } from '../components/ui/Logo';
+import { ThemeToggle } from '../components/ui/ThemeToggle';
 import {
   ArrowRight,
   LockKeyhole,
@@ -10,80 +10,80 @@ import {
   Loader2,
   MessageCircle,
   RotateCcw,
-} from 'lucide-react'
+} from 'lucide-react';
 
-const OTP_LENGTH = 6
+const OTP_LENGTH = 6;
 
 export const VerifyResetCodePage: React.FC = () => {
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const requestId = searchParams.get('requestId') ?? ''
-  const maskedPhone = searchParams.get('maskedPhone') ?? ''
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const requestId = searchParams.get('requestId') ?? '';
+  const maskedPhone = searchParams.get('maskedPhone') ?? '';
 
-  const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(''))
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(''));
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!requestId) {
-      navigate('/esqueci-senha')
-      return
+      navigate('/esqueci-senha');
+      return;
     }
-    inputRefs.current[0]?.focus()
-  }, [requestId, navigate])
+    inputRefs.current[0]?.focus();
+  }, [requestId, navigate]);
 
   const handleChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return
-    const next = value.slice(-1)
-    const newDigits = [...digits]
-    newDigits[index] = next
-    setDigits(newDigits)
+    if (!/^\d*$/.test(value)) return;
+    const next = value.slice(-1);
+    const newDigits = [...digits];
+    newDigits[index] = next;
+    setDigits(newDigits);
 
     if (next && index < OTP_LENGTH - 1) {
-      inputRefs.current[index + 1]?.focus()
+      inputRefs.current[index + 1]?.focus();
     }
 
     if (newDigits.every(d => d !== '')) {
-      submitCode(newDigits.join(''))
+      submitCode(newDigits.join(''));
     }
-  }
+  };
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
     if (e.key === 'Backspace' && !digits[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus()
+      inputRefs.current[index - 1]?.focus();
     }
-  }
+  };
 
   const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault()
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, OTP_LENGTH)
-    if (!pasted) return
-    const newDigits = Array(OTP_LENGTH).fill('')
-    for (let i = 0; i < pasted.length; i++) newDigits[i] = pasted[i]
-    setDigits(newDigits)
-    const focusIdx = Math.min(pasted.length, OTP_LENGTH - 1)
-    inputRefs.current[focusIdx]?.focus()
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, OTP_LENGTH);
+    if (!pasted) return;
+    const newDigits = Array(OTP_LENGTH).fill('');
+    for (let i = 0; i < pasted.length; i++) newDigits[i] = pasted[i];
+    setDigits(newDigits);
+    const focusIdx = Math.min(pasted.length, OTP_LENGTH - 1);
+    inputRefs.current[focusIdx]?.focus();
     if (newDigits.every(d => d !== '')) {
-      submitCode(newDigits.join(''))
+      submitCode(newDigits.join(''));
     }
-  }
+  };
 
   const submitCode = async (code: string) => {
-    setSubmitting(true)
-    setError(null)
+    setSubmitting(true);
+    setError(null);
     try {
-      const { token } = await authApi.verifyWhatsAppResetCode(requestId, code)
-      navigate(`/reset-password?token=${token}`)
+      const { token } = await authApi.verifyWhatsAppResetCode(requestId, code);
+      navigate(`/reset-password?token=${token}`);
     } catch (err: unknown) {
-      const msg = (err as { message?: string })?.message ?? 'Código inválido'
-      setError(msg)
-      setDigits(Array(OTP_LENGTH).fill(''))
-      inputRefs.current[0]?.focus()
+      const msg = (err as { message?: string })?.message ?? 'Código inválido';
+      setError(msg);
+      setDigits(Array(OTP_LENGTH).fill(''));
+      inputRefs.current[0]?.focus();
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center p-4 relative">
@@ -94,13 +94,16 @@ export const VerifyResetCodePage: React.FC = () => {
         <div
           className="h-1 w-full opacity-80"
           style={{
-            background:
-              'linear-gradient(to right, transparent, #00c2b3, transparent)',
+            background: 'linear-gradient(to right, transparent, #00c2b3, transparent)',
           }}
         />
         <div className="p-8 flex flex-col items-center">
           <div className="mb-6 flex flex-col items-center gap-4">
-            <button type="button" onClick={() => navigate('/esqueci-senha')} className="cursor-pointer">
+            <button
+              type="button"
+              onClick={() => navigate('/esqueci-senha')}
+              className="cursor-pointer"
+            >
               <Logo size="md" />
             </button>
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg border border-border">
@@ -122,22 +125,22 @@ export const VerifyResetCodePage: React.FC = () => {
             <div className="space-y-4">
               <p className="text-[11px] text-text-muted text-center leading-relaxed">
                 Digite o código de 6 dígitos enviado para{' '}
-                <strong className="text-text-secondary">
-                  {maskedPhone || 'seu WhatsApp'}
-                </strong>
+                <strong className="text-text-secondary">{maskedPhone || 'seu WhatsApp'}</strong>
               </p>
 
               <div className="flex justify-center gap-3">
                 {digits.map((d, i) => (
                   <input
                     key={i}
-                    ref={(el) => { inputRefs.current[i] = el }}
+                    ref={el => {
+                      inputRefs.current[i] = el;
+                    }}
                     type="text"
                     inputMode="numeric"
                     maxLength={1}
                     value={d}
-                    onChange={(e) => handleChange(i, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(i, e)}
+                    onChange={e => handleChange(i, e.target.value)}
+                    onKeyDown={e => handleKeyDown(i, e)}
                     onPaste={handlePaste}
                     disabled={submitting}
                     className="w-12 h-14 text-center text-lg font-bold bg-bg border border-border rounded-xl
@@ -175,7 +178,7 @@ export const VerifyResetCodePage: React.FC = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default VerifyResetCodePage;

@@ -1,16 +1,10 @@
-import React, { useState, useMemo } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { authApi } from '../infra/authApi'
-import { Logo } from '../components/ui/Logo'
-import { ThemeToggle } from '../components/ui/ThemeToggle'
-import { PasswordInput } from '../components/ui/PasswordInput'
-import {
-  ArrowRight,
-  LockKeyhole,
-  AlertCircle,
-  Loader2,
-  CheckCircle,
-} from 'lucide-react'
+import React, { useState, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { authApi } from '../infra/authApi';
+import { Logo } from '../components/ui/Logo';
+import { ThemeToggle } from '../components/ui/ThemeToggle';
+import { PasswordInput } from '../components/ui/PasswordInput';
+import { ArrowRight, LockKeyhole, AlertCircle, Loader2, CheckCircle } from 'lucide-react';
 
 const inputClass = (hasError: boolean) =>
   `w-full bg-bg border rounded-xl py-3 pl-4 pr-4 text-text-primary text-sm
@@ -20,42 +14,42 @@ const inputClass = (hasError: boolean) =>
      hasError
        ? 'border-danger/40 text-danger focus:border-danger'
        : 'border-border focus:border-accent/50 hover:border-border-strong'
-   }`
+   }`;
 
 export const ResetPasswordPage: React.FC = () => {
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const token = searchParams.get('token') ?? ''
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token') ?? '';
 
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const passwordsMatch = useMemo(
     () => newPassword.length > 0 && newPassword === confirmPassword,
     [newPassword, confirmPassword]
-  )
+  );
 
-  const isValid = token.length > 10 && newPassword.length >= 6 && passwordsMatch
+  const isValid = token.length > 10 && newPassword.length >= 6 && passwordsMatch;
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!isValid) return
-    setSubmitting(true)
-    setError(null)
+    e.preventDefault();
+    if (!isValid) return;
+    setSubmitting(true);
+    setError(null);
     try {
-      await authApi.resetPassword(token, newPassword)
-      setSuccess(true)
-      setTimeout(() => navigate('/login'), 3000)
+      await authApi.resetPassword(token, newPassword);
+      setSuccess(true);
+      setTimeout(() => navigate('/login'), 3000);
     } catch (err: any) {
-      setError(err?.message || 'Token inválido ou expirado. Solicite um novo link de redefinição.')
+      setError(err?.message || 'Token inválido ou expirado. Solicite um novo link de redefinição.');
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   if (!token) {
     return (
@@ -81,7 +75,7 @@ export const ResetPasswordPage: React.FC = () => {
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   if (success) {
@@ -116,7 +110,7 @@ export const ResetPasswordPage: React.FC = () => {
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -128,8 +122,7 @@ export const ResetPasswordPage: React.FC = () => {
         <div
           className="h-1 w-full opacity-80"
           style={{
-            background:
-              'linear-gradient(to right, transparent, #00c2b3, transparent)',
+            background: 'linear-gradient(to right, transparent, #00c2b3, transparent)',
           }}
         />
         <div className="p-8 flex flex-col items-center">
@@ -165,10 +158,10 @@ export const ResetPasswordPage: React.FC = () => {
                 <PasswordInput
                   showStrength
                   showPassword={showPassword}
-                  onToggleShow={() => setShowPassword((v) => !v)}
+                  onToggleShow={() => setShowPassword(v => !v)}
                   placeholder="Mínimo 6 caracteres"
                   value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
+                  onChange={e => setNewPassword(e.target.value)}
                 />
               </div>
 
@@ -178,10 +171,10 @@ export const ResetPasswordPage: React.FC = () => {
                 </label>
                 <PasswordInput
                   showPassword={showPassword}
-                  onToggleShow={() => setShowPassword((v) => !v)}
+                  onToggleShow={() => setShowPassword(v => !v)}
                   placeholder="Repita a nova senha"
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={e => setConfirmPassword(e.target.value)}
                   error={
                     confirmPassword.length > 0 && !passwordsMatch
                       ? 'As senhas não coincidem'
@@ -216,7 +209,7 @@ export const ResetPasswordPage: React.FC = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default ResetPasswordPage;

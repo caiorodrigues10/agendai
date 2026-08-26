@@ -40,9 +40,16 @@ export const authApi = {
   forgotPassword: (email: string) =>
     apiClient<{ message: string }>('/api/auth/forgot-password', 'POST', { email }),
   requestWhatsAppReset: (email: string) =>
-    apiClient<{ message: string; requestId?: string; maskedPhone?: string }>('/api/auth/forgot-password/whatsapp', 'POST', { email }),
+    apiClient<{ message: string; requestId?: string; maskedPhone?: string }>(
+      '/api/auth/forgot-password/whatsapp',
+      'POST',
+      { email }
+    ),
   verifyWhatsAppResetCode: (requestId: string, code: string) =>
-    apiClient<{ token: string }>('/api/auth/forgot-password/whatsapp/verify', 'POST', { requestId, code }),
+    apiClient<{ token: string }>('/api/auth/forgot-password/whatsapp/verify', 'POST', {
+      requestId,
+      code,
+    }),
   resetPassword: (token: string, newPassword: string) =>
     apiClient<{ message: string }>('/api/auth/reset-password', 'POST', { token, newPassword }),
 };
