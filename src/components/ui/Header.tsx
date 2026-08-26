@@ -21,9 +21,15 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
           {currentUser ? (
             <div className="flex items-center gap-2 bg-surface rounded-lg p-1 pr-3 border border-border">
               <div className="px-2 py-1 bg-accent/15 rounded text-xs font-bold text-accent uppercase">
-                {currentUser.role === 'MASTER_ADMIN' ? 'Admin' : currentUser.role === 'OWNER' ? 'Dono' : 'Funcionário'}
+                {currentUser.role === 'MASTER_ADMIN'
+                  ? 'Admin'
+                  : currentUser.role === 'OWNER'
+                    ? 'Dono'
+                    : 'Funcionário'}
               </div>
-              <span className="text-xs font-medium text-text-primary hidden sm:block">{currentUser.name}</span>
+              <span className="text-xs font-medium text-text-primary hidden sm:block">
+                {currentUser.name}
+              </span>
               <button
                 onClick={onLogout}
                 className="ml-2 text-text-muted hover:text-danger transition-colors"

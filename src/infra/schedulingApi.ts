@@ -2,9 +2,10 @@ import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
 import { Appointment, QueueItem } from '../types';
 import { AvailabilitySlot } from '../utils/schedulingUtils';
+import { QueueItem } from '../types';
 
-function unwrap<T>(res: any): T {
-  if (res && typeof res === 'object' && 'data' in res) return res.data as T;
+function unwrap<T>(res: unknown): T {
+  if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
   return res as T;
 }
 
@@ -14,6 +15,21 @@ export interface ListAppointmentsParams {
   staffId?: string;
   from?: string;
   to?: string;
+}
+
+interface JoinQueuePayload {
+  customerName: string;
+  whatsapp: string;
+  serviceId: string;
+  barbershopId: string;
+  sessionId: string;
+}
+
+interface QueueUpdatePayload {
+  status: QueueItem['status'];
+  finalPrice?: number;
+  completedAt?: number;
+  completedBy?: string;
 }
 
 function buildQuery(params: Record<string, string | undefined>): string {
@@ -30,17 +46,31 @@ export const schedulingApi = {
     // Token opcional: staff autenticado recebe a fila completa (com whatsapp);
     // visitante recebe a visão pública mascarada.
     const token = authStorage.getAccessToken() || undefined;
-    const res = await apiClient<any>(`/api/queue${qs}`, 'GET', undefined, token);
-    const data = unwrap<any[]>(res);
+    const res = await apiClient<{ success: boolean; data: QueueItem[] }>(
+      `/api/queue${qs}`,
+      'GET',
+      undefined,
+      token
+    );
+    const data = unwrap<QueueItem[]>(res);
     return Array.isArray(data) ? data : [];
   },
-  joinQueue: async (payload: any) => {
-    const res = await apiClient<any>('/api/queue', 'POST', payload);
+  joinQueue: async (payload: JoinQueuePayload) => {
+    const res = await apiClient<{ success: boolean; data: QueueItem }>(
+      '/api/queue',
+      'POST',
+      payload
+    );
     return unwrap<QueueItem>(res);
   },
-  updateQueueItem: async (id: string, payload: any) => {
+  updateQueueItem: async (id: string, payload: QueueUpdatePayload) => {
     const token = authStorage.getAccessToken() || '';
-    const res = await apiClient<any>(`/api/queue/${id}`, 'PATCH', payload, token);
+    const res = await apiClient<{ success: boolean; data: QueueItem }>(
+      `/api/queue/${id}`,
+      'PATCH',
+      payload,
+      token
+    );
     return unwrap<QueueItem>(res);
   },
   deleteQueueItem: (id: string) => {
@@ -49,31 +79,58 @@ export const schedulingApi = {
   },
   getQueueMetrics: async (barbershopId?: string) => {
     const qs = barbershopId ? `?barbershopId=${barbershopId}` : '';
-    const res = await apiClient<any>(`/api/queue/metrics${qs}`);
+    const res = await apiClient<{ success: boolean; data: { completedCount: number } }>(
+      `/api/queue/metrics${qs}`
+    );
     return unwrap<{ completedCount: number }>(res);
   },
   listAppointments: (params: ListAppointmentsParams = {}) => {
     const token = authStorage.getAccessToken() || '';
     if (!token) return Promise.resolve([]);
-    return apiClient<any>(`/api/appointments${buildQuery(params as Record<string, string | undefined>)}`, 'GET', undefined, token).then(res => unwrap<Appointment[]>(res));
+    return apiClient<{ success: boolean; data: unknown[] }>(
+      `/api/appointments${buildQuery(params as Record<string, string | undefined>)}`,
+      'GET',
+      undefined,
+      token
+    ).then(res => unwrap<unknown[]>(res));
   },
   getAvailability: (barbershopId: string, date: string, staffId?: string) => {
     const qs = buildQuery({ barbershopId, date, staffId });
-    return apiClient<AvailabilitySlot[]>(`/api/appointments/availability${qs}`).then(res => unwrap<AvailabilitySlot[]>(res));
+    return apiClient<{ success: boolean; data: AvailabilitySlot[] }>(
+      `/api/appointments/availability${qs}`
+    ).then(res => unwrap<AvailabilitySlot[]>(res));
   },
-  bookAppointment: async (payload: any) => {
+  bookAppointment: async (payload: unknown) => {
     // Backend exige staff autenticado para criar agendamento
     const token = authStorage.getAccessToken() || undefined;
-    const res = await apiClient<any>('/api/appointments', 'POST', payload, token);
-    return unwrap<Appointment>(res);
+    const res = await apiClient<{ success: boolean; data: unknown }>(
+      '/api/appointments',
+      'POST',
+      payload,
+      token
+    );
+    return unwrap<unknown>(res);
   },
-  updateAppointment: async (id: string, payload: any) => {
+  bookAppointmentPublic: async (payload: unknown) => {
+    const res = await apiClient<{ success: boolean; data: unknown }>(
+      '/api/appointments/public',
+      'POST',
+      payload
+    );
+    return unwrap<unknown>(res);
+  },
+  updateAppointment: async (id: string, payload: unknown) => {
     const token = authStorage.getAccessToken() || '';
-    const res = await apiClient<any>(`/api/appointments/${id}`, 'PATCH', payload, token);
-    return unwrap<Appointment>(res);
+    const res = await apiClient<{ success: boolean; data: unknown }>(
+      `/api/appointments/${id}`,
+      'PATCH',
+      payload,
+      token
+    );
+    return unwrap<unknown>(res);
   },
   deleteAppointment: (id: string) => {
     const token = authStorage.getAccessToken() || '';
     return apiClient<void>(`/api/appointments/${id}`, 'DELETE', undefined, token);
-  }
+  },
 };

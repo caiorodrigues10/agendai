@@ -3,15 +3,23 @@ import { Service } from '../../types';
 import { ServiceForm } from './ServiceForm';
 import { DynamicIcon } from '../ui/DynamicIcon';
 import { Pencil, Trash2, Plus } from 'lucide-react';
+import { PackageCatalog } from './PackageCatalog';
 
 interface ServiceManagerProps {
   services: Service[];
   onAdd: (service: Omit<Service, 'id'>) => void;
   onEdit: (id: string, service: Omit<Service, 'id'>) => void;
   onDelete: (id: string) => void;
+  canManagePackages?: boolean;
 }
 
-export const ServiceManager: React.FC<ServiceManagerProps> = ({ services, onAdd, onEdit, onDelete }) => {
+export const ServiceManager: React.FC<ServiceManagerProps> = ({
+  services,
+  onAdd,
+  onEdit,
+  onDelete,
+  canManagePackages = true,
+}) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -28,8 +36,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ services, onAdd,
       </div>
 
       <div className="space-y-3">
-        {services.map((service) => (
-          <div key={service.id} className="bg-surface p-3 rounded-lg border border-border flex items-center justify-between hover:border-border-strong transition-all">
+        {services.map(service => (
+          <div
+            key={service.id}
+            className="bg-surface p-3 rounded-lg border border-border flex items-center justify-between hover:border-border-strong transition-all"
+          >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-surface-2 flex items-center justify-center text-text-secondary">
                 <DynamicIcon name={service.icon} size={20} />
@@ -51,9 +62,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ services, onAdd,
               </button>
               <button
                 onClick={() => {
-                    if(confirm('Tem certeza que deseja excluir este serviço?')) {
-                        onDelete(service.id);
-                    }
+                  if (confirm('Tem certeza que deseja excluir este serviço?')) {
+                    onDelete(service.id);
+                  }
                 }}
                 className="p-2 text-text-secondary hover:text-danger transition-colors"
                 title="Excluir"
@@ -67,7 +78,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ services, onAdd,
 
       {isAdding && (
         <ServiceForm
-          onSave={(data) => {
+          onSave={data => {
             onAdd(data);
             setIsAdding(false);
           }}
@@ -78,13 +89,15 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({ services, onAdd,
       {editingId && (
         <ServiceForm
           initialService={services.find(s => s.id === editingId)}
-          onSave={(data) => {
+          onSave={data => {
             onEdit(editingId, data);
             setEditingId(null);
           }}
           onCancel={() => setEditingId(null)}
         />
       )}
+
+      <PackageCatalog services={services} canManage={canManagePackages} />
     </div>
   );
 };

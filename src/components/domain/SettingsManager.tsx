@@ -1,17 +1,27 @@
 import React, { useState } from 'react';
 import { ShopSettings, DaySchedule } from '../../types';
-import { Save, Clock, CalendarDays, Check, X, Upload, Smartphone } from 'lucide-react';
+import { barbershopApi } from '../../infra/barbershopApi';
+import { maskPhone } from '../../utils/documentUtils';
+import { getErrorMessage } from '../../utils/errorMessage';
+import { Save, Clock, CalendarDays, Check, X, Upload, Smartphone, Loader2 } from 'lucide-react';
 
 interface SettingsManagerProps {
   settings: ShopSettings;
+  barbershopId?: string;
   onSave: (settings: ShopSettings) => void;
 }
 
-export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSave }) => {
+export const SettingsManager: React.FC<SettingsManagerProps> = ({
+  settings,
+  barbershopId,
+  onSave,
+}) => {
   const [shopName, setShopName] = useState(settings.shopName);
   const [whatsapp, setWhatsapp] = useState(settings.whatsapp || '');
   const [schedule, setSchedule] = useState<DaySchedule[]>(settings.schedule || []);
   const [logoUrl, setLogoUrl] = useState<string | undefined>(settings.logoUrl);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
 
   const handleDayChange = (index: number, field: keyof DaySchedule, value: any) => {
     const newSchedule = [...schedule];
@@ -19,14 +29,35 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSa
     setSchedule(newSchedule);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogoUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    if (!file || !barbershopId) return;
+
+    setLogoUploading(true);
+    setLogoError(null);
+    try {
+      const { uploadUrl, publicUrl } = await barbershopApi.getLogoUploadUrl(
+        barbershopId,
+        file.type
+      );
+      const putRes = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: { 'Content-Type': file.type },
+      });
+      if (!putRes.ok) {
+        throw new Error(
+          `Falha ao enviar a imagem para o storage (${putRes.status}). Verifique CORS do bucket e as credenciais GCS.`
+        );
+      }
+      await barbershopApi.confirmLogo(barbershopId, publicUrl);
+      setLogoUrl(publicUrl);
+    } catch (err) {
+      setLogoUrl(settings.logoUrl);
+      setLogoError(getErrorMessage(err, 'Não foi possível enviar a logo. Tente novamente.'));
+    } finally {
+      setLogoUploading(false);
+      e.target.value = '';
     }
   };
 
@@ -35,7 +66,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSa
       shopName,
       whatsapp,
       schedule,
-      logoUrl
+      logoUrl,
     });
   };
 
@@ -50,7 +81,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSa
             <input
               type="text"
               value={shopName}
-              onChange={(e) => setShopName(e.target.value)}
+              onChange={e => setShopName(e.target.value)}
               className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
             />
           </div>
@@ -61,11 +92,14 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSa
               <input
                 type="tel"
                 value={whatsapp}
-                onChange={(e) => setWhatsapp(e.target.value)}
+                onChange={e => setWhatsapp(maskPhone(e.target.value))}
                 className="w-full bg-bg border border-border rounded-lg pl-10 pr-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
                 placeholder="(11) 99999-9999"
               />
-              <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
+              <Smartphone
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+                size={16}
+              />
             </div>
           </div>
 
@@ -73,13 +107,32 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSa
             <label className="block text-sm text-text-secondary mb-2">Logo do Salão</label>
             <div className="flex items-center gap-3">
               <div className="w-16 h-16 rounded-lg bg-bg border border-border flex items-center justify-center overflow-hidden">
-                {logoUrl ? <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" /> : <Upload className="text-text-muted" size={20} />}
+                {logoUploading ? (
+                  <Loader2 className="text-accent animate-spin" size={20} />
+                ) : logoUrl ? (
+                  <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                ) : (
+                  <Upload className="text-text-muted" size={20} />
+                )}
               </div>
-              <label className="px-3 py-2 text-xs bg-surface-2 text-text-secondary rounded-lg border border-border-strong cursor-pointer hover:bg-border-strong">
-                Escolher arquivo
-                <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+              <label
+                className={`px-3 py-2 text-xs bg-surface-2 text-text-secondary rounded-lg border border-border-strong cursor-pointer hover:bg-border-strong ${logoUploading ? 'opacity-50 pointer-events-none' : ''}`}
+              >
+                {logoUploading ? 'Enviando...' : 'Escolher arquivo'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  disabled={logoUploading}
+                />
               </label>
             </div>
+            {logoError && (
+              <p className="mt-2 text-xs text-danger" role="alert">
+                {logoError}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -108,20 +161,26 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({ settings, onSa
               {day.isOpen && (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="relative">
-                    <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" size={14} />
+                    <Clock
+                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted"
+                      size={14}
+                    />
                     <input
                       type="time"
                       value={day.openTime}
-                      onChange={(e) => handleDayChange(index, 'openTime', e.target.value)}
+                      onChange={e => handleDayChange(index, 'openTime', e.target.value)}
                       className="w-full bg-surface border border-border rounded-lg pl-8 pr-2 py-2 text-text-primary text-xs outline-none"
                     />
                   </div>
                   <div className="relative">
-                    <Clock className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" size={14} />
+                    <Clock
+                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted"
+                      size={14}
+                    />
                     <input
                       type="time"
                       value={day.closeTime}
-                      onChange={(e) => handleDayChange(index, 'closeTime', e.target.value)}
+                      onChange={e => handleDayChange(index, 'closeTime', e.target.value)}
                       className="w-full bg-surface border border-border rounded-lg pl-8 pr-2 py-2 text-text-primary text-xs outline-none"
                     />
                   </div>

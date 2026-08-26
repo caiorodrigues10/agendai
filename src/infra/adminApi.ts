@@ -1,7 +1,8 @@
 import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
 
-export type DashboardPeriod = 'day' | 'week' | '1m' | '3m' | '6m' | '12m' | '1y' | '2y' | '3y' | '5y';
+export type DashboardPeriod =
+  'day' | 'week' | '1m' | '3m' | '6m' | '12m' | '1y' | '2y' | '3y' | '5y';
 
 export interface DashboardChartPoint {
   label: string;
@@ -142,6 +143,7 @@ export interface SubscriptionListItem {
   startDate: string | null;
   endDate: string | null;
   cancelDate: string | null;
+  cancelReason?: string | null;
   trialEndsAt: string;
   latestInvoice: { id: string; status: string; amount: number; createdAt: string } | null;
 }
@@ -194,6 +196,22 @@ export interface AdminNotificationItem {
   updatedAt: string;
 }
 
+export interface ReferralPlatformStats {
+  totalReferrals: number;
+  converted: number;
+  rejected: number;
+  pending: number;
+  conversionRate: number;
+  totalCreditDays: number;
+  topReferrers: {
+    barbershopId: string;
+    barbershopName: string;
+    totalReferrals: number;
+    creditDays: number;
+  }[];
+  monthlyEvolution: { month: string; count: number }[];
+}
+
 export interface ListMeta {
   total: number;
   page: number;
@@ -216,36 +234,52 @@ export const adminApi = {
       getAuthHeader()
     ),
 
-  listBarbershops: (params?: { page?: number; limit?: number; status?: string; search?: string }) => {
+  listBarbershops: (params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    search?: string;
+  }) => {
     const qs = new URLSearchParams();
     if (params?.page) qs.set('page', String(params.page));
     if (params?.limit) qs.set('limit', String(params.limit));
     if (params?.status) qs.set('status', params.status);
     if (params?.search) qs.set('search', params.search);
-    return apiClient<{ success: boolean; data: BarbershopListItem[]; meta: { total: number; page: number; limit: number; totalPages: number } }>(
-      `/api/admin/barbershops?${qs.toString()}`,
-      'GET',
-      undefined,
-      getAuthHeader()
-    );
+    return apiClient<{
+      success: boolean;
+      data: BarbershopListItem[];
+      meta: { total: number; page: number; limit: number; totalPages: number };
+    }>(`/api/admin/barbershops?${qs.toString()}`, 'GET', undefined, getAuthHeader());
   },
 
-  listUsers: (params?: { page?: number; limit?: number; role?: string; active?: boolean; search?: string }) => {
+  listUsers: (params?: {
+    page?: number;
+    limit?: number;
+    role?: string;
+    active?: boolean;
+    search?: string;
+  }) => {
     const qs = new URLSearchParams();
     if (params?.page) qs.set('page', String(params.page));
     if (params?.limit) qs.set('limit', String(params.limit));
     if (params?.role) qs.set('role', params.role);
     if (params?.active !== undefined) qs.set('active', String(params.active));
     if (params?.search) qs.set('search', params.search);
-    return apiClient<{ success: boolean; data: UserListItem[]; meta: { total: number; page: number; limit: number; totalPages: number } }>(
-      `/api/admin/users?${qs.toString()}`,
-      'GET',
-      undefined,
-      getAuthHeader()
-    );
+    return apiClient<{
+      success: boolean;
+      data: UserListItem[];
+      meta: { total: number; page: number; limit: number; totalPages: number };
+    }>(`/api/admin/users?${qs.toString()}`, 'GET', undefined, getAuthHeader());
   },
 
-  createUser: (body: { name: string; email: string; password?: string; role: string; barbershopId?: string | null; active?: boolean }) =>
+  createUser: (body: {
+    name: string;
+    email: string;
+    password?: string;
+    role: string;
+    barbershopId?: string | null;
+    active?: boolean;
+  }) =>
     apiClient<{ success: boolean; data: UserListItem }>(
       `/api/admin/users`,
       'POST',
@@ -253,7 +287,10 @@ export const adminApi = {
       getAuthHeader()
     ),
 
-  updateUser: (id: string, body: { name?: string; email?: string; role?: string; active?: boolean }) =>
+  updateUser: (
+    id: string,
+    body: { name?: string; email?: string; role?: string; active?: boolean }
+  ) =>
     apiClient<{ success: boolean; data: UserListItem }>(
       `/api/admin/users/${id}`,
       'PATCH',
@@ -269,22 +306,30 @@ export const adminApi = {
       getAuthHeader()
     ),
 
-  listAuditLogs: (params?: { page?: number; limit?: number; userId?: string; resource?: string; action?: string }) => {
+  listAuditLogs: (params?: {
+    page?: number;
+    limit?: number;
+    userId?: string;
+    resource?: string;
+    action?: string;
+  }) => {
     const qs = new URLSearchParams();
     if (params?.page) qs.set('page', String(params.page));
     if (params?.limit) qs.set('limit', String(params.limit));
     if (params?.userId) qs.set('userId', params.userId);
     if (params?.resource) qs.set('resource', params.resource);
     if (params?.action) qs.set('action', params.action);
-    return apiClient<{ success: boolean; data: AuditLog[]; meta: { total: number; page: number; limit: number; totalPages: number } }>(
-      `/api/admin/audit-logs?${qs.toString()}`,
-      'GET',
-      undefined,
-      getAuthHeader()
-    );
+    return apiClient<{
+      success: boolean;
+      data: AuditLog[];
+      meta: { total: number; page: number; limit: number; totalPages: number };
+    }>(`/api/admin/audit-logs?${qs.toString()}`, 'GET', undefined, getAuthHeader());
   },
 
-  updateBarbershopStatus: (id: string, body: { active?: boolean; approvalStatus?: string; rejectionReason?: string }) =>
+  updateBarbershopStatus: (
+    id: string,
+    body: { active?: boolean; approvalStatus?: string; rejectionReason?: string }
+  ) =>
     apiClient<{ success: boolean; data: any }>(
       `/api/admin/barbershops/${id}/status`,
       'PATCH',
@@ -333,7 +378,12 @@ export const adminApi = {
 
   // ─── Faturamento: assinaturas ───────────────────────────────────────────
 
-  listSubscriptions: (params?: { page?: number; limit?: number; status?: string; search?: string }) => {
+  listSubscriptions: (params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    search?: string;
+  }) => {
     const qs = new URLSearchParams();
     if (params?.page) qs.set('page', String(params.page));
     if (params?.limit) qs.set('limit', String(params.limit));
@@ -412,16 +462,21 @@ export const adminApi = {
     ),
 
   deactivatePlan: (id: string) =>
-    apiClient<{ success: boolean; message: string; data: { activeSubscriptionsRemaining: number; info: string } }>(
-      `/api/admin/plans/${id}`,
-      'DELETE',
-      undefined,
-      getAuthHeader()
-    ),
+    apiClient<{
+      success: boolean;
+      message: string;
+      data: { activeSubscriptionsRemaining: number; info: string };
+    }>(`/api/admin/plans/${id}`, 'DELETE', undefined, getAuthHeader()),
 
   // ─── Faturamento: bloqueios (inadimplência) ─────────────────────────────
 
-  listBlockedEntities: (params?: { page?: number; limit?: number; type?: string; isActive?: boolean; search?: string }) => {
+  listBlockedEntities: (params?: {
+    page?: number;
+    limit?: number;
+    type?: string;
+    isActive?: boolean;
+    search?: string;
+  }) => {
     const qs = new URLSearchParams();
     if (params?.page) qs.set('page', String(params.page));
     if (params?.limit) qs.set('limit', String(params.limit));
@@ -446,18 +501,22 @@ export const adminApi = {
 
   // ─── Notificações admin ─────────────────────────────────────────────────
 
-  listNotifications: (params?: { page?: number; limit?: number; read?: boolean; type?: string }) => {
+  listNotifications: (params?: {
+    page?: number;
+    limit?: number;
+    read?: boolean;
+    type?: string;
+  }) => {
     const qs = new URLSearchParams();
     if (params?.page) qs.set('page', String(params.page));
     if (params?.limit) qs.set('limit', String(params.limit));
     if (params?.read !== undefined) qs.set('read', String(params.read));
     if (params?.type) qs.set('type', params.type);
-    return apiClient<{ success: boolean; data: AdminNotificationItem[]; meta: ListMeta & { unreadCount: number } }>(
-      `/api/admin/notifications?${qs.toString()}`,
-      'GET',
-      undefined,
-      getAuthHeader()
-    );
+    return apiClient<{
+      success: boolean;
+      data: AdminNotificationItem[];
+      meta: ListMeta & { unreadCount: number };
+    }>(`/api/admin/notifications?${qs.toString()}`, 'GET', undefined, getAuthHeader());
   },
 
   unreadNotificationsCount: () =>
@@ -483,4 +542,17 @@ export const adminApi = {
       undefined,
       getAuthHeader()
     ),
+
+  getReferralStats: async () => {
+    const res = await apiClient<{ success: boolean; data: ReferralPlatformStats }>(
+      '/api/admin/referrals',
+      'GET',
+      undefined,
+      getAuthHeader()
+    );
+    if (res && typeof res === 'object' && 'data' in res) {
+      return (res as { data: ReferralPlatformStats }).data;
+    }
+    return res as unknown as ReferralPlatformStats;
+  },
 };

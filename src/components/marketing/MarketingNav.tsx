@@ -1,54 +1,104 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { Logo } from '../ui/Logo';
 
+/** Âncoras da landing (`/#id`). */
 const sectionLinks = [
   { id: 'recursos', label: 'Recursos' },
   { id: 'tecnologia', label: 'Tecnologia' },
   { id: 'precos', label: 'Preços' },
-];
+] as const;
+
+/** Páginas de marketing. */
+const pageLinks = [
+  { to: '/funcionalidades', label: 'Funcionalidades' },
+  { to: '/planos', label: 'Planos' },
+  { to: '/sobre', label: 'Sobre' },
+  { to: '/contato', label: 'Contato' },
+] as const;
+
+function scrollToSection(id: string) {
+  const el = document.getElementById(id);
+  if (!el) return false;
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  return true;
+}
 
 /**
- * Nav compartilhada entre a landing page e as páginas de marketing
- * (Funcionalidades, IA Preditiva, Agendamento, Dashboard, Sobre Nós, Contato).
- *
- * Os links de seção (Recursos/Tecnologia/Preços) sempre apontam para a home
- * via hash (`/#id`); a `LandingPage` lê `location.hash` no mount e faz o
- * scroll suave até a seção correspondente.
+ * Nav compartilhada entre a landing e as páginas de marketing.
+ * Seções usam scroll na home; páginas usam rotas normais.
  */
 export const MarketingNav: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const goToSection = (id: string) => {
+    setMobileOpen(false);
+    if (location.pathname === '/') {
+      scrollToSection(id);
+      if (location.hash !== `#${id}`) {
+        window.history.pushState(null, '', `/#${id}`);
+      }
+      return;
+    }
+    navigate(`/#${id}`);
+  };
+
   return (
-    <nav className="fixed top-0 w-full z-50 backdrop-blur-2xl border-b border-white/5 px-6 py-4 bg-black/50">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3 cursor-pointer group" onClick={() => setMobileOpen(false)}>
+    <nav className="fixed top-0 z-50 w-full border-b border-white/5 bg-black/50 px-5 py-4 backdrop-blur-2xl sm:px-8 xl:px-12">
+      <div className="mx-auto flex max-w-400 items-center justify-between gap-4">
+        <Link
+          to="/"
+          className="flex shrink-0 items-center gap-3 cursor-pointer group"
+          onClick={() => setMobileOpen(false)}
+        >
           <Logo size="md" className="text-white" />
         </Link>
 
-        <div className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-neutral-400">
-          {sectionLinks.map((link) => (
-            <Link
+        <div className="hidden items-center gap-6 lg:flex xl:gap-8">
+          {sectionLinks.map(link => (
+            <button
               key={link.id}
-              to={`/#${link.id}`}
-              className="transition-colors hover:text-white relative group cursor-pointer"
+              type="button"
+              onClick={() => goToSection(link.id)}
+              className="relative cursor-pointer text-[11px] font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
             >
               {link.label}
-              <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-emerald-500 transition-all group-hover:w-full"></span>
+            </button>
+          ))}
+          <span className="h-3 w-px bg-white/10" aria-hidden />
+          {pageLinks.map(link => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="text-[11px] font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
+            >
+              {link.label}
             </Link>
           ))}
         </div>
 
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate('/login')} className="hidden md:block text-xs font-bold uppercase tracking-tight text-neutral-400 hover:text-white transition-colors">Acessar Painel</button>
-          <button onClick={() => navigate('/planos')} className="hidden sm:block bg-white text-black px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-tighter hover:scale-105 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(255,255,255,0.4)]">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            className="hidden text-xs font-bold uppercase tracking-tight text-neutral-400 transition-colors hover:text-white md:block"
+          >
+            Acessar Painel
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/planos')}
+            className="hidden rounded-full bg-white px-5 py-2.5 text-xs font-black uppercase tracking-tighter text-black shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] sm:block"
+          >
             Começar Agora
           </button>
           <button
-            onClick={() => setMobileOpen((v) => !v)}
-            className="md:hidden text-white p-2 -mr-2"
+            type="button"
+            onClick={() => setMobileOpen(v => !v)}
+            className="p-2 -mr-2 text-white lg:hidden"
             aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
             aria-expanded={mobileOpen}
           >
@@ -58,32 +108,45 @@ export const MarketingNav: React.FC = () => {
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden max-w-7xl mx-auto mt-4 pb-2 flex flex-col gap-1 text-sm font-bold uppercase tracking-widest text-neutral-300 border-t border-white/5 pt-4">
-          {sectionLinks.map((link) => (
-            <Link
+        <div className="mx-auto mt-4 flex max-w-400 flex-col gap-0.5 border-t border-white/5 pb-2 pt-4 text-sm font-bold uppercase tracking-widest text-neutral-300 lg:hidden">
+          {sectionLinks.map(link => (
+            <button
               key={link.id}
-              to={`/#${link.id}`}
+              type="button"
+              onClick={() => goToSection(link.id)}
+              className="py-3 text-left transition-colors hover:text-white"
+            >
+              {link.label}
+            </button>
+          ))}
+          <div className="my-2 h-px bg-white/8" />
+          {pageLinks.map(link => (
+            <Link
+              key={link.to}
+              to={link.to}
               onClick={() => setMobileOpen(false)}
-              className="py-3 hover:text-white transition-colors"
+              className="py-3 transition-colors hover:text-white"
             >
               {link.label}
             </Link>
           ))}
           <button
+            type="button"
             onClick={() => {
               setMobileOpen(false);
               navigate('/login');
             }}
-            className="py-3 text-left hover:text-white transition-colors"
+            className="py-3 text-left transition-colors hover:text-white"
           >
             Acessar Painel
           </button>
           <button
+            type="button"
             onClick={() => {
               setMobileOpen(false);
               navigate('/planos');
             }}
-            className="mt-2 bg-white text-black px-5 py-3 rounded-full text-xs font-black uppercase tracking-tighter"
+            className="mt-2 rounded-full bg-white px-5 py-3 text-xs font-black uppercase tracking-tighter text-black"
           >
             Começar Agora
           </button>

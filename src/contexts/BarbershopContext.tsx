@@ -4,6 +4,7 @@ import { StaffMember, Service, ShopSettings, FeedPost } from '../types';
 import { mapScheduleFromApi, mapStaffFromApi } from '../utils/schedulingUtils';
 import { useBarbershopFilters } from './BarbershopFiltersContext';
 import { useAuth } from './AuthContext';
+import { logger } from '../utils/logger';
 
 interface BarbershopContextValue {
   loading: boolean;
@@ -85,9 +86,9 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
 
       try {
         const servicesData = await barbershopApi.listServices(barbershopId);
-        setServices(Array.isArray(servicesData) ? servicesData as Service[] : []);
+        setServices(Array.isArray(servicesData) ? (servicesData as Service[]) : []);
       } catch (e) {
-        console.error('Falha ao carregar serviços', e);
+        logger.error('Falha ao carregar serviços', e);
         setServices([]);
       }
 
@@ -95,20 +96,20 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
         const staffData = await barbershopApi.listStaff(barbershopId);
         setStaff(Array.isArray(staffData) ? staffData.map(mapStaffFromApi) : []);
       } catch (e) {
-        console.error('Falha ao carregar equipe', e);
+        logger.error('Falha ao carregar equipe', e);
         setStaff([]);
       }
 
       try {
         const feedData = await barbershopApi.listFeed(barbershopId);
-        setFeed(Array.isArray(feedData) ? feedData as FeedPost[] : []);
+        setFeed(Array.isArray(feedData) ? (feedData as FeedPost[]) : []);
       } catch (e) {
-        console.error('Falha ao carregar feed', e);
+        logger.error('Falha ao carregar feed', e);
         setFeed([]);
       }
 
       try {
-        const shopData = await barbershopApi.getBarbershop(barbershopId) as {
+        const shopData = (await barbershopApi.getBarbershop(barbershopId)) as {
           name?: string;
           whatsapp?: string;
           address?: string | null;
@@ -116,13 +117,22 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
         } | null;
         let schedule = mapScheduleFromApi(null);
         try {
-          const scheduleData = await barbershopApi.getSchedule(barbershopId) as
-            | Array<{ dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }>
-            | { schedule?: Array<{ dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }> }
+          const scheduleData = (await barbershopApi.getSchedule(barbershopId)) as
+            | { dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }[]
+            | {
+                schedule?: {
+                  dayOfWeek: number;
+                  isOpen: boolean;
+                  openTime: string;
+                  closeTime: string;
+                }[];
+              }
             | null;
-          schedule = mapScheduleFromApi(Array.isArray(scheduleData) ? scheduleData : scheduleData?.schedule);
+          schedule = mapScheduleFromApi(
+            Array.isArray(scheduleData) ? scheduleData : scheduleData?.schedule
+          );
         } catch (e) {
-          console.error('Falha ao carregar horários', e);
+          logger.error('Falha ao carregar horários', e);
         }
 
         if (shopData) {
@@ -137,7 +147,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
           setSettingsState(null);
         }
       } catch (e) {
-        console.error('Falha ao carregar configurações do salão', e);
+        logger.error('Falha ao carregar configurações do salão', e);
         setSettingsState(null);
       }
 
@@ -168,7 +178,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const editService = async (id: string, data: Omit<Service, 'id'>) => {
     const updated = await barbershopApi.updateService(id, data);
-    setServices(prev => prev.map(s => s.id === id ? updated : s));
+    setServices(prev => prev.map(s => (s.id === id ? updated : s)));
   };
 
   const deleteService = async (id: string) => {
@@ -193,7 +203,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
           barbershopId,
         })
       ),
-      ...toRemove.map(member => barbershopApi.deleteStaff(member.id))
+      ...toRemove.map(member => barbershopApi.deleteStaff(member.id)),
     ]);
     const staffData = await barbershopApi.listStaff(barbershopId);
     setStaff(Array.isArray(staffData) ? staffData.map(mapStaffFromApi) : []);
@@ -214,7 +224,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
     const post = feed.find(p => p.id === id);
     if (!post) return;
     const updated = await barbershopApi.updatePost(id, { likes: post.likes + 1 });
-    setFeed(prev => prev.map(p => p.id === id ? updated : p));
+    setFeed(prev => prev.map(p => (p.id === id ? updated : p)));
   };
 
   const isShopOpen = () => {
@@ -232,23 +242,26 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
     return `${today.openTime} - ${today.closeTime}`;
   };
 
-  const value = useMemo(() => ({
-    loading,
-    services,
-    staff,
-    settings,
-    feed,
-    setSettings,
-    addService,
-    editService,
-    deleteService,
-    updateTeam,
-    addPost,
-    deletePost,
-    likePost,
-    isShopOpen,
-    getTodayScheduleDisplay
-  }), [loading, services, staff, settings, feed]);
+  const value = useMemo(
+    () => ({
+      loading,
+      services,
+      staff,
+      settings,
+      feed,
+      setSettings,
+      addService,
+      editService,
+      deleteService,
+      updateTeam,
+      addPost,
+      deletePost,
+      likePost,
+      isShopOpen,
+      getTodayScheduleDisplay,
+    }),
+    [loading, services, staff, settings, feed]
+  );
 
   return <BarbershopContext.Provider value={value}>{children}</BarbershopContext.Provider>;
 };

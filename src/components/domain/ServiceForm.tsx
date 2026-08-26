@@ -15,23 +15,25 @@ interface ServiceFormProps {
 export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave, onCancel }) => {
   const [selectedIcon, setSelectedIcon] = useState(initialService?.icon || 'Scissors');
 
-  const { register, handleSubmit, formState: { errors } } = useForm<ServiceFormData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ServiceFormData>({
     resolver: zodResolver(ServiceSchema),
     defaultValues: {
       name: initialService?.name || '',
       price: initialService?.price || 0,
       avgTimeMinutes: initialService?.avgTimeMinutes || 30,
-      icon: initialService?.icon || 'Scissors'
-    }
+      icon: initialService?.icon || 'Scissors',
+    },
   });
 
   const onSubmit = (data: ServiceFormData) => {
     onSave({
-      name: data.name,
-      price: data.price,
-      avgTimeMinutes: data.avgTimeMinutes,
-      icon: selectedIcon
-    });
+      ...data,
+      icon: selectedIcon,
+    } as Omit<Service, 'id'>);
   };
 
   return (
@@ -43,19 +45,27 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-text-secondary mb-1.5">Nome do Serviço</label>
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">
+              Nome do Serviço
+            </label>
             <input
               type="text"
               className={`w-full bg-bg border rounded-lg px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all placeholder:text-text-muted ${errors.name ? 'border-danger' : 'border-border'}`}
               placeholder="Ex: Corte Degrade"
               {...register('name')}
             />
-            {errors.name && <span className="text-danger text-xs flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.name.message}</span>}
+            {errors.name && (
+              <span className="text-danger text-xs flex items-center gap-1 mt-1">
+                <AlertCircle size={10} /> {errors.name.message}
+              </span>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-text-secondary mb-1.5">Preço (R$)</label>
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">
+                Preço (R$)
+              </label>
               <input
                 type="number"
                 step="0.01"
@@ -63,17 +73,27 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
                 placeholder="0.00"
                 {...register('price', { valueAsNumber: true })}
               />
-               {errors.price && <span className="text-danger text-xs flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.price.message}</span>}
+              {errors.price && (
+                <span className="text-danger text-xs flex items-center gap-1 mt-1">
+                  <AlertCircle size={10} /> {errors.price.message}
+                </span>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-secondary mb-1.5">Tempo (min)</label>
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">
+                Tempo (min)
+              </label>
               <input
                 type="number"
                 className={`w-full bg-bg border rounded-lg px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all placeholder:text-text-muted ${errors.avgTimeMinutes ? 'border-danger' : 'border-border'}`}
                 placeholder="30"
                 {...register('avgTimeMinutes', { valueAsNumber: true })}
               />
-              {errors.avgTimeMinutes && <span className="text-danger text-xs flex items-center gap-1 mt-1"><AlertCircle size={10} /> {errors.avgTimeMinutes.message}</span>}
+              {errors.avgTimeMinutes && (
+                <span className="text-danger text-xs flex items-center gap-1 mt-1">
+                  <AlertCircle size={10} /> {errors.avgTimeMinutes.message}
+                </span>
+              )}
             </div>
           </div>
 
@@ -81,14 +101,14 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
             <label className="block text-sm font-medium text-text-secondary mb-2">Ícone</label>
             <div className="bg-bg p-3 rounded-xl border border-border max-h-48 overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-5 gap-2">
-                {ICON_OPTIONS.map((i) => (
+                {ICON_OPTIONS.map(i => (
                   <button
                     key={i}
                     type="button"
                     onClick={() => setSelectedIcon(i)}
                     className={`aspect-square rounded-lg flex items-center justify-center transition-all ${
-                      selectedIcon === i 
-                        ? 'bg-accent text-accent-fg shadow-lg shadow-accent/20 scale-105' 
+                      selectedIcon === i
+                        ? 'bg-accent text-accent-fg shadow-lg shadow-accent/20 scale-105'
                         : 'bg-surface text-text-muted hover:bg-surface-2 hover:text-text-secondary'
                     }`}
                   >

@@ -11,15 +11,15 @@ import { SubscriptionProvider } from './contexts/SubscriptionContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
-  throw new Error("Could not find root element to mount to");
+  throw new Error('Could not find root element to mount to');
 }
 
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <ThemeProvider>
-      <BarbershopFiltersProvider>
-        <AuthProvider>
+    <BarbershopFiltersProvider>
+      <AuthProvider>
+        <ThemeProvider>
           <SubscriptionProvider>
             <BarbershopProvider>
               <SchedulingProvider>
@@ -27,8 +27,8 @@ root.render(
               </SchedulingProvider>
             </BarbershopProvider>
           </SubscriptionProvider>
-        </AuthProvider>
-      </BarbershopFiltersProvider>
-    </ThemeProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </BarbershopFiltersProvider>
   </React.StrictMode>
 );

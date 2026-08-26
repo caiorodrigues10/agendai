@@ -1,86 +1,156 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Instagram, Twitter, Linkedin } from 'lucide-react';
 import { Logo } from '../ui/Logo';
+import { trialCampaign } from '../../marketing/trialCampaign';
 
 const platformLinks = [
   { to: '/funcionalidades', label: 'Funcionalidades' },
-  { to: '/ia-preditiva', label: 'IA Preditiva', badge: 'Novo' },
+  { to: '/ia-preditiva', label: 'IA Preditiva' },
   { to: '/agendamento', label: 'Agendamento' },
   { to: '/dashboard', label: 'Dashboard' },
+  { to: '/planos', label: 'Planos' },
 ];
 
 const companyLinks = [
-  { to: '/sobre', label: 'Sobre Nós' },
+  { to: '/sobre', label: 'Sobre' },
   { to: '/contato', label: 'Contato' },
+  { to: '/login', label: 'Acessar painel' },
+  { to: '/login', label: trialCampaign.cta },
+];
+
+const exploreLinks = [
+  { to: '/#recursos', label: 'Recursos' },
+  { to: '/#tecnologia', label: 'Tecnologia' },
+  { to: '/#precos', label: 'Preços' },
+  { to: '/queue', label: 'Fila ao vivo' },
 ];
 
 const socialLinks = [
-  { icon: Instagram, href: '#', label: 'Instagram' },
-  { icon: Twitter, href: '#', label: 'Twitter' },
-  { icon: Linkedin, href: '#', label: 'LinkedIn' },
+  { href: '#', label: 'Instagram' },
+  { href: '#', label: 'X' },
+  { href: '#', label: 'LinkedIn' },
 ];
+
+function FooterColumn({
+  title,
+  links,
+}: {
+  title: string;
+  links: { to?: string; href?: string; label: string }[];
+}) {
+  return (
+    <div>
+      <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-neutral-500">
+        {title}
+      </h3>
+      <ul className="mt-5 space-y-3">
+        {links.map(link => (
+          <li key={`${title}-${link.label}`}>
+            {link.to ? (
+              <Link
+                to={link.to}
+                className="text-[13px] font-medium leading-snug text-neutral-400 transition-colors hover:text-white"
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <a
+                href={link.href}
+                className="text-[13px] font-medium leading-snug text-neutral-400 transition-colors hover:text-white"
+              >
+                {link.label}
+              </a>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 /** Footer compartilhado entre a landing page e as páginas de marketing. */
 export const MarketingFooter: React.FC = () => {
+  const year = new Date().getFullYear();
+
   return (
-    <footer className="relative bg-[#050505] pt-32 pb-10 px-6 border-t border-white/10 z-10 overflow-hidden">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-emerald-500/5 blur-[120px] rounded-full pointer-events-none" />
+    <footer className="relative z-10 border-t border-white/10 bg-[#0b0b0d] px-6 pb-12 pt-16 text-neutral-400 md:px-10 md:pt-24 xl:px-12">
+      <div className="mx-auto max-w-375">
+        <div className="border-b border-white/10 pb-12 md:pb-14">
+          <nav
+            className="mb-10 text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-600"
+            aria-label="Breadcrumb"
+          >
+            <ol className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+              <li>
+                <Link to="/" className="transition-colors hover:text-neutral-300">
+                  AgendAI
+                </Link>
+              </li>
+              <li aria-hidden className="text-neutral-700">
+                /
+              </li>
+              <li className="normal-case tracking-normal text-neutral-300">
+                Para salões e barbearias
+              </li>
+            </ol>
+          </nav>
 
-      <div className="max-w-7xl mx-auto relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-16 mb-24">
-          <div className="md:col-span-5">
-            <Link to="/" className="flex items-center gap-2 mb-8">
-              <Logo size="sm" className="text-white" />
-            </Link>
-            <p className="text-neutral-400 text-lg max-w-sm leading-relaxed mb-10 font-light">
-              Fila, agenda e gestão para salões de beleza, barbearias e studios — feitos para atender todo mundo.
-            </p>
+          <div className="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-20 xl:gap-28">
+            <div className="max-w-md shrink-0">
+              <Link to="/" className="group inline-flex transition duration-300 hover:opacity-100">
+                <Logo
+                  size="lg"
+                  className="text-white transition duration-300 group-hover:text-emerald-100"
+                />
+              </Link>
 
-            <div className="flex gap-4">
-              {socialLinks.map((social, i) => (
-                <a key={i} href={social.href} aria-label={social.label} className="w-10 h-10 bg-neutral-900/50 rounded-full flex items-center justify-center text-neutral-400 hover:text-emerald-400 hover:bg-neutral-800 transition-all border border-white/5 hover:border-emerald-500/30 hover:shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-                  <social.icon className="w-4 h-4" />
-                </a>
-              ))}
+              <div className="mt-8 space-y-4 md:mt-10">
+                <p className="max-w-[22ch] text-[clamp(1.35rem,2.4vw,1.75rem)] font-semibold leading-[1.2] tracking-[-0.035em] text-white">
+                  Fila, agenda e caixa no ritmo do seu salão.
+                </p>
+                <p className="max-w-sm text-[13px] font-light leading-relaxed text-neutral-500 md:text-sm">
+                  Para salões de beleza, barbearias e studios — atendimento feminino, masculino ou
+                  unissex.
+                </p>
+              </div>
+
+              <p className="mt-6 text-[10px] font-black uppercase tracking-[0.22em] text-emerald-400/90">
+                {trialCampaign.eyebrow}
+              </p>
             </div>
-          </div>
 
-          <div className="md:col-span-7 grid grid-cols-2 gap-12">
-            <div>
-              <h5 className="text-white font-bold mb-8 uppercase text-[10px] tracking-[0.2em]">Plataforma</h5>
-              <ul className="space-y-5 text-sm text-neutral-400 font-light">
-                {platformLinks.map((link) => (
-                  <li key={link.to}>
-                    <Link to={link.to} className="hover:text-emerald-400 transition-colors flex items-center gap-2">
-                      {link.label}
-                      {link.badge && (
-                        <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[8px] font-bold uppercase tracking-wider">{link.badge}</span>
-                      )}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h5 className="text-white font-bold mb-8 uppercase text-[10px] tracking-[0.2em]">Empresa</h5>
-              <ul className="space-y-5 text-sm text-neutral-400 font-light">
-                {companyLinks.map((link) => (
-                  <li key={link.to}>
-                    <Link to={link.to} className="hover:text-emerald-400 transition-colors">{link.label}</Link>
-                  </li>
-                ))}
-              </ul>
+            <div className="grid flex-1 grid-cols-2 gap-x-10 gap-y-10 sm:grid-cols-4 sm:gap-x-8 lg:pt-1">
+              <FooterColumn title="Explorar" links={exploreLinks} />
+              <FooterColumn title="Plataforma" links={platformLinks} />
+              <FooterColumn title="Empresa" links={companyLinks} />
+              <FooterColumn title="Rede" links={socialLinks} />
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/10 text-xs text-neutral-500 font-light">
-          <p>© {new Date().getFullYear()} AGENDAI. Todos os direitos reservados.</p>
-          <div className="flex gap-6 mt-6 md:mt-0 items-center">
-            <span className="hover:text-white transition-colors cursor-pointer">Sede: Bebedouro-SP</span>
+        <div className="flex flex-col gap-4 pt-7 text-[11px] font-medium leading-relaxed text-neutral-600 md:flex-row md:items-center md:justify-between md:text-[12px]">
+          <p>Copyright © {year} AgendAI. Todos os direitos reservados.</p>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <span>Brasil</span>
+            <span className="hidden text-neutral-700 sm:inline" aria-hidden>
+              |
+            </span>
+            <span>Sede: Bebedouro-SP</span>
+            <span className="hidden text-neutral-700 sm:inline" aria-hidden>
+              |
+            </span>
+            <Link to="/contato" className="transition-colors hover:text-white">
+              Contato
+            </Link>
+            <Link to="/privacidade" className="transition-colors hover:text-white">
+              Privacidade
+            </Link>
+            <Link to="/termos" className="transition-colors hover:text-white">
+              Termos
+            </Link>
+            <Link to="/planos" className="transition-colors hover:text-white">
+              Planos
+            </Link>
           </div>
         </div>
       </div>

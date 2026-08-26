@@ -36,10 +36,14 @@ interface PasswordInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEle
 
 export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
   ({ showPassword, onToggleShow, error, showStrength, value, className, ...props }, ref) => {
-    const strength = showStrength ? getPasswordStrength(value ?? '') : null;
+    // Só controla o value quando o pai passa explicitamente (ex.: watch do RHF + strength).
+    // Se defaultar para '', o login com register() fica preso em string vazia.
+    const isControlled = value !== undefined;
+    const strengthValue = isControlled ? value : '';
+    const strength = showStrength ? getPasswordStrength(strengthValue) : null;
     const hasError = !!error;
     const borderLevel = hasError ? 'empty' : (strength?.level ?? 'empty');
-    const showMeter = showStrength && (value ?? '').length > 0;
+    const showMeter = showStrength && strengthValue.length > 0;
 
     return (
       <div className="space-y-1">
@@ -47,9 +51,11 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           className={`
             rounded-xl border overflow-hidden transition-colors
             focus-within:shadow-[0_0_15px_rgba(16,185,129,0.15)]
-            ${hasError
-              ? 'border-danger/40 focus-within:border-danger'
-              : STRENGTH_BORDER[borderLevel]}
+            ${
+              hasError
+                ? 'border-danger/40 focus-within:border-danger'
+                : STRENGTH_BORDER[borderLevel]
+            }
           `}
         >
           <div className="relative group bg-bg">
@@ -64,7 +70,6 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             <input
               ref={ref}
               type={showPassword ? 'text' : 'password'}
-              {...(value !== undefined ? { value } : {})}
               className={`
                 w-full bg-transparent py-3 pl-10 pr-10 text-text-primary text-sm
                 outline-none placeholder:text-text-muted
@@ -72,12 +77,13 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
                 ${className ?? ''}
               `}
               {...props}
+              {...(isControlled ? { value } : {})}
             />
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
               <button
                 type="button"
                 onClick={onToggleShow}
-                className="text-text-muted hover:text-accent transition-colors focus:outline-none"
+                className="text-text-muted hover:text-accent transition-colors focus:outline-none cursor-pointer"
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -93,14 +99,14 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
                     <div
                       key={segment}
                       className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
-                        segment <= strength.score
-                          ? STRENGTH_BAR[strength.level]
-                          : 'bg-border'
+                        segment <= strength.score ? STRENGTH_BAR[strength.level] : 'bg-border'
                       }`}
                     />
                   ))}
                 </div>
-                <span className={`text-[10px] font-bold uppercase tracking-wide shrink-0 ${STRENGTH_TEXT[strength.level]}`}>
+                <span
+                  className={`text-[10px] font-bold uppercase tracking-wide shrink-0 ${STRENGTH_TEXT[strength.level]}`}
+                >
                   {strength.label}
                 </span>
               </div>
@@ -121,7 +127,11 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
                         met ? 'text-success' : 'text-text-muted'
                       }`}
                     >
-                      {met ? <Check size={10} strokeWidth={3} /> : <span className="w-2.5 h-px bg-border-strong" />}
+                      {met ? (
+                        <Check size={10} strokeWidth={3} />
+                      ) : (
+                        <span className="w-2.5 h-px bg-border-strong" />
+                      )}
                       {label}
                     </li>
                   );

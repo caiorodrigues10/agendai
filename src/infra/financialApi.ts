@@ -1,8 +1,8 @@
 import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
 
-function unwrap<T>(res: any): T {
-  if (res && typeof res === 'object' && 'data' in res) return res.data as T;
+function unwrap<T>(res: unknown): T {
+  if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
   return res as T;
 }
 
@@ -26,7 +26,7 @@ export interface FinancialSummary {
     totalPaid: number;
     totalPending: number;
     count: number;
-    byType: Array<{ type: string; total: number; count: number }>;
+    byType: { type: string; total: number; count: number }[];
   };
   fiados: {
     activeDebtors: number;
@@ -35,6 +35,10 @@ export interface FinancialSummary {
     totalPending: number;
     overdueCount: number;
     overdueAmount: number;
+  };
+  packages?: {
+    count: number;
+    totalPaid: number;
   };
 }
 
@@ -64,14 +68,14 @@ export interface ExpenseSummary {
   totalAmount: number;
   totalPaid: number;
   totalPending: number;
-  byCategory: Array<{
+  byCategory: {
     categoryId: string | null;
     categoryName: string | null;
     total: number;
     count: number;
-  }>;
-  byType: Array<{ type: ExpenseType; total: number; count: number }>;
-  byMonth: Array<{ month: string; total: number; count: number }>;
+  }[];
+  byType: { type: ExpenseType; total: number; count: number }[];
+  byMonth: { month: string; total: number; count: number }[];
 }
 
 export interface FiadoItem {
@@ -90,14 +94,14 @@ export interface FiadoItem {
   createdAt: string;
   updatedAt: string;
   isOverdue: boolean;
-  payments?: Array<{
+  payments?: {
     id: string;
     fiadoId: string;
     amount: number;
     notes: string | null;
     registeredById: string;
     createdAt: string;
-  }>;
+  }[];
 }
 
 export interface ExpenseCategory {
@@ -115,7 +119,7 @@ export interface ExpenseCategory {
 export interface CreateExpenseBody {
   title: string;
   amount: number;
-  type: 'FIXED' | 'VARIABLE';
+  type: ExpenseType;
   referenceDate: string;
   categoryId?: string | null;
   description?: string | null;
@@ -160,33 +164,33 @@ export interface BarbershopInsights {
     openFiado: number;
     overdueFiado: number;
   };
-  byWeekday: Array<{ day: string; label: string; volume: number; revenue: number }>;
-  byHour: Array<{ hour: number; label: string; volume: number }>;
-  topServices: Array<{
+  byWeekday: { day: string; label: string; volume: number; revenue: number }[];
+  byHour: { hour: number; label: string; volume: number }[];
+  topServices: {
     serviceId: string;
     name: string;
     count: number;
     revenue: number;
-  }>;
-  byStaff: Array<{
+  }[];
+  byStaff: {
     staffId: string;
     name: string;
     count: number;
     revenue: number;
-  }>;
+  }[];
   appointments: {
     total: number;
     confirmed: number;
     completed: number;
     cancelled: number;
   };
-  inactiveCustomers: Array<{
+  inactiveCustomers: {
     whatsapp: string;
     customerName: string;
     lastVisitAt: string;
     daysSince: number;
     visits: number;
-  }>;
+  }[];
   highlights: string[];
 }
 
@@ -225,16 +229,13 @@ export const financialApi = {
       token()
     ).then(res => ({
       data: unwrap<ExpenseItem[]>(res),
-      meta: (res as any).meta as ListMeta
+      meta: res.meta,
     })),
 
   createExpense: (body: CreateExpenseBody) =>
-    apiClient<{ success: boolean; data: ExpenseItem }>(
-      '/api/expenses',
-      'POST',
-      body,
-      token()
-    ).then(res => unwrap<ExpenseItem>(res)),
+    apiClient<{ success: boolean; data: ExpenseItem }>('/api/expenses', 'POST', body, token()).then(
+      res => unwrap<ExpenseItem>(res)
+    ),
 
   deleteExpense: (id: string) =>
     apiClient<void>(`/api/expenses/${id}`, 'DELETE', undefined, token()),
@@ -255,16 +256,13 @@ export const financialApi = {
       token()
     ).then(res => ({
       data: unwrap<FiadoItem[]>(res),
-      meta: (res as any).meta as ListMeta
+      meta: res.meta,
     })),
 
   createFiado: (body: CreateFiadoBody) =>
-    apiClient<{ success: boolean; data: FiadoItem }>(
-      '/api/fiado',
-      'POST',
-      body,
-      token()
-    ).then(res => unwrap<FiadoItem>(res)),
+    apiClient<{ success: boolean; data: FiadoItem }>('/api/fiado', 'POST', body, token()).then(
+      res => unwrap<FiadoItem>(res)
+    ),
 
   addFiadoPayment: (id: string, body: { amount: number; notes?: string }) =>
     apiClient<{ success: boolean; data: FiadoPayment }>(
@@ -274,8 +272,7 @@ export const financialApi = {
       token()
     ).then(res => unwrap<FiadoPayment>(res)),
 
-  deleteFiado: (id: string) =>
-    apiClient<void>(`/api/fiado/${id}`, 'DELETE', undefined, token()),
+  deleteFiado: (id: string) => apiClient<void>(`/api/fiado/${id}`, 'DELETE', undefined, token()),
 
   listExpenseCategories: () =>
     apiClient<{ success: boolean; data: ExpenseCategory[] }>(
@@ -283,5 +280,5 @@ export const financialApi = {
       'GET',
       undefined,
       token()
-    ).then(res => unwrap<ExpenseCategory[]>(res))
+    ).then(res => unwrap<ExpenseCategory[]>(res)),
 };

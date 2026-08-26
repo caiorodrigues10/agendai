@@ -1,0 +1,94 @@
+.rdp-root.rdp-root {
+  --rdp-accent-color: var(--ag-accent);
+  --rdp-accent-background-color: color-mix(in srgb, var(--ag-accent) 18%, transparent);
+  --rdp-today-color: var(--ag-accent);
+  --rdp-day-height: 2.5rem;
+  --rdp-day-width: auto;
+  --rdp-day_button-border-radius: 0.65rem;
+  --rdp-day_button-height: 2.25rem;
+  --rdp-day_button-width: 2.25rem;
+  --rdp-selected-border: 2px solid var(--ag-accent);
+  --rdp-disabled-opacity: 0.28;
+  --rdp-outside-opacity: 0.35;
+  --rdp-nav-height: 2.25rem;
+  --rdp-weekday-padding: 0.35rem 0;
+  color: var(--ag-text-primary);
+  font-family: var(--font-sans);
+  width: 100%;
+}
+
+.rdp-root .rdp-months,
+.rdp-root .rdp-month,
+.rdp-root .rdp-month_grid {
+  width: 100%;
+  max-width: 100%;
+}
+
+.rdp-root .rdp-month_grid {
+  table-layout: fixed;
+}
+
+.rdp-root .rdp-weekdays,
+.rdp-root .rdp-week {
+  width: 100%;
+}
+
+.rdp-root .rdp-weekday,
+.rdp-root .rdp-day {
+  width: 14.2857%;
+  text-align: center;
+  vertical-align: middle;
+  padding: 0;
+}
+
+.rdp-root .rdp-month_caption {
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: capitalize;
+}
+
+.rdp-root .rdp-weekday {
+  color: var(--ag-text-muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  opacity: 1;
+}
+
+.rdp-root .rdp-chevron {
+  fill: var(--ag-accent);
+}
+
+.rdp-root .rdp-button_previous,
+.rdp-root .rdp-button_next {
+  border-radius: 0.6rem;
+}
+
+.rdp-root .rdp-button_previous:hover,
+.rdp-root .rdp-button_next:hover {
+  background: var(--ag-bg);
+}
+
+.rdp-root .rdp-day_button {
+  border-radius: 0.65rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-inline: auto;
+}
+
+.rdp-root .rdp-day_button:hover:not([disabled]):not(.rdp-selected .rdp-day_button) {
+  background: var(--ag-bg);
+}
+
+.rdp-root .rdp-selected .rdp-day_button {
+  background: var(--ag-accent);
+  color: var(--ag-accent-fg);
+  border: none;
+  font-weight: 700;
+}
+
+.rdp-root .rdp-today:not(.rdp-selected) .rdp-day_button {
+  color: var(--ag-accent);
+  font-weight: 800;
+}

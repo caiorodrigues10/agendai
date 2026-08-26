@@ -1,12 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import {
-  CardNumber,
-  ExpirationDate,
-  SecurityCode,
-  createCardToken,
-  getPaymentMethods
-} from '@mercadopago/sdk-react';
+// MercadoPago SDK removido — pagamento exclusivo via Asaas
 import {
   ArrowLeft,
   Loader2,
@@ -17,22 +11,25 @@ import {
   CheckCircle2,
   Clock,
   PartyPopper,
-  ExternalLink,
-  RefreshCcw
+  Landmark,
 } from 'lucide-react';
 import { plansApi, Plan } from '../infra/plansApi';
 import { subscriptionsApi, SubscribePayload } from '../infra/subscriptionsApi';
 import { paymentsApi, Payment } from '../infra/paymentsApi';
-import { ensureMercadoPago } from '../infra/mercadoPago';
-import { ApiError } from '../infra/apiClient';
+import { getErrorMessage } from '../utils/errorMessage';
+import { trialCampaign } from '../marketing/trialCampaign';
 import { useAuth } from '../contexts/AuthContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
-import { useTheme } from '../contexts/ThemeContext';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { Logo } from '../components/ui/Logo';
-import { normalizeDocument, maskCpf, maskCnpj, isValidDocument } from '../utils/documentUtils';
-
-type PayMethod = 'pix' | 'credit_card' | 'payment_link';
+import { CreditCardForm } from '../components/ui/credit-card-form';
+import {
+  normalizeDocument,
+  maskCpf,
+  maskCnpj,
+  maskPhone,
+  isValidDocument,
+} from '../utils/documentUtils';
 
 const PIX_POLL_INTERVAL_MS = 5_000;
 
@@ -50,7 +47,7 @@ const REJECTION_MESSAGES: Record<string, string> = {
   cc_rejected_card_disabled: 'Cartão desabilitado. Entre em contato com seu banco.',
   cc_rejected_duplicated_payment: 'Pagamento duplicado. Aguarde alguns minutos.',
   cc_rejected_high_risk: 'Pagamento recusado por segurança. Tente outro meio de pagamento.',
-  cc_rejected_other_reason: 'Pagamento recusado pelo emissor do cartão. Tente outro cartão.'
+  cc_rejected_other_reason: 'Pagamento recusado pelo emissor do cartão. Tente outro cartão.',
 };
 
 const rejectionMessage = (statusDetail?: string) =>
@@ -60,28 +57,22 @@ const rejectionMessage = (statusDetail?: string) =>
 const inputClass =
   'w-full bg-bg border border-border rounded-xl py-3 px-4 text-text-primary text-sm outline-none transition-colors placeholder:text-text-muted focus:border-accent/60 hover:border-border-strong';
 
-const secureFieldContainerClass =
-  'w-full bg-bg border border-border rounded-xl px-4 text-sm transition-colors focus-within:border-accent/60 hover:border-border-strong h-[46px]';
-
 export const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const planId = searchParams.get('planId');
-  const returnStatus = searchParams.get('status');
+  const isTrialSetup = searchParams.get('setup') === 'trial';
   const { user } = useAuth();
-  const { refresh: refreshSubscription, data: subscriptionData } = useSubscription();
-  const { theme } = useTheme();
-
-  const mpReady = useMemo(() => ensureMercadoPago(), []);
+  const { refresh: refreshSubscription } = useSubscription();
 
   const [plan, setPlan] = useState<Plan | null>(null);
   const [loadingPlan, setLoadingPlan] = useState(true);
-  const [method, setMethod] = useState<PayMethod>('payment_link');
+  const [asaasBillingType, setAsaasBillingType] = useState<'PIX' | 'CREDIT_CARD'>(
+    isTrialSetup ? 'CREDIT_CARD' : 'PIX'
+  );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [awaitingLinkConfirm, setAwaitingLinkConfirm] = useState(false);
-  const [checkingReturn, setCheckingReturn] = useState(false);
 
   // Dados do pagador
   const [payerEmail, setPayerEmail] = useState(user?.email ?? '');
@@ -90,9 +81,14 @@ export const CheckoutPage: React.FC = () => {
   const [docType, setDocType] = useState<'CPF' | 'CNPJ'>('CPF');
   const [docNumber, setDocNumber] = useState('');
 
-  // Cartão
-  const [cardholderName, setCardholderName] = useState('');
-  const [cardPaymentMethodId, setCardPaymentMethodId] = useState<string | null>(null);
+  // Cartão Asaas (tokenizado no navegador — nunca passa pelo backend)
+  const [asaasCardName, setAsaasCardName] = useState('');
+  const [asaasCardNumber, setAsaasCardNumber] = useState('');
+  const [asaasCardExpiry, setAsaasCardExpiry] = useState('');
+  const [asaasCardCvv, setAsaasCardCvv] = useState('');
+  const [asaasPostalCode, setAsaasPostalCode] = useState('');
+  const [asaasAddressNumber, setAsaasAddressNumber] = useState('');
+  const [asaasPhone, setAsaasPhone] = useState('');
 
   // PIX
   const [pixPayment, setPixPayment] = useState<Payment | null>(null);
@@ -113,59 +109,6 @@ export const CheckoutPage: React.FC = () => {
       .finally(() => setLoadingPlan(false));
   }, [planId, navigate]);
 
-  // Retorno do checkout hospedado AbacatePay (?status=success|back)
-  useEffect(() => {
-    if (!returnStatus || loadingPlan) return;
-
-    if (returnStatus === 'back') {
-      setSearchParams(
-        prev => {
-          const next = new URLSearchParams(prev);
-          next.delete('status');
-          return next;
-        },
-        { replace: true }
-      );
-      setMethod('payment_link');
-      return;
-    }
-
-    if (returnStatus !== 'success') return;
-
-    let cancelled = false;
-    setAwaitingLinkConfirm(true);
-    setCheckingReturn(true);
-
-    (async () => {
-      try {
-        await refreshSubscription();
-        if (cancelled) return;
-        const me = await subscriptionsApi.me();
-        if (me.subscription?.status === 'ACTIVE') {
-          setSuccess(true);
-          setAwaitingLinkConfirm(false);
-          sessionStorage.removeItem('bq:access-block-info');
-        }
-      } catch {
-        // Mantém tela de aguardando — usuário pode atualizar manualmente
-      } finally {
-        if (!cancelled) setCheckingReturn(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [returnStatus, loadingPlan, refreshSubscription, setSearchParams]);
-
-  useEffect(() => {
-    if (awaitingLinkConfirm && subscriptionData?.subscription?.status === 'ACTIVE') {
-      setSuccess(true);
-      setAwaitingLinkConfirm(false);
-      sessionStorage.removeItem('bq:access-block-info');
-    }
-  }, [awaitingLinkConfirm, subscriptionData?.subscription?.status]);
-
   const stopPolling = useCallback(() => {
     if (pollRef.current) {
       clearInterval(pollRef.current);
@@ -176,7 +119,7 @@ export const CheckoutPage: React.FC = () => {
   const handleApproved = useCallback(() => {
     stopPolling();
     setSuccess(true);
-    sessionStorage.removeItem('bq:access-block-info');
+    sessionStorage.removeItem('agendai:access-block-info');
     refreshSubscription();
   }, [stopPolling, refreshSubscription]);
 
@@ -206,6 +149,7 @@ export const CheckoutPage: React.FC = () => {
   useEffect(() => {
     if (!pixPayment?.pixQrCode?.expirationDate || success) return;
     const expiresAt = new Date(pixPayment.pixQrCode.expirationDate).getTime();
+    if (Number.isNaN(expiresAt)) return;
 
     const tick = () => {
       const remaining = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
@@ -222,12 +166,39 @@ export const CheckoutPage: React.FC = () => {
 
   const validatePayerForm = (): string | null => {
     if (!payerEmail || !/\S+@\S+\.\S+/.test(payerEmail)) return 'Informe um e-mail válido.';
+    const asaasCard = asaasBillingType === 'CREDIT_CARD';
     const doc = normalizeDocument(docNumber);
-    if (method === 'credit_card' || doc) {
+    if (asaasCard || doc) {
       if (!isValidDocument(docType, doc)) return `${docType} inválido. Confira o número.`;
     }
-    if (method === 'credit_card' && !cardholderName.trim()) {
-      return 'Informe o nome impresso no cartão.';
+    return null;
+  };
+
+  const validateAsaasCard = (): string | null => {
+    if (!asaasCardName.trim()) return 'Informe o nome impresso no cartão.';
+    const digits = asaasCardNumber.replace(/\D/g, '');
+    if (digits.length < 13 || digits.length > 19)
+      return 'Número do cartão inválido. Confira os dados.';
+    const m = /^(\d{2})\s*\/\s*(\d{2})$/.exec(asaasCardExpiry.trim());
+    if (!m) return 'Validade inválida. Use o formato MM/AA.';
+    const month = Number(m[1]);
+    const year = 2000 + Number(m[2]);
+    const now = new Date();
+    if (
+      month < 1 ||
+      month > 12 ||
+      year < now.getFullYear() ||
+      (year === now.getFullYear() && month < now.getMonth() + 1)
+    ) {
+      return 'Validade do cartão vencida. Confira os dados.';
+    }
+    if (!/^\d{3,4}$/.test(asaasCardCvv.trim())) return 'Código de segurança (CVV) inválido.';
+    if (normalizeDocument(asaasPostalCode).length !== 8)
+      return 'Informe um CEP válido (8 dígitos).';
+    if (!asaasAddressNumber.trim()) return 'Informe o número do endereço do titular.';
+    const phoneDigits = normalizeDocument(asaasPhone);
+    if (phoneDigits.length < 10 || phoneDigits.length > 11) {
+      return 'Informe um telefone válido com DDD.';
     }
     return null;
   };
@@ -236,15 +207,15 @@ export const CheckoutPage: React.FC = () => {
     const doc = normalizeDocument(docNumber);
     return {
       planId: planId!,
-      paymentMethod: method,
+      paymentMethod: 'asaas',
       payerEmail: payerEmail.trim(),
       payerFirstName: firstName.trim() || undefined,
       payerLastName: lastName.trim() || undefined,
-      payerIdentification: doc ? { type: docType, number: doc } : undefined
+      payerIdentification: doc ? { type: docType, number: doc } : undefined,
     };
   };
 
-  const submitPix = async () => {
+  const submitAsaasPix = async () => {
     const validationError = validatePayerForm();
     if (validationError) {
       setError(validationError);
@@ -253,127 +224,83 @@ export const CheckoutPage: React.FC = () => {
     setError(null);
     setSubmitting(true);
     try {
-      const subscription = await subscriptionsApi.subscribe(buildBasePayload());
-      const payment = (subscription as any).payment as Payment | undefined;
+      const subscription = await subscriptionsApi.subscribe({
+        ...buildBasePayload(),
+        asaasBillingType: 'PIX',
+      });
+      const payment = subscription.payment;
       if (!payment?.pixQrCode?.qrCode) {
-        throw new Error('O pagamento PIX foi criado, mas o QR Code não foi retornado. Tente novamente.');
+        throw new Error(
+          'O pagamento PIX foi criado, mas o QR Code não foi retornado. Tente novamente.'
+        );
       }
       setPixExpired(false);
       setPixPayment(payment);
     } catch (err: any) {
-      setError(err instanceof ApiError ? err.message : err?.message ?? 'Erro ao gerar o PIX.');
+      setError(getErrorMessage(err, 'Erro ao gerar o PIX.'));
     } finally {
       setSubmitting(false);
     }
   };
 
-  const submitCard = async () => {
-    const validationError = validatePayerForm();
+  const submitAsaasCard = async () => {
+    const validationError = validatePayerForm() || validateAsaasCard();
     if (validationError) {
       setError(validationError);
-      return;
-    }
-    if (!cardPaymentMethodId) {
-      setError('Não foi possível identificar a bandeira do cartão. Confira o número digitado.');
       return;
     }
     setError(null);
     setSubmitting(true);
     try {
-      // Tokenização no browser — o número do cartão nunca passa pelo nosso backend
-      let token;
-      try {
-        token = await createCardToken({
-          cardholderName: cardholderName.trim(),
-          identificationType: docType,
-          identificationNumber: normalizeDocument(docNumber)
+      const [mm, yy] = asaasCardExpiry.split('/');
+      const card = {
+        holderName: asaasCardName.trim(),
+        number: asaasCardNumber.replace(/\D/g, ''),
+        expiryMonth: mm.trim(),
+        expiryYear: `20${yy.trim()}`,
+        ccv: asaasCardCvv.trim(),
+        postalCode: normalizeDocument(asaasPostalCode),
+        addressNumber: asaasAddressNumber.trim(),
+        phone: normalizeDocument(asaasPhone),
+      };
+      const doc = normalizeDocument(docNumber);
+
+      if (isTrialSetup) {
+        if (!doc || !isValidDocument(docType, doc)) {
+          setError(`${docType} inválido. Confira o número.`);
+          setSubmitting(false);
+          return;
+        }
+        const sub = await subscriptionsApi.setupTrialCard({
+          planId: planId!,
+          payerEmail: payerEmail.trim(),
+          payerFirstName: firstName.trim() || undefined,
+          payerLastName: lastName.trim() || undefined,
+          payerIdentification: { type: docType, number: doc },
+          asaasCreditCard: card,
         });
-      } catch (tokenErr: any) {
-        const details = Array.isArray(tokenErr?.cause)
-          ? tokenErr.cause.map((c: any) => c?.description).filter(Boolean).join(' ')
-          : '';
-        throw new Error(
-          `Dados do cartão inválidos. Confira número, validade e CVV. ${details}`.trim()
-        );
-      }
-      if (!token?.id) {
-        throw new Error('Não foi possível validar o cartão. Confira os dados e tente novamente.');
+        await refreshSubscription();
+        if (sub.hasPaymentMethod || sub.status === 'TRIALING') {
+          setSuccess(true);
+          sessionStorage.removeItem('agendai:access-block-info');
+        } else {
+          setError('Cartão não foi salvo. Tente novamente.');
+        }
+        return;
       }
 
-      const subscription = await subscriptionsApi.subscribe({
+      await subscriptionsApi.subscribe({
         ...buildBasePayload(),
-        cardToken: token.id,
-        cardPaymentMethodId
+        asaasBillingType: 'CREDIT_CARD',
+        asaasCreditCard: card,
       });
-
-      const payment = (subscription as any).payment as Payment | undefined;
-      if (subscription.status === 'ACTIVE') {
-        handleApproved();
-      } else if (payment && payment.status === 'rejected') {
-        setError(rejectionMessage(payment.statusDetail));
-      } else if (payment && ['pending', 'in_process'].includes(payment.status)) {
-        setError(
-          'O pagamento está em análise pelo emissor. Assim que for aprovado, seu acesso será liberado automaticamente.'
-        );
-      } else {
-        setError('O pagamento não foi aprovado. Tente novamente ou use PIX.');
-      }
-    } catch (err: any) {
-      setError(err instanceof ApiError ? err.message : err?.message ?? 'Erro ao processar o cartão.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const submitPaymentLink = async () => {
-    const validationError = validatePayerForm();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-    setError(null);
-    setSubmitting(true);
-    try {
-      const sub = await subscriptionsApi.subscribe({
-        ...buildBasePayload(),
-        paymentMethod: 'payment_link'
-      });
-      const payment = sub.payment;
-      if (!payment?.checkoutUrl) {
-        throw new Error(
-          'O link de pagamento foi criado, mas a URL não foi retornada. Tente novamente.'
-        );
-      }
-      window.location.assign(payment.checkoutUrl);
-    } catch (err: any) {
       setError(
-        err instanceof ApiError
-          ? err.message
-          : err?.message ?? 'Erro ao gerar o link de pagamento.'
+        'Pagamento processado. Assim que for confirmado, seu acesso será liberado automaticamente.'
       );
-      setSubmitting(false);
-    }
-  };
-
-  const refreshAfterLinkReturn = async () => {
-    setCheckingReturn(true);
-    setError(null);
-    try {
-      await refreshSubscription();
-      const me = await subscriptionsApi.me();
-      if (me.subscription?.status === 'ACTIVE') {
-        setSuccess(true);
-        setAwaitingLinkConfirm(false);
-        sessionStorage.removeItem('bq:access-block-info');
-      } else {
-        setError(
-          'Pagamento ainda não confirmado. Se você já pagou, aguarde alguns segundos e tente de novo.'
-        );
-      }
     } catch (err: any) {
-      setError(err instanceof ApiError ? err.message : 'Não foi possível verificar o status.');
+      setError(getErrorMessage(err, 'Erro ao processar o cartão.'));
     } finally {
-      setCheckingReturn(false);
+      setSubmitting(false);
     }
   };
 
@@ -383,15 +310,6 @@ export const CheckoutPage: React.FC = () => {
     setPixCopied(true);
     setTimeout(() => setPixCopied(false), 2500);
   };
-
-  const secureFieldStyle = useMemo(
-    () => ({
-      color: theme === 'dark' ? '#fafafa' : '#171717',
-      placeholderColor: '#737373',
-      fontSize: '14px'
-    }),
-    [theme]
-  );
 
   const formatCountdown = (total: number) => {
     const h = Math.floor(total / 3600);
@@ -430,10 +348,21 @@ export const CheckoutPage: React.FC = () => {
         {!loadingPlan && plan && success && (
           <div className="bg-surface border border-success/40 rounded-2xl p-10 text-center">
             <PartyPopper size={48} className="mx-auto text-success mb-4" />
-            <h1 className="text-2xl font-bold mb-2">Assinatura ativa!</h1>
+            <h1 className="text-2xl font-bold mb-2">
+              {isTrialSetup ? 'Trial liberado!' : 'Assinatura ativa!'}
+            </h1>
             <p className="text-text-secondary text-sm mb-8">
-              O plano <span className="font-bold text-text-primary">{plan.name}</span> foi ativado com
-              sucesso. Bom trabalho!
+              {isTrialSetup ? (
+                <>
+                  Plano <span className="font-bold text-text-primary">{plan.name}</span> com 30 dias
+                  de Pro. Experimente o painel completo e veja se faz sentido para o seu negócio.
+                </>
+              ) : (
+                <>
+                  O plano <span className="font-bold text-text-primary">{plan.name}</span> foi
+                  ativado com sucesso. Bom trabalho!
+                </>
+              )}
             </p>
             <button
               onClick={() => navigate('/app/queue')}
@@ -444,42 +373,17 @@ export const CheckoutPage: React.FC = () => {
           </div>
         )}
 
-        {!loadingPlan && plan && !success && awaitingLinkConfirm && (
-          <div className="bg-surface border border-border rounded-2xl p-10 text-center">
-            <Loader2 size={40} className="mx-auto text-accent mb-4 animate-spin" />
-            <h1 className="text-xl font-bold mb-2">Confirmando pagamento…</h1>
-            <p className="text-text-secondary text-sm mb-6">
-              Se você concluiu o pagamento no link, a assinatura será liberada em instantes.
-            </p>
-            {error && (
-              <div className="mb-4 p-3 bg-warning/10 border border-warning/30 rounded-xl text-warning text-sm">
-                {error}
-              </div>
-            )}
-            <button
-              onClick={refreshAfterLinkReturn}
-              disabled={checkingReturn}
-              className="px-6 py-3 rounded-xl bg-accent text-accent-fg font-bold text-sm hover:bg-accent-hover transition-colors disabled:opacity-60 inline-flex items-center gap-2"
-            >
-              {checkingReturn ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" /> Verificando…
-                </>
-              ) : (
-                <>
-                  <RefreshCcw size={16} /> Atualizar status
-                </>
-              )}
-            </button>
-          </div>
-        )}
-
-        {!loadingPlan && plan && !success && !awaitingLinkConfirm && (
+        {!loadingPlan && plan && !success && (
           <>
             <div className="bg-surface border border-border rounded-2xl p-5 mb-6 flex items-center justify-between">
               <div>
-                <p className="text-xs text-text-muted uppercase tracking-wider font-bold mb-1">Plano escolhido</p>
+                <p className="text-xs text-text-muted uppercase tracking-wider font-bold mb-1">
+                  Plano escolhido
+                </p>
                 <h1 className="text-lg font-bold">{plan.name}</h1>
+                <p className="mt-1 text-[11px] text-text-secondary leading-relaxed max-w-sm">
+                  {trialCampaign.checkoutHint}
+                </p>
               </div>
               <div className="text-right">
                 <span className="text-2xl font-bold text-accent">{formatPrice(plan.price)}</span>
@@ -487,32 +391,15 @@ export const CheckoutPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Abas: Link / PIX / Cartão */}
-            <div className="flex bg-surface p-1 rounded-xl mb-6 border border-border gap-0.5">
-              {(
-                [
-                  { id: 'payment_link', label: 'Link', icon: ExternalLink },
-                  { id: 'pix', label: 'PIX', icon: QrCode },
-                  { id: 'credit_card', label: 'Cartão', icon: CreditCard }
-                ] as const
-              ).map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setMethod(tab.id);
-                    setError(null);
-                  }}
-                  disabled={!!pixPayment && !pixExpired}
-                  className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${
-                    method === tab.id
-                      ? 'bg-accent/15 text-accent'
-                      : 'text-text-muted hover:text-text-secondary'
-                  } disabled:opacity-50`}
-                >
-                  <tab.icon size={16} /> {tab.label}
-                </button>
-              ))}
-            </div>
+            {isTrialSetup && (
+              <div className="mb-6 p-4 bg-accent/10 border border-accent/30 rounded-xl text-sm text-text-secondary">
+                <p className="font-bold text-accent mb-1">{trialCampaign.eyebrow}</p>
+                <p>
+                  {trialCampaign.checkoutHint} Cadastre um cartão para liberar o painel; a cobrança
+                  só acontece depois do trial.
+                </p>
+              </div>
+            )}
 
             {error && (
               <div className="mb-6 p-4 bg-danger/10 border border-danger/30 rounded-xl flex items-start gap-2 text-danger text-sm">
@@ -520,8 +407,8 @@ export const CheckoutPage: React.FC = () => {
               </div>
             )}
 
-            {/* Tela do QR Code PIX gerado */}
-            {method === 'pix' && pixPayment?.pixQrCode && !pixExpired && (
+            {/* Tela do QR Code PIX gerado (Mercado Pago ou Asaas) */}
+            {pixPayment?.pixQrCode && !pixExpired && (
               <div className="bg-surface border border-border rounded-2xl p-6 text-center">
                 <h2 className="font-bold mb-1">Escaneie para pagar</h2>
                 <p className="text-xs text-text-muted mb-4">
@@ -563,7 +450,7 @@ export const CheckoutPage: React.FC = () => {
             )}
 
             {/* PIX expirado */}
-            {method === 'pix' && pixExpired && (
+            {pixExpired && (
               <div className="bg-surface border border-warning/40 rounded-2xl p-8 text-center">
                 <Clock size={40} className="mx-auto text-warning mb-3" />
                 <h2 className="font-bold mb-1">QR Code expirado</h2>
@@ -574,7 +461,7 @@ export const CheckoutPage: React.FC = () => {
                   onClick={() => {
                     setPixPayment(null);
                     setPixExpired(false);
-                    submitPix();
+                    submitAsaasPix();
                   }}
                   disabled={submitting}
                   className="px-6 py-3 rounded-xl bg-accent text-accent-fg font-bold text-sm hover:bg-accent-hover transition-colors disabled:opacity-60"
@@ -585,14 +472,16 @@ export const CheckoutPage: React.FC = () => {
             )}
 
             {/* Formulário (dados do pagador + cartão) */}
-            {!(method === 'pix' && pixPayment && !pixExpired) && !pixExpired && (
+            {!(pixPayment && !pixExpired) && !pixExpired && (
               <div className="bg-surface border border-border rounded-2xl p-6 space-y-4">
                 <h2 className="font-bold text-sm uppercase tracking-wider text-text-secondary">
                   Dados do pagador
                 </h2>
 
                 <div>
-                  <label className="text-xs font-bold text-text-secondary block mb-1">E-mail *</label>
+                  <label className="text-xs font-bold text-text-secondary block mb-1">
+                    E-mail *
+                  </label>
                   <input
                     type="email"
                     className={inputClass}
@@ -613,7 +502,9 @@ export const CheckoutPage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-text-secondary block mb-1">Sobrenome</label>
+                    <label className="text-xs font-bold text-text-secondary block mb-1">
+                      Sobrenome
+                    </label>
                     <input
                       className={inputClass}
                       placeholder="Sobrenome"
@@ -623,141 +514,183 @@ export const CheckoutPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-[110px_1fr] gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-[148px_1fr]">
                   <div>
-                    <label className="text-xs font-bold text-text-secondary block mb-1">Documento</label>
-                    <select
-                      className={inputClass}
-                      value={docType}
-                      onChange={e => {
-                        setDocType(e.target.value as 'CPF' | 'CNPJ');
-                        setDocNumber('');
-                      }}
+                    <label className="text-xs font-bold text-text-secondary block mb-1">
+                      Documento
+                    </label>
+                    <div
+                      role="group"
+                      aria-label="Tipo de documento"
+                      className="flex h-[46px] rounded-xl border border-border bg-bg p-1 gap-0.5"
                     >
-                      <option value="CPF">CPF</option>
-                      <option value="CNPJ">CNPJ</option>
-                    </select>
+                      {(['CPF', 'CNPJ'] as const).map(type => {
+                        const active = docType === type;
+                        return (
+                          <button
+                            key={type}
+                            type="button"
+                            aria-pressed={active}
+                            onClick={() => {
+                              if (docType === type) return;
+                              setDocType(type);
+                              setDocNumber('');
+                            }}
+                            className={`flex-1 rounded-lg text-sm font-bold transition-all ${
+                              active
+                                ? 'bg-accent text-accent-fg shadow-sm shadow-accent/20'
+                                : 'text-text-muted hover:text-text-primary hover:bg-surface-2'
+                            }`}
+                          >
+                            {type}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                   <div>
                     <label className="text-xs font-bold text-text-secondary block mb-1">
-                      Número{' '}
-                      {method === 'credit_card'
-                        ? '*'
-                        : method === 'payment_link'
-                          ? '(recomendado)'
-                          : '(opcional para PIX)'}
+                      Número {asaasBillingType === 'CREDIT_CARD' ? '*' : '(opcional para PIX)'}
                     </label>
                     <input
                       className={inputClass}
                       placeholder={docType === 'CPF' ? '000.000.000-00' : '00.000.000/0000-00'}
                       value={docNumber}
                       onChange={e =>
-                        setDocNumber(docType === 'CPF' ? maskCpf(e.target.value) : maskCnpj(e.target.value))
+                        setDocNumber(
+                          docType === 'CPF' ? maskCpf(e.target.value) : maskCnpj(e.target.value)
+                        )
                       }
                     />
                   </div>
                 </div>
 
-                {method === 'payment_link' && (
+                {!isTrialSetup && (
+                  <>
+                    <div className="flex bg-bg/60 p-1 rounded-xl border border-border gap-0.5">
+                      {(
+                        [
+                          { id: 'PIX', label: 'PIX', icon: QrCode },
+                          { id: 'CREDIT_CARD', label: 'Cartão', icon: CreditCard },
+                        ] as const
+                      ).map(opt => (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          onClick={() => {
+                            setAsaasBillingType(opt.id);
+                            setError(null);
+                          }}
+                          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                            asaasBillingType === opt.id
+                              ? 'bg-accent/15 text-accent'
+                              : 'text-text-muted hover:text-text-secondary'
+                          }`}
+                        >
+                          <opt.icon size={13} /> {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-text-muted">
+                      Pagamento processado pelo Asaas{' '}
+                      {asaasBillingType === 'PIX'
+                        ? 'via PIX — o QR Code é gerado aqui mesmo.'
+                        : 'via cartão — o pagamento é aprovado em instantes.'}
+                    </p>
+                  </>
+                )}
+
+                {isTrialSetup && (
                   <p className="text-xs text-text-muted">
-                    Você será redirecionado para uma página segura (AbacatePay) para pagar com PIX ou
-                    cartão. Ao concluir, volte aqui — a assinatura ativa automaticamente.
+                    Cartão tokenizado pelo Asaas — sem cobrança até o fim dos 30 dias.
                   </p>
                 )}
 
-                {method === 'credit_card' && !mpReady && (
-                  <div className="p-4 bg-warning/10 border border-warning/30 rounded-xl text-warning text-sm flex items-start gap-2">
-                    <AlertCircle size={16} className="mt-0.5 shrink-0" />
-                    Pagamento com cartão indisponível: a variável VITE_MERCADOPAGO_PUBLIC_KEY não está
-                    configurada. Use link de pagamento, PIX ou contate o suporte.
-                  </div>
-                )}
-
-                {method === 'credit_card' && mpReady && (
+                {asaasBillingType === 'CREDIT_CARD' && (
                   <>
-                    <h2 className="font-bold text-sm uppercase tracking-wider text-text-secondary pt-2">
-                      Dados do cartão
-                    </h2>
-                    <p className="text-[11px] text-text-muted -mt-2">
-                      Os dados do cartão são enviados diretamente ao Mercado Pago — nunca passam pelos
-                      nossos servidores.
-                    </p>
-
-                    <div>
-                      <label className="text-xs font-bold text-text-secondary block mb-1">
-                        Número do cartão *
-                      </label>
-                      <div className={secureFieldContainerClass}>
-                        <CardNumber
-                          placeholder="0000 0000 0000 0000"
-                          style={secureFieldStyle}
-                          onBinChange={async ({ bin }) => {
-                            if (!bin) {
-                              setCardPaymentMethodId(null);
-                              return;
-                            }
-                            try {
-                              const methods = await getPaymentMethods({ bin });
-                              setCardPaymentMethodId(methods?.results?.[0]?.id ?? null);
-                            } catch {
-                              setCardPaymentMethodId(null);
-                            }
-                          }}
-                        />
-                      </div>
+                    <div className="pt-2">
+                      <CreditCardForm
+                        maskMiddle
+                        showSubmit={false}
+                        ring1="#10b981"
+                        ring2="#06b6d4"
+                        submitLabel={
+                          isTrialSetup ? 'Cadastrar cartão' : `Pagar ${formatPrice(plan.price)}`
+                        }
+                        onChange={state => {
+                          setAsaasCardNumber(state.number);
+                          setAsaasCardName(state.holder);
+                          setAsaasCardExpiry(`${state.month}/${state.year.slice(-2)}`);
+                          setAsaasCardCvv(state.cvv);
+                        }}
+                        onSubmit={() => {
+                          if (asaasBillingType === 'CREDIT_CARD') {
+                            submitAsaasCard();
+                          }
+                        }}
+                      />
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-xs font-bold text-text-secondary block mb-1">Validade *</label>
-                        <div className={secureFieldContainerClass}>
-                          <ExpirationDate placeholder="MM/AA" mode="short" style={secureFieldStyle} />
-                        </div>
+                        <label className="text-xs font-bold text-text-secondary block mb-1">
+                          CEP *
+                        </label>
+                        <input
+                          className={inputClass}
+                          placeholder="00000-000"
+                          inputMode="numeric"
+                          value={asaasPostalCode}
+                          onChange={e => {
+                            const d = normalizeDocument(e.target.value).slice(0, 8);
+                            setAsaasPostalCode(d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d);
+                          }}
+                        />
                       </div>
                       <div>
-                        <label className="text-xs font-bold text-text-secondary block mb-1">CVV *</label>
-                        <div className={secureFieldContainerClass}>
-                          <SecurityCode placeholder="123" style={secureFieldStyle} />
-                        </div>
+                        <label className="text-xs font-bold text-text-secondary block mb-1">
+                          Nº endereço *
+                        </label>
+                        <input
+                          className={inputClass}
+                          placeholder="123"
+                          value={asaasAddressNumber}
+                          onChange={e => setAsaasAddressNumber(e.target.value.slice(0, 20))}
+                        />
                       </div>
                     </div>
 
                     <div>
                       <label className="text-xs font-bold text-text-secondary block mb-1">
-                        Nome impresso no cartão *
+                        Telefone do titular *
                       </label>
                       <input
                         className={inputClass}
-                        placeholder="Como aparece no cartão"
-                        value={cardholderName}
-                        onChange={e => setCardholderName(e.target.value)}
+                        placeholder="(00) 00000-0000"
+                        inputMode="numeric"
+                        value={asaasPhone}
+                        onChange={e => setAsaasPhone(maskPhone(e.target.value))}
                       />
                     </div>
                   </>
                 )}
 
                 <button
-                  onClick={
-                    method === 'pix'
-                      ? submitPix
-                      : method === 'payment_link'
-                        ? submitPaymentLink
-                        : submitCard
-                  }
-                  disabled={submitting || (method === 'credit_card' && !mpReady)}
+                  onClick={asaasBillingType === 'CREDIT_CARD' ? submitAsaasCard : submitAsaasPix}
+                  disabled={submitting}
                   className="w-full py-4 rounded-xl bg-accent text-accent-fg font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-accent-hover transition-colors disabled:opacity-60"
                 >
                   {submitting ? (
                     <>
                       <Loader2 size={16} className="animate-spin" /> Processando...
                     </>
-                  ) : method === 'pix' ? (
+                  ) : isTrialSetup ? (
+                    <>
+                      <Landmark size={16} /> Cadastrar cartão e começar trial
+                    </>
+                  ) : asaasBillingType === 'PIX' ? (
                     <>
                       <QrCode size={16} /> Gerar QR Code PIX
-                    </>
-                  ) : method === 'payment_link' ? (
-                    <>
-                      <ExternalLink size={16} /> Ir para o pagamento {formatPrice(plan.price)}
                     </>
                   ) : (
                     <>
@@ -785,3 +718,5 @@ export const CheckoutPage: React.FC = () => {
     </div>
   );
 };
+
+export default CheckoutPage;

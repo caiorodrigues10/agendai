@@ -26,7 +26,7 @@ import {
   Ban,
   Mail,
   Shield,
-  ExternalLink,
+  Gift,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -54,13 +54,14 @@ import {
   UserListItem,
   AuditLog,
 } from '../../infra/adminApi';
-import { ApiError } from '../../infra/apiClient';
+import { getErrorMessage } from '../../utils/errorMessage';
 import { BillingTab } from './BillingTab';
+import { ReferralsTab } from './ReferralsTab';
 
 // ─────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────
-type Tab = 'overview' | 'barbershops' | 'users' | 'billing';
+type Tab = 'overview' | 'barbershops' | 'users' | 'billing' | 'referrals';
 
 const PERIOD_OPTIONS: { value: DashboardPeriod; label: string }[] = [
   { value: 'day', label: '1D' },
@@ -122,7 +123,15 @@ const COLOR_MAP = {
   },
 };
 
-const KPICard: React.FC<KPICardProps> = ({ icon, value, label, trend, trendUp, color, delay = 0 }) => {
+const KPICard: React.FC<KPICardProps> = ({
+  icon,
+  value,
+  label,
+  trend,
+  trendUp,
+  color,
+  delay = 0,
+}) => {
   const c = COLOR_MAP[color];
   return (
     <motion.div
@@ -131,15 +140,21 @@ const KPICard: React.FC<KPICardProps> = ({ icon, value, label, trend, trendUp, c
       transition={{ delay, duration: 0.5 }}
       className="bg-surface border border-border p-6 rounded-2xl relative overflow-hidden group hover:border-border-strong transition-all duration-300"
     >
-      <div className={`absolute top-0 right-0 w-32 h-32 ${c.glow} rounded-full blur-2xl -mr-10 -mt-10 transition-colors duration-500`} />
+      <div
+        className={`absolute top-0 right-0 w-32 h-32 ${c.glow} rounded-full blur-2xl -mr-10 -mt-10 transition-colors duration-500`}
+      />
       <div className="flex justify-between items-start mb-4 relative z-10">
-        <div className={`w-10 h-10 ${c.bg} rounded-xl flex items-center justify-center ${c.text} border ${c.border}`}>
+        <div
+          className={`w-10 h-10 ${c.bg} rounded-xl flex items-center justify-center ${c.text} border ${c.border}`}
+        >
           {icon}
         </div>
         {trend && (
-          <span className={`text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 ${
-            trendUp ? 'text-green-400 bg-green-400/10' : 'text-red-400 bg-red-400/10'
-          }`}>
+          <span
+            className={`text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 ${
+              trendUp ? 'text-green-400 bg-green-400/10' : 'text-red-400 bg-red-400/10'
+            }`}
+          >
             {trendUp ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
             {trend}
           </span>
@@ -272,13 +287,27 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({ selected, onChange }) =
 // ─────────────────────────────────────────────
 const ApprovalBadge: React.FC<{ status: 'PENDING' | 'APPROVED' | 'REJECTED' }> = ({ status }) => {
   const cfg = {
-    PENDING: { label: 'Pendente', colorClass: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
-    APPROVED: { label: 'Aprovada', colorClass: 'bg-green-500/10 text-green-400 border-green-500/20' },
+    PENDING: {
+      label: 'Pendente',
+      colorClass: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    },
+    APPROVED: {
+      label: 'Aprovada',
+      colorClass: 'bg-green-500/10 text-green-400 border-green-500/20',
+    },
     REJECTED: { label: 'Rejeitada', colorClass: 'bg-red-500/10 text-red-400 border-red-500/20' },
   }[status];
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${cfg.colorClass}`}>
-      {status === 'PENDING' ? <AlertCircle size={9} /> : status === 'APPROVED' ? <CheckCircle2 size={9} /> : <XCircle size={9} />}
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${cfg.colorClass}`}
+    >
+      {status === 'PENDING' ? (
+        <AlertCircle size={9} />
+      ) : status === 'APPROVED' ? (
+        <CheckCircle2 size={9} />
+      ) : (
+        <XCircle size={9} />
+      )}
       {cfg.label}
     </span>
   );
@@ -308,7 +337,9 @@ const OverviewTab: React.FC<{
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-text-primary tracking-tight">Painel de Controle</h2>
+          <h2 className="text-2xl font-bold text-text-primary tracking-tight">
+            Painel de Controle
+          </h2>
           <p className="text-text-secondary text-sm mt-1">
             {data ? `Métricas: ${data.periodLabel}` : 'Carregando dados...'}
           </p>
@@ -320,7 +351,7 @@ const OverviewTab: React.FC<{
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
         <KPICard
           icon={<Building2 size={18} />}
-          value={loading ? '—' : data?.kpis.totalBarbershops.toLocaleString('pt-BR') ?? '—'}
+          value={loading ? '—' : (data?.kpis.totalBarbershops.toLocaleString('pt-BR') ?? '—')}
           label="Total de Salões"
           trend={data?.kpis.growthRate}
           trendUp={data ? !data.kpis.growthRate.startsWith('-') : true}
@@ -329,21 +360,21 @@ const OverviewTab: React.FC<{
         />
         <KPICard
           icon={<CheckCircle2 size={18} />}
-          value={loading ? '—' : data?.kpis.activeBarbershops.toLocaleString('pt-BR') ?? '—'}
+          value={loading ? '—' : (data?.kpis.activeBarbershops.toLocaleString('pt-BR') ?? '—')}
           label="Salões Ativos"
           color="green"
           delay={0.08}
         />
         <KPICard
           icon={<Users size={18} />}
-          value={loading ? '—' : data?.kpis.totalUsers.toLocaleString('pt-BR') ?? '—'}
+          value={loading ? '—' : (data?.kpis.totalUsers.toLocaleString('pt-BR') ?? '—')}
           label="Usuários (Staff)"
           color="blue"
           delay={0.16}
         />
         <KPICard
           icon={<TrendingUp size={18} />}
-          value={loading ? '—' : data?.kpis.newInPeriod.toLocaleString('pt-BR') ?? '—'}
+          value={loading ? '—' : (data?.kpis.newInPeriod.toLocaleString('pt-BR') ?? '—')}
           label={`Novas no Período`}
           trend={data?.kpis.growthRate}
           trendUp={data ? !data.kpis.growthRate.startsWith('-') : true}
@@ -406,7 +437,9 @@ const OverviewTab: React.FC<{
           >
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-bold text-text-primary">Tendência</span>
-              <span className="text-[10px] text-text-muted font-medium uppercase tracking-wider">{data?.periodLabel}</span>
+              <span className="text-[10px] text-text-muted font-medium uppercase tracking-wider">
+                {data?.periodLabel}
+              </span>
             </div>
             <div className="h-24 relative">
               {!loading && lineData.length >= 2 ? (
@@ -419,10 +452,16 @@ const OverviewTab: React.FC<{
             </div>
             {data && (
               <div className="mt-2 flex items-center gap-2">
-                <div className={`flex items-center gap-1 text-xs font-bold ${
-                  !data.kpis.growthRate.startsWith('-') ? 'text-green-400' : 'text-red-400'
-                }`}>
-                  {!data.kpis.growthRate.startsWith('-') ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                <div
+                  className={`flex items-center gap-1 text-xs font-bold ${
+                    !data.kpis.growthRate.startsWith('-') ? 'text-green-400' : 'text-red-400'
+                  }`}
+                >
+                  {!data.kpis.growthRate.startsWith('-') ? (
+                    <TrendingUp size={12} />
+                  ) : (
+                    <TrendingDown size={12} />
+                  )}
                   {data.kpis.growthRate}
                 </div>
                 <span className="text-[10px] text-text-muted">vs período anterior</span>
@@ -439,7 +478,9 @@ const OverviewTab: React.FC<{
           >
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm font-bold text-text-primary">Recém Cadastradas</span>
-              <span className="text-[10px] text-violet-400 font-bold uppercase tracking-wider">Ao vivo</span>
+              <span className="text-[10px] text-violet-400 font-bold uppercase tracking-wider">
+                Ao vivo
+              </span>
             </div>
             <div className="flex-1 overflow-y-auto space-y-2">
               {loading
@@ -483,11 +524,19 @@ interface ManageBarbershopModalProps {
   onUpdated: () => void;
 }
 
-const ManageBarbershopModal: React.FC<ManageBarbershopModalProps> = ({ shop, onClose, onUpdated }) => {
+const ManageBarbershopModal: React.FC<ManageBarbershopModalProps> = ({
+  shop,
+  onClose,
+  onUpdated,
+}) => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const mutate = async (body: { active?: boolean; approvalStatus?: string; rejectionReason?: string }) => {
+  const mutate = async (body: {
+    active?: boolean;
+    approvalStatus?: string;
+    rejectionReason?: string;
+  }) => {
     setSaving(true);
     setError(null);
     try {
@@ -495,7 +544,7 @@ const ManageBarbershopModal: React.FC<ManageBarbershopModalProps> = ({ shop, onC
       onUpdated();
       onClose();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Erro ao atualizar o salão. Tente novamente.');
+      setError(getErrorMessage(err, 'Erro ao atualizar o salão. Tente novamente.'));
     } finally {
       setSaving(false);
     }
@@ -503,7 +552,8 @@ const ManageBarbershopModal: React.FC<ManageBarbershopModalProps> = ({ shop, onC
 
   const handleToggleActive = () => {
     const target = !shop.active;
-    if (!confirm(`Deseja realmente ${target ? 'ativar' : 'desativar'} o salão "${shop.name}"?`)) return;
+    if (!confirm(`Deseja realmente ${target ? 'ativar' : 'desativar'} o salão "${shop.name}"?`))
+      return;
     mutate({ active: target });
   };
 
@@ -524,9 +574,14 @@ const ManageBarbershopModal: React.FC<ManageBarbershopModalProps> = ({ shop, onC
         <div className="p-6 border-b border-border flex justify-between items-center">
           <div>
             <h3 className="text-xl font-bold text-text-primary tracking-tight">{shop.name}</h3>
-            <p className="text-[10px] text-text-muted uppercase tracking-widest mt-1">Gerenciar salão</p>
+            <p className="text-[10px] text-text-muted uppercase tracking-widest mt-1">
+              Gerenciar salão
+            </p>
           </div>
-          <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors">
+          <button
+            onClick={onClose}
+            className="text-text-muted hover:text-text-primary transition-colors"
+          >
             <XCircle size={20} />
           </button>
         </div>
@@ -541,25 +596,37 @@ const ManageBarbershopModal: React.FC<ManageBarbershopModalProps> = ({ shop, onC
           {/* Detalhes */}
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-bg/40 border border-border rounded-xl p-3.5">
-              <p className="text-[9px] text-text-muted uppercase tracking-widest font-bold mb-1">CNPJ</p>
+              <p className="text-[9px] text-text-muted uppercase tracking-widest font-bold mb-1">
+                CNPJ
+              </p>
               <p className="text-sm text-text-primary font-medium truncate">{shop.cnpj ?? '—'}</p>
             </div>
             <div className="bg-bg/40 border border-border rounded-xl p-3.5">
-              <p className="text-[9px] text-text-muted uppercase tracking-widest font-bold mb-1">WhatsApp</p>
-              <p className="text-sm text-text-primary font-medium truncate">{shop.whatsapp || '—'}</p>
+              <p className="text-[9px] text-text-muted uppercase tracking-widest font-bold mb-1">
+                WhatsApp
+              </p>
+              <p className="text-sm text-text-primary font-medium truncate">
+                {shop.whatsapp || '—'}
+              </p>
             </div>
             <div className="bg-bg/40 border border-border rounded-xl p-3.5 col-span-2">
-              <p className="text-[9px] text-text-muted uppercase tracking-widest font-bold mb-1">Endereço</p>
+              <p className="text-[9px] text-text-muted uppercase tracking-widest font-bold mb-1">
+                Endereço
+              </p>
               <p className="text-sm text-text-primary font-medium">{shop.address ?? '—'}</p>
             </div>
             <div className="bg-bg/40 border border-border rounded-xl p-3.5">
-              <p className="text-[9px] text-text-muted uppercase tracking-widest font-bold mb-1">Cadastrado em</p>
+              <p className="text-[9px] text-text-muted uppercase tracking-widest font-bold mb-1">
+                Cadastrado em
+              </p>
               <p className="text-sm text-text-primary font-medium">
                 {new Date(shop.createdAt).toLocaleDateString('pt-BR')}
               </p>
             </div>
             <div className="bg-bg/40 border border-border rounded-xl p-3.5">
-              <p className="text-[9px] text-text-muted uppercase tracking-widest font-bold mb-1">Aprovação</p>
+              <p className="text-[9px] text-text-muted uppercase tracking-widest font-bold mb-1">
+                Aprovação
+              </p>
               <ApprovalBadge status={shop.approvalStatus} />
             </div>
           </div>
@@ -568,11 +635,15 @@ const ManageBarbershopModal: React.FC<ManageBarbershopModalProps> = ({ shop, onC
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-bg/40 border border-border rounded-xl p-3.5 text-center">
               <p className="text-lg font-black text-text-primary">{shop._count.users}</p>
-              <p className="text-[9px] text-text-muted uppercase tracking-widest font-bold">Membros</p>
+              <p className="text-[9px] text-text-muted uppercase tracking-widest font-bold">
+                Membros
+              </p>
             </div>
             <div className="bg-bg/40 border border-border rounded-xl p-3.5 text-center">
               <p className="text-lg font-black text-text-primary">{shop._count.appointments}</p>
-              <p className="text-[9px] text-text-muted uppercase tracking-widest font-bold">Agendam.</p>
+              <p className="text-[9px] text-text-muted uppercase tracking-widest font-bold">
+                Agendam.
+              </p>
             </div>
             <div className="bg-bg/40 border border-border rounded-xl p-3.5 text-center">
               <p className="text-lg font-black text-text-primary">{shop._count.queue}</p>
@@ -669,7 +740,8 @@ const BarbershopsTab: React.FC = () => {
         <div>
           <h2 className="text-2xl font-bold text-text-primary tracking-tight">Gestão de Salões</h2>
           <p className="text-text-secondary text-sm mt-1">
-            {meta.total} sal{meta.total !== 1 ? 'ões' : 'ão'} encontrado{meta.total !== 1 ? 's' : ''}
+            {meta.total} sal{meta.total !== 1 ? 'ões' : 'ão'} encontrado
+            {meta.total !== 1 ? 's' : ''}
           </p>
         </div>
       </div>
@@ -681,7 +753,10 @@ const BarbershopsTab: React.FC = () => {
           <input
             type="text"
             value={search}
-            onChange={e => { setSearch(e.target.value); setPage(1); }}
+            onChange={e => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             placeholder="Buscar por nome, CNPJ ou endereço..."
             className="w-full bg-surface border border-border text-text-primary text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-text-muted"
           />
@@ -690,7 +765,10 @@ const BarbershopsTab: React.FC = () => {
           {(['all', 'active', 'inactive'] as const).map(s => (
             <button
               key={s}
-              onClick={() => { setStatusFilter(s); setPage(1); }}
+              onClick={() => {
+                setStatusFilter(s);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
                 statusFilter === s
                   ? 'bg-violet-500 text-black'
@@ -739,17 +817,23 @@ const BarbershopsTab: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
-                        shop.active
-                          ? 'bg-green-500/10 text-green-400 border-green-500/20'
-                          : 'bg-surface-2 text-text-muted border-border-strong'
-                      }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${shop.active ? 'bg-success' : 'bg-text-muted'}`} />
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
+                          shop.active
+                            ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                            : 'bg-surface-2 text-text-muted border-border-strong'
+                        }`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${shop.active ? 'bg-success' : 'bg-text-muted'}`}
+                        />
                         {shop.active ? 'Ativa' : 'Inativa'}
                       </span>
                     </td>
                     <td className="px-6 py-4 hidden lg:table-cell">
-                      <div className="text-text-secondary text-sm font-medium">{shop._count.users}</div>
+                      <div className="text-text-secondary text-sm font-medium">
+                        {shop._count.users}
+                      </div>
                     </td>
                     <td className="px-6 py-4 hidden lg:table-cell">
                       <ApprovalBadge status={shop.approvalStatus} />
@@ -770,7 +854,9 @@ const BarbershopsTab: React.FC = () => {
         {/* Pagination */}
         <div className="px-6 py-3 border-t border-border flex items-center justify-between bg-bg/40">
           <span className="text-xs text-text-muted font-medium">
-            {loading ? '...' : `Exibindo ${((page - 1) * meta.limit) + 1}–${Math.min(page * meta.limit, meta.total)} de ${meta.total}`}
+            {loading
+              ? '...'
+              : `Exibindo ${(page - 1) * meta.limit + 1}–${Math.min(page * meta.limit, meta.total)} de ${meta.total}`}
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -780,7 +866,9 @@ const BarbershopsTab: React.FC = () => {
             >
               Anterior
             </button>
-            <span className="text-xs text-text-muted font-mono">{page}/{meta.totalPages}</span>
+            <span className="text-xs text-text-muted font-mono">
+              {page}/{meta.totalPages}
+            </span>
             <button
               onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
               disabled={page >= meta.totalPages}
@@ -815,7 +903,13 @@ interface EditUserModalProps {
   loading: boolean;
 }
 
-const EditUserModal: React.FC<EditUserModalProps> = ({ user, barbershops, onClose, onSave, loading }) => {
+const EditUserModal: React.FC<EditUserModalProps> = ({
+  user,
+  barbershops,
+  onClose,
+  onSave,
+  loading,
+}) => {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -845,14 +939,19 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, barbershops, onClos
           <h3 className="text-xl font-bold text-text-primary tracking-tight">
             {user ? 'Editar Usuário' : 'Novo Usuário'}
           </h3>
-          <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors">
+          <button
+            onClick={onClose}
+            className="text-text-muted hover:text-text-primary transition-colors"
+          >
             <XCircle size={20} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">Nome Completo</label>
+            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              Nome Completo
+            </label>
             <input
               type="text"
               required
@@ -863,7 +962,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, barbershops, onClos
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">E-mail</label>
+            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              E-mail
+            </label>
             <input
               type="email"
               required
@@ -875,7 +976,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, barbershops, onClos
           </div>
           {!user && (
             <div>
-              <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">Senha Provisória</label>
+              <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+                Senha Provisória
+              </label>
               <input
                 type="password"
                 required={!user}
@@ -888,7 +991,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, barbershops, onClos
           )}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">Cargo / Role</label>
+              <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+                Cargo / Role
+              </label>
               <select
                 value={formData.role}
                 onChange={e => setFormData({ ...formData, role: e.target.value as any })}
@@ -900,7 +1005,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, barbershops, onClos
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">Status</label>
+              <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+                Status
+              </label>
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, active: !formData.active })}
@@ -917,7 +1024,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, barbershops, onClos
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">Vincular Salão</label>
+            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              Vincular Salão
+            </label>
             <select
               required={formData.role !== 'MASTER_ADMIN'}
               value={formData.barbershopId || ''}
@@ -925,12 +1034,21 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, barbershops, onClos
               className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-all appearance-none cursor-pointer"
             >
               <option value="">Selecione um salão...</option>
-              <option value="NULL" className={formData.role === 'MASTER_ADMIN' ? 'block' : 'hidden'}>Sem Salão (Apenas Master)</option>
+              <option
+                value="NULL"
+                className={formData.role === 'MASTER_ADMIN' ? 'block' : 'hidden'}
+              >
+                Sem Salão (Apenas Master)
+              </option>
               {barbershops.map(shop => (
-                <option key={shop.id} value={shop.id}>{shop.name}</option>
+                <option key={shop.id} value={shop.id}>
+                  {shop.name}
+                </option>
               ))}
             </select>
-            <p className="text-[10px] text-text-muted mt-1 ml-1">* Obrigatório para proprietários e funcionários</p>
+            <p className="text-[10px] text-text-muted mt-1 ml-1">
+              * Obrigatório para proprietários e funcionários
+            </p>
           </div>
 
           <div className="pt-4 flex gap-3">
@@ -986,11 +1104,18 @@ const AuditLogDrawer: React.FC<AuditLogDrawerProps> = ({ user, onClose }) => {
             <History size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-text-primary tracking-tight leading-none">Logs de Auditoria</h3>
-            <p className="text-[10px] text-text-muted uppercase tracking-widest mt-1.5">{user.name}</p>
+            <h3 className="text-lg font-bold text-text-primary tracking-tight leading-none">
+              Logs de Auditoria
+            </h3>
+            <p className="text-[10px] text-text-muted uppercase tracking-widest mt-1.5">
+              {user.name}
+            </p>
           </div>
         </div>
-        <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors">
+        <button
+          onClick={onClose}
+          className="text-text-muted hover:text-text-primary transition-colors"
+        >
           <XCircle size={20} />
         </button>
       </div>
@@ -1011,14 +1136,20 @@ const AuditLogDrawer: React.FC<AuditLogDrawerProps> = ({ user, onClose }) => {
               <div className="absolute left-[-5px] top-0 w-2 h-2 rounded-full bg-violet-500 ring-4 ring-surface" />
               <div className="bg-bg/40 border border-border/50 rounded-xl p-3.5 group hover:border-border-strong transition-colors">
                 <div className="flex justify-between items-start gap-2 mb-1.5">
-                  <span className="text-[10px] font-black text-violet-400 uppercase tracking-tighter">{log.action}</span>
+                  <span className="text-[10px] font-black text-violet-400 uppercase tracking-tighter">
+                    {log.action}
+                  </span>
                   <span className="text-[9px] text-text-muted font-medium">
                     {new Date(log.createdAt).toLocaleString('pt-BR')}
                   </span>
                 </div>
-                <p className="text-xs text-text-secondary line-clamp-2">{log.details ? log.details : `Ação no recurso ${log.resource}`}</p>
+                <p className="text-xs text-text-secondary line-clamp-2">
+                  {log.details ? log.details : `Ação no recurso ${log.resource}`}
+                </p>
                 {log.ipAddress && (
-                  <div className="mt-2 text-[8px] text-text-muted font-mono">IP: {log.ipAddress}</div>
+                  <div className="mt-2 text-[8px] text-text-muted font-mono">
+                    IP: {log.ipAddress}
+                  </div>
                 )}
               </div>
             </div>
@@ -1052,7 +1183,7 @@ const UsersTab: React.FC = () => {
           role: roleFilter === 'all' ? undefined : roleFilter,
           search: search || undefined,
         }),
-        adminApi.listBarbershops({ limit: 100 })
+        adminApi.listBarbershops({ limit: 100 }),
       ]);
       setUsers(userRes.data);
       setMeta(userRes.meta);
@@ -1100,11 +1231,18 @@ const UsersTab: React.FC = () => {
     <div className="space-y-5 relative">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-text-primary tracking-tight">Gestão de Usuários</h2>
-          <p className="text-text-secondary text-sm mt-1">Controle de acesso e monitoramento de atividades</p>
+          <h2 className="text-2xl font-bold text-text-primary tracking-tight">
+            Gestão de Usuários
+          </h2>
+          <p className="text-text-secondary text-sm mt-1">
+            Controle de acesso e monitoramento de atividades
+          </p>
         </div>
         <button
-          onClick={() => { setSelectedUser(null); setModalOpen(true); }}
+          onClick={() => {
+            setSelectedUser(null);
+            setModalOpen(true);
+          }}
           className="bg-violet-500 hover:bg-violet-400 text-black px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] active:scale-95"
         >
           <UserPlus size={18} />
@@ -1118,7 +1256,10 @@ const UsersTab: React.FC = () => {
           <input
             type="text"
             value={search}
-            onChange={e => { setSearch(e.target.value); setPage(1); }}
+            onChange={e => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             placeholder="Buscar por nome ou e-mail..."
             className="w-full bg-surface border border-border text-text-primary text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-text-muted"
           />
@@ -1127,7 +1268,10 @@ const UsersTab: React.FC = () => {
           {['all', 'MASTER_ADMIN', 'OWNER', 'EMPLOYEE'].map(r => (
             <button
               key={r}
-              onClick={() => { setRoleFilter(r); setPage(1); }}
+              onClick={() => {
+                setRoleFilter(r);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
                 roleFilter === r
                   ? 'bg-violet-500 text-black'
@@ -1153,88 +1297,112 @@ const UsersTab: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/40">
-              {loading
-                ? Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i}>
-                      <td colSpan={5} className="px-6 py-5">
-                        <div className="h-10 bg-surface-2/50 rounded-xl animate-pulse" />
-                      </td>
-                    </tr>
-                  ))
-                : users.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-20 text-center text-text-muted font-medium">Nenhum usuário encontrado.</td>
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i}>
+                    <td colSpan={5} className="px-6 py-5">
+                      <div className="h-10 bg-surface-2/50 rounded-xl animate-pulse" />
+                    </td>
                   </tr>
-                ) : users.map(u => (
-                    <tr key={u.id} className="group hover:bg-surface-2/20 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-[10px] ${
-                            u.role === 'MASTER_ADMIN' ? 'bg-violet-500 text-black' : 'bg-surface-2 text-text-secondary'
-                          }`}>
-                            {u.name[0].toUpperCase()}
+                ))
+              ) : users.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-20 text-center text-text-muted font-medium">
+                    Nenhum usuário encontrado.
+                  </td>
+                </tr>
+              ) : (
+                users.map(u => (
+                  <tr key={u.id} className="group hover:bg-surface-2/20 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-[10px] ${
+                            u.role === 'MASTER_ADMIN'
+                              ? 'bg-violet-500 text-black'
+                              : 'bg-surface-2 text-text-secondary'
+                          }`}
+                        >
+                          {u.name[0].toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-bold text-text-primary text-sm truncate">
+                            {u.name}
                           </div>
-                          <div className="min-w-0">
-                            <div className="font-bold text-text-primary text-sm truncate">{u.name}</div>
-                            <div className="text-[10px] text-text-muted font-mono truncate">{u.email}</div>
+                          <div className="text-[10px] text-text-muted font-mono truncate">
+                            {u.email}
                           </div>
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter border ${
-                          u.role === 'MASTER_ADMIN' ? 'bg-violet-500/10 text-violet-400 border-violet-500/20' :
-                          u.role === 'OWNER' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
-                          u.role === 'EMPLOYEE' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                          'bg-surface-2 text-text-muted border-border-strong'
-                        }`}>
-                          <Shield size={9} />
-                          {u.role.replace('_', ' ')}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 hidden md:table-cell">
-                        <div className="text-xs text-text-secondary font-medium italic">
-                          {u.barbershop?.name ?? 'Plataforma Master'}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter border ${
+                          u.role === 'MASTER_ADMIN'
+                            ? 'bg-violet-500/10 text-violet-400 border-violet-500/20'
+                            : u.role === 'OWNER'
+                              ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                              : u.role === 'EMPLOYEE'
+                                ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                                : 'bg-surface-2 text-text-muted border-border-strong'
+                        }`}
+                      >
+                        <Shield size={9} />
+                        {u.role.replace('_', ' ')}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 hidden md:table-cell">
+                      <div className="text-xs text-text-secondary font-medium italic">
+                        {u.barbershop?.name ?? 'Plataforma Master'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${
                           u.active
                             ? 'bg-green-500/10 text-green-400 border-green-500/20'
                             : 'bg-red-500/10 text-red-500 border-red-500/20'
-                        }`}>
-                          <span className={`w-1 h-1 rounded-full ${u.active ? 'bg-green-400 animate-pulse' : 'bg-red-500'}`} />
-                          {u.active ? 'Ativo' : 'Suspenso'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="inline-flex items-center bg-bg/80 border border-border rounded-xl p-1 gap-1 shadow-sm">
-                          <button
-                            onClick={() => setLogUser(u)}
-                            title="Ver Atividades"
-                            className="p-2 text-text-muted hover:text-violet-400 hover:bg-violet-500/10 rounded-lg transition-all"
-                          >
-                            <History size={16} />
-                          </button>
-                          <div className="w-px h-4 bg-surface-2 mx-0.5" />
-                          <button
-                            onClick={() => { setSelectedUser(u); setModalOpen(true); }}
-                            title="Editar"
-                            className="p-2 text-text-muted hover:text-text-primary hover:bg-surface-2 rounded-lg transition-all"
-                          >
-                            <UserCog size={16} />
-                          </button>
-                          <div className="w-px h-4 bg-surface-2 mx-0.5" />
-                          <button
-                            onClick={() => handleDeleteUser(u)}
-                            title="Excluir"
-                            className="p-2 text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        }`}
+                      >
+                        <span
+                          className={`w-1 h-1 rounded-full ${u.active ? 'bg-green-400 animate-pulse' : 'bg-red-500'}`}
+                        />
+                        {u.active ? 'Ativo' : 'Suspenso'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="inline-flex items-center bg-bg/80 border border-border rounded-xl p-1 gap-1 shadow-sm">
+                        <button
+                          onClick={() => setLogUser(u)}
+                          title="Ver Atividades"
+                          className="p-2 text-text-muted hover:text-violet-400 hover:bg-violet-500/10 rounded-lg transition-all"
+                        >
+                          <History size={16} />
+                        </button>
+                        <div className="w-px h-4 bg-surface-2 mx-0.5" />
+                        <button
+                          onClick={() => {
+                            setSelectedUser(u);
+                            setModalOpen(true);
+                          }}
+                          title="Editar"
+                          className="p-2 text-text-muted hover:text-text-primary hover:bg-surface-2 rounded-lg transition-all"
+                        >
+                          <UserCog size={16} />
+                        </button>
+                        <div className="w-px h-4 bg-surface-2 mx-0.5" />
+                        <button
+                          onClick={() => handleDeleteUser(u)}
+                          title="Excluir"
+                          className="p-2 text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -1251,7 +1419,9 @@ const UsersTab: React.FC = () => {
             >
               Anterior
             </button>
-            <span className="text-xs text-text-muted font-mono tracking-tighter">{page} de {meta.totalPages}</span>
+            <span className="text-xs text-text-muted font-mono tracking-tighter">
+              {page} de {meta.totalPages}
+            </span>
             <button
               onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
               disabled={page >= meta.totalPages}
@@ -1273,12 +1443,7 @@ const UsersTab: React.FC = () => {
         />
       )}
 
-      {logUser && (
-        <AuditLogDrawer
-          user={logUser}
-          onClose={() => setLogUser(null)}
-        />
-      )}
+      {logUser && <AuditLogDrawer user={logUser} onClose={() => setLogUser(null)} />}
     </div>
   );
 };
@@ -1289,7 +1454,9 @@ const UsersTab: React.FC = () => {
 export const MasterAdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [period, setPeriod] = useState<DashboardPeriod>('12m');
-  const [chartMetric, setChartMetric] = useState<'newShops' | 'appointments' | 'completedQueue'>('newShops');
+  const [chartMetric, setChartMetric] = useState<'newShops' | 'appointments' | 'completedQueue'>(
+    'newShops'
+  );
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const { logout, user } = useAuth();
@@ -1321,6 +1488,7 @@ export const MasterAdminDashboard: React.FC = () => {
     { tab: 'barbershops', icon: <Scissors size={17} />, label: 'Salões' },
     { tab: 'users', icon: <Users size={17} />, label: 'Usuários' },
     { tab: 'billing', icon: <CreditCard size={17} />, label: 'Faturamento' },
+    { tab: 'referrals', icon: <Gift size={17} />, label: 'Indicações' },
   ];
 
   return (
@@ -1333,8 +1501,12 @@ export const MasterAdminDashboard: React.FC = () => {
             M
           </div>
           <div>
-            <p className="font-bold text-text-primary text-xs tracking-tight leading-none">Master Admin</p>
-            <p className="text-[10px] text-violet-400/70 uppercase tracking-widest mt-0.5">AGENDAI Master</p>
+            <p className="font-bold text-text-primary text-xs tracking-tight leading-none">
+              Master Admin
+            </p>
+            <p className="text-[10px] text-violet-400/70 uppercase tracking-widest mt-0.5">
+              AGENDAI Master
+            </p>
           </div>
         </div>
 
@@ -1363,7 +1535,9 @@ export const MasterAdminDashboard: React.FC = () => {
               {user?.name?.[0]?.toUpperCase() ?? 'A'}
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-text-primary truncate">{user?.name ?? 'Admin'}</p>
+              <p className="text-xs font-bold text-text-primary truncate">
+                {user?.name ?? 'Admin'}
+              </p>
               <p className="text-[10px] text-text-muted truncate">{user?.email ?? ''}</p>
             </div>
           </div>
@@ -1460,9 +1634,22 @@ export const MasterAdminDashboard: React.FC = () => {
                 <BillingTab />
               </motion.div>
             )}
+            {activeTab === 'referrals' && (
+              <motion.div
+                key="referrals"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ReferralsTab />
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
       </main>
     </div>
   );
 };
+
+export default MasterAdminDashboard;

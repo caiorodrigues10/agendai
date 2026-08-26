@@ -1,5 +1,5 @@
 {
-  "name": "BarberQueue Pro AI",
-  "description": "A smart, cost-effective barber shop queue management system featuring AI-driven wait time estimation and a sleek, modern interface.",
+  "name": "AgendAI",
+  "description": "Gestão de fila digital e agenda para salões de beleza, barbearias e studios — atendimento feminino, masculino e unissex.",
   "requestFramePermissions": []
 }

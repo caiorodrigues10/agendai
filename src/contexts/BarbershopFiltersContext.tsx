@@ -21,19 +21,20 @@ export const BarbershopFiltersProvider: React.FC<{ children: ReactNode }> = ({ c
   const [staffId, setStaffId] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange | null>(null);
 
-  const value = useMemo(() => ({
-    barbershopId,
-    staffId,
-    dateRange,
-    setBarbershopId,
-    setStaffId,
-    setDateRange
-  }), [barbershopId, staffId, dateRange]);
+  const value = useMemo(
+    () => ({
+      barbershopId,
+      staffId,
+      dateRange,
+      setBarbershopId,
+      setStaffId,
+      setDateRange,
+    }),
+    [barbershopId, staffId, dateRange]
+  );
 
   return (
-    <BarbershopFiltersContext.Provider value={value}>
-      {children}
-    </BarbershopFiltersContext.Provider>
+    <BarbershopFiltersContext.Provider value={value}>{children}</BarbershopFiltersContext.Provider>
   );
 };
 

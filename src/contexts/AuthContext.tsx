@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState, ReactNo
 import { authApi, RegisterPayload } from '../infra/authApi';
 import { authStorage } from '../infra/authStorage';
 import { ApiError } from '../infra/apiClient';
+import { getErrorMessage } from '../utils/errorMessage';
 import { StaffMember } from '../types';
 
 export type AuthResult = { ok: true } | { ok: false; message: string };
@@ -10,6 +11,7 @@ interface AuthContextValue {
   user: StaffMember | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<AuthResult>;
+  loginWithGoogle: (idToken: string) => Promise<AuthResult>;
   register: (data: RegisterPayload) => Promise<AuthResult>;
   logout: () => void;
   hasRole: (roles: StaffMember['role'][]) => boolean;
@@ -35,7 +37,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           success = true;
         } catch (err) {
           // Rate limit / rede: mantém sessão local em vez de forçar logout
-          if (err instanceof ApiError && (err.statusCode === 429 || err.statusCode >= 500)) {
+          if (
+            err instanceof ApiError &&
+            (err.statusCode === 0 ||
+              err.code === 'NETWORK_ERROR' ||
+              err.statusCode === 429 ||
+              err.statusCode >= 500)
+          ) {
             if (cachedUser) {
               setUser(cachedUser as StaffMember);
               success = true;
@@ -54,7 +62,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             authStorage.setUser(resp.user);
             setUser(resp.user as StaffMember);
           } catch (err) {
-            if (err instanceof ApiError && (err.statusCode === 429 || err.statusCode >= 500) && cachedUser) {
+            if (
+              err instanceof ApiError &&
+              (err.statusCode === 0 ||
+                err.code === 'NETWORK_ERROR' ||
+                err.statusCode === 429 ||
+                err.statusCode >= 500) &&
+              cachedUser
+            ) {
               setUser(cachedUser as StaffMember);
             } else {
               authStorage.clearTokens();
@@ -78,13 +93,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setLoading(false);
     };
     init();
+
+    // Escuta evento disparado pelo apiClient quando refresh falha
+    const onSessionExpired = () => {
+      authStorage.clearTokens();
+      authStorage.clearUser();
+      setUser(null);
+    };
+    window.addEventListener('agendai:session-expired', onSessionExpired);
+    return () => window.removeEventListener('agendai:session-expired', onSessionExpired);
   }, []);
 
   const persistSession = (resp: { user: any; accessToken: string; refreshToken: string }) => {
     authStorage.setTokens(resp.accessToken, resp.refreshToken);
     authStorage.setUser(resp.user);
     setUser(resp.user as StaffMember);
-    sessionStorage.removeItem('bq:access-block-info');
+    sessionStorage.removeItem('agendai:access-block-info');
   };
 
   const login = async (email: string, password: string): Promise<AuthResult> => {
@@ -94,11 +118,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return { ok: true };
     } catch (err) {
       if (err instanceof ApiError && err.isAccessBlocked) {
-        // AccessBlockedListener redireciona — modal pode fechar
-        return { ok: false, message: err.message };
+        return { ok: false, message: getErrorMessage(err, err.message) };
       }
-      const message = err instanceof ApiError ? err.message : 'E-mail ou senha inválidos';
-      return { ok: false, message };
+      return { ok: false, message: getErrorMessage(err, 'E-mail ou senha inválidos') };
+    }
+  };
+
+  const loginWithGoogle = async (idToken: string): Promise<AuthResult> => {
+    try {
+      const resp = await authApi.googleLogin(idToken);
+      persistSession(resp);
+      return { ok: true };
+    } catch (err) {
+      if (
+        err instanceof ApiError &&
+        err.statusCode === 404 &&
+        err.code === 'GOOGLE_ACCOUNT_NOT_FOUND'
+      ) {
+        return {
+          ok: false,
+          message: 'Conta não encontrada. Cadastre-se normalmente com e-mail e senha.',
+        };
+      }
+      return { ok: false, message: getErrorMessage(err, 'Erro ao autenticar com Google.') };
     }
   };
 
@@ -108,15 +150,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       persistSession(resp);
       return { ok: true };
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : 'Não foi possível criar sua conta. Tente novamente.';
-      return { ok: false, message };
+      return {
+        ok: false,
+        message: getErrorMessage(err, 'Não foi possível criar sua conta. Tente novamente.'),
+      };
     }
   };
 
   const logout = () => {
     authStorage.clearTokens();
     authStorage.clearUser();
-    sessionStorage.removeItem('bq:access-block-info');
+    sessionStorage.removeItem('agendai:access-block-info');
     setUser(null);
   };
 
@@ -127,7 +171,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return normalizedRoles.includes(normalizedUserRole);
   };
 
-  const value = useMemo(() => ({ user, loading, login, register, logout, hasRole }), [user, loading]);
+  const value = useMemo(
+    () => ({ user, loading, login, loginWithGoogle, register, logout, hasRole }),
+    [user, loading]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -9,6 +9,8 @@ import { TeamManager } from '../components/domain/TeamManager';
 import { FinancialDashboard } from '../components/domain/FinancialDashboard';
 import { OwnerFinancialPanel } from '../components/domain/OwnerFinancialPanel';
 import { OwnerSubscriptionPanel } from '../components/domain/OwnerSubscriptionPanel';
+import { OwnerReferralsPanel } from '../components/domain/OwnerReferralsPanel';
+import { PostsManager } from '../components/domain/PostsManager';
 import { ShopProfile } from '../components/domain/ShopProfile';
 import { AppointmentCalendar } from '../components/domain/AppointmentCalendar';
 import { Toast } from '../components/ui/Toast';
@@ -16,25 +18,101 @@ import { useAuth } from '../contexts/AuthContext';
 import { useBarbershop } from '../contexts/BarbershopContext';
 import { useScheduling } from '../contexts/SchedulingContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
-import { Clock, Settings, Scissors, Users, BarChart3, Store, List, CalendarDays, Coffee, Loader2, CreditCard } from 'lucide-react';
+import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
+import {
+  Settings,
+  Scissors,
+  Users,
+  BarChart3,
+  Store,
+  List,
+  CalendarDays,
+  Coffee,
+  Loader2,
+  CreditCard,
+  Gift,
+  Megaphone,
+  Contact,
+} from 'lucide-react';
+import { ClientsManager } from '../components/domain/ClientsManager';
 
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { hasDashboard } = useSubscription();
-  const { services, settings, staff, feed, addPost, deletePost, likePost, setSettings, addService, editService, deleteService, updateTeam, isShopOpen, loading: shopLoading } = useBarbershop();
-  const { queue, appointments, availability, aiInsight, completedCount, joinQueue, leaveQueue, updateQueueStatus, bookAppointment, cancelAppointment, checkInAppointment, deleteHistoryItem, clientId, loading: schedulingLoading, refreshAppointments, loadAvailability } = useScheduling();
+  const { hasDashboard, accessState, loading: subscriptionLoading } = useSubscription();
+  const {
+    services,
+    settings,
+    staff,
+    feed,
+    addPost,
+    deletePost,
+    likePost,
+    setSettings,
+    addService,
+    editService,
+    deleteService,
+    updateTeam,
+    isShopOpen,
+    loading: shopLoading,
+  } = useBarbershop();
+  const { barbershopId } = useBarbershopFilters();
+  const {
+    queue,
+    appointments,
+    availability,
+    aiInsight,
+    completedCount,
+    joinQueue,
+    leaveQueue,
+    updateQueueStatus,
+    bookAppointment,
+    cancelAppointment,
+    checkInAppointment,
+    deleteHistoryItem,
+    clientId,
+    loading: schedulingLoading,
+    refreshAppointments,
+    loadAvailability,
+  } = useScheduling();
   const [showJoinForm, setShowJoinForm] = useState(false);
-  const [toast, setToast] = useState<{message: string, type: 'success' | 'bot'} | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'bot' } | null>(null);
 
-  const activeTab = location.pathname.split('/')[2] as 'queue' | 'profile' | 'appointments' | 'services' | 'settings' | 'team' | 'reports' | 'finance' | 'subscription' || 'queue';
+  const activeTab =
+    (location.pathname.split('/')[2] as
+      | 'queue'
+      | 'profile'
+      | 'appointments'
+      | 'clients'
+      | 'services'
+      | 'settings'
+      | 'team'
+      | 'reports'
+      | 'finance'
+      | 'subscription'
+      | 'referrals'
+      | 'posts') || 'queue';
+
+  useEffect(() => {
+    if (subscriptionLoading) return;
+    if (accessState === 'needs_card') {
+      navigate('/planos?setup=trial', { replace: true });
+    } else if (accessState === 'blocked') {
+      navigate('/bloqueado', { replace: true });
+    }
+  }, [accessState, subscriptionLoading, navigate]);
 
   const tabs = useMemo(() => {
-    const t = [{ id: 'queue', label: 'Fila', icon: List }, { id: 'appointments', label: 'Agenda', icon: CalendarDays }];
+    const t = [
+      { id: 'queue', label: 'Fila', icon: List },
+      { id: 'appointments', label: 'Agenda', icon: CalendarDays },
+      { id: 'clients', label: 'Clientes', icon: Contact },
+      { id: 'settings', label: 'Configurações', icon: Settings },
+    ];
     if ((user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && hasDashboard) {
-        t.push({ id: 'reports', label: 'Relatórios', icon: BarChart3 });
-        t.push({ id: 'finance', label: 'Financeiro', icon: CreditCard });
+      t.push({ id: 'reports', label: 'Relatórios', icon: BarChart3 });
+      t.push({ id: 'finance', label: 'Financeiro', icon: CreditCard });
     }
     t.push({ id: 'profile', label: 'Perfil', icon: Store });
     return t;
@@ -42,18 +120,30 @@ export const StaffDashboard: React.FC = () => {
 
   useEffect(() => {
     if (!user) return;
-    const restrictedTabs = ['services', 'settings', 'team'];
-    if (restrictedTabs.includes(activeTab) && !(user.role === 'MASTER_ADMIN' || user.role === 'OWNER')) {
+    const restrictedTabs = ['services', 'team'];
+    if (
+      restrictedTabs.includes(activeTab) &&
+      !(user.role === 'MASTER_ADMIN' || user.role === 'OWNER')
+    ) {
       navigate('/app/queue');
     }
     // Redirecionar se tentar acessar reports sem permissão (caso acesse via URL direta)
     if (activeTab === 'reports' && (user.role === 'EMPLOYEE' || !hasDashboard)) {
       navigate('/app/queue');
     }
-    if (activeTab === 'finance' && (!(user.role === 'MASTER_ADMIN' || user.role === 'OWNER') || !hasDashboard)) {
+    if (
+      activeTab === 'finance' &&
+      (!(user.role === 'MASTER_ADMIN' || user.role === 'OWNER') || !hasDashboard)
+    ) {
       navigate('/app/queue');
     }
     if (activeTab === 'subscription' && !(user.role === 'MASTER_ADMIN' || user.role === 'OWNER')) {
+      navigate('/app/queue');
+    }
+    if (activeTab === 'referrals' && !(user.role === 'MASTER_ADMIN' || user.role === 'OWNER')) {
+      navigate('/app/queue');
+    }
+    if (activeTab === 'posts' && !(user.role === 'MASTER_ADMIN' || user.role === 'OWNER')) {
       navigate('/app/queue');
     }
   }, [activeTab, user, navigate, hasDashboard]);
@@ -68,13 +158,20 @@ export const StaffDashboard: React.FC = () => {
     showToast('Cliente adicionado!');
   };
 
-  const handleDateChange = useCallback((date: string) => {
-    refreshAppointments(date);
-    loadAvailability(date);
-  }, [refreshAppointments, loadAvailability]);
+  const handleDateChange = useCallback(
+    (date: string) => {
+      refreshAppointments(date);
+      loadAvailability(date);
+    },
+    [refreshAppointments, loadAvailability]
+  );
 
   if (shopLoading || schedulingLoading) {
-    return <div className="min-h-screen bg-bg flex items-center justify-center text-accent"><Loader2 className="animate-spin" size={40}/></div>;
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center text-accent">
+        <Loader2 className="animate-spin" size={40} />
+      </div>
+    );
   }
 
   const activeQueue = queue.filter(q => q.status !== 'completed' && q.status !== 'cancelled');
@@ -88,123 +185,200 @@ export const StaffDashboard: React.FC = () => {
       <Header
         currentUser={user}
         onOpenLogin={() => navigate('/login')}
-        onLogout={() => { logout(); navigate('/'); }}
+        onLogout={() => {
+          logout();
+          navigate('/');
+        }}
         logoUrl={settings?.logoUrl}
       />
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       <main className="max-w-md mx-auto px-4 pt-6">
-        <div className="flex bg-surface p-1 rounded-xl mb-6 border border-border relative">
-            {tabs.map((tab) => (
-                <button
-                    key={tab.id}
-                    onClick={() => navigate(`/app/${tab.id}`)}
-                    className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 z-10 relative
+        <div className="flex bg-surface p-1 rounded-xl mb-6 border border-border relative overflow-x-auto no-scrollbar">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => navigate(`/app/${tab.id}`)}
+              className={`flex-1 min-w-[4.5rem] py-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-2 z-10 relative
                         ${activeTab === tab.id ? 'text-text-primary' : 'text-text-muted'}
                     `}
-                >
-                    <tab.icon size={16} /> {tab.label}
-                </button>
-            ))}
-
-            <div
-                className="absolute top-1 bottom-1 bg-surface-2 rounded-lg transition-all duration-300"
-                style={{
-                    width: `calc(${100 / tabs.length}% - 2px)`,
-                    left: `calc(${(tabs.findIndex(t => t.id === activeTab) !== -1 ? tabs.findIndex(t => t.id === activeTab) : 0) * (100 / tabs.length)}% + 1px)`
-                }}
             >
-            </div>
+              <tab.icon size={16} /> {tab.label}
+            </button>
+          ))}
+
+          <div
+            className="absolute top-1 bottom-1 bg-surface-2 rounded-lg transition-all duration-300"
+            style={{
+              width: `calc(${100 / tabs.length}% - 2px)`,
+              left: `calc(${(tabs.findIndex(t => t.id === activeTab) !== -1 ? tabs.findIndex(t => t.id === activeTab) : 0) * (100 / tabs.length)}% + 1px)`,
+            }}
+          ></div>
         </div>
 
         {user && (
           <div className="flex gap-2 mb-6 bg-surface p-1 rounded-lg border border-border overflow-x-auto no-scrollbar">
-
             {(user.role === 'MASTER_ADMIN' || user.role === 'OWNER') && (
-                <>
-                    <button onClick={() => navigate('/app/services')} className={`flex-1 min-w-[80px] py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'services' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}>
-                        <Scissors size={16} /> Serviços
-                    </button>
-                    <button onClick={() => navigate('/app/team')} className={`flex-1 min-w-[80px] py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'team' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}>
-                        <Users size={16} /> Equipe
-                    </button>
-                    <button
-                      onClick={() => navigate('/app/subscription')}
-                      className={`flex-1 min-w-[80px] py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'subscription' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
-                      title="Planos e assinatura"
-                    >
-                        <CreditCard size={16} /> Assinatura
-                    </button>
-                    <button onClick={() => navigate('/app/settings')} className={`w-12 py-2 flex items-center justify-center rounded-md transition-all ${activeTab === 'settings' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}>
-                        <Settings size={18} />
-                    </button>
-                </>
+              <>
+                <button
+                  onClick={() => navigate('/app/services')}
+                  className={`flex-1 min-w-[80px] py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'services' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
+                >
+                  <Scissors size={16} /> Serviços
+                </button>
+                <button
+                  onClick={() => navigate('/app/team')}
+                  className={`flex-1 min-w-[80px] py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'team' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
+                >
+                  <Users size={16} /> Equipe
+                </button>
+                <button
+                  onClick={() => navigate('/app/subscription')}
+                  className={`flex-1 min-w-[80px] py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'subscription' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
+                  title="Planos e assinatura"
+                >
+                  <CreditCard size={16} /> Assinatura
+                </button>
+                <button
+                  onClick={() => navigate('/app/referrals')}
+                  className={`flex-1 min-w-[80px] py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'referrals' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
+                  title="Indique e ganhe"
+                >
+                  <Gift size={16} /> Indicar
+                </button>
+                <button
+                  onClick={() => navigate('/app/posts')}
+                  className={`flex-1 min-w-[80px] py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'posts' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
+                  title="Posts do salão"
+                >
+                  <Megaphone size={16} /> Posts
+                </button>
+              </>
             )}
           </div>
         )}
 
         {activeTab === 'profile' && settings && (
-            <ShopProfile
-                settings={settings}
-                posts={feed}
-                currentUser={user}
-                onAddPost={(p) => { addPost(p); showToast('Postado!'); }}
-                onDeletePost={deletePost}
-                onLikePost={likePost}
-            />
+          <ShopProfile
+            settings={settings}
+            posts={feed}
+            currentUser={user}
+            onAddPost={p => {
+              addPost(p);
+              showToast('Postado!');
+            }}
+            onDeletePost={deletePost}
+            onLikePost={likePost}
+          />
         )}
 
         {activeTab === 'appointments' && settings && (
-            <AppointmentCalendar
-                appointments={appointments}
-                services={services}
-                staff={staff}
-                settings={settings}
-                currentUserId={user?.id}
-                currentUserRole={user?.role}
-                occupancy={availability}
-                onBook={async (d) => { await bookAppointment(d); showToast('Agendado com sucesso!'); }}
-                onCancel={(id) => { cancelAppointment(id); showToast('Cancelado'); }}
-                onCheckIn={(appt) => { checkInAppointment(appt); showToast('Check-in realizado!'); }}
-                onDateChange={handleDateChange}
-            />
+          <AppointmentCalendar
+            appointments={appointments}
+            services={services}
+            staff={staff}
+            settings={settings}
+            currentUserId={user?.id}
+            currentUserRole={user?.role}
+            occupancy={availability}
+            onBook={async d => {
+              await bookAppointment(d);
+              showToast('Agendado com sucesso!');
+            }}
+            onCancel={id => {
+              cancelAppointment(id);
+              showToast('Cancelado');
+            }}
+            onCheckIn={appt => {
+              checkInAppointment(appt);
+              showToast('Check-in realizado!');
+            }}
+            onDateChange={handleDateChange}
+          />
         )}
 
         {activeTab === 'appointments' && !settings && (
-            <div className="text-center py-12 bg-surface rounded-xl border border-border border-dashed">
-                <p className="text-text-muted">Carregando configurações do salão...</p>
-            </div>
+          <div className="text-center py-12 bg-surface rounded-xl border border-border border-dashed">
+            <p className="text-text-muted">Carregando configurações do salão...</p>
+          </div>
         )}
 
-        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'settings' && settings && (
-            <SettingsManager settings={settings} onSave={(s) => { setSettings(s); showToast('Salvo!'); }} />
-        )}
+        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') &&
+          activeTab === 'settings' &&
+          settings && (
+            <SettingsManager
+              settings={settings}
+              barbershopId={barbershopId || undefined}
+              onSave={s => {
+                setSettings(s);
+                showToast('Salvo!');
+              }}
+            />
+          )}
+
+        {user &&
+          activeTab === 'settings' &&
+          !((user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && settings) && (
+            <div className="text-center py-12 bg-surface rounded-xl border border-border border-dashed">
+              <p className="text-text-muted">Carregando configurações...</p>
+            </div>
+          )}
 
         {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'services' && (
-            <ServiceManager services={services} onAdd={addService} onEdit={editService} onDelete={deleteService} />
+          <ServiceManager
+            services={services}
+            onAdd={addService}
+            onEdit={editService}
+            onDelete={deleteService}
+          />
         )}
 
-        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'team' && user && (
-            <TeamManager staff={staff} onUpdateTeam={async (t) => { await updateTeam(t); showToast('Equipe atualizada'); }} currentAdminId={user.id} />
+        {user && activeTab === 'clients' && settings && (
+          <ClientsManager
+            services={services}
+            staff={staff}
+            settings={settings}
+            canCancelSale={user.role === 'MASTER_ADMIN' || user.role === 'OWNER'}
+          />
         )}
+
+        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') &&
+          activeTab === 'team' &&
+          user && (
+            <TeamManager
+              staff={staff}
+              onUpdateTeam={async t => {
+                await updateTeam(t);
+                showToast('Equipe atualizada');
+              }}
+              currentAdminId={user.id}
+            />
+          )}
 
         {user && activeTab === 'reports' && (
-            <FinancialDashboard
-                queueHistory={queue}
-                services={services}
-                currentUser={user}
-                allStaff={staff}
-                onDeleteHistoryItem={deleteHistoryItem}
-            />
+          <FinancialDashboard
+            queueHistory={queue}
+            services={services}
+            currentUser={user}
+            allStaff={staff}
+            onDeleteHistoryItem={deleteHistoryItem}
+          />
         )}
 
         {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'finance' && (
-            <OwnerFinancialPanel />
+          <OwnerFinancialPanel />
         )}
 
-        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'subscription' && (
-            <OwnerSubscriptionPanel />
+        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') &&
+          activeTab === 'subscription' && <OwnerSubscriptionPanel />}
+
+        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'referrals' && (
+          <OwnerReferralsPanel />
+        )}
+
+        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'posts' && (
+          <PostsManager />
         )}
 
         {activeTab === 'queue' && (
@@ -216,33 +390,41 @@ export const StaffDashboard: React.FC = () => {
                     {settings?.shopName}
                   </h2>
                   {aiInsight && (
-                     <span className={`text-xs px-2.5 py-1 rounded-full font-bold uppercase border tracking-wide shadow-sm
-                       ${!isOpen ? 'bg-surface-2 text-text-secondary border-border-strong' :
-                        aiInsight.busyLevel === 'high' ? 'bg-danger/10 text-danger border-danger/20' :
-                          aiInsight.busyLevel === 'medium' ? 'bg-warning/10 text-warning border-warning/20' : 'bg-success/10 text-success border-success/20'}
-                     `}>
-                       { !isOpen ? 'Fechado' :
-                         aiInsight.busyLevel === 'high' ? 'Movimento Alto' :
-                         aiInsight.busyLevel === 'medium' ? 'Movimento Médio' : 'Movimento Tranquilo' }
-                     </span>
+                    <span
+                      className={`text-xs px-2.5 py-1 rounded-full font-bold uppercase border tracking-wide shadow-sm
+                       ${
+                         !isOpen
+                           ? 'bg-surface-2 text-text-secondary border-border-strong'
+                           : aiInsight.busyLevel === 'high'
+                             ? 'bg-danger/10 text-danger border-danger/20'
+                             : aiInsight.busyLevel === 'medium'
+                               ? 'bg-warning/10 text-warning border-warning/20'
+                               : 'bg-success/10 text-success border-success/20'
+                       }
+                     `}
+                    >
+                      {!isOpen
+                        ? 'Fechado'
+                        : aiInsight.busyLevel === 'high'
+                          ? 'Movimento Alto'
+                          : aiInsight.busyLevel === 'medium'
+                            ? 'Movimento Médio'
+                            : 'Movimento Tranquilo'}
+                    </span>
                   )}
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 text-xs text-text-secondary">
-                       <Coffee size={12} className="text-accent" />
-                      <span>{isOpen ? 'Aberto hoje' : 'Fechado hoje'}</span>
-                    </div>
-                    <div className="h-1 w-1 bg-border-strong rounded-full"></div>
-                    <div className="text-xs text-text-muted">
-                      {aiInsight?.estimatedWait || '--'}
-                    </div>
+                  <div className="flex items-center gap-2 text-xs text-text-secondary">
+                    <Coffee size={12} className="text-accent" />
+                    <span>{isOpen ? 'Aberto hoje' : 'Fechado hoje'}</span>
+                  </div>
+                  <div className="h-1 w-1 bg-border-strong rounded-full"></div>
+                  <div className="text-xs text-text-muted">{aiInsight?.estimatedWait || '--'}</div>
                 </div>
 
                 {aiInsight && (
-                    <p className="mt-4 text-sm text-text-secondary">
-                      {aiInsight.message}
-                    </p>
+                  <p className="mt-4 text-sm text-text-secondary">{aiInsight.message}</p>
                 )}
               </div>
             </div>
@@ -255,7 +437,7 @@ export const StaffDashboard: React.FC = () => {
                 <div className="bg-surface border border-border rounded-xl px-3 py-2 text-xs text-text-secondary">
                   <span className="text-text-primary font-bold">{completedCount}</span> concluídos
                 </div>
-                  {currentInChair && (
+                {currentInChair && (
                   <div className="bg-success/10 border border-success/30 rounded-xl px-3 py-2 text-xs text-success">
                     {currentInChair.customerName} na cadeira
                   </div>
@@ -288,7 +470,10 @@ export const StaffDashboard: React.FC = () => {
                     shopName={settings?.shopName}
                     isCurrentUser={item.customerId === clientId}
                     onStatusChange={updateQueueStatus}
-                    onLeaveQueue={(id) => { leaveQueue(id); showToast('Cliente removido.', 'bot'); }}
+                    onLeaveQueue={id => {
+                      leaveQueue(id);
+                      showToast('Cliente removido.', 'bot');
+                    }}
                   />
                 ))
               )}
@@ -308,3 +493,5 @@ export const StaffDashboard: React.FC = () => {
     </div>
   );
 };
+
+export default StaffDashboard;

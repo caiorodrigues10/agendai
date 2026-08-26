@@ -47,6 +47,9 @@ export interface Subscription {
   createdAt: string;
   trialEndsAt: string;
   daysRemainingInTrial: number | null;
+  hasPaymentMethod?: boolean;
+  cardLast4?: string | null;
+  cardBrand?: string | null;
   latestInvoice: Invoice | null;
   /** Presente apenas na resposta de POST /subscriptions (QR PIX, cartão ou checkoutUrl). */
   payment?: Payment;
@@ -59,7 +62,11 @@ export interface TrialInfo {
   isExpired: boolean;
 }
 
-/** Resposta de GET /subscriptions/me — subscription null significa trial (ativo ou expirado). */
+/**
+ * Resposta de GET /subscriptions/me.
+ * `trial` vem sempre (mesmo com assinatura): 30 dias de Pro desde o cadastro.
+ * Se assinar Essencial no meio do trial, o Pro continua até trialEndsAt.
+ */
 export interface MySubscription {
   subscription: Subscription | null;
   trial?: TrialInfo;
@@ -73,34 +80,112 @@ export interface PayerIdentification {
   number: string;
 }
 
+export interface CancellationContext {
+  hasUsage: boolean;
+  usageDays: number;
+  appointmentsTotal: number;
+  appointmentsCompleted: number;
+  queueCompleted: number;
+  postsPublished: number;
+  revenue: number;
+  uniqueCustomers: number;
+  savingsSoFar: number;
+  yearlySavingsPerYear: number;
+  currentBillingCycle: 'MONTHLY' | 'YEARLY' | null;
+  planName: string | null;
+  proratedRefundAvailable: boolean;
+  refundProvider: 'ABACATEPAY' | 'MERCADOPAGO' | 'ASAAS' | null;
+}
+
 export interface SubscribePayload {
   planId: string;
-  paymentMethod: 'pix' | 'credit_card' | 'payment_link';
+  paymentMethod: 'pix' | 'credit_card' | 'payment_link' | 'asaas';
+  /** Meio de pagamento embutido do Asaas (PIX por padrão). */
+  asaasBillingType?: 'PIX' | 'CREDIT_CARD';
   cardToken?: string;
   cardPaymentMethodId?: string;
+  /** Cartão Asaas processado no backend (createPayment). */
+  asaasCreditCard?: {
+    holderName: string;
+    number: string;
+    expiryMonth: string;
+    expiryYear: string;
+    ccv: string;
+    postalCode: string;
+    addressNumber: string;
+    phone: string;
+  };
   payerEmail: string;
   payerFirstName?: string;
   payerLastName?: string;
   payerIdentification?: PayerIdentification;
 }
 
-function unwrap<T>(res: any): T {
-  if (res && typeof res === 'object' && 'data' in res) return res.data as T;
+export interface SetupTrialCardPayload {
+  planId: string;
+  payerEmail: string;
+  payerFirstName?: string;
+  payerLastName?: string;
+  payerIdentification: PayerIdentification;
+  asaasCreditCard: NonNullable<SubscribePayload['asaasCreditCard']>;
+}
+
+function unwrap<T>(res: unknown): T {
+  if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
   return res as T;
+}
+
+interface CancelResponse {
+  proratedRefund?: {
+    status: 'SUCCEEDED' | 'PENDING' | 'FAILED';
+    amount: number;
+  };
 }
 
 const token = () => authStorage.getAccessToken() || '';
 
 export const subscriptionsApi = {
   me: () =>
-    apiClient<any>('/api/subscriptions/me', 'GET', undefined, token()).then(res =>
-      unwrap<MySubscription>(res)
-    ),
+    apiClient<{ success: boolean; data: MySubscription }>(
+      '/api/subscriptions/me',
+      'GET',
+      undefined,
+      token()
+    ).then(res => unwrap<MySubscription>(res)),
   subscribe: (payload: SubscribePayload) =>
-    apiClient<any>('/api/subscriptions', 'POST', payload, token()).then(res =>
-      unwrap<Subscription>(res)
+    apiClient<{ success: boolean; data: Subscription }>(
+      '/api/subscriptions',
+      'POST',
+      payload,
+      token()
+    ).then(res => unwrap<Subscription>(res)),
+  setupTrialCard: (payload: SetupTrialCardPayload) =>
+    apiClient<{ success: boolean; data: Subscription }>(
+      '/api/subscriptions/setup-trial-card',
+      'POST',
+      payload,
+      token()
+    ).then(res => unwrap<Subscription>(res)),
+  cancel: (payload?: { cancelReason?: string; pixKey?: string; pixKeyType?: string }) =>
+    apiClient<CancelResponse>(
+      '/api/subscriptions/me',
+      'DELETE',
+      payload?.cancelReason || payload?.pixKey
+        ? {
+            cancelReason: payload.cancelReason,
+            pixKey: payload.pixKey,
+            pixKeyType: payload.pixKeyType,
+          }
+        : undefined,
+      token()
     ),
-  cancel: () => apiClient<any>('/api/subscriptions/me', 'DELETE', undefined, token())
+  getCancellationContext: () =>
+    apiClient<{ success: boolean; data: CancellationContext }>(
+      '/api/subscriptions/cancellation-context',
+      'GET',
+      undefined,
+      token()
+    ).then(res => unwrap<CancellationContext>(res)),
 };
 
 // Compat: `plans` também aparece embutido nos erros 402 (SUBSCRIPTION_REQUIRED)

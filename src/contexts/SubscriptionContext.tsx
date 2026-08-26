@@ -1,9 +1,17 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  ReactNode,
+} from 'react';
 import { subscriptionsApi, MySubscription } from '../infra/subscriptionsApi';
 import { ApiError } from '../infra/apiClient';
 import { useAuth } from './AuthContext';
 
-export type AccessState = 'unknown' | 'active' | 'trial' | 'blocked';
+export type AccessState = 'unknown' | 'active' | 'trial' | 'blocked' | 'needs_card';
 
 interface SubscriptionContextValue {
   /** Dados de GET /subscriptions/me (null enquanto não carregado ou usuário sem barbearia). */
@@ -22,11 +30,10 @@ interface SubscriptionContextValue {
 
 function deriveHasDashboard(data: MySubscription | null): boolean {
   if (!data) return true;
-  if (data.subscription) {
+  if (data.trial && !data.trial.isExpired && data.subscription?.hasPaymentMethod) return true;
+  if (data.subscription?.status === 'ACTIVE') {
     return data.subscription.planHasDashboard !== false;
   }
-  // Trial sem assinatura: acesso completo (captura)
-  if (data.trial && !data.trial.isExpired) return true;
   return true;
 }
 
@@ -34,10 +41,16 @@ const SubscriptionContext = createContext<SubscriptionContextValue | undefined>(
 
 const deriveAccessState = (data: MySubscription | null): AccessState => {
   if (!data) return 'unknown';
-  if (data.subscription) {
-    return ['TRIALING', 'ACTIVE'].includes(data.subscription.status) ? 'active' : 'blocked';
+  const sub = data.subscription;
+  if (sub?.status === 'ACTIVE') return 'active';
+  if (sub?.status === 'TRIALING' && sub.hasPaymentMethod) return 'trial';
+  if (data.trial && !data.trial.isExpired) {
+    // Calendário de trial sem cartão vaulted → obrigatório cadastrar
+    if (!sub?.hasPaymentMethod) return 'needs_card';
+    return 'trial';
   }
-  if (data.trial) return data.trial.isExpired ? 'blocked' : 'trial';
+  if (sub && ['PAST_DUE', 'CANCELED', 'UNPAID'].includes(sub.status)) return 'blocked';
+  if (data.trial?.isExpired) return 'blocked';
   return 'unknown';
 };
 
@@ -71,6 +84,7 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
   }, [user]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refresh();
   }, [refresh]);
 
@@ -84,11 +98,15 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
   const value = useMemo(
     () => ({
       data,
-      accessState: blockInfo ? ('blocked' as const) : deriveAccessState(data),
+      accessState: blockInfo
+        ? blockInfo.reason === 'CARD_REQUIRED'
+          ? ('needs_card' as const)
+          : ('blocked' as const)
+        : deriveAccessState(data),
       loading,
       hasDashboard: deriveHasDashboard(data),
       blockInfo,
-      refresh
+      refresh,
     }),
     [data, blockInfo, loading, refresh]
   );
