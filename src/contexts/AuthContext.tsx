@@ -20,7 +20,16 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<StaffMember | null>(authStorage.getUser());
+  /** Normaliza o role pra uppercase — o backend retorna "owner", "employee" etc. */
+  const normalizeUser = (u: unknown): StaffMember => {
+    const raw = u as StaffMember;
+    return { ...raw, role: (raw.role?.toUpperCase?.() ?? raw.role) as StaffMember['role'] };
+  };
+
+  const [user, setUser] = useState<StaffMember | null>(() => {
+    const stored = authStorage.getUser();
+    return stored ? normalizeUser(stored) : null;
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,7 +41,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (token) {
         try {
           const me = await authApi.me(token);
-          setUser(me.user as StaffMember);
+          setUser(normalizeUser(me.user));
           authStorage.setUser(me.user);
           success = true;
         } catch (err) {
@@ -45,7 +54,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               err.statusCode >= 500)
           ) {
             if (cachedUser) {
-              setUser(cachedUser as StaffMember);
+              setUser(normalizeUser(cachedUser));
               success = true;
             }
           }
@@ -58,7 +67,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           const resp = await authApi.refresh();
           authStorage.setTokens(resp.accessToken);
           authStorage.setUser(resp.user);
-          setUser(resp.user as StaffMember);
+          setUser(normalizeUser(resp.user));
         } catch (err) {
           if (
             err instanceof ApiError &&
@@ -68,7 +77,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               err.statusCode >= 500) &&
             cachedUser
           ) {
-            setUser(cachedUser as StaffMember);
+            setUser(normalizeUser(cachedUser));
           } else {
             authStorage.clearTokens();
             authStorage.clearUser();
@@ -93,7 +102,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const persistSession = (resp: { user: any; accessToken: string; refreshToken?: string }) => {
     authStorage.setTokens(resp.accessToken);
     authStorage.setUser(resp.user);
-    setUser(resp.user as StaffMember);
+    setUser(normalizeUser(resp.user));
     sessionStorage.removeItem('agendai:access-block-info');
   };
 

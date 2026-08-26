@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo, useCallback } from 'react';
+﻿import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '../components/ui/Header';
 import { QueueItemCard } from '../components/domain/QueueItemCard';
@@ -94,6 +94,35 @@ export const StaffDashboard: React.FC = () => {
       | 'referrals'
       | 'posts') || 'queue';
 
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const tabBtnRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+
+  const measureIndicator = useCallback(() => {
+    const container = tabsRef.current;
+    const activeBtn = tabBtnRefs.current.get(activeTab);
+    if (!container || !activeBtn) return;
+    const containerRect = container.getBoundingClientRect();
+    const btnRect = activeBtn.getBoundingClientRect();
+    const newLeft = btnRect.left - containerRect.left + container.scrollLeft;
+    setIndicator({
+      left: newLeft,
+      width: btnRect.width,
+    });
+    const btnCenter = newLeft + btnRect.width / 2;
+    const viewportCenter = container.clientWidth / 2;
+    container.scrollTo({ left: btnCenter - viewportCenter, behavior: 'smooth' });
+  }, [activeTab]);
+
+  useEffect(() => {
+    const timer = setTimeout(measureIndicator, 100);
+    window.addEventListener('resize', measureIndicator);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', measureIndicator);
+    };
+  }, [measureIndicator]);
+
   useEffect(() => {
     if (subscriptionLoading) return;
     if (accessState === 'needs_card') {
@@ -108,8 +137,12 @@ export const StaffDashboard: React.FC = () => {
       { id: 'queue', label: 'Fila', icon: List },
       { id: 'appointments', label: 'Agenda', icon: CalendarDays },
       { id: 'clients', label: 'Clientes', icon: Contact },
-      { id: 'settings', label: 'Configurações', icon: Settings },
     ];
+    if (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') {
+      t.push({ id: 'services', label: 'Serviços', icon: Scissors });
+      t.push({ id: 'team', label: 'Equipe', icon: Users });
+    }
+    t.push({ id: 'settings', label: 'Configurações', icon: Settings });
     if ((user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && hasDashboard) {
       t.push({ id: 'reports', label: 'Relatórios', icon: BarChart3 });
       t.push({ id: 'finance', label: 'Financeiro', icon: CreditCard });
@@ -195,25 +228,24 @@ export const StaffDashboard: React.FC = () => {
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       <main className="max-w-md mx-auto px-4 pt-6">
-        <div className="flex bg-surface p-1 rounded-xl mb-6 border border-border relative overflow-x-auto no-scrollbar">
+        <div ref={tabsRef} className="flex bg-surface p-1 rounded-xl mb-6 border border-border relative overflow-x-auto no-scrollbar">
           {tabs.map(tab => (
             <button
               key={tab.id}
+              ref={btn => { if (btn) tabBtnRefs.current.set(tab.id, btn); }}
               onClick={() => navigate(`/app/${tab.id}`)}
-              className={`flex-1 min-w-[4.5rem] py-2 text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-2 z-10 relative
+              className={`flex-shrink-0 px-3 py-2 text-[10px] sm:text-xs font-bold rounded-lg transition-all flex flex-col items-center justify-center gap-0.5 z-10 relative leading-tight
                         ${activeTab === tab.id ? 'text-text-primary' : 'text-text-muted'}
                     `}
             >
-              <tab.icon size={16} /> {tab.label}
+              <tab.icon size={16} />
+              <span>{tab.label}</span>
             </button>
           ))}
 
           <div
             className="absolute top-1 bottom-1 bg-surface-2 rounded-lg transition-all duration-300"
-            style={{
-              width: `calc(${100 / tabs.length}% - 2px)`,
-              left: `calc(${(tabs.findIndex(t => t.id === activeTab) !== -1 ? tabs.findIndex(t => t.id === activeTab) : 0) * (100 / tabs.length)}% + 1px)`,
-            }}
+            style={{ left: indicator.left, width: indicator.width }}
           ></div>
         </div>
 
@@ -222,34 +254,22 @@ export const StaffDashboard: React.FC = () => {
             {(user.role === 'MASTER_ADMIN' || user.role === 'OWNER') && (
               <>
                 <button
-                  onClick={() => navigate('/app/services')}
-                  className={`flex-1 min-w-[80px] py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'services' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
-                >
-                  <Scissors size={16} /> Serviços
-                </button>
-                <button
-                  onClick={() => navigate('/app/team')}
-                  className={`flex-1 min-w-[80px] py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'team' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
-                >
-                  <Users size={16} /> Equipe
-                </button>
-                <button
                   onClick={() => navigate('/app/subscription')}
-                  className={`flex-1 min-w-[80px] py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'subscription' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
+                  className={`flex-shrink-0 px-3 py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'subscription' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
                   title="Planos e assinatura"
                 >
                   <CreditCard size={16} /> Assinatura
                 </button>
                 <button
                   onClick={() => navigate('/app/referrals')}
-                  className={`flex-1 min-w-[80px] py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'referrals' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
+                  className={`flex-shrink-0 px-3 py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'referrals' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
                   title="Indique e ganhe"
                 >
                   <Gift size={16} /> Indicar
                 </button>
                 <button
                   onClick={() => navigate('/app/posts')}
-                  className={`flex-1 min-w-[80px] py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'posts' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
+                  className={`flex-shrink-0 px-3 py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'posts' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
                   title="Posts do salão"
                 >
                   <Megaphone size={16} /> Posts

@@ -6,6 +6,7 @@ import { CookieConsent } from './components/infra/CookieConsent';
 import { ScrollToTop } from './components/infra/ScrollToTop';
 import { ReferralRefCapture } from './components/infra/ReferralRefCapture';
 import { Loader } from './components/ui/Loader';
+import { ErrorBoundary } from './components/infra/ErrorBoundary';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const FeaturesPage = lazy(() => import('./pages/marketing/FeaturesPage'));
@@ -36,8 +37,9 @@ const App: React.FC = () => {
       <ReferralRefCapture />
       <AccessBlockedListener />
       <CookieConsent />
-      <Suspense fallback={<Loader />}>
-        <Routes>
+      <ErrorBoundary>
+        <Suspense fallback={<Loader />}>
+          <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/funcionalidades" element={<FeaturesPage />} />
           <Route path="/ia-preditiva" element={<AiPredictivePage />} />
@@ -102,6 +104,7 @@ const App: React.FC = () => {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 };

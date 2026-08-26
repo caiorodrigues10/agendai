@@ -183,7 +183,7 @@ export const SettingsPage: React.FC = () => {
             </h2>
             <p className="text-text-muted text-sm mb-4">
               Exclua permanentemente sua conta e dados pessoais. Esta ação é irreversível. Seus
-              dados serão anonimizados (nome → "Usuário Excluído", e-mail → "deleted-{id}
+              dados serão anonimizados (nome → "Usuário Excluído", e-mail → "deleted-{"{id}"}
               @agendai.local"), mas relações com a barbearia, logs de auditoria e pagamentos serão
               mantidos para conformidade legal e financeira.
             </p>

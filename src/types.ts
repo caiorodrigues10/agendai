@@ -71,6 +71,7 @@ export interface StaffMember {
   password?: string;
   role: StaffRole;
   barbershopId?: string;
+  emailVerified?: boolean;
 }
 
 export interface FeedPost {

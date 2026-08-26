@@ -8,9 +8,9 @@ import {
   getServiceDuration,
   getServiceName,
   getStaffName,
+  AvailabilitySlot,
 } from '../../utils/schedulingUtils';
 import { AppointmentBookingModal } from './AppointmentBookingModal';
-import { AvailabilitySlot } from '../../utils/schedulingUtils';
 import {
   ChevronLeft,
   ChevronRight,
@@ -82,7 +82,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
     currentUserRole === 'EMPLOYEE' ? 'professional' : 'salon'
   );
   const [selectedStaffId, setSelectedStaffId] = useState<string>(
-    currentUserRole === 'employee' && currentUserId ? currentUserId : (staff[0]?.id ?? 'any')
+    currentUserRole === 'EMPLOYEE' && currentUserId ? currentUserId : (staff[0]?.id ?? 'any')
   );
   const [showBooking, setShowBooking] = useState(false);
   const [selectedAppt, setSelectedAppt] = useState<Appointment | null>(null);
@@ -241,7 +241,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
 
           {showStaffDropdown && (
             <div className="absolute z-30 w-full mt-1 bg-surface border border-border rounded-xl shadow-2xl overflow-hidden animate-fade-in">
-              {currentUserRole !== 'employee' && (
+              {currentUserRole !== 'EMPLOYEE' && (
                 <button
                   onClick={() => {
                     setSelectedStaffId('any');
@@ -263,7 +263,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                   )}
                 </button>
               )}
-              {currentUserRole !== 'employee' && <div className="h-px bg-border" />}
+              {currentUserRole !== 'EMPLOYEE' && <div className="h-px bg-border" />}
               {staff.map(s => (
                 <button
                   key={s.id}

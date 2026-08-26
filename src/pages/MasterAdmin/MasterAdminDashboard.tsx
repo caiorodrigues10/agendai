@@ -1323,7 +1323,7 @@ const UsersTab: React.FC = () => {
                               : 'bg-surface-2 text-text-secondary'
                           }`}
                         >
-                          {u.name[0].toUpperCase()}
+                          {(u.name?.[0] ?? 'U').toUpperCase()}
                         </div>
                         <div className="min-w-0">
                           <div className="font-bold text-text-primary text-sm truncate">

@@ -1,8 +1,7 @@
 import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
-import { Appointment, QueueItem } from '../types';
-import { AvailabilitySlot } from '../utils/schedulingUtils';
 import { QueueItem } from '../types';
+import { AvailabilitySlot } from '../utils/schedulingUtils';
 
 function unwrap<T>(res: unknown): T {
   if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
