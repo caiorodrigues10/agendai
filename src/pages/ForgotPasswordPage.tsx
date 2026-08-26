@@ -8,6 +8,7 @@ import {
   LockKeyhole,
   AlertCircle,
   Mail,
+  MessageCircle,
   Loader2,
   CheckCircle,
 } from 'lucide-react'
@@ -28,17 +29,39 @@ export const ForgotPasswordPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [step, setStep] = useState<'email' | 'choose'>('email')
 
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isValidEmail) return
+    setStep('choose')
+  }
+
+  const handleSendEmail = async () => {
     setSubmitting(true)
     setError(null)
     try {
       await authApi.forgotPassword(email.trim())
       setSuccess(true)
+    } catch {
+      setSuccess(true)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleSendWhatsApp = async () => {
+    setSubmitting(true)
+    setError(null)
+    try {
+      const result = await authApi.requestWhatsAppReset(email.trim())
+      if (result.requestId) {
+        navigate(`/verificar-codigo?requestId=${result.requestId}&maskedPhone=${encodeURIComponent(result.maskedPhone ?? '')}`)
+      } else {
+        setSuccess(true)
+      }
     } catch {
       setSuccess(true)
     } finally {
@@ -114,48 +137,93 @@ export const ForgotPasswordPage: React.FC = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="w-full space-y-6">
-            <div className="space-y-4">
-              <p className="text-[11px] text-text-muted text-center leading-relaxed">
-                Informe o e-mail associado à sua conta e enviaremos instruções para redefinir sua senha.
-              </p>
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-accent">
-                  E-mail
-                </label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail
-                      size={16}
-                      className="text-text-muted group-focus-within:text-accent transition-colors"
+          {step === 'email' ? (
+            <form onSubmit={handleEmailSubmit} className="w-full space-y-6">
+              <div className="space-y-4">
+                <p className="text-[11px] text-text-muted text-center leading-relaxed">
+                  Informe o e-mail associado à sua conta para recuperar sua senha.
+                </p>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-accent">
+                    E-mail
+                  </label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Mail
+                        size={16}
+                        className="text-text-muted group-focus-within:text-accent transition-colors"
+                      />
+                    </div>
+                    <input
+                      type="email"
+                      className={inputClass(false)}
+                      placeholder="seu@email.com"
+                      autoFocus
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                     />
                   </div>
-                  <input
-                    type="email"
-                    className={inputClass(false)}
-                    placeholder="seu@email.com"
-                    autoFocus
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
                 </div>
               </div>
-            </div>
 
-            <button
-              type="submit"
-              disabled={submitting || !isValidEmail}
-              className="w-full py-4 bg-accent text-accent-fg hover:bg-accent-hover shadow-lg shadow-accent/20 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 disabled:opacity-60"
-            >
-              {submitting ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : (
-                <>
-                  Enviar instruções <ArrowRight size={14} />
-                </>
-              )}
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={!isValidEmail}
+                className="w-full py-4 bg-accent text-accent-fg hover:bg-accent-hover shadow-lg shadow-accent/20 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 disabled:opacity-60"
+              >
+                Continuar <ArrowRight size={14} />
+              </button>
+            </form>
+          ) : (
+            <div className="w-full space-y-6">
+              <p className="text-[11px] text-text-muted text-center leading-relaxed">
+                Como deseja receber o código de redefinição para{' '}
+                <strong className="text-text-secondary">{email}</strong>?
+              </p>
+
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={handleSendEmail}
+                  className="w-full py-4 bg-bg border border-border hover:border-accent/50 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 text-text-primary hover:text-accent disabled:opacity-60"
+                >
+                  {submitting ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <>
+                      <Mail size={16} />
+                      Enviar por e-mail
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  disabled={submitting}
+                  onClick={handleSendWhatsApp}
+                  className="w-full py-4 bg-[#25d366] hover:bg-[#1da851] text-white rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 disabled:opacity-60"
+                >
+                  {submitting ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <>
+                      <MessageCircle size={16} />
+                      Enviar por WhatsApp
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setStep('email')}
+                className="w-full text-[11px] text-text-muted hover:text-accent transition-colors text-center"
+              >
+                Usar outro e-mail
+              </button>
+            </div>
+          )}
 
           <button
             type="button"
@@ -169,3 +237,5 @@ export const ForgotPasswordPage: React.FC = () => {
     </div>
   )
 }
+
+export default ForgotPasswordPage;

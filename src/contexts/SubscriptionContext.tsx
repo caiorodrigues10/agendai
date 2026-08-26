@@ -43,12 +43,8 @@ const deriveAccessState = (data: MySubscription | null): AccessState => {
   if (!data) return 'unknown';
   const sub = data.subscription;
   if (sub?.status === 'ACTIVE') return 'active';
-  if (sub?.status === 'TRIALING' && sub.hasPaymentMethod) return 'trial';
-  if (data.trial && !data.trial.isExpired) {
-    // Calendário de trial sem cartão vaulted → obrigatório cadastrar
-    if (!sub?.hasPaymentMethod) return 'needs_card';
-    return 'trial';
-  }
+  if (sub?.status === 'TRIALING') return 'trial';
+  if (data.trial && !data.trial.isExpired) return 'trial';
   if (sub && ['PAST_DUE', 'CANCELED', 'UNPAID'].includes(sub.status)) return 'blocked';
   if (data.trial?.isExpired) return 'blocked';
   return 'unknown';

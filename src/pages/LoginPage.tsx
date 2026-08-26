@@ -603,6 +603,14 @@ export const LoginPage: React.FC = () => {
                     />
                   </div>
 
+                  <button
+                    type="button"
+                    onClick={() => navigate('/esqueci-senha')}
+                    className="text-[11px] text-text-muted hover:text-accent transition-colors text-right w-full -mt-2"
+                  >
+                    Esqueci minha senha
+                  </button>
+
                   <button type="submit" disabled={submitting} className={primaryBtn}>
                     {submitting ? (
                       <Loader2 size={14} className="animate-spin" />
