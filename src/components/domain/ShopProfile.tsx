@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShopSettings, FeedPost, StaffMember } from '../../types';
 import { Logo } from '../ui/Logo';
@@ -13,8 +13,11 @@ import {
   Star,
   Scissors,
   MoreHorizontal,
+  Film,
+  X,
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
+import { barbershopApi } from '../../infra/barbershopApi';
 
 interface ShopProfileProps {
   settings: ShopSettings;
@@ -38,7 +41,20 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
   const [newPostTitle, setNewPostTitle] = useState('');
   const [newPostType, setNewPostType] = useState<'haircut' | 'beard' | 'announcement'>('haircut');
   const [newPostImage, setNewPostImage] = useState<string | null>(null);
+  const [newPostVideoUrl, setNewPostVideoUrl] = useState<string | null>(null);
+  const [newPostVideoPreview, setNewPostVideoPreview] = useState<string | null>(null);
+  const [videoError, setVideoError] = useState<string | null>(null);
   const [isPosting, setIsPosting] = useState(false);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const videoPreviewObjectUrl = useRef<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (videoPreviewObjectUrl.current) {
+        URL.revokeObjectURL(videoPreviewObjectUrl.current);
+      }
+    };
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,9 +67,70 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
     }
   };
 
+  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setVideoError(null);
+
+    if (file.size > 25 * 1024 * 1024) {
+      setVideoError('Arquivo muito grande. Máximo: 25 MB');
+      return;
+    }
+
+    const video = document.createElement('video');
+    const objectUrl = URL.createObjectURL(file);
+    video.src = objectUrl;
+
+    video.onloadedmetadata = async () => {
+      if (video.duration > 60) {
+        URL.revokeObjectURL(objectUrl);
+        setVideoError('Vídeo muito longo. Máximo: 60 segundos');
+        return;
+      }
+
+      if (videoPreviewObjectUrl.current) {
+        URL.revokeObjectURL(videoPreviewObjectUrl.current);
+      }
+      videoPreviewObjectUrl.current = objectUrl;
+      setNewPostVideoPreview(objectUrl);
+
+      try {
+        if (!currentUser?.barbershopId) return;
+        const result = await barbershopApi.uploadPostVideo(currentUser.barbershopId, file);
+        setNewPostVideoUrl(result.videoUrl);
+      } catch (err) {
+        setVideoError(err instanceof Error ? err.message : 'Erro ao enviar vídeo');
+        setNewPostVideoPreview(null);
+        if (videoPreviewObjectUrl.current) {
+          URL.revokeObjectURL(videoPreviewObjectUrl.current);
+          videoPreviewObjectUrl.current = null;
+        }
+      }
+    };
+
+    video.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      setVideoError('Formato de vídeo não suportado');
+    };
+  };
+
+  const handleRemoveVideo = () => {
+    if (videoPreviewObjectUrl.current) {
+      URL.revokeObjectURL(videoPreviewObjectUrl.current);
+      videoPreviewObjectUrl.current = null;
+    }
+    setNewPostVideoPreview(null);
+    setNewPostVideoUrl(null);
+    setVideoError(null);
+    if (videoInputRef.current) {
+      videoInputRef.current.value = '';
+    }
+  };
+
   const handleSubmitPost = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPostContent && !newPostImage && !newPostTitle) return;
+    if (!newPostContent && !newPostImage && !newPostVideoUrl && !newPostTitle) return;
 
     setIsPosting(true);
 
@@ -63,6 +140,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
       title: newPostTitle,
       content: newPostContent,
       imageUrl: newPostImage || undefined,
+      videoUrl: newPostVideoUrl || undefined,
       createdAt: Date.now(),
       likes: 0,
       authorName: currentUser?.name || 'Equipe',
@@ -73,6 +151,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
       setNewPostContent('');
       setNewPostTitle('');
       setNewPostImage(null);
+      handleRemoveVideo();
       setIsPosting(false);
     }, 500);
   };
@@ -188,16 +267,49 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
               </div>
             )}
 
-            <div className="flex items-center justify-between">
-              <label className="px-3 py-2 text-xs bg-bg text-text-secondary rounded-lg border border-border cursor-pointer hover:bg-surface flex items-center gap-2">
-                <ImageIcon size={14} /> Adicionar imagem
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
+            {newPostVideoPreview && (
+              <div className="relative rounded-xl overflow-hidden border border-border">
+                <video
+                  src={newPostVideoPreview}
+                  className="w-full h-40 object-cover"
+                  controls
                 />
-              </label>
+                <button
+                  type="button"
+                  onClick={handleRemoveVideo}
+                  className="absolute top-2 right-2 p-1.5 bg-bg/80 rounded-full text-text-secondary hover:text-danger transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            )}
+
+            {videoError && (
+              <p className="text-xs text-danger">{videoError}</p>
+            )}
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <label className="px-3 py-2 text-xs bg-bg text-text-secondary rounded-lg border border-border cursor-pointer hover:bg-surface flex items-center gap-2">
+                  <ImageIcon size={14} /> Imagem
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </label>
+                <label className="px-3 py-2 text-xs bg-bg text-text-secondary rounded-lg border border-border cursor-pointer hover:bg-surface flex items-center gap-2">
+                  <Film size={14} /> Vídeo
+                  <input
+                    ref={videoInputRef}
+                    type="file"
+                    accept="video/mp4,video/webm,video/quicktime"
+                    onChange={handleVideoUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
               <button
                 type="submit"
                 disabled={isPosting}
@@ -251,6 +363,13 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
             </div>
             {post.imageUrl && (
               <img src={post.imageUrl} alt="Post" className="w-full h-56 object-cover" />
+            )}
+            {post.videoUrl && !post.imageUrl && (
+              <video
+                src={post.videoUrl}
+                className="w-full h-56 object-cover"
+                controls
+              />
             )}
             {(post.postMode || post.ctaText) && post.barbershopId && (
               <div className="p-4 pb-0">

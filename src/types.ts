@@ -80,6 +80,7 @@ export interface FeedPost {
   title?: string;
   content: string;
   imageUrl?: string;
+  videoUrl?: string;
   createdAt: number;
   likes: number;
   authorName?: string;

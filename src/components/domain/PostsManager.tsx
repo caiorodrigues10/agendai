@@ -13,6 +13,7 @@ import {
   List,
   CheckCheck,
   Image as ImageIcon,
+  Film,
 } from 'lucide-react';
 import { barbershopApi } from '../../infra/barbershopApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';

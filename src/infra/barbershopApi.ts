@@ -247,4 +247,26 @@ export const barbershopApi = {
     const token = authStorage.getAccessToken() || '';
     return apiClient<void>(`/api/barbershops/${barbershopId}/logo`, 'DELETE', undefined, token);
   },
+
+  uploadPostVideo: async (barbershopId: string, file: File): Promise<{ videoUrl: string }> => {
+    const token = authStorage.getAccessToken() || '';
+    const formData = new FormData();
+    formData.append('video', file);
+
+    const response = await fetch(`/api/feed/video?barbershopId=${barbershopId}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Erro ao enviar vídeo' }));
+      throw new Error(error.message || 'Erro ao enviar vídeo');
+    }
+
+    const result = await response.json();
+    return result.data;
+  },
 };
