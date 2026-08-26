@@ -4,7 +4,7 @@ import { authStorage } from '../infra/authStorage';
 import { ApiError } from '../infra/apiClient';
 import { StaffMember } from '../types';
 
-type AuthResult = { ok: true } | { ok: false; message: string };
+export type AuthResult = { ok: true } | { ok: false; message: string };
 
 interface AuthContextValue {
   user: StaffMember | null;

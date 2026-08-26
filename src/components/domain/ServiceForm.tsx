@@ -27,7 +27,9 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
 
   const onSubmit = (data: ServiceFormData) => {
     onSave({
-      ...data,
+      name: data.name,
+      price: data.price,
+      avgTimeMinutes: data.avgTimeMinutes,
       icon: selectedIcon
     });
   };

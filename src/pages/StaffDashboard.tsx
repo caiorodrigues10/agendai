@@ -32,7 +32,7 @@ export const StaffDashboard: React.FC = () => {
 
   const tabs = useMemo(() => {
     const t = [{ id: 'queue', label: 'Fila', icon: List }, { id: 'appointments', label: 'Agenda', icon: CalendarDays }];
-    if ((user?.role === 'admin' || user?.role === 'owner') && hasDashboard) {
+    if ((user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && hasDashboard) {
         t.push({ id: 'reports', label: 'Relatórios', icon: BarChart3 });
         t.push({ id: 'finance', label: 'Financeiro', icon: CreditCard });
     }
@@ -43,17 +43,17 @@ export const StaffDashboard: React.FC = () => {
   useEffect(() => {
     if (!user) return;
     const restrictedTabs = ['services', 'settings', 'team'];
-    if (restrictedTabs.includes(activeTab) && !(user.role === 'admin' || user.role === 'owner')) {
+    if (restrictedTabs.includes(activeTab) && !(user.role === 'MASTER_ADMIN' || user.role === 'OWNER')) {
       navigate('/app/queue');
     }
     // Redirecionar se tentar acessar reports sem permissão (caso acesse via URL direta)
-    if (activeTab === 'reports' && (user.role === 'employee' || !hasDashboard)) {
+    if (activeTab === 'reports' && (user.role === 'EMPLOYEE' || !hasDashboard)) {
       navigate('/app/queue');
     }
-    if (activeTab === 'finance' && (!(user.role === 'admin' || user.role === 'owner') || !hasDashboard)) {
+    if (activeTab === 'finance' && (!(user.role === 'MASTER_ADMIN' || user.role === 'OWNER') || !hasDashboard)) {
       navigate('/app/queue');
     }
-    if (activeTab === 'subscription' && !(user.role === 'admin' || user.role === 'owner')) {
+    if (activeTab === 'subscription' && !(user.role === 'MASTER_ADMIN' || user.role === 'OWNER')) {
       navigate('/app/queue');
     }
   }, [activeTab, user, navigate, hasDashboard]);
@@ -121,7 +121,7 @@ export const StaffDashboard: React.FC = () => {
         {user && (
           <div className="flex gap-2 mb-6 bg-surface p-1 rounded-lg border border-border overflow-x-auto no-scrollbar">
 
-            {(user.role === 'admin' || user.role === 'owner') && (
+            {(user.role === 'MASTER_ADMIN' || user.role === 'OWNER') && (
                 <>
                     <button onClick={() => navigate('/app/services')} className={`flex-1 min-w-[80px] py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'services' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}>
                         <Scissors size={16} /> Serviços
@@ -177,15 +177,15 @@ export const StaffDashboard: React.FC = () => {
             </div>
         )}
 
-        {(user?.role === 'admin' || user?.role === 'owner') && activeTab === 'settings' && settings && (
+        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'settings' && settings && (
             <SettingsManager settings={settings} onSave={(s) => { setSettings(s); showToast('Salvo!'); }} />
         )}
 
-        {(user?.role === 'admin' || user?.role === 'owner') && activeTab === 'services' && (
+        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'services' && (
             <ServiceManager services={services} onAdd={addService} onEdit={editService} onDelete={deleteService} />
         )}
 
-        {(user?.role === 'admin' || user?.role === 'owner') && activeTab === 'team' && user && (
+        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'team' && user && (
             <TeamManager staff={staff} onUpdateTeam={async (t) => { await updateTeam(t); showToast('Equipe atualizada'); }} currentAdminId={user.id} />
         )}
 
@@ -199,11 +199,11 @@ export const StaffDashboard: React.FC = () => {
             />
         )}
 
-        {(user?.role === 'admin' || user?.role === 'owner') && activeTab === 'finance' && (
+        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'finance' && (
             <OwnerFinancialPanel />
         )}
 
-        {(user?.role === 'admin' || user?.role === 'owner') && activeTab === 'subscription' && (
+        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'subscription' && (
             <OwnerSubscriptionPanel />
         )}
 

@@ -18,6 +18,9 @@ export const RegisterSchema = z.object({
   barbershopName: z.string().min(3, 'Nome do salão é obrigatório'),
   whatsapp: z.string().min(10, 'WhatsApp inválido (mínimo 10 dígitos)'),
   cnpj: z.string().optional(),
+  termsAccepted: z.boolean().refine(v => v === true, 'É necessário aceitar os Termos de Uso'),
+  lgpdConsent: z.boolean().refine(v => v === true, 'É necessário consentir com o tratamento de dados (LGPD)'),
+  marketingOptIn: z.boolean().optional().default(false),
 });
 
 export type RegisterFormData = z.infer<typeof RegisterSchema>;

@@ -49,7 +49,7 @@ const brl = (n: number) =>
   n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
 
 const isOwnerLike = (role: StaffMember['role']) =>
-  role === 'OWNER' || role === 'MASTER_ADMIN' || (role as string) === 'owner' || (role as string) === 'admin';
+  role === 'OWNER' || role === 'MASTER_ADMIN';
 
 export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
   queueHistory,

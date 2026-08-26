@@ -31,7 +31,7 @@ interface AppointmentCalendarProps {
   staff: StaffMember[];
   settings: ShopSettings;
   currentUserId?: string;
-  currentUserRole?: string;
+  currentUserRole?: StaffMember['role'];
   occupancy: AvailabilitySlot[];
   onBook: (data: any) => Promise<void>;
   onCancel: (id: string) => void;
@@ -54,10 +54,10 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
 }) => {
   const [selectedDate, setSelectedDate] = useState(() => formatDateISO(new Date()));
   const [view, setView] = useState<AgendaView>(
-    currentUserRole === 'employee' ? 'professional' : 'salon'
+    currentUserRole === 'EMPLOYEE' ? 'professional' : 'salon'
   );
   const [selectedStaffId, setSelectedStaffId] = useState<string>(
-    currentUserRole === 'employee' && currentUserId ? currentUserId : staff[0]?.id ?? 'any'
+    currentUserRole === 'EMPLOYEE' && currentUserId ? currentUserId : staff[0]?.id ?? 'any'
   );
   const [showBooking, setShowBooking] = useState(false);
   const [selectedAppt, setSelectedAppt] = useState<Appointment | null>(null);
@@ -156,7 +156,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
           onChange={(e) => setSelectedStaffId(e.target.value)}
           className="w-full bg-surface border border-border rounded-xl px-4 py-2.5 text-text-primary text-sm"
         >
-          {currentUserRole !== 'employee' && <option value="any">Qualquer profissional</option>}
+          {currentUserRole !== 'EMPLOYEE' && <option value="any">Qualquer profissional</option>}
           {staff.map((s) => (
             <option key={s.id} value={s.id}>{s.name}</option>
           ))}

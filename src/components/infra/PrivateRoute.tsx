@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface PrivateRouteProps {
-  roles?: ('admin' | 'owner' | 'employee' | 'MASTER_ADMIN' | 'OWNER' | 'EMPLOYEE' | 'ADMIN')[];
+  roles?: ('MASTER_ADMIN' | 'OWNER' | 'EMPLOYEE' | 'CUSTOMER')[];
   children: React.ReactNode;
   fallback?: React.ReactNode;
 }

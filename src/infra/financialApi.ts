@@ -122,6 +122,15 @@ export interface CreateExpenseBody {
   notes?: string | null;
 }
 
+export interface FiadoPayment {
+  id: string;
+  fiadoId: string;
+  amount: number;
+  notes: string | null;
+  registeredById: string;
+  createdAt: string;
+}
+
 export interface CreateFiadoBody {
   customerName: string;
   whatsapp: string;
@@ -238,7 +247,7 @@ export const financialApi = {
       token()
     ).then(res => unwrap<ExpenseSummary>(res)),
 
-  listFiados: (params?: { page?: number; status?: string; search?: string }) =>
+  listFiados: (params?: { page?: number; limit?: number; status?: string; search?: string }) =>
     apiClient<{ success: boolean; data: FiadoItem[]; meta: ListMeta }>(
       `/api/fiado${buildQuery(params)}`,
       'GET',
@@ -258,12 +267,12 @@ export const financialApi = {
     ).then(res => unwrap<FiadoItem>(res)),
 
   addFiadoPayment: (id: string, body: { amount: number; notes?: string }) =>
-    apiClient<{ success: boolean; data: unknown }>(
+    apiClient<{ success: boolean; data: FiadoPayment }>(
       `/api/fiado/${id}/payments`,
       'POST',
       body,
       token()
-    ).then(res => unwrap(res)),
+    ).then(res => unwrap<FiadoPayment>(res)),
 
   deleteFiado: (id: string) =>
     apiClient<void>(`/api/fiado/${id}`, 'DELETE', undefined, token()),

@@ -35,11 +35,11 @@ interface PasswordInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEle
 }
 
 export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
-  ({ showPassword, onToggleShow, error, showStrength, value = '', className, ...props }, ref) => {
-    const strength = showStrength ? getPasswordStrength(value) : null;
+  ({ showPassword, onToggleShow, error, showStrength, value, className, ...props }, ref) => {
+    const strength = showStrength ? getPasswordStrength(value ?? '') : null;
     const hasError = !!error;
     const borderLevel = hasError ? 'empty' : (strength?.level ?? 'empty');
-    const showMeter = showStrength && value.length > 0;
+    const showMeter = showStrength && (value ?? '').length > 0;
 
     return (
       <div className="space-y-1">
@@ -64,7 +64,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             <input
               ref={ref}
               type={showPassword ? 'text' : 'password'}
-              value={value}
+              {...(value !== undefined ? { value } : {})}
               className={`
                 w-full bg-transparent py-3 pl-10 pr-10 text-text-primary text-sm
                 outline-none placeholder:text-text-muted

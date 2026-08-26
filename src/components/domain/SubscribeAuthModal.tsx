@@ -15,6 +15,7 @@ import {
   Store,
   Smartphone,
   CreditCard,
+  Check,
 } from 'lucide-react';
 import { LoginSchema, LoginFormData, RegisterSchema, RegisterFormData } from '../../schemas';
 import { useAuth } from '../../contexts/AuthContext';
@@ -48,7 +49,7 @@ export const SubscribeAuthModal: React.FC<SubscribeAuthModalProps> = ({ plan, on
 
   const registerForm = useForm<RegisterFormData>({
     resolver: zodResolver(RegisterSchema),
-    defaultValues: { cnpj: '' },
+    defaultValues: { cnpj: '', termsAccepted: false, lgpdConsent: false, marketingOptIn: false },
   });
 
   const goToCheckout = () => {
@@ -61,7 +62,7 @@ export const SubscribeAuthModal: React.FC<SubscribeAuthModalProps> = ({ plan, on
     setSubmitting(true);
     const result = await login(data.email, data.password);
     setSubmitting(false);
-    if (!result.ok) {
+    if (result.ok === false) {
       setFormError(result.message);
       return;
     }
@@ -84,9 +85,13 @@ export const SubscribeAuthModal: React.FC<SubscribeAuthModalProps> = ({ plan, on
       barbershopName: data.barbershopName.trim(),
       whatsapp: normalizeDocument(data.whatsapp),
       cnpj: data.cnpj ? normalizeDocument(data.cnpj) : undefined,
+      termsVersion: '1.0',
+      termsAccepted: data.termsAccepted,
+      lgpdConsent: data.lgpdConsent,
+      marketingOptIn: data.marketingOptIn,
     });
     setSubmitting(false);
-    if (!result.ok) {
+    if (result.ok === false) {
       setFormError(result.message);
       return;
     }
@@ -340,6 +345,78 @@ export const SubscribeAuthModal: React.FC<SubscribeAuthModalProps> = ({ plan, on
                     registerForm.setValue('cnpj', maskCnpj(e.target.value), { shouldValidate: true })
                   }
                 />
+              </div>
+
+              <div className="space-y-3 pt-1">
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <div className="relative mt-0.5">
+                    <input
+                      type="checkbox"
+                      className="peer sr-only"
+                      checked={registerForm.watch('termsAccepted') ?? false}
+                      onChange={(e) =>
+                        registerForm.setValue('termsAccepted', e.target.checked, { shouldValidate: true })
+                      }
+                    />
+                    <div className="w-4 h-4 rounded border border-border bg-bg transition-all peer-checked:bg-accent peer-checked:border-accent flex items-center justify-center">
+                      {registerForm.watch('termsAccepted') && <Check size={10} className="text-white" />}
+                    </div>
+                  </div>
+                  <span className="text-[11px] text-text-muted leading-relaxed group-hover:text-text-secondary transition-colors">
+                    Li e aceito os{' '}
+                    <span className="text-accent font-medium">Termos de Uso</span> e a{' '}
+                    <span className="text-accent font-medium">Política de Privacidade</span>
+                  </span>
+                </label>
+                {registerForm.formState.errors.termsAccepted && (
+                  <span className="text-[10px] text-danger flex items-center gap-1 -mt-2">
+                    <AlertCircle size={10} /> {registerForm.formState.errors.termsAccepted.message}
+                  </span>
+                )}
+
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <div className="relative mt-0.5">
+                    <input
+                      type="checkbox"
+                      className="peer sr-only"
+                      checked={registerForm.watch('lgpdConsent') ?? false}
+                      onChange={(e) =>
+                        registerForm.setValue('lgpdConsent', e.target.checked, { shouldValidate: true })
+                      }
+                    />
+                    <div className="w-4 h-4 rounded border border-border bg-bg transition-all peer-checked:bg-accent peer-checked:border-accent flex items-center justify-center">
+                      {registerForm.watch('lgpdConsent') && <Check size={10} className="text-white" />}
+                    </div>
+                  </div>
+                  <span className="text-[11px] text-text-muted leading-relaxed group-hover:text-text-secondary transition-colors">
+                    Concordo com o tratamento dos meus dados pessoais, conforme a{' '}
+                    <span className="text-accent font-medium">LGPD</span>
+                  </span>
+                </label>
+                {registerForm.formState.errors.lgpdConsent && (
+                  <span className="text-[10px] text-danger flex items-center gap-1 -mt-2">
+                    <AlertCircle size={10} /> {registerForm.formState.errors.lgpdConsent.message}
+                  </span>
+                )}
+
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <div className="relative mt-0.5">
+                    <input
+                      type="checkbox"
+                      className="peer sr-only"
+                      checked={registerForm.watch('marketingOptIn') ?? false}
+                      onChange={(e) =>
+                        registerForm.setValue('marketingOptIn', e.target.checked)
+                      }
+                    />
+                    <div className="w-4 h-4 rounded border border-border bg-bg transition-all peer-checked:bg-accent peer-checked:border-accent flex items-center justify-center">
+                      {registerForm.watch('marketingOptIn') && <Check size={10} className="text-white" />}
+                    </div>
+                  </div>
+                  <span className="text-[11px] text-text-muted leading-relaxed group-hover:text-text-secondary transition-colors">
+                    Quero receber novidades e promoções por e-mail
+                  </span>
+                </label>
               </div>
 
               <button

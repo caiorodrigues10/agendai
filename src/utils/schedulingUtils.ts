@@ -1,4 +1,4 @@
-import { Appointment, Service, ShopSettings, StaffMember, DaySchedule } from '../../types';
+import { Appointment, Service, ShopSettings, StaffMember, DaySchedule } from '../types';
 
 export interface AvailabilitySlot {
   time: string;

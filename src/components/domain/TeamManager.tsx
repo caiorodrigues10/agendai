@@ -138,20 +138,20 @@ export const TeamManager: React.FC<TeamManagerProps> = ({ staff, onUpdateTeam, c
         {staff.map((member) => (
           <div key={member.id} className="bg-surface p-3 rounded-lg border border-border flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${member.role === 'OWNER' || member.role === 'MASTER_ADMIN' || member.role === 'owner' ? 'bg-accent/20 text-accent' : 'bg-surface-2 text-text-secondary'}`}>
-                {member.role === 'OWNER' || member.role === 'MASTER_ADMIN' || member.role === 'owner' ? <Shield size={16} /> : <User size={16} />}
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${member.role === 'OWNER' || member.role === 'MASTER_ADMIN' ? 'bg-accent/20 text-accent' : 'bg-surface-2 text-text-secondary'}`}>
+                {member.role === 'OWNER' || member.role === 'MASTER_ADMIN' ? <Shield size={16} /> : <User size={16} />}
               </div>
               <div>
                 <h4 className="font-medium text-sm text-text-primary">{member.name} {member.id === currentAdminId && '(Você)'}</h4>
                 <p className="text-xs text-text-muted flex items-center gap-1">
                    {member.email} <span className="uppercase text-[0.6rem] border border-border px-1 rounded bg-bg">
-                     {member.role === 'MASTER_ADMIN' || member.role === 'admin' ? 'Admin' : member.role === 'OWNER' || member.role === 'owner' ? 'Dono' : 'Funcionário'}
+                     {member.role === 'MASTER_ADMIN' ? 'Admin' : member.role === 'OWNER' ? 'Dono' : 'Funcionário'}
                    </span>
                 </p>
               </div>
             </div>
 
-            {member.id !== currentAdminId && (member.role === 'EMPLOYEE' || member.role === 'employee') && (
+            {member.id !== currentAdminId && member.role === 'EMPLOYEE' && (
               deleteConfirmId === member.id ? (
                 <div className="flex items-center gap-2 animate-fade-in">
                    <span className="text-[10px] text-danger font-bold">Excluir?</span>

@@ -1,5 +1,6 @@
 import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
+import { Appointment, QueueItem } from '../types';
 import { AvailabilitySlot } from '../utils/schedulingUtils';
 
 function unwrap<T>(res: any): T {
@@ -35,12 +36,12 @@ export const schedulingApi = {
   },
   joinQueue: async (payload: any) => {
     const res = await apiClient<any>('/api/queue', 'POST', payload);
-    return unwrap(res);
+    return unwrap<QueueItem>(res);
   },
   updateQueueItem: async (id: string, payload: any) => {
     const token = authStorage.getAccessToken() || '';
     const res = await apiClient<any>(`/api/queue/${id}`, 'PATCH', payload, token);
-    return unwrap(res);
+    return unwrap<QueueItem>(res);
   },
   deleteQueueItem: (id: string) => {
     const token = authStorage.getAccessToken() || '';
@@ -54,22 +55,22 @@ export const schedulingApi = {
   listAppointments: (params: ListAppointmentsParams = {}) => {
     const token = authStorage.getAccessToken() || '';
     if (!token) return Promise.resolve([]);
-    return apiClient<any>(`/api/appointments${buildQuery(params as Record<string, string | undefined>)}`, 'GET', undefined, token).then(unwrap);
+    return apiClient<any>(`/api/appointments${buildQuery(params as Record<string, string | undefined>)}`, 'GET', undefined, token).then(res => unwrap<Appointment[]>(res));
   },
   getAvailability: (barbershopId: string, date: string, staffId?: string) => {
     const qs = buildQuery({ barbershopId, date, staffId });
-    return apiClient<AvailabilitySlot[]>(`/api/appointments/availability${qs}`).then(unwrap);
+    return apiClient<AvailabilitySlot[]>(`/api/appointments/availability${qs}`).then(res => unwrap<AvailabilitySlot[]>(res));
   },
   bookAppointment: async (payload: any) => {
     // Backend exige staff autenticado para criar agendamento
     const token = authStorage.getAccessToken() || undefined;
     const res = await apiClient<any>('/api/appointments', 'POST', payload, token);
-    return unwrap(res);
+    return unwrap<Appointment>(res);
   },
   updateAppointment: async (id: string, payload: any) => {
     const token = authStorage.getAccessToken() || '';
     const res = await apiClient<any>(`/api/appointments/${id}`, 'PATCH', payload, token);
-    return unwrap(res);
+    return unwrap<Appointment>(res);
   },
   deleteAppointment: (id: string) => {
     const token = authStorage.getAccessToken() || '';

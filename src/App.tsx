@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { PublicHome } from './pages/PublicHome';
 import { StaffDashboard } from './pages/StaffDashboard';
 import { LoginPage } from './pages/LoginPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { LandingPage } from './pages/LandingPage';
 import { FeaturesPage } from './pages/marketing/FeaturesPage';
 import { AiPredictivePage } from './pages/marketing/AiPredictivePage';
@@ -32,6 +34,8 @@ const App: React.FC = () => {
         <Route path="/queue" element={<PublicHome />} />
         <Route path="/queue/:id" element={<PublicHome />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
+        <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
         {/* Tela de bloqueio: também acessível sem sessão (bloqueio pode ocorrer no login) */}
         <Route path="/bloqueado" element={<AccessBlockedPage />} />
         {/* Planos são públicos: qualquer visitante pode ver preços antes de logar.
@@ -40,12 +44,12 @@ const App: React.FC = () => {
         <Route
           path="/checkout"
           element={
-            <PrivateRoute roles={['OWNER', 'MASTER_ADMIN', 'ADMIN']} fallback={<Navigate to="/login" replace />}>
+            <PrivateRoute roles={['OWNER', 'MASTER_ADMIN']} fallback={<Navigate to="/login" replace />}>
               <CheckoutPage />
             </PrivateRoute>
           }
         />
-        <Route path="/master/*" element={<PrivateRoute roles={['MASTER_ADMIN', 'ADMIN']} fallback={<Navigate to="/login" replace />}> <MasterAdminDashboard /> </PrivateRoute>} />
+        <Route path="/master/*" element={<PrivateRoute roles={['MASTER_ADMIN']} fallback={<Navigate to="/login" replace />}> <MasterAdminDashboard /> </PrivateRoute>} />
         <Route
           path="/app/:tab"
           element={
