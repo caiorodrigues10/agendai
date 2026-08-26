@@ -33,8 +33,10 @@ import {
   Gift,
   Megaphone,
   Contact,
+  Link2,
 } from 'lucide-react';
 import { ClientsManager } from '../components/domain/ClientsManager';
+import { PublicLinkPanel } from '../components/domain/PublicLinkPanel';
 
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -92,7 +94,8 @@ export const StaffDashboard: React.FC = () => {
       | 'finance'
       | 'subscription'
       | 'referrals'
-      | 'posts') || 'queue';
+      | 'posts'
+      | 'link') || 'queue';
 
   const tabsRef = useRef<HTMLDivElement>(null);
   const tabBtnRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
@@ -179,6 +182,9 @@ export const StaffDashboard: React.FC = () => {
     if (activeTab === 'posts' && !(user.role === 'MASTER_ADMIN' || user.role === 'OWNER')) {
       navigate('/app/queue');
     }
+    if (activeTab === 'link' && !(user.role === 'MASTER_ADMIN' || user.role === 'OWNER')) {
+      navigate('/app/queue');
+    }
   }, [activeTab, user, navigate, hasDashboard]);
 
   const showToast = (msg: string, type: 'success' | 'bot' = 'success') => {
@@ -228,7 +234,7 @@ export const StaffDashboard: React.FC = () => {
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       <main className="max-w-md mx-auto px-4 pt-6">
-        <div ref={tabsRef} className="flex bg-surface p-1 rounded-xl mb-6 border border-border relative overflow-x-auto no-scrollbar">
+        <div ref={tabsRef} className="flex w-full max-w-full bg-surface p-1 rounded-xl mb-6 border border-border relative overflow-x-auto no-scrollbar">
           {tabs.map(tab => (
             <button
               key={tab.id}
@@ -250,7 +256,7 @@ export const StaffDashboard: React.FC = () => {
         </div>
 
         {user && (
-          <div className="flex gap-2 mb-6 bg-surface p-1 rounded-lg border border-border overflow-x-auto no-scrollbar">
+          <div className="flex w-fit max-w-full gap-2 mb-6 bg-surface p-1 rounded-lg border border-border overflow-x-auto no-scrollbar">
             {(user.role === 'MASTER_ADMIN' || user.role === 'OWNER') && (
               <>
                 <button
@@ -273,6 +279,13 @@ export const StaffDashboard: React.FC = () => {
                   title="Posts do salão"
                 >
                   <Megaphone size={16} /> Posts
+                </button>
+                <button
+                  onClick={() => navigate('/app/link')}
+                  className={`flex-shrink-0 px-3 py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'link' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
+                  title="Link público do salão"
+                >
+                  <Link2 size={16} /> Link
                 </button>
               </>
             )}
@@ -400,6 +413,10 @@ export const StaffDashboard: React.FC = () => {
         {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'posts' && (
           <PostsManager />
         )}
+
+        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') &&
+          activeTab === 'link' &&
+          barbershopId && <PublicLinkPanel barbershopId={barbershopId} />}
 
         {activeTab === 'queue' && (
           <>
