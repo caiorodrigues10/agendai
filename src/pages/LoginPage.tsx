@@ -36,6 +36,7 @@ import {
 } from '../utils/documentUtils';
 import { referralStorage } from '../utils/referralStorage';
 import { trialCampaign } from '../marketing/trialCampaign';
+import { getRecaptchaToken } from '../utils/recaptcha';
 
 type Tab = 'login' | 'register';
 type RegisterStep = 1 | 2;
@@ -376,7 +377,8 @@ export const LoginPage: React.FC = () => {
 
   const handleLogin = async (data: LoginFormData) => {
     setSubmitting(true);
-    const result = await login(data.email, data.password);
+    const token = await getRecaptchaToken('login');
+    const result = await login(data.email, data.password, token);
     setSubmitting(false);
     if (result.ok === false) {
       showErrorToast(result.message);
@@ -406,6 +408,7 @@ export const LoginPage: React.FC = () => {
     setSubmitting(true);
     const referralCode = referralStorage.get() ?? undefined;
     sessionStorage.setItem('agendai:just-registered', 'true');
+    const token = await getRecaptchaToken('register');
     const result = await registerUser({
       ownerName: data.ownerName.trim(),
       email: data.email.trim(),
@@ -419,6 +422,7 @@ export const LoginPage: React.FC = () => {
       termsAccepted: data.termsAccepted,
       marketingOptIn: data.marketingOptIn,
       lgpdConsent: data.lgpdConsent,
+      recaptchaToken: token,
     });
     setSubmitting(false);
     if (result.ok === false) {

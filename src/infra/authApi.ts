@@ -28,17 +28,17 @@ export interface RegisterPayload {
 }
 
 export const authApi = {
-  login: (email: string, password: string) =>
-    apiClient<AuthResponse>('/api/auth/login', 'POST', { email, password }),
-  register: (payload: RegisterPayload) =>
+  login: (email: string, password: string, recaptchaToken?: string) =>
+    apiClient<AuthResponse>('/api/auth/login', 'POST', { email, password, recaptchaToken }),
+  register: (payload: RegisterPayload & { recaptchaToken?: string }) =>
     apiClient<AuthResponse>('/api/auth/register', 'POST', payload),
   refresh: () =>
     apiClient<AuthResponse>('/api/auth/refresh', 'POST'),
   me: (token: string) => apiClient<{ user: AuthUser }>('/api/auth/me', 'GET', undefined, token),
   googleLogin: (idToken: string) =>
     apiClient<AuthResponse>('/api/auth/google', 'POST', { idToken }),
-  forgotPassword: (email: string) =>
-    apiClient<{ message: string }>('/api/auth/forgot-password', 'POST', { email }),
+  forgotPassword: (email: string, recaptchaToken?: string) =>
+    apiClient<{ message: string }>('/api/auth/forgot-password', 'POST', { email, recaptchaToken }),
   requestWhatsAppReset: (email: string) =>
     apiClient<{ message: string; requestId?: string; maskedPhone?: string }>(
       '/api/auth/forgot-password/whatsapp',

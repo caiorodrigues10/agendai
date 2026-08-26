@@ -10,9 +10,9 @@ export type AuthResult = { ok: true } | { ok: false; message: string };
 interface AuthContextValue {
   user: StaffMember | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<AuthResult>;
+  login: (email: string, password: string, recaptchaToken?: string) => Promise<AuthResult>;
   loginWithGoogle: (idToken: string) => Promise<AuthResult>;
-  register: (data: RegisterPayload) => Promise<AuthResult>;
+  register: (data: RegisterPayload & { recaptchaToken?: string }) => Promise<AuthResult>;
   logout: () => void;
   hasRole: (roles: StaffMember['role'][]) => boolean;
 }
@@ -97,9 +97,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     sessionStorage.removeItem('agendai:access-block-info');
   };
 
-  const login = async (email: string, password: string): Promise<AuthResult> => {
+  const login = async (email: string, password: string, recaptchaToken?: string): Promise<AuthResult> => {
     try {
-      const resp = await authApi.login(email, password);
+      const resp = await authApi.login(email, password, recaptchaToken);
       persistSession(resp);
       return { ok: true };
     } catch (err) {
@@ -130,7 +130,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const register = async (data: RegisterPayload): Promise<AuthResult> => {
+  const register = async (data: RegisterPayload & { recaptchaToken?: string }): Promise<AuthResult> => {
     try {
       const resp = await authApi.register(data);
       persistSession(resp);

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../infra/authApi';
+import { getRecaptchaToken } from '../utils/recaptcha';
 import { Logo } from '../components/ui/Logo';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import {
@@ -43,7 +44,8 @@ export const ForgotPasswordPage: React.FC = () => {
     setSubmitting(true);
     setError(null);
     try {
-      await authApi.forgotPassword(email.trim());
+      const token = await getRecaptchaToken('forgot_password');
+      await authApi.forgotPassword(email.trim(), token);
       setSuccess(true);
     } catch {
       setSuccess(true);
