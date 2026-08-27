@@ -60,6 +60,15 @@ const MODE_LABEL: Record<PostMode, string> = {
   both: 'Fila e Agenda',
 };
 
+function downloadPostImage(imageUrl: string, filename: string) {
+  const link = document.createElement('a');
+  link.href = imageUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 export const PostsManager: React.FC = () => {
   const { barbershopId } = useBarbershopFilters();
   const { settings } = useBarbershop();
@@ -208,6 +217,11 @@ export const PostsManager: React.FC = () => {
       showToast('Adicione pelo menos um título ou texto do botão de ação.', 'error');
       return;
     }
+    if (publishMode === 'now') {
+      if (!window.confirm('Publicar agora vai enviar este post por WhatsApp para todos os clientes cadastrados do salão. Continuar?')) {
+        return;
+      }
+    }
     setSubmitting(true);
     try {
       const payload: any = {
@@ -221,8 +235,15 @@ export const PostsManager: React.FC = () => {
       if (publishMode === 'schedule' && scheduledFor) {
         payload.scheduledFor = new Date(scheduledFor).toISOString();
       }
-      await barbershopApi.createPost(payload);
-      showToast(publishMode === 'schedule' ? 'Post agendado!' : 'Post publicado!');
+      const res = await barbershopApi.createPost(payload);
+      if (publishMode === 'now' && res?.imageUrl) {
+        downloadPostImage(res.imageUrl, `post-${res.id}.png`);
+      }
+      showToast(
+        publishMode === 'now'
+          ? 'Post publicado! Baixando imagem e enviando para os clientes por WhatsApp...'
+          : 'Post agendado!'
+      );
       setTitle('');
       setCtaText('');
       setScheduledFor('');
@@ -235,9 +256,15 @@ export const PostsManager: React.FC = () => {
   };
 
   const handlePublishNow = async (post: FeedPost) => {
+    if (!window.confirm('Publicar post e enviar imagem via WhatsApp para todos os clientes cadastrados?')) {
+      return;
+    }
     setPublishingId(post.id);
     try {
       await barbershopApi.updateScheduledPost(post.id, { status: 'published' });
+      if (post.imageUrl) {
+        downloadPostImage(post.imageUrl, `post-${post.id}.png`);
+      }
       showToast('Post publicado!');
       await refreshScheduled();
     } catch (err) {

@@ -140,18 +140,20 @@ export const StaffDashboard: React.FC = () => {
     container.scrollTo({ left: btnCenter - viewportCenter, behavior: 'smooth' });
   }, [activeTab]);
 
+  const remeasure = useCallback(() => {
+    measureIndicator();
+    if (tabsRef.current) updateFades(tabsRef.current, setMainBarFades);
+    if (subTabsRef.current) updateFades(subTabsRef.current, setSubBarFades);
+  }, [measureIndicator]);
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      measureIndicator();
-      if (tabsRef.current) updateFades(tabsRef.current, setMainBarFades);
-      if (subTabsRef.current) updateFades(subTabsRef.current, setSubBarFades);
-    }, 100);
-    window.addEventListener('resize', measureIndicator);
+    const timer = setTimeout(remeasure, 100);
+    window.addEventListener('resize', remeasure);
     return () => {
       clearTimeout(timer);
-      window.removeEventListener('resize', measureIndicator);
+      window.removeEventListener('resize', remeasure);
     };
-  }, [measureIndicator]);
+  }, [remeasure]);
 
   useEffect(() => {
     if (subscriptionLoading) return;
@@ -260,13 +262,13 @@ export const StaffDashboard: React.FC = () => {
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-      <main className="max-w-md mx-auto px-4 pt-6">
+      <main className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 pt-6">
         <div className="relative">
           <div
             ref={tabsRef}
             onScroll={e => updateFades(e.currentTarget, setMainBarFades)}
             style={edgeMaskStyle(mainBarFades)}
-            className="flex w-full max-w-full bg-surface p-1 rounded-xl mb-6 border border-border relative overflow-x-auto no-scrollbar"
+            className="flex w-fit max-w-full mx-auto bg-surface p-1 rounded-xl mb-6 border border-border relative overflow-x-auto no-scrollbar"
           >
             {tabs.map(tab => (
               <button
@@ -315,7 +317,7 @@ export const StaffDashboard: React.FC = () => {
               ref={subTabsRef}
               onScroll={e => updateFades(e.currentTarget, setSubBarFades)}
               style={edgeMaskStyle(subBarFades)}
-              className="flex w-fit max-w-full gap-2 bg-surface p-1 rounded-lg border border-border overflow-x-auto no-scrollbar"
+              className="flex w-fit max-w-full mx-auto gap-2 bg-surface p-1 rounded-lg border border-border overflow-x-auto no-scrollbar"
             >
             {(user.role === 'MASTER_ADMIN' || user.role === 'OWNER') && (
               <>

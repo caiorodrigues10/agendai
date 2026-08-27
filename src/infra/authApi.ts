@@ -25,6 +25,11 @@ export interface RegisterPayload {
   whatsapp: string;
   cnpj?: string;
   referralCode?: string;
+  termsVersion: string;
+  termsAccepted: boolean;
+  marketingOptIn?: boolean;
+  lgpdConsent: boolean;
+  schedule?: Array<{ dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }>;
 }
 
 export const authApi = {

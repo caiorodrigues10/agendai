@@ -235,6 +235,9 @@ export const LoginPage: React.FC = () => {
   const [pendingReferral, setPendingReferral] = useState<string | null>(() =>
     referralStorage.get()
   );
+  const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5, 6]);
+  const [openTime, setOpenTime] = useState('09:00');
+  const [closeTime, setCloseTime] = useState('19:00');
 
   const showErrorToast = (message: string) => {
     setToast({ message, type: 'error' });
@@ -405,10 +408,25 @@ export const LoginPage: React.FC = () => {
       setRegisterStep(1);
       return;
     }
+    if (selectedDays.length === 0) {
+      showErrorToast('Selecione pelo menos 1 dia de funcionamento.');
+      return;
+    }
+    if (openTime >= closeTime) {
+      showErrorToast('Horário de abertura deve ser anterior ao de fechamento.');
+      return;
+    }
     setSubmitting(true);
     const referralCode = referralStorage.get() ?? undefined;
     sessionStorage.setItem('agendai:just-registered', 'true');
     const token = await getRecaptchaToken('register');
+    const WEEKDAY_ORDER = [0, 1, 2, 3, 4, 5, 6];
+    const schedule = WEEKDAY_ORDER.map(dayOfWeek => ({
+      dayOfWeek,
+      isOpen: selectedDays.includes(dayOfWeek),
+      openTime,
+      closeTime,
+    }));
     const result = await registerUser({
       ownerName: data.ownerName.trim(),
       email: data.email.trim(),
@@ -422,6 +440,7 @@ export const LoginPage: React.FC = () => {
       termsAccepted: data.termsAccepted,
       marketingOptIn: data.marketingOptIn,
       lgpdConsent: data.lgpdConsent,
+      schedule,
       recaptchaToken: token,
     });
     setSubmitting(false);
@@ -443,6 +462,9 @@ export const LoginPage: React.FC = () => {
     setRegisterStep(1);
     setRegisterFieldsUnlocked(false);
     sessionStorage.removeItem('agendai:just-registered');
+    setSelectedDays([1, 2, 3, 4, 5, 6]);
+    setOpenTime('09:00');
+    setCloseTime('19:00');
     if (next === 'register') {
       registerForm.reset({
         ownerName: '',
@@ -781,6 +803,68 @@ export const LoginPage: React.FC = () => {
                           }
                         />
                       </Field>
+
+                      <div className="space-y-2 pt-2 border-t border-border">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                          Horário de funcionamento
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {(['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] as const).map(
+                            (label, i) => (
+                              <button
+                                key={i}
+                                type="button"
+                                onClick={() =>
+                                  setSelectedDays(prev =>
+                                    prev.includes(i)
+                                      ? prev.filter(d => d !== i)
+                                      : [...prev, i].sort()
+                                  )
+                                }
+                                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all ${
+                                  selectedDays.includes(i)
+                                    ? 'bg-accent border-accent text-accent-fg'
+                                    : 'bg-bg border-border text-text-muted'
+                                }`}
+                              >
+                                {label}
+                              </button>
+                            )
+                          )}
+                        </div>
+                        {selectedDays.length === 0 && (
+                          <p className="text-[11px] text-danger">Selecione pelo menos 1 dia</p>
+                        )}
+                        <div className="flex gap-3">
+                          <div className="flex-1 space-y-1">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                              Abre
+                            </label>
+                            <input
+                              type="time"
+                              value={openTime}
+                              onChange={e => setOpenTime(e.target.value)}
+                              className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent"
+                            />
+                          </div>
+                          <div className="flex-1 space-y-1">
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                              Fecha
+                            </label>
+                            <input
+                              type="time"
+                              value={closeTime}
+                              onChange={e => setCloseTime(e.target.value)}
+                              className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent"
+                            />
+                          </div>
+                        </div>
+                        {openTime >= closeTime && (
+                          <p className="text-[11px] text-danger">
+                            Horário de abertura deve ser anterior ao de fechamento
+                          </p>
+                        )}
+                      </div>
 
                       <div className="space-y-3 pt-2 border-t border-border">
                         <p className="text-[11px] text-text-muted text-center">

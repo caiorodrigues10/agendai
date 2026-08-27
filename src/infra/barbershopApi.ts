@@ -207,7 +207,7 @@ export const barbershopApi = {
       token
     ).then(res => unwrap<FeedPost>(res));
   },
-  updateScheduledPost: (id: string, payload: Partial<CreatePostPayload>) => {
+  updateScheduledPost: (id: string, payload: Partial<CreatePostPayload> & { status?: string }) => {
     const token = authStorage.getAccessToken() || '';
     return apiClient<{ success: boolean; data: FeedPost }>(
       `/api/posts/${id}`,

@@ -114,7 +114,7 @@ export const PublicHome: React.FC = () => {
     <div className="min-h-screen pb-20 bg-bg text-text-primary">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-      <main className="max-w-md mx-auto px-4 pt-6">
+      <main className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 pt-6">
         <div className="flex bg-surface p-1 rounded-xl mb-6 border border-border relative">
           {['queue', 'appointments', 'profile'].map(tab => (
             <button

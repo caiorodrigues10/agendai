@@ -41,6 +41,18 @@ export const RegisterSchema = z.object({
   lgpdConsent: z
     .boolean()
     .refine(v => v === true, 'É necessário consentir com o tratamento de dados (LGPD)'),
+  schedule: z
+    .array(
+      z.object({
+        dayOfWeek: z.number().min(0).max(6),
+        isOpen: z.boolean(),
+        openTime: z.string().min(4).max(5),
+        closeTime: z.string().min(4).max(5),
+      })
+    )
+    .min(7)
+    .max(7)
+    .optional(),
 });
 
 export type RegisterFormData = z.infer<typeof RegisterSchema>;
