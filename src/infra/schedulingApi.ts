@@ -21,14 +21,14 @@ interface JoinQueuePayload {
   whatsapp: string;
   serviceId: string;
   barbershopId: string;
-  sessionId: string;
+  sessionId?: string;
 }
 
-interface QueueUpdatePayload {
+export interface QueueUpdatePayload {
   status: QueueItem['status'];
   finalPrice?: number;
-  completedAt?: number;
   completedBy?: string;
+  insertAt?: number;
 }
 
 function buildQuery(params: Record<string, string | undefined>): string {

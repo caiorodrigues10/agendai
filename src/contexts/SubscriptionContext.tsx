@@ -30,7 +30,7 @@ interface SubscriptionContextValue {
 
 function deriveHasDashboard(data: MySubscription | null): boolean {
   if (!data) return true;
-  if (data.trial && !data.trial.isExpired && data.subscription?.hasPaymentMethod) return true;
+  if (data.trial && !data.trial.isExpired) return true;
   if (data.subscription?.status === 'ACTIVE') {
     return data.subscription.planHasDashboard !== false;
   }

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { Logo } from '../ui/Logo';
+import { useAuth } from '../../contexts/AuthContext';
+import { staffHomePath } from '../../utils/subscriptionPaywall';
 
 /** Âncoras da landing (`/#id`). */
 const sectionLinks = [
@@ -32,7 +34,18 @@ function scrollToSection(id: string) {
 export const MarketingNav: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const goPanel = () => {
+    setMobileOpen(false);
+    navigate(user ? staffHomePath(user.role) : '/login');
+  };
+
+  const goStart = () => {
+    setMobileOpen(false);
+    navigate(user ? staffHomePath(user.role) : '/planos');
+  };
 
   const goToSection = (id: string) => {
     setMobileOpen(false);
@@ -83,17 +96,17 @@ export const MarketingNav: React.FC = () => {
         <div className="flex items-center gap-3 sm:gap-4">
           <button
             type="button"
-            onClick={() => navigate('/login')}
+            onClick={goPanel}
             className="hidden text-xs font-bold uppercase tracking-tight text-neutral-400 transition-colors hover:text-white md:block"
           >
             Acessar Painel
           </button>
           <button
             type="button"
-            onClick={() => navigate('/planos')}
+            onClick={goStart}
             className="hidden rounded-full bg-white px-5 py-2.5 text-xs font-black uppercase tracking-tighter text-black shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] sm:block"
           >
-            Começar Agora
+            {user ? 'Ir para o painel' : 'Começar Agora'}
           </button>
           <button
             type="button"
@@ -132,23 +145,17 @@ export const MarketingNav: React.FC = () => {
           ))}
           <button
             type="button"
-            onClick={() => {
-              setMobileOpen(false);
-              navigate('/login');
-            }}
+            onClick={goPanel}
             className="py-3 text-left transition-colors hover:text-white"
           >
             Acessar Painel
           </button>
           <button
             type="button"
-            onClick={() => {
-              setMobileOpen(false);
-              navigate('/planos');
-            }}
+            onClick={goStart}
             className="mt-2 rounded-full bg-white px-5 py-3 text-xs font-black uppercase tracking-tighter text-black"
           >
-            Começar Agora
+            {user ? 'Ir para o painel' : 'Começar Agora'}
           </button>
         </div>
       )}

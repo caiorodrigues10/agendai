@@ -11,7 +11,7 @@ const EXEMPT_PATHS = ['/bloqueado', '/planos', '/checkout', '/login'];
  * Listener global: quando qualquer chamada à API falha com
  * SUBSCRIPTION_REQUIRED (402) ou CPF_BLOCKED (403), guarda o payload do erro
  * (planos, motivo, data do bloqueio) e redireciona para a tela de bloqueio.
- * CARD_REQUIRED → /planos?setup=trial (cadastro de cartão sem cobrança).
+ * Trial expirado no login usa modal na própria LoginPage (sessão já existe).
  */
 export const AccessBlockedListener: React.FC = () => {
   const navigate = useNavigate();
@@ -27,19 +27,6 @@ export const AccessBlockedListener: React.FC = () => {
       const path = window.location.pathname;
       if (EXEMPT_PATHS.some(p => path.startsWith(p))) return;
 
-      // Usuário acabou de se cadastrar → trial sem pagamento não é bloqueio,
-      // é só o fluxo normal de checkout. Redireciona para planos em vez de bloqueado.
-      const justRegistered = sessionStorage.getItem('agendai:just-registered');
-      if (justRegistered) {
-        sessionStorage.removeItem('agendai:just-registered');
-        navigate('/planos?setup=trial', { replace: true });
-        return;
-      }
-
-      if (detail?.reason === 'CARD_REQUIRED') {
-        navigate('/planos?setup=trial', { replace: true });
-        return;
-      }
       navigate('/bloqueado', { replace: true });
     };
 

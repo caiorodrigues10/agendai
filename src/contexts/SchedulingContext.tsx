@@ -10,7 +10,7 @@ import React, {
 } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Appointment, QueueItem, AIInsight } from '../types';
-import { schedulingApi } from '../infra/schedulingApi';
+import { schedulingApi, QueueUpdatePayload } from '../infra/schedulingApi';
 import { useBarbershopFilters } from './BarbershopFiltersContext';
 import { useAuth } from './AuthContext';
 import { getQueueInsight } from '../services/geminiService';
@@ -26,9 +26,18 @@ interface SchedulingContextValue {
   aiInsight: AIInsight | null;
   clientId: string;
   completedCount: number;
-  joinQueue: (name: string, whatsapp: string, serviceId: string) => Promise<void>;
+  joinQueue: (
+    name: string,
+    whatsapp: string,
+    serviceId: string,
+    opts?: { additionalPerson?: boolean }
+  ) => Promise<void>;
   leaveQueue: (id: string) => Promise<void>;
-  updateQueueStatus: (id: string, status: QueueItem['status']) => Promise<void>;
+  updateQueueStatus: (
+    id: string,
+    status: QueueItem['status'],
+    extras?: { insertAt?: number }
+  ) => Promise<void>;
   deleteHistoryItem: (id: string) => Promise<void>;
   bookAppointment: (data: any) => Promise<void>;
   bookAppointmentPublic: (data: any) => Promise<void>;
@@ -196,14 +205,19 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     return () => clearInterval(interval);
   }, [queue, services]);
 
-  const joinQueue = async (name: string, whatsapp: string, serviceId: string) => {
+  const joinQueue = async (
+    name: string,
+    whatsapp: string,
+    serviceId: string,
+    opts?: { additionalPerson?: boolean }
+  ) => {
     if (!barbershopId) return;
     const payload = {
       customerName: name,
       whatsapp,
       serviceId,
       barbershopId,
-      sessionId: clientId,
+      ...(opts?.additionalPerson ? {} : { sessionId: clientId }),
     };
 
     try {
@@ -220,18 +234,28 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     setQueue(prev => prev.filter(item => item.id !== id));
   };
 
-  const updateQueueStatus = async (id: string, status: QueueItem['status']) => {
+  const updateQueueStatus = async (
+    id: string,
+    status: QueueItem['status'],
+    extras?: { insertAt?: number }
+  ) => {
     const target = queue.find(item => item.id === id);
     if (!target) return;
-    const payload: any = { status };
+    const payload: QueueUpdatePayload = { status };
     if (status === 'completed') {
       const service = services.find(s => s.id === target.serviceId);
       payload.finalPrice = service?.price || 0;
-      payload.completedAt = Date.now();
       payload.completedBy = user?.id || undefined;
     }
+    if (status === 'waiting' && extras?.insertAt != null) {
+      payload.insertAt = extras.insertAt;
+    }
     const updated = await schedulingApi.updateQueueItem(id, payload);
-    setQueue(prev => prev.map(item => (item.id === id ? updated : item)));
+    setQueue(prev =>
+      [...prev.map(item => (item.id === id ? updated : item))].sort(
+        (a, b) => a.joinedAt - b.joinedAt
+      )
+    );
 
     if (status === 'completed') {
       try {

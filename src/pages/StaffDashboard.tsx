@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '../components/ui/Header';
 import { QueueItemCard } from '../components/domain/QueueItemCard';
 import { AddCustomerForm } from '../components/domain/AddCustomerForm';
+import { ReturnToQueueModal } from '../components/domain/ReturnToQueueModal';
 import { ServiceManager } from '../components/domain/ServiceManager';
 import { SettingsManager } from '../components/domain/SettingsManager';
 import { TeamManager } from '../components/domain/TeamManager';
@@ -39,6 +40,8 @@ import {
 } from 'lucide-react';
 import { ClientsManager } from '../components/domain/ClientsManager';
 import { PublicLinkPanel } from '../components/domain/PublicLinkPanel';
+import { getErrorMessage } from '../utils/errorMessage';
+import { QueueItem } from '../types';
 
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -81,6 +84,8 @@ export const StaffDashboard: React.FC = () => {
     loadAvailability,
   } = useScheduling();
   const [showJoinForm, setShowJoinForm] = useState(false);
+  const [returnToQueueItem, setReturnToQueueItem] = useState<QueueItem | null>(null);
+  const [returningToQueue, setReturningToQueue] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'bot' } | null>(null);
 
   const activeTab =
@@ -157,9 +162,7 @@ export const StaffDashboard: React.FC = () => {
 
   useEffect(() => {
     if (subscriptionLoading) return;
-    if (accessState === 'needs_card') {
-      navigate('/planos?setup=trial', { replace: true });
-    } else if (accessState === 'blocked') {
+    if (accessState === 'blocked') {
       navigate('/bloqueado', { replace: true });
     }
   }, [accessState, subscriptionLoading, navigate]);
@@ -224,6 +227,20 @@ export const StaffDashboard: React.FC = () => {
     await joinQueue(name, whatsapp, serviceId);
     setShowJoinForm(false);
     showToast('Cliente adicionado!');
+  };
+
+  const handleConfirmReturnToQueue = async (insertAt: number) => {
+    if (!returnToQueueItem) return;
+    setReturningToQueue(true);
+    try {
+      await updateQueueStatus(returnToQueueItem.id, 'waiting', { insertAt });
+      showToast(`${returnToQueueItem.customerName} voltou para a fila.`, 'bot');
+      setReturnToQueueItem(null);
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Não foi possível devolver à fila.'), 'bot');
+    } finally {
+      setReturningToQueue(false);
+    }
   };
 
   const handleDateChange = useCallback(
@@ -590,6 +607,7 @@ export const StaffDashboard: React.FC = () => {
                     shopName={settings?.shopName}
                     isCurrentUser={item.customerId === clientId}
                     onStatusChange={updateQueueStatus}
+                    onReturnToQueue={setReturnToQueueItem}
                     onLeaveQueue={id => {
                       leaveQueue(id);
                       showToast('Cliente removido.', 'bot');
@@ -608,6 +626,20 @@ export const StaffDashboard: React.FC = () => {
           onJoin={handleJoinQueue}
           onCancel={() => setShowJoinForm(false)}
           isStaffMode={true}
+        />
+      )}
+      {returnToQueueItem && (
+        <ReturnToQueueModal
+          item={returnToQueueItem}
+          waiting={queue.filter(
+            q => q.status === 'waiting' && q.id !== returnToQueueItem.id
+          )}
+          services={services}
+          submitting={returningToQueue}
+          onConfirm={handleConfirmReturnToQueue}
+          onClose={() => {
+            if (!returningToQueue) setReturnToQueueItem(null);
+          }}
         />
       )}
     </div>

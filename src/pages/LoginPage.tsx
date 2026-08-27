@@ -623,7 +623,6 @@ export const LoginPage: React.FC = () => {
                   exit={{ opacity: 0, x: 16 }}
                   transition={{ duration: 0.2 }}
                   onSubmit={loginForm.handleSubmit(handleLogin)}
-                  autoComplete="off"
                   className="w-full space-y-4"
                 >
                   <Field
@@ -633,11 +632,11 @@ export const LoginPage: React.FC = () => {
                   >
                     <input
                       type="email"
-                      autoComplete="new-email"
                       className={inputClass(!!loginForm.formState.errors.email)}
                       placeholder="seu@email.com"
                       autoFocus
                       {...loginForm.register('email')}
+                      autoComplete="username"
                     />
                   </Field>
 
@@ -650,8 +649,8 @@ export const LoginPage: React.FC = () => {
                       onToggleShow={() => setShowPassword(v => !v)}
                       error={loginForm.formState.errors.password?.message}
                       placeholder="••••••••"
-                      autoComplete="new-password"
                       {...loginForm.register('password')}
+                      autoComplete="current-password"
                     />
                   </div>
 

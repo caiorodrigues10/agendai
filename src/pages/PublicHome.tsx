@@ -61,10 +61,14 @@ export const PublicHome: React.FC = () => {
     setToast({ message: msg, type });
   };
 
+  const alreadyInQueue = queue.some(
+    q => q.customerId === clientId && q.status !== 'completed' && q.status !== 'cancelled'
+  );
+
   const handleJoinQueue = async (name: string, whatsapp: string, serviceId: string) => {
-    await joinQueue(name, whatsapp, serviceId);
+    await joinQueue(name, whatsapp, serviceId, { additionalPerson: alreadyInQueue });
     setShowJoinForm(false);
-    showToast('Você entrou na fila!', 'bot');
+    showToast(alreadyInQueue ? 'Pessoa adicionada à fila!' : 'Você entrou na fila!', 'bot');
   };
 
   // Wait until URL tenant is applied before deciding to redirect
@@ -286,8 +290,9 @@ export const PublicHome: React.FC = () => {
                   <span className="font-bold">Você já está na fila!</span>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setShowJoinForm(true)}
-                  className="w-full bg-surface border-x border-b border-border hover:bg-surface-2 text-text-secondary hover:text-text-primary text-sm font-medium py-3 rounded-b-xl transition-all flex items-center justify-center gap-2"
+                  className="w-full bg-surface border-x border-b border-border hover:bg-surface-2 text-text-secondary hover:text-text-primary text-sm font-medium py-3 rounded-b-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <DynamicIcon name="UserPlus" size={16} /> Adicionar outra pessoa
                 </button>
@@ -348,6 +353,7 @@ export const PublicHome: React.FC = () => {
           services={services}
           onJoin={handleJoinQueue}
           onCancel={() => setShowJoinForm(false)}
+          isAdditionalPerson={isUserInQueue}
         />
       )}
     </div>

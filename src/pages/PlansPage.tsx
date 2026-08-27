@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AlertCircle, ArrowRight, Check, CheckCircle2, Loader2, X } from 'lucide-react';
 import { plansApi, Plan } from '../infra/plansApi';
@@ -10,6 +10,7 @@ import { MarketingFooter } from '../components/marketing/MarketingFooter';
 import { PricingPersuasionCharts } from '../components/marketing/PricingPersuasionCharts';
 import { getErrorMessage } from '../utils/errorMessage';
 import { trialCampaign } from '../marketing/trialCampaign';
+import { hasPanelAccess, staffHomePath } from '../utils/subscriptionPaywall';
 
 const formatPrice = (price: number) =>
   price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -50,8 +51,6 @@ const objections = [
 
 export const PlansPage: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const setupTrial = searchParams.get('setup') === 'trial';
   const { user } = useAuth();
   const { data: subscriptionData } = useSubscription();
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -84,8 +83,10 @@ export const PlansPage: React.FC = () => {
 
   const handleSubscribe = (plan: Plan) => {
     const billing = isYearly ? 'YEARLY' : 'MONTHLY';
-    const setupQ =
-      setupTrial || !subscriptionData?.subscription?.hasPaymentMethod ? '&setup=trial' : '';
+    const inCalendarTrial = Boolean(
+      subscriptionData?.trial && !subscriptionData.trial.isExpired
+    );
+    const setupQ = inCalendarTrial ? '&setup=trial' : '';
     if (user) {
       navigate(`/checkout?planId=${plan.id}&billing=${billing}${setupQ}`);
       return;
@@ -110,10 +111,23 @@ export const PlansPage: React.FC = () => {
   const essentialPlan = plans.find(p => isEssential(p));
   const displayPlans = [essentialPlan, proPlan].filter(Boolean) as Plan[];
 
+  const staffLoggedIn = Boolean(
+    user && ['OWNER', 'EMPLOYEE', 'MASTER_ADMIN', 'ADMIN'].includes(user.role.toUpperCase())
+  );
+  const goToExistingPanel =
+    staffLoggedIn && (hasPanelAccess(subscriptionData, user?.role) || !subscriptionData);
+
   const startPro = () => {
+    if (goToExistingPanel && user) {
+      navigate(staffHomePath(user.role));
+      return;
+    }
     if (proPlan) handleSubscribe(proPlan);
-    else navigate('/login');
+    else navigate(user ? staffHomePath(user.role) : '/login');
   };
+
+  const heroCta = goToExistingPanel ? trialCampaign.ctaGoToPanel : trialCampaign.cta;
+  const stickyCta = goToExistingPanel ? trialCampaign.ctaGoToPanel : trialCampaign.ctaShort;
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-emerald-500/30">
@@ -189,7 +203,7 @@ export const PlansPage: React.FC = () => {
                 onClick={startPro}
                 className="group inline-flex items-center justify-center gap-3 rounded-full bg-emerald-400 px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-300"
               >
-                {trialCampaign.cta}
+                {heroCta}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </button>
               <p className="mt-3 text-sm text-neutral-500">{trialCampaign.heroSubline}</p>
@@ -520,7 +534,7 @@ export const PlansPage: React.FC = () => {
                 onClick={startPro}
                 className="group mt-10 inline-flex items-center justify-center gap-3 rounded-full bg-white px-8 py-4 text-base font-black text-black transition hover:-translate-y-0.5 hover:bg-emerald-300"
               >
-                {trialCampaign.cta}
+                {heroCta}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </button>
             </div>
@@ -545,7 +559,7 @@ export const PlansPage: React.FC = () => {
           onClick={startPro}
           className="group inline-flex items-center gap-2.5 rounded-full bg-emerald-400 px-6 py-3.5 text-sm font-black text-black shadow-[0_16px_50px_rgba(16,185,129,0.45)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-emerald-300 md:px-7 md:text-base"
         >
-          {trialCampaign.ctaShort}
+          {stickyCta}
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </button>
       </div>

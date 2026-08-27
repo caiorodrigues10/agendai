@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FocusLock from 'react-focus-lock';
 import {
@@ -23,6 +23,9 @@ import {
   Wallet,
   ArrowRightLeft,
   HeartHandshake,
+  Gift,
+  Zap,
+  ShieldCheck,
 } from 'lucide-react';
 import { useSubscription } from '../../contexts/SubscriptionContext';
 import {
@@ -31,8 +34,11 @@ import {
   MySubscription,
   CancellationContext,
 } from '../../infra/subscriptionsApi';
+import { plansApi, Plan } from '../../infra/plansApi';
+import { referralsApi, ReferralDashboard } from '../../infra/referralsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { trialCampaign } from '../../marketing/trialCampaign';
+import { ShareReferralButton } from './ShareReferralButton';
 
 const brl = (n: number) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -91,6 +97,8 @@ export const OwnerSubscriptionPanel: React.FC = () => {
   const navigate = useNavigate();
   const { data, loading: ctxLoading, refresh } = useSubscription();
   const [detail, setDetail] = useState<MySubscription | null>(data);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [referral, setReferral] = useState<ReferralDashboard | null>(null);
   const [loading, setLoading] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -104,6 +112,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
   const [pixKeyType, setPixKeyType] = useState<'CPF' | 'CNPJ' | 'PHONE' | 'EMAIL' | 'RANDOM'>(
     'EMAIL'
   );
+  const [billingYearly, setBillingYearly] = useState(true);
   const cancelTriggerRef = useRef<HTMLButtonElement>(null);
 
   const needsPixKey =
@@ -112,6 +121,26 @@ export const OwnerSubscriptionPanel: React.FC = () => {
   useEffect(() => {
     if (data) setDetail(data);
   }, [data]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [planList, ref] = await Promise.all([
+          plansApi.list().catch(() => [] as Plan[]),
+          referralsApi.me().catch(() => null),
+        ]);
+        if (cancelled) return;
+        setPlans(planList.filter(p => p.active !== false));
+        setReferral(ref);
+      } catch {
+        /* silent — painel principal continua */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!showCancelModal) return;
@@ -125,8 +154,29 @@ export const OwnerSubscriptionPanel: React.FC = () => {
   const economics: PlanEconomics | undefined = detail?.economics;
   const sub = detail?.subscription;
   const trial = detail?.trial;
+  const inCalendarTrial = Boolean(trial && !trial.isExpired);
+  const needsCard = inCalendarTrial && !sub?.hasPaymentMethod;
   const onYearly = economics?.currentBillingCycle === 'YEARLY';
   const onMonthly = economics?.currentBillingCycle === 'MONTHLY';
+
+  const displayPlans = useMemo(() => {
+    const source = plans.length > 0 ? plans : detail?.plans ?? [];
+    const cycle = billingYearly ? 'YEARLY' : 'MONTHLY';
+    const byCycle = source.filter(p => (p.billingCycle ?? 'MONTHLY') === cycle);
+    const pool = byCycle.length > 0 ? byCycle : source;
+    const isPro = (p: Plan) => p.hasDashboard !== false || /pro/i.test(p.name);
+    const essential = pool.find(p => !isPro(p));
+    const pro = pool.find(p => isPro(p));
+    return [essential, pro].filter(Boolean) as Plan[];
+  }, [plans, detail?.plans, billingYearly]);
+
+  const goCheckout = (plan: Plan) => {
+    const billing = (plan.billingCycle ?? (billingYearly ? 'YEARLY' : 'MONTHLY')) as
+      | 'MONTHLY'
+      | 'YEARLY';
+    const setup = needsCard || sub?.status !== 'ACTIVE' ? '&setup=trial' : '';
+    navigate(`/checkout?planId=${encodeURIComponent(plan.id)}&billing=${billing}${setup}`);
+  };
 
   const closeCancelModal = () => {
     setShowCancelModal(false);
@@ -201,15 +251,12 @@ export const OwnerSubscriptionPanel: React.FC = () => {
           <CreditCard size={20} className="text-accent" /> Assinatura
         </h2>
         <p className="text-sm text-text-secondary mt-1">
-          Gerencie seu plano e veja a economia do anual frente ao mensal.
+          {needsCard
+            ? trialCampaign.huntBody
+            : inCalendarTrial
+              ? trialCampaign.optionalSubscribe
+              : 'Gerencie seu plano, economize no anual e indique salões para ganhar dias grátis.'}
         </p>
-        <button
-          type="button"
-          onClick={() => navigate('/app/referrals')}
-          className="mt-3 text-xs font-bold text-accent hover:underline"
-        >
-          Indique um salão e ganhe dias grátis →
-        </button>
       </div>
 
       {error && (
@@ -223,7 +270,78 @@ export const OwnerSubscriptionPanel: React.FC = () => {
         </div>
       )}
 
-      <div className="bg-surface border border-border rounded-2xl p-5 space-y-3">
+      {/* Indicação — card em destaque */}
+      <div className="relative overflow-hidden rounded-2xl border border-accent/40 bg-linear-to-br from-accent/15 via-surface to-surface p-5">
+        <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-accent/10 blur-2xl pointer-events-none" />
+        <div className="relative flex flex-col sm:flex-row sm:items-start gap-4">
+          <div className="w-12 h-12 shrink-0 rounded-2xl bg-accent text-accent-fg flex items-center justify-center shadow-lg shadow-accent/25">
+            <Gift size={24} />
+          </div>
+          <div className="flex-1 min-w-0 space-y-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-accent">
+              Programa de indicação
+            </p>
+            <h3 className="text-lg font-extrabold text-text-primary leading-tight">
+              Indique um salão e ganhe{' '}
+              <span className="text-accent">
+                +{referral?.rewardDays ?? 30} dias grátis
+              </span>
+            </h3>
+            <p className="text-sm text-text-secondary">
+              Cada amigo que assinar estende sua assinatura. Quanto mais indicar, mais sobe de
+              nível (Bronze → Prata → Ouro) e maior a recompensa.
+            </p>
+            {referral ? (
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <code className="text-[11px] bg-bg/80 border border-border rounded-lg px-2.5 py-1.5 text-text-primary truncate max-w-[min(100%,280px)]">
+                  {referral.shareUrl}
+                </code>
+                <ShareReferralButton
+                  shareUrl={referral.shareUrl}
+                  shareText={`Use meu link e ganhe trial no AGENDAI: ${referral.shareUrl}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => navigate('/app/referrals')}
+                  className="text-xs font-bold text-accent hover:underline"
+                >
+                  Ver minhas indicações →
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => navigate('/app/referrals')}
+                className="inline-flex items-center gap-2 mt-1 px-4 py-2.5 rounded-xl bg-accent text-accent-fg text-sm font-bold hover:bg-accent-hover"
+              >
+                <Gift size={15} /> Abrir indicações e copiar link
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Status atual + urgência */}
+      <div
+        className={`rounded-2xl p-5 space-y-3 border ${
+          needsCard
+            ? 'border-warning/50 bg-warning/5'
+            : 'border-border bg-surface'
+        }`}
+      >
+        {needsCard && (
+          <div className="flex items-start gap-2 rounded-xl bg-warning/15 border border-warning/30 px-3 py-2.5">
+            <Zap size={16} className="text-warning shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-bold text-warning">{trialCampaign.huntHeadline}</p>
+              <p className="text-xs text-text-secondary mt-0.5">
+                {trial?.daysRemainingInTrial ?? 30} dia(s) de Pro restantes — escolha o plano abaixo
+                e cadastre o cartão em menos de 1 minuto. Sem cobrança agora.
+              </p>
+            </div>
+          </div>
+        )}
+
         {sub ? (
           <>
             <div className="flex items-start justify-between gap-3">
@@ -236,6 +354,13 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                   {brl(sub.planPrice)}
                   {sub.planBillingCycle === 'YEARLY' || onYearly ? '/ano' : '/mês'}
                 </p>
+                {sub.hasPaymentMethod && sub.cardLast4 && (
+                  <p className="text-xs text-text-muted mt-1 flex items-center gap-1.5">
+                    <ShieldCheck size={12} className="text-success" />
+                    Cartão •••• {sub.cardLast4}
+                    {sub.cardBrand ? ` (${sub.cardBrand})` : ''}
+                  </p>
+                )}
               </div>
               <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full border border-border bg-surface-2">
                 {STATUS_LABEL[sub.status] ?? sub.status}
@@ -248,7 +373,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                 </p>
                 <p className="mt-0.5 text-[11px] text-text-secondary">
                   Acesso Pro completo até {new Date(trial.trialEndsAt).toLocaleDateString('pt-BR')}.{' '}
-                  {trialCampaign.ownerEvaluate} Depois segue o plano {sub.planName}.
+                  {trialCampaign.ownerEvaluate}
                 </p>
               </div>
             )}
@@ -281,22 +406,25 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                 : `${trial.daysRemainingInTrial} dia(s) restantes`}
             </p>
             <p className="text-xs text-text-secondary mt-1">
-              Pro completo até {new Date(trial.trialEndsAt).toLocaleDateString('pt-BR')}.{' '}
-              {trialCampaign.ownerEvaluate} {trialCampaign.afterTrial}
+              {trial.isExpired ? (
+                <>
+                  Pro completo até {new Date(trial.trialEndsAt).toLocaleDateString('pt-BR')}.{' '}
+                  {trialCampaign.afterTrial}
+                </>
+              ) : (
+                <>
+                  Pro completo até {new Date(trial.trialEndsAt).toLocaleDateString('pt-BR')}.{' '}
+                  {trialCampaign.huntBody}
+                </>
+              )}
             </p>
           </div>
         ) : (
           <p className="text-sm text-text-muted">Nenhuma assinatura ativa.</p>
         )}
 
-        <div className="flex flex-wrap gap-2 pt-2">
-          <button
-            onClick={() => navigate('/planos')}
-            className="flex-1 min-w-[140px] py-2.5 rounded-xl bg-accent text-accent-fg text-sm font-bold flex items-center justify-center gap-2 hover:bg-accent-hover"
-          >
-            {sub ? 'Trocar plano' : 'Ver planos'} <ArrowRight size={15} />
-          </button>
-          {sub && sub.status !== 'CANCELED' && (
+        {sub && sub.status !== 'CANCELED' && (
+          <div className="flex flex-wrap gap-2 pt-1">
             <button
               ref={cancelTriggerRef}
               onClick={openCancelModal}
@@ -306,8 +434,130 @@ export const OwnerSubscriptionPanel: React.FC = () => {
               {cancelling ? <Loader2 size={15} className="animate-spin" /> : <XCircle size={15} />}
               Cancelar
             </button>
-          )}
+          </div>
+        )}
+      </div>
+
+      {/* Planos — caça conversão */}
+      <div className="space-y-3">
+        <div className="flex items-end justify-between gap-3 flex-wrap">
+          <div>
+            <h3 className="font-bold text-base flex items-center gap-2">
+              <Zap size={16} className="text-accent" />
+              {needsCard ? 'Escolha o plano e cadastre o cartão' : 'Planos'}
+            </h3>
+            <p className="text-xs text-text-secondary mt-0.5">
+              {needsCard
+                ? 'Checkout direto — cartão em 1 minuto, sem cobrança no trial.'
+                : 'Anual = 2 meses grátis. Troque quando quiser.'}
+            </p>
+          </div>
+          <div className="flex bg-surface border border-border rounded-xl p-0.5 text-xs font-bold">
+            <button
+              type="button"
+              onClick={() => setBillingYearly(false)}
+              className={`px-3 py-1.5 rounded-lg transition-colors ${
+                !billingYearly ? 'bg-accent/15 text-accent' : 'text-text-muted'
+              }`}
+            >
+              Mensal
+            </button>
+            <button
+              type="button"
+              onClick={() => setBillingYearly(true)}
+              className={`px-3 py-1.5 rounded-lg transition-colors ${
+                billingYearly ? 'bg-accent/15 text-accent' : 'text-text-muted'
+              }`}
+            >
+              Anual · 2 meses off
+            </button>
+          </div>
         </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          {displayPlans.map(plan => {
+            const isPro = plan.hasDashboard !== false || /pro/i.test(plan.name);
+            const isCurrent = sub?.planId === plan.id;
+            return (
+              <div
+                key={plan.id}
+                className={`rounded-2xl border p-4 flex flex-col gap-3 ${
+                  isPro
+                    ? 'border-accent/50 bg-accent/5 ring-1 ring-accent/20'
+                    : 'border-border bg-surface'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-accent">
+                      {isPro ? 'Mais vendido' : 'Começar barato'}
+                    </p>
+                    <p className="text-lg font-extrabold">{plan.name}</p>
+                  </div>
+                  {isCurrent && (
+                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-success/15 text-success">
+                      Atual
+                    </span>
+                  )}
+                </div>
+                <p className="text-2xl font-black text-text-primary">
+                  {brl(plan.price)}
+                  <span className="text-xs font-medium text-text-muted">
+                    /{plan.billingCycle === 'YEARLY' || billingYearly ? 'ano' : 'mês'}
+                  </span>
+                </p>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  {isPro
+                    ? 'Painel completo, financeiro, insights e IA. Ideal se você quer crescer com dados — não no feeling.'
+                    : 'Fila + agenda + equipe ilimitada. Perfeito para operar o salão sem pagar pelo dashboard ainda.'}
+                </p>
+                <ul className="space-y-1.5 text-xs text-text-secondary">
+                  {(isPro
+                    ? [
+                        'Dashboard e relatórios',
+                        'Financeiro, despesas e fiado',
+                        'Insights de movimento + IA',
+                      ]
+                    : ['Fila digital + agenda', 'Funcionários ilimitados', 'Link público do salão']
+                  ).map(f => (
+                    <li key={f} className="flex items-center gap-1.5">
+                      <CheckCircle2 size={12} className="text-accent shrink-0" /> {f}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  type="button"
+                  onClick={() => goCheckout(plan)}
+                  className={`mt-auto w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors ${
+                    isPro
+                      ? 'bg-accent text-accent-fg hover:bg-accent-hover shadow-lg shadow-accent/20'
+                      : 'border border-accent/40 text-accent hover:bg-accent/10'
+                  }`}
+                >
+                  <CreditCard size={15} />
+                  {needsCard
+                    ? isPro
+                      ? 'Garantir Pro · cartão agora'
+                      : 'Escolher Essencial · cartão agora'
+                    : isCurrent
+                      ? 'Renovar / gerenciar'
+                      : `Assinar ${plan.name}`}
+                  <ArrowRight size={14} />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {displayPlans.length === 0 && (
+          <button
+            type="button"
+            onClick={() => navigate('/planos')}
+            className="w-full py-3 rounded-xl bg-accent text-accent-fg text-sm font-bold flex items-center justify-center gap-2 hover:bg-accent-hover"
+          >
+            Ver planos <ArrowRight size={15} />
+          </button>
+        )}
       </div>
 
       {economics && economics.yearlySavingsPerYear > 0 && (

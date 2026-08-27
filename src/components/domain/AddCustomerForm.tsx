@@ -13,13 +13,20 @@ import {
 /** Enviado ao backend quando o staff não informa WhatsApp do cliente. */
 const STAFF_PLACEHOLDER_WHATSAPP = '00000000000';
 import { maskPhone, normalizeDocument } from '../../utils/documentUtils';
+import { getErrorMessage } from '../../utils/errorMessage';
 import { X, Loader2, UserCheck, AlertCircle } from 'lucide-react';
 
 interface AddCustomerFormProps {
   services: Service[];
-  onJoin: (name: string, whatsapp: string, serviceId: string, isManualEntry?: boolean) => void;
+  onJoin: (
+    name: string,
+    whatsapp: string,
+    serviceId: string,
+    isManualEntry?: boolean
+  ) => void | Promise<void>;
   onCancel: () => void;
   isStaffMode?: boolean;
+  isAdditionalPerson?: boolean;
 }
 
 export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
@@ -27,8 +34,10 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
   onJoin,
   onCancel,
   isStaffMode = false,
+  isAdditionalPerson = false,
 }) => {
   const [loading, setLoading] = React.useState(false);
+  const [submitError, setSubmitError] = React.useState<string | null>(null);
 
   const {
     register,
@@ -54,10 +63,13 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
 
   const onSubmit = async (data: CustomerQueueFormData | CustomerQueueStaffFormData) => {
     setLoading(true);
+    setSubmitError(null);
     try {
       const raw = data.whatsapp.trim();
       const whatsapp = isStaffMode && !raw ? STAFF_PLACEHOLDER_WHATSAPP : normalizeDocument(raw);
       await onJoin(data.name, whatsapp, data.serviceId, isStaffMode);
+    } catch (err) {
+      setSubmitError(getErrorMessage(err, 'Não foi possível entrar na fila. Tente de novo.'));
     } finally {
       setLoading(false);
     }
@@ -76,7 +88,11 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
           <div className="flex items-center gap-2">
             {isStaffMode && <UserCheck className="text-accent" size={24} />}
             <h2 className="text-2xl font-bold text-text-primary">
-              {isStaffMode ? 'Adicionar Cliente Manual' : 'Entrar na Fila'}
+              {isStaffMode
+                ? 'Adicionar Cliente Manual'
+                : isAdditionalPerson
+                  ? 'Adicionar outra pessoa'
+                  : 'Entrar na Fila'}
             </h2>
           </div>
           <button
@@ -125,7 +141,9 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
 
             {!isStaffMode && (
               <p className="text-xs text-text-muted mt-1">
-                *O dono será notificado e te avisaremos quando faltar 15min.
+                {isAdditionalPerson
+                  ? 'Pode ser o mesmo WhatsApp — use o nome da outra pessoa.'
+                  : '*O dono será notificado e te avisaremos quando faltar 15min.'}
               </p>
             )}
           </div>
@@ -152,13 +170,18 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
           </div>
 
           <div className="pt-4">
+            {submitError && (
+              <p className="text-danger text-xs mb-3 flex items-center gap-1">
+                <AlertCircle size={12} /> {submitError}
+              </p>
+            )}
             <button
               type="submit"
               disabled={loading}
               className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition-all ${
                 loading
                   ? 'bg-surface-2 text-text-muted cursor-not-allowed'
-                  : 'bg-accent text-accent-fg hover:bg-accent-hover hover:shadow-accent/20'
+                  : 'bg-accent text-accent-fg hover:bg-accent-hover hover:shadow-accent/20 cursor-pointer'
               }`}
             >
               {loading ? (

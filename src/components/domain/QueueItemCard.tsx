@@ -1,7 +1,7 @@
 import React from 'react';
 import { QueueItem, Service } from '../../types';
 import { DynamicIcon } from '../ui/DynamicIcon';
-import { MessageCircle, Trash2, LogOut, CheckCircle, Bell, Clock } from 'lucide-react';
+import { MessageCircle, Trash2, LogOut, CheckCircle, Bell, Clock, Undo2 } from 'lucide-react';
 
 interface QueueItemCardProps {
   item: QueueItem;
@@ -12,6 +12,7 @@ interface QueueItemCardProps {
   shopName?: string;
   onStatusChange: (id: string, status: QueueItem['status']) => void;
   onLeaveQueue: (id: string) => void;
+  onReturnToQueue?: (item: QueueItem) => void;
 }
 
 export const QueueItemCard: React.FC<QueueItemCardProps> = ({
@@ -23,6 +24,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
   shopName = 'salão',
   onStatusChange,
   onLeaveQueue,
+  onReturnToQueue,
 }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -169,12 +171,24 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
             </>
           )}
           {item.status === 'in_chair' && (
-            <button
-              onClick={() => onStatusChange(item.id, 'completed')}
-              className="px-4 py-1.5 text-xs font-bold text-text-primary bg-success hover:bg-success/80 rounded shadow-md w-full flex items-center justify-center gap-1 transition-colors"
-            >
-              <CheckCircle size={14} /> Finalizar Serviço
-            </button>
+            <div className="flex flex-col sm:flex-row gap-2 w-full">
+              {onReturnToQueue && (
+                <button
+                  type="button"
+                  onClick={() => onReturnToQueue(item)}
+                  className="px-4 py-1.5 text-xs font-bold text-text-primary bg-surface-2 border border-border hover:bg-surface hover:border-border-strong rounded flex items-center justify-center gap-1 transition-colors cursor-pointer sm:flex-1"
+                >
+                  <Undo2 size={14} /> Voltar para a fila
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => onStatusChange(item.id, 'completed')}
+                className="px-4 py-1.5 text-xs font-bold text-text-primary bg-success hover:bg-success/80 rounded shadow-md flex items-center justify-center gap-1 transition-colors cursor-pointer sm:flex-1"
+              >
+                <CheckCircle size={14} /> Finalizar Serviço
+              </button>
+            </div>
           )}
         </div>
       )}
