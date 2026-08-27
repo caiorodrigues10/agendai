@@ -10,7 +10,7 @@ export type AuthResult = { ok: true } | { ok: false; message: string };
 interface AuthContextValue {
   user: StaffMember | null;
   loading: boolean;
-  login: (email: string, password: string, recaptchaToken?: string) => Promise<AuthResult>;
+  login: (email: string, password: string, recaptchaToken?: string, rememberMe?: boolean) => Promise<AuthResult>;
   loginWithGoogle: (idToken: string) => Promise<AuthResult>;
   register: (data: RegisterPayload & { recaptchaToken?: string }) => Promise<AuthResult>;
   logout: () => void;
@@ -112,17 +112,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return () => window.removeEventListener('agendai:session-expired', onSessionExpired);
   }, []);
 
-  const persistSession = (resp: { user: any; accessToken: string; refreshToken?: string }) => {
-    authStorage.setTokens(resp.accessToken, resp.refreshToken);
+  const persistSession = (resp: { user: any; accessToken: string; refreshToken?: string }, rememberMe = true) => {
+    authStorage.setTokens(resp.accessToken, resp.refreshToken, rememberMe);
     authStorage.setUser(resp.user);
     setUser(normalizeUser(resp.user));
     sessionStorage.removeItem('agendai:access-block-info');
   };
 
-  const login = async (email: string, password: string, recaptchaToken?: string): Promise<AuthResult> => {
+  const login = async (email: string, password: string, recaptchaToken?: string, rememberMe = true): Promise<AuthResult> => {
     try {
       const resp = await authApi.login(email, password, recaptchaToken);
-      persistSession(resp);
+      persistSession(resp, rememberMe);
       return { ok: true };
     } catch (err) {
       if (err instanceof ApiError && err.isAccessBlocked) {

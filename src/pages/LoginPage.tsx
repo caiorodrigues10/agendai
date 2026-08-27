@@ -37,6 +37,10 @@ import {
 import { referralStorage } from '../utils/referralStorage';
 import { trialCampaign } from '../marketing/trialCampaign';
 import { getRecaptchaToken } from '../utils/recaptcha';
+import { plansApi, Plan } from '../infra/plansApi';
+import { subscriptionsApi } from '../infra/subscriptionsApi';
+import { needsPaywallAfterAuth } from '../utils/subscriptionPaywall';
+import { TrialExpiredPaywallModal } from '../components/domain/TrialExpiredPaywallModal';
 
 type Tab = 'login' | 'register';
 type RegisterStep = 1 | 2;
@@ -227,6 +231,7 @@ export const LoginPage: React.FC = () => {
   const [tab, setTab] = useState<Tab>('login');
   const [registerStep, setRegisterStep] = useState<RegisterStep>(1);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState<{
     message: string;
@@ -238,6 +243,9 @@ export const LoginPage: React.FC = () => {
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5, 6]);
   const [openTime, setOpenTime] = useState('09:00');
   const [closeTime, setCloseTime] = useState('19:00');
+  const [paywallOpen, setPaywallOpen] = useState(false);
+  const [paywallPlans, setPaywallPlans] = useState<Plan[]>([]);
+  const hadSessionOnMount = useRef(Boolean(authStorage.getUser()));
 
   const showErrorToast = (message: string) => {
     setToast({ message, type: 'error' });
@@ -257,7 +265,7 @@ export const LoginPage: React.FC = () => {
       setGoogleError(result.message);
       return;
     }
-    navigateAfterAuth();
+    await navigateAfterAuth();
   };
 
   useEffect(() => {
@@ -355,11 +363,11 @@ export const LoginPage: React.FC = () => {
     navigate('/app/queue');
   };
 
-  const navigateAfterAuth = (opts?: { forceCheckout?: boolean }) => {
+  const navigateAfterAuth = async () => {
     const planId = searchParams.get('planId');
     if (planId) {
       const billing = searchParams.get('billing') === 'YEARLY' ? 'YEARLY' : 'MONTHLY';
-      navigate(`/checkout?planId=${encodeURIComponent(planId)}&billing=${billing}&setup=trial`);
+      navigate(`/checkout?planId=${encodeURIComponent(planId)}&billing=${billing}`);
       return;
     }
     const loggedUser = authStorage.getUser();
@@ -370,24 +378,45 @@ export const LoginPage: React.FC = () => {
         return;
       }
     }
-    if (opts?.forceCheckout) {
-      navigate('/planos?setup=trial');
-      return;
+
+    try {
+      const me = await subscriptionsApi.me();
+      if (needsPaywallAfterAuth(me)) {
+        if (me.plans && me.plans.length > 0) {
+          setPaywallPlans(me.plans);
+        } else {
+          try {
+            setPaywallPlans(await plansApi.list());
+          } catch {
+            setPaywallPlans([]);
+          }
+        }
+        setPaywallOpen(true);
+        return;
+      }
+    } catch {
+      // GET /subscriptions/me falhou: entra no painel; 402 global manda a /bloqueado
     }
-    // Sem cartão no trial → checkout; StaffDashboard também redireciona
     navigate('/app/queue');
   };
+
+  useEffect(() => {
+    if (!hadSessionOnMount.current || !user || paywallOpen) return;
+    void navigateAfterAuth();
+    // Só na sessão já existente ao abrir /login — login/cadastro chamam navigateAfterAuth sozinhos.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const handleLogin = async (data: LoginFormData) => {
     setSubmitting(true);
     const token = await getRecaptchaToken('login');
-    const result = await login(data.email, data.password, token);
+    const result = await login(data.email, data.password, token, rememberMe);
     setSubmitting(false);
     if (result.ok === false) {
       showErrorToast(result.message);
       return;
     }
-    navigateAfterAuth();
+    await navigateAfterAuth();
   };
 
   const goToRegisterStep2 = async () => {
@@ -418,7 +447,6 @@ export const LoginPage: React.FC = () => {
     }
     setSubmitting(true);
     const referralCode = referralStorage.get() ?? undefined;
-    sessionStorage.setItem('agendai:just-registered', 'true');
     const token = await getRecaptchaToken('register');
     const WEEKDAY_ORDER = [0, 1, 2, 3, 4, 5, 6];
     const schedule = WEEKDAY_ORDER.map(dayOfWeek => ({
@@ -445,12 +473,11 @@ export const LoginPage: React.FC = () => {
     });
     setSubmitting(false);
     if (result.ok === false) {
-      sessionStorage.removeItem('agendai:just-registered');
       showErrorToast(result.message);
       return;
     }
     referralStorage.clear();
-    navigateAfterAuth({ forceCheckout: true });
+    await navigateAfterAuth();
   };
 
   const registerPassword = registerForm.watch('password') ?? '';
@@ -461,7 +488,6 @@ export const LoginPage: React.FC = () => {
     setTab(next);
     setRegisterStep(1);
     setRegisterFieldsUnlocked(false);
-    sessionStorage.removeItem('agendai:just-registered');
     setSelectedDays([1, 2, 3, 4, 5, 6]);
     setOpenTime('09:00');
     setCloseTime('19:00');
@@ -636,6 +662,25 @@ export const LoginPage: React.FC = () => {
                   >
                     Esqueci minha senha
                   </button>
+
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <div className="relative flex items-center justify-center">
+                      <input
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={(e) => setRememberMe(e.target.checked)}
+                        className="peer sr-only"
+                      />
+                      <div className="w-4 h-4 rounded border border-text-muted/40 bg-bg transition-all peer-checked:bg-accent peer-checked:border-accent flex items-center justify-center">
+                        {rememberMe && (
+                          <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-xs text-text-secondary">Manter conectado</span>
+                  </label>
 
                   <button type="submit" disabled={submitting} className={primaryBtn}>
                     {submitting ? (
@@ -984,6 +1029,12 @@ export const LoginPage: React.FC = () => {
           </div>
         </motion.div>
       </div>
+      <TrialExpiredPaywallModal
+        open={paywallOpen}
+        plans={paywallPlans}
+        isOwner={(authStorage.getUser()?.role ?? '').toUpperCase() === 'OWNER'}
+        onClose={() => setPaywallOpen(false)}
+      />
     </div>
   );
 };
