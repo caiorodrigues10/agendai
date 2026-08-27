@@ -1,4 +1,7 @@
+import { useEffect } from 'react';
+
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '';
+const BADGE_CLASS = 'recaptcha-visible';
 
 let scriptLoaded = false;
 let scriptPromise: Promise<void> | null = null;
@@ -35,4 +38,19 @@ export async function getRecaptchaToken(action: string): Promise<string> {
     console.warn('reCAPTCHA error:', err);
     return '';
   }
+}
+
+/** Carrega o script e mostra o badge só enquanto a página de login estiver montada. */
+export function useRecaptchaBadge(): void {
+  useEffect(() => {
+    if (!RECAPTCHA_SITE_KEY) return;
+    let cancelled = false;
+    void loadScript().then(() => {
+      if (!cancelled) document.body.classList.add(BADGE_CLASS);
+    });
+    return () => {
+      cancelled = true;
+      document.body.classList.remove(BADGE_CLASS);
+    };
+  }, []);
 }

@@ -46,7 +46,9 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
     watch,
     formState: { errors },
   } = useForm<CustomerQueueFormData | CustomerQueueStaffFormData>({
-    resolver: zodResolver(isStaffMode ? CustomerQueueStaffSchema : CustomerQueueSchema),
+    resolver: zodResolver(
+      isStaffMode || isAdditionalPerson ? CustomerQueueStaffSchema : CustomerQueueSchema
+    ),
     defaultValues: {
       whatsapp: '',
       serviceId: services.length > 0 ? services[0].id : '',
@@ -66,7 +68,10 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
     setSubmitError(null);
     try {
       const raw = data.whatsapp.trim();
-      const whatsapp = isStaffMode && !raw ? STAFF_PLACEHOLDER_WHATSAPP : normalizeDocument(raw);
+      const whatsapp =
+        (isStaffMode || isAdditionalPerson) && !raw
+          ? STAFF_PLACEHOLDER_WHATSAPP
+          : normalizeDocument(raw);
       await onJoin(data.name, whatsapp, data.serviceId, isStaffMode);
     } catch (err) {
       setSubmitError(getErrorMessage(err, 'Não foi possível entrar na fila. Tente de novo.'));
@@ -91,7 +96,7 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
               {isStaffMode
                 ? 'Adicionar Cliente Manual'
                 : isAdditionalPerson
-                  ? 'Adicionar outra pessoa'
+                  ? 'Adicionar dependente'
                   : 'Entrar na Fila'}
             </h2>
           </div>
@@ -106,7 +111,7 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-2">
-              Nome do Cliente
+              {isAdditionalPerson ? 'Nome do dependente' : 'Nome do Cliente'}
             </label>
             <input
               type="text"
@@ -124,7 +129,8 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-2">
-              WhatsApp {isStaffMode ? '(opcional)' : '(para aviso)'}
+              WhatsApp{' '}
+              {isStaffMode || isAdditionalPerson ? '(opcional)' : '(para aviso)'}
             </label>
             <input
               type="tel"
@@ -133,7 +139,7 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
               value={watch('whatsapp')}
               onChange={handlePhoneChange}
             />
-            {errors.whatsapp && !isStaffMode && (
+            {errors.whatsapp && (
               <p className="text-danger text-xs mt-1 flex items-center gap-1">
                 <AlertCircle size={10} /> {errors.whatsapp.message}
               </p>
@@ -142,7 +148,7 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
             {!isStaffMode && (
               <p className="text-xs text-text-muted mt-1">
                 {isAdditionalPerson
-                  ? 'Pode ser o mesmo WhatsApp — use o nome da outra pessoa.'
+                  ? 'Opcional. Se o dependente não tiver WhatsApp, deixe em branco.'
                   : '*O dono será notificado e te avisaremos quando faltar 15min.'}
               </p>
             )}
@@ -189,13 +195,13 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
                   <Loader2 className="animate-spin" size={20} />
                   Processando...
                 </>
-              ) : isStaffMode ? (
+              ) : isStaffMode || isAdditionalPerson ? (
                 'Adicionar à Fila'
               ) : (
                 'Confirmar e Avisar Dono'
               )}
             </button>
-            {!isStaffMode && (
+            {!isStaffMode && !isAdditionalPerson && (
               <p className="text-center text-xs text-text-muted mt-4">
                 Ao entrar, você será redirecionado para o WhatsApp do salão.
               </p>

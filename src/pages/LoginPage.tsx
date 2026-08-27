@@ -36,7 +36,7 @@ import {
 } from '../utils/documentUtils';
 import { referralStorage } from '../utils/referralStorage';
 import { trialCampaign } from '../marketing/trialCampaign';
-import { getRecaptchaToken } from '../utils/recaptcha';
+import { getRecaptchaToken, useRecaptchaBadge } from '../utils/recaptcha';
 import { plansApi, Plan } from '../infra/plansApi';
 import { subscriptionsApi } from '../infra/subscriptionsApi';
 import { needsPaywallAfterAuth } from '../utils/subscriptionPaywall';
@@ -246,6 +246,7 @@ export const LoginPage: React.FC = () => {
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [paywallPlans, setPaywallPlans] = useState<Plan[]>([]);
   const hadSessionOnMount = useRef(Boolean(authStorage.getUser()));
+  useRecaptchaBadge();
 
   const showErrorToast = (message: string) => {
     setToast({ message, type: 'error' });

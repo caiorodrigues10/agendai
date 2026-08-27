@@ -78,5 +78,6 @@ describe('PublicHome smoke', () => {
     await waitFor(() => {
       expect(screen.getByText(/salão teste/i)).toBeInTheDocument();
     });
+    expect(screen.getByRole('button', { name: /adicionar dependente/i })).toBeInTheDocument();
   });
 });

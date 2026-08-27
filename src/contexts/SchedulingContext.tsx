@@ -88,7 +88,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     async (options?: { silent?: boolean }) => {
       if (!barbershopId) return;
       try {
-        const queueData = await schedulingApi.listQueue(barbershopId);
+        const queueData = await schedulingApi.listQueue(barbershopId, clientId);
         setQueue(queueData as QueueItem[]);
       } catch (error) {
         if (options?.silent) return; // polling: mantém dados anteriores
@@ -96,7 +96,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
         setQueue([]);
       }
     },
-    [barbershopId]
+    [barbershopId, clientId]
   );
 
   const refreshAppointments = useCallback(

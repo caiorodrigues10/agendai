@@ -86,7 +86,7 @@ export const StaffDashboard: React.FC = () => {
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [returnToQueueItem, setReturnToQueueItem] = useState<QueueItem | null>(null);
   const [returningToQueue, setReturningToQueue] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'bot' } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'bot' | 'error' } | null>(null);
 
   const activeTab =
     (location.pathname.split('/')[2] as
@@ -219,7 +219,7 @@ export const StaffDashboard: React.FC = () => {
     }
   }, [activeTab, user, navigate, hasDashboard]);
 
-  const showToast = (msg: string, type: 'success' | 'bot' = 'success') => {
+  const showToast = (msg: string, type: 'success' | 'bot' | 'error' = 'success') => {
     setToast({ message: msg, type });
   };
 
@@ -605,9 +605,11 @@ export const StaffDashboard: React.FC = () => {
                     position={index + 1}
                     isAdmin={true}
                     shopName={settings?.shopName}
+                    barbershopId={barbershopId || item.barbershopId}
                     isCurrentUser={item.customerId === clientId}
                     onStatusChange={updateQueueStatus}
                     onReturnToQueue={setReturnToQueueItem}
+                    onNotify={showToast}
                     onLeaveQueue={id => {
                       leaveQueue(id);
                       showToast('Cliente removido.', 'bot');

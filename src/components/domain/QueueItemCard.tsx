@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { QueueItem, Service } from '../../types';
 import { DynamicIcon } from '../ui/DynamicIcon';
-import { MessageCircle, Trash2, LogOut, CheckCircle, Bell, Clock, Undo2 } from 'lucide-react';
+import { MessageCircle, Trash2, LogOut, CheckCircle, Bell, Clock, Undo2, Loader2 } from 'lucide-react';
+import { notificationsApi } from '../../infra/notificationsApi';
+import { getErrorMessage } from '../../utils/errorMessage';
 
 interface QueueItemCardProps {
   item: QueueItem;
@@ -10,9 +12,11 @@ interface QueueItemCardProps {
   isAdmin: boolean;
   isCurrentUser: boolean;
   shopName?: string;
+  barbershopId?: string;
   onStatusChange: (id: string, status: QueueItem['status']) => void;
   onLeaveQueue: (id: string) => void;
   onReturnToQueue?: (item: QueueItem) => void;
+  onNotify?: (message: string, type: 'success' | 'error' | 'bot') => void;
 }
 
 export const QueueItemCard: React.FC<QueueItemCardProps> = ({
@@ -22,10 +26,13 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
   isAdmin,
   isCurrentUser,
   shopName = 'salão',
+  barbershopId,
   onStatusChange,
   onLeaveQueue,
   onReturnToQueue,
+  onNotify,
 }) => {
+  const [sending, setSending] = useState<'reminder' | 'next' | null>(null);
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'in_chair':
@@ -54,16 +61,25 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
     }
   };
 
-  const sendReminder = () => {
+  const sendWhatsApp = async (kind: 'reminder' | 'next') => {
     const phone = item.whatsapp.replace(/\D/g, '');
-    const msg = `Olá ${item.customerName}! Sua vez no ${shopName} está chegando (aprox. 15 min). Já pode vir!`;
-    window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-  };
-
-  const sendNextNotification = () => {
-    const phone = item.whatsapp.replace(/\D/g, '');
-    const msg = `Olá ${item.customerName}! Você é o próximo na fila do ${shopName}. Por favor, fique atento!`;
-    window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    const msg =
+      kind === 'reminder'
+        ? `Olá ${item.customerName}! Sua vez no ${shopName} está chegando (aprox. 15 min). Já pode vir!`
+        : `Olá ${item.customerName}! Você é o próximo na fila do ${shopName}. Por favor, fique atento!`;
+    setSending(kind);
+    try {
+      await notificationsApi.sendWhatsApp({
+        phone,
+        message: msg,
+        barbershopId: barbershopId || item.barbershopId,
+      });
+      onNotify?.(kind === 'reminder' ? 'Aviso de 15 min enviado.' : 'Cliente avisado que é o próximo.', 'success');
+    } catch (err) {
+      onNotify?.(getErrorMessage(err, 'Não foi possível enviar o WhatsApp.'), 'error');
+    } finally {
+      setSending(null);
+    }
   };
 
   const hasValidPhone =
@@ -143,16 +159,30 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
               {hasValidPhone && (
                 <>
                   <button
-                    onClick={sendReminder}
-                    className="px-3 py-1.5 text-xs text-success bg-success/10 border border-success/30 hover:bg-success/20 rounded flex items-center gap-1 transition-colors"
+                    type="button"
+                    disabled={sending !== null}
+                    onClick={() => void sendWhatsApp('reminder')}
+                    className="px-3 py-1.5 text-xs text-success bg-success/10 border border-success/30 hover:bg-success/20 rounded flex items-center gap-1 transition-colors disabled:opacity-50 cursor-pointer"
                   >
-                    <MessageCircle size={14} /> Avisar (15m)
+                    {sending === 'reminder' ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <MessageCircle size={14} />
+                    )}
+                    Avisar (15m)
                   </button>
                   <button
-                    onClick={sendNextNotification}
-                    className="px-3 py-1.5 text-xs text-accent bg-accent/10 border border-accent/30 hover:bg-accent/20 rounded flex items-center gap-1 transition-colors"
+                    type="button"
+                    disabled={sending !== null}
+                    onClick={() => void sendWhatsApp('next')}
+                    className="px-3 py-1.5 text-xs text-accent bg-accent/10 border border-accent/30 hover:bg-accent/20 rounded flex items-center gap-1 transition-colors disabled:opacity-50 cursor-pointer"
                   >
-                    <MessageCircle size={14} /> É o Próximo
+                    {sending === 'next' ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <MessageCircle size={14} />
+                    )}
+                    É o Próximo
                   </button>
                 </>
               )}

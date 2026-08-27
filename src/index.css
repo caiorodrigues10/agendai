@@ -195,3 +195,11 @@ input:-webkit-autofill:active {
   border: 0;
   overflow: hidden;
 }
+
+/* reCAPTCHA v3: badge só na página de login (`body.recaptcha-visible`). */
+.grecaptcha-badge {
+  visibility: hidden !important;
+}
+body.recaptcha-visible .grecaptcha-badge {
+  visibility: visible !important;
+}

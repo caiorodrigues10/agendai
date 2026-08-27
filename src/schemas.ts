@@ -76,7 +76,7 @@ export const CustomerQueueSchema = z.object({
 
 export type CustomerQueueFormData = z.infer<typeof CustomerQueueSchema>;
 
-/** Fila adicionada pelo staff — WhatsApp opcional. */
+/** Fila adicionada pelo staff ou dependente — WhatsApp opcional. */
 export const CustomerQueueStaffSchema = CustomerQueueSchema.extend({
   whatsapp: z
     .string()

@@ -41,6 +41,7 @@ export const PublicHome: React.FC = () => {
     loading: schedulingLoading,
   } = useScheduling();
   const [showJoinForm, setShowJoinForm] = useState(false);
+  const [joinMode, setJoinMode] = useState<'self' | 'dependent'>('self');
   const [activeTab, setActiveTab] = useState<'queue' | 'profile' | 'appointments'>('queue');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'bot' } | null>(null);
 
@@ -61,14 +62,16 @@ export const PublicHome: React.FC = () => {
     setToast({ message: msg, type });
   };
 
-  const alreadyInQueue = queue.some(
-    q => q.customerId === clientId && q.status !== 'completed' && q.status !== 'cancelled'
-  );
-
   const handleJoinQueue = async (name: string, whatsapp: string, serviceId: string) => {
-    await joinQueue(name, whatsapp, serviceId, { additionalPerson: alreadyInQueue });
+    const asDependent = joinMode === 'dependent';
+    await joinQueue(name, whatsapp, serviceId, { additionalPerson: asDependent });
     setShowJoinForm(false);
-    showToast(alreadyInQueue ? 'Pessoa adicionada à fila!' : 'Você entrou na fila!', 'bot');
+    showToast(asDependent ? 'Dependente adicionado à fila!' : 'Você entrou na fila!', 'bot');
+  };
+
+  const openJoinForm = (mode: 'self' | 'dependent') => {
+    setJoinMode(mode);
+    setShowJoinForm(true);
   };
 
   // Wait until URL tenant is applied before deciding to redirect
@@ -272,8 +275,9 @@ export const PublicHome: React.FC = () => {
                 </div>
               ) : (
                 <button
-                  onClick={() => setShowJoinForm(true)}
-                  className="w-full bg-accent hover:bg-accent-hover text-accent-fg font-bold text-lg py-4 rounded-xl shadow-lg shadow-accent/30 hover:shadow-accent/50 transition-all transform hover:scale-[1.02] active:scale-[0.98] mb-8 flex items-center justify-center gap-3 border border-accent/20 relative overflow-hidden group"
+                  type="button"
+                  onClick={() => openJoinForm('self')}
+                  className="w-full bg-accent hover:bg-accent-hover text-accent-fg font-bold text-lg py-4 rounded-t-xl shadow-lg shadow-accent/30 hover:shadow-accent/50 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 border border-accent/20 relative overflow-hidden group cursor-pointer"
                 >
                   <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 group-hover:translate-x-full"></div>
                   <span className="relative flex items-center gap-3">
@@ -284,19 +288,24 @@ export const PublicHome: React.FC = () => {
               ))}
 
             {isUserInQueue && (
-              <div className="mb-8 animate-fade-in">
-                <div className="w-full bg-accent/10 border border-accent/30 text-accent text-center py-3 rounded-t-xl flex items-center justify-center gap-2">
-                  <DynamicIcon name="CheckCircle" size={20} className="text-accent" />
-                  <span className="font-bold">Você já está na fila!</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowJoinForm(true)}
-                  className="w-full bg-surface border-x border-b border-border hover:bg-surface-2 text-text-secondary hover:text-text-primary text-sm font-medium py-3 rounded-b-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <DynamicIcon name="UserPlus" size={16} /> Adicionar outra pessoa
-                </button>
+              <div
+                className={`w-full bg-accent/10 border border-accent/30 text-accent text-center py-3 flex items-center justify-center gap-2 ${
+                  isOpen ? 'rounded-t-xl' : 'rounded-xl mb-8'
+                }`}
+              >
+                <DynamicIcon name="CheckCircle" size={20} className="text-accent" />
+                <span className="font-bold">Você já está na fila!</span>
               </div>
+            )}
+
+            {isOpen && (
+              <button
+                type="button"
+                onClick={() => openJoinForm('dependent')}
+                className="w-full bg-surface border border-t-0 border-border hover:bg-surface-2 text-text-secondary hover:text-text-primary text-sm font-medium py-3 rounded-b-xl transition-all flex items-center justify-center gap-2 cursor-pointer mb-8"
+              >
+                <DynamicIcon name="UserPlus" size={16} /> Adicionar dependente
+              </button>
             )}
 
             {/* QUEUE LIST HEADER */}
@@ -318,8 +327,9 @@ export const PublicHome: React.FC = () => {
                   <p className="text-text-muted font-medium">Nenhum cliente na fila.</p>
                   {!isUserInQueue && isOpen && (
                     <button
-                      onClick={() => setShowJoinForm(true)}
-                      className="text-accent text-sm font-bold mt-2 hover:underline"
+                      type="button"
+                      onClick={() => openJoinForm('self')}
+                      className="text-accent text-sm font-bold mt-2 hover:underline cursor-pointer"
                     >
                       Seja o primeiro!
                     </button>
@@ -353,7 +363,7 @@ export const PublicHome: React.FC = () => {
           services={services}
           onJoin={handleJoinQueue}
           onCancel={() => setShowJoinForm(false)}
-          isAdditionalPerson={isUserInQueue}
+          isAdditionalPerson={joinMode === 'dependent'}
         />
       )}
     </div>

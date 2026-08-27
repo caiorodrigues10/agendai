@@ -40,10 +40,10 @@ function buildQuery(params: Record<string, string | undefined>): string {
 }
 
 export const schedulingApi = {
-  listQueue: async (barbershopId?: string) => {
-    const qs = barbershopId ? `?barbershopId=${barbershopId}` : '';
+  listQueue: async (barbershopId?: string, sessionId?: string) => {
+    const qs = buildQuery({ barbershopId, sessionId });
     // Token opcional: staff autenticado recebe a fila completa (com whatsapp);
-    // visitante recebe a visão pública mascarada.
+    // visitante recebe a visão pública mascarada (customerId só da própria sessão).
     const token = authStorage.getAccessToken() || undefined;
     const res = await apiClient<{ success: boolean; data: QueueItem[] }>(
       `/api/queue${qs}`,
