@@ -877,6 +877,7 @@ export const LoginPage: React.FC = () => {
                             registerForm.setValue('termsAccepted', v, { shouldValidate: true })
                           }
                           required
+                          error={registerForm.formState.errors.termsAccepted?.message}
                           helpLink={{ label: 'Ler Termos de Uso', href: '/termos' }}
                         />
                         <ConsentCheckbox
@@ -886,6 +887,7 @@ export const LoginPage: React.FC = () => {
                             registerForm.setValue('lgpdConsent', v, { shouldValidate: true })
                           }
                           required
+                          error={registerForm.formState.errors.lgpdConsent?.message}
                           helpLink={{ label: 'Política de Privacidade', href: '/privacidade' }}
                         />
                         <ConsentCheckbox
