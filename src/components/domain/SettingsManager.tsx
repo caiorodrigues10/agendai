@@ -4,6 +4,7 @@ import { barbershopApi, ShopWhatsAppStatus } from '../../infra/barbershopApi';
 import { ApiError } from '../../infra/apiClient';
 import { maskPhone } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { AccountPrivacyPanel } from './AccountPrivacyPanel';
 import {
   Save,
   Clock,
@@ -204,12 +205,14 @@ interface SettingsManagerProps {
   settings: ShopSettings;
   barbershopId?: string;
   onSave: (settings: ShopSettings) => void;
+  onNotify: (message: string, type: 'success' | 'error') => void;
 }
 
 export const SettingsManager: React.FC<SettingsManagerProps> = ({
   settings,
   barbershopId,
   onSave,
+  onNotify,
 }) => {
   const [shopName, setShopName] = useState(settings.shopName);
   const [whatsapp, setWhatsapp] = useState(settings.whatsapp || '');
@@ -398,6 +401,8 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
       >
         <Save size={16} /> Salvar Configurações
       </button>
+
+      <AccountPrivacyPanel onNotify={onNotify} />
     </div>
   );
 };

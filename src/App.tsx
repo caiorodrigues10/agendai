@@ -28,7 +28,6 @@ const PlansPage = lazy(() => import('./pages/PlansPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const MasterAdminDashboard = lazy(() => import('./pages/MasterAdmin/MasterAdminDashboard'));
 const StaffDashboard = lazy(() => import('./pages/StaffDashboard'));
-const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 
 const App: React.FC = () => {
   return (
@@ -78,6 +77,7 @@ const App: React.FC = () => {
               </PrivateRoute>
             }
           />
+          <Route path="/app/account" element={<Navigate to="/app/settings" replace />} />
           <Route
             path="/app/:tab"
             element={
@@ -86,17 +86,6 @@ const App: React.FC = () => {
                 fallback={<Navigate to="/login" replace />}
               >
                 <StaffDashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/app/settings"
-            element={
-              <PrivateRoute
-                roles={['OWNER', 'EMPLOYEE']}
-                fallback={<Navigate to="/login" replace />}
-              >
-                <SettingsPage />
               </PrivateRoute>
             }
           />

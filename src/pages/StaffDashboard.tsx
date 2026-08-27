@@ -6,6 +6,7 @@ import { AddCustomerForm } from '../components/domain/AddCustomerForm';
 import { ReturnToQueueModal } from '../components/domain/ReturnToQueueModal';
 import { ServiceManager } from '../components/domain/ServiceManager';
 import { SettingsManager } from '../components/domain/SettingsManager';
+import { AccountPrivacyPanel } from '../components/domain/AccountPrivacyPanel';
 import { TeamManager } from '../components/domain/TeamManager';
 import { FinancialDashboard } from '../components/domain/FinancialDashboard';
 import { OwnerFinancialPanel } from '../components/domain/OwnerFinancialPanel';
@@ -447,14 +448,21 @@ export const StaffDashboard: React.FC = () => {
                 setSettings(s);
                 showToast('Salvo!');
               }}
+              onNotify={showToast}
             />
           )}
 
         {user &&
           activeTab === 'settings' &&
           !((user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && settings) && (
-            <div className="text-center py-12 bg-surface rounded-xl border border-border border-dashed">
-              <p className="text-text-muted">Carregando configurações...</p>
+            <div className="mt-6">
+              {user.role === 'EMPLOYEE' ? (
+                <AccountPrivacyPanel onNotify={showToast} />
+              ) : (
+                <div className="text-center py-12 bg-surface rounded-xl border border-border border-dashed">
+                  <p className="text-text-muted">Carregando configurações...</p>
+                </div>
+              )}
             </div>
           )}
 
