@@ -255,7 +255,7 @@ export const StaffDashboard: React.FC = () => {
           ></div>
         </div>
 
-        {user && (
+        {user && (user.role === 'MASTER_ADMIN' || user.role === 'OWNER') && (
           <div className="flex w-fit max-w-full gap-2 mb-6 bg-surface p-1 rounded-lg border border-border overflow-x-auto no-scrollbar">
             {(user.role === 'MASTER_ADMIN' || user.role === 'OWNER') && (
               <>
