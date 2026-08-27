@@ -34,6 +34,8 @@ import {
   Megaphone,
   Contact,
   Link2,
+  ChevronRight,
+  ChevronLeft,
 } from 'lucide-react';
 import { ClientsManager } from '../components/domain/ClientsManager';
 import { PublicLinkPanel } from '../components/domain/PublicLinkPanel';
@@ -98,8 +100,29 @@ export const StaffDashboard: React.FC = () => {
       | 'link') || 'queue';
 
   const tabsRef = useRef<HTMLDivElement>(null);
+  const subTabsRef = useRef<HTMLDivElement>(null);
   const tabBtnRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+  const [mainBarFades, setMainBarFades] = useState({ left: false, right: false });
+  const [subBarFades, setSubBarFades] = useState({ left: false, right: false });
+
+  const updateFades = (el: HTMLDivElement, set: typeof setMainBarFades) => {
+    set({
+      left: el.scrollLeft > 1,
+      right: el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
+    });
+  };
+
+  const edgeMaskStyle = (fades: { left: boolean; right: boolean }): React.CSSProperties | undefined => {
+    if (!fades.left && !fades.right) return undefined;
+    const parts: string[] = [];
+    if (fades.left) parts.push('transparent 0', '#000 36px');
+    else parts.push('#000 0');
+    if (fades.right) parts.push('#000 calc(100% - 44px)', 'transparent 100%');
+    else parts.push('#000 100%');
+    const image = `linear-gradient(to right, ${parts.join(', ')})`;
+    return { WebkitMaskImage: image, maskImage: image };
+  };
 
   const measureIndicator = useCallback(() => {
     const container = tabsRef.current;
@@ -118,7 +141,11 @@ export const StaffDashboard: React.FC = () => {
   }, [activeTab]);
 
   useEffect(() => {
-    const timer = setTimeout(measureIndicator, 100);
+    const timer = setTimeout(() => {
+      measureIndicator();
+      if (tabsRef.current) updateFades(tabsRef.current, setMainBarFades);
+      if (subTabsRef.current) updateFades(subTabsRef.current, setSubBarFades);
+    }, 100);
     window.addEventListener('resize', measureIndicator);
     return () => {
       clearTimeout(timer);
@@ -234,29 +261,62 @@ export const StaffDashboard: React.FC = () => {
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       <main className="max-w-md mx-auto px-4 pt-6">
-        <div ref={tabsRef} className="flex w-full max-w-full bg-surface p-1 rounded-xl mb-6 border border-border relative overflow-x-auto no-scrollbar">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              ref={btn => { if (btn) tabBtnRefs.current.set(tab.id, btn); }}
-              onClick={() => navigate(`/app/${tab.id}`)}
-              className={`flex-shrink-0 px-3 py-2 text-[10px] sm:text-xs font-bold rounded-lg transition-all flex flex-col items-center justify-center gap-0.5 z-10 relative leading-tight
-                        ${activeTab === tab.id ? 'text-text-primary' : 'text-text-muted'}
-                    `}
-            >
-              <tab.icon size={16} />
-              <span>{tab.label}</span>
-            </button>
-          ))}
-
+        <div className="relative">
           <div
-            className="absolute top-1 bottom-1 bg-surface-2 rounded-lg transition-all duration-300"
-            style={{ left: indicator.left, width: indicator.width }}
-          ></div>
+            ref={tabsRef}
+            onScroll={e => updateFades(e.currentTarget, setMainBarFades)}
+            style={edgeMaskStyle(mainBarFades)}
+            className="flex w-full max-w-full bg-surface p-1 rounded-xl mb-6 border border-border relative overflow-x-auto no-scrollbar"
+          >
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                ref={btn => { if (btn) tabBtnRefs.current.set(tab.id, btn); }}
+                onClick={() => navigate(`/app/${tab.id}`)}
+                className={`flex-shrink-0 px-3 py-2 text-[10px] sm:text-xs font-bold rounded-lg transition-all flex flex-col items-center justify-center gap-0.5 z-10 relative leading-tight
+                          ${activeTab === tab.id ? 'text-text-primary' : 'text-text-muted'}
+                      `}
+              >
+                <tab.icon size={16} />
+                <span>{tab.label}</span>
+              </button>
+            ))}
+
+            <div
+              className="absolute top-1 bottom-1 bg-surface-2 rounded-lg transition-all duration-300"
+              style={{ left: indicator.left, width: indicator.width }}
+            ></div>
+          </div>
+          {mainBarFades.right && (
+            <button
+              type="button"
+              aria-label="Rolar abas para a direita"
+              onClick={() => tabsRef.current?.scrollBy({ left: 140, behavior: 'smooth' })}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 p-1 rounded-full bg-surface-2 border border-border text-text-secondary shadow-md hover:text-text-primary transition-colors cursor-pointer"
+            >
+              <ChevronRight size={14} />
+            </button>
+          )}
+          {mainBarFades.left && (
+            <button
+              type="button"
+              aria-label="Rolar abas para a esquerda"
+              onClick={() => tabsRef.current?.scrollBy({ left: -140, behavior: 'smooth' })}
+              className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 p-1 rounded-full bg-surface-2 border border-border text-text-secondary shadow-md hover:text-text-primary transition-colors cursor-pointer"
+            >
+              <ChevronLeft size={14} />
+            </button>
+          )}
         </div>
 
         {user && (user.role === 'MASTER_ADMIN' || user.role === 'OWNER') && (
-          <div className="flex w-fit max-w-full gap-2 mb-6 bg-surface p-1 rounded-lg border border-border overflow-x-auto no-scrollbar">
+          <div className="relative mb-6">
+            <div
+              ref={subTabsRef}
+              onScroll={e => updateFades(e.currentTarget, setSubBarFades)}
+              style={edgeMaskStyle(subBarFades)}
+              className="flex w-fit max-w-full gap-2 bg-surface p-1 rounded-lg border border-border overflow-x-auto no-scrollbar"
+            >
             {(user.role === 'MASTER_ADMIN' || user.role === 'OWNER') && (
               <>
                 <button
@@ -288,6 +348,27 @@ export const StaffDashboard: React.FC = () => {
                   <Link2 size={16} /> Link
                 </button>
               </>
+            )}
+            </div>
+            {subBarFades.right && (
+              <button
+                type="button"
+                aria-label="Rolar ações para a direita"
+                onClick={() => subTabsRef.current?.scrollBy({ left: 140, behavior: 'smooth' })}
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 p-1 rounded-full bg-surface-2 border border-border text-text-secondary shadow-md hover:text-text-primary transition-colors cursor-pointer"
+              >
+                <ChevronRight size={14} />
+              </button>
+            )}
+            {subBarFades.left && (
+              <button
+                type="button"
+                aria-label="Rolar ações para a esquerda"
+                onClick={() => subTabsRef.current?.scrollBy({ left: -140, behavior: 'smooth' })}
+                className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 p-1 rounded-full bg-surface-2 border border-border text-text-secondary shadow-md hover:text-text-primary transition-colors cursor-pointer"
+              >
+                <ChevronLeft size={14} />
+              </button>
             )}
           </div>
         )}
