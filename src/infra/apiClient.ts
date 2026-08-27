@@ -110,13 +110,25 @@ async function refreshAccessToken(): Promise<string | null> {
   return refreshInFlight;
 }
 
+const SKIP_SANITIZE_KEYS = new Set([
+  'password',
+  'newPassword',
+  'currentPassword',
+  'confirmPassword',
+  'recaptchaToken',
+  'idToken',
+  'refreshToken',
+  'accessToken',
+  'token',
+]);
+
 const sanitize = (payload: unknown): unknown => {
   if (!payload || typeof payload !== 'object') return payload;
   if (Array.isArray(payload)) return payload.map(sanitize);
   return Object.entries(payload as Record<string, unknown>).reduce(
     (acc, [k, v]) => {
       if (typeof v === 'string') {
-        acc[k] = v.replace(/[<>]/g, '').trim();
+        acc[k] = SKIP_SANITIZE_KEYS.has(k) ? v : v.replace(/[<>]/g, '').trim();
       } else {
         acc[k] = sanitize(v);
       }
