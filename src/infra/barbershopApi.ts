@@ -36,9 +36,25 @@ interface CreatePostPayload {
   barbershopId: string;
   postMode: PostMode;
   type: string;
+  title?: string;
+  ctaText?: string;
   content?: string;
   imageUrl?: string;
   scheduledFor?: string;
+}
+
+export interface PostAiSuggestion {
+  title: string;
+  ctaText: string;
+}
+
+interface GeneratePostPayload {
+  barbershopId: string;
+  type: string;
+  postMode: PostMode;
+  tone?: 'promocional' | 'informativo' | 'divertido';
+  extra?: string;
+  count?: number;
 }
 
 interface PostConfigPayload {
@@ -172,6 +188,15 @@ export const barbershopApi = {
       undefined,
       token
     ).then(res => unwrap<{ imageUrl: string }>(res));
+  },
+  generatePostContent: (payload: GeneratePostPayload) => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient<{
+      success: boolean;
+      data: { suggestions: PostAiSuggestion[]; source: 'ai' | 'template' };
+    }>('/api/posts/generate', 'POST', payload, token).then(
+      res => unwrap<{ suggestions: PostAiSuggestion[]; source: 'ai' | 'template' }>(res)
+    );
   },
   createPost: (payload: CreatePostPayload) => {
     const token = authStorage.getAccessToken() || '';

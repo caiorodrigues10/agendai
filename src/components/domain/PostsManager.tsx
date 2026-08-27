@@ -13,9 +13,11 @@ import {
   List,
   CheckCheck,
   Image as ImageIcon,
-  Film,
+  Sparkles,
+  Wand2,
+  Check,
 } from 'lucide-react';
-import { barbershopApi } from '../../infra/barbershopApi';
+import { barbershopApi, PostAiSuggestion } from '../../infra/barbershopApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { getErrorMessage } from '../../utils/errorMessage';
@@ -23,6 +25,7 @@ import { FeedPost, PostMode } from '../../types';
 import { Toast } from '../ui/Toast';
 
 type PostType = 'haircut' | 'beard' | 'announcement';
+type PostTone = 'promocional' | 'informativo' | 'divertido' | null;
 
 const TYPE_OPTIONS: {
   id: PostType;
@@ -44,6 +47,15 @@ const MODE_OPTIONS: {
   { id: 'both', label: 'Ambos', icon: CheckCheck },
 ];
 
+const TONE_OPTIONS: {
+  id: PostTone;
+  label: string;
+}[] = [
+  { id: 'promocional', label: 'Promocional' },
+  { id: 'informativo', label: 'Informativo' },
+  { id: 'divertido', label: 'Descontraído' },
+];
+
 const MODE_LABEL: Record<PostMode, string> = {
   queue: 'Fila',
   appointments: 'Agenda',
@@ -56,11 +68,17 @@ export const PostsManager: React.FC = () => {
 
   const [type, setType] = useState<PostType>('haircut');
   const [postMode, setPostMode] = useState<PostMode>('queue');
+  const [tone, setTone] = useState<PostTone>(null);
+  const [extra, setExtra] = useState('');
   const [title, setTitle] = useState('');
   const [ctaText, setCtaText] = useState('');
   const [publishMode, setPublishMode] = useState<'now' | 'schedule'>('now');
   const [scheduledFor, setScheduledFor] = useState('');
   const [autoPostEnabled, setAutoPostEnabled] = useState(false);
+
+  const [suggestions, setSuggestions] = useState<PostAiSuggestion[]>([]);
+  const [suggestionsSource, setSuggestionsSource] = useState<'ai' | 'template' | null>(null);
+  const [generating, setGenerating] = useState(false);
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -107,6 +125,34 @@ export const PostsManager: React.FC = () => {
     };
     void load();
   }, [barbershopId, showToast]);
+
+  useEffect(() => {
+    setSuggestions([]);
+    setSuggestionsSource(null);
+  }, [type, postMode]);
+
+  const handleGenerate = async () => {
+    if (!barbershopId) return;
+    setGenerating(true);
+    setSuggestions([]);
+    setSuggestionsSource(null);
+    try {
+      const res = await barbershopApi.generatePostContent({
+        barbershopId,
+        type,
+        postMode,
+        tone: tone || undefined,
+        extra: extra.trim() || undefined,
+        count: 3,
+      });
+      setSuggestions(res.suggestions);
+      setSuggestionsSource(res.source);
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Não foi possível gerar sugestões.'), 'error');
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const regeneratePreview = useCallback(
     async (mode: PostMode, t: PostType, ti: string, ct: string, id: string | null) => {
@@ -245,7 +291,85 @@ export const PostsManager: React.FC = () => {
 
             <div>
               <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
-                Título (opcional)
+                Tom da mensagem
+              </label>
+              <div className="flex gap-2">
+                {TONE_OPTIONS.map(opt => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setTone(tone === opt.id ? null : opt.id)}
+                    className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 border transition-all
+                      ${tone === opt.id ? 'bg-accent border-accent text-accent-fg' : 'bg-bg border-border text-text-muted'}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
+                Algo específico? <span className="text-text-muted font-normal">(opcional)</span>
+              </label>
+              <input
+                type="text"
+                value={extra}
+                onChange={e => setExtra(e.target.value)}
+                maxLength={200}
+                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent"
+                placeholder="Ex.: promoção de aniversário, serviço novo..."
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => void handleGenerate()}
+              disabled={generating}
+              className="w-full px-4 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:from-violet-500 hover:to-fuchsia-500 shadow-lg shadow-violet-500/25 disabled:opacity-60"
+            >
+              {generating ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Sparkles size={16} />
+              )}
+              {generating ? 'Gerando...' : 'Gerar com IA'}
+            </button>
+
+            {suggestions.length > 0 && (
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-text-secondary block">
+                  Sugestões <span className="font-normal normal-case">(clique para aplicar)</span>
+                </label>
+                {suggestions.map((s, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => {
+                      setTitle(s.title);
+                      setCtaText(s.ctaText);
+                    }}
+                    className="w-full text-left bg-bg border border-border rounded-lg px-4 py-3 hover:border-accent transition-all group"
+                  >
+                    <p className="text-sm font-bold text-text-primary group-hover:text-accent transition-colors">
+                      {s.title}
+                    </p>
+                    <p className="text-xs text-text-secondary mt-0.5">
+                      CTA: {s.ctaText}
+                    </p>
+                  </button>
+                ))}
+                {suggestionsSource === 'template' && (
+                  <p className="text-[11px] text-text-muted italic">
+                    gerado localmente · adicione GEMINI_API_KEY para sugestões por IA
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
+                Título <span className="text-text-muted font-normal">(edite manualmente ou selecione acima)</span>
               </label>
               <input
                 type="text"
@@ -259,7 +383,7 @@ export const PostsManager: React.FC = () => {
 
             <div>
               <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
-                Texto do CTA (opcional)
+                Texto do CTA <span className="text-text-muted font-normal">(edite manualmente ou selecione acima)</span>
               </label>
               <input
                 type="text"
