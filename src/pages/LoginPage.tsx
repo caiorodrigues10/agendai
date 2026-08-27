@@ -657,7 +657,7 @@ export const LoginPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => navigate('/esqueci-senha')}
-                    className="text-[11px] text-text-muted hover:text-accent transition-colors text-right w-full -mt-2"
+                    className="text-[11px] text-text-muted hover:text-accent transition-colors text-right w-auto -mt-2"
                   >
                     Esqueci minha senha
                   </button>
