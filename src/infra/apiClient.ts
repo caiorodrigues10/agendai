@@ -45,9 +45,17 @@ async function refreshAccessToken(): Promise<string | null> {
 
   refreshInFlight = (async () => {
     try {
+      const refreshToken = authStorage.getRefreshToken();
+      if (!refreshToken) {
+        authStorage.clearTokens();
+        authStorage.clearUser();
+        window.dispatchEvent(new Event('agendai:session-expired'));
+        return null;
+      }
       const res = await fetch('/api/auth/refresh', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
         credentials: 'include',
       });
       if (!res.ok) {
@@ -65,7 +73,7 @@ async function refreshAccessToken(): Promise<string | null> {
         window.dispatchEvent(new Event('agendai:session-expired'));
         return null;
       }
-      authStorage.setTokens(accessToken);
+      authStorage.setTokens(accessToken, data?.refreshToken as string | undefined);
       if (data.user) authStorage.setUser(data.user);
       return accessToken;
     } catch {

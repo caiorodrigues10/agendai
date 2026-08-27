@@ -1,21 +1,25 @@
 const ACCESS_TOKEN_KEY = 'barber_access_token';
+const REFRESH_TOKEN_KEY = 'barber_refresh_token';
 const USER_KEY = 'barber_user';
 
 export const authStorage = {
   getAccessToken: () => localStorage.getItem(ACCESS_TOKEN_KEY),
+  getRefreshToken: () => localStorage.getItem(REFRESH_TOKEN_KEY),
   setAccessToken: (token: string) => {
     localStorage.setItem(ACCESS_TOKEN_KEY, token);
   },
   clearAccessToken: () => {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
   },
-  setTokens: (accessToken: string, _refreshToken?: string) => {
+  setTokens: (accessToken: string, refreshToken?: string) => {
     localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
-    // refreshToken is now in httpOnly cookie — ignore
+    if (refreshToken) {
+      localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    }
   },
   clearTokens: () => {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
-    // Cookie is cleared by the backend logout endpoint
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
   },
   getUser: () => {
     const raw = localStorage.getItem(USER_KEY);

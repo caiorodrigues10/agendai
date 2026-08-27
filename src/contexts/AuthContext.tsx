@@ -63,26 +63,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
       if (!success) {
-        try {
-          const resp = await authApi.refresh();
-          authStorage.setTokens(resp.accessToken);
-          authStorage.setUser(resp.user);
-          setUser(normalizeUser(resp.user));
-        } catch (err) {
-          if (
-            err instanceof ApiError &&
-            (err.statusCode === 0 ||
-              err.code === 'NETWORK_ERROR' ||
-              err.statusCode === 429 ||
-              err.statusCode >= 500) &&
-            cachedUser
-          ) {
-            setUser(normalizeUser(cachedUser));
-          } else {
-            authStorage.clearTokens();
-            authStorage.clearUser();
-            setUser(null);
+        const refreshToken = authStorage.getRefreshToken();
+        if (refreshToken) {
+          try {
+            const resp = await authApi.refresh(refreshToken);
+            authStorage.setTokens(resp.accessToken, resp.refreshToken);
+            authStorage.setUser(resp.user);
+            setUser(normalizeUser(resp.user));
+          } catch (err) {
+            if (
+              err instanceof ApiError &&
+              (err.statusCode === 0 ||
+                err.code === 'NETWORK_ERROR' ||
+                err.statusCode === 429 ||
+                err.statusCode >= 500) &&
+              cachedUser
+            ) {
+              setUser(normalizeUser(cachedUser));
+            } else {
+              authStorage.clearTokens();
+              authStorage.clearUser();
+              setUser(null);
+            }
           }
+        } else if (!token) {
+          authStorage.clearTokens();
+          authStorage.clearUser();
+          setUser(null);
+        } else if (cachedUser) {
+          setUser(normalizeUser(cachedUser));
+        } else {
+          authStorage.clearTokens();
+          authStorage.clearUser();
+          setUser(null);
         }
       }
       setLoading(false);
@@ -100,7 +113,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const persistSession = (resp: { user: any; accessToken: string; refreshToken?: string }) => {
-    authStorage.setTokens(resp.accessToken);
+    authStorage.setTokens(resp.accessToken, resp.refreshToken);
     authStorage.setUser(resp.user);
     setUser(normalizeUser(resp.user));
     sessionStorage.removeItem('agendai:access-block-info');
