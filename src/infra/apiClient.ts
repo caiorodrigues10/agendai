@@ -64,17 +64,31 @@ async function refreshAccessToken(): Promise<string | null> {
         window.dispatchEvent(new Event('agendai:session-expired'));
         return null;
       }
-      const json = await res.json();
-      const data = json?.data ?? json;
-      const accessToken = data?.accessToken as string | undefined;
+      const bodyText = await res.text();
+      if (!bodyText) {
+        authStorage.clearTokens();
+        authStorage.clearUser();
+        window.dispatchEvent(new Event('agendai:session-expired'));
+        return null;
+      }
+      const json = tryParseJson(bodyText);
+      if (!json || typeof json !== 'object') {
+        authStorage.clearTokens();
+        authStorage.clearUser();
+        window.dispatchEvent(new Event('agendai:session-expired'));
+        return null;
+      }
+      const obj = json as Record<string, unknown>;
+      const data = (obj.data && typeof obj.data === 'object' ? obj.data as Record<string, unknown> : obj);
+      const accessToken = typeof data.accessToken === 'string' ? data.accessToken : undefined;
       if (!accessToken) {
         authStorage.clearTokens();
         authStorage.clearUser();
         window.dispatchEvent(new Event('agendai:session-expired'));
         return null;
       }
-      authStorage.setTokens(accessToken, data?.refreshToken as string | undefined);
-      if (data.user) authStorage.setUser(data.user);
+      authStorage.setTokens(accessToken, typeof data.refreshToken === 'string' ? data.refreshToken : undefined);
+      if (data.user && typeof data.user === 'object') authStorage.setUser(data.user as Record<string, unknown>);
       return accessToken;
     } catch {
       authStorage.clearTokens();
@@ -213,5 +227,15 @@ export const apiClient = async <T>(
     notifyIfAccessBlocked(error);
     throw error;
   }
-  return res.json() as Promise<T>;
+
+  // Defensivo: lê como texto primeiro para tratar 2xx com body vazio/inválido
+  const bodyText = await res.text();
+  if (!bodyText) {
+    throw new ApiError('Resposta vazia do servidor', res.status);
+  }
+  const parsed = tryParseJson(bodyText);
+  if (!parsed) {
+    throw new ApiError('Resposta inválida do servidor', res.status);
+  }
+  return parsed as T;
 };
