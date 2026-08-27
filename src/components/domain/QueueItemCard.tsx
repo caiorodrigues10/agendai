@@ -67,16 +67,24 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
       kind === 'reminder'
         ? `Olá ${item.customerName}! Sua vez no ${shopName} está chegando (aprox. 15 min). Já pode vir!`
         : `Olá ${item.customerName}! Você é o próximo na fila do ${shopName}. Por favor, fique atento!`;
+    const shopId = barbershopId || item.barbershopId;
+    if (!shopId) {
+      onNotify?.('Conecte o WhatsApp do salão em Configurações para enviar mensagens.', 'error');
+      return;
+    }
     setSending(kind);
     try {
       await notificationsApi.sendWhatsApp({
         phone,
         message: msg,
-        barbershopId: barbershopId || item.barbershopId,
+        barbershopId: shopId,
       });
       onNotify?.(kind === 'reminder' ? 'Aviso de 15 min enviado.' : 'Cliente avisado que é o próximo.', 'success');
     } catch (err) {
-      onNotify?.(getErrorMessage(err, 'Não foi possível enviar o WhatsApp.'), 'error');
+      onNotify?.(
+        getErrorMessage(err, 'Conecte o WhatsApp do salão em Configurações para enviar mensagens.'),
+        'error'
+      );
     } finally {
       setSending(null);
     }

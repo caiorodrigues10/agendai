@@ -9,7 +9,7 @@ function unwrap<T>(res: unknown): T {
 export interface SendWhatsAppPayload {
   phone: string;
   message: string;
-  barbershopId?: string;
+  barbershopId: string;
 }
 
 export const notificationsApi = {

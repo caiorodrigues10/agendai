@@ -1,9 +1,204 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ShopSettings, DaySchedule } from '../../types';
-import { barbershopApi } from '../../infra/barbershopApi';
+import { barbershopApi, ShopWhatsAppStatus } from '../../infra/barbershopApi';
+import { ApiError } from '../../infra/apiClient';
 import { maskPhone } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
-import { Save, Clock, CalendarDays, Check, X, Upload, Smartphone, Loader2 } from 'lucide-react';
+import {
+  Save,
+  Clock,
+  CalendarDays,
+  Upload,
+  Smartphone,
+  Loader2,
+  QrCode,
+  Unplug,
+} from 'lucide-react';
+
+const WA_POLL_MS = 2000;
+const WA_POLL_TIMEOUT_MS = 40_000;
+
+function platformWhatsAppUnavailable(err: unknown): boolean {
+  return (
+    err instanceof ApiError &&
+    (err.statusCode === 503 || err.code === 'EVOLUTION_NOT_CONFIGURED')
+  );
+}
+
+const SalonWhatsAppConnection: React.FC<{ barbershopId: string }> = ({ barbershopId }) => {
+  const [data, setData] = useState<ShopWhatsAppStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopPoll = useCallback(() => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  }, []);
+
+  const applyStatus = useCallback(
+    (next: ShopWhatsAppStatus) => {
+      setData(next);
+      if (next.connected) stopPoll();
+    },
+    [stopPoll]
+  );
+
+  const loadStatus = useCallback(async () => {
+    try {
+      const next = await barbershopApi.getWhatsAppStatus(barbershopId);
+      applyStatus(next);
+      setError(null);
+      return next;
+    } catch (err) {
+      setError(
+        platformWhatsAppUnavailable(err)
+          ? 'WhatsApp da plataforma indisponível.'
+          : getErrorMessage(err, 'Não foi possível consultar o WhatsApp do salão.')
+      );
+      return null;
+    }
+  }, [barbershopId, applyStatus]);
+
+  const startPoll = useCallback(() => {
+    stopPoll();
+    const deadline = Date.now() + WA_POLL_TIMEOUT_MS;
+    pollRef.current = setInterval(() => {
+      if (Date.now() > deadline) {
+        stopPoll();
+        return;
+      }
+      void loadStatus();
+    }, WA_POLL_MS);
+  }, [loadStatus, stopPoll]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const next = await loadStatus();
+      if (
+        !cancelled &&
+        next &&
+        !next.connected &&
+        (next.qrcodeBase64 || next.status === 'connecting')
+      ) {
+        startPoll();
+      }
+      if (!cancelled) setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+      stopPoll();
+    };
+  }, [loadStatus, startPoll, stopPoll]);
+
+  const handleConnect = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const next = await barbershopApi.connectWhatsApp(barbershopId);
+      applyStatus(next);
+      if (!next.connected) startPoll();
+    } catch (err) {
+      setError(
+        platformWhatsAppUnavailable(err)
+          ? 'WhatsApp da plataforma indisponível.'
+          : getErrorMessage(err, 'Não foi possível conectar o WhatsApp.')
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    if (
+      !confirm(
+        'Desconectar o WhatsApp deste salão? As mensagens deixam de ser enviadas até conectar de novo.'
+      )
+    ) {
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const next = await barbershopApi.disconnectWhatsApp(barbershopId);
+      applyStatus(next);
+    } catch (err) {
+      setError(getErrorMessage(err, 'Não foi possível desconectar o WhatsApp.'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const connected = Boolean(data?.connected);
+  const qr = data?.qrcodeBase64;
+  const platformDown = error === 'WhatsApp da plataforma indisponível.';
+
+  return (
+    <div className="pt-4 mt-4 border-t border-border">
+      <h4 className="text-sm font-bold text-text-primary mb-1">WhatsApp do salão</h4>
+      <p className="text-xs text-text-muted mb-3">
+        Escaneie o QR com o celular que vai <span className="font-semibold">enviar</span> os avisos
+        (fila, lembretes e posts). Sem conexão, as mensagens não saem.
+      </p>
+
+      {loading ? (
+        <div className="flex items-center gap-2 text-xs text-text-muted">
+          <Loader2 size={14} className="animate-spin" /> Consultando sessão...
+        </div>
+      ) : platformDown ? null : connected ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-success/10 text-success">
+            Conectado
+          </span>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void handleDisconnect()}
+            className="px-3 py-2 text-xs font-bold rounded-lg border border-danger/30 text-danger bg-danger/10 hover:bg-danger/20 disabled:opacity-50 flex items-center gap-1.5"
+          >
+            {busy ? <Loader2 size={14} className="animate-spin" /> : <Unplug size={14} />}
+            Desconectar
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {qr && (
+            <div className="flex flex-col items-start gap-2">
+              <img
+                src={qr}
+                alt="QR Code para conectar o WhatsApp"
+                className="w-48 h-48 rounded-lg border border-border bg-white p-2"
+              />
+              <p className="text-xs text-text-secondary">
+                Abra o WhatsApp no celular → Aparelhos conectados → Conectar um aparelho.
+              </p>
+            </div>
+          )}
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void handleConnect()}
+            className="px-3 py-2 text-xs font-bold rounded-lg bg-accent hover:bg-accent-hover text-accent-fg disabled:opacity-50 flex items-center gap-1.5"
+          >
+            {busy ? <Loader2 size={14} className="animate-spin" /> : <QrCode size={14} />}
+            {qr ? 'Gerar QR novamente' : 'Conectar'}
+          </button>
+        </div>
+      )}
+
+      {error && (
+        <p className="mt-2 text-xs text-danger" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+};
 
 interface SettingsManagerProps {
   settings: ShopSettings;
@@ -101,7 +296,13 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                 size={16}
               />
             </div>
+            <p className="mt-1.5 text-[11px] text-text-muted">
+              Número que recebe o aviso quando um cliente entra na fila. Quem envia é o WhatsApp
+              conectado abaixo.
+            </p>
           </div>
+
+          {barbershopId && <SalonWhatsAppConnection barbershopId={barbershopId} />}
 
           <div>
             <label className="block text-sm text-text-secondary mb-2">Logo do Salão</label>

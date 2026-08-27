@@ -249,7 +249,13 @@ export const PostsManager: React.FC = () => {
       setScheduledFor('');
       await refreshScheduled();
     } catch (err) {
-      showToast(getErrorMessage(err, 'Não foi possível publicar o post.'), 'error');
+      showToast(
+        getErrorMessage(
+          err,
+          'Conecte o WhatsApp do salão em Configurações para enviar o post aos clientes.'
+        ),
+        'error'
+      );
     } finally {
       setSubmitting(false);
     }
@@ -268,7 +274,13 @@ export const PostsManager: React.FC = () => {
       showToast('Post publicado!');
       await refreshScheduled();
     } catch (err) {
-      showToast(getErrorMessage(err, 'Não foi possível publicar o post.'), 'error');
+      showToast(
+        getErrorMessage(
+          err,
+          'Conecte o WhatsApp do salão em Configurações para enviar o post aos clientes.'
+        ),
+        'error'
+      );
     } finally {
       setPublishingId(null);
     }

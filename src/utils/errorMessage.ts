@@ -85,6 +85,16 @@ export function getErrorMessage(
     const fromFields = formatApiFieldErrors(err.data?.errors);
     if (fromFields) return fromFields;
 
+    if (err.code === 'WHATSAPP_NOT_CONNECTED') {
+      return (
+        err.message?.trim() ||
+        'Conecte o WhatsApp do salão em Configurações para enviar mensagens.'
+      );
+    }
+    if (err.code === 'EVOLUTION_NOT_CONFIGURED') {
+      return err.message?.trim() || 'WhatsApp da plataforma indisponível.';
+    }
+
     const raw = err.message?.trim() ?? '';
     if (
       err.statusCode === 401 &&

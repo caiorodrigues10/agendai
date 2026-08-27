@@ -62,6 +62,12 @@ interface PostConfigPayload {
   autoPostEnabled: boolean;
 }
 
+export interface ShopWhatsAppStatus {
+  status: 'disconnected' | 'connecting' | 'open';
+  connected: boolean;
+  qrcodeBase64: string | null;
+}
+
 export const barbershopApi = {
   listBarbershops: () =>
     apiClient<{ success: boolean; data: BarbershopData[] }>('/api/barbershops').then(unwrap),
@@ -248,6 +254,36 @@ export const barbershopApi = {
     return apiClient<void>(`/api/posts/${id}`, 'DELETE', undefined, token);
   },
 
+  getWhatsAppStatus: (barbershopId: string) => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient<{ success: boolean; data: ShopWhatsAppStatus }>(
+      `/api/barbershops/${barbershopId}/whatsapp`,
+      'GET',
+      undefined,
+      token
+    ).then(res => unwrap<ShopWhatsAppStatus>(res));
+  },
+
+  connectWhatsApp: (barbershopId: string) => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient<{ success: boolean; data: ShopWhatsAppStatus }>(
+      `/api/barbershops/${barbershopId}/whatsapp/connect`,
+      'POST',
+      undefined,
+      token
+    ).then(res => unwrap<ShopWhatsAppStatus>(res));
+  },
+
+  disconnectWhatsApp: (barbershopId: string) => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient<{ success: boolean; data: ShopWhatsAppStatus }>(
+      `/api/barbershops/${barbershopId}/whatsapp/disconnect`,
+      'POST',
+      undefined,
+      token
+    ).then(res => unwrap<ShopWhatsAppStatus>(res));
+  },
+
   getLogoUploadUrl: (barbershopId: string, mimeType: string) => {
     const token = authStorage.getAccessToken() || '';
     return apiClient<{ success: boolean; data: { uploadUrl: string; publicUrl: string } }>(
@@ -255,7 +291,7 @@ export const barbershopApi = {
       'GET',
       undefined,
       token
-    ).then(unwrap);
+    ).then(res => unwrap<{ uploadUrl: string; publicUrl: string }>(res));
   },
 
   confirmLogo: (barbershopId: string, logoUrl: string) => {
