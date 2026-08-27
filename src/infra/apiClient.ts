@@ -2,6 +2,13 @@ import { authStorage } from './authStorage';
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
+/**
+ * Em produção (Render Static Site), o frontend é servido em um domínio diferente do backend.
+ * A VITE_API_URL permite apontar as chamadas /api/* para o backend correto.
+ * Em dev, o Vite proxy já redireciona /api → localhost:3333.
+ */
+const API_BASE = (import.meta as any).env?.VITE_API_URL ?? '';
+
 const RATE_LIMIT_MAX = 500;
 const RATE_LIMIT_WINDOW_MS = 60_000;
 let calls: number[] = [];
@@ -52,7 +59,7 @@ async function refreshAccessToken(): Promise<string | null> {
         window.dispatchEvent(new Event('agendai:session-expired'));
         return null;
       }
-      const res = await fetch('/api/auth/refresh', {
+      const res = await fetch(`${API_BASE}/api/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refreshToken }),
@@ -194,10 +201,11 @@ export const apiClient = async <T>(
 
   let res: Response;
   try {
-    res = await fetch(url, {
+    res = await fetch(`${API_BASE}${url}`, {
       method,
       headers,
       body: body ? JSON.stringify(sanitize(body)) : undefined,
+      credentials: 'include',
     });
   } catch (err) {
     throw new ApiError(
