@@ -61,7 +61,7 @@ export const CookieConsent: React.FC = () => {
             <button
               type="button"
               onClick={accept}
-              className="shrink-0 rounded-xl bg-accent px-5 py-2.5 text-sm font-bold text-accent-fg transition hover:bg-accent-hover"
+              className="shrink-0 cursor-pointer rounded-xl bg-accent px-5 py-2.5 text-sm font-bold text-accent-fg transition hover:bg-accent-hover"
             >
               Aceitar
             </button>

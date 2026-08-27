@@ -11,7 +11,6 @@ import {
   ChevronRight,
   Scissors,
   Smartphone,
-  Sparkles,
   TrendingUp,
   Users,
   Zap,
@@ -963,12 +962,12 @@ export const LandingPage: React.FC = () => {
                 className="flex w-screen min-w-max shrink-0 items-center justify-around gap-10 px-8 md:gap-14 md:px-16"
               >
                 {marqueeItems.map(item => (
-                  <div key={`${group}-${item}`} className="flex shrink-0 items-center gap-8">
-                    <span className="text-xs font-black uppercase tracking-[0.24em] text-neutral-500">
-                      {item}
-                    </span>
-                    <Sparkles className="h-3.5 w-3.5 text-emerald-400/70" />
-                  </div>
+                  <span
+                    key={`${group}-${item}`}
+                    className="shrink-0 text-xs font-black uppercase tracking-[0.24em] text-neutral-500"
+                  >
+                    {item}
+                  </span>
                 ))}
               </div>
             ))}
@@ -1816,37 +1815,35 @@ export const LandingPage: React.FC = () => {
 
             <div
               data-reveal
-              className="mt-12 overflow-hidden rounded-[1.75rem] border border-emerald-400/20 bg-linear-to-r from-emerald-400/[0.09] via-white/[0.03] to-transparent p-6 md:p-8"
+              className="mt-12 overflow-hidden rounded-[1.75rem] border border-emerald-400/20 bg-linear-to-r from-emerald-400/[0.09] via-white/[0.03] to-transparent p-5 sm:p-6 md:p-8"
             >
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                <div className="max-w-2xl">
-                  <p className="text-2xl font-black tracking-tight text-white md:text-3xl">
-                    Comece com 30 dias de Pro. Veja se faz sentido para o seu negócio.
+              <div className="flex flex-col gap-6 sm:gap-8 lg:flex-row lg:items-center lg:justify-between">
+                <div className="max-w-2xl space-y-4">
+                  <p className="text-xl font-black tracking-tight text-white sm:text-2xl md:text-3xl">
+                    Teste o Pro grátis por 30 dias.
                   </p>
-                  <p className="mt-3 text-base font-medium leading-relaxed text-neutral-400 md:text-lg">
+                  <p className="text-sm font-medium leading-relaxed text-neutral-400 sm:text-base md:text-lg">
                     {trialCampaign.body} {trialCampaign.afterTrial}
                   </p>
-                  <div className="mt-5 flex flex-wrap gap-2.5">
-                    {['Sem cartão na entrada', 'Cancela quando quiser', 'Equipe ilimitada'].map(
-                      item => (
-                        <span
-                          key={item}
-                          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-3.5 py-1.5 text-sm font-semibold text-neutral-200"
-                        >
-                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-                          {item}
-                        </span>
-                      )
-                    )}
+                  <div className="flex flex-wrap gap-2">
+                    {['Sem cartão', 'Cancele quando quiser', 'Equipe ilimitada'].map(item => (
+                      <span
+                        key={item}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs font-semibold text-neutral-300 sm:px-3.5 sm:py-1.5 sm:text-sm"
+                      >
+                        <CheckCircle2 className="h-3 w-3 text-emerald-400 sm:h-3.5 sm:w-3.5" />
+                        {item}
+                      </span>
+                    ))}
                   </div>
                 </div>
 
-                <div className="flex w-full flex-col gap-3 sm:w-auto sm:min-w-56">
+                <div className="flex w-full flex-col gap-3 sm:w-auto sm:min-w-52">
                   <button
                     type="button"
                     data-sticky-cta-anchor
                     onClick={() => navigate('/login')}
-                    className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-white px-7 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-300"
+                    className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-white px-6 py-3.5 text-sm font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-300 sm:px-7 sm:py-4 sm:text-base"
                   >
                     {trialCampaign.cta}
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -1854,7 +1851,7 @@ export const LandingPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={event => scrollToSection(event, 'precos')}
-                    className="inline-flex items-center justify-center rounded-full border border-white/12 bg-white/3 px-7 py-3.5 text-sm font-bold text-neutral-300 transition hover:bg-white/8 hover:text-white"
+                    className="inline-flex items-center justify-center rounded-full border border-white/12 bg-white/3 px-6 py-3 text-xs font-bold text-neutral-400 transition hover:bg-white/8 hover:text-white sm:px-7 sm:py-3.5 sm:text-sm"
                   >
                     Ver planos
                   </button>
@@ -2059,27 +2056,27 @@ export const LandingPage: React.FC = () => {
                 maskImage: 'radial-gradient(circle at center, black, transparent 72%)',
               }}
             />
-            <div className="relative z-10 mx-auto max-w-4xl">
+            <div className="relative z-10 mx-auto max-w-4xl space-y-6 text-center sm:text-left">
               <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-300/80">
                 {trialCampaign.eyebrow}
               </p>
-              <h2 className="mt-6 text-5xl font-black leading-[1.05] tracking-[-0.06em] text-white md:text-7xl xl:text-8xl">
-                Comece com 30 dias de Pro. Veja se faz sentido para o seu negócio.
+              <h2 className="text-4xl font-black leading-[1.08] tracking-[-0.05em] text-white sm:text-5xl md:text-7xl xl:text-8xl">
+                Teste o Pro grátis por 30 dias.
               </h2>
-              <p className="mx-auto mt-7 max-w-2xl text-lg font-light leading-relaxed text-neutral-300 md:text-xl">
+              <p className="mx-auto max-w-2xl text-base font-light leading-relaxed text-neutral-400 sm:text-lg md:text-xl sm:mx-0">
                 {trialCampaign.body} {trialCampaign.afterTrial}
               </p>
-              <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
+              <div className="flex flex-col justify-center gap-3 pt-2 sm:flex-row sm:justify-start sm:gap-4">
                 <button
                   onClick={() => navigate('/login')}
-                  className="group inline-flex items-center justify-center gap-3 rounded-full bg-white px-8 py-4 text-sm font-black text-black transition duration-300 hover:-translate-y-1 hover:bg-emerald-300"
+                  className="group inline-flex items-center justify-center gap-3 rounded-full bg-white px-7 py-3.5 text-sm font-black text-black transition duration-300 hover:-translate-y-1 hover:bg-emerald-300 sm:px-8 sm:py-4"
                 >
                   {trialCampaign.cta}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </button>
                 <button
                   onClick={() => navigate('/contato')}
-                  className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/4 px-8 py-4 text-sm font-bold text-white transition hover:bg-white/8"
+                  className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/4 px-7 py-3.5 text-sm font-bold text-neutral-400 transition hover:bg-white/8 hover:text-white sm:px-8"
                 >
                   Tirar uma dúvida
                 </button>
