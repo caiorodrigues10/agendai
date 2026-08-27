@@ -14,8 +14,6 @@ import {
   CheckCheck,
   Image as ImageIcon,
   Sparkles,
-  Wand2,
-  Check,
 } from 'lucide-react';
 import { barbershopApi, PostAiSuggestion } from '../../infra/barbershopApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
@@ -147,8 +145,20 @@ export const PostsManager: React.FC = () => {
       });
       setSuggestions(res.suggestions);
       setSuggestionsSource(res.source);
-    } catch (err) {
-      showToast(getErrorMessage(err, 'Não foi possível gerar sugestões.'), 'error');
+    } catch (err: any) {
+      if (err?.code === 'AI_DAILY_LIMIT_EXCEEDED') {
+        const retryAfter = err?.data?.retryAfter;
+        let msg = 'Você atingiu o limite de gerações de post por hoje. Tente novamente amanhã ou preencha o post manualmente.';
+        if (retryAfter) {
+          const d = new Date(retryAfter);
+          const hh = d.getHours().toString().padStart(2, '0');
+          const mm = d.getMinutes().toString().padStart(2, '0');
+          msg = `Você atingiu o limite de gerações de post por hoje. Libera às ${hh}:${mm}. Enquanto isso, você pode preencher o post manualmente.`;
+        }
+        showToast(msg, 'error');
+      } else {
+        showToast(getErrorMessage(err, 'Não foi possível gerar sugestões.'), 'error');
+      }
     } finally {
       setGenerating(false);
     }
@@ -185,6 +195,17 @@ export const PostsManager: React.FC = () => {
     if (!barbershopId) return;
     if (publishMode === 'schedule' && !scheduledFor) {
       showToast('Escolha a data e hora para agendar o post.', 'error');
+      return;
+    }
+    if (publishMode === 'schedule' && scheduledFor) {
+      const scheduledDate = new Date(scheduledFor);
+      if (scheduledDate.getTime() <= Date.now()) {
+        showToast('A data de agendamento precisa ser no futuro.', 'error');
+        return;
+      }
+    }
+    if (!title.trim() && !ctaText.trim()) {
+      showToast('Adicione pelo menos um título ou texto do botão de ação.', 'error');
       return;
     }
     setSubmitting(true);
@@ -279,6 +300,7 @@ export const PostsManager: React.FC = () => {
                   <button
                     key={opt.id}
                     type="button"
+                    aria-pressed={type === opt.id}
                     onClick={() => setType(opt.id)}
                     className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 border transition-all
                       ${type === opt.id ? 'bg-accent border-accent text-accent-fg' : 'bg-bg border-border text-text-muted'}`}
@@ -298,6 +320,7 @@ export const PostsManager: React.FC = () => {
                   <button
                     key={opt.id}
                     type="button"
+                    aria-pressed={tone === opt.id}
                     onClick={() => setTone(tone === opt.id ? null : opt.id)}
                     className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 border transition-all
                       ${tone === opt.id ? 'bg-accent border-accent text-accent-fg' : 'bg-bg border-border text-text-muted'}`}
@@ -309,10 +332,11 @@ export const PostsManager: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
+              <label htmlFor="post-extra" className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
                 Algo específico? <span className="text-text-muted font-normal">(opcional)</span>
               </label>
               <input
+                id="post-extra"
                 type="text"
                 value={extra}
                 onChange={e => setExtra(e.target.value)}
@@ -355,23 +379,24 @@ export const PostsManager: React.FC = () => {
                       {s.title}
                     </p>
                     <p className="text-xs text-text-secondary mt-0.5">
-                      CTA: {s.ctaText}
+                      Botão: {s.ctaText}
                     </p>
                   </button>
                 ))}
                 {suggestionsSource === 'template' && (
                   <p className="text-[11px] text-text-muted italic">
-                    gerado localmente · adicione GEMINI_API_KEY para sugestões por IA
+                    gerado localmente · configure pelo menos uma chave de IA no backend (ver .env)
                   </p>
                 )}
               </div>
             )}
 
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
+              <label htmlFor="post-title" className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
                 Título <span className="text-text-muted font-normal">(edite manualmente ou selecione acima)</span>
               </label>
               <input
+                id="post-title"
                 type="text"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
@@ -382,10 +407,11 @@ export const PostsManager: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
-                Texto do CTA <span className="text-text-muted font-normal">(edite manualmente ou selecione acima)</span>
+              <label htmlFor="post-cta" className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
+                Texto do botão de ação <span className="text-text-muted font-normal">(edite manualmente ou selecione acima)</span>
               </label>
               <input
+                id="post-cta"
                 type="text"
                 value={ctaText}
                 onChange={e => setCtaText(e.target.value)}
@@ -397,13 +423,14 @@ export const PostsManager: React.FC = () => {
 
             <div>
               <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
-                O CTA leva para
+                Para onde o botão leva
               </label>
               <div className="flex gap-2">
                 {MODE_OPTIONS.map(opt => (
                   <button
                     key={opt.id}
                     type="button"
+                    aria-pressed={postMode === opt.id}
                     onClick={() => setPostMode(opt.id)}
                     className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 border transition-all
                       ${postMode === opt.id ? 'bg-accent border-accent text-accent-fg' : 'bg-bg border-border text-text-muted'}`}
@@ -421,6 +448,7 @@ export const PostsManager: React.FC = () => {
               <div className="flex gap-2 mb-3">
                 <button
                   type="button"
+                  aria-pressed={publishMode === 'now'}
                   onClick={() => setPublishMode('now')}
                   className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 border transition-all
                     ${publishMode === 'now' ? 'bg-accent border-accent text-accent-fg' : 'bg-bg border-border text-text-muted'}`}
@@ -429,6 +457,7 @@ export const PostsManager: React.FC = () => {
                 </button>
                 <button
                   type="button"
+                  aria-pressed={publishMode === 'schedule'}
                   onClick={() => setPublishMode('schedule')}
                   className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 border transition-all
                     ${publishMode === 'schedule' ? 'bg-accent border-accent text-accent-fg' : 'bg-bg border-border text-text-muted'}`}
@@ -438,9 +467,11 @@ export const PostsManager: React.FC = () => {
               </div>
               {publishMode === 'schedule' && (
                 <input
+                  id="post-schedule"
                   type="datetime-local"
                   value={scheduledFor}
                   onChange={e => setScheduledFor(e.target.value)}
+                  min={new Date(Date.now() + 60_000).toISOString().slice(0, 16)}
                   className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent"
                 />
               )}
@@ -515,7 +546,7 @@ export const PostsManager: React.FC = () => {
                         </p>
                         {post.ctaText && (
                           <p className="text-xs text-text-secondary mt-0.5 truncate">
-                            CTA: {post.ctaText} · {MODE_LABEL[post.postMode || 'queue']}
+                            Botão: {post.ctaText} · {MODE_LABEL[post.postMode || 'queue']}
                           </p>
                         )}
                       </div>
