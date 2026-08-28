@@ -32,6 +32,7 @@ import {
   CalendarDays,
   Loader2,
   CreditCard,
+  Wallet,
   Gift,
   Megaphone,
   Contact,
@@ -179,6 +180,9 @@ export const StaffDashboard: React.FC = () => {
       t.push({ id: 'team', label: 'Equipe', icon: Users });
     }
     t.push({ id: 'settings', label: 'Configurações', icon: Settings });
+    if (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') {
+      t.push({ id: 'subscription', label: 'Plano', icon: Wallet });
+    }
     if ((user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && hasDashboard) {
       t.push({ id: 'reports', label: 'Relatórios', icon: BarChart3 });
       t.push({ id: 'finance', label: 'Financeiro', icon: CreditCard });
@@ -339,13 +343,6 @@ export const StaffDashboard: React.FC = () => {
             >
             {(user.role === 'MASTER_ADMIN' || user.role === 'OWNER') && (
               <>
-                <button
-                  onClick={() => navigate('/app/subscription')}
-                  className={`flex-shrink-0 px-3 py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'subscription' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
-                  title="Planos e assinatura"
-                >
-                  <CreditCard size={16} /> Assinatura
-                </button>
                 <button
                   onClick={() => navigate('/app/referrals')}
                   className={`flex-shrink-0 px-3 py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'referrals' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}

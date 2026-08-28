@@ -1,8 +1,9 @@
 import React from 'react';
 import { Logo } from './Logo';
-import { Lock, LogOut } from 'lucide-react';
+import { Lock, LogOut, Wallet } from 'lucide-react';
 import { StaffMember } from '../../types';
 import { ThemeToggle } from './ThemeToggle';
+import { Link } from 'react-router-dom';
 
 interface HeaderProps {
   currentUser: StaffMember | null;
@@ -20,6 +21,14 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
           <ThemeToggle />
           {currentUser ? (
             <div className="flex items-center gap-2 bg-surface rounded-lg p-1 pr-3 border border-border">
+              {currentUser.role === 'OWNER' && (
+                <Link
+                  to="/app/subscription"
+                  className="px-2.5 py-1.5 rounded-md text-[11px] font-bold bg-accent text-accent-fg hover:bg-accent-hover flex items-center gap-1"
+                >
+                  <Wallet size={12} /> Plano
+                </Link>
+              )}
               <div className="px-2 py-1 bg-accent/15 rounded text-xs font-bold text-accent uppercase">
                 {currentUser.role === 'MASTER_ADMIN'
                   ? 'Admin'

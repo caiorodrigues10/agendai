@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShopSettings, DaySchedule } from '../../types';
 import { barbershopApi, ShopWhatsAppStatus } from '../../infra/barbershopApi';
 import { ApiError } from '../../infra/apiClient';
@@ -14,6 +15,7 @@ import {
   Loader2,
   QrCode,
   Unplug,
+  Wallet,
 } from 'lucide-react';
 
 const WA_POLL_MS = 2000;
@@ -214,6 +216,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
   onSave,
   onNotify,
 }) => {
+  const navigate = useNavigate();
   const [shopName, setShopName] = useState(settings.shopName);
   const [whatsapp, setWhatsapp] = useState(settings.whatsapp || '');
   const [schedule, setSchedule] = useState<DaySchedule[]>(settings.schedule || []);
@@ -400,6 +403,14 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
         className="w-full py-3 bg-accent hover:bg-accent-hover text-accent-fg font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-accent/20"
       >
         <Save size={16} /> Salvar Configurações
+      </button>
+
+      <button
+        type="button"
+        onClick={() => navigate('/app/subscription')}
+        className="w-full py-3 bg-accent/15 hover:bg-accent/25 text-accent font-bold rounded-xl flex items-center justify-center gap-2 border border-accent/40"
+      >
+        <Wallet size={16} /> Pagar ou gerenciar plano
       </button>
 
       <AccountPrivacyPanel onNotify={onNotify} />

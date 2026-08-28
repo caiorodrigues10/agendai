@@ -206,6 +206,18 @@ export const PlansPage: React.FC = () => {
                 {heroCta}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </button>
+              {goToExistingPanel && user?.role?.toUpperCase() === 'OWNER' && (
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/app/subscription')}
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-emerald-400/50 bg-emerald-400/10 px-6 py-3 text-sm font-black text-emerald-300 hover:bg-emerald-400/20"
+                  >
+                    Pagar ou gerenciar plano
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
               <p className="mt-3 text-sm text-neutral-500">{trialCampaign.heroSubline}</p>
             </motion.div>
           </div>

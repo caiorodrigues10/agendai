@@ -160,7 +160,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
   const onMonthly = economics?.currentBillingCycle === 'MONTHLY';
 
   const displayPlans = useMemo(() => {
-    const source = plans.length > 0 ? plans : detail?.plans ?? [];
+    const source = plans.length > 0 ? plans : (detail?.plans ?? []);
     const cycle = billingYearly ? 'YEARLY' : 'MONTHLY';
     const byCycle = source.filter(p => (p.billingCycle ?? 'MONTHLY') === cycle);
     const pool = byCycle.length > 0 ? byCycle : source;
@@ -170,11 +170,10 @@ export const OwnerSubscriptionPanel: React.FC = () => {
     return [essential, pro].filter(Boolean) as Plan[];
   }, [plans, detail?.plans, billingYearly]);
 
-  const goCheckout = (plan: Plan) => {
+  const goCheckout = (plan: Plan, payNow = true) => {
     const billing = (plan.billingCycle ?? (billingYearly ? 'YEARLY' : 'MONTHLY')) as
-      | 'MONTHLY'
-      | 'YEARLY';
-    const setup = needsCard || sub?.status !== 'ACTIVE' ? '&setup=trial' : '';
+      'MONTHLY' | 'YEARLY';
+    const setup = !payNow && (needsCard || sub?.status !== 'ACTIVE') ? '&setup=trial' : '';
     navigate(`/checkout?planId=${encodeURIComponent(plan.id)}&billing=${billing}${setup}`);
   };
 
@@ -251,11 +250,8 @@ export const OwnerSubscriptionPanel: React.FC = () => {
           <CreditCard size={20} className="text-accent" /> Assinatura
         </h2>
         <p className="text-sm text-text-secondary mt-1">
-          {needsCard
-            ? trialCampaign.huntBody
-            : inCalendarTrial
-              ? trialCampaign.optionalSubscribe
-              : 'Gerencie seu plano, economize no anual e indique salões para ganhar dias grátis.'}
+          Escolha Essencial ou Pro e pague no checkout (PIX ou cartão). O atalho também fica no
+          topo: <span className="font-semibold text-text-primary">Plano</span>.
         </p>
       </div>
 
@@ -270,6 +266,22 @@ export const OwnerSubscriptionPanel: React.FC = () => {
         </div>
       )}
 
+      <div className="rounded-2xl border-2 border-accent/50 bg-accent/10 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex-1">
+          <p className="text-sm font-extrabold text-text-primary">Pagar o plano</p>
+          <p className="text-xs text-text-secondary mt-0.5">
+            PIX ou cartão no checkout. Escolha Essencial ou Pro abaixo.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => document.getElementById('planos-pagamento')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          className="shrink-0 px-4 py-3 rounded-xl bg-accent text-accent-fg text-sm font-bold flex items-center justify-center gap-2 hover:bg-accent-hover shadow-lg shadow-accent/20"
+        >
+          <CreditCard size={16} /> Ir para o pagamento
+        </button>
+      </div>
+
       {/* Indicação — card em destaque */}
       <div className="relative overflow-hidden rounded-2xl border border-accent/40 bg-linear-to-br from-accent/15 via-surface to-surface p-5">
         <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-accent/10 blur-2xl pointer-events-none" />
@@ -283,13 +295,11 @@ export const OwnerSubscriptionPanel: React.FC = () => {
             </p>
             <h3 className="text-lg font-extrabold text-text-primary leading-tight">
               Indique um salão e ganhe{' '}
-              <span className="text-accent">
-                +{referral?.rewardDays ?? 30} dias grátis
-              </span>
+              <span className="text-accent">+{referral?.rewardDays ?? 30} dias grátis</span>
             </h3>
             <p className="text-sm text-text-secondary">
-              Cada amigo que assinar estende sua assinatura. Quanto mais indicar, mais sobe de
-              nível (Bronze → Prata → Ouro) e maior a recompensa.
+              Cada amigo que assinar estende sua assinatura. Quanto mais indicar, mais sobe de nível
+              (Bronze → Prata → Ouro) e maior a recompensa.
             </p>
             {referral ? (
               <div className="flex flex-wrap items-center gap-2 pt-1">
@@ -324,9 +334,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
       {/* Status atual + urgência */}
       <div
         className={`rounded-2xl p-5 space-y-3 border ${
-          needsCard
-            ? 'border-warning/50 bg-warning/5'
-            : 'border-border bg-surface'
+          needsCard ? 'border-warning/50 bg-warning/5' : 'border-border bg-surface'
         }`}
       >
         {needsCard && (
@@ -438,8 +446,8 @@ export const OwnerSubscriptionPanel: React.FC = () => {
         )}
       </div>
 
-      {/* Planos — caça conversão */}
-      <div className="space-y-3">
+      {/* Planos — pagamento */}
+      <div id="planos-pagamento" className="space-y-3 scroll-mt-24">
         <div className="flex items-end justify-between gap-3 flex-wrap">
           <div>
             <h3 className="font-bold text-base flex items-center gap-2">
@@ -527,7 +535,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                 </ul>
                 <button
                   type="button"
-                  onClick={() => goCheckout(plan)}
+                  onClick={() => goCheckout(plan, true)}
                   className={`mt-auto w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors ${
                     isPro
                       ? 'bg-accent text-accent-fg hover:bg-accent-hover shadow-lg shadow-accent/20'
@@ -535,15 +543,18 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                   }`}
                 >
                   <CreditCard size={15} />
-                  {needsCard
-                    ? isPro
-                      ? 'Garantir Pro · cartão agora'
-                      : 'Escolher Essencial · cartão agora'
-                    : isCurrent
-                      ? 'Renovar / gerenciar'
-                      : `Assinar ${plan.name}`}
+                  {isCurrent ? `Pagar / renovar ${plan.name}` : `Pagar ${plan.name}`}
                   <ArrowRight size={14} />
                 </button>
+                {inCalendarTrial && (
+                  <button
+                    type="button"
+                    onClick={() => goCheckout(plan, false)}
+                    className="w-full text-[11px] font-bold text-text-muted hover:text-text-secondary"
+                  >
+                    Só cadastrar cartão (cobra depois do trial)
+                  </button>
+                )}
               </div>
             );
           })}
