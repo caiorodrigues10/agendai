@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CreditCard } from 'lucide-react';
 
@@ -57,7 +55,7 @@ const CreditCardForm = ({
   onChange,
   onSubmit,
   className = '',
-  submitLabel = 'Submit',
+  submitLabel = 'Confirmar',
 }: Props) => {
   const [number, setNumber] = useState(clampDigits(defaultNumber, 19));
   const [holder, setHolder] = useState(defaultHolder.toUpperCase());

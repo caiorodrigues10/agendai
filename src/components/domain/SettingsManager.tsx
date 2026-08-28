@@ -224,7 +224,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoError, setLogoError] = useState<string | null>(null);
 
-  const handleDayChange = (index: number, field: keyof DaySchedule, value: any) => {
+  const handleDayChange = (index: number, field: keyof DaySchedule, value: string | boolean) => {
     const newSchedule = [...schedule];
     newSchedule[index] = { ...newSchedule[index], [field]: value };
     setSchedule(newSchedule);
@@ -263,6 +263,15 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
   };
 
   const handleSave = () => {
+    for (const day of schedule) {
+      if (day.isOpen && day.openTime >= day.closeTime) {
+        onNotify(
+          `${day.dayName}: horário de abertura deve ser anterior ao de fechamento.`,
+          'error'
+        );
+        return;
+      }
+    }
     onSave({
       shopName,
       whatsapp,

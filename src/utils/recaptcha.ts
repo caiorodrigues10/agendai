@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { logger } from './logger';
 
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '';
 const BADGE_CLASS = 'recaptcha-visible';
@@ -35,7 +36,7 @@ export async function getRecaptchaToken(action: string): Promise<string> {
     if (!grecaptcha) return '';
     return await grecaptcha.execute(RECAPTCHA_SITE_KEY, { action });
   } catch (err) {
-    console.warn('reCAPTCHA error:', err);
+    logger.warn('reCAPTCHA error:', err);
     return '';
   }
 }

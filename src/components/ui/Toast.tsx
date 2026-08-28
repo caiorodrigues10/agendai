@@ -4,14 +4,15 @@ import { CheckCircle, AlertCircle, Bot } from 'lucide-react';
 interface ToastProps {
   message: string;
   type?: 'success' | 'error' | 'bot';
+  duration?: number;
   onClose: () => void;
 }
 
-export const Toast: React.FC<ToastProps> = ({ message, type = 'success', onClose }) => {
+export const Toast: React.FC<ToastProps> = ({ message, type = 'success', duration = 4000, onClose }) => {
   useEffect(() => {
-    const timer = setTimeout(onClose, 4000);
+    const timer = setTimeout(onClose, duration);
     return () => clearTimeout(timer);
-  }, [onClose]);
+  }, [onClose, duration]);
 
   const getIcon = () => {
     if (type === 'bot') return <Bot className="text-accent" size={20} />;

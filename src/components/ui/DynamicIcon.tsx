@@ -53,6 +53,16 @@ export const ICON_OPTIONS = [
   'Armchair',
   'Gift',
   'Music',
+  'Smile',
+  'Briefcase',
+  'Calendar',
+  'CreditCard',
+  'Banknote',
+  'Wifi',
+  'Tv',
+  'Rocket',
+  'CheckCircle',
+  'UserPlus',
 ];
 
 interface DynamicIconProps {

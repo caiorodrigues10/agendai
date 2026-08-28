@@ -27,6 +27,7 @@ export const PackageCatalog: React.FC<PackageCatalogProps> = ({ services, canMan
   const [isAdding, setIsAdding] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [formErrors, setFormErrors] = useState<{ name?: string; sessionCount?: string; price?: string }>({});
 
   const load = async () => {
     setLoading(true);
@@ -68,7 +69,12 @@ export const PackageCatalog: React.FC<PackageCatalogProps> = ({ services, canMan
     const sessionCount = Number(form.sessionCount);
     const price = Number(String(form.price).replace(',', '.'));
     const validityDays = form.validityDays.trim() ? Number(form.validityDays) : null;
-    if (!form.name.trim() || !form.serviceId || sessionCount < 2 || Number.isNaN(price)) return;
+    const errors: { name?: string; sessionCount?: string; price?: string } = {};
+    if (!form.name.trim()) errors.name = 'Nome é obrigatório.';
+    if (Number.isNaN(sessionCount) || sessionCount < 2) errors.sessionCount = 'Sessões deve ser ≥ 2.';
+    if (Number.isNaN(price) || price <= 0) errors.price = 'Preço deve ser um número maior que zero.';
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) return;
 
     setSaving(true);
     setError(null);
@@ -178,12 +184,15 @@ export const PackageCatalog: React.FC<PackageCatalogProps> = ({ services, canMan
           onSubmit={handleSave}
           className="mt-4 bg-surface border border-border rounded-xl p-4 space-y-3"
         >
-          <input
-            className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-sm text-text-primary"
-            placeholder="Nome (ex.: Pacote 5 cortes)"
-            value={form.name}
-            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-          />
+          <div>
+            <input
+              className={`w-full bg-bg border rounded-xl px-4 py-3 text-sm text-text-primary ${formErrors.name ? 'border-danger' : 'border-border'}`}
+              placeholder="Nome (ex.: Pacote 5 cortes)"
+              value={form.name}
+              onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+            />
+            {formErrors.name && <p className="mt-1 text-[11px] text-danger">{formErrors.name}</p>}
+          </div>
           <select
             className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-sm text-text-primary"
             value={form.serviceId}
@@ -197,28 +206,36 @@ export const PackageCatalog: React.FC<PackageCatalogProps> = ({ services, canMan
             ))}
           </select>
           <div className="grid grid-cols-3 gap-2">
-            <input
-              type="number"
-              min={2}
-              className="w-full bg-bg border border-border rounded-xl px-3 py-3 text-sm text-text-primary"
-              placeholder="Sessões"
-              value={form.sessionCount}
-              onChange={e => setForm(f => ({ ...f, sessionCount: e.target.value }))}
-            />
-            <input
-              className="w-full bg-bg border border-border rounded-xl px-3 py-3 text-sm text-text-primary"
-              placeholder="Preço"
-              value={form.price}
-              onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
-            />
-            <input
-              type="number"
-              min={1}
-              className="w-full bg-bg border border-border rounded-xl px-3 py-3 text-sm text-text-primary"
-              placeholder="Validade (dias)"
-              value={form.validityDays}
-              onChange={e => setForm(f => ({ ...f, validityDays: e.target.value }))}
-            />
+            <div>
+              <input
+                type="number"
+                min={2}
+                className={`w-full bg-bg border rounded-xl px-3 py-3 text-sm text-text-primary ${formErrors.sessionCount ? 'border-danger' : 'border-border'}`}
+                placeholder="Sessões"
+                value={form.sessionCount}
+                onChange={e => setForm(f => ({ ...f, sessionCount: e.target.value }))}
+              />
+              {formErrors.sessionCount && <p className="mt-1 text-[11px] text-danger">{formErrors.sessionCount}</p>}
+            </div>
+            <div>
+              <input
+                className={`w-full bg-bg border rounded-xl px-3 py-3 text-sm text-text-primary ${formErrors.price ? 'border-danger' : 'border-border'}`}
+                placeholder="Preço"
+                value={form.price}
+                onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
+              />
+              {formErrors.price && <p className="mt-1 text-[11px] text-danger">{formErrors.price}</p>}
+            </div>
+            <div>
+              <input
+                type="number"
+                min={1}
+                className="w-full bg-bg border border-border rounded-xl px-3 py-3 text-sm text-text-primary"
+                placeholder="Validade (dias)"
+                value={form.validityDays}
+                onChange={e => setForm(f => ({ ...f, validityDays: e.target.value }))}
+              />
+            </div>
           </div>
           <div className="flex gap-2">
             <button

@@ -95,7 +95,7 @@ const QUEUE_MOCK = [
 ] as const;
 
 const BrandPanel: React.FC = () => (
-  <div className="relative hidden lg:flex flex-col overflow-hidden bg-[#050d0b] text-white">
+  <div className="relative hidden lg:flex flex-col overflow-hidden bg-bg text-white">
     <motion.div
       aria-hidden
       className="absolute -top-32 -left-32 w-[560px] h-[560px] rounded-full blur-[140px] pointer-events-none"
@@ -132,11 +132,11 @@ const BrandPanel: React.FC = () => (
         >
           <h1 className="font-sans text-4xl xl:text-5xl font-extrabold leading-[1.08] tracking-tight">
             Seu salão,{' '}
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-300 via-teal-300 to-emerald-400">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-accent/80 via-accent to-accent">
               no controle.
             </span>
           </h1>
-          <p className="mt-4 text-neutral-400 text-sm xl:text-base max-w-md leading-relaxed font-light">
+          <p className="mt-4 text-text-secondary text-sm xl:text-base max-w-md leading-relaxed font-light">
             Fila digital, agenda, financeiro e clientes — tudo em um painel que trabalha por você,
             em tempo real.
           </p>
@@ -154,10 +154,10 @@ const BrandPanel: React.FC = () => (
             className="rounded-2xl border border-white/10 bg-white/6 backdrop-blur-xl p-5 shadow-2xl shadow-black/40"
           >
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-neutral-300 flex items-center gap-2">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-text-secondary flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-60" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
                 </span>
                 Fila ao vivo
               </span>
@@ -166,7 +166,7 @@ const BrandPanel: React.FC = () => (
             <div className="space-y-3">
               {QUEUE_MOCK.map((item, i) => (
                 <div key={item.name} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-linear-to-br from-emerald-400/30 to-teal-500/30 border border-emerald-400/20 flex items-center justify-center text-[11px] font-bold text-emerald-200">
+                  <div className="w-8 h-8 rounded-full bg-linear-to-br from-accent/30 to-accent/20 border border-accent/20 flex items-center justify-center text-[11px] font-bold text-accent">
                     {item.name.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -175,7 +175,7 @@ const BrandPanel: React.FC = () => (
                   </div>
                   <span
                     className={`text-[10px] font-bold px-2 py-1 rounded-full shrink-0 ${
-                      i === 0 ? 'bg-emerald-400/15 text-emerald-300' : 'bg-white/5 text-neutral-400'
+                      i === 0 ? 'bg-accent/15 text-accent' : 'bg-white/5 text-text-muted'
                     }`}
                   >
                     {item.status}
@@ -192,8 +192,8 @@ const BrandPanel: React.FC = () => (
             className="absolute -right-10 -top-5"
           >
             <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/8 backdrop-blur-xl px-3.5 py-2.5 shadow-xl shadow-black/40">
-              <div className="w-7 h-7 rounded-lg bg-emerald-400/15 flex items-center justify-center">
-                <TrendingUp size={14} className="text-emerald-300" />
+              <div className="w-7 h-7 rounded-lg bg-accent/15 flex items-center justify-center">
+                <TrendingUp size={14} className="text-accent" />
               </div>
               <div>
                 <p className="text-xs font-black text-white leading-none">+32%</p>
@@ -205,17 +205,17 @@ const BrandPanel: React.FC = () => (
       </div>
 
       <div className="space-y-5">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-neutral-500 text-[11px] font-medium">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-text-muted text-[11px] font-medium">
           <span className="flex items-center gap-1.5">
-            <CalendarCheck size={13} className="text-emerald-400/70" />
+            <CalendarCheck size={13} className="text-accent/70" />
             Agenda inteligente
           </span>
           <span className="flex items-center gap-1.5">
-            <Users size={13} className="text-emerald-400/70" />
+            <Users size={13} className="text-accent/70" />
             Fila em tempo real
           </span>
           <span className="flex items-center gap-1.5">
-            <ShieldCheck size={13} className="text-emerald-400/70" />
+            <ShieldCheck size={13} className="text-accent/70" />
             Dados protegidos
           </span>
         </div>

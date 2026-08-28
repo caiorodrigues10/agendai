@@ -80,6 +80,7 @@ export const OwnerFinancialPanel: React.FC = () => {
   });
   const [expenseSubmitting, setExpenseSubmitting] = useState(false);
   const [deleteExpenseId, setDeleteExpenseId] = useState<string | null>(null);
+  const [expenseErrors, setExpenseErrors] = useState<{ title?: string; amount?: string }>({});
 
   const [fiadoForm, setFiadoForm] = useState({
     customerName: '',
@@ -88,6 +89,7 @@ export const OwnerFinancialPanel: React.FC = () => {
     amount: '',
   });
   const [fiadoSubmitting, setFiadoSubmitting] = useState(false);
+  const [fiadoErrors, setFiadoErrors] = useState<{ description?: string; amount?: string }>({});
 
   const [paymentFiadoId, setPaymentFiadoId] = useState<string | null>(null);
   const [paymentAmount, setPaymentAmount] = useState('');
@@ -125,8 +127,13 @@ export const OwnerFinancialPanel: React.FC = () => {
 
   const handleCreateExpense = async (e: React.FormEvent) => {
     e.preventDefault();
+    const title = expenseForm.title.trim();
     const amount = parseFloat(expenseForm.amount.replace(',', '.'));
-    if (!expenseForm.title.trim() || !amount || amount <= 0) return;
+    const errors: { title?: string; amount?: string } = {};
+    if (title.length < 2) errors.title = 'Título deve ter no mínimo 2 caracteres.';
+    if (!amount || amount <= 0) errors.amount = 'Valor deve ser maior que zero.';
+    setExpenseErrors(errors);
+    if (Object.keys(errors).length > 0) return;
 
     setExpenseSubmitting(true);
     setError(null);
@@ -160,15 +167,12 @@ export const OwnerFinancialPanel: React.FC = () => {
   const handleCreateFiado = async (e: React.FormEvent) => {
     e.preventDefault();
     const amount = parseFloat(fiadoForm.amount.replace(',', '.'));
-    if (
-      !fiadoForm.customerName.trim() ||
-      !fiadoForm.whatsapp.trim() ||
-      !fiadoForm.description.trim() ||
-      !amount ||
-      amount <= 0
-    ) {
-      return;
-    }
+    const description = fiadoForm.description.trim();
+    const errors: { description?: string; amount?: string } = {};
+    if (description.length < 2) errors.description = 'Descrição deve ter no mínimo 2 caracteres.';
+    if (!amount || amount <= 0) errors.amount = 'Valor deve ser maior que zero.';
+    setFiadoErrors(errors);
+    if (Object.keys(errors).length > 0) return;
 
     setFiadoSubmitting(true);
     setError(null);
@@ -386,24 +390,34 @@ export const OwnerFinancialPanel: React.FC = () => {
               <Plus size={16} className="text-accent" /> Nova despesa
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <input
-                type="text"
-                placeholder="Título"
-                value={expenseForm.title}
-                onChange={e => setExpenseForm(f => ({ ...f, title: e.target.value }))}
-                className="bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
-                required
-              />
-              <input
-                type="number"
-                step="0.01"
-                min="0.01"
-                placeholder="Valor (R$)"
-                value={expenseForm.amount}
-                onChange={e => setExpenseForm(f => ({ ...f, amount: e.target.value }))}
-                className="bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
-                required
-              />
+              <div>
+                <input
+                  type="text"
+                  placeholder="Título"
+                  value={expenseForm.title}
+                  onChange={e => setExpenseForm(f => ({ ...f, title: e.target.value }))}
+                  className={`bg-bg border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent ${expenseErrors.title ? 'border-danger' : 'border-border'}`}
+                  required
+                />
+                {expenseErrors.title && (
+                  <p className="mt-1 text-[11px] text-danger">{expenseErrors.title}</p>
+                )}
+              </div>
+              <div>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  placeholder="Valor (R$)"
+                  value={expenseForm.amount}
+                  onChange={e => setExpenseForm(f => ({ ...f, amount: e.target.value }))}
+                  className={`bg-bg border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent ${expenseErrors.amount ? 'border-danger' : 'border-border'}`}
+                  required
+                />
+                {expenseErrors.amount && (
+                  <p className="mt-1 text-[11px] text-danger">{expenseErrors.amount}</p>
+                )}
+              </div>
               <select
                 value={expenseForm.type}
                 onChange={e =>
@@ -545,24 +559,34 @@ export const OwnerFinancialPanel: React.FC = () => {
                 className="bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
                 required
               />
-              <input
-                type="text"
-                placeholder="Descrição (ex: Corte + escova)"
-                value={fiadoForm.description}
-                onChange={e => setFiadoForm(f => ({ ...f, description: e.target.value }))}
-                className="bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent sm:col-span-2"
-                required
-              />
-              <input
-                type="number"
-                step="0.01"
-                min="0.01"
-                placeholder="Valor (R$)"
-                value={fiadoForm.amount}
-                onChange={e => setFiadoForm(f => ({ ...f, amount: e.target.value }))}
-                className="bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
-                required
-              />
+              <div className="sm:col-span-2">
+                <input
+                  type="text"
+                  placeholder="Descrição (ex: Corte + escova)"
+                  value={fiadoForm.description}
+                  onChange={e => setFiadoForm(f => ({ ...f, description: e.target.value }))}
+                  className={`bg-bg border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent w-full ${fiadoErrors.description ? 'border-danger' : 'border-border'}`}
+                  required
+                />
+                {fiadoErrors.description && (
+                  <p className="mt-1 text-[11px] text-danger">{fiadoErrors.description}</p>
+                )}
+              </div>
+              <div>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  placeholder="Valor (R$)"
+                  value={fiadoForm.amount}
+                  onChange={e => setFiadoForm(f => ({ ...f, amount: e.target.value }))}
+                  className={`bg-bg border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent w-full ${fiadoErrors.amount ? 'border-danger' : 'border-border'}`}
+                  required
+                />
+                {fiadoErrors.amount && (
+                  <p className="mt-1 text-[11px] text-danger">{fiadoErrors.amount}</p>
+                )}
+              </div>
             </div>
             <button
               type="submit"
