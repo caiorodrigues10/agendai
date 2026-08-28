@@ -395,6 +395,7 @@ export const StaffDashboard: React.FC = () => {
             settings={settings}
             posts={feed}
             currentUser={user}
+            audience="staff"
             onAddPost={p => {
               addPost(p);
               showToast('Postado!');

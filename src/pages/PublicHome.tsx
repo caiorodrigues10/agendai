@@ -161,6 +161,9 @@ export const PublicHome: React.FC = () => {
             settings={settings}
             posts={feed}
             currentUser={user}
+            audience="public"
+            onGoQueue={() => setActiveTab('queue')}
+            onGoAppointments={() => setActiveTab('appointments')}
             onAddPost={p => {
               addPost(p);
               showToast('Postado!');
