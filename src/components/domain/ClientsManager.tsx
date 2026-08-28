@@ -23,6 +23,12 @@ const PAYMENT_LABEL: Record<PackagePaymentMethod, string> = {
   other: 'Outro',
 };
 
+function clientPhoneLabel(whatsapp: string): string {
+  const digits = whatsapp.replace(/\D/g, '');
+  if (digits.length >= 10 && digits.length <= 11) return maskPhone(whatsapp);
+  return 'Sem WhatsApp';
+}
+
 interface ClientsManagerProps {
   services: Service[];
   staff: StaffMember[];
@@ -253,7 +259,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
             >
               <p className="font-medium text-text-primary">{c.name}</p>
               <p className="text-xs text-text-muted">
-                {maskPhone(c.whatsapp)} · {c.remainingSessions} sessão(ões) · {c.activePackageCount}{' '}
+                {clientPhoneLabel(c.whatsapp)} · {c.remainingSessions} sessão(ões) · {c.activePackageCount}{' '}
                 pacote(s)
               </p>
             </button>
@@ -265,7 +271,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
         <div className="bg-surface border border-border rounded-xl p-4 space-y-4">
           <div>
             <h4 className="font-bold text-text-primary">{detail.name}</h4>
-            <p className="text-xs text-text-muted">{maskPhone(detail.whatsapp)}</p>
+            <p className="text-xs text-text-muted">{clientPhoneLabel(detail.whatsapp)}</p>
           </div>
 
           <div className="space-y-2">

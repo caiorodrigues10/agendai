@@ -91,9 +91,9 @@ const sections = [
 
 export const PrivacyPolicyPage: React.FC = () => {
   return (
-    <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-emerald-500/30">
+    <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
       <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -left-[15%] top-[-12%] h-[50%] w-[50%] rounded-full bg-emerald-900/25 blur-[140px]" />
+        <div className="absolute -left-[15%] top-[-12%] h-[50%] w-[50%] rounded-full bg-accent/25 blur-[140px]" />
         <div className="absolute -right-[10%] bottom-[-10%] h-[45%] w-[45%] rounded-full bg-teal-900/15 blur-[120px]" />
       </div>
 
@@ -106,7 +106,7 @@ export const PrivacyPolicyPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-accent">
               <ShieldCheck className="h-3.5 w-3.5" />
               Privacidade e LGPD
             </div>
@@ -150,7 +150,7 @@ export const PrivacyPolicyPage: React.FC = () => {
                         key={item.slice(0, 40)}
                         className="flex gap-2 text-sm leading-relaxed text-neutral-400"
                       >
-                        <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-emerald-400" />
+                        <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-accent" />
                         {item}
                       </li>
                     ))}
@@ -163,7 +163,7 @@ export const PrivacyPolicyPage: React.FC = () => {
           <div className="mt-12 flex flex-wrap gap-4">
             <Link
               to="/contato"
-              className="group inline-flex items-center gap-2 rounded-full bg-emerald-400 px-6 py-3 text-sm font-black text-black transition hover:bg-emerald-300"
+              className="group inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-black text-black transition hover:bg-accent-light"
             >
               Falar com a gente
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

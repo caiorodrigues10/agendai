@@ -122,7 +122,7 @@ export const ReturnToQueueModal: React.FC<ReturnToQueueModalProps> = ({
                 <input
                   type="radio"
                   name="insertAt"
-                  className="mt-1 accent-emerald-500 cursor-pointer"
+                  className="mt-1 accent-accent cursor-pointer"
                   checked={insertAt === slot.insertAt}
                   onChange={() => setInsertAt(slot.insertAt)}
                 />

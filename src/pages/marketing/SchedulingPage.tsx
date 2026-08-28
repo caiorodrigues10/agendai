@@ -18,7 +18,7 @@ const daySlots = [
 ];
 
 const pros = [
-  { name: 'Marina', role: 'Cabelo', color: 'bg-emerald-400' },
+  { name: 'Marina', role: 'Cabelo', color: 'bg-accent' },
   { name: 'Leo', role: 'Barba', color: 'bg-cyan-400' },
   { name: 'Sofia', role: 'Unhas', color: 'bg-amber-300' },
 ];
@@ -55,11 +55,11 @@ export const SchedulingPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-emerald-500/30">
+    <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
       <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -left-[15%] top-[-12%] h-[55%] w-[55%] rounded-full bg-emerald-900/25 blur-[140px]" />
+        <div className="absolute -left-[15%] top-[-12%] h-[55%] w-[55%] rounded-full bg-accent/25 blur-[140px]" />
         <div className="absolute -right-[10%] top-[20%] h-[45%] w-[45%] rounded-full bg-teal-900/15 blur-[130px]" />
-        <div className="absolute bottom-[-15%] left-[20%] h-[40%] w-[50%] rounded-full bg-emerald-950/40 blur-[120px]" />
+        <div className="absolute bottom-[-15%] left-[20%] h-[40%] w-[50%] rounded-full bg-text-primary/40 blur-[120px]" />
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -81,7 +81,7 @@ export const SchedulingPage: React.FC = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2.5 rounded-full border border-emerald-400/25 bg-emerald-400/8 px-5 py-2.5 text-sm font-black uppercase tracking-[0.16em] text-emerald-300 md:text-base"
+              className="inline-flex items-center gap-2.5 rounded-full border border-accent/25 bg-accent/8 px-5 py-2.5 text-sm font-black uppercase tracking-[0.16em] text-accent-light md:text-base"
             >
               <CalendarCheck className="h-4 w-4 md:h-5 md:w-5" />
               Agendamento
@@ -94,7 +94,7 @@ export const SchedulingPage: React.FC = () => {
               className="mt-7 text-5xl font-black leading-[1.06] tracking-[-0.05em] text-white md:text-7xl xl:text-8xl"
             >
               O telefone para.
-              <span className="mt-2 block text-emerald-300">A agenda continua enchendo.</span>
+              <span className="mt-2 block text-accent-light">A agenda continua enchendo.</span>
             </motion.h1>
 
             <motion.p
@@ -116,7 +116,7 @@ export const SchedulingPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="group inline-flex items-center justify-center gap-3 rounded-full bg-white px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-300"
+                className="group inline-flex items-center justify-center gap-3 rounded-full bg-white px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-accent-light"
               >
                 {trialCampaign.cta}
                 <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
@@ -137,15 +137,15 @@ export const SchedulingPage: React.FC = () => {
               className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-base font-semibold text-neutral-300 md:text-lg"
             >
               <span className="inline-flex items-center gap-2.5">
-                <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                <CheckCircle2 className="h-5 w-5 text-accent" />
                 Sem instalar app
               </span>
               <span className="inline-flex items-center gap-2.5">
-                <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                <CheckCircle2 className="h-5 w-5 text-accent" />
                 Por profissional
               </span>
               <span className="inline-flex items-center gap-2.5">
-                <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                <CheckCircle2 className="h-5 w-5 text-accent" />
                 Sync com a fila
               </span>
             </motion.div>
@@ -158,20 +158,20 @@ export const SchedulingPage: React.FC = () => {
             transition={{ duration: 0.75, delay: 0.2 }}
             className="relative"
           >
-            <div className="absolute -inset-6 rounded-[3rem] bg-emerald-400/10 blur-3xl" />
+            <div className="absolute -inset-6 rounded-[3rem] bg-accent/10 blur-3xl" />
             <div className="relative overflow-hidden rounded-[2.25rem] border border-white/10 bg-[#0c1210]/90 shadow-[0_40px_100px_rgba(0,0,0,0.55)] backdrop-blur-xl">
               <div className="flex items-center justify-between border-b border-white/8 px-6 py-5 md:px-7">
                 <div>
-                  <p className="text-sm font-black uppercase tracking-[0.18em] text-emerald-400">
+                  <p className="text-sm font-black uppercase tracking-[0.18em] text-accent">
                     Quinta · 09 jul
                   </p>
                   <p className="mt-1 text-2xl font-black tracking-tight text-white md:text-3xl">
                     Dia da equipe
                   </p>
                 </div>
-                <div className="rounded-2xl border border-emerald-400/25 bg-emerald-400/10 px-4 py-2.5 text-right">
-                  <p className="text-2xl font-black text-emerald-300">6</p>
-                  <p className="text-xs font-bold uppercase tracking-wider text-emerald-300/70">
+                <div className="rounded-2xl border border-accent/25 bg-accent/10 px-4 py-2.5 text-right">
+                  <p className="text-2xl font-black text-accent-light">6</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-accent-light/70">
                     livres
                   </p>
                 </div>
@@ -183,7 +183,7 @@ export const SchedulingPage: React.FC = () => {
                     key={pro.name}
                     className={`flex min-w-max items-center gap-2.5 rounded-full border px-4 py-2.5 ${
                       i === 0
-                        ? 'border-emerald-400/35 bg-emerald-400/12'
+                        ? 'border-accent/35 bg-accent/12'
                         : 'border-white/8 bg-white/3'
                     }`}
                   >
@@ -207,7 +207,7 @@ export const SchedulingPage: React.FC = () => {
                     transition={{ delay: 0.35 + i * 0.04 }}
                     className={`flex items-center gap-4 rounded-2xl border px-4 py-4 ${
                       slot.status === 'selected'
-                        ? 'border-emerald-400/40 bg-emerald-400/12 shadow-[0_0_30px_rgba(52,211,153,0.12)]'
+                        ? 'border-accent/40 bg-accent/12 shadow-[0_0_30px_rgba(52,211,153,0.12)]'
                         : slot.status === 'busy'
                           ? 'border-white/6 bg-white/3'
                           : 'border-white/8 bg-black/25'
@@ -235,10 +235,10 @@ export const SchedulingPage: React.FC = () => {
                     ) : slot.status === 'selected' ? (
                       <>
                         <div className="min-w-0 flex-1">
-                          <p className="text-base font-bold text-emerald-200">Horário escolhido</p>
-                          <p className="text-sm text-emerald-300/70">Corte + escova · Marina</p>
+                          <p className="text-base font-bold text-accent-light">Horário escolhido</p>
+                          <p className="text-sm text-accent-light/70">Corte + escova · Marina</p>
                         </div>
-                        <span className="rounded-full bg-emerald-400 px-3 py-1 text-xs font-black uppercase tracking-wider text-black">
+                        <span className="rounded-full bg-accent px-3 py-1 text-xs font-black uppercase tracking-wider text-black">
                           Livre
                         </span>
                       </>
@@ -247,7 +247,7 @@ export const SchedulingPage: React.FC = () => {
                         <div className="min-w-0 flex-1">
                           <p className="text-base font-semibold text-neutral-400">Disponível</p>
                         </div>
-                        <span className="rounded-full border border-emerald-400/25 px-3 py-1 text-xs font-black uppercase tracking-wider text-emerald-400">
+                        <span className="rounded-full border border-accent/25 px-3 py-1 text-xs font-black uppercase tracking-wider text-accent">
                           Abrir
                         </span>
                       </>
@@ -265,7 +265,7 @@ export const SchedulingPage: React.FC = () => {
         <div className="mx-auto max-w-375">
           <div className="mb-14 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-400/90">
+              <p className="text-xs font-bold uppercase tracking-[0.28em] text-accent/90">
                 Como funciona
               </p>
               <h2 className="mt-4 text-5xl font-black tracking-[-0.04em] text-white md:text-6xl xl:text-7xl">
@@ -281,25 +281,25 @@ export const SchedulingPage: React.FC = () => {
             {flowSteps.map((item, i) => {
               const border =
                 item.accent === 'emerald'
-                  ? 'border-emerald-400/20 hover:border-emerald-400/40'
+                  ? 'border-accent/20 hover:border-accent/40'
                   : item.accent === 'cyan'
                     ? 'border-cyan-400/20 hover:border-cyan-400/40'
                     : 'border-amber-300/20 hover:border-amber-300/40';
               const number =
                 item.accent === 'emerald'
-                  ? 'text-emerald-400'
+                  ? 'text-accent'
                   : item.accent === 'cyan'
                     ? 'text-cyan-300'
                     : 'text-amber-200';
               const glow =
                 item.accent === 'emerald'
-                  ? 'bg-emerald-400/12'
+                  ? 'bg-accent/12'
                   : item.accent === 'cyan'
                     ? 'bg-cyan-400/12'
                     : 'bg-amber-300/12';
               const pill =
                 item.accent === 'emerald'
-                  ? 'bg-emerald-400/15 text-emerald-300'
+                  ? 'bg-accent/15 text-accent-light'
                   : item.accent === 'cyan'
                     ? 'bg-cyan-400/15 text-cyan-300'
                     : 'bg-amber-300/15 text-amber-200';
@@ -317,8 +317,8 @@ export const SchedulingPage: React.FC = () => {
                       : 'bg-white/6 text-neutral-300';
                 }
                 return idx === 2
-                  ? 'bg-emerald-400 text-black'
-                  : 'bg-emerald-400/12 text-emerald-200 ring-1 ring-emerald-400/20';
+                  ? 'bg-accent text-black'
+                  : 'bg-accent/12 text-accent-light ring-1 ring-accent/20';
               };
 
               return (
@@ -328,7 +328,7 @@ export const SchedulingPage: React.FC = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.08 }}
-                  className={`relative flex flex-col overflow-hidden rounded-[2rem] border bg-[#0a0f0c] p-7 transition-colors md:rounded-none md:border-y md:border-l-0 md:border-r md:border-white/8 md:bg-transparent md:p-8 md:first:rounded-l-[2rem] md:first:border-l md:last:rounded-r-[2rem] md:last:border-r ${border} md:hover:bg-white/2`}
+                  className={`relative flex flex-col overflow-hidden rounded-[2rem] border bg-surface p-7 transition-colors md:rounded-none md:border-y md:border-l-0 md:border-r md:border-white/8 md:bg-transparent md:p-8 md:first:rounded-l-[2rem] md:first:border-l md:last:rounded-r-[2rem] md:last:border-r ${border} md:hover:bg-white/2`}
                 >
                   <div
                     className={`absolute -right-10 -top-10 h-36 w-36 rounded-full ${glow} blur-[60px]`}
@@ -376,7 +376,7 @@ export const SchedulingPage: React.FC = () => {
         <div className="mx-auto max-w-375">
           <div className="mb-14 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <p className="text-base font-black uppercase tracking-[0.18em] text-emerald-400">
+              <p className="text-base font-black uppercase tracking-[0.18em] text-accent">
                 Na prática
               </p>
               <h2 className="mt-4 text-5xl font-black tracking-[-0.04em] text-white md:text-6xl xl:text-7xl">
@@ -395,15 +395,15 @@ export const SchedulingPage: React.FC = () => {
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="group relative min-h-100 overflow-hidden rounded-[2.25rem] border border-emerald-400/15 bg-[#07110b] lg:col-span-7"
+              className="group relative min-h-100 overflow-hidden rounded-[2.25rem] border border-accent/15 bg-surface lg:col-span-7"
             >
-              <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-emerald-400/50 to-transparent" />
-              <div className="absolute -right-16 -top-20 h-80 w-80 rounded-full bg-emerald-400/12 blur-[100px]" />
+              <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-accent/50 to-transparent" />
+              <div className="absolute -right-16 -top-20 h-80 w-80 rounded-full bg-accent/12 blur-[100px]" />
 
               <div className="relative z-10 flex h-full flex-col p-8 lg:p-10">
                 <div className="flex flex-wrap items-end justify-between gap-4 border-b border-white/8 pb-6">
                   <div className="max-w-md">
-                    <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-400/90">
+                    <p className="text-xs font-bold uppercase tracking-[0.28em] text-accent/90">
                       Disponibilidade real
                     </p>
                     <h3 className="mt-3 text-4xl font-black tracking-tight text-white md:text-5xl">
@@ -448,10 +448,10 @@ export const SchedulingPage: React.FC = () => {
                             key={`${row.pro}-${slot.t}`}
                             className={`rounded-lg py-2.5 text-center text-[11px] font-black ${
                               slot.s === 'selected'
-                                ? 'bg-emerald-400 text-black shadow-[0_0_24px_rgba(52,211,153,0.35)]'
+                                ? 'bg-accent text-black shadow-[0_0_24px_rgba(52,211,153,0.35)]'
                                 : slot.s === 'busy'
                                   ? 'bg-white/4 text-neutral-600 line-through'
-                                  : 'bg-emerald-400/12 text-emerald-300 ring-1 ring-emerald-400/20'
+                                  : 'bg-accent/12 text-accent-light ring-1 ring-accent/20'
                             }`}
                           >
                             {slot.t}
@@ -590,11 +590,11 @@ export const SchedulingPage: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.12 }}
-              className="group relative overflow-hidden rounded-[2.25rem] border border-white/10 bg-[#0d110e] lg:col-span-7"
+              className="group relative overflow-hidden rounded-[2.25rem] border border-white/10 bg-surface lg:col-span-7"
             >
               <div className="grid h-full lg:grid-cols-[1.1fr_0.9fr]">
                 <div className="relative z-10 p-8 lg:p-9">
-                  <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-400/90">
+                  <p className="text-xs font-bold uppercase tracking-[0.28em] text-accent/90">
                     Check-in na fila
                   </p>
                   <h3 className="mt-3 text-3xl font-black tracking-tight text-white md:text-4xl xl:text-5xl">
@@ -616,14 +616,14 @@ export const SchedulingPage: React.FC = () => {
                   </div>
 
                   <div className="flex items-center gap-3 py-3 pl-2">
-                    <div className="h-10 w-px bg-linear-to-b from-white/20 via-emerald-400/60 to-emerald-400" />
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-300">
+                    <div className="h-10 w-px bg-linear-to-b from-white/20 via-accent/60 to-accent" />
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-accent-light">
                       <Repeat className="h-3 w-3" />
                       Check-in
                     </span>
                   </div>
 
-                  <div className="rounded-2xl border border-emerald-400/35 bg-emerald-400 px-5 py-4 text-black shadow-[0_16px_40px_rgba(52,211,153,0.25)]">
+                  <div className="rounded-2xl border border-accent/35 bg-accent px-5 py-4 text-black shadow-[0_16px_40px_rgba(52,211,153,0.25)]">
                     <p className="text-[10px] font-black uppercase tracking-wider text-black/60">
                       Na fila · 2ª posição
                     </p>
@@ -653,7 +653,7 @@ export const SchedulingPage: React.FC = () => {
               transition={{ delay: i * 0.06 }}
               className="flex flex-col items-center text-center md:border-r md:border-white/8 md:last:border-r-0"
             >
-              <stat.icon className="mb-4 h-8 w-8 text-emerald-400" />
+              <stat.icon className="mb-4 h-8 w-8 text-accent" />
               <p className="text-4xl font-black tracking-tight text-white md:text-5xl">
                 {stat.value}
               </p>
@@ -671,7 +671,7 @@ export const SchedulingPage: React.FC = () => {
           initial={{ opacity: 0, y: 28 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="relative mx-auto max-w-6xl overflow-hidden rounded-[2.5rem] border border-emerald-400/15 bg-[#07110b] px-8 py-16 text-center md:px-16 md:py-24"
+          className="relative mx-auto max-w-6xl overflow-hidden rounded-[2.5rem] border border-accent/15 bg-surface px-8 py-16 text-center md:px-16 md:py-24"
         >
           <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(ellipse_at_top,rgba(52,211,153,0.22),transparent_65%)]" />
           <div
@@ -685,11 +685,11 @@ export const SchedulingPage: React.FC = () => {
           />
 
           <div className="relative z-10 mx-auto max-w-3xl">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-400 text-black shadow-[0_16px_45px_rgba(52,211,153,0.24)]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-black shadow-[0_16px_45px_rgba(52,211,153,0.24)]">
               <CalendarCheck className="h-7 w-7" />
             </div>
 
-            <p className="mt-8 text-base font-black uppercase tracking-[0.18em] text-emerald-300">
+            <p className="mt-8 text-base font-black uppercase tracking-[0.18em] text-accent-light">
               Agenda digital
             </p>
             <h2 className="mt-5 text-5xl font-black leading-[1.08] tracking-[-0.045em] text-white md:text-6xl xl:text-7xl">
@@ -701,17 +701,17 @@ export const SchedulingPage: React.FC = () => {
               veja se faz sentido para o seu modelo de negócio.
             </p>
 
-            <div className="mx-auto mt-8 flex max-w-xl flex-wrap items-center justify-center gap-x-6 gap-y-3 text-base font-semibold text-emerald-100/90 md:text-lg">
+            <div className="mx-auto mt-8 flex max-w-xl flex-wrap items-center justify-center gap-x-6 gap-y-3 text-base font-semibold text-accent-light/90 md:text-lg">
               <span className="inline-flex items-center gap-2.5">
-                <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                <CheckCircle2 className="h-5 w-5 text-accent" />
                 Marcação 24h
               </span>
               <span className="inline-flex items-center gap-2.5">
-                <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                <CheckCircle2 className="h-5 w-5 text-accent" />
                 Menos faltas
               </span>
               <span className="inline-flex items-center gap-2.5">
-                <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                <CheckCircle2 className="h-5 w-5 text-accent" />
                 Sync com a fila
               </span>
             </div>
@@ -720,7 +720,7 @@ export const SchedulingPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="group inline-flex items-center justify-center gap-3 rounded-full bg-white px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-1 hover:bg-emerald-300"
+                className="group inline-flex items-center justify-center gap-3 rounded-full bg-white px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-1 hover:bg-accent-light"
               >
                 {trialCampaign.cta}
                 <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />

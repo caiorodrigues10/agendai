@@ -43,10 +43,10 @@ const ContactSchema = z.object({
 type ContactFormData = z.infer<typeof ContactSchema>;
 
 const fieldClass = (hasError: boolean) =>
-  `w-full rounded-2xl border bg-black/40 px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-neutral-600 focus:ring-1 focus:ring-emerald-400/40 ${
+  `w-full rounded-2xl border bg-black/40 px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-neutral-600 focus:ring-1 focus:ring-accent/40 ${
     hasError
       ? 'border-red-500/40 focus:border-red-500'
-      : 'border-white/10 hover:border-white/20 focus:border-emerald-400/50'
+      : 'border-white/10 hover:border-white/20 focus:border-accent/50'
   }`;
 
 export const ContactPage: React.FC = () => {
@@ -94,9 +94,9 @@ export const ContactPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-emerald-500/30">
+    <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
       <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -left-[15%] top-[-12%] h-[50%] w-[50%] rounded-full bg-emerald-900/25 blur-[140px]" />
+        <div className="absolute -left-[15%] top-[-12%] h-[50%] w-[50%] rounded-full bg-accent/25 blur-[140px]" />
         <div className="absolute -right-[10%] bottom-[-10%] h-[45%] w-[45%] rounded-full bg-teal-900/15 blur-[120px]" />
       </div>
 
@@ -108,7 +108,7 @@ export const ContactPage: React.FC = () => {
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-400/90"
+              className="text-xs font-bold uppercase tracking-[0.28em] text-accent/90"
             >
               Contato
             </motion.p>
@@ -120,7 +120,7 @@ export const ContactPage: React.FC = () => {
             >
               Fala com a gente.
               <br />
-              <span className="text-emerald-400">Resposta em 1 dia útil.</span>
+              <span className="text-accent">Resposta em 1 dia útil.</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 14 }}
@@ -143,16 +143,16 @@ export const ContactPage: React.FC = () => {
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="rounded-4xl border border-white/10 bg-[#0d110e] p-6"
+              className="rounded-4xl border border-white/10 bg-surface p-6"
             >
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-500">
                 Canal direto
               </p>
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
-                className="mt-3 inline-flex items-center gap-2 text-lg font-bold text-white transition hover:text-emerald-300"
+                className="mt-3 inline-flex items-center gap-2 text-lg font-bold text-white transition hover:text-accent-light"
               >
-                <Mail className="h-5 w-5 text-emerald-400" />
+                <Mail className="h-5 w-5 text-accent" />
                 {CONTACT_EMAIL}
               </a>
               <p className="mt-3 text-sm font-medium text-neutral-500">
@@ -165,9 +165,9 @@ export const ContactPage: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.05 }}
-              className="rounded-4xl border border-white/10 bg-[#0d110e] p-6"
+              className="rounded-4xl border border-white/10 bg-surface p-6"
             >
-              <div className="flex items-center gap-2 text-emerald-300">
+              <div className="flex items-center gap-2 text-accent-light">
                 <Clock className="h-4 w-4" />
                 <span className="text-xs font-black uppercase tracking-wider">Horário</span>
               </div>
@@ -184,16 +184,16 @@ export const ContactPage: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.08 }}
-              className="rounded-4xl border border-emerald-400/20 bg-emerald-400/8 p-6"
+              className="rounded-4xl border border-accent/20 bg-accent/8 p-6"
             >
-              <p className="text-sm font-bold text-emerald-200">{trialCampaign.eyebrow}?</p>
+              <p className="text-sm font-bold text-accent-light">{trialCampaign.eyebrow}?</p>
               <p className="mt-2 text-sm font-medium leading-relaxed text-neutral-300">
                 {trialCampaign.body} {trialCampaign.afterTrial}
               </p>
               <button
                 type="button"
                 onClick={() => navigate('/planos')}
-                className="group mt-4 inline-flex items-center gap-2 text-sm font-black text-white transition hover:text-emerald-300"
+                className="group mt-4 inline-flex items-center gap-2 text-sm font-black text-white transition hover:text-accent-light"
               >
                 Ver planos
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -209,11 +209,11 @@ export const ContactPage: React.FC = () => {
             className="rounded-4xl border border-white/10 bg-[#0a100c] p-7 md:p-10 lg:col-span-8"
           >
             {status === 'success' && (
-              <div className="mb-8 flex items-start gap-3 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 p-4 text-sm font-medium text-emerald-200">
+              <div className="mb-8 flex items-start gap-3 rounded-2xl border border-accent/30 bg-accent/10 p-4 text-sm font-medium text-accent-light">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
                 <div>
-                  <p className="font-bold text-emerald-100">Mensagem recebida.</p>
-                  <p className="mt-1 text-emerald-200/80">
+                  <p className="font-bold text-accent-light">Mensagem recebida.</p>
+                  <p className="mt-1 text-accent-light/80">
                     Nossa equipe já foi notificada. Retorno em até 1 dia útil.
                   </p>
                 </div>
@@ -242,7 +242,7 @@ export const ContactPage: React.FC = () => {
                         onClick={() => setValue('topic', item.value, { shouldValidate: true })}
                         className={`rounded-2xl border px-3 py-3 text-left transition ${
                           active
-                            ? 'border-emerald-400/40 bg-emerald-400/12 text-white'
+                            ? 'border-accent/40 bg-accent/12 text-white'
                             : 'border-white/8 bg-black/30 text-neutral-400 hover:border-white/15 hover:text-neutral-200'
                         }`}
                       >
@@ -366,7 +366,7 @@ export const ContactPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-emerald-400 px-8 py-4 text-sm font-black text-black transition hover:-translate-y-0.5 hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-accent px-8 py-4 text-sm font-black text-black transition hover:-translate-y-0.5 hover:bg-accent-light disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {submitting ? (
                     <>

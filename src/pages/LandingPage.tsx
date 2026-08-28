@@ -76,11 +76,11 @@ const processSteps = [
 
 const stepAccent = {
   emerald: {
-    line: 'via-emerald-400/50',
-    meta: 'text-emerald-400',
-    glow: 'bg-emerald-400/20',
-    num: 'text-emerald-400/55',
-    bar: 'bg-emerald-400',
+    line: 'via-accent/50',
+    meta: 'text-accent',
+    glow: 'bg-accent/20',
+    num: 'text-accent/55',
+    bar: 'bg-accent',
   },
   cyan: {
     line: 'via-cyan-400/50',
@@ -637,12 +637,12 @@ export const LandingPage: React.FC = () => {
   return (
     <div
       ref={pageRef}
-      className="min-h-screen overflow-x-hidden bg-[#050706] font-sans text-neutral-100 selection:bg-emerald-400/30"
+      className="min-h-screen overflow-x-hidden bg-bg font-sans text-neutral-100 selection:bg-accent/30"
     >
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
         <div
           data-ambient="one"
-          className="absolute -left-[10%] -top-[15%] h-192 w-3xl rounded-full bg-emerald-600/9 blur-[150px]"
+          className="absolute -left-[10%] -top-[15%] h-192 w-3xl rounded-full bg-accent-dark/9 blur-[150px]"
         />
         <div
           data-ambient="two"
@@ -671,7 +671,7 @@ export const LandingPage: React.FC = () => {
             <div className="relative z-20 max-w-3xl">
               <p
                 data-hero-badge
-                className="mb-6 text-[11px] font-medium uppercase tracking-[0.28em] text-emerald-400/90"
+                className="mb-6 text-[11px] font-medium uppercase tracking-[0.28em] text-accent/90"
               >
                 Fila · agenda · financeiro
               </p>
@@ -685,7 +685,7 @@ export const LandingPage: React.FC = () => {
                 <span className="-mb-[0.12em] block overflow-hidden pb-[0.2em]">
                   <span
                     data-hero-line
-                    className="block bg-linear-to-r from-emerald-300 via-emerald-400 to-cyan-400 bg-clip-text text-transparent md:whitespace-nowrap"
+                    className="block bg-linear-to-r from-accent-light via-accent to-cyan-400 bg-clip-text text-transparent md:whitespace-nowrap"
                   >
                     sem confusão.
                   </span>
@@ -719,10 +719,10 @@ export const LandingPage: React.FC = () => {
                       {trialCampaign.cta}
                       <span
                         aria-hidden
-                        className="absolute inset-x-0 -bottom-1 h-[2px] origin-left scale-x-100 bg-emerald-400 transition duration-300 group-hover:bg-emerald-300"
+                        className="absolute inset-x-0 -bottom-1 h-[2px] origin-left scale-x-100 bg-accent transition duration-300 group-hover:bg-accent-light"
                       />
                     </span>
-                    <ArrowRight className="h-5 w-5 shrink-0 text-emerald-400 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-emerald-300" />
+                    <ArrowRight className="h-5 w-5 shrink-0 text-accent transition-transform duration-300 group-hover:translate-x-1 group-hover:text-accent-light" />
                   </span>
                   <span className="mt-3 block text-[11px] font-medium tracking-[0.04em] text-neutral-500">
                     {trialCampaign.heroSubline}
@@ -767,7 +767,7 @@ export const LandingPage: React.FC = () => {
                         <span className="text-3xl font-black tracking-tight text-white md:text-4xl">
                           {benefit.value}
                         </span>
-                        <span className="text-sm font-bold text-emerald-300">{benefit.unit}</span>
+                        <span className="text-sm font-bold text-accent-light">{benefit.unit}</span>
                       </div>
                       <p className="mt-2 max-w-56 text-sm font-medium leading-relaxed text-neutral-400">
                         {benefit.label}
@@ -785,15 +785,15 @@ export const LandingPage: React.FC = () => {
               <div
                 data-parallax
                 data-depth="0.35"
-                className="absolute -inset-10 rounded-full bg-emerald-500/10 blur-[80px]"
+                className="absolute -inset-10 rounded-full bg-accent/10 blur-[80px]"
                 aria-hidden="true"
               />
 
-              <div className="relative overflow-hidden rounded-4xl border border-white/10 bg-[#0b0e0c]/90 p-3 shadow-[0_35px_100px_rgba(0,0,0,0.65)] backdrop-blur-2xl sm:p-4">
+              <div className="relative overflow-hidden rounded-4xl border border-white/10 bg-surface/90 p-3 shadow-[0_35px_100px_rgba(0,0,0,0.65)] backdrop-blur-2xl sm:p-4">
                 <div className="rounded-[1.45rem] border border-white/[0.07] bg-[#101411]">
                   <div className="flex items-center justify-between border-b border-white/[0.07] px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-400 text-black">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent text-black">
                         <Scissors className="h-4 w-4" />
                       </div>
                       <div>
@@ -801,8 +801,8 @@ export const LandingPage: React.FC = () => {
                         <p className="text-[10px] text-neutral-500">Studio Aurora · sexta-feira</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/[0.07] px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-emerald-300">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    <div className="flex items-center gap-2 rounded-full border border-accent/15 bg-accent/[0.07] px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-accent-light">
+                      <span className="h-1.5 w-1.5 rounded-full bg-accent" />
                       Aberto
                     </div>
                   </div>
@@ -817,7 +817,7 @@ export const LandingPage: React.FC = () => {
                         key={item.label}
                         className={`rounded-2xl border p-4 ${
                           item.accent
-                            ? 'border-emerald-400/20 bg-emerald-400/[0.07]'
+                            ? 'border-accent/20 bg-accent/[0.07]'
                             : 'border-white/6 bg-white/2.5'
                         }`}
                       >
@@ -849,7 +849,7 @@ export const LandingPage: React.FC = () => {
                             <div
                               className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[9px] font-black ${
                                 index === 0
-                                  ? 'bg-emerald-400 text-black'
+                                  ? 'bg-accent text-black'
                                   : 'bg-white/[0.07] text-neutral-300'
                               }`}
                             >
@@ -863,7 +863,7 @@ export const LandingPage: React.FC = () => {
                                 {customer.service}
                               </p>
                             </div>
-                            <span className="text-[9px] font-bold text-emerald-400">
+                            <span className="text-[9px] font-bold text-accent">
                               {customer.wait}
                             </span>
                           </div>
@@ -877,7 +877,7 @@ export const LandingPage: React.FC = () => {
                           <p className="text-xs font-bold text-white">Movimento</p>
                           <p className="mt-1 text-[9px] text-neutral-500">Atendimentos por hora</p>
                         </div>
-                        <BarChart3 className="h-4 w-4 text-emerald-400" />
+                        <BarChart3 className="h-4 w-4 text-accent" />
                       </div>
                       <div className="mt-6 flex min-h-32 flex-1 items-end gap-2">
                         {[36, 55, 43, 72, 62, 88, 68, 96, 78].map((height, index) => (
@@ -886,8 +886,8 @@ export const LandingPage: React.FC = () => {
                             data-hero-bar
                             className={`flex-1 rounded-t-md ${
                               index === 7
-                                ? 'bg-emerald-400'
-                                : 'bg-linear-to-t from-emerald-500/35 to-cyan-400/20'
+                                ? 'bg-accent'
+                                : 'bg-linear-to-t from-accent/35 to-cyan-400/20'
                             }`}
                             style={{ height: `${height}%` }}
                           />
@@ -908,7 +908,7 @@ export const LandingPage: React.FC = () => {
                 data-float="one"
                 data-parallax
                 data-depth="1.25"
-                className="absolute -left-4 top-[30%] hidden w-52 rounded-2xl border border-white/10 bg-[#111512]/90 p-4 shadow-2xl backdrop-blur-2xl sm:block lg:-left-16"
+                className="absolute -left-4 top-[30%] hidden w-52 rounded-2xl border border-white/10 bg-surface/90 p-4 shadow-2xl backdrop-blur-2xl sm:block lg:-left-16"
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300">
@@ -926,13 +926,13 @@ export const LandingPage: React.FC = () => {
                 data-float="two"
                 data-parallax
                 data-depth="1.5"
-                className="absolute -bottom-7 right-2 hidden w-56 rounded-2xl border border-emerald-400/15 bg-[#111512]/90 p-4 shadow-2xl backdrop-blur-2xl sm:block lg:-right-10"
+                className="absolute -bottom-7 right-2 hidden w-56 rounded-2xl border border-accent/15 bg-surface/90 p-4 shadow-2xl backdrop-blur-2xl sm:block lg:-right-10"
               >
                 <div className="mb-3 flex items-center justify-between">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-accent">
                     Próximo horário
                   </span>
-                  <Calendar className="h-4 w-4 text-emerald-400" />
+                  <Calendar className="h-4 w-4 text-accent" />
                 </div>
                 <p className="text-sm font-bold text-white">14:30 · Corte + escova</p>
                 <p className="mt-1 text-[9px] text-neutral-500">com Marina Oliveira</p>
@@ -947,14 +947,14 @@ export const LandingPage: React.FC = () => {
           >
             Explore
             <span className="relative h-10 w-px overflow-hidden bg-white/10">
-              <span className="absolute left-0 top-0 h-1/2 w-full animate-pulse bg-emerald-400" />
+              <span className="absolute left-0 top-0 h-1/2 w-full animate-pulse bg-accent" />
             </span>
           </button>
         </section>
 
         <section className="relative overflow-hidden border-y border-white/6 bg-white/[0.018] py-5">
-          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-linear-to-r from-[#050706] to-transparent md:w-48" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-linear-to-l from-[#050706] to-transparent md:w-48" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-linear-to-r from-bg to-transparent md:w-48" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-linear-to-l from-bg to-transparent md:w-48" />
           <div data-marquee-track className="flex w-max items-center">
             {[0, 1].map(group => (
               <div
@@ -977,7 +977,7 @@ export const LandingPage: React.FC = () => {
         <section id="produto" className="relative scroll-mt-20 px-6 py-28 md:py-40">
           <div className="mx-auto max-w-375">
             <div data-reveal className="mb-16 max-w-3xl">
-              <span className="text-[10px] font-black uppercase tracking-[0.28em] text-emerald-400">
+              <span className="text-[10px] font-black uppercase tracking-[0.28em] text-accent">
                 Da chegada ao resultado
               </span>
               <h2 className="mt-5 text-5xl font-black tracking-[-0.05em] text-white md:text-7xl">
@@ -997,7 +997,7 @@ export const LandingPage: React.FC = () => {
                 className="grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-16"
               >
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-400">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-accent">
                     Link público + painel
                   </p>
                   <h3 className="mt-4 text-4xl font-black tracking-tight text-white md:text-6xl">
@@ -1017,20 +1017,20 @@ export const LandingPage: React.FC = () => {
                         key={item}
                         className="flex items-start gap-3 text-sm font-semibold text-neutral-300"
                       >
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
                         {item}
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <div className="rounded-[1.75rem] border border-white/8 bg-[#0d110e] p-5 md:p-6">
+                <div className="rounded-[1.75rem] border border-white/8 bg-surface p-5 md:p-6">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
                       <p className="text-base font-bold text-white">Fila ao vivo</p>
                       <p className="mt-0.5 text-sm text-neutral-500">Studio Aurora · hoje</p>
                     </div>
-                    <span className="rounded-full bg-emerald-400/12 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-emerald-300">
+                    <span className="rounded-full bg-accent/12 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-accent-light">
                       3 na fila
                     </span>
                   </div>
@@ -1038,18 +1038,18 @@ export const LandingPage: React.FC = () => {
                   <div className="space-y-2.5">
                     <div
                       data-queue-row
-                      className="flex items-center gap-3 rounded-2xl border border-emerald-400/25 bg-emerald-400/10 p-3.5"
+                      className="flex items-center gap-3 rounded-2xl border border-accent/25 bg-accent/10 p-3.5"
                     >
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-400 text-sm font-black text-black">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent text-sm font-black text-black">
                         AM
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-bold text-white">Ana Martins</p>
-                        <p className="mt-0.5 text-xs text-emerald-100/70">
+                        <p className="mt-0.5 text-xs text-accent-light/70">
                           Corte + escova · cadeira 1
                         </p>
                       </div>
-                      <span className="rounded-full bg-emerald-400 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-black">
+                      <span className="rounded-full bg-accent px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-black">
                         Na cadeira
                       </span>
                     </div>
@@ -1081,7 +1081,7 @@ export const LandingPage: React.FC = () => {
                     <span className="text-xs font-semibold text-neutral-400">
                       Próxima chamada estimada
                     </span>
-                    <span className="text-sm font-black text-emerald-300">~18 min</span>
+                    <span className="text-sm font-black text-accent-light">~18 min</span>
                   </div>
                 </div>
               </article>
@@ -1093,7 +1093,7 @@ export const LandingPage: React.FC = () => {
                 className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16"
               >
                 <div className="order-2 lg:order-1">
-                  <div className="rounded-[1.75rem] border border-white/8 bg-[#0b0e0c] p-5 md:p-6">
+                  <div className="rounded-[1.75rem] border border-white/8 bg-surface p-5 md:p-6">
                     <div className="mb-5 flex items-baseline justify-between gap-3">
                       <div>
                         <p className="text-base font-bold text-white">Agendar</p>
@@ -1159,18 +1159,18 @@ export const LandingPage: React.FC = () => {
 
                     <div
                       data-booking-confirm
-                      className="mt-5 flex items-center gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/8 p-3.5"
+                      className="mt-5 flex items-center gap-3 rounded-2xl border border-accent/20 bg-accent/8 p-3.5"
                     >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-400/15 text-emerald-300">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/15 text-accent-light">
                         <Calendar className="h-4 w-4" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-bold text-white">Qui 15 · 15:30</p>
-                        <p className="mt-0.5 text-xs text-emerald-100/70">
+                        <p className="mt-0.5 text-xs text-accent-light/70">
                           60 min · R$ 85 · lembrete
                         </p>
                       </div>
-                      <span className="rounded-full bg-emerald-400 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-black">
+                      <span className="rounded-full bg-accent px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-black">
                         Ok
                       </span>
                     </div>
@@ -1239,7 +1239,7 @@ export const LandingPage: React.FC = () => {
                   </ul>
                 </div>
 
-                <div className="rounded-[1.75rem] border border-white/8 bg-[#0d110e] p-5 md:p-6">
+                <div className="rounded-[1.75rem] border border-white/8 bg-surface p-5 md:p-6">
                   <div className="flex items-end justify-between gap-4">
                     <div>
                       <p className="text-xs font-black uppercase tracking-wider text-neutral-500">
@@ -1247,7 +1247,7 @@ export const LandingPage: React.FC = () => {
                       </p>
                       <p className="mt-1 text-4xl font-black tracking-tight text-white">R$ 5.840</p>
                     </div>
-                    <span className="rounded-full bg-emerald-400/12 px-3 py-1.5 text-xs font-black text-emerald-300">
+                    <span className="rounded-full bg-accent/12 px-3 py-1.5 text-xs font-black text-accent-light">
                       +18% vs mês
                     </span>
                   </div>
@@ -1258,7 +1258,7 @@ export const LandingPage: React.FC = () => {
                         label: 'Entradas',
                         value: 'R$ 8.400',
                         width: '100%',
-                        bar: 'bg-emerald-400',
+                        bar: 'bg-accent',
                       },
                       {
                         label: 'Despesas',
@@ -1355,7 +1355,7 @@ export const LandingPage: React.FC = () => {
                 className="grid items-start gap-12 lg:grid-cols-[1fr_1.15fr] lg:gap-16"
               >
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-300">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-accent-light">
                     Quem vê o quê
                   </p>
                   <h3 className="mt-4 text-4xl font-black tracking-tight text-white md:text-6xl">
@@ -1374,19 +1374,19 @@ export const LandingPage: React.FC = () => {
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div
                       data-role-panel
-                      className="rounded-[1.5rem] border border-emerald-400/25 bg-[#0d110e] p-5"
+                      className="rounded-[1.5rem] border border-accent/25 bg-surface p-5"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-400 text-sm font-black text-black">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent text-sm font-black text-black">
                           MO
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-bold text-white">Marina Oliveira</p>
-                          <p className="text-xs font-black uppercase tracking-wider text-emerald-300">
+                          <p className="text-xs font-black uppercase tracking-wider text-accent-light">
                             Dono
                           </p>
                         </div>
-                        <span className="rounded-full bg-emerald-400/15 px-2 py-1 text-[10px] font-black text-emerald-300">
+                        <span className="rounded-full bg-accent/15 px-2 py-1 text-[10px] font-black text-accent-light">
                           Online
                         </span>
                       </div>
@@ -1401,7 +1401,7 @@ export const LandingPage: React.FC = () => {
                             key={item}
                             className="flex items-center gap-2.5 text-sm font-semibold text-neutral-200"
                           >
-                            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                            <CheckCircle2 className="h-4 w-4 shrink-0 text-accent" />
                             {item}
                           </li>
                         ))}
@@ -1410,7 +1410,7 @@ export const LandingPage: React.FC = () => {
 
                     <div
                       data-role-panel
-                      className="rounded-[1.5rem] border border-white/8 bg-[#0d110e] p-5"
+                      className="rounded-[1.5rem] border border-white/8 bg-surface p-5"
                     >
                       <div className="flex items-center gap-3">
                         <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-sm font-black text-white">
@@ -1441,7 +1441,7 @@ export const LandingPage: React.FC = () => {
                           >
                             <CheckCircle2
                               className={`h-4 w-4 shrink-0 ${
-                                item.ok ? 'text-emerald-400' : 'text-neutral-700'
+                                item.ok ? 'text-accent' : 'text-neutral-700'
                               }`}
                             />
                             {item.label}
@@ -1453,13 +1453,13 @@ export const LandingPage: React.FC = () => {
 
                   <div
                     data-role-panel
-                    className="rounded-[1.5rem] border border-white/8 bg-[#0d110e] p-4"
+                    className="rounded-[1.5rem] border border-white/8 bg-surface p-4"
                   >
                     <div className="mb-3 flex items-center justify-between">
                       <p className="text-xs font-black uppercase tracking-wider text-neutral-500">
                         Agora no painel
                       </p>
-                      <span className="text-[10px] font-bold text-emerald-300">ao vivo</span>
+                      <span className="text-[10px] font-bold text-accent-light">ao vivo</span>
                     </div>
                     <div className="space-y-2">
                       {[
@@ -1483,7 +1483,7 @@ export const LandingPage: React.FC = () => {
                           key={row.action}
                           className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/3 px-3 py-2.5"
                         >
-                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
                           <p className="min-w-0 flex-1 truncate text-sm text-neutral-300">
                             <span className="font-bold text-white">{row.who}</span>
                             {' · '}
@@ -1505,7 +1505,7 @@ export const LandingPage: React.FC = () => {
         <section className="relative z-10 border-y border-white/5 bg-[#080a09] px-6 py-24 md:py-32 lg:px-10 xl:px-12">
           <div className="mx-auto grid max-w-375 gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start lg:gap-16 xl:gap-20">
             <div data-reveal className="lg:sticky lg:top-32 lg:self-start">
-              <span className="text-xs font-black uppercase tracking-[0.28em] text-emerald-400">
+              <span className="text-xs font-black uppercase tracking-[0.28em] text-accent">
                 Como funciona
               </span>
               <h2 className="mt-5 max-w-lg text-4xl font-black tracking-[-0.05em] text-white md:text-5xl xl:text-6xl">
@@ -1521,7 +1521,7 @@ export const LandingPage: React.FC = () => {
                 className="group mt-8 inline-flex items-center gap-3 text-sm font-bold text-white"
               >
                 Explorar funcionalidades
-                <ArrowRight className="h-4 w-4 text-emerald-400 transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="h-4 w-4 text-accent transition-transform group-hover:translate-x-1" />
               </button>
             </div>
 
@@ -1532,7 +1532,7 @@ export const LandingPage: React.FC = () => {
               >
                 <div
                   data-stack-progress
-                  className="h-full w-full origin-top scale-y-0 bg-linear-to-b from-emerald-400 via-cyan-400 to-amber-300"
+                  className="h-full w-full origin-top scale-y-0 bg-linear-to-b from-accent via-cyan-400 to-amber-300"
                 />
               </div>
 
@@ -1598,24 +1598,24 @@ export const LandingPage: React.FC = () => {
 
         <section
           id="tecnologia"
-          className="relative z-20 scroll-mt-20 bg-[#050706] px-6 py-28 md:rounded-t-[2.75rem] md:py-40 md:shadow-[0_-30px_80px_rgba(0,0,0,0.4)]"
+          className="relative z-20 scroll-mt-20 bg-bg px-6 py-28 md:rounded-t-[2.75rem] md:py-40 md:shadow-[0_-30px_80px_rgba(0,0,0,0.4)]"
         >
           <div
             data-reveal
-            className="relative mx-auto max-w-375 overflow-hidden rounded-[2.75rem] bg-[#ecfdf5] text-[#07110b] md:rounded-[4rem]"
+            className="relative mx-auto max-w-375 overflow-hidden rounded-[2.75rem] bg-surface text-text-primary md:rounded-[4rem]"
           >
-            <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-emerald-300/60 blur-[110px]" />
+            <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-accent-light/60 blur-[110px]" />
             <div className="absolute -bottom-48 left-1/3 h-96 w-96 rounded-full bg-cyan-200/55 blur-[120px]" />
 
             <div className="relative z-10 grid gap-14 p-8 md:p-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:p-24">
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-emerald-800/70">
+                <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-text-primary/70">
                   Dados com contexto
                 </p>
                 <h2 className="mt-8 text-5xl font-black leading-[1.08] tracking-[-0.045em] md:text-6xl xl:text-7xl">
                   Decisões com contexto, não achismo.
                 </h2>
-                <p className="mt-8 max-w-2xl text-xl font-medium leading-relaxed text-emerald-950/75 md:text-2xl">
+                <p className="mt-8 max-w-2xl text-xl font-medium leading-relaxed text-text-primary/75 md:text-2xl">
                   Acompanhe movimento, tempo de espera e resultado financeiro. A AgendAI transforma
                   a rotina do estabelecimento em uma visão simples para agir.
                 </p>
@@ -1628,10 +1628,10 @@ export const LandingPage: React.FC = () => {
                   ].map(item => (
                     <div
                       key={item}
-                      className="flex items-start gap-4 text-lg font-semibold text-emerald-950 md:text-xl"
+                      className="flex items-start gap-4 text-lg font-semibold text-text-primary md:text-xl"
                     >
-                      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#07110b]">
-                        <CheckCircle2 className="h-4 w-4 text-emerald-300" />
+                      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface">
+                        <CheckCircle2 className="h-4 w-4 text-accent-light" />
                       </span>
                       {item}
                     </div>
@@ -1640,22 +1640,22 @@ export const LandingPage: React.FC = () => {
               </div>
 
               <div className="relative">
-                <div className="rounded-4xl border border-emerald-950/10 bg-white/75 p-6 shadow-[0_30px_80px_rgba(6,78,59,0.12)] backdrop-blur-xl md:p-9">
+                <div className="rounded-4xl border border-text-primary/10 bg-white/75 p-6 shadow-[0_30px_80px_rgba(6,78,59,0.12)] backdrop-blur-xl md:p-9">
                   <div className="flex items-end justify-between gap-4">
                     <div>
-                      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-emerald-800/65">
+                      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-text-primary/65">
                         Movimento semanal
                       </p>
                       <p className="mt-2 text-4xl font-black tracking-tight md:text-5xl">
                         128 atendimentos
                       </p>
-                      <p className="mt-2 text-base text-emerald-950/55 md:text-lg">
+                      <p className="mt-2 text-base text-text-primary/55 md:text-lg">
                         Visão ilustrativa do dashboard Pro
                       </p>
                     </div>
-                    <p className="shrink-0 pb-1 text-right text-sm font-semibold tabular-nums text-emerald-700">
+                    <p className="shrink-0 pb-1 text-right text-sm font-semibold tabular-nums text-accent-dark">
                       +12%
-                      <span className="mt-0.5 block text-[10px] font-medium uppercase tracking-[0.16em] text-emerald-950/45">
+                      <span className="mt-0.5 block text-[10px] font-medium uppercase tracking-[0.16em] text-text-primary/45">
                         vs. semana
                       </span>
                     </p>
@@ -1664,7 +1664,7 @@ export const LandingPage: React.FC = () => {
                   <div className="relative mt-10 h-56">
                     <div className="absolute inset-0 flex flex-col justify-between">
                       {[0, 1, 2, 3, 4].map(line => (
-                        <div key={line} className="h-px w-full bg-emerald-950/10" />
+                        <div key={line} className="h-px w-full bg-text-primary/10" />
                       ))}
                     </div>
                     <svg
@@ -1692,7 +1692,7 @@ export const LandingPage: React.FC = () => {
                         strokeWidth="5"
                       />
                     </svg>
-                    <div className="absolute -bottom-8 flex w-full justify-between text-xs font-black uppercase tracking-widest text-emerald-950/45">
+                    <div className="absolute -bottom-8 flex w-full justify-between text-xs font-black uppercase tracking-widest text-text-primary/45">
                       {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (
                         <span key={day}>{day}</span>
                       ))}
@@ -1700,14 +1700,14 @@ export const LandingPage: React.FC = () => {
                   </div>
 
                   <div className="mt-14 grid grid-cols-2 gap-4">
-                    <div className="rounded-2xl bg-emerald-950/5 p-5">
-                      <p className="text-xs font-black uppercase tracking-widest text-emerald-950/50 md:text-sm">
+                    <div className="rounded-2xl bg-text-primary/5 p-5">
+                      <p className="text-xs font-black uppercase tracking-widest text-text-primary/50 md:text-sm">
                         Pico de movimento
                       </p>
                       <p className="mt-2 text-2xl font-black md:text-3xl">Sábado · 11h</p>
                     </div>
-                    <div className="rounded-2xl bg-emerald-950/5 p-5">
-                      <p className="text-xs font-black uppercase tracking-widest text-emerald-950/50 md:text-sm">
+                    <div className="rounded-2xl bg-text-primary/5 p-5">
+                      <p className="text-xs font-black uppercase tracking-widest text-text-primary/50 md:text-sm">
                         Espera média
                       </p>
                       <p className="mt-2 text-2xl font-black md:text-3xl">18 minutos</p>
@@ -1720,12 +1720,12 @@ export const LandingPage: React.FC = () => {
         </section>
 
         <section className="relative overflow-hidden border-y border-white/8 bg-[#080a09] px-6 py-24 md:px-10 md:py-32 xl:px-12">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-emerald-400/40 to-transparent" />
-          <div className="pointer-events-none absolute left-1/2 top-0 h-64 w-2/3 -translate-x-1/2 rounded-full bg-emerald-500/6 blur-[120px]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-accent/40 to-transparent" />
+          <div className="pointer-events-none absolute left-1/2 top-0 h-64 w-2/3 -translate-x-1/2 rounded-full bg-accent/6 blur-[120px]" />
 
           <div className="relative z-10 mx-auto max-w-375">
             <div data-reveal className="mb-14 max-w-3xl md:mb-20">
-              <span className="text-sm font-black uppercase tracking-[0.2em] text-emerald-400">
+              <span className="text-sm font-black uppercase tracking-[0.2em] text-accent">
                 Por que começar agora
               </span>
               <h2 className="mt-5 text-4xl font-black tracking-[-0.045em] text-white md:text-6xl xl:text-7xl">
@@ -1782,7 +1782,7 @@ export const LandingPage: React.FC = () => {
                   }`}
                 >
                   {fact.featured && (
-                    <span className="mb-4 inline-flex w-fit rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-300">
+                    <span className="mb-4 inline-flex w-fit rounded-full border border-accent/25 bg-accent/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-accent-light">
                       Mais pedido
                     </span>
                   )}
@@ -1799,7 +1799,7 @@ export const LandingPage: React.FC = () => {
                     >
                       {fact.prefix ?? ''}0{fact.suffix ?? ''}
                     </p>
-                    <span className="mb-2 text-base font-bold text-emerald-300/90 md:mb-3 md:text-lg">
+                    <span className="mb-2 text-base font-bold text-accent-light/90 md:mb-3 md:text-lg">
                       {fact.unit}
                     </span>
                   </div>
@@ -1815,7 +1815,7 @@ export const LandingPage: React.FC = () => {
 
             <div
               data-reveal
-              className="mt-12 overflow-hidden rounded-[1.75rem] border border-emerald-400/20 bg-linear-to-r from-emerald-400/[0.09] via-white/[0.03] to-transparent p-5 sm:p-6 md:p-8"
+              className="mt-12 overflow-hidden rounded-[1.75rem] border border-accent/20 bg-linear-to-r from-accent/[0.09] via-white/[0.03] to-transparent p-5 sm:p-6 md:p-8"
             >
               <div className="flex flex-col gap-6 sm:gap-8 lg:flex-row lg:items-center lg:justify-between">
                 <div className="max-w-2xl space-y-4">
@@ -1831,7 +1831,7 @@ export const LandingPage: React.FC = () => {
                         key={item}
                         className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs font-semibold text-neutral-300 sm:px-3.5 sm:py-1.5 sm:text-sm"
                       >
-                        <CheckCircle2 className="h-3 w-3 text-emerald-400 sm:h-3.5 sm:w-3.5" />
+                        <CheckCircle2 className="h-3 w-3 text-accent sm:h-3.5 sm:w-3.5" />
                         {item}
                       </span>
                     ))}
@@ -1843,7 +1843,7 @@ export const LandingPage: React.FC = () => {
                     type="button"
                     data-sticky-cta-anchor
                     onClick={() => navigate('/login')}
-                    className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-white px-6 py-3.5 text-sm font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-300 sm:px-7 sm:py-4 sm:text-base"
+                    className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-white px-6 py-3.5 text-sm font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-accent-light sm:px-7 sm:py-4 sm:text-base"
                   >
                     {trialCampaign.cta}
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -1862,10 +1862,10 @@ export const LandingPage: React.FC = () => {
         </section>
 
         <section id="precos" className="relative scroll-mt-16 px-6 py-28 md:py-40">
-          <div className="absolute left-1/2 top-0 h-80 w-3/4 -translate-x-1/2 rounded-full bg-emerald-500/6 blur-[130px]" />
+          <div className="absolute left-1/2 top-0 h-80 w-3/4 -translate-x-1/2 rounded-full bg-accent/6 blur-[130px]" />
           <div className="relative z-10 mx-auto max-w-6xl">
             <div data-reveal className="mx-auto mb-12 max-w-3xl text-center">
-              <span className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-400/90">
+              <span className="text-xs font-bold uppercase tracking-[0.28em] text-accent/90">
                 Preço simples
               </span>
               <h2 className="mt-5 text-5xl font-black tracking-[-0.055em] text-white md:text-7xl">
@@ -1879,7 +1879,7 @@ export const LandingPage: React.FC = () => {
 
             <p
               data-reveal
-              className="mx-auto mb-10 max-w-xl text-center text-[11px] font-medium uppercase tracking-[0.24em] text-emerald-400/85"
+              className="mx-auto mb-10 max-w-xl text-center text-[11px] font-medium uppercase tracking-[0.24em] text-accent/85"
             >
               {trialCampaign.eyebrow}
             </p>
@@ -1891,7 +1891,7 @@ export const LandingPage: React.FC = () => {
                 className="group relative flex flex-col overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#0c100e] p-8 transition duration-500 hover:border-white/18 md:p-9"
               >
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.04),_transparent_55%)]" />
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-linear-to-t from-[#050706] via-[#050706]/70 to-transparent" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-linear-to-t from-bg via-bg/70 to-transparent" />
 
                 <div className="relative z-10 flex items-start justify-between gap-4">
                   <div>
@@ -1955,22 +1955,22 @@ export const LandingPage: React.FC = () => {
               {/* Pro */}
               <article
                 data-stagger-item
-                className="group relative flex flex-col overflow-hidden rounded-[1.75rem] border border-emerald-400/40 bg-[#08140f] p-8 shadow-[0_0_90px_rgba(52,211,153,0.14)] transition duration-500 hover:border-emerald-400/60 hover:shadow-[0_0_110px_rgba(52,211,153,0.22)] md:p-9 lg:-translate-y-1"
+                className="group relative flex flex-col overflow-hidden rounded-[1.75rem] border border-accent/40 bg-surface p-8 shadow-[0_0_90px_rgba(52,211,153,0.14)] transition duration-500 hover:border-accent/60 hover:shadow-[0_0_110px_rgba(52,211,153,0.22)] md:p-9 lg:-translate-y-1"
               >
-                <div className="pointer-events-none absolute -inset-px rounded-[1.75rem] bg-linear-to-br from-emerald-400/25 via-transparent to-cyan-400/15 opacity-80" />
-                <div className="pointer-events-none absolute inset-[1px] rounded-[1.7rem] bg-[#08140f]" />
-                <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-emerald-400/18 blur-[90px] transition duration-700 group-hover:bg-emerald-400/28" />
+                <div className="pointer-events-none absolute -inset-px rounded-[1.75rem] bg-linear-to-br from-accent/25 via-transparent to-cyan-400/15 opacity-80" />
+                <div className="pointer-events-none absolute inset-[1px] rounded-[1.7rem] bg-surface" />
+                <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-accent/18 blur-[90px] transition duration-700 group-hover:bg-accent/28" />
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-[#04100a] via-[#04100a]/75 to-transparent" />
                 <div className="pointer-events-none absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent transition duration-700 ease-out group-hover:translate-x-full" />
 
                 <div className="relative z-10 flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-400/90">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-accent/90">
                       Visão de dono
                     </p>
                     <h3 className="mt-2 text-3xl font-black tracking-tight text-white">Pro</h3>
                   </div>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-black">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-black">
                     <Zap className="h-3 w-3" />
                     Recomendado
                   </span>
@@ -1978,13 +1978,13 @@ export const LandingPage: React.FC = () => {
 
                 <div className="relative z-10 mt-8">
                   <div className="flex items-end gap-2">
-                    <span className="mb-2 text-base font-bold text-emerald-400">R$</span>
+                    <span className="mb-2 text-base font-bold text-accent">R$</span>
                     <span className="text-6xl font-black tracking-[-0.06em] text-white md:text-7xl">
                       20
                     </span>
                     <span className="mb-3 text-sm text-neutral-400">/mês</span>
                   </div>
-                  <p className="mt-3 text-sm font-semibold text-emerald-300">
+                  <p className="mt-3 text-sm font-semibold text-accent-light">
                     Anual R$ 200 · economize R$ 40
                   </p>
                   <p className="mt-4 text-sm font-medium leading-relaxed text-neutral-300">
@@ -1993,9 +1993,9 @@ export const LandingPage: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="relative z-10 mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/8 px-4 py-3">
-                  <p className="text-sm font-bold text-emerald-100">{trialCampaign.planIncluded}</p>
-                  <p className="mt-1 text-xs font-medium text-emerald-200/70">
+                <div className="relative z-10 mt-6 rounded-2xl border border-accent/20 bg-accent/8 px-4 py-3">
+                  <p className="text-sm font-bold text-accent-light">{trialCampaign.planIncluded}</p>
+                  <p className="mt-1 text-xs font-medium text-accent-light/70">
                     {trialCampaign.afterTrialThenPro}
                   </p>
                 </div>
@@ -2006,7 +2006,7 @@ export const LandingPage: React.FC = () => {
                       key={feature}
                       className="flex items-center gap-3 text-sm font-medium text-neutral-100"
                     >
-                      <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-accent" />
                       {feature}
                     </li>
                   ))}
@@ -2015,7 +2015,7 @@ export const LandingPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => navigate('/login')}
-                  className="group/btn relative z-10 mt-9 inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-400 px-6 py-4 text-sm font-black text-black shadow-[0_16px_50px_rgba(52,211,153,0.28)] transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-300"
+                  className="group/btn relative z-10 mt-9 inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-4 text-sm font-black text-black shadow-[0_16px_50px_rgba(52,211,153,0.28)] transition duration-300 hover:-translate-y-0.5 hover:bg-accent-light"
                 >
                   {trialCampaign.cta}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
@@ -2044,9 +2044,9 @@ export const LandingPage: React.FC = () => {
         <section data-sticky-cta-end className="px-6 pb-32 pt-12 md:pb-44">
           <div
             data-reveal
-            className="relative mx-auto max-w-375 overflow-hidden rounded-[2.75rem] border border-emerald-400/15 bg-[#0d1510] px-7 py-20 text-center md:rounded-[4rem] md:px-16 md:py-28"
+            className="relative mx-auto max-w-375 overflow-hidden rounded-[2.75rem] border border-accent/15 bg-surface px-7 py-20 text-center md:rounded-[4rem] md:px-16 md:py-28"
           >
-            <div className="absolute left-1/2 top-0 h-80 w-2/3 -translate-x-1/2 rounded-full bg-emerald-400/13 blur-[100px]" />
+            <div className="absolute left-1/2 top-0 h-80 w-2/3 -translate-x-1/2 rounded-full bg-accent/13 blur-[100px]" />
             <div
               className="absolute inset-0 opacity-[0.045]"
               style={{
@@ -2057,7 +2057,7 @@ export const LandingPage: React.FC = () => {
               }}
             />
             <div className="relative z-10 mx-auto max-w-4xl space-y-6 text-center sm:text-left">
-              <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-300/80">
+              <p className="text-xs font-bold uppercase tracking-[0.28em] text-accent-light/80">
                 {trialCampaign.eyebrow}
               </p>
               <h2 className="text-4xl font-black leading-[1.08] tracking-[-0.05em] text-white sm:text-5xl md:text-7xl xl:text-8xl">
@@ -2069,7 +2069,7 @@ export const LandingPage: React.FC = () => {
               <div className="flex flex-col justify-center gap-3 pt-2 sm:flex-row sm:justify-start sm:gap-4">
                 <button
                   onClick={() => navigate('/login')}
-                  className="group inline-flex items-center justify-center gap-3 rounded-full bg-white px-7 py-3.5 text-sm font-black text-black transition duration-300 hover:-translate-y-1 hover:bg-emerald-300 sm:px-8 sm:py-4"
+                  className="group inline-flex items-center justify-center gap-3 rounded-full bg-white px-7 py-3.5 text-sm font-black text-black transition duration-300 hover:-translate-y-1 hover:bg-accent-light sm:px-8 sm:py-4"
                 >
                   {trialCampaign.cta}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -2096,7 +2096,7 @@ export const LandingPage: React.FC = () => {
         <button
           type="button"
           onClick={() => navigate('/login')}
-          className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-emerald-400 px-6 py-3.5 text-sm font-black text-black shadow-[0_16px_50px_rgba(16,185,129,0.45)] ring-1 ring-white/20 transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-300 md:px-7 md:py-4 md:text-base"
+          className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-accent px-6 py-3.5 text-sm font-black text-black shadow-[0_16px_50px_rgba(16,185,129,0.45)] ring-1 ring-white/20 transition duration-300 hover:-translate-y-0.5 hover:bg-accent-light md:px-7 md:py-4 md:text-base"
         >
           {trialCampaign.cta}
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

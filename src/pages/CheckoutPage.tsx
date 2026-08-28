@@ -13,7 +13,7 @@ import {
   PartyPopper,
   Landmark,
 } from 'lucide-react';
-import { plansApi, Plan } from '../infra/plansApi';
+import { plansApi, Plan, pickPlanForCheckout } from '../infra/plansApi';
 import { subscriptionsApi, SubscribePayload } from '../infra/subscriptionsApi';
 import { paymentsApi, Payment } from '../infra/paymentsApi';
 import { getErrorMessage } from '../utils/errorMessage';
@@ -57,13 +57,27 @@ const rejectionMessage = (statusDetail?: string) =>
 const inputClass =
   'w-full bg-bg border border-border rounded-xl py-3 px-4 text-text-primary text-sm outline-none transition-colors placeholder:text-text-muted focus:border-accent/60 hover:border-border-strong';
 
-export const CheckoutPage: React.FC = () => {
+export type SubscriptionCheckoutProps = {
+  planId?: string | null;
+  billing?: 'MONTHLY' | 'YEARLY';
+  setupTrial?: boolean;
+  variant?: 'page' | 'embedded';
+  onBack?: () => void;
+};
+
+export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
+  planId: planIdProp,
+  billing = 'YEARLY',
+  setupTrial = false,
+  variant = 'page',
+  onBack,
+}) => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const planId = searchParams.get('planId');
-  const isTrialSetup = searchParams.get('setup') === 'trial';
+  const planId = planIdProp ?? null;
+  const billingParam = billing;
+  const isTrialSetup = setupTrial;
   const { user } = useAuth();
-  const { refresh: refreshSubscription } = useSubscription();
+  const { data: subscriptionData, refresh: refreshSubscription } = useSubscription();
 
   const [plan, setPlan] = useState<Plan | null>(null);
   const [loadingPlan, setLoadingPlan] = useState(true);
@@ -98,16 +112,52 @@ export const CheckoutPage: React.FC = () => {
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    if (!planId) {
-      navigate('/planos', { replace: true });
-      return;
-    }
-    plansApi
-      .get(planId)
-      .then(setPlan)
-      .catch(() => setError('Plano não encontrado. Volte e escolha novamente.'))
-      .finally(() => setLoadingPlan(false));
-  }, [planId, navigate]);
+    let cancelled = false;
+
+    (async () => {
+      if (!cancelled) {
+        setLoadingPlan(true);
+        setError(null);
+      }
+      try {
+        if (planId) {
+          try {
+            const found = await plansApi.get(planId);
+            if (!cancelled) setPlan(found);
+            return;
+          } catch {
+            /* cai no fallback da lista / GET /me */
+          }
+        }
+        let list: Plan[] = [];
+        try {
+          list = await plansApi.list();
+        } catch {
+          list = [];
+        }
+        if (list.length === 0) {
+          list = (subscriptionData?.plans ?? []).filter(p => p.active !== false);
+        }
+        const chosen = pickPlanForCheckout(list, billingParam);
+        if (!chosen) {
+          if (!cancelled) {
+            setError('Nenhum plano disponível no momento. Tente de novo em instantes.');
+            setPlan(null);
+          }
+          return;
+        }
+        if (!cancelled) setPlan(chosen);
+      } catch {
+        if (!cancelled) setError('Plano não encontrado. Volte e escolha novamente.');
+      } finally {
+        if (!cancelled) setLoadingPlan(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [planId, billingParam, subscriptionData?.plans]);
 
   const stopPolling = useCallback(() => {
     if (pollRef.current) {
@@ -206,7 +256,7 @@ export const CheckoutPage: React.FC = () => {
   const buildBasePayload = (): SubscribePayload => {
     const doc = normalizeDocument(docNumber);
     return {
-      planId: planId!,
+      planId: plan!.id,
       paymentMethod: 'asaas',
       payerEmail: payerEmail.trim(),
       payerFirstName: firstName.trim() || undefined,
@@ -272,7 +322,7 @@ export const CheckoutPage: React.FC = () => {
           return;
         }
         const sub = await subscriptionsApi.setupTrialCard({
-          planId: planId!,
+          planId: plan!.id,
           payerEmail: payerEmail.trim(),
           payerFirstName: firstName.trim() || undefined,
           payerLastName: lastName.trim() || undefined,
@@ -326,9 +376,12 @@ export const CheckoutPage: React.FC = () => {
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate('/planos')}
+              onClick={() => {
+                if (onBack) onBack();
+                else navigate(user ? '/app/subscription' : '/planos');
+              }}
               className="p-2 rounded-lg text-text-secondary hover:text-accent transition-colors"
-              title="Voltar aos planos"
+              title="Voltar"
             >
               <ArrowLeft size={18} />
             </button>
@@ -708,17 +761,32 @@ export const CheckoutPage: React.FC = () => {
 
         {!loadingPlan && !plan && (
           <div className="text-center py-16">
-            <p className="text-text-muted mb-4">Plano não encontrado.</p>
+            <p className="text-text-muted mb-4">{error || 'Plano não encontrado.'}</p>
             <button
-              onClick={() => navigate('/planos')}
+              onClick={() => {
+                if (onBack) onBack();
+                else navigate(`/checkout?billing=${billingParam}`);
+              }}
               className="px-5 py-2.5 rounded-xl bg-accent text-accent-fg font-bold text-sm hover:bg-accent-hover transition-colors"
             >
-              Ver planos
+              Tentar novamente
             </button>
           </div>
         )}
       </main>
     </div>
+  );
+};
+
+export const CheckoutPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  return (
+    <SubscriptionCheckout
+      planId={searchParams.get('planId')}
+      billing={searchParams.get('billing') === 'MONTHLY' ? 'MONTHLY' : 'YEARLY'}
+      setupTrial={searchParams.get('setup') === 'trial'}
+      variant="page"
+    />
   );
 };
 

@@ -34,7 +34,7 @@ export function FloatingPathsBackground({
     <div className={cn('relative w-full', className)}>
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         <svg
-          className="h-full w-full text-emerald-300/80"
+          className="h-full w-full text-accent-light/80"
           viewBox="0 0 696 316"
           fill="none"
           preserveAspectRatio="xMidYMid slice"

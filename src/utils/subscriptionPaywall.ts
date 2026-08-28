@@ -6,6 +6,15 @@ export function staffHomePath(role?: string | null): string {
   return '/app/queue';
 }
 
+/** Assinatura paga de verdade (não é só trial calendário / TRIALING). */
+export function isPaidSubscription(data: MySubscription | null): boolean {
+  const sub = data?.subscription;
+  if (!sub) return false;
+  if (sub.status === 'ACTIVE' && sub.hasPaymentMethod) return true;
+  if (sub.status === 'ACTIVE' && sub.latestInvoice?.status === 'PAID') return true;
+  return false;
+}
+
 /** Trial ativo ou assinatura paga — o dono já pode usar o painel. */
 export function hasPanelAccess(data: MySubscription | null, role?: string | null): boolean {
   const r = (role ?? '').toUpperCase();

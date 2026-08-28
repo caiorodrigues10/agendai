@@ -55,8 +55,8 @@ const PredictionPhone = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="text-xs font-bold text-white tracking-wide">IA PREDITIVA</div>
           <div className="flex items-center gap-1.5">
-            <Activity className="w-3 h-3 text-emerald-400" />
-            <span className="text-[10px] text-emerald-400 font-bold">Ativo</span>
+            <Activity className="w-3 h-3 text-accent" />
+            <span className="text-[10px] text-accent font-bold">Ativo</span>
           </div>
         </div>
         {predictions.map((p, i) => (
@@ -64,7 +64,7 @@ const PredictionPhone = () => {
             key={p.client}
             onClick={() => setActive(i)}
             className={`p-3 rounded-xl border transition-all cursor-pointer ${
-              active === i ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-white/5 border-white/5'
+              active === i ? 'bg-accent/10 border-accent/30' : 'bg-white/5 border-white/5'
             }`}
           >
             <div className="flex items-center justify-between mb-2">
@@ -75,7 +75,7 @@ const PredictionPhone = () => {
                     ? 'bg-red-500/20 text-red-400'
                     : p.color === 'amber'
                       ? 'bg-amber-500/20 text-amber-400'
-                      : 'bg-emerald-500/20 text-emerald-400'
+                      : 'bg-accent/20 text-accent'
                 }`}
               >
                 {p.risk}
@@ -98,10 +98,10 @@ const PredictionPhone = () => {
             )}
           </div>
         ))}
-        <div className="mt-2 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+        <div className="mt-2 p-3 rounded-xl bg-accent/5 border border-accent/20">
           <div className="flex items-center gap-2 mb-1">
-            <TrendingDown className="w-3 h-3 text-emerald-400" />
-            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+            <TrendingDown className="w-3 h-3 text-accent" />
+            <span className="text-[10px] font-bold text-accent uppercase tracking-wider">
               Previsão da semana
             </span>
           </div>
@@ -116,7 +116,7 @@ const PredictionPhone = () => {
 
 const WaitTimePhone = () => {
   const bars = [
-    { client: 'Lucas', min: 25, pct: 100, color: 'bg-emerald-500' },
+    { client: 'Lucas', min: 25, pct: 100, color: 'bg-accent' },
     { client: 'Pedro', min: 15, pct: 60, color: 'bg-teal-500' },
     { client: 'Rafael', min: 10, pct: 40, color: 'bg-cyan-500' },
   ];
@@ -126,13 +126,13 @@ const WaitTimePhone = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between mb-2">
           <div className="text-xs font-bold text-white tracking-wide">TEMPO ESTIMADO</div>
-          <Gauge className="w-4 h-4 text-emerald-400" />
+          <Gauge className="w-4 h-4 text-accent" />
         </div>
         {bars.map(bar => (
           <div key={bar.client} className="space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-[10px] text-neutral-300 font-semibold">{bar.client}</span>
-              <span className="text-[10px] text-emerald-400 font-bold">{bar.min} min</span>
+              <span className="text-[10px] text-accent font-bold">{bar.min} min</span>
             </div>
             <div className="h-2 bg-white/5 rounded-full overflow-hidden">
               <div
@@ -404,10 +404,10 @@ export const AiPredictivePage: React.FC = () => {
   return (
     <div
       ref={pageRef}
-      className="min-h-screen bg-black text-neutral-100 selection:bg-emerald-500/30 font-sans overflow-x-hidden"
+      className="min-h-screen bg-black text-neutral-100 selection:bg-accent/30 font-sans overflow-x-hidden"
     >
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-900/20 rounded-full blur-[120px]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-accent/20 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-teal-900/10 rounded-full blur-[120px]" />
       </div>
 
@@ -417,10 +417,10 @@ export const AiPredictivePage: React.FC = () => {
       <section className="relative pt-40 pb-20 md:pt-52 md:pb-28 px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 relative z-10">
           <div className="flex-1 text-center lg:text-left">
-            <div className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em] mb-8 opacity-0">
+            <div className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-accent/20 bg-accent/5 text-accent text-[10px] font-black uppercase tracking-[0.3em] mb-8 opacity-0">
               <Sparkles className="w-3.5 h-3.5" />
               IA Preditiva
-              <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[8px] font-bold uppercase tracking-wider">
+              <span className="px-1.5 py-0.5 rounded bg-accent/20 text-accent-light text-[8px] font-bold uppercase tracking-wider">
                 Novo
               </span>
             </div>
@@ -429,7 +429,7 @@ export const AiPredictivePage: React.FC = () => {
                 Inteligência que trabalha
               </span>
               <br />
-              <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-accent to-teal-400 bg-clip-text text-transparent">
                 antes de você perceber o problema.
               </span>
             </h1>
@@ -440,7 +440,7 @@ export const AiPredictivePage: React.FC = () => {
             <div className="hero-cta flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 opacity-0">
               <button
                 onClick={() => navigate('/planos')}
-                className="bg-emerald-500 text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
+                className="bg-accent text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-accent transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
               >
                 Ver planos
                 <ArrowRight className="w-4 h-4" />
@@ -463,14 +463,14 @@ export const AiPredictivePage: React.FC = () => {
       <section className="feature-block py-24 md:py-36 px-6 relative z-10">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
           <div className="feature-text flex-1">
-            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
+            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/20 bg-accent/5 text-accent text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
               <Gauge className="w-3.5 h-3.5" />
               Previsão de Espera
             </div>
             <h2 className="feature-title text-4xl md:text-6xl font-black tracking-tight mb-6 leading-[1.05] opacity-0">
               <span className="text-white">Tempo de espera preciso.</span>
               <br />
-              <span className="text-emerald-400">Não chute.</span>
+              <span className="text-accent">Não chute.</span>
             </h2>
             <p className="section-subtitle text-neutral-400 text-lg leading-relaxed font-light mb-8 max-w-lg">
               Em vez de "mais ou menos 20 minutos", o cliente recebe um número real. A IA calcula o
@@ -485,8 +485,8 @@ export const AiPredictivePage: React.FC = () => {
                 { icon: Users, text: 'Cliente acompanha no celular sem perguntar' },
               ].map(item => (
                 <div key={item.text} className="bullet-item flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-                    <item.icon className="w-4 h-4 text-emerald-400" />
+                  <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                    <item.icon className="w-4 h-4 text-accent" />
                   </div>
                   <span className="text-sm text-neutral-300">{item.text}</span>
                 </div>
@@ -647,15 +647,15 @@ export const AiPredictivePage: React.FC = () => {
                   step: '01',
                   title: 'Você opera normalmente',
                   text: 'Fila, agendamentos e financeiro seguem funcionando como sempre.',
-                  accent: 'text-emerald-700',
-                  rule: 'bg-emerald-700',
+                  accent: 'text-accent-dark',
+                  rule: 'bg-accent-dark',
                 },
                 {
                   step: '02',
                   title: 'Os dados alimentam o modelo',
                   text: 'Cada atendimento concluído refina as previsões do seu salão.',
-                  accent: 'text-emerald-600',
-                  rule: 'bg-emerald-600',
+                  accent: 'text-accent-dark',
+                  rule: 'bg-accent-dark',
                 },
                 {
                   step: '03',
@@ -690,7 +690,7 @@ export const AiPredictivePage: React.FC = () => {
       <section className="relative z-10 border-y border-white/5 bg-neutral-950 px-6 py-24">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 max-w-xl">
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-400/80">
+            <p className="text-xs font-bold uppercase tracking-[0.28em] text-accent/80">
               Resultado esperado · Pro
             </p>
             <h2 className="mt-3 text-3xl font-black tracking-tight text-white md:text-4xl">
@@ -743,7 +743,7 @@ export const AiPredictivePage: React.FC = () => {
                       : '#22d3ee';
               const soft =
                 stat.tone === 'emerald'
-                  ? 'from-emerald-400/15 to-transparent'
+                  ? 'from-accent/15 to-transparent'
                   : stat.tone === 'amber'
                     ? 'from-amber-400/15 to-transparent'
                     : stat.tone === 'violet'
@@ -855,7 +855,7 @@ export const AiPredictivePage: React.FC = () => {
       <section className="cta-section py-24 px-6 relative z-10 opacity-0">
         <div className="max-w-5xl mx-auto text-center">
           <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-8">
-            Disponível no plano <span className="text-emerald-400">Pro</span>
+            Disponível no plano <span className="text-accent">Pro</span>
           </h2>
           <p className="text-lg text-neutral-400 mb-10 max-w-xl mx-auto font-light">
             Faça upgrade a qualquer momento direto do seu painel, sem burocracia.
@@ -863,7 +863,7 @@ export const AiPredictivePage: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={() => navigate('/planos')}
-              className="bg-emerald-500 text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
+              className="bg-accent text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-accent transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
             >
               Ver planos
               <ArrowRight className="w-4 h-4" />

@@ -666,7 +666,7 @@ export const PostsManager: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => void regeneratePreview(postMode, type, title, ctaText, barbershopId)}
-                  className="text-[11px] font-bold text-emerald-400 flex items-center gap-1 px-2 py-1 rounded-md hover:bg-white/5"
+                  className="text-[11px] font-bold text-accent flex items-center gap-1 px-2 py-1 rounded-md hover:bg-white/5"
                 >
                   <RefreshCw size={12} className={previewLoading ? 'animate-spin' : ''} /> Atualizar
                 </button>
@@ -674,19 +674,19 @@ export const PostsManager: React.FC = () => {
               </div>
             </div>
 
-            <div className="aspect-square w-full bg-[#0f0f0f] relative overflow-hidden">
+            <div className="aspect-square w-full bg-surface relative overflow-hidden">
               {!previewUrl && (
                 <>
-                  <div className="absolute inset-x-0 top-0 h-1 bg-emerald-500" />
+                  <div className="absolute inset-x-0 top-0 h-1 bg-accent" />
                   <div
-                    className="pointer-events-none absolute -top-16 -right-10 h-48 w-48 rounded-full bg-emerald-500/20 blur-3xl"
+                    className="pointer-events-none absolute -top-16 -right-10 h-48 w-48 rounded-full bg-accent/20 blur-3xl"
                     aria-hidden
                   />
                 </>
               )}
               {previewLoading ? (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Loader2 size={32} className="text-emerald-400 animate-spin" />
+                  <Loader2 size={32} className="text-accent animate-spin" />
                 </div>
               ) : previewUrl ? (
                 <img
@@ -700,13 +700,13 @@ export const PostsManager: React.FC = () => {
                   <p className="text-lg font-extrabold text-white leading-tight">
                     {title || 'Vem pra cá hoje!'}
                   </p>
-                  <div className="w-full rounded-2xl bg-[#212121] border border-[#303030] px-4 py-3 text-left">
-                    <p className="text-[10px] font-bold tracking-widest text-emerald-500">HOJE</p>
+                  <div className="w-full rounded-2xl bg-surface border border-border px-4 py-3 text-left">
+                    <p className="text-[10px] font-bold tracking-widest text-accent">HOJE</p>
                     <p className="text-sm text-neutral-200 mt-0.5">
                       {openingTime ? `Aberto às ${openingTime}` : 'Horário do salão'}
                     </p>
                   </div>
-                  <span className="inline-flex items-center justify-center px-8 py-2.5 rounded-full bg-emerald-500 text-[#052e1f] text-xs font-extrabold">
+                  <span className="inline-flex items-center justify-center px-8 py-2.5 rounded-full bg-accent text-text-on-accent text-xs font-extrabold">
                     {ctaText || 'Agende agora'}
                   </span>
                 </div>

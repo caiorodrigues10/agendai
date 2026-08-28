@@ -73,7 +73,7 @@ export const MarketingFooter: React.FC = () => {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="relative z-10 border-t border-white/10 bg-[#0b0b0d] px-6 pb-12 pt-16 text-neutral-400 md:px-10 md:pt-24 xl:px-12">
+    <footer className="relative z-10 border-t border-white/10 bg-bg px-6 pb-12 pt-16 text-neutral-400 md:px-10 md:pt-24 xl:px-12">
       <div className="mx-auto max-w-375">
         <div className="border-b border-white/10 pb-12 md:pb-14">
           <nav
@@ -100,7 +100,7 @@ export const MarketingFooter: React.FC = () => {
               <Link to="/" className="group inline-flex transition duration-300 hover:opacity-100">
                 <Logo
                   size="lg"
-                  className="text-white transition duration-300 group-hover:text-emerald-100"
+                  className="text-white transition duration-300 group-hover:text-accent-light"
                 />
               </Link>
 
@@ -114,7 +114,7 @@ export const MarketingFooter: React.FC = () => {
                 </p>
               </div>
 
-              <p className="mt-6 text-[10px] font-black uppercase tracking-[0.22em] text-emerald-400/90">
+              <p className="mt-6 text-[10px] font-black uppercase tracking-[0.22em] text-accent/90">
                 {trialCampaign.eyebrow}
               </p>
             </div>

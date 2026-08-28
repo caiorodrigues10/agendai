@@ -29,7 +29,7 @@ export const CookieConsent: React.FC = () => {
           transition={{ duration: 0.28, ease: 'easeOut' }}
           className="fixed inset-x-0 bottom-0 z-[60] p-4 sm:p-6 pointer-events-none"
         >
-          <div className="pointer-events-auto mx-auto flex max-w-3xl flex-col gap-4 rounded-2xl border border-border bg-surface/95 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:flex-row sm:items-center sm:gap-5 sm:p-5 dark:border-white/10 dark:bg-[#141414]/95">
+          <div className="pointer-events-auto mx-auto flex max-w-3xl flex-col gap-4 rounded-2xl border border-border bg-surface/95 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:flex-row sm:items-center sm:gap-5 sm:p-5 dark:border-white/10 dark:bg-surface/95">
             <div className="flex min-w-0 flex-1 items-start gap-3">
               <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent">
                 <Cookie size={18} aria-hidden />

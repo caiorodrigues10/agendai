@@ -97,7 +97,7 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
       <div className="mx-auto max-w-2xl text-center">
         <p
           className={`mb-4 text-xs font-bold uppercase tracking-[0.28em] ${
-            isDark ? 'text-emerald-400/90' : 'text-accent'
+            isDark ? 'text-accent/90' : 'text-accent'
           }`}
         >
           Conta de guardanapo
@@ -154,11 +154,11 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
           </ChartContainer>
           <p className={`mt-4 text-sm leading-relaxed ${muted}`}>
             Essencial se paga com{' '}
-            <span className={isDark ? 'font-bold text-emerald-400' : 'font-bold text-accent'}>
+            <span className={isDark ? 'font-bold text-accent' : 'font-bold text-accent'}>
               {essentialBreakEven} cliente
             </span>
             . Pro com{' '}
-            <span className={isDark ? 'font-bold text-emerald-400' : 'font-bold text-accent'}>
+            <span className={isDark ? 'font-bold text-accent' : 'font-bold text-accent'}>
               {proBreakEven} clientes
             </span>
             . Três faltas evitadas no mês cobrem o Pro e ainda sobra.
@@ -204,7 +204,7 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
               <p className={`text-[10px] font-bold uppercase tracking-wider ${faint}`}>
                 Economia Essencial
               </p>
-              <p className={`text-xl font-black ${isDark ? 'text-emerald-400' : 'text-accent'}`}>
+              <p className={`text-xl font-black ${isDark ? 'text-accent' : 'text-accent'}`}>
                 R$ {ESSENTIAL_MONTHLY * 12 - ESSENTIAL_YEARLY}
               </p>
             </div>
@@ -212,7 +212,7 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
               <p className={`text-[10px] font-bold uppercase tracking-wider ${faint}`}>
                 Economia Pro
               </p>
-              <p className={`text-xl font-black ${isDark ? 'text-emerald-400' : 'text-accent'}`}>
+              <p className={`text-xl font-black ${isDark ? 'text-accent' : 'text-accent'}`}>
                 R$ {PRO_MONTHLY * 12 - PRO_YEARLY}
               </p>
             </div>
@@ -293,7 +293,7 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
           </ChartContainer>
           <p
             className={`mt-4 text-center text-sm font-semibold ${
-              isDark ? 'text-emerald-400' : 'text-accent'
+              isDark ? 'text-accent' : 'text-accent'
             }`}
           >
             {trialCampaign.body} Se não precisar do dashboard, fique no Essencial depois.

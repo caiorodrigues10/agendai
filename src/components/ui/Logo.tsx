@@ -56,7 +56,7 @@ export const Logo: React.FC<LogoProps> = ({
   if (!showText) {
     return (
       <span
-        className={`${s.text} ${s.badge} inline-flex items-center justify-center font-black tracking-tight text-[#0a0f18] bg-[#00c2b3] shrink-0 select-none`}
+        className={`${s.text} ${s.badge} inline-flex items-center justify-center font-black tracking-tight text-text-on-accent bg-accent shrink-0 select-none`}
         style={font}
         aria-label="AGENDAI"
         role="img"
@@ -75,7 +75,7 @@ export const Logo: React.FC<LogoProps> = ({
     >
       <span className={`relative z-10 ${s.overlap} text-current`}>AGEND</span>
       <span
-        className={`${s.badge} relative z-0 inline-flex items-center justify-center text-[#0a0f18] bg-[#00c2b3] shrink-0`}
+        className={`${s.badge} relative z-0 inline-flex items-center justify-center text-text-on-accent bg-accent shrink-0`}
       >
         AI
       </span>

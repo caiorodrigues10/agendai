@@ -10,7 +10,7 @@ import { MarketingFooter } from '../components/marketing/MarketingFooter';
 import { PricingPersuasionCharts } from '../components/marketing/PricingPersuasionCharts';
 import { getErrorMessage } from '../utils/errorMessage';
 import { trialCampaign } from '../marketing/trialCampaign';
-import { hasPanelAccess, staffHomePath } from '../utils/subscriptionPaywall';
+import { isPaidSubscription, staffHomePath } from '../utils/subscriptionPaywall';
 
 const formatPrice = (price: number) =>
   price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -77,17 +77,16 @@ export const PlansPage: React.FC = () => {
   }, []);
 
   const currentPlanId = subscriptionData?.subscription?.planId;
-  const isSubscriptionActive =
-    subscriptionData?.subscription &&
-    ['TRIALING', 'ACTIVE'].includes(subscriptionData.subscription.status);
+  const alreadyPaid = isPaidSubscription(subscriptionData);
 
   const handleSubscribe = (plan: Plan) => {
-    const billing = isYearly ? 'YEARLY' : 'MONTHLY';
+    const billing = (plan.billingCycle ?? (isYearly ? 'YEARLY' : 'MONTHLY')) as
+      | 'MONTHLY'
+      | 'YEARLY';
     if (user) {
       navigate(`/checkout?planId=${plan.id}&billing=${billing}`);
       return;
     }
-    // Cadastro na tela original de login — sem modal embutido
     navigate(`/login?tab=register&planId=${encodeURIComponent(plan.id)}&billing=${billing}`);
   };
 
@@ -114,25 +113,33 @@ export const PlansPage: React.FC = () => {
   const staffLoggedIn = Boolean(
     user && ['OWNER', 'EMPLOYEE', 'MASTER_ADMIN', 'ADMIN'].includes(user.role.toUpperCase())
   );
-  const goToExistingPanel =
-    staffLoggedIn && (hasPanelAccess(subscriptionData, user?.role) || !subscriptionData);
+  /** Só manda ao painel quem já pagou. Trial com acesso ainda precisa chegar no PIX/cartão. */
+  const goToExistingPanel = staffLoggedIn && alreadyPaid;
 
   const startPro = () => {
     if (goToExistingPanel && user) {
       navigate(staffHomePath(user.role));
       return;
     }
-    if (proPlan) handleSubscribe(proPlan);
-    else navigate(user ? staffHomePath(user.role) : '/login');
+    if (proPlan) {
+      handleSubscribe(proPlan);
+      return;
+    }
+    if (user && ['OWNER', 'MASTER_ADMIN'].includes(user.role.toUpperCase())) {
+      navigate('/checkout');
+      return;
+    }
+    navigate(user ? staffHomePath(user.role) : '/login');
   };
 
-  const heroCta = goToExistingPanel ? trialCampaign.ctaGoToPanel : trialCampaign.cta;
-  const stickyCta = goToExistingPanel ? trialCampaign.ctaGoToPanel : trialCampaign.ctaShort;
+  const payCta = user ? 'Pagar com PIX ou cartão' : trialCampaign.cta;
+  const heroCta = goToExistingPanel ? trialCampaign.ctaGoToPanel : payCta;
+  const stickyCta = goToExistingPanel ? trialCampaign.ctaGoToPanel : payCta;
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-emerald-500/30">
+    <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
       <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -left-[15%] top-[-12%] h-[55%] w-[55%] rounded-full bg-emerald-900/25 blur-[140px]" />
+        <div className="absolute -left-[15%] top-[-12%] h-[55%] w-[55%] rounded-full bg-accent/25 blur-[140px]" />
         <div className="absolute -right-[10%] top-[25%] h-[40%] w-[40%] rounded-full bg-teal-900/15 blur-[120px]" />
       </div>
 
@@ -145,7 +152,7 @@ export const PlansPage: React.FC = () => {
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-400/90"
+              className="text-xs font-bold uppercase tracking-[0.28em] text-accent/90"
             >
               {trialCampaign.eyebrow}
             </motion.p>
@@ -157,7 +164,7 @@ export const PlansPage: React.FC = () => {
             >
               Menos que um corte.
               <br />
-              <span className="text-emerald-400">Mais que o caderno.</span>
+              <span className="text-accent">Mais que o caderno.</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 14 }}
@@ -201,7 +208,7 @@ export const PlansPage: React.FC = () => {
               <button
                 type="button"
                 onClick={startPro}
-                className="group inline-flex items-center justify-center gap-3 rounded-full bg-emerald-400 px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-300"
+                className="group inline-flex items-center justify-center gap-3 rounded-full bg-accent px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-accent-light"
               >
                 {heroCta}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -211,9 +218,9 @@ export const PlansPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => navigate('/app/subscription')}
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-emerald-400/50 bg-emerald-400/10 px-6 py-3 text-sm font-black text-emerald-300 hover:bg-emerald-400/20"
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-accent/50 bg-accent/10 px-6 py-3 text-sm font-black text-accent-light hover:bg-accent/20"
                   >
-                    Pagar ou gerenciar plano
+                    Gerenciar plano no painel
                     <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>
@@ -274,7 +281,7 @@ export const PlansPage: React.FC = () => {
                   type="button"
                   onClick={() => setIsYearly(true)}
                   className={`rounded-full px-5 py-2.5 text-sm font-bold transition ${
-                    isYearly ? 'bg-emerald-400 text-black' : 'text-neutral-400 hover:text-white'
+                    isYearly ? 'bg-accent text-black' : 'text-neutral-400 hover:text-white'
                   }`}
                 >
                   Anual
@@ -284,14 +291,14 @@ export const PlansPage: React.FC = () => {
                 </button>
               </div>
               {isYearly && (
-                <p className="text-sm font-semibold text-emerald-300">
+                <p className="text-sm font-semibold text-accent-light">
                   Melhor custo: anual já selecionado
                 </p>
               )}
             </div>
 
             {loading && (
-              <div className="flex justify-center py-20 text-emerald-400">
+              <div className="flex justify-center py-20 text-accent">
                 <Loader2 className="animate-spin" size={36} />
               </div>
             )}
@@ -306,7 +313,7 @@ export const PlansPage: React.FC = () => {
               <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2">
                 {displayPlans.map(plan => {
                   const currentIsPro = isPro(plan);
-                  const isCurrent = plan.id === currentPlanId && isSubscriptionActive;
+                  const isCurrent = alreadyPaid && plan.id === currentPlanId;
                   const price = getDisplayPrice(plan);
                   const period = isYearly ? 'ano' : 'mês';
                   const monthlyEquivalent = isYearly
@@ -326,12 +333,12 @@ export const PlansPage: React.FC = () => {
                       viewport={{ once: true }}
                       className={`relative flex flex-col rounded-[2rem] border p-8 transition ${
                         currentIsPro
-                          ? 'border-emerald-400/45 bg-[#0c1610] shadow-[0_0_80px_rgba(52,211,153,0.12)] md:scale-[1.02]'
-                          : 'border-white/10 bg-[#0d110e]'
+                          ? 'border-accent/45 bg-surface shadow-[0_0_80px_rgba(52,211,153,0.12)] md:scale-[1.02]'
+                          : 'border-white/10 bg-surface'
                       }`}
                     >
                       {currentIsPro && (
-                        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-emerald-400 px-4 py-1 text-[10px] font-black uppercase tracking-widest text-black">
+                        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-accent px-4 py-1 text-[10px] font-black uppercase tracking-widest text-black">
                           Recomendado
                         </div>
                       )}
@@ -339,7 +346,7 @@ export const PlansPage: React.FC = () => {
                       <div className="mb-2 flex items-center justify-between gap-3">
                         <h2 className="text-2xl font-black text-white">{plan.name}</h2>
                         {isCurrent && (
-                          <span className="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-300">
+                          <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-accent-light">
                             Atual
                           </span>
                         )}
@@ -349,7 +356,7 @@ export const PlansPage: React.FC = () => {
                           ? 'Dashboard, financeiro e insights — visão de dono.'
                           : 'Fila, agenda e equipe. Operação limpa, preço baixo.'}
                       </p>
-                      <p className="mt-2 text-xs font-semibold text-emerald-300/90">
+                      <p className="mt-2 text-xs font-semibold text-accent-light/90">
                         {trialCampaign.planIncluded}
                       </p>
 
@@ -357,7 +364,7 @@ export const PlansPage: React.FC = () => {
                         <div className="flex items-baseline gap-1.5">
                           <span
                             className={`text-5xl font-black tracking-tight ${
-                              currentIsPro ? 'text-emerald-400' : 'text-white'
+                              currentIsPro ? 'text-accent' : 'text-white'
                             }`}
                           >
                             {formatPrice(price)}
@@ -365,7 +372,7 @@ export const PlansPage: React.FC = () => {
                           <span className="text-sm text-neutral-500">/{period}</span>
                         </div>
                         {monthlyEquivalent != null && (
-                          <p className="mt-2 text-sm font-semibold text-emerald-300">
+                          <p className="mt-2 text-sm font-semibold text-accent-light">
                             ≈ {formatPrice(monthlyEquivalent)}/mês · economize{' '}
                             {formatPrice(yearlySavings)}
                           </p>
@@ -405,12 +412,12 @@ export const PlansPage: React.FC = () => {
                           >
                             <span
                               className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
-                                currentIsPro ? 'bg-emerald-400/15' : 'bg-white/6'
+                                currentIsPro ? 'bg-accent/15' : 'bg-white/6'
                               }`}
                             >
                               <Check
                                 size={12}
-                                className={currentIsPro ? 'text-emerald-400' : 'text-neutral-400'}
+                                className={currentIsPro ? 'text-accent' : 'text-neutral-400'}
                               />
                             </span>
                             {feature}
@@ -426,11 +433,11 @@ export const PlansPage: React.FC = () => {
                           isCurrent
                             ? 'cursor-not-allowed bg-white/5 text-neutral-500'
                             : currentIsPro
-                              ? 'bg-emerald-400 text-black hover:-translate-y-0.5 hover:bg-emerald-300'
+                              ? 'bg-accent text-black hover:-translate-y-0.5 hover:bg-accent-light'
                               : 'border border-white/15 bg-white/5 text-white hover:bg-white/10'
                         }`}
                       >
-                        {isCurrent ? 'Assinado' : trialCampaign.cta}
+                        {isCurrent ? 'Assinado' : user ? 'Pagar com PIX ou cartão' : trialCampaign.cta}
                         {!isCurrent && (
                           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                         )}
@@ -461,7 +468,7 @@ export const PlansPage: React.FC = () => {
         <section className="px-6 py-20 md:px-10 xl:px-12">
           <div className="mx-auto max-w-4xl">
             <div className="mb-10 max-w-2xl">
-              <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-400/90">
+              <p className="text-xs font-bold uppercase tracking-[0.28em] text-accent/90">
                 Comparativo
               </p>
               <h2 className="mt-3 text-4xl font-black tracking-tight text-white md:text-5xl">
@@ -469,11 +476,11 @@ export const PlansPage: React.FC = () => {
               </h2>
             </div>
 
-            <div className="overflow-hidden rounded-4xl border border-white/10 bg-[#0a0f0c]">
+            <div className="overflow-hidden rounded-4xl border border-white/10 bg-surface">
               <div className="grid grid-cols-[1.5fr_0.75fr_0.75fr] border-b border-white/8 px-5 py-4 text-[10px] font-black uppercase tracking-wider text-neutral-500 md:px-8 md:text-xs">
                 <span>Recurso</span>
                 <span className="text-center">Essencial</span>
-                <span className="text-center text-emerald-300">Pro</span>
+                <span className="text-center text-accent-light">Pro</span>
               </div>
               {matrix.map(row => (
                 <div
@@ -490,7 +497,7 @@ export const PlansPage: React.FC = () => {
                   </span>
                   <span className="flex justify-center">
                     {row.pro ? (
-                      <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                      <CheckCircle2 className="h-5 w-5 text-accent" />
                     ) : (
                       <X className="h-5 w-5 text-neutral-700" />
                     )}
@@ -515,7 +522,7 @@ export const PlansPage: React.FC = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.04 }}
-                  className="rounded-3xl border border-white/8 bg-[#0d110e] p-6"
+                  className="rounded-3xl border border-white/8 bg-surface p-6"
                 >
                   <p className="text-base font-black text-white">{item.q}</p>
                   <p className="mt-3 text-sm font-medium leading-relaxed text-neutral-400">
@@ -529,10 +536,10 @@ export const PlansPage: React.FC = () => {
 
         {/* Final CTA */}
         <section className="px-6 py-24 md:px-10 md:pb-36 xl:px-12">
-          <div className="relative mx-auto max-w-5xl overflow-hidden rounded-[2.5rem] border border-emerald-400/15 bg-[#0d1510] px-8 py-16 text-center md:rounded-[3.5rem] md:px-16 md:py-20">
-            <div className="absolute left-1/2 top-0 h-64 w-2/3 -translate-x-1/2 rounded-full bg-emerald-400/12 blur-[100px]" />
+          <div className="relative mx-auto max-w-5xl overflow-hidden rounded-[2.5rem] border border-accent/15 bg-surface px-8 py-16 text-center md:rounded-[3.5rem] md:px-16 md:py-20">
+            <div className="absolute left-1/2 top-0 h-64 w-2/3 -translate-x-1/2 rounded-full bg-accent/12 blur-[100px]" />
             <div className="relative z-10">
-              <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-300/80">
+              <p className="text-xs font-bold uppercase tracking-[0.28em] text-accent-light/80">
                 {trialCampaign.eyebrow}
               </p>
               <h2 className="mt-5 text-4xl font-black tracking-[-0.04em] text-white md:text-6xl">
@@ -544,7 +551,7 @@ export const PlansPage: React.FC = () => {
               <button
                 type="button"
                 onClick={startPro}
-                className="group mt-10 inline-flex items-center justify-center gap-3 rounded-full bg-white px-8 py-4 text-base font-black text-black transition hover:-translate-y-0.5 hover:bg-emerald-300"
+                className="group mt-10 inline-flex items-center justify-center gap-3 rounded-full bg-white px-8 py-4 text-base font-black text-black transition hover:-translate-y-0.5 hover:bg-accent-light"
               >
                 {heroCta}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -569,7 +576,7 @@ export const PlansPage: React.FC = () => {
           type="button"
           tabIndex={stickyVisible ? 0 : -1}
           onClick={startPro}
-          className="group inline-flex items-center gap-2.5 rounded-full bg-emerald-400 px-6 py-3.5 text-sm font-black text-black shadow-[0_16px_50px_rgba(16,185,129,0.45)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-emerald-300 md:px-7 md:text-base"
+          className="group inline-flex items-center gap-2.5 rounded-full bg-accent px-6 py-3.5 text-sm font-black text-black shadow-[0_16px_50px_rgba(16,185,129,0.45)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-accent-light md:px-7 md:text-base"
         >
           {stickyCta}
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

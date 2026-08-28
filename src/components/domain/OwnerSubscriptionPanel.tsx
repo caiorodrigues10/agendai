@@ -39,6 +39,7 @@ import { referralsApi, ReferralDashboard } from '../../infra/referralsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { trialCampaign } from '../../marketing/trialCampaign';
 import { ShareReferralButton } from './ShareReferralButton';
+import { SubscriptionCheckout } from '../../pages/CheckoutPage';
 
 const brl = (n: number) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -98,6 +99,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
   const { data, loading: ctxLoading, refresh } = useSubscription();
   const [detail, setDetail] = useState<MySubscription | null>(data);
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [plansLoading, setPlansLoading] = useState(true);
   const [referral, setReferral] = useState<ReferralDashboard | null>(null);
   const [loading, setLoading] = useState(false);
   const [cancelling, setCancelling] = useState(false);
@@ -113,6 +115,9 @@ export const OwnerSubscriptionPanel: React.FC = () => {
     'EMAIL'
   );
   const [billingYearly, setBillingYearly] = useState(true);
+  const [payOpen, setPayOpen] = useState(false);
+  const [paySetupTrial, setPaySetupTrial] = useState(false);
+  const [payPlanId, setPayPlanId] = useState<string | null>(null);
   const cancelTriggerRef = useRef<HTMLButtonElement>(null);
 
   const needsPixKey =
@@ -135,6 +140,8 @@ export const OwnerSubscriptionPanel: React.FC = () => {
         setReferral(ref);
       } catch {
         /* silent — painel principal continua */
+      } finally {
+        if (!cancelled) setPlansLoading(false);
       }
     })();
     return () => {
@@ -171,10 +178,17 @@ export const OwnerSubscriptionPanel: React.FC = () => {
   }, [plans, detail?.plans, billingYearly]);
 
   const goCheckout = (plan: Plan, payNow = true) => {
-    const billing = (plan.billingCycle ?? (billingYearly ? 'YEARLY' : 'MONTHLY')) as
-      'MONTHLY' | 'YEARLY';
-    const setup = !payNow && (needsCard || sub?.status !== 'ACTIVE') ? '&setup=trial' : '';
-    navigate(`/checkout?planId=${encodeURIComponent(plan.id)}&billing=${billing}${setup}`);
+    setPayPlanId(plan.id);
+    setPaySetupTrial(!payNow);
+    setPayOpen(true);
+  };
+
+  const payPreferred = (payNow = true) => {
+    const preferred =
+      displayPlans.find(p => p.hasDashboard !== false || /pro/i.test(p.name)) ?? displayPlans[0];
+    setPayPlanId(preferred?.id ?? sub?.planId ?? null);
+    setPaySetupTrial(!payNow);
+    setPayOpen(true);
   };
 
   const closeCancelModal = () => {
@@ -275,13 +289,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
         </div>
         <button
           type="button"
-          onClick={() => {
-            const preferred =
-              displayPlans.find(p => p.hasDashboard !== false || /pro/i.test(p.name)) ??
-              displayPlans[0];
-            if (preferred) goCheckout(preferred, true);
-            else navigate('/planos');
-          }}
+          onClick={() => payPreferred(true)}
           className="shrink-0 px-4 py-3 rounded-xl bg-accent text-accent-fg text-sm font-bold flex items-center justify-center gap-2 hover:bg-accent-hover shadow-lg shadow-accent/20"
         >
           <CreditCard size={16} /> Ir para o pagamento
@@ -566,13 +574,19 @@ export const OwnerSubscriptionPanel: React.FC = () => {
           })}
         </div>
 
-        {displayPlans.length === 0 && (
+        {plansLoading && displayPlans.length === 0 && (
+          <div className="flex justify-center py-8 text-accent">
+            <Loader2 className="animate-spin" size={24} />
+          </div>
+        )}
+
+        {displayPlans.length === 0 && !plansLoading && (
           <button
             type="button"
-            onClick={() => navigate('/planos')}
+            onClick={() => payPreferred(true)}
             className="w-full py-3 rounded-xl bg-accent text-accent-fg text-sm font-bold flex items-center justify-center gap-2 hover:bg-accent-hover"
           >
-            Ver planos <ArrowRight size={15} />
+            Pagar com PIX ou cartão <ArrowRight size={15} />
           </button>
         )}
       </div>
@@ -936,6 +950,22 @@ export const OwnerSubscriptionPanel: React.FC = () => {
               )}
             </div>
           </FocusLock>
+        </div>
+      )}
+
+      {payOpen && (
+        <div className="fixed inset-0 z-[80] overflow-y-auto bg-bg">
+          <SubscriptionCheckout
+            planId={payPlanId}
+            billing={billingYearly ? 'YEARLY' : 'MONTHLY'}
+            setupTrial={paySetupTrial}
+            variant="embedded"
+            onBack={() => {
+              setPayOpen(false);
+              setPayPlanId(null);
+              setPaySetupTrial(false);
+            }}
+          />
         </div>
       )}
     </div>

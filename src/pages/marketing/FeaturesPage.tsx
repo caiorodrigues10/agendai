@@ -65,9 +65,9 @@ const PainSolution = ({
         <X className="w-4 h-4 text-red-400 shrink-0" />
         <span className="text-neutral-500 text-sm line-through">{pain}</span>
       </div>
-      <ChevronRight className="w-4 h-4 text-emerald-500 shrink-0" />
+      <ChevronRight className="w-4 h-4 text-accent shrink-0" />
       <div className="flex items-center gap-2 flex-1">
-        <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+        <Check className="w-4 h-4 text-accent shrink-0" />
         <span className="text-white text-sm font-medium">{solution}</span>
       </div>
     </div>
@@ -97,8 +97,8 @@ const QueueSimulation = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="text-xs font-bold text-white tracking-wide">FILA AO VIVO</div>
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[10px] text-emerald-400 font-bold">3 na fila</span>
+            <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+            <span className="text-[10px] text-accent font-bold">3 na fila</span>
           </div>
         </div>
         {clients.map((client, i) => (
@@ -106,14 +106,14 @@ const QueueSimulation = () => {
             key={client.name}
             onClick={() => setActive(i)}
             className={`p-3 rounded-xl border transition-all cursor-pointer ${
-              active === i ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-white/5 border-white/5'
+              active === i ? 'bg-accent/10 border-accent/30' : 'bg-white/5 border-white/5'
             }`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                    active === i ? 'bg-emerald-500 text-white' : 'bg-white/10 text-neutral-400'
+                    active === i ? 'bg-accent text-white' : 'bg-white/10 text-neutral-400'
                   }`}
                 >
                   {client.position}
@@ -124,16 +124,16 @@ const QueueSimulation = () => {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-xs font-bold text-emerald-400">{client.time}</div>
+                <div className="text-xs font-bold text-accent">{client.time}</div>
                 <div className="text-[10px] text-neutral-600">estimado</div>
               </div>
             </div>
           </div>
         ))}
-        <div className="mt-4 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+        <div className="mt-4 p-3 rounded-xl bg-accent/5 border border-accent/20">
           <div className="flex items-center gap-2 mb-1">
-            <Bell className="w-3 h-3 text-emerald-400" />
-            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+            <Bell className="w-3 h-3 text-accent" />
+            <span className="text-[10px] font-bold text-accent uppercase tracking-wider">
               Próximo aviso
             </span>
           </div>
@@ -193,7 +193,7 @@ const DashboardMini = () => {
           </div>
           <div className="mt-1 text-3xl font-black text-white">R$ 6.160</div>
         </div>
-        <div className="flex items-center gap-1.5 text-emerald-400">
+        <div className="flex items-center gap-1.5 text-accent">
           <TrendingUp className="h-4 w-4" />
           <span className="text-xs font-bold">+18%</span>
         </div>
@@ -208,13 +208,13 @@ const DashboardMini = () => {
           >
             <div className="relative flex w-full flex-1 items-end">
               {hoveredBar === i && (
-                <div className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-bold text-emerald-400">
+                <div className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-bold text-accent">
                   {bar.val}
                 </div>
               )}
               <div
                 className={`chart-bar w-full origin-bottom rounded-t-md transition-colors ${
-                  hoveredBar === i ? 'bg-emerald-400' : 'bg-emerald-500/40'
+                  hoveredBar === i ? 'bg-accent' : 'bg-accent/40'
                 }`}
                 style={{ height: `${bar.h}%` }}
               />
@@ -447,10 +447,10 @@ export const FeaturesPage: React.FC = () => {
   return (
     <div
       ref={pageRef}
-      className="min-h-screen bg-black text-neutral-100 selection:bg-emerald-500/30 font-sans overflow-x-hidden"
+      className="min-h-screen bg-black text-neutral-100 selection:bg-accent/30 font-sans overflow-x-hidden"
     >
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-900/20 rounded-full blur-[120px]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-accent/20 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-teal-900/10 rounded-full blur-[120px]" />
       </div>
 
@@ -460,7 +460,7 @@ export const FeaturesPage: React.FC = () => {
       <section className="relative pt-40 pb-20 md:pt-52 md:pb-28 px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 relative z-10">
           <div className="flex-1 text-center lg:text-left">
-            <div className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em] mb-8 opacity-0">
+            <div className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-accent/20 bg-accent/5 text-accent text-[10px] font-black uppercase tracking-[0.3em] mb-8 opacity-0">
               <Sparkles className="w-3.5 h-3.5" />
               Para quem não para
             </div>
@@ -485,7 +485,7 @@ export const FeaturesPage: React.FC = () => {
             >
               <button
                 onClick={() => navigate('/login')}
-                className="bg-emerald-500 text-white px-8 py-4 rounded-2xl font-bold text-sm hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
+                className="bg-accent text-white px-8 py-4 rounded-2xl font-bold text-sm hover:bg-accent transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
               >
                 Começar grátis
                 <ArrowRight className="w-4 h-4" />
@@ -509,7 +509,7 @@ export const FeaturesPage: React.FC = () => {
       <section className="py-16 px-6 relative z-10 border-y border-white/5 bg-neutral-950/50">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-400">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-accent">
               O que muda
             </span>
           </div>
@@ -552,14 +552,14 @@ export const FeaturesPage: React.FC = () => {
       <section className="feature-section py-24 md:py-36 px-6 relative z-10">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
           <div className="feature-text flex-1">
-            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
+            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/20 bg-accent/5 text-accent text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
               <Clock className="w-3.5 h-3.5" />
               Fila Digital
             </div>
             <h2 className="section-title text-4xl md:text-6xl font-black tracking-tight mb-6 leading-[1.05]">
               <span className="text-white">O cliente entra na fila</span>
               <br />
-              <span className="text-emerald-400">de qualquer lugar.</span>
+              <span className="text-accent">de qualquer lugar.</span>
             </h2>
             <p className="section-subtitle text-neutral-400 text-lg leading-relaxed font-light mb-8 max-w-lg">
               De casa, do trabalho, do bar. Ele abre o link, escolhe o serviço e pronto — sabe
@@ -572,8 +572,8 @@ export const FeaturesPage: React.FC = () => {
                 { icon: Bell, text: '"Sua vez!" no WhatsApp — automático.' },
               ].map(item => (
                 <div key={item.text} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-                    <item.icon className="w-4 h-4 text-emerald-400" />
+                  <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                    <item.icon className="w-4 h-4 text-accent" />
                   </div>
                   <span className="text-sm text-neutral-300">{item.text}</span>
                 </div>
@@ -606,7 +606,7 @@ export const FeaturesPage: React.FC = () => {
                     <div
                       key={time}
                       className={`p-2 rounded-lg text-center text-[10px] font-bold ${
-                        i === 1 ? 'bg-emerald-500 text-white' : 'bg-white/5 text-neutral-400'
+                        i === 1 ? 'bg-accent text-white' : 'bg-white/5 text-neutral-400'
                       }`}
                     >
                       {time}
@@ -623,7 +623,7 @@ export const FeaturesPage: React.FC = () => {
                     </div>
                   ))}
                 </div>
-                <div className="p-3 rounded-xl bg-emerald-500 text-white text-center text-xs font-bold">
+                <div className="p-3 rounded-xl bg-accent text-white text-center text-xs font-bold">
                   Confirmar agendamento
                 </div>
               </div>
@@ -767,7 +767,7 @@ export const FeaturesPage: React.FC = () => {
                   </div>
                   <div className="bg-white/5 rounded-lg p-3">
                     <div className="text-[10px] text-neutral-500 mb-1">Faturamento</div>
-                    <div className="text-sm font-bold text-emerald-400">{person.revenue}</div>
+                    <div className="text-sm font-bold text-accent">{person.revenue}</div>
                   </div>
                 </div>
               </div>
@@ -782,7 +782,7 @@ export const FeaturesPage: React.FC = () => {
           <div className="feature-visual flex-1 flex justify-center phone-parallax">
             <PhoneMockup>
               <div className="space-y-3">
-                <div className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-2">
+                <div className="text-[10px] font-bold text-accent uppercase tracking-wider mb-2">
                   Mensagens automáticas
                 </div>
                 {[
@@ -810,14 +810,14 @@ export const FeaturesPage: React.FC = () => {
                     key={i}
                     className={`p-2.5 rounded-xl text-[10px] max-w-[85%] ${
                       msg.from === 'bot'
-                        ? 'bg-emerald-500/10 border border-emerald-500/20 text-neutral-300 mr-auto'
+                        ? 'bg-accent/10 border border-accent/20 text-neutral-300 mr-auto'
                         : 'bg-blue-500/20 border border-blue-500/20 text-white ml-auto'
                     }`}
                   >
                     <div>{msg.msg}</div>
                     <div className="flex items-center justify-between mt-1">
                       <span className="text-neutral-600">{msg.time}</span>
-                      {msg.status && <span className="text-emerald-500/60">{msg.status}</span>}
+                      {msg.status && <span className="text-accent/60">{msg.status}</span>}
                     </div>
                   </div>
                 ))}
@@ -909,18 +909,18 @@ export const FeaturesPage: React.FC = () => {
           <div className="feature-visual phone-parallax flex flex-1 justify-center">
             <PhoneMockup>
               <div className="space-y-3">
-                <div className="overflow-hidden rounded-xl border border-white/8 bg-gradient-to-br from-emerald-500/25 via-neutral-900 to-neutral-950">
+                <div className="overflow-hidden rounded-xl border border-white/8 bg-gradient-to-br from-accent/25 via-neutral-900 to-neutral-950">
                   <div className="flex items-center gap-3 p-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-400 text-sm font-black text-black">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent text-sm font-black text-black">
                       BC
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-xs font-bold text-white">Barbearia Central</div>
                       <div className="text-[10px] text-neutral-400">Unissex · Centro</div>
                     </div>
-                    <div className="flex items-center gap-1 rounded-full bg-emerald-400/15 px-2 py-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                      <span className="text-[9px] font-bold text-emerald-300">Aberto</span>
+                    <div className="flex items-center gap-1 rounded-full bg-accent/15 px-2 py-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+                      <span className="text-[9px] font-bold text-accent-light">Aberto</span>
                     </div>
                   </div>
                   <div className="border-t border-white/8 px-3 py-2 text-[10px] text-neutral-400">
@@ -929,7 +929,7 @@ export const FeaturesPage: React.FC = () => {
                 </div>
 
                 <div className="flex gap-2">
-                  <div className="flex-1 rounded-lg bg-emerald-400 px-2 py-2.5 text-center text-[10px] font-black text-black">
+                  <div className="flex-1 rounded-lg bg-accent px-2 py-2.5 text-center text-[10px] font-black text-black">
                     Entrar na fila
                   </div>
                   <div className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-2.5 text-center text-[10px] font-bold text-white">
@@ -953,7 +953,7 @@ export const FeaturesPage: React.FC = () => {
                       <div className="text-[11px] font-semibold text-white">{service.name}</div>
                       <div className="text-[9px] text-neutral-500">{service.time}</div>
                     </div>
-                    <div className="text-[11px] font-bold text-emerald-300">{service.price}</div>
+                    <div className="text-[11px] font-bold text-accent-light">{service.price}</div>
                   </div>
                 ))}
 
@@ -1025,7 +1025,7 @@ export const FeaturesPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="group inline-flex items-center justify-center gap-3 rounded-full bg-black px-8 py-4 text-base font-black text-white transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-400 hover:text-black"
+                className="group inline-flex items-center justify-center gap-3 rounded-full bg-black px-8 py-4 text-base font-black text-white transition duration-300 hover:-translate-y-0.5 hover:bg-accent hover:text-black"
               >
                 {trialCampaign.cta}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

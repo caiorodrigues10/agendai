@@ -35,9 +35,9 @@ export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-emerald-500/30">
+    <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
       <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -left-[15%] top-[-12%] h-[55%] w-[55%] rounded-full bg-emerald-900/25 blur-[140px]" />
+        <div className="absolute -left-[15%] top-[-12%] h-[55%] w-[55%] rounded-full bg-accent/25 blur-[140px]" />
         <div className="absolute -right-[12%] top-[18%] h-[45%] w-[45%] rounded-full bg-teal-900/15 blur-[130px]" />
         <div className="absolute bottom-[-18%] left-[25%] h-[40%] w-[50%] rounded-full bg-cyan-950/30 blur-[120px]" />
         <div
@@ -60,7 +60,7 @@ export const DashboardPage: React.FC = () => {
             <motion.p
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-400/90"
+              className="text-xs font-bold uppercase tracking-[0.28em] text-accent/90"
             >
               Dashboard · Plano Pro
             </motion.p>
@@ -72,7 +72,7 @@ export const DashboardPage: React.FC = () => {
             >
               O movimento do salão,
               <br />
-              <span className="text-emerald-400">não o feeling.</span>
+              <span className="text-accent">não o feeling.</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 16 }}
@@ -92,7 +92,7 @@ export const DashboardPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="group inline-flex items-center justify-center gap-3 rounded-full bg-emerald-400 px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-300"
+                className="group inline-flex items-center justify-center gap-3 rounded-full bg-accent px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-accent-light"
               >
                 {trialCampaign.cta}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -115,7 +115,7 @@ export const DashboardPage: React.FC = () => {
             transition={{ delay: 0.28, duration: 0.7 }}
             className="relative mx-auto mt-16 max-w-5xl"
           >
-            <div className="absolute -inset-6 rounded-[3rem] bg-emerald-400/8 blur-3xl" />
+            <div className="absolute -inset-6 rounded-[3rem] bg-accent/8 blur-3xl" />
             <div className="relative overflow-hidden rounded-4xl border border-white/10 bg-[#0a100c] shadow-[0_40px_120px_rgba(0,0,0,0.55)] md:rounded-[2.5rem]">
               <div className="flex items-center justify-between border-b border-white/8 px-5 py-4 md:px-8">
                 <div className="flex items-center gap-3">
@@ -128,7 +128,7 @@ export const DashboardPage: React.FC = () => {
                     Relatórios · Barbearia Central
                   </span>
                 </div>
-                <span className="rounded-full bg-emerald-400/15 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-300">
+                <span className="rounded-full bg-accent/15 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-accent-light">
                   Pro
                 </span>
               </div>
@@ -140,7 +140,7 @@ export const DashboardPage: React.FC = () => {
                       label: 'Faturamento',
                       value: 'R$ 6.160',
                       meta: '+18% vs sem. ant.',
-                      tone: 'text-emerald-300',
+                      tone: 'text-accent-light',
                     },
                     {
                       label: 'Atendimentos',
@@ -186,7 +186,7 @@ export const DashboardPage: React.FC = () => {
                       </p>
                       <p className="mt-1 text-lg font-black text-white">Faturamento diário</p>
                     </div>
-                    <p className="text-sm font-bold text-emerald-300">Pico no sábado</p>
+                    <p className="text-sm font-bold text-accent-light">Pico no sábado</p>
                   </div>
                   <div className="flex h-44 items-end gap-2.5 md:h-52">
                     {weekBars.map(bar => (
@@ -196,7 +196,7 @@ export const DashboardPage: React.FC = () => {
                       >
                         <div className="relative flex w-full flex-1 items-end">
                           <div
-                            className="w-full rounded-t-md bg-linear-to-t from-emerald-500/30 to-emerald-400"
+                            className="w-full rounded-t-md bg-linear-to-t from-accent/30 to-accent"
                             style={{ height: `${bar.h}%` }}
                           />
                         </div>
@@ -220,11 +220,11 @@ export const DashboardPage: React.FC = () => {
                         <div key={s.name}>
                           <div className="mb-1.5 flex justify-between text-sm">
                             <span className="font-semibold text-white">{s.name}</span>
-                            <span className="font-bold text-emerald-300">{s.value}</span>
+                            <span className="font-bold text-accent-light">{s.value}</span>
                           </div>
                           <div className="h-1.5 overflow-hidden rounded-full bg-white/6">
                             <div
-                              className="h-full rounded-full bg-emerald-400"
+                              className="h-full rounded-full bg-accent"
                               style={{ width: `${s.pct}%` }}
                             />
                           </div>
@@ -288,7 +288,7 @@ export const DashboardPage: React.FC = () => {
         <div className="mx-auto max-w-375">
           <div className="mb-14 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-400/90">
+              <p className="text-xs font-bold uppercase tracking-[0.28em] text-accent/90">
                 O que o Pro mostra
               </p>
               <h2 className="mt-4 text-5xl font-black tracking-[-0.04em] text-white md:text-6xl">
@@ -307,11 +307,11 @@ export const DashboardPage: React.FC = () => {
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="relative overflow-hidden rounded-[2.25rem] border border-emerald-400/20 bg-[#07110b] p-8 lg:col-span-7 lg:p-10"
+              className="relative overflow-hidden rounded-[2.25rem] border border-accent/20 bg-surface p-8 lg:col-span-7 lg:p-10"
             >
-              <div className="absolute -right-16 -top-16 h-72 w-72 rounded-full bg-emerald-400/12 blur-[90px]" />
+              <div className="absolute -right-16 -top-16 h-72 w-72 rounded-full bg-accent/12 blur-[90px]" />
               <div className="relative z-10">
-                <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-400/90">
+                <p className="text-xs font-bold uppercase tracking-[0.28em] text-accent/90">
                   Financeiro
                 </p>
                 <h3 className="mt-3 max-w-lg text-3xl font-black tracking-tight text-white md:text-4xl">
@@ -323,8 +323,8 @@ export const DashboardPage: React.FC = () => {
                 </p>
 
                 <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-2xl border border-emerald-400/25 bg-emerald-400/10 p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-300/80">
+                  <div className="rounded-2xl border border-accent/25 bg-accent/10 p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-accent-light/80">
                       Entradas
                     </p>
                     <p className="mt-2 text-2xl font-black text-white">R$ 8.4k</p>
@@ -385,7 +385,7 @@ export const DashboardPage: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.04 }}
-              className="relative overflow-hidden rounded-[2.25rem] border border-white/10 bg-[#0d110e] p-8 lg:col-span-5 lg:p-9"
+              className="relative overflow-hidden rounded-[2.25rem] border border-white/10 bg-surface p-8 lg:col-span-5 lg:p-9"
             >
               <p className="text-xs font-bold uppercase tracking-[0.28em] text-neutral-400">
                 Por profissional
@@ -403,11 +403,11 @@ export const DashboardPage: React.FC = () => {
                           {person.role} · {person.jobs} atend.
                         </p>
                       </div>
-                      <p className="text-sm font-black text-emerald-300">{person.revenue}</p>
+                      <p className="text-sm font-black text-accent-light">{person.revenue}</p>
                     </div>
                     <div className="h-1.5 overflow-hidden rounded-full bg-white/6">
                       <div
-                        className="h-full rounded-full bg-emerald-400/80"
+                        className="h-full rounded-full bg-accent/80"
                         style={{ width: `${person.share}%` }}
                       />
                     </div>
@@ -467,7 +467,7 @@ export const DashboardPage: React.FC = () => {
       <section className="relative z-10 border-y border-white/8 bg-white/1.5 px-6 py-24 md:px-10 md:py-28 xl:px-12">
         <div className="mx-auto max-w-375">
           <div className="mb-12 max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-400/90">
+            <p className="text-xs font-bold uppercase tracking-[0.28em] text-accent/90">
               Planos
             </p>
             <h2 className="mt-4 text-4xl font-black tracking-tight text-white md:text-5xl">
@@ -479,11 +479,11 @@ export const DashboardPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="overflow-hidden rounded-4xl border border-white/10 bg-[#0a0f0c]">
+          <div className="overflow-hidden rounded-4xl border border-white/10 bg-surface">
             <div className="grid grid-cols-[1.4fr_0.8fr_0.8fr] border-b border-white/8 px-5 py-4 text-[10px] font-black uppercase tracking-wider text-neutral-500 md:px-8 md:text-xs">
               <span>Recurso</span>
               <span className="text-center">Essencial</span>
-              <span className="text-center text-emerald-300">Pro</span>
+              <span className="text-center text-accent-light">Pro</span>
             </div>
             {comparison.map(row => (
               <div
@@ -501,7 +501,7 @@ export const DashboardPage: React.FC = () => {
                   )}
                 </span>
                 <span className="text-center">
-                  {row.pro ? <CheckCircle2 className="mx-auto h-5 w-5 text-emerald-400" /> : '—'}
+                  {row.pro ? <CheckCircle2 className="mx-auto h-5 w-5 text-accent" /> : '—'}
                 </span>
               </div>
             ))}
@@ -511,10 +511,10 @@ export const DashboardPage: React.FC = () => {
 
       {/* CTA */}
       <section className="relative z-10 px-6 py-24 md:px-10 md:pb-36 xl:px-12">
-        <div className="relative mx-auto max-w-375 overflow-hidden rounded-[2.5rem] border border-emerald-400/15 bg-[#0d1510] px-8 py-16 text-center md:rounded-[3.5rem] md:px-16 md:py-24">
-          <div className="absolute left-1/2 top-0 h-72 w-2/3 -translate-x-1/2 rounded-full bg-emerald-400/12 blur-[100px]" />
+        <div className="relative mx-auto max-w-375 overflow-hidden rounded-[2.5rem] border border-accent/15 bg-surface px-8 py-16 text-center md:rounded-[3.5rem] md:px-16 md:py-24">
+          <div className="absolute left-1/2 top-0 h-72 w-2/3 -translate-x-1/2 rounded-full bg-accent/12 blur-[100px]" />
           <div className="relative z-10 mx-auto max-w-3xl">
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-300/80">
+            <p className="text-xs font-bold uppercase tracking-[0.28em] text-accent-light/80">
               {trialCampaign.eyebrow}
             </p>
             <h2 className="mt-6 text-4xl font-black leading-[1.05] tracking-[-0.05em] text-white md:text-6xl xl:text-7xl">
@@ -527,7 +527,7 @@ export const DashboardPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="group inline-flex items-center justify-center gap-3 rounded-full bg-white px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-300"
+                className="group inline-flex items-center justify-center gap-3 rounded-full bg-white px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-accent-light"
               >
                 {trialCampaign.cta}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
