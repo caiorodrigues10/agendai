@@ -12,8 +12,12 @@ import {
   CalendarDays,
   List,
   CheckCheck,
-  Image as ImageIcon,
   Sparkles,
+  Download,
+  Heart,
+  MessageCircle,
+  Bookmark,
+  MoreHorizontal,
 } from 'lucide-react';
 import { barbershopApi, PostAiSuggestion } from '../../infra/barbershopApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
@@ -319,16 +323,32 @@ export const PostsManager: React.FC = () => {
   const todaySchedule = settings?.schedule?.[new Date().getDay()];
   const openingTime = todaySchedule?.isOpen ? todaySchedule.openTime : null;
 
+  const shopInitials = (settings?.shopName || 'AG')
+    .split(/\s+/)
+    .slice(0, 2)
+    .map(w => w[0])
+    .join('')
+    .toUpperCase();
+
   return (
     <div className="animate-fade-in space-y-6 pb-20">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-      <div className="grid lg:grid-cols-2 gap-6 items-start">
+      <div className="rounded-2xl border border-border bg-surface p-5 shadow-lg overflow-hidden relative">
+        <div className="absolute inset-x-0 top-0 h-1 bg-accent" />
+        <h2 className="text-lg font-bold text-text-primary tracking-tight">Posts do salão</h2>
+        <p className="text-sm text-text-secondary mt-1 max-w-xl">
+          Arte 1080×1080 no visual do AgendAI — preto e esmeralda, como o site. Publique no WhatsApp
+          ou baixe para o Instagram.
+        </p>
+      </div>
+
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_400px] gap-6 items-start">
         <div className="space-y-6">
           <div className="bg-surface rounded-2xl border border-border p-5 shadow-lg space-y-5">
-            <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
-              <Megaphone size={20} className="text-accent" /> Novo Post
-            </h2>
+            <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
+              <Megaphone size={20} className="text-accent" /> Novo post
+            </h3>
 
             <div>
               <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
@@ -389,7 +409,7 @@ export const PostsManager: React.FC = () => {
               type="button"
               onClick={() => void handleGenerate()}
               disabled={generating}
-              className="w-full px-4 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:from-violet-500 hover:to-fuchsia-500 shadow-lg shadow-violet-500/25 disabled:opacity-60"
+              className="w-full px-4 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all bg-accent text-accent-fg hover:bg-accent-hover shadow-lg shadow-accent/20 disabled:opacity-60"
             >
               {generating ? (
                 <Loader2 size={16} className="animate-spin" />
@@ -639,24 +659,41 @@ export const PostsManager: React.FC = () => {
           </div>
         </div>
 
-        <div className="lg:sticky lg:top-4">
-          <div className="bg-surface rounded-2xl border border-border p-5 shadow-lg">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-                <ImageIcon size={16} className="text-accent" /> Preview do post
-              </h3>
-              <button
-                type="button"
-                onClick={() => void regeneratePreview(postMode, type, title, ctaText, barbershopId)}
-                className="text-xs font-bold text-accent flex items-center gap-1 hover:underline"
-              >
-                <RefreshCw size={12} /> Atualizar
-              </button>
+        <div className="lg:sticky lg:top-4 space-y-3">
+          <div className="rounded-2xl border border-border bg-black shadow-xl overflow-hidden">
+            <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/10">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-[10px] font-bold text-emerald-400 shrink-0">
+                  {shopInitials}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-white truncate">
+                    {settings?.shopName || 'Seu salão'}
+                  </p>
+                  <p className="text-[10px] text-neutral-500">Feed · 1080×1080</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => void regeneratePreview(postMode, type, title, ctaText, barbershopId)}
+                  className="text-[11px] font-bold text-emerald-400 flex items-center gap-1 px-2 py-1 rounded-md hover:bg-white/5"
+                >
+                  <RefreshCw size={12} className={previewLoading ? 'animate-spin' : ''} /> Atualizar
+                </button>
+                <MoreHorizontal size={16} className="text-neutral-500" />
+              </div>
             </div>
-            <div className="aspect-square w-full bg-bg rounded-2xl border border-border overflow-hidden flex items-center justify-center">
+
+            <div className="aspect-square w-full bg-[#0f0f0f] relative overflow-hidden">
+              <div className="absolute inset-x-0 top-0 h-1 bg-emerald-500" />
+              <div
+                className="pointer-events-none absolute -top-16 -right-10 h-48 w-48 rounded-full bg-emerald-500/20 blur-3xl"
+                aria-hidden
+              />
               {previewLoading ? (
-                <div className="w-full h-full animate-pulse bg-surface-2 flex items-center justify-center">
-                  <Loader2 size={32} className="text-text-muted animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Loader2 size={32} className="text-emerald-400 animate-spin" />
                 </div>
               ) : previewUrl ? (
                 <img
@@ -665,18 +702,53 @@ export const PostsManager: React.FC = () => {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="text-center p-6">
-                  <ImageIcon size={32} className="text-text-muted mx-auto mb-2" />
-                  <p className="text-xs text-text-muted">Gere o preview para visualizar o post</p>
+                <div className="h-full flex flex-col items-center justify-center px-8 text-center gap-4">
+                  <span className="text-[10px] font-bold tracking-[0.35em] text-emerald-400 border border-emerald-500/40 rounded-full px-3 py-1">
+                    AGENDAI
+                  </span>
+                  <p className="text-lg font-extrabold text-white leading-tight">
+                    {title || 'Seu post aparece aqui'}
+                  </p>
+                  <div className="w-full rounded-2xl bg-[#212121] border border-[#303030] px-4 py-3 text-left">
+                    <p className="text-[10px] font-bold tracking-widest text-emerald-500">HOJE</p>
+                    <p className="text-sm text-neutral-200 mt-0.5">
+                      {openingTime ? `Aberto às ${openingTime}` : 'Horário do salão'}
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center justify-center px-8 py-2.5 rounded-full bg-emerald-500 text-[#052e1f] text-xs font-extrabold">
+                    {ctaText || 'Agende agora'}
+                  </span>
                 </div>
               )}
             </div>
-            <p className="text-[11px] text-text-muted mt-3">
+
+            <div className="px-3 py-2.5 flex items-center justify-between text-neutral-400">
+              <div className="flex items-center gap-3">
+                <Heart size={18} />
+                <MessageCircle size={18} />
+                <Send size={17} />
+              </div>
+              <Bookmark size={18} />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between gap-2 px-1">
+            <p className="text-[11px] text-text-muted">
               {settings?.shopName
-                ? `Prévia gerada para ${settings.shopName}.`
-                : 'Prévia gerada pelo sistema.'}{' '}
-              Imagem 1080x1080
+                ? `Prévia para ${settings.shopName}`
+                : 'Prévia gerada pelo sistema'}
             </p>
+            {previewUrl && (
+              <button
+                type="button"
+                onClick={() =>
+                  downloadPostImage(previewUrl, `agendai-post-${Date.now()}.png`)
+                }
+                className="text-[11px] font-bold text-accent flex items-center gap-1 hover:underline"
+              >
+                <Download size={12} /> Baixar PNG
+              </button>
+            )}
           </div>
         </div>
       </div>
