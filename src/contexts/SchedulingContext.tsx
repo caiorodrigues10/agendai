@@ -76,7 +76,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       if (!barbershopId) return;
       try {
         const slots = await schedulingApi.getAvailability(barbershopId, date, staffId);
-        setAvailability(slots);
+        setAvailability(Array.isArray(slots) ? slots : []);
       } catch {
         setAvailability([]);
       }
@@ -232,6 +232,12 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   const leaveQueue = async (id: string) => {
     await schedulingApi.deleteQueueItem(id);
     setQueue(prev => prev.filter(item => item.id !== id));
+    try {
+      const metrics = await schedulingApi.getQueueMetrics(barbershopId);
+      setCompletedCount(metrics.completedCount);
+    } catch (e) {
+      logger.error('Erro ao atualizar métricas após remoção', e);
+    }
   };
 
   const updateQueueStatus = async (
@@ -270,6 +276,12 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   const deleteHistoryItem = async (id: string) => {
     await schedulingApi.deleteQueueItem(id);
     setQueue(prev => prev.filter(item => item.id !== id));
+    try {
+      const metrics = await schedulingApi.getQueueMetrics(barbershopId);
+      setCompletedCount(metrics.completedCount);
+    } catch (e) {
+      logger.error('Erro ao atualizar métricas após remoção', e);
+    }
   };
 
   const bookAppointment = async (data: any) => {
