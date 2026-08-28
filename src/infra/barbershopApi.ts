@@ -123,16 +123,37 @@ export const barbershopApi = {
     const token = authStorage.getAccessToken() || '';
     return apiClient<void>(`/api/services/${id}`, 'DELETE', undefined, token);
   },
-  listStaff: (barbershopId?: string) => {
+  listStaff: async (barbershopId?: string) => {
     const token = authStorage.getAccessToken() || '';
-    if (!token) return Promise.resolve([]);
-    const qs = barbershopId ? `?barbershopId=${barbershopId}` : '';
-    return apiClient<{ success: boolean; data: StaffMember[] }>(
-      `/api/users${qs}`,
-      'GET',
-      undefined,
-      token
-    ).then(res => unwrap<StaffMember[]>(res));
+    if (token) {
+      const qs = barbershopId ? `?barbershopId=${barbershopId}` : '';
+      try {
+        const res = await apiClient<{ success: boolean; data: StaffMember[] }>(
+          `/api/users${qs}`,
+          'GET',
+          undefined,
+          token
+        );
+        const data = unwrap<StaffMember[]>(res);
+        return Array.isArray(data) ? data : [];
+      } catch {
+        // OWNER-only /users: visitante ou employee cai no endpoint público.
+      }
+    }
+    if (!barbershopId) return [];
+    const res = await apiClient<{ success: boolean; data: { id: string; name: string }[] }>(
+      `/api/barbershops/${barbershopId}/staff`,
+      'GET'
+    );
+    const data = unwrap<{ id: string; name: string }[]>(res);
+    if (!Array.isArray(data)) return [];
+    return data.map(member => ({
+      id: member.id,
+      name: member.name,
+      email: '',
+      role: 'EMPLOYEE' as const,
+      barbershopId,
+    }));
   },
   addStaff: (payload: StaffPayload) => {
     const token = authStorage.getAccessToken() || '';

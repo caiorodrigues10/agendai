@@ -60,7 +60,10 @@ export function mapStaffFromApi(raw: Record<string, unknown>): StaffMember {
 }
 
 export function formatDateISO(date: Date): string {
-  return date.toISOString().split('T')[0];
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 export function addDays(date: Date, days: number): Date {
@@ -106,13 +109,13 @@ export function isSlotAvailable(
   occupancy: AvailabilitySlot[],
   staffCount: number
 ): boolean {
-  if (!staffId || staffId === 'any') {
-    if (staffCount <= 0) return false;
-  }
+  const occupied = Array.isArray(occupancy) ? occupancy : [];
+  // Visitante não carrega /users; sem fallback o front zera todos os horários.
+  const chairs = Math.max(staffCount, 1);
 
   const slotStart = timeToMinutes(time);
 
-  const conflicts = occupancy.filter(slot => {
+  const conflicts = occupied.filter(slot => {
     const occupiedStart = timeToMinutes(slot.time);
     const occupiedEnd = occupiedStart + slot.durationMinutes;
     const checkEnd = slotStart + 30;
@@ -129,13 +132,13 @@ export function isSlotAvailable(
     return conflicts.length === 0;
   }
 
-  const busyAtTime = occupancy.filter(slot => {
+  const busyAtTime = occupied.filter(slot => {
     const occupiedStart = timeToMinutes(slot.time);
     const occupiedEnd = occupiedStart + slot.durationMinutes;
     return slotStart < occupiedEnd && occupiedStart < slotStart + 30;
   }).length;
 
-  return busyAtTime < staffCount;
+  return busyAtTime < chairs;
 }
 
 export function getServiceDuration(serviceId: string, services: Service[]): number {

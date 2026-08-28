@@ -8,21 +8,19 @@ import {
   generateTimeSlots,
   getDaySchedule,
   isSlotAvailable,
-  formatDateISO,
+  addDays,
 } from '../../utils/schedulingUtils';
 import { maskPhone } from '../../utils/documentUtils';
 import {
   Calendar,
-  Clock,
   User,
   CheckCircle,
   Smartphone,
-  ChevronRight,
-  ChevronLeft,
-  Mail,
   AlertCircle,
+  Clock,
 } from 'lucide-react';
 import { DynamicIcon } from '../ui/DynamicIcon';
+import { ThemedCalendar, toLocalISO } from '../ui/ThemedCalendar';
 
 interface AppointmentSchedulerProps {
   services: Service[];
@@ -31,6 +29,15 @@ interface AppointmentSchedulerProps {
   occupancy?: AvailabilitySlot[];
   onBook: (data: any) => void;
   onDateChange?: (date: string, staffId?: string) => void;
+}
+
+function firstOpenDate(schedule: ShopSettings['schedule']): string {
+  const start = new Date();
+  for (let i = 0; i < 14; i++) {
+    const day = addDays(start, i);
+    if (getDaySchedule(day, schedule).isOpen) return toLocalISO(day);
+  }
+  return toLocalISO(start);
 }
 
 export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
@@ -42,38 +49,32 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
   onDateChange,
 }) => {
   const [bookingComplete, setBookingComplete] = useState(false);
-  const dateInputRef = React.useRef<HTMLInputElement>(null);
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
-    trigger,
     formState: { errors },
   } = useForm<AppointmentFormData>({
     resolver: zodResolver(AppointmentSchema),
     defaultValues: {
       staffId: 'any',
       serviceId: '',
-      date: '',
+      date: firstOpenDate(settings.schedule),
       time: '',
       customerName: '',
       whatsapp: '',
     },
   });
 
-  const { ref: dateRef, ...dateRest } = register('date');
-
   const selectedServiceId = watch('serviceId');
   const selectedStaffId = watch('staffId');
   const date = watch('date');
   const time = watch('time');
-  const name = watch('customerName');
-  const phone = watch('whatsapp');
 
-  const today = formatDateISO(new Date());
-  const maxDate = formatDateISO(new Date(Date.now() + 30 * 86400000));
+  const today = toLocalISO(new Date());
+  const maxDate = toLocalISO(addDays(new Date(), 30));
 
   React.useEffect(() => {
     if (date) onDateChange?.(date, selectedStaffId !== 'any' ? selectedStaffId : undefined);
@@ -97,12 +98,18 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
     return slots.filter(slot => isSlotAvailable(slot, selectedStaffId, occupancy, staff.length));
   }, [date, isDateClosed, settings.schedule, selectedStaffId, occupancy, staff.length]);
 
+  const dateLabel = date
+    ? new Date(date + 'T12:00:00').toLocaleDateString('pt-BR', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+      })
+    : '';
+
   const onSubmit = (data: AppointmentFormData) => {
     onBook(data);
     setBookingComplete(true);
   };
-
-  const selectedStaff = staff.find(s => s.id === selectedStaffId);
 
   const getEventDetails = () => {
     if (!selectedService || !date || !time) return null;
@@ -254,37 +261,22 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
                 <label className="text-xs text-text-secondary font-bold uppercase tracking-wider">
                   Data
                 </label>
-                <div
-                  className="relative cursor-pointer group"
-                  onClick={() => {
-                    try {
-                      dateInputRef.current?.showPicker();
-                    } catch (e) {
-                      console.warn('showPicker not supported', e);
-                    }
-                  }}
-                >
-                  <input
-                    type="date"
+                {dateLabel && (
+                  <p className="text-sm text-text-primary font-medium capitalize">{dateLabel}</p>
+                )}
+                <div className="rounded-xl border border-border bg-bg px-2 py-2">
+                  <ThemedCalendar
+                    value={date}
                     min={today}
                     max={maxDate}
-                    className={`w-full bg-bg border rounded-xl px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all cursor-pointer ${errors.date ? 'border-danger' : 'border-border'}`}
-                    {...dateRest}
-                    ref={e => {
-                      dateRef(e);
-                      dateInputRef.current = e;
+                    isDayDisabled={day => !getDaySchedule(day, settings.schedule).isOpen}
+                    onChange={iso => {
+                      setValue('date', iso, { shouldValidate: true });
+                      setValue('time', '', { shouldValidate: false });
                     }}
-                    onClick={e => {
-                      try {
-                        (e.target as HTMLInputElement).showPicker();
-                      } catch (e) {}
-                    }}
-                  />
-                  <Calendar
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-text-muted group-hover:text-accent transition-colors pointer-events-none"
-                    size={18}
                   />
                 </div>
+                <input type="hidden" {...register('date')} />
                 {errors.date && (
                   <p className="text-danger text-xs mt-1 flex items-center gap-1">
                     <AlertCircle size={12} /> {errors.date.message}
@@ -293,8 +285,8 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs text-text-secondary font-bold uppercase tracking-wider">
-                  Horários Disponíveis
+                <label className="text-xs text-text-secondary font-bold uppercase tracking-wider flex items-center gap-1.5">
+                  <Clock size={12} className="text-accent" /> Horários disponíveis
                 </label>
                 <div className="grid grid-cols-4 gap-2">
                   {timeSlots.length === 0 ? (
@@ -307,6 +299,8 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
                         <span className="flex items-center justify-center gap-2">
                           <AlertCircle size={14} /> Fechado neste dia. Escolha outra data.
                         </span>
+                      ) : date ? (
+                        'Nenhum horário livre neste dia.'
                       ) : (
                         'Selecione uma data para ver os horários'
                       )}
