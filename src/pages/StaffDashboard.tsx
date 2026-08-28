@@ -2,6 +2,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '../components/ui/Header';
 import { QueueItemCard } from '../components/domain/QueueItemCard';
+import { QueueStatusCard } from '../components/domain/QueueStatusCard';
 import { AddCustomerForm } from '../components/domain/AddCustomerForm';
 import { ReturnToQueueModal } from '../components/domain/ReturnToQueueModal';
 import { ServiceManager } from '../components/domain/ServiceManager';
@@ -29,7 +30,6 @@ import {
   Store,
   List,
   CalendarDays,
-  Coffee,
   Loader2,
   CreditCard,
   Gift,
@@ -528,71 +528,21 @@ export const StaffDashboard: React.FC = () => {
 
         {activeTab === 'queue' && (
           <>
-            <div className="mb-6 bg-surface rounded-xl p-5 border border-border shadow-2xl relative overflow-hidden group">
-              <div className="relative z-10">
-                <div className="flex justify-between items-start mb-4">
-                  <h2 className="text-accent font-bold text-sm tracking-wider uppercase flex items-center gap-2 drop-shadow-md">
-                    {settings?.shopName}
-                  </h2>
-                  {aiInsight && (
-                    <span
-                      className={`text-xs px-2.5 py-1 rounded-full font-bold uppercase border tracking-wide shadow-sm
-                       ${
-                         !isOpen
-                           ? 'bg-surface-2 text-text-secondary border-border-strong'
-                           : aiInsight.busyLevel === 'high'
-                             ? 'bg-danger/10 text-danger border-danger/20'
-                             : aiInsight.busyLevel === 'medium'
-                               ? 'bg-warning/10 text-warning border-warning/20'
-                               : 'bg-success/10 text-success border-success/20'
-                       }
-                     `}
-                    >
-                      {!isOpen
-                        ? 'Fechado'
-                        : aiInsight.busyLevel === 'high'
-                          ? 'Movimento Alto'
-                          : aiInsight.busyLevel === 'medium'
-                            ? 'Movimento Médio'
-                            : 'Movimento Tranquilo'}
-                    </span>
-                  )}
-                </div>
+            <QueueStatusCard
+              shopName={settings?.shopName}
+              isOpen={isOpen}
+              insight={aiInsight}
+              peopleWaiting={peopleWaiting}
+              completedCount={completedCount}
+              inChairName={currentInChair?.customerName ?? null}
+              showStaffStats
+            />
 
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 text-xs text-text-secondary">
-                    <Coffee size={12} className="text-accent" />
-                    <span>{isOpen ? 'Aberto hoje' : 'Fechado hoje'}</span>
-                  </div>
-                  <div className="h-1 w-1 bg-border-strong rounded-full"></div>
-                  <div className="text-xs text-text-muted">{aiInsight?.estimatedWait || '--'}</div>
-                </div>
-
-                {aiInsight && (
-                  <p className="mt-4 text-sm text-text-secondary">{aiInsight.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex gap-3 items-center flex-wrap">
-                <div className="bg-surface border border-border rounded-xl px-3 py-2 text-xs text-text-secondary">
-                  <span className="text-text-primary font-bold">{peopleWaiting}</span> na espera
-                </div>
-                <div className="bg-surface border border-border rounded-xl px-3 py-2 text-xs text-text-secondary">
-                  <span className="text-text-primary font-bold">{completedCount}</span> concluídos
-                </div>
-                {currentInChair && (
-                  <div className="bg-success/10 border border-success/30 rounded-xl px-3 py-2 text-xs text-success">
-                    {currentInChair.customerName} na cadeira
-                  </div>
-                )}
-              </div>
-
+            <div className="flex items-center justify-end mb-4">
               {!isUserInQueue && (
                 <button
                   onClick={() => setShowJoinForm(true)}
-                  className="px-3 py-2 rounded-xl bg-accent text-accent-fg text-xs font-bold shadow-lg shadow-accent/20"
+                  className="w-full sm:w-auto px-4 py-3 rounded-xl bg-accent text-accent-fg text-sm font-bold shadow-lg shadow-accent/20"
                 >
                   Adicionar cliente
                 </button>

@@ -4,13 +4,14 @@ import { QueueItemCard } from '../components/domain/QueueItemCard';
 import { AddCustomerForm } from '../components/domain/AddCustomerForm';
 import { ShopProfile } from '../components/domain/ShopProfile';
 import { AppointmentScheduler } from '../components/domain/AppointmentScheduler';
+import { QueueStatusCard } from '../components/domain/QueueStatusCard';
 import { Toast } from '../components/ui/Toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useBarbershop } from '../contexts/BarbershopContext';
 import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
 import { useScheduling } from '../contexts/SchedulingContext';
 import { DynamicIcon } from '../components/ui/DynamicIcon';
-import { List, CalendarDays, Store, Coffee, Loader2, Clock } from 'lucide-react';
+import { List, CalendarDays, Store, Coffee, Loader2 } from 'lucide-react';
 
 export const PublicHome: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -194,57 +195,11 @@ export const PublicHome: React.FC = () => {
 
         {activeTab === 'queue' && (
           <>
-            {/* BIG HEADER CARD */}
-            <div className="mb-6 bg-surface rounded-xl p-6 border border-border shadow-2xl relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-accent/20 transition-all duration-700"></div>
-
-              <div className="relative z-10">
-                <div className="flex justify-between items-start mb-6">
-                  <div>
-                    <h2 className="text-accent font-bold text-sm tracking-wider uppercase mb-1 flex items-center gap-2">
-                      {settings?.shopName}
-                    </h2>
-                    <div className="flex items-center gap-2 text-4xl font-bold text-text-primary tracking-tighter">
-                      <Clock size={32} className="text-text-muted" />
-                      <span>{aiInsight?.estimatedWait || '0 min'}</span>
-                    </div>
-                    <span className="text-xs text-text-muted uppercase tracking-widest font-semibold ml-1">
-                      Tempo Estimado
-                    </span>
-                  </div>
-
-                  {aiInsight && (
-                    <span
-                      className={`text-xs px-3 py-1 rounded-full font-bold uppercase border tracking-wide shadow-lg
-                       ${
-                         !isOpen
-                           ? 'bg-surface-2 text-text-secondary border-border-strong'
-                           : aiInsight.busyLevel === 'high'
-                             ? 'bg-danger/15 text-danger border-danger/30 shadow-danger/10'
-                             : aiInsight.busyLevel === 'medium'
-                               ? 'bg-warning/15 text-warning border-warning/30 shadow-warning/10'
-                               : 'bg-success/15 text-success border-success/30 shadow-success/10'
-                       }
-                     `}
-                    >
-                      {!isOpen
-                        ? 'Fechado'
-                        : aiInsight.busyLevel === 'high'
-                          ? 'Movimento Alto'
-                          : aiInsight.busyLevel === 'medium'
-                            ? 'Movimento Médio'
-                            : 'Movimento Tranquilo'}
-                    </span>
-                  )}
-                </div>
-
-                <div className="bg-bg/50 rounded-lg p-4 border border-border backdrop-blur-sm">
-                  <p className="text-sm text-text-secondary leading-relaxed font-medium">
-                    {aiInsight?.message || 'O estabelecimento está pronto para te receber.'}
-                  </p>
-                </div>
-              </div>
-            </div>
+            <QueueStatusCard
+              shopName={settings?.shopName}
+              isOpen={isOpen}
+              insight={aiInsight}
+            />
 
             {/* STATS GRID */}
             <div className="grid grid-cols-2 gap-4 mb-8">
