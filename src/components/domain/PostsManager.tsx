@@ -25,6 +25,7 @@ import { useBarbershop } from '../../contexts/BarbershopContext';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { FeedPost, PostMode } from '../../types';
 import { Toast } from '../ui/Toast';
+import { Logo } from '../ui/Logo';
 
 type PostType = 'haircut' | 'beard' | 'announcement';
 type PostTone = 'promocional' | 'informativo' | 'divertido' | null;
@@ -81,8 +82,8 @@ export const PostsManager: React.FC = () => {
   const [postMode, setPostMode] = useState<PostMode>('queue');
   const [tone, setTone] = useState<PostTone>(null);
   const [extra, setExtra] = useState('');
-  const [title, setTitle] = useState('');
-  const [ctaText, setCtaText] = useState('');
+  const [title, setTitle] = useState('Vem pra cá hoje!');
+  const [ctaText, setCtaText] = useState('Agende agora');
   const [publishMode, setPublishMode] = useState<'now' | 'schedule'>('now');
   const [scheduledFor, setScheduledFor] = useState('');
   const [autoPostEnabled, setAutoPostEnabled] = useState(false);
@@ -182,7 +183,7 @@ export const PostsManager: React.FC = () => {
       if (!id) return;
       setPreviewLoading(true);
       try {
-        const res = await barbershopApi.getPostPreview(id, mode, t);
+        const res = await barbershopApi.getPostPreview(id, mode, t, ti, ct);
         setPreviewUrl(res?.imageUrl || null);
       } catch (err) {
         setPreviewUrl(null);
@@ -248,8 +249,8 @@ export const PostsManager: React.FC = () => {
           ? 'Post publicado! Baixando imagem e enviando para os clientes por WhatsApp...'
           : 'Post agendado!'
       );
-      setTitle('');
-      setCtaText('');
+      setTitle('Vem pra cá hoje!');
+      setCtaText('Agende agora');
       setScheduledFor('');
       await refreshScheduled();
     } catch (err) {
@@ -323,24 +324,21 @@ export const PostsManager: React.FC = () => {
   const todaySchedule = settings?.schedule?.[new Date().getDay()];
   const openingTime = todaySchedule?.isOpen ? todaySchedule.openTime : null;
 
-  const shopInitials = (settings?.shopName || 'AG')
-    .split(/\s+/)
-    .slice(0, 2)
-    .map(w => w[0])
-    .join('')
-    .toUpperCase();
-
   return (
     <div className="animate-fade-in space-y-6 pb-20">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       <div className="rounded-2xl border border-border bg-surface p-5 shadow-lg overflow-hidden relative">
         <div className="absolute inset-x-0 top-0 h-1 bg-accent" />
-        <h2 className="text-lg font-bold text-text-primary tracking-tight">Posts do salão</h2>
-        <p className="text-sm text-text-secondary mt-1 max-w-xl">
-          Arte 1080×1080 no visual do AgendAI — preto e esmeralda, como o site. Publique no WhatsApp
-          ou baixe para o Instagram.
-        </p>
+        <div className="flex items-center gap-3">
+          <Logo size="sm" />
+          <div>
+            <h2 className="text-lg font-bold text-text-primary tracking-tight">Posts do salão</h2>
+            <p className="text-sm text-text-secondary mt-0.5 max-w-xl">
+              Arte 1080×1080 com a marca AgendAI. Escreva o título, veja a prévia e publique.
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-[minmax(0,1fr)_400px] gap-6 items-start">
@@ -371,88 +369,8 @@ export const PostsManager: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
-                Tom da mensagem
-              </label>
-              <div className="flex gap-2">
-                {TONE_OPTIONS.map(opt => (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    aria-pressed={tone === opt.id}
-                    onClick={() => setTone(tone === opt.id ? null : opt.id)}
-                    className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 border transition-all
-                      ${tone === opt.id ? 'bg-accent border-accent text-accent-fg' : 'bg-bg border-border text-text-muted'}`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="post-extra" className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
-                Algo específico? <span className="text-text-muted font-normal">(opcional)</span>
-              </label>
-              <input
-                id="post-extra"
-                type="text"
-                value={extra}
-                onChange={e => setExtra(e.target.value)}
-                maxLength={200}
-                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent"
-                placeholder="Ex.: promoção de aniversário, serviço novo..."
-              />
-            </div>
-
-            <button
-              type="button"
-              onClick={() => void handleGenerate()}
-              disabled={generating}
-              className="w-full px-4 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all bg-accent text-accent-fg hover:bg-accent-hover shadow-lg shadow-accent/20 disabled:opacity-60"
-            >
-              {generating ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <Sparkles size={16} />
-              )}
-              {generating ? 'Gerando...' : 'Gerar com IA'}
-            </button>
-
-            {suggestions.length > 0 && (
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-text-secondary block">
-                  Sugestões <span className="font-normal normal-case">(clique para aplicar)</span>
-                </label>
-                {suggestions.map((s, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => {
-                      setTitle(s.title);
-                      setCtaText(s.ctaText);
-                    }}
-                    className="w-full text-left bg-bg border border-border rounded-lg px-4 py-3 hover:border-accent transition-all group"
-                  >
-                    <p className="text-sm font-bold text-text-primary group-hover:text-accent transition-colors">
-                      {s.title}
-                    </p>
-                    <p className="text-xs text-text-secondary mt-0.5">
-                      Botão: {s.ctaText}
-                    </p>
-                  </button>
-                ))}
-                {suggestionsSource === 'template' && (
-                  <p className="text-[11px] text-text-muted italic">
-                    gerado localmente · configure pelo menos uma chave de IA no backend (ver .env)
-                  </p>
-                )}
-              </div>
-            )}
-
-            <div>
               <label htmlFor="post-title" className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
-                Título <span className="text-text-muted font-normal">(edite manualmente ou selecione acima)</span>
+                Título
               </label>
               <input
                 id="post-title"
@@ -467,7 +385,7 @@ export const PostsManager: React.FC = () => {
 
             <div>
               <label htmlFor="post-cta" className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
-                Texto do botão de ação <span className="text-text-muted font-normal">(edite manualmente ou selecione acima)</span>
+                Texto do botão
               </label>
               <input
                 id="post-cta"
@@ -499,6 +417,79 @@ export const PostsManager: React.FC = () => {
                 ))}
               </div>
             </div>
+
+            <details className="rounded-xl border border-border bg-bg px-4 py-3">
+              <summary className="text-xs font-bold uppercase tracking-wider text-text-secondary cursor-pointer list-none flex items-center justify-between gap-2">
+                <span>Sugerir frases (opcional)</span>
+                <Sparkles size={14} className="text-text-muted" />
+              </summary>
+              <p className="text-[11px] text-text-muted mt-2 mb-3">
+                Frases prontas do AgendAI. Não depende de Gemini nem ChatGPT — você pode ignorar e
+                escrever o seu texto.
+              </p>
+              <div className="flex gap-2 mb-3">
+                {TONE_OPTIONS.map(opt => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    aria-pressed={tone === opt.id}
+                    onClick={() => setTone(tone === opt.id ? null : opt.id)}
+                    className={`flex-1 px-2 py-1.5 rounded-lg text-[11px] font-bold border transition-all
+                      ${tone === opt.id ? 'bg-accent border-accent text-accent-fg' : 'bg-surface border-border text-text-muted'}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              <input
+                id="post-extra"
+                type="text"
+                value={extra}
+                onChange={e => setExtra(e.target.value)}
+                maxLength={200}
+                className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent mb-3"
+                placeholder="Ex.: promoção de aniversário…"
+              />
+              <button
+                type="button"
+                onClick={() => void handleGenerate()}
+                disabled={generating}
+                className="w-full px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-2 border border-border text-text-primary hover:border-accent disabled:opacity-60"
+              >
+                {generating ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <Sparkles size={14} />
+                )}
+                {generating ? 'Buscando frases…' : 'Sugerir frases'}
+              </button>
+              {suggestions.length > 0 && (
+                <div className="space-y-2 mt-3">
+                  {suggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => {
+                        setTitle(s.title);
+                        setCtaText(s.ctaText);
+                      }}
+                      className="w-full text-left bg-surface border border-border rounded-lg px-3 py-2 hover:border-accent transition-all group"
+                    >
+                      <p className="text-sm font-bold text-text-primary group-hover:text-accent">
+                        {s.title}
+                      </p>
+                      <p className="text-[11px] text-text-secondary mt-0.5">Botão: {s.ctaText}</p>
+                    </button>
+                  ))}
+                  {suggestionsSource === 'template' && (
+                    <p className="text-[11px] text-text-muted">Modelos locais · sem chamada a IA.</p>
+                  )}
+                  {suggestionsSource === 'ai' && (
+                    <p className="text-[11px] text-text-muted">Sugestão gerada por um provedor de texto.</p>
+                  )}
+                </div>
+              )}
+            </details>
 
             <div>
               <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
@@ -663,9 +654,7 @@ export const PostsManager: React.FC = () => {
           <div className="rounded-2xl border border-border bg-black shadow-xl overflow-hidden">
             <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/10">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-[10px] font-bold text-emerald-400 shrink-0">
-                  {shopInitials}
-                </div>
+                <Logo size="sm" className="text-white shrink-0" />
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-white truncate">
                     {settings?.shopName || 'Seu salão'}
@@ -686,11 +675,15 @@ export const PostsManager: React.FC = () => {
             </div>
 
             <div className="aspect-square w-full bg-[#0f0f0f] relative overflow-hidden">
-              <div className="absolute inset-x-0 top-0 h-1 bg-emerald-500" />
-              <div
-                className="pointer-events-none absolute -top-16 -right-10 h-48 w-48 rounded-full bg-emerald-500/20 blur-3xl"
-                aria-hidden
-              />
+              {!previewUrl && (
+                <>
+                  <div className="absolute inset-x-0 top-0 h-1 bg-emerald-500" />
+                  <div
+                    className="pointer-events-none absolute -top-16 -right-10 h-48 w-48 rounded-full bg-emerald-500/20 blur-3xl"
+                    aria-hidden
+                  />
+                </>
+              )}
               {previewLoading ? (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Loader2 size={32} className="text-emerald-400 animate-spin" />
@@ -703,11 +696,9 @@ export const PostsManager: React.FC = () => {
                 />
               ) : (
                 <div className="h-full flex flex-col items-center justify-center px-8 text-center gap-4">
-                  <span className="text-[10px] font-bold tracking-[0.35em] text-emerald-400 border border-emerald-500/40 rounded-full px-3 py-1">
-                    AGENDAI
-                  </span>
+                  <Logo size="md" className="text-white" />
                   <p className="text-lg font-extrabold text-white leading-tight">
-                    {title || 'Seu post aparece aqui'}
+                    {title || 'Vem pra cá hoje!'}
                   </p>
                   <div className="w-full rounded-2xl bg-[#212121] border border-[#303030] px-4 py-3 text-left">
                     <p className="text-[10px] font-bold tracking-widest text-emerald-500">HOJE</p>

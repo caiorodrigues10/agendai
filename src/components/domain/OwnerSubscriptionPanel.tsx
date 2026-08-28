@@ -275,7 +275,13 @@ export const OwnerSubscriptionPanel: React.FC = () => {
         </div>
         <button
           type="button"
-          onClick={() => document.getElementById('planos-pagamento')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+          onClick={() => {
+            const preferred =
+              displayPlans.find(p => p.hasDashboard !== false || /pro/i.test(p.name)) ??
+              displayPlans[0];
+            if (preferred) goCheckout(preferred, true);
+            else navigate('/planos');
+          }}
           className="shrink-0 px-4 py-3 rounded-xl bg-accent text-accent-fg text-sm font-bold flex items-center justify-center gap-2 hover:bg-accent-hover shadow-lg shadow-accent/20"
         >
           <CreditCard size={16} /> Ir para o pagamento

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CreditCard } from 'lucide-react';
 
 interface CardState {
@@ -65,6 +65,8 @@ const CreditCardForm = ({
   const [year, setYear] = useState(defaultYear);
   const [cvv, setCVV] = useState(clampDigits(defaultCVV, 4));
   const [focusField, setFocusField] = useState<null | 'number' | 'holder' | 'expire' | 'cvv'>(null);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
   const flip = focusField === 'cvv';
   const years = useMemo(() => {
@@ -90,8 +92,8 @@ const CreditCardForm = ({
   }, [number, holder, month, year, cvv]);
 
   useEffect(() => {
-    onChange?.({ number, holder, month, year, cvv }, validity);
-  }, [number, holder, month, year, cvv, validity, onChange]);
+    onChangeRef.current?.({ number, holder, month, year, cvv }, validity);
+  }, [number, holder, month, year, cvv, validity]);
 
   const displayDigits = useMemo(() => number.slice(0, 16).split(''), [number]);
 

@@ -206,11 +206,23 @@ export const barbershopApi = {
     ).then(res => unwrap<FeedPost>(res));
   },
 
-  getPostPreview: (barbershopId: string, postMode: PostMode, type: string) => {
+  getPostPreview: (
+    barbershopId: string,
+    postMode: PostMode,
+    type: string,
+    title?: string,
+    ctaText?: string
+  ) => {
     const token = authStorage.getAccessToken() || '';
-    const qs = `barbershopId=${encodeURIComponent(barbershopId)}&postMode=${postMode}&type=${encodeURIComponent(type)}`;
+    const params = new URLSearchParams({
+      barbershopId,
+      postMode,
+      type,
+    });
+    if (title?.trim()) params.set('title', title.trim());
+    if (ctaText?.trim()) params.set('ctaText', ctaText.trim());
     return apiClient<{ success: boolean; data: { imageUrl: string } }>(
-      `/api/posts/preview?${qs}`,
+      `/api/posts/preview?${params.toString()}`,
       'GET',
       undefined,
       token

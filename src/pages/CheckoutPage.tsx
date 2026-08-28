@@ -387,7 +387,9 @@ export const CheckoutPage: React.FC = () => {
               </div>
               <div className="text-right">
                 <span className="text-2xl font-bold text-accent">{formatPrice(plan.price)}</span>
-                <span className="text-xs text-text-muted block">/mês</span>
+                <span className="text-xs text-text-muted block">
+                  {plan.billingCycle === 'YEARLY' ? '/ano' : '/mês'}
+                </span>
               </div>
             </div>
 
@@ -676,6 +678,7 @@ export const CheckoutPage: React.FC = () => {
                 )}
 
                 <button
+                  type="button"
                   onClick={asaasBillingType === 'CREDIT_CARD' ? submitAsaasCard : submitAsaasPix}
                   disabled={submitting}
                   className="w-full py-4 rounded-xl bg-accent text-accent-fg font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-accent-hover transition-colors disabled:opacity-60"

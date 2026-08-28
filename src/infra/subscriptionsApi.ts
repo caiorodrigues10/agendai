@@ -166,19 +166,18 @@ export const subscriptionsApi = {
       payload,
       token()
     ).then(res => unwrap<Subscription>(res)),
-  cancel: (payload?: { cancelReason?: string; pixKey?: string; pixKeyType?: string }) =>
-    apiClient<CancelResponse>(
+  cancel: (payload?: { cancelReason?: string; pixKey?: string; pixKeyType?: string }) => {
+    const body: Record<string, string> = {};
+    if (payload?.cancelReason) body.cancelReason = payload.cancelReason;
+    if (payload?.pixKey) body.pixKey = payload.pixKey;
+    if (payload?.pixKeyType) body.pixKeyType = payload.pixKeyType;
+    return apiClient<{ success: boolean; data: CancelResponse }>(
       '/api/subscriptions/me',
       'DELETE',
-      payload?.cancelReason || payload?.pixKey
-        ? {
-            cancelReason: payload.cancelReason,
-            pixKey: payload.pixKey,
-            pixKeyType: payload.pixKeyType,
-          }
-        : undefined,
+      body,
       token()
-    ),
+    ).then(res => unwrap<CancelResponse>(res));
+  },
   getCancellationContext: () =>
     apiClient<{ success: boolean; data: CancellationContext }>(
       '/api/subscriptions/cancellation-context',

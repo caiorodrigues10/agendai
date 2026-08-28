@@ -648,8 +648,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "package_devdependencies_testing_library_user_event",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 52,
+      "community_name": "@testing-library/user-event",
       "norm_label": "@testing-library/user-event"
     },
     {
@@ -659,8 +659,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "testing_library_user_event",
-      "community": 4,
-      "community_name": "devDependencies",
+      "community": 52,
+      "community_name": "@testing-library/user-event",
       "norm_label": "@testing-library/user-event"
     },
     {
@@ -912,8 +912,8 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "package_devdependencies_eslint_plugin_react_hooks",
-      "community": 66,
-      "community_name": "eslint-plugin-react-hooks",
+      "community": 4,
+      "community_name": "devDependencies",
       "norm_label": "eslint-plugin-react-hooks"
     },
     {
@@ -923,8 +923,8 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "eslint_plugin_react_hooks",
-      "community": 66,
-      "community_name": "eslint-plugin-react-hooks",
+      "community": 4,
+      "community_name": "devDependencies",
       "norm_label": "eslint-plugin-react-hooks"
     },
     {
@@ -1880,8 +1880,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_components_domain_financialdashboard_financialdashboardprops",
-      "community": 38,
-      "community_name": "ClientsManager.tsx",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "financialdashboardprops"
     },
     {
@@ -2188,8 +2188,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_domain_packagecatalog",
-      "community": 52,
-      "community_name": "@testing-library/user-event",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "packagecatalog.tsx"
     },
     {
@@ -2199,8 +2199,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_domain_packagecatalog_brl",
-      "community": 52,
-      "community_name": "@testing-library/user-event",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "brl"
     },
     {
@@ -2210,8 +2210,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_domain_packagecatalog_packagecatalogprops",
-      "community": 52,
-      "community_name": "@testing-library/user-event",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "packagecatalogprops"
     },
     {
@@ -2221,8 +2221,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_components_domain_packagecatalog_emptyform",
-      "community": 52,
-      "community_name": "@testing-library/user-event",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "emptyform"
     },
     {
@@ -2232,8 +2232,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_domain_packagecatalog_packagecatalog",
-      "community": 52,
-      "community_name": "@testing-library/user-event",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "packagecatalog()"
     },
     {
@@ -2243,8 +2243,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_domain_postsmanager",
-      "community": 0,
-      "community_name": "StaffDashboard.tsx",
+      "community": 24,
+      "community_name": "DashboardPage.tsx",
       "norm_label": "postsmanager.tsx"
     },
     {
@@ -2254,8 +2254,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_components_domain_postsmanager_posttype",
-      "community": 0,
-      "community_name": "StaffDashboard.tsx",
+      "community": 24,
+      "community_name": "DashboardPage.tsx",
       "norm_label": "posttype"
     },
     {
@@ -2265,8 +2265,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "src_components_domain_postsmanager_posttone",
-      "community": 0,
-      "community_name": "StaffDashboard.tsx",
+      "community": 24,
+      "community_name": "DashboardPage.tsx",
       "norm_label": "posttone"
     },
     {
@@ -2276,8 +2276,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "src_components_domain_postsmanager_type_options",
-      "community": 0,
-      "community_name": "StaffDashboard.tsx",
+      "community": 24,
+      "community_name": "DashboardPage.tsx",
       "norm_label": "type_options"
     },
     {
@@ -2287,8 +2287,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "src_components_domain_postsmanager_mode_options",
-      "community": 0,
-      "community_name": "StaffDashboard.tsx",
+      "community": 24,
+      "community_name": "DashboardPage.tsx",
       "norm_label": "mode_options"
     },
     {
@@ -2298,8 +2298,8 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "src_components_domain_postsmanager_tone_options",
-      "community": 0,
-      "community_name": "StaffDashboard.tsx",
+      "community": 24,
+      "community_name": "DashboardPage.tsx",
       "norm_label": "tone_options"
     },
     {
@@ -2309,8 +2309,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "src_components_domain_postsmanager_mode_label",
-      "community": 0,
-      "community_name": "StaffDashboard.tsx",
+      "community": 24,
+      "community_name": "DashboardPage.tsx",
       "norm_label": "mode_label"
     },
     {
@@ -2320,8 +2320,8 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "src_components_domain_postsmanager_downloadpostimage",
-      "community": 0,
-      "community_name": "StaffDashboard.tsx",
+      "community": 24,
+      "community_name": "DashboardPage.tsx",
       "norm_label": "downloadpostimage()"
     },
     {
@@ -2386,8 +2386,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_domain_queueitemcard_queueitemcardprops",
-      "community": 38,
-      "community_name": "ClientsManager.tsx",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "queueitemcardprops"
     },
     {
@@ -2397,8 +2397,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_domain_queueitemcard_queueitemcard",
-      "community": 15,
-      "community_name": "MarketingFooter.tsx",
+      "community": 0,
+      "community_name": "StaffDashboard.tsx",
       "norm_label": "queueitemcard()"
     },
     {
@@ -2452,8 +2452,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_components_domain_queuestatuscard_queuestatuscardprops",
-      "community": 64,
-      "community_name": "MarketingNav.tsx",
+      "community": 38,
+      "community_name": "ClientsManager.tsx",
       "norm_label": "queuestatuscardprops"
     },
     {
@@ -2518,8 +2518,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_domain_returntoqueuemodal",
-      "community": 38,
-      "community_name": "ClientsManager.tsx",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "returntoqueuemodal.tsx"
     },
     {
@@ -2529,8 +2529,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_domain_returntoqueuemodal_returntoqueuemodalprops",
-      "community": 38,
-      "community_name": "ClientsManager.tsx",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "returntoqueuemodalprops"
     },
     {
@@ -2540,8 +2540,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_domain_returntoqueuemodal_returntoqueuemodal",
-      "community": 38,
-      "community_name": "ClientsManager.tsx",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "returntoqueuemodal()"
     },
     {
@@ -2658,7 +2658,7 @@
       "label": "platformWhatsAppUnavailable()",
       "file_type": "code",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L24",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_domain_settingsmanager_platformwhatsappunavailable",
       "community": 27,
@@ -2669,7 +2669,7 @@
       "label": "SalonWhatsAppConnection()",
       "file_type": "code",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L31",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "src_components_domain_settingsmanager_salonwhatsappconnection",
       "community": 27,
@@ -2680,7 +2680,7 @@
       "label": "SettingsManagerProps",
       "file_type": "code",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L206",
+      "source_location": "L204",
       "_origin": "ast",
       "id": "src_components_domain_settingsmanager_settingsmanagerprops",
       "community": 27,
@@ -2691,7 +2691,7 @@
       "label": "SettingsManager()",
       "file_type": "code",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L213",
+      "source_location": "L211",
       "_origin": "ast",
       "id": "src_components_domain_settingsmanager_settingsmanager",
       "community": 27,
@@ -2760,8 +2760,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_components_domain_shopprofile_shopprofile",
-      "community": 24,
-      "community_name": "DashboardPage.tsx",
+      "community": 0,
+      "community_name": "StaffDashboard.tsx",
       "norm_label": "shopprofile()"
     },
     {
@@ -3329,7 +3329,7 @@
       "label": "HeaderProps",
       "file_type": "code",
       "source_file": "src/components/ui/Header.tsx",
-      "source_location": "L8",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_ui_header_headerprops",
       "community": 14,
@@ -3340,7 +3340,7 @@
       "label": "Header()",
       "file_type": "code",
       "source_file": "src/components/ui/Header.tsx",
-      "source_location": "L15",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "src_components_ui_header_header",
       "community": 14,
@@ -4894,8 +4894,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "src_infra_barbershopapi_postaisuggestion",
-      "community": 0,
-      "community_name": "StaffDashboard.tsx",
+      "community": 24,
+      "community_name": "DashboardPage.tsx",
       "norm_label": "postaisuggestion"
     },
     {
@@ -5675,8 +5675,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_infra_schedulingapi_queueupdatepayload",
-      "community": 38,
-      "community_name": "ClientsManager.tsx",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "queueupdatepayload"
     },
     {
@@ -7127,8 +7127,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_pages_publichome",
-      "community": 15,
-      "community_name": "MarketingFooter.tsx",
+      "community": 0,
+      "community_name": "StaffDashboard.tsx",
       "norm_label": "publichome.tsx"
     },
     {
@@ -7190,7 +7190,7 @@
       "label": "StaffDashboard()",
       "file_type": "code",
       "source_file": "src/pages/StaffDashboard.tsx",
-      "source_location": "L48",
+      "source_location": "L47",
       "_origin": "ast",
       "id": "src_pages_staffdashboard_staffdashboard",
       "community": 0,
@@ -8007,8 +8007,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_types",
-      "community": 52,
-      "community_name": "@testing-library/user-event",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "types.ts"
     },
     {
@@ -8029,8 +8029,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_types_queueitem",
-      "community": 38,
-      "community_name": "ClientsManager.tsx",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "queueitem"
     },
     {
@@ -8073,8 +8073,8 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "src_types_aiinsight",
-      "community": 64,
-      "community_name": "MarketingNav.tsx",
+      "community": 38,
+      "community_name": "ClientsManager.tsx",
       "norm_label": "aiinsight"
     },
     {
@@ -8084,8 +8084,8 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "src_types_staffrole",
-      "community": 52,
-      "community_name": "@testing-library/user-event",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "staffrole"
     },
     {
@@ -8128,8 +8128,8 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "src_types_postconfig",
-      "community": 52,
-      "community_name": "@testing-library/user-event",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "postconfig"
     },
     {
@@ -8150,8 +8150,8 @@
       "source_location": "L102",
       "_origin": "ast",
       "id": "src_types_clientpackagestatus",
-      "community": 52,
-      "community_name": "@testing-library/user-event",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "clientpackagestatus"
     },
     {
@@ -8161,8 +8161,8 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "src_types_servicepackage",
-      "community": 52,
-      "community_name": "@testing-library/user-event",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "servicepackage"
     },
     {
@@ -8183,8 +8183,8 @@
       "source_location": "L137",
       "_origin": "ast",
       "id": "src_types_salonclientpackagesummary",
-      "community": 52,
-      "community_name": "@testing-library/user-event",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "salonclientpackagesummary"
     },
     {
@@ -8194,8 +8194,8 @@
       "source_location": "L152",
       "_origin": "ast",
       "id": "src_types_salonclientappointment",
-      "community": 52,
-      "community_name": "@testing-library/user-event",
+      "community": 15,
+      "community_name": "MarketingFooter.tsx",
       "norm_label": "salonclientappointment"
     },
     {
@@ -11082,7 +11082,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L8",
+      "source_location": "L7",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager",
       "target": "src_components_domain_accountprivacypanel",
@@ -11137,7 +11137,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L8",
+      "source_location": "L7",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager",
       "target": "src_components_domain_accountprivacypanel_accountprivacypanel",
@@ -13205,7 +13205,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/StaffDashboard.tsx",
-      "source_location": "L43",
+      "source_location": "L42",
       "weight": 1.0,
       "source": "src_pages_staffdashboard",
       "target": "src_components_domain_clientsmanager",
@@ -13271,7 +13271,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/StaffDashboard.tsx",
-      "source_location": "L43",
+      "source_location": "L42",
       "weight": 1.0,
       "source": "src_pages_staffdashboard",
       "target": "src_components_domain_clientsmanager_clientsmanager",
@@ -14313,7 +14313,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/OwnerSubscriptionPanel.tsx",
-      "source_location": "L224",
+      "source_location": "L225",
       "weight": 1.0,
       "source": "src_components_domain_ownersubscriptionpanel_ownersubscriptionpanel",
       "target": "src_components_domain_ownersubscriptionpanel_brl",
@@ -14336,7 +14336,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/domain/OwnerSubscriptionPanel.tsx",
-      "source_location": "L232",
+      "source_location": "L233",
       "weight": 1.0,
       "source": "src_components_domain_ownersubscriptionpanel_ownersubscriptionpanel",
       "target": "src_utils_errormessage_geterrormessage"
@@ -14838,7 +14838,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/StaffDashboard.tsx",
-      "source_location": "L44",
+      "source_location": "L43",
       "weight": 1.0,
       "source": "src_pages_staffdashboard",
       "target": "src_components_domain_publiclinkpanel",
@@ -14849,7 +14849,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/StaffDashboard.tsx",
-      "source_location": "L44",
+      "source_location": "L43",
       "weight": 1.0,
       "source": "src_pages_staffdashboard",
       "target": "src_components_domain_publiclinkpanel_publiclinkpanel",
@@ -15677,7 +15677,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L24",
+      "source_location": "L22",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager",
       "target": "src_components_domain_settingsmanager_platformwhatsappunavailable",
@@ -15687,7 +15687,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L31",
+      "source_location": "L29",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager",
       "target": "src_components_domain_settingsmanager_salonwhatsappconnection",
@@ -15697,7 +15697,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L213",
+      "source_location": "L211",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager",
       "target": "src_components_domain_settingsmanager_settingsmanager",
@@ -15707,7 +15707,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L206",
+      "source_location": "L204",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager",
       "target": "src_components_domain_settingsmanager_settingsmanagerprops",
@@ -15718,7 +15718,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L5",
+      "source_location": "L4",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager",
       "target": "src_infra_apiclient",
@@ -15729,7 +15729,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L5",
+      "source_location": "L4",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager",
       "target": "src_infra_apiclient_apierror",
@@ -15740,7 +15740,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L4",
+      "source_location": "L3",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager",
       "target": "src_infra_barbershopapi",
@@ -15751,7 +15751,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L4",
+      "source_location": "L3",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager",
       "target": "src_infra_barbershopapi_barbershopapi",
@@ -15762,7 +15762,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L4",
+      "source_location": "L3",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager",
       "target": "src_infra_barbershopapi_shopwhatsappstatus",
@@ -15773,7 +15773,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L3",
+      "source_location": "L2",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager",
       "target": "src_types",
@@ -15784,7 +15784,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L3",
+      "source_location": "L2",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager",
       "target": "src_types_dayschedule",
@@ -15795,7 +15795,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L3",
+      "source_location": "L2",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager",
       "target": "src_types_shopsettings",
@@ -15806,7 +15806,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L6",
+      "source_location": "L5",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager",
       "target": "src_utils_documentutils",
@@ -15817,7 +15817,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L6",
+      "source_location": "L5",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager",
       "target": "src_utils_documentutils_maskphone",
@@ -15828,7 +15828,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L7",
+      "source_location": "L6",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager",
       "target": "src_utils_errormessage",
@@ -15839,7 +15839,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L7",
+      "source_location": "L6",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager",
       "target": "src_utils_errormessage_geterrormessage",
@@ -15861,7 +15861,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L61",
+      "source_location": "L59",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager_salonwhatsappconnection",
       "target": "src_components_domain_settingsmanager_platformwhatsappunavailable",
@@ -15873,7 +15873,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L63",
+      "source_location": "L61",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager_salonwhatsappconnection",
       "target": "src_utils_errormessage_geterrormessage"
@@ -15884,7 +15884,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L296",
+      "source_location": "L293",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager_settingsmanager",
       "target": "src_utils_documentutils_maskphone"
@@ -15895,7 +15895,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/domain/SettingsManager.tsx",
-      "source_location": "L258",
+      "source_location": "L255",
       "weight": 1.0,
       "source": "src_components_domain_settingsmanager_settingsmanager",
       "target": "src_utils_errormessage_geterrormessage"
@@ -17535,7 +17535,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ui/Header.tsx",
-      "source_location": "L15",
+      "source_location": "L14",
       "weight": 1.0,
       "source": "src_components_ui_header",
       "target": "src_components_ui_header_header",
@@ -17545,7 +17545,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ui/Header.tsx",
-      "source_location": "L8",
+      "source_location": "L7",
       "weight": 1.0,
       "source": "src_components_ui_header",
       "target": "src_components_ui_header_headerprops",
@@ -17633,7 +17633,7 @@
       "context": "field",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ui/Header.tsx",
-      "source_location": "L9",
+      "source_location": "L8",
       "weight": 1.0,
       "source": "src_components_ui_header_headerprops",
       "target": "src_types_staffmember",
@@ -19235,7 +19235,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/pages/StaffDashboard.tsx",
-      "source_location": "L51",
+      "source_location": "L50",
       "weight": 1.0,
       "source": "src_pages_staffdashboard_staffdashboard",
       "target": "src_contexts_authcontext_useauth"
@@ -19648,7 +19648,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/pages/StaffDashboard.tsx",
-      "source_location": "L68",
+      "source_location": "L67",
       "weight": 1.0,
       "source": "src_pages_staffdashboard_staffdashboard",
       "target": "src_contexts_barbershopcontext_usebarbershop"
@@ -19819,7 +19819,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/pages/StaffDashboard.tsx",
-      "source_location": "L69",
+      "source_location": "L68",
       "weight": 1.0,
       "source": "src_pages_staffdashboard_staffdashboard",
       "target": "src_contexts_barbershopfilterscontext_usebarbershopfilters"
@@ -20167,7 +20167,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/pages/StaffDashboard.tsx",
-      "source_location": "L87",
+      "source_location": "L86",
       "weight": 1.0,
       "source": "src_pages_staffdashboard_staffdashboard",
       "target": "src_contexts_schedulingcontext_usescheduling"
@@ -20479,7 +20479,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/pages/StaffDashboard.tsx",
-      "source_location": "L52",
+      "source_location": "L51",
       "weight": 1.0,
       "source": "src_pages_staffdashboard_staffdashboard",
       "target": "src_contexts_subscriptioncontext_usesubscription"
@@ -22995,7 +22995,7 @@
       "context": "export",
       "confidence": "EXTRACTED",
       "source_file": "src/infra/subscriptionsApi.ts",
-      "source_location": "L191",
+      "source_location": "L192",
       "weight": 1.0,
       "source": "src_infra_subscriptionsapi",
       "target": "src_infra_plansapi",
@@ -25776,7 +25776,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/PlansPage.tsx",
-      "source_location": "L363",
+      "source_location": "L351",
       "weight": 1.0,
       "source": "src_pages_planspage_planspage",
       "target": "src_pages_planspage_formatprice",
@@ -25861,7 +25861,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/StaffDashboard.tsx",
-      "source_location": "L48",
+      "source_location": "L47",
       "weight": 1.0,
       "source": "src_pages_staffdashboard",
       "target": "src_pages_staffdashboard_staffdashboard",
@@ -25872,7 +25872,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/StaffDashboard.tsx",
-      "source_location": "L46",
+      "source_location": "L45",
       "weight": 1.0,
       "source": "src_pages_staffdashboard",
       "target": "src_types",
@@ -25883,7 +25883,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/StaffDashboard.tsx",
-      "source_location": "L46",
+      "source_location": "L45",
       "weight": 1.0,
       "source": "src_pages_staffdashboard",
       "target": "src_types_queueitem",
@@ -25894,7 +25894,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/StaffDashboard.tsx",
-      "source_location": "L45",
+      "source_location": "L44",
       "weight": 1.0,
       "source": "src_pages_staffdashboard",
       "target": "src_utils_errormessage",
@@ -25905,7 +25905,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/pages/StaffDashboard.tsx",
-      "source_location": "L45",
+      "source_location": "L44",
       "weight": 1.0,
       "source": "src_pages_staffdashboard",
       "target": "src_utils_errormessage_geterrormessage",
@@ -25917,7 +25917,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/pages/StaffDashboard.tsx",
-      "source_location": "L245",
+      "source_location": "L241",
       "weight": 1.0,
       "source": "src_pages_staffdashboard_staffdashboard",
       "target": "src_utils_errormessage_geterrormessage"
@@ -28069,5 +28069,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "75f349a46b83dd774c7d5bd0823b7863559a31b2"
+  "built_at_commit": "abfb3a7baaadfcfdb1d01a114e9fbc0ab3695413"
 }

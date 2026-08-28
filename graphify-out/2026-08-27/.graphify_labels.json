@@ -64,6 +64,5 @@
   "62": "@vitest/coverage-v8",
   "63": "paymentsApi.ts",
   "64": "MarketingNav.tsx",
-  "65": "ContactPage.tsx",
-  "66": "eslint-plugin-react-hooks"
+  "65": "ContactPage.tsx"
 }

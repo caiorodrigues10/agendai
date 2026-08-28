@@ -83,33 +83,33 @@ export const PlansPage: React.FC = () => {
 
   const handleSubscribe = (plan: Plan) => {
     const billing = isYearly ? 'YEARLY' : 'MONTHLY';
-    const inCalendarTrial = Boolean(
-      subscriptionData?.trial && !subscriptionData.trial.isExpired
-    );
-    const setupQ = inCalendarTrial ? '&setup=trial' : '';
     if (user) {
-      navigate(`/checkout?planId=${plan.id}&billing=${billing}${setupQ}`);
+      navigate(`/checkout?planId=${plan.id}&billing=${billing}`);
       return;
     }
     // Cadastro na tela original de login — sem modal embutido
     navigate(`/login?tab=register&planId=${encodeURIComponent(plan.id)}&billing=${billing}`);
   };
 
-  const getDisplayPrice = (plan: Plan) => {
-    if (isYearly) {
-      if (/pro/i.test(plan.name) || plan.hasDashboard) return PRO_YEARLY;
-      return ESSENTIAL_YEARLY;
-    }
-    if (/pro/i.test(plan.name) || plan.hasDashboard) return PRO_MONTHLY;
-    return ESSENTIAL_MONTHLY;
-  };
-
   const isPro = (plan: Plan) => plan.hasDashboard !== false || /pro/i.test(plan.name);
   const isEssential = (plan: Plan) => !isPro(plan);
 
-  const proPlan = plans.find(p => isPro(p));
-  const essentialPlan = plans.find(p => isEssential(p));
+  const cycle: Plan['billingCycle'] = isYearly ? 'YEARLY' : 'MONTHLY';
+  const byCycle = plans.filter(p => (p.billingCycle ?? 'MONTHLY') === cycle);
+  const pool = byCycle.length > 0 ? byCycle : plans;
+  const proPlan = pool.find(p => isPro(p));
+  const essentialPlan = pool.find(p => isEssential(p));
   const displayPlans = [essentialPlan, proPlan].filter(Boolean) as Plan[];
+
+  const getDisplayPrice = (plan: Plan) => {
+    if (plan.price > 0) return plan.price;
+    if (isYearly) {
+      if (isPro(plan)) return PRO_YEARLY;
+      return ESSENTIAL_YEARLY;
+    }
+    if (isPro(plan)) return PRO_MONTHLY;
+    return ESSENTIAL_MONTHLY;
+  };
 
   const staffLoggedIn = Boolean(
     user && ['OWNER', 'EMPLOYEE', 'MASTER_ADMIN', 'ADMIN'].includes(user.role.toUpperCase())

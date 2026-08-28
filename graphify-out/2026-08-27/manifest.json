@@ -65,8 +65,8 @@
     "semantic_hash": ""
   },
   "src/components/domain/OwnerSubscriptionPanel.tsx": {
-    "mtime": 1787882793.718812,
-    "ast_hash": "514ba46207022d88f78f69861962d536",
+    "mtime": 1787856808.389318,
+    "ast_hash": "5f5093b2be77ec1c4114b376091d37d0",
     "semantic_hash": ""
   },
   "src/components/domain/PostsManager.tsx": {
@@ -100,8 +100,8 @@
     "semantic_hash": ""
   },
   "src/components/domain/SettingsManager.tsx": {
-    "mtime": 1787882798.1129615,
-    "ast_hash": "fc7a8c397fff6b1633a253fcd9a4f64b",
+    "mtime": 1787881258.7734227,
+    "ast_hash": "10ad214a4bdb05cf13f8092638715330",
     "semantic_hash": ""
   },
   "src/components/domain/ShareReferralButton.tsx": {
@@ -150,8 +150,8 @@
     "semantic_hash": ""
   },
   "src/components/marketing/MarketingNav.tsx": {
-    "mtime": 1787882345.7843225,
-    "ast_hash": "0d42ecfc6396c68940c4e50676d5736a",
+    "mtime": 1787852986.1041312,
+    "ast_hash": "6e2f8dbf60cede496aa8451aa9c6d315",
     "semantic_hash": ""
   },
   "src/components/marketing/PricingPersuasionCharts.tsx": {
@@ -165,8 +165,8 @@
     "semantic_hash": ""
   },
   "src/components/ui/Header.tsx": {
-    "mtime": 1787882809.0660963,
-    "ast_hash": "bfe0f3a72c88e2ec57c8234e8c938338",
+    "mtime": 1787838709.6866558,
+    "ast_hash": "a3361dc9c95894133718e46397d290fe",
     "semantic_hash": ""
   },
   "src/components/ui/Logo.tsx": {
@@ -220,8 +220,8 @@
     "semantic_hash": ""
   },
   "src/contexts/SubscriptionContext.tsx": {
-    "mtime": 1787882630.375688,
-    "ast_hash": "a18f8c286d80f8a721eb8d9f1b19c067",
+    "mtime": 1787852126.176835,
+    "ast_hash": "907966aa634e13d32a22a5ef6ccb25fc",
     "semantic_hash": ""
   },
   "src/contexts/ThemeContext.tsx": {
@@ -290,8 +290,8 @@
     "semantic_hash": ""
   },
   "src/infra/subscriptionsApi.ts": {
-    "mtime": 1787882605.3929348,
-    "ast_hash": "a3e444caeb6e5d8c262edde548843770",
+    "mtime": 1787690260.4798205,
+    "ast_hash": "804db2c444d5a5c7864ba0427ede657c",
     "semantic_hash": ""
   },
   "src/lib/utils.ts": {
@@ -360,8 +360,8 @@
     "semantic_hash": ""
   },
   "src/pages/PlansPage.tsx": {
-    "mtime": 1787882794.9835775,
-    "ast_hash": "c36706686657350a771c42718575b379",
+    "mtime": 1787853026.902057,
+    "ast_hash": "b3b8f6b55003430fc2e6a9ecc12f3ea5",
     "semantic_hash": ""
   },
   "src/pages/PublicHome.test.tsx": {
@@ -375,8 +375,8 @@
     "semantic_hash": ""
   },
   "src/pages/StaffDashboard.tsx": {
-    "mtime": 1787882759.638444,
-    "ast_hash": "e045a9f32530b6afcbbbdb19eac4902c",
+    "mtime": 1787881766.1580644,
+    "ast_hash": "3ac6bb944f9e2016862734587c08f22f",
     "semantic_hash": ""
   },
   "src/pages/marketing/AboutPage.tsx": {

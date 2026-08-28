@@ -1,16 +1,16 @@
 # Graph Report - agendai  (2026-08-27)
 
 ## Corpus Check
-- 128 files · ~99,574 words
+- 128 files · ~99,378 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 847 nodes · 1765 edges · 67 communities (42 shown, 25 thin omitted)
+- 847 nodes · 1765 edges · 66 communities (41 shown, 25 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 7 edges (avg confidence: 0.63)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `75f349a4`
+- Built from commit: `abfb3a7b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -74,7 +74,6 @@
 - paymentsApi.ts
 - MarketingNav.tsx
 - ContactPage.tsx
-- eslint-plugin-react-hooks
 
 ## God Nodes (most connected - your core abstractions)
 1. `getErrorMessage()` - 43 edges
@@ -103,11 +102,11 @@
 ## Import Cycles
 - None detected.
 
-## Communities (67 total, 25 thin omitted)
+## Communities (66 total, 25 thin omitted)
 
 ### Community 0 - "StaffDashboard.tsx"
-Cohesion: 0.16
-Nodes (18): downloadPostImage(), MODE_LABEL, MODE_OPTIONS, PostsManager(), PostTone, PostType, TONE_OPTIONS, TYPE_OPTIONS (+10 more)
+Cohesion: 0.26
+Nodes (12): PostsManager(), PublicLinkPanel(), PublicLinkPanelProps, QueueItemCard(), ShopProfile(), Toast(), ToastProps, useBarbershop() (+4 more)
 
 ### Community 1 - "LoginPage.tsx"
 Cohesion: 0.06
@@ -123,7 +122,7 @@ Nodes (46): AppointmentBookingModal(), AppointmentBookingModalProps, fieldClass(
 
 ### Community 4 - "devDependencies"
 Cohesion: 0.29
-Nodes (7): eslint, devDependencies, eslint, @testing-library/user-event, @types/node, @testing-library/user-event, @types/node
+Nodes (7): eslint, eslint-plugin-react-hooks, devDependencies, eslint, eslint-plugin-react-hooks, @types/node, @types/node
 
 ### Community 5 - "CheckoutPage.tsx"
 Cohesion: 0.09
@@ -166,8 +165,8 @@ Cohesion: 0.06
 Nodes (34): Header(), HeaderProps, Logo(), LogoProps, sizeMap, PasswordInput, PasswordInputProps, STRENGTH_BAR (+26 more)
 
 ### Community 15 - "MarketingFooter.tsx"
-Cohesion: 0.26
-Nodes (10): QueueItemCard(), ServiceCardProps, ServiceForm(), ServiceFormProps, ServiceManager(), ServiceManagerProps, DynamicIcon(), DynamicIconProps (+2 more)
+Cohesion: 0.12
+Nodes (25): FinancialDashboardProps, brl, emptyForm, PackageCatalog(), PackageCatalogProps, QueueItemCardProps, ReturnToQueueModal(), ReturnToQueueModalProps (+17 more)
 
 ### Community 16 - "apiClient.ts"
 Cohesion: 0.33
@@ -194,8 +193,8 @@ Cohesion: 0.25
 Nodes (7): Checklist de PR, Convenções de commits, Diretrizes de arquitetura, Diretrizes universais para IAs, Fluxo de branches (GitFlow), Padrão de CSS, Qualidade e testes
 
 ### Community 24 - "DashboardPage.tsx"
-Cohesion: 0.13
-Nodes (16): ShopProfile(), ShopProfileProps, AddPostPayload, AddServicePayload, barbershopApi, BarbershopData, CreatePostPayload, GeneratePostPayload (+8 more)
+Cohesion: 0.10
+Nodes (23): downloadPostImage(), MODE_LABEL, MODE_OPTIONS, PostTone, PostType, TONE_OPTIONS, TYPE_OPTIONS, ShopProfileProps (+15 more)
 
 ### Community 25 - "FeaturesPage.tsx"
 Cohesion: 0.13
@@ -218,8 +217,8 @@ Cohesion: 0.21
 Nodes (11): BarbershopContext, BarbershopProvider(), isShopStaffRole(), BarbershopFiltersContext, BarbershopFiltersProvider(), BarbershopFiltersValue, DateRange, root (+3 more)
 
 ### Community 38 - "ClientsManager.tsx"
-Cohesion: 0.18
-Nodes (13): FinancialDashboardProps, QueueItemCardProps, ReturnToQueueModal(), ReturnToQueueModalProps, SchedulingContext, SchedulingContextValue, SchedulingProvider(), QueueUpdatePayload (+5 more)
+Cohesion: 0.26
+Nodes (9): QueueStatusCardProps, SchedulingContext, SchedulingContextValue, SchedulingProvider(), getQueueInsight(), QUEUE_MESSAGES, AIInsight, logger (+1 more)
 
 ### Community 39 - "StaffMember"
 Cohesion: 0.22
@@ -233,17 +232,13 @@ Nodes (7): errorMessage(), formatDate(), PlanFormModal(), PlansSection(), Refund
 Cohesion: 0.33
 Nodes (3): JoinQueuePayload, ListAppointmentsParams, schedulingApi
 
-### Community 52 - "@testing-library/user-event"
-Cohesion: 0.18
-Nodes (10): brl, emptyForm, PackageCatalog(), PackageCatalogProps, ClientPackageStatus, PostConfig, SalonClientAppointment, SalonClientPackageSummary (+2 more)
-
 ### Community 63 - "paymentsApi.ts"
 Cohesion: 0.20
 Nodes (7): ListMeta, PaymentProvider, paymentsApi, PaymentStatus, PixQrCode, Refund, RefundListResponse
 
 ### Community 64 - "MarketingNav.tsx"
-Cohesion: 0.43
-Nodes (6): busyCopy(), BusyLevel, busyStyles(), QueueStatusCard(), QueueStatusCardProps, AIInsight
+Cohesion: 0.60
+Nodes (4): busyCopy(), BusyLevel, busyStyles(), QueueStatusCard()
 
 ## Knowledge Gaps
 - **287 isolated node(s):** `name`, `private`, `version`, `type`, `dev` (+282 more)
@@ -257,7 +252,7 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.195) - this node is a cross-community bridge._
 - **Why does `react` connect `OwnerFinancialPanel.tsx` to `StaffDashboard.tsx`, `LoginPage.tsx`, `schedulingUtils.ts`, `dependencies`?**
   _High betweenness centrality (0.193) - this node is a cross-community bridge._
-- **Why does `devDependencies` connect `devDependencies` to `dependencies`, `eslint-config-prettier`, `eslint-plugin-jsx-a11y`, `jsdom`, `playwright`, `postcss`, `prettier`, `tailwindcss`, `@tailwindcss/postcss`, `@testing-library/jest-dom`, `@testing-library/react`, `@types/react`, `@types/react-dom`, `typescript`, `typescript-eslint`, `@typescript-eslint/eslint-plugin`, `@typescript-eslint/parser`, `vite`, `@vitejs/plugin-react`, `vitest`, `@vitest/coverage-v8`, `ContactPage.tsx`, `eslint-plugin-react-hooks`?**
+- **Why does `devDependencies` connect `devDependencies` to `dependencies`, `eslint-config-prettier`, `eslint-plugin-jsx-a11y`, `jsdom`, `playwright`, `postcss`, `prettier`, `tailwindcss`, `@tailwindcss/postcss`, `@testing-library/jest-dom`, `@testing-library/react`, `@testing-library/user-event`, `@types/react`, `@types/react-dom`, `typescript`, `typescript-eslint`, `@typescript-eslint/eslint-plugin`, `@typescript-eslint/parser`, `vite`, `@vitejs/plugin-react`, `vitest`, `@vitest/coverage-v8`, `ContactPage.tsx`?**
   _High betweenness centrality (0.106) - this node is a cross-community bridge._
 - **What connects `name`, `private`, `version` to the rest of the system?**
   _287 weakly-connected nodes found - possible documentation gaps or missing edges._
