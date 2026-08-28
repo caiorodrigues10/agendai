@@ -140,42 +140,42 @@ const SalonWhatsAppConnection: React.FC<{ barbershopId: string }> = ({ barbersho
   const platformDown = error === 'WhatsApp da plataforma indisponível.';
 
   return (
-    <div className="pt-4 mt-4 border-t border-border">
-      <h4 className="text-sm font-bold text-text-primary mb-1">WhatsApp do salão</h4>
-      <p className="text-xs text-text-muted mb-3">
-        Escaneie o QR com o celular que vai <span className="font-semibold">enviar</span> os avisos
-        (fila, lembretes e posts). Sem conexão, as mensagens não saem.
+    <div className="bg-surface border-2 border-accent/40 rounded-xl p-5">
+      <h3 className="text-lg font-bold text-text-primary mb-1">WhatsApp do salão</h3>
+      <p className="text-sm text-text-secondary mb-4">
+        Escaneie o QR com o celular que vai <span className="font-semibold text-text-primary">enviar</span>{' '}
+        os avisos (fila, lembretes e posts). Sem conexão, as mensagens não saem.
       </p>
 
       {loading ? (
-        <div className="flex items-center gap-2 text-xs text-text-muted">
-          <Loader2 size={14} className="animate-spin" /> Consultando sessão...
+        <div className="flex items-center gap-2 text-sm text-text-muted">
+          <Loader2 size={16} className="animate-spin" /> Consultando sessão...
         </div>
       ) : platformDown ? null : connected ? (
         <div className="flex flex-wrap items-center gap-3">
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-success/10 text-success">
+          <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide bg-success/10 text-success">
             Conectado
           </span>
           <button
             type="button"
             disabled={busy}
             onClick={() => void handleDisconnect()}
-            className="px-3 py-2 text-xs font-bold rounded-lg border border-danger/30 text-danger bg-danger/10 hover:bg-danger/20 disabled:opacity-50 flex items-center gap-1.5"
+            className="px-4 py-3 text-sm font-bold rounded-xl border border-danger/30 text-danger bg-danger/10 hover:bg-danger/20 disabled:opacity-50 flex items-center gap-2"
           >
-            {busy ? <Loader2 size={14} className="animate-spin" /> : <Unplug size={14} />}
+            {busy ? <Loader2 size={16} className="animate-spin" /> : <Unplug size={16} />}
             Desconectar
           </button>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {qr && (
-            <div className="flex flex-col items-start gap-2">
+            <div className="flex flex-col items-center gap-2">
               <img
                 src={qr}
                 alt="QR Code para conectar o WhatsApp"
-                className="w-48 h-48 rounded-lg border border-border bg-white p-2"
+                className="w-56 h-56 rounded-xl border border-border bg-white p-3"
               />
-              <p className="text-xs text-text-secondary">
+              <p className="text-sm text-text-secondary text-center">
                 Abra o WhatsApp no celular → Aparelhos conectados → Conectar um aparelho.
               </p>
             </div>
@@ -184,16 +184,16 @@ const SalonWhatsAppConnection: React.FC<{ barbershopId: string }> = ({ barbersho
             type="button"
             disabled={busy}
             onClick={() => void handleConnect()}
-            className="px-3 py-2 text-xs font-bold rounded-lg bg-accent hover:bg-accent-hover text-accent-fg disabled:opacity-50 flex items-center gap-1.5"
+            className="w-full py-3.5 bg-accent hover:bg-accent-hover text-accent-fg font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-accent/20 disabled:opacity-50 text-base"
           >
-            {busy ? <Loader2 size={14} className="animate-spin" /> : <QrCode size={14} />}
-            {qr ? 'Gerar QR novamente' : 'Conectar'}
+            {busy ? <Loader2 size={20} className="animate-spin" /> : <QrCode size={20} />}
+            {qr ? 'Gerar QR novamente' : 'Conectar WhatsApp'}
           </button>
         </div>
       )}
 
       {error && (
-        <p className="mt-2 text-xs text-danger" role="alert">
+        <p className="mt-3 text-sm text-danger" role="alert">
           {error}
         </p>
       )}
@@ -301,11 +301,9 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
             </div>
             <p className="mt-1.5 text-[11px] text-text-muted">
               Número que recebe o aviso quando um cliente entra na fila. Quem envia é o WhatsApp
-              conectado abaixo.
+              conectado no cartão abaixo.
             </p>
           </div>
-
-          {barbershopId && <SalonWhatsAppConnection barbershopId={barbershopId} />}
 
           <div>
             <label className="block text-sm text-text-secondary mb-2">Logo do Salão</label>
@@ -340,6 +338,8 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
           </div>
         </div>
       </div>
+
+      {barbershopId && <SalonWhatsAppConnection barbershopId={barbershopId} />}
 
       <div className="bg-surface border border-border rounded-xl p-5">
         <h3 className="text-lg font-bold text-text-primary mb-4">Horários de Funcionamento</h3>

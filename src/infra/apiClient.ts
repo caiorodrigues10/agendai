@@ -206,17 +206,19 @@ export const apiClient = async <T>(
   _retried = false
 ): Promise<T> => {
   checkRateLimit();
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+  const headers: Record<string, string> = {};
   if (token) headers['Authorization'] = `Bearer ${token}`;
+  const hasJsonBody = body !== undefined && body !== null;
+  if (hasJsonBody) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   let res: Response;
   try {
     res = await fetch(`${API_BASE}${url}`, {
       method,
       headers,
-      body: body ? JSON.stringify(sanitize(body)) : undefined,
+      body: hasJsonBody ? JSON.stringify(sanitize(body)) : undefined,
       credentials: 'include',
     });
   } catch (err) {
