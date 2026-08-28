@@ -240,9 +240,15 @@ export const LoginPage: React.FC = () => {
   const [pendingReferral, setPendingReferral] = useState<string | null>(() =>
     referralStorage.get()
   );
-  const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5, 6]);
-  const [openTime, setOpenTime] = useState('09:00');
-  const [closeTime, setCloseTime] = useState('19:00');
+  const [scheduleDays, setScheduleDays] = useState<Record<number, { isOpen: boolean; openTime: string; closeTime: string }>>({
+    0: { isOpen: false, openTime: '09:00', closeTime: '19:00' },
+    1: { isOpen: true, openTime: '09:00', closeTime: '19:00' },
+    2: { isOpen: true, openTime: '09:00', closeTime: '19:00' },
+    3: { isOpen: true, openTime: '09:00', closeTime: '19:00' },
+    4: { isOpen: true, openTime: '09:00', closeTime: '19:00' },
+    5: { isOpen: true, openTime: '09:00', closeTime: '19:00' },
+    6: { isOpen: true, openTime: '09:00', closeTime: '19:00' },
+  });
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [paywallPlans, setPaywallPlans] = useState<Plan[]>([]);
   const hadSessionOnMount = useRef(Boolean(authStorage.getUser()));
@@ -438,23 +444,26 @@ export const LoginPage: React.FC = () => {
       setRegisterStep(1);
       return;
     }
-    if (selectedDays.length === 0) {
+    const hasOpenDay = Object.values(scheduleDays).some(d => d.isOpen);
+    if (!hasOpenDay) {
       showErrorToast('Selecione pelo menos 1 dia de funcionamento.');
       return;
     }
-    if (openTime >= closeTime) {
-      showErrorToast('Horário de abertura deve ser anterior ao de fechamento.');
-      return;
+    for (const [dayStr, day] of Object.entries(scheduleDays)) {
+      if (day.isOpen && day.openTime >= day.closeTime) {
+        const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+        showErrorToast(`${dayNames[Number(dayStr)]}: horário de abertura deve ser anterior ao de fechamento.`);
+        return;
+      }
     }
     setSubmitting(true);
     const referralCode = referralStorage.get() ?? undefined;
     const token = await getRecaptchaToken('register');
-    const WEEKDAY_ORDER = [0, 1, 2, 3, 4, 5, 6];
-    const schedule = WEEKDAY_ORDER.map(dayOfWeek => ({
+    const schedule = [0, 1, 2, 3, 4, 5, 6].map(dayOfWeek => ({
       dayOfWeek,
-      isOpen: selectedDays.includes(dayOfWeek),
-      openTime,
-      closeTime,
+      isOpen: scheduleDays[dayOfWeek].isOpen,
+      openTime: scheduleDays[dayOfWeek].openTime,
+      closeTime: scheduleDays[dayOfWeek].closeTime,
     }));
     const result = await registerUser({
       ownerName: data.ownerName.trim(),
@@ -489,9 +498,15 @@ export const LoginPage: React.FC = () => {
     setTab(next);
     setRegisterStep(1);
     setRegisterFieldsUnlocked(false);
-    setSelectedDays([1, 2, 3, 4, 5, 6]);
-    setOpenTime('09:00');
-    setCloseTime('19:00');
+    setScheduleDays({
+      0: { isOpen: false, openTime: '09:00', closeTime: '19:00' },
+      1: { isOpen: true, openTime: '09:00', closeTime: '19:00' },
+      2: { isOpen: true, openTime: '09:00', closeTime: '19:00' },
+      3: { isOpen: true, openTime: '09:00', closeTime: '19:00' },
+      4: { isOpen: true, openTime: '09:00', closeTime: '19:00' },
+      5: { isOpen: true, openTime: '09:00', closeTime: '19:00' },
+      6: { isOpen: true, openTime: '09:00', closeTime: '19:00' },
+    });
     if (next === 'register') {
       registerForm.reset({
         ownerName: '',
@@ -853,61 +868,73 @@ export const LoginPage: React.FC = () => {
                         <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
                           Horário de funcionamento
                         </p>
-                        <div className="flex flex-wrap gap-1.5">
+                        <div className="space-y-1.5">
                           {(['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] as const).map(
-                            (label, i) => (
-                              <button
-                                key={i}
-                                type="button"
-                                onClick={() =>
-                                  setSelectedDays(prev =>
-                                    prev.includes(i)
-                                      ? prev.filter(d => d !== i)
-                                      : [...prev, i].sort()
-                                  )
-                                }
-                                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all ${
-                                  selectedDays.includes(i)
-                                    ? 'bg-accent border-accent text-accent-fg'
-                                    : 'bg-bg border-border text-text-muted'
-                                }`}
-                              >
-                                {label}
-                              </button>
-                            )
+                            (label, i) => {
+                              const day = scheduleDays[i];
+                              return (
+                                <div
+                                  key={i}
+                                  className={`flex items-center gap-2 p-2 rounded-lg border transition-all ${
+                                    day.isOpen
+                                      ? 'border-accent/30 bg-accent/5'
+                                      : 'border-border bg-bg'
+                                  }`}
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setScheduleDays(prev => ({
+                                        ...prev,
+                                        [i]: { ...prev[i], isOpen: !prev[i].isOpen },
+                                      }))
+                                    }
+                                    className={`w-10 shrink-0 rounded-md px-2 py-1 text-[11px] font-bold border transition-all ${
+                                      day.isOpen
+                                        ? 'bg-accent border-accent text-accent-fg'
+                                        : 'bg-bg border-border text-text-muted'
+                                    }`}
+                                  >
+                                    {label}
+                                  </button>
+                                  {day.isOpen ? (
+                                    <div className="flex items-center gap-1.5 flex-1">
+                                      <input
+                                        type="time"
+                                        value={day.openTime}
+                                        onChange={e =>
+                                          setScheduleDays(prev => ({
+                                            ...prev,
+                                            [i]: { ...prev[i], openTime: e.target.value },
+                                          }))
+                                        }
+                                        className="flex-1 min-w-0 bg-bg border border-border rounded-md px-2 py-1 text-text-primary text-[11px] outline-none focus:ring-1 focus:ring-accent"
+                                      />
+                                      <span className="text-[10px] text-text-muted">até</span>
+                                      <input
+                                        type="time"
+                                        value={day.closeTime}
+                                        onChange={e =>
+                                          setScheduleDays(prev => ({
+                                            ...prev,
+                                            [i]: { ...prev[i], closeTime: e.target.value },
+                                          }))
+                                        }
+                                        className="flex-1 min-w-0 bg-bg border border-border rounded-md px-2 py-1 text-text-primary text-[11px] outline-none focus:ring-1 focus:ring-accent"
+                                      />
+                                    </div>
+                                  ) : (
+                                    <span className="flex-1 text-[11px] text-text-muted italic">
+                                      Fechado
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            }
                           )}
                         </div>
-                        {selectedDays.length === 0 && (
+                        {!Object.values(scheduleDays).some(d => d.isOpen) && (
                           <p className="text-[11px] text-danger">Selecione pelo menos 1 dia</p>
-                        )}
-                        <div className="flex gap-3">
-                          <div className="flex-1 space-y-1">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
-                              Abre
-                            </label>
-                            <input
-                              type="time"
-                              value={openTime}
-                              onChange={e => setOpenTime(e.target.value)}
-                              className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent"
-                            />
-                          </div>
-                          <div className="flex-1 space-y-1">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
-                              Fecha
-                            </label>
-                            <input
-                              type="time"
-                              value={closeTime}
-                              onChange={e => setCloseTime(e.target.value)}
-                              className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent"
-                            />
-                          </div>
-                        </div>
-                        {openTime >= closeTime && (
-                          <p className="text-[11px] text-danger">
-                            Horário de abertura deve ser anterior ao de fechamento
-                          </p>
                         )}
                       </div>
 
