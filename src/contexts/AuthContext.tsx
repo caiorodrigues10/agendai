@@ -43,7 +43,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         try {
           const me = await authApi.me(token);
           setUser(normalizeUser(me.user));
-          authStorage.setUser(me.user);
+          authStorage.setUser(me.user, authStorage.isPersistent());
           success = true;
         } catch (err) {
           // Rate limit / rede: mantém sessão local em vez de forçar logout
@@ -68,8 +68,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (refreshToken) {
           try {
             const resp = await authApi.refresh(refreshToken);
-            authStorage.setTokens(resp.accessToken, resp.refreshToken);
-            authStorage.setUser(resp.user);
+            const rememberMe = authStorage.isPersistent();
+            authStorage.setTokens(resp.accessToken, resp.refreshToken, rememberMe);
+            authStorage.setUser(resp.user, rememberMe);
             setUser(normalizeUser(resp.user));
           } catch (err) {
             if (
@@ -115,14 +116,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const persistSession = (resp: { user: any; accessToken: string; refreshToken?: string }, rememberMe = true) => {
     authStorage.setTokens(resp.accessToken, resp.refreshToken, rememberMe);
-    authStorage.setUser(resp.user);
+    authStorage.setUser(resp.user, rememberMe);
     setUser(normalizeUser(resp.user));
     sessionStorage.removeItem('agendai:access-block-info');
   };
 
   const login = async (email: string, password: string, recaptchaToken?: string, rememberMe = true): Promise<AuthResult> => {
     try {
-      const resp = await authApi.login(email, password, recaptchaToken);
+      const resp = await authApi.login(email, password, recaptchaToken, rememberMe);
       persistSession(resp, rememberMe);
       return { ok: true };
     } catch (err) {
@@ -184,7 +185,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(prev => {
       if (!prev) return prev;
       const updated = { ...prev, avatarUrl };
-      authStorage.setUser(updated as any);
+      authStorage.setUser(updated as any, authStorage.isPersistent());
       return updated;
     });
   }, []);

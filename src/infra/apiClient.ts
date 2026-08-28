@@ -94,8 +94,9 @@ async function refreshAccessToken(): Promise<string | null> {
         window.dispatchEvent(new Event('agendai:session-expired'));
         return null;
       }
-      authStorage.setTokens(accessToken, typeof data.refreshToken === 'string' ? data.refreshToken : undefined);
-      if (data.user && typeof data.user === 'object') authStorage.setUser(data.user as Record<string, unknown>);
+      const rememberMe = authStorage.isPersistent();
+      authStorage.setTokens(accessToken, typeof data.refreshToken === 'string' ? data.refreshToken : undefined, rememberMe);
+      if (data.user && typeof data.user === 'object') authStorage.setUser(data.user as Record<string, unknown>, rememberMe);
       return accessToken;
     } catch {
       authStorage.clearTokens();

@@ -33,8 +33,8 @@ export interface RegisterPayload {
 }
 
 export const authApi = {
-  login: (email: string, password: string, recaptchaToken?: string) =>
-    apiClient<AuthResponse>('/api/auth/login', 'POST', { email, password, recaptchaToken }),
+  login: (email: string, password: string, recaptchaToken?: string, rememberMe = true) =>
+    apiClient<AuthResponse>('/api/auth/login', 'POST', { email, password, recaptchaToken, rememberMe }),
   register: (payload: RegisterPayload & { recaptchaToken?: string }) =>
     apiClient<AuthResponse>('/api/auth/register', 'POST', payload),
   refresh: (refreshToken: string) =>
