@@ -1,5 +1,6 @@
 import React from 'react';
 import { Logo } from './Logo';
+import { Avatar } from './Avatar';
 import { Lock, LogOut, Wallet } from 'lucide-react';
 import { StaffMember } from '../../types';
 import { ThemeToggle } from './ThemeToggle';
@@ -29,6 +30,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
                   <Wallet size={12} /> Plano
                 </Link>
               )}
+              <Avatar src={currentUser.avatarUrl} name={currentUser.name} size="xs" />
               <div className="px-2 py-1 bg-accent/15 rounded text-xs font-bold text-accent uppercase">
                 {currentUser.role === 'MASTER_ADMIN'
                   ? 'Admin'

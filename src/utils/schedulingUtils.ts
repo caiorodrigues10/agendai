@@ -56,6 +56,7 @@ export function mapStaffFromApi(raw: Record<string, unknown>): StaffMember {
     email: String(raw.email),
     role,
     barbershopId: raw.barbershopId ? String(raw.barbershopId) : undefined,
+    avatarUrl: raw.avatarUrl ? String(raw.avatarUrl) : null,
   };
 }
 

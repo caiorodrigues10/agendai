@@ -72,6 +72,7 @@ export interface StaffMember {
   role: StaffRole;
   barbershopId?: string;
   emailVerified?: boolean;
+  avatarUrl?: string | null;
 }
 
 export interface FeedPost {

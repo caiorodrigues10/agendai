@@ -4,7 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { StaffMember } from '../../types';
 import { TeamMemberSchema, TeamMemberFormData } from '../../schemas';
 import { v4 as uuidv4 } from 'uuid';
-import { Trash2, UserPlus, Shield, User, X, Check, AlertCircle } from 'lucide-react';
+import { Trash2, UserPlus, X, Check, AlertCircle } from 'lucide-react';
+import { Avatar } from '../ui/Avatar';
 
 interface TeamManagerProps {
   staff: StaffMember[];
@@ -183,15 +184,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
             className="bg-surface p-3 rounded-lg border border-border flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${member.role === 'OWNER' || member.role === 'MASTER_ADMIN' ? 'bg-accent/20 text-accent' : 'bg-surface-2 text-text-secondary'}`}
-              >
-                {member.role === 'OWNER' || member.role === 'MASTER_ADMIN' ? (
-                  <Shield size={16} />
-                ) : (
-                  <User size={16} />
-                )}
-              </div>
+              <Avatar src={member.avatarUrl} name={member.name} size="sm" />
               <div>
                 <h4 className="font-medium text-sm text-text-primary">
                   {member.name} {member.id === currentAdminId && '(Você)'}

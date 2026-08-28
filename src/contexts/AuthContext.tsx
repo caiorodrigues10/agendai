@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
 import { authApi, RegisterPayload } from '../infra/authApi';
 import { authStorage } from '../infra/authStorage';
 import { ApiError } from '../infra/apiClient';
@@ -15,6 +15,7 @@ interface AuthContextValue {
   register: (data: RegisterPayload & { recaptchaToken?: string }) => Promise<AuthResult>;
   logout: () => void;
   hasRole: (roles: StaffMember['role'][]) => boolean;
+  updateUserAvatar: (avatarUrl: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -179,9 +180,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return normalizedRoles.includes(normalizedUserRole);
   };
 
+  const updateUserAvatar = useCallback((avatarUrl: string | null) => {
+    setUser(prev => {
+      if (!prev) return prev;
+      const updated = { ...prev, avatarUrl };
+      authStorage.setUser(updated as any);
+      return updated;
+    });
+  }, []);
+
   const value = useMemo(
-    () => ({ user, loading, login, loginWithGoogle, register, logout, hasRole }),
-    [user, loading]
+    () => ({ user, loading, login, loginWithGoogle, register, logout, hasRole, updateUserAvatar }),
+    [user, loading, updateUserAvatar]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

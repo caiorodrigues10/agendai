@@ -8,6 +8,7 @@ import { ReturnToQueueModal } from '../components/domain/ReturnToQueueModal';
 import { ServiceManager } from '../components/domain/ServiceManager';
 import { SettingsManager } from '../components/domain/SettingsManager';
 import { AccountPrivacyPanel } from '../components/domain/AccountPrivacyPanel';
+import { ProfileAvatarSection } from '../components/domain/ProfileAvatarSection';
 import { TeamManager } from '../components/domain/TeamManager';
 import { FinancialDashboard } from '../components/domain/FinancialDashboard';
 import { OwnerFinancialPanel } from '../components/domain/OwnerFinancialPanel';
@@ -48,7 +49,7 @@ import { QueueItem } from '../types';
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, updateUserAvatar } = useAuth();
   const { hasDashboard, accessState, loading: subscriptionLoading } = useSubscription();
   const {
     services,
@@ -433,6 +434,20 @@ export const StaffDashboard: React.FC = () => {
         {activeTab === 'appointments' && !settings && (
           <div className="text-center py-12 bg-surface rounded-xl border border-border border-dashed">
             <p className="text-text-muted">Carregando configurações do salão...</p>
+          </div>
+        )}
+
+        {user && activeTab === 'settings' && (
+          <div className="mt-6">
+            <ProfileAvatarSection
+              userId={user.id}
+              userName={user.name}
+              avatarUrl={user.avatarUrl}
+              onAvatarUpdated={url => {
+                updateUserAvatar(url);
+              }}
+              onNotify={showToast}
+            />
           </div>
         )}
 
