@@ -225,46 +225,50 @@ export const PublicHome: React.FC = () => {
             </div>
 
             {/* ACTIONS */}
-            {!isUserInQueue &&
-              (!isOpen ? (
-                <div className="w-full bg-surface border border-border text-text-muted font-bold text-lg py-4 rounded-xl mb-8 flex items-center justify-center gap-3 opacity-75 cursor-not-allowed">
-                  <Coffee size={24} />
-                  <span>Fechado hoje</span>
+            <div className="mb-8 space-y-2">
+              {!isUserInQueue &&
+                (!isOpen ? (
+                  <div className="w-full bg-surface border border-border text-text-muted font-bold text-lg py-4 rounded-xl flex items-center justify-center gap-3 opacity-75 cursor-not-allowed">
+                    <Coffee size={24} />
+                    <span>Fechado hoje</span>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => openJoinForm('self')}
+                    className="w-full bg-accent hover:bg-accent-hover text-accent-fg font-bold text-lg py-4 rounded-xl shadow-lg shadow-accent/30 hover:shadow-accent/50 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 border border-accent/20 relative overflow-hidden group cursor-pointer"
+                  >
+                    <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 group-hover:translate-x-full"></div>
+                    <span className="relative flex items-center gap-3">
+                      <DynamicIcon name="Scissors" size={24} />
+                      Entrar na Fila
+                    </span>
+                  </button>
+                ))}
+
+              {isUserInQueue && (
+                <div className="w-full bg-accent/10 border border-accent/30 text-accent text-center py-3 rounded-xl flex items-center justify-center gap-2">
+                  <DynamicIcon name="CheckCircle" size={20} className="text-accent" />
+                  <span className="font-bold">Você já está na fila!</span>
                 </div>
-              ) : (
+              )}
+
+              {isOpen && (
                 <button
                   type="button"
-                  onClick={() => openJoinForm('self')}
-                  className="w-full bg-accent hover:bg-accent-hover text-accent-fg font-bold text-lg py-4 rounded-t-xl shadow-lg shadow-accent/30 hover:shadow-accent/50 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 border border-accent/20 relative overflow-hidden group cursor-pointer"
+                  onClick={() => openJoinForm('dependent')}
+                  className="w-full bg-surface border border-border hover:border-accent/50 hover:bg-surface-2 text-text-primary text-sm font-bold py-3.5 rounded-xl transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer"
                 >
-                  <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 group-hover:translate-x-full"></div>
-                  <span className="relative flex items-center gap-3">
-                    <DynamicIcon name="Scissors" size={24} />
-                    Entrar na Fila
+                  <span className="flex items-center gap-2">
+                    <DynamicIcon name="UserPlus" size={16} className="text-accent" />
+                    Adicionar dependente
+                  </span>
+                  <span className="text-[11px] font-medium text-text-muted">
+                    Filho, parceiro ou quem veio junto — sem entrar de novo
                   </span>
                 </button>
-              ))}
-
-            {isUserInQueue && (
-              <div
-                className={`w-full bg-accent/10 border border-accent/30 text-accent text-center py-3 flex items-center justify-center gap-2 ${
-                  isOpen ? 'rounded-t-xl' : 'rounded-xl mb-8'
-                }`}
-              >
-                <DynamicIcon name="CheckCircle" size={20} className="text-accent" />
-                <span className="font-bold">Você já está na fila!</span>
-              </div>
-            )}
-
-            {isOpen && (
-              <button
-                type="button"
-                onClick={() => openJoinForm('dependent')}
-                className="w-full bg-surface border border-t-0 border-border hover:bg-surface-2 text-text-secondary hover:text-text-primary text-sm font-medium py-3 rounded-b-xl transition-all flex items-center justify-center gap-2 cursor-pointer mb-8"
-              >
-                <DynamicIcon name="UserPlus" size={16} /> Adicionar dependente
-              </button>
-            )}
+              )}
+            </div>
 
             {/* QUEUE LIST HEADER */}
             <div className="flex items-center gap-3 mb-4">
