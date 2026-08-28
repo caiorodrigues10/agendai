@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { StaffMember } from '../../types';
 import { TeamMemberSchema, TeamMemberFormData } from '../../schemas';
 import { v4 as uuidv4 } from 'uuid';
-import { Trash2, UserPlus, X, Check, AlertCircle } from 'lucide-react';
+import { Trash2, UserPlus, X, Check, AlertCircle, Camera, Loader2 } from 'lucide-react';
 import { Avatar } from '../ui/Avatar';
+import { usersApi } from '../../infra/usersApi';
+import { getErrorMessage } from '../../utils/errorMessage';
 
 interface TeamManagerProps {
   staff: StaffMember[];
@@ -22,6 +24,9 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [avatarUploadingId, setAvatarUploadingId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [avatarTargetId, setAvatarTargetId] = useState<string | null>(null);
 
   const {
     register,
@@ -68,8 +73,47 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
     }
   };
 
+  const handleAvatarClick = (memberId: string) => {
+    setAvatarTargetId(memberId);
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !avatarTargetId) return;
+
+    setAvatarUploadingId(avatarTargetId);
+    try {
+      const { uploadUrl, publicUrl } = await usersApi.getAvatarUploadUrl(avatarTargetId, file.type);
+      const putRes = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: { 'Content-Type': file.type },
+      });
+      if (!putRes.ok) throw new Error('Falha ao enviar arquivo');
+      await usersApi.confirmAvatar(avatarTargetId, publicUrl);
+      const updated = staff.map(m =>
+        m.id === avatarTargetId ? { ...m, avatarUrl: publicUrl } : m
+      );
+      await onUpdateTeam(updated);
+    } catch (err) {
+      setFormError(getErrorMessage(err, 'Erro ao enviar foto'));
+    } finally {
+      setAvatarUploadingId(null);
+      setAvatarTargetId(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div className="mt-6 animate-fade-in">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/jpg,image/png,image/webp"
+        onChange={handleAvatarUpload}
+        className="hidden"
+      />
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-bold text-text-primary">Equipe & Acessos</h3>
         <button
@@ -92,6 +136,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
       {isAdding && (
         <form
           onSubmit={handleSubmit(handleAddMember)}
+          autoComplete="off"
           className="bg-surface p-4 rounded-xl border border-border mb-4 animate-fade-in-down"
         >
           <h4 className="text-sm font-bold text-text-primary mb-3">Novo Membro</h4>
@@ -119,6 +164,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
               <input
                 type="email"
                 placeholder="E-mail"
+                autoComplete="off"
                 className={`w-full bg-bg border rounded px-3 py-2 text-text-primary text-sm focus:ring-1 focus:ring-accent outline-none ${errors.email ? 'border-danger' : 'border-border'}`}
                 {...register('email')}
               />
@@ -147,6 +193,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
               <input
                 type="password"
                 placeholder="Senha"
+                autoComplete="new-password"
                 className={`w-full bg-bg border rounded px-3 py-2 text-text-primary text-sm focus:ring-1 focus:ring-accent outline-none ${errors.password ? 'border-danger' : 'border-border'}`}
                 {...register('password')}
               />
@@ -184,7 +231,16 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
             className="bg-surface p-3 rounded-lg border border-border flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
-              <Avatar src={member.avatarUrl} name={member.name} size="sm" />
+              <div className="relative group cursor-pointer" onClick={() => handleAvatarClick(member.id)}>
+                <Avatar src={member.avatarUrl} name={member.name} size="sm" />
+                <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  {avatarUploadingId === member.id ? (
+                    <Loader2 size={14} className="text-white animate-spin" />
+                  ) : (
+                    <Camera size={14} className="text-white" />
+                  )}
+                </div>
+              </div>
               <div>
                 <h4 className="font-medium text-sm text-text-primary">
                   {member.name} {member.id === currentAdminId && '(Você)'}
