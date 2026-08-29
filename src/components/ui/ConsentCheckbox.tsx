@@ -11,6 +11,7 @@ interface ConsentCheckboxProps {
   helpText?: string;
   helpLink?: { label: string; href: string };
   className?: string;
+  variant?: 'default' | 'compact';
 }
 
 export const ConsentCheckbox: React.FC<ConsentCheckboxProps> = ({
@@ -23,13 +24,16 @@ export const ConsentCheckbox: React.FC<ConsentCheckboxProps> = ({
   helpText,
   helpLink,
   className = '',
+  variant = 'default',
 }) => {
+  const isCompact = variant === 'compact';
+
   return (
     <div className={className}>
       <label
-        className={`flex items-start gap-3 cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`flex ${isCompact ? 'items-center' : 'items-start'} ${isCompact ? 'gap-2' : 'gap-3'} cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
-        <div className="relative mt-0.5 flex-shrink-0">
+        <div className={`relative flex-shrink-0 ${isCompact ? '' : 'mt-0.5'}`}>
           <input
             type="checkbox"
             checked={checked}
@@ -39,7 +43,7 @@ export const ConsentCheckbox: React.FC<ConsentCheckboxProps> = ({
             aria-required={required}
           />
           <div
-            className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200
+            className={`${isCompact ? 'w-4 h-4' : 'w-5 h-5'} rounded border-2 flex items-center justify-center transition-all duration-200
             ${
               error
                 ? 'border-danger'
@@ -50,11 +54,11 @@ export const ConsentCheckbox: React.FC<ConsentCheckboxProps> = ({
             peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-accent/50
             ${disabled ? 'opacity-50' : ''}`}
           >
-            {checked && <Check size={12} className="text-current" />}
+            {checked && <Check size={isCompact ? 10 : 12} className="text-current" />}
           </div>
         </div>
-        <div className="flex-1 min-w-0 text-sm leading-relaxed">
-          <span className="text-text-primary font-medium">
+        <div className={`flex-1 min-w-0 ${isCompact ? 'text-[11px] leading-none' : 'text-sm leading-relaxed'}`}>
+          <span className={`text-text-primary ${isCompact ? 'text-[11px]' : 'font-medium'}`}>
             {label}
             {required && (
               <span className="text-danger ml-1" aria-hidden="true">

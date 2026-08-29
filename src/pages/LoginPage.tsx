@@ -670,32 +670,21 @@ export const LoginPage: React.FC = () => {
                     />
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => navigate('/esqueci-senha')}
-                    className="text-[11px] text-text-muted hover:text-accent transition-colors text-right w-auto -mt-2"
-                  >
-                    Esqueci minha senha
-                  </button>
-
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
-                    <div className="relative flex items-center justify-center">
-                      <input
-                        type="checkbox"
-                        checked={rememberMe}
-                        onChange={(e) => setRememberMe(e.target.checked)}
-                        className="peer sr-only"
-                      />
-                      <div className="w-4 h-4 rounded border border-text-muted/40 bg-bg transition-all peer-checked:bg-accent peer-checked:border-accent flex items-center justify-center">
-                        {rememberMe && (
-                          <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                    <span className="text-xs text-text-secondary">Manter conectado</span>
-                  </label>
+                  <div className="flex items-center justify-between -mt-1">
+                    <ConsentCheckbox
+                      label="Manter conectado"
+                      checked={rememberMe}
+                      onChange={setRememberMe}
+                      variant="compact"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => navigate('/esqueci-senha')}
+                      className="text-[11px] text-text-muted hover:text-accent transition-colors shrink-0"
+                    >
+                      Esqueci minha senha
+                    </button>
+                  </div>
 
                   <button type="submit" disabled={submitting} className={primaryBtn}>
                     {submitting ? (
