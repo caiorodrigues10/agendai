@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/media-has-caption -- vídeo demonstrativo pode ser fornecido sem faixa de áudio */
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {

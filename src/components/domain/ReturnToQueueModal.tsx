@@ -50,19 +50,21 @@ export const ReturnToQueueModal: React.FC<ReturnToQueueModalProps> = ({
   ];
 
   return (
-    <div
-      className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-4 bg-black/55"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="return-queue-title"
-      onClick={() => {
-        if (!submitting) onClose();
-      }}
-    >
+    <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-4">
+      <button
+        type="button"
+        aria-label="Fechar modal"
+        className="absolute inset-0 bg-black/55"
+        onClick={() => {
+          if (!submitting) onClose();
+        }}
+      />
       <FocusLock returnFocus>
         <div
-          className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-surface p-5 shadow-xl"
-          onClick={e => e.stopPropagation()}
+          className="relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-surface p-5 shadow-xl"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="return-queue-title"
         >
           <div className="flex items-start justify-between gap-3 mb-4">
             <div>

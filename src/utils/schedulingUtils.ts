@@ -114,8 +114,8 @@ export function isSlotAvailable(
   staffCount: number
 ): boolean {
   const occupied = Array.isArray(occupancy) ? occupancy : [];
-  // Visitante não carrega /users; sem fallback o front zera todos os horários.
-  const chairs = Math.max(staffCount, 1);
+  if (staffCount <= 0) return false;
+  const chairs = staffCount;
 
   const slotStart = timeToMinutes(time);
 

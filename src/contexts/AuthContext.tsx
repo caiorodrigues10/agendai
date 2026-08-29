@@ -90,12 +90,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               setUser(null);
             }
           }
-        } else if (!token) {
-          authStorage.clearTokens();
-          authStorage.clearUser();
-          setUser(null);
-        } else if (cachedUser) {
-          setUser(normalizeUser(cachedUser));
         } else {
           authStorage.clearTokens();
           authStorage.clearUser();

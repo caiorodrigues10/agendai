@@ -29,7 +29,7 @@ export interface RegisterPayload {
   termsAccepted: boolean;
   marketingOptIn?: boolean;
   lgpdConsent: boolean;
-  schedule?: Array<{ dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }>;
+  schedule?: { dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }[];
 }
 
 export const authApi = {

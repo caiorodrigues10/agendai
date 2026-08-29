@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/media-has-caption -- mídia enviada pelo salão não possui trilha de legenda separada */
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShopSettings, FeedPost, StaffMember, Service, DaySchedule } from '../../types';

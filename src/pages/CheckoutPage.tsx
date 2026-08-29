@@ -57,13 +57,13 @@ const rejectionMessage = (statusDetail?: string) =>
 const inputClass =
   'w-full bg-bg border border-border rounded-xl py-3 px-4 text-text-primary text-sm outline-none transition-colors placeholder:text-text-muted focus:border-accent/60 hover:border-border-strong';
 
-export type SubscriptionCheckoutProps = {
+export interface SubscriptionCheckoutProps {
   planId?: string | null;
   billing?: 'MONTHLY' | 'YEARLY';
   setupTrial?: boolean;
   variant?: 'page' | 'embedded';
   onBack?: () => void;
-};
+}
 
 export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
   planId: planIdProp,

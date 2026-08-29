@@ -86,6 +86,9 @@ export const PostsManager: React.FC = () => {
   const [ctaText, setCtaText] = useState('Agende agora');
   const [publishMode, setPublishMode] = useState<'now' | 'schedule'>('now');
   const [scheduledFor, setScheduledFor] = useState('');
+  const [minimumScheduleDate] = useState(() =>
+    new Date(Date.now() + 60_000).toISOString().slice(0, 16)
+  );
   const [autoPostEnabled, setAutoPostEnabled] = useState(false);
 
   const [suggestions, setSuggestions] = useState<PostAiSuggestion[]>([]);
@@ -521,7 +524,7 @@ export const PostsManager: React.FC = () => {
                   type="datetime-local"
                   value={scheduledFor}
                   onChange={e => setScheduledFor(e.target.value)}
-                  min={new Date(Date.now() + 60_000).toISOString().slice(0, 16)}
+                  min={minimumScheduleDate}
                   className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent"
                 />
               )}

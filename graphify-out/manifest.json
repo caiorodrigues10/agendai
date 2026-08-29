@@ -5,8 +5,8 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1788011370.5079052,
-    "ast_hash": "3fe105513428f33035361b9de1c2e684",
+    "mtime": 1788025136.185963,
+    "ast_hash": "e42aa3cdd9e1964cdb6f6e28497be3a4",
     "semantic_hash": ""
   },
   "postcss.config.js": {
@@ -50,13 +50,13 @@
     "semantic_hash": ""
   },
   "src/components/domain/FinancialDashboard.tsx": {
-    "mtime": 1787690258.5993655,
-    "ast_hash": "fb5513f72cb6b17265dfb3a375ce9716",
+    "mtime": 1788023985.925153,
+    "ast_hash": "359d1210d7e25e60a5e73d15b69ca42b",
     "semantic_hash": ""
   },
   "src/components/domain/OwnerFinancialPanel.tsx": {
-    "mtime": 1788012235.9774706,
-    "ast_hash": "0dc5321eaf7f93162e145b52385c54a9",
+    "mtime": 1788023979.311591,
+    "ast_hash": "57bbcfb49a89b7e4664c8003a60549d7",
     "semantic_hash": ""
   },
   "src/components/domain/OwnerReferralsPanel.tsx": {
@@ -70,8 +70,8 @@
     "semantic_hash": ""
   },
   "src/components/domain/PostsManager.tsx": {
-    "mtime": 1787933985.1576042,
-    "ast_hash": "e5aa8b8753b414249ccfacd83fb8c79c",
+    "mtime": 1788025136.1703582,
+    "ast_hash": "d7582a9d63d2da4b133163a9939e440d",
     "semantic_hash": ""
   },
   "src/components/domain/QueueItemCard.tsx": {
@@ -95,8 +95,8 @@
     "semantic_hash": ""
   },
   "src/components/domain/ServiceManager.tsx": {
-    "mtime": 1787690259.0818715,
-    "ast_hash": "dafaba309b25f7f38f6d13f38109c178",
+    "mtime": 1788024303.284833,
+    "ast_hash": "0c4cfc37950825046ae7af30178fa07f",
     "semantic_hash": ""
   },
   "src/components/domain/SettingsManager.tsx": {
@@ -110,13 +110,13 @@
     "semantic_hash": ""
   },
   "src/components/domain/ShopProfile.tsx": {
-    "mtime": 1788007824.165155,
-    "ast_hash": "a736eeeb2ed70acfcdb28e1149daf471",
+    "mtime": 1788025199.2382207,
+    "ast_hash": "3c75562f520c035b8a7a4d9466303822",
     "semantic_hash": ""
   },
   "src/components/domain/TeamManager.tsx": {
-    "mtime": 1788010873.3662558,
-    "ast_hash": "a68cea1f9e401f021c85887bcfa66669",
+    "mtime": 1788024367.9200974,
+    "ast_hash": "97ca77f431cc8f470632d2ebc98e82f4",
     "semantic_hash": ""
   },
   "src/components/infra/AccessBlockedListener.tsx": {
@@ -200,8 +200,8 @@
     "semantic_hash": ""
   },
   "src/contexts/AuthContext.tsx": {
-    "mtime": 1788007449.055382,
-    "ast_hash": "f198d91dce7af818eec4bb12ca1539d9",
+    "mtime": 1788025136.1799572,
+    "ast_hash": "72dedc36e7e8d5d2ef4221484b4fb4b4",
     "semantic_hash": ""
   },
   "src/contexts/BarbershopContext.tsx": {
@@ -245,8 +245,8 @@
     "semantic_hash": ""
   },
   "src/infra/authApi.ts": {
-    "mtime": 1788007449.0513563,
-    "ast_hash": "2e1770d56ffae34abd990c0ce9e2b285",
+    "mtime": 1788025136.1819603,
+    "ast_hash": "060d928512d05a5706e737cb8d5c7fa5",
     "semantic_hash": ""
   },
   "src/infra/authStorage.ts": {
@@ -310,8 +310,8 @@
     "semantic_hash": ""
   },
   "src/pages/CheckoutPage.tsx": {
-    "mtime": 1787952008.0785992,
-    "ast_hash": "1055076733d0536d7a53e3dd065ee25b",
+    "mtime": 1788025136.1849601,
+    "ast_hash": "10e45ef5ab4a6704559a3db13310528d",
     "semantic_hash": ""
   },
   "src/pages/EmailVerifiedPage.tsx": {
@@ -325,8 +325,8 @@
     "semantic_hash": ""
   },
   "src/pages/LandingPage.tsx": {
-    "mtime": 1788023465.7757611,
-    "ast_hash": "8e92618f6d81092f8b10bdf3d62f9ddb",
+    "mtime": 1788025199.2412224,
+    "ast_hash": "11f764ab6b21cd669ef762b0ca28b628",
     "semantic_hash": ""
   },
   "src/pages/LoginPage.test.tsx": {
@@ -360,13 +360,13 @@
     "semantic_hash": ""
   },
   "src/pages/PlansPage.tsx": {
-    "mtime": 1788011903.333043,
-    "ast_hash": "fe18f7926ebdcb5cd0c16d61fbb5f5e7",
+    "mtime": 1788024101.3481922,
+    "ast_hash": "5863b93e455e64762945700004dc2cb0",
     "semantic_hash": ""
   },
   "src/pages/PublicHome.test.tsx": {
-    "mtime": 1787860759.0354295,
-    "ast_hash": "4634bba93ed2a9dd1be7570c6cfcb6a5",
+    "mtime": 1788025338.9655254,
+    "ast_hash": "229c75de188ffb9df329a9c4905a1aea",
     "semantic_hash": ""
   },
   "src/pages/PublicHome.tsx": {
@@ -375,8 +375,8 @@
     "semantic_hash": ""
   },
   "src/pages/StaffDashboard.tsx": {
-    "mtime": 1788023671.5494957,
-    "ast_hash": "415d57c93ddc8267059eea7aff2f2fea",
+    "mtime": 1788024092.6952868,
+    "ast_hash": "5c4916b6a8aa5a0b79c0c541c7026c74",
     "semantic_hash": ""
   },
   "src/pages/marketing/AboutPage.tsx": {
@@ -430,8 +430,8 @@
     "semantic_hash": ""
   },
   "src/tests/testUtils.tsx": {
-    "mtime": 1787690263.046672,
-    "ast_hash": "aca4e71b36ad3b6dea4802f06387360b",
+    "mtime": 1788025338.9645271,
+    "ast_hash": "e5a9249d488e1490a9dc249b9bf299a1",
     "semantic_hash": ""
   },
   "src/types.ts": {
@@ -470,8 +470,8 @@
     "semantic_hash": ""
   },
   "src/utils/schedulingUtils.ts": {
-    "mtime": 1788010987.83297,
-    "ast_hash": "2249b4ee9d2bce1cc44f88f511263efc",
+    "mtime": 1788025338.9675252,
+    "ast_hash": "62de284501146a38c6a01fe93ca95093",
     "semantic_hash": ""
   },
   "src/vite-env.d.ts": {
@@ -635,13 +635,13 @@
     "semantic_hash": ""
   },
   "src/components/domain/ReturnToQueueModal.tsx": {
-    "mtime": 1787933985.3722453,
-    "ast_hash": "39a5b9f44ee50a5c7c1f7953e9c1acbc",
+    "mtime": 1788025136.1754377,
+    "ast_hash": "11386c09b09a722590fe2c1d759c7518",
     "semantic_hash": ""
   },
   "src/components/domain/TrialExpiredPaywallModal.tsx": {
-    "mtime": 1787852122.8897016,
-    "ast_hash": "8f306b721517e87b9c0e7045e0cc3cb9",
+    "mtime": 1788025136.1779556,
+    "ast_hash": "bceb8a3cd3c81e459ea9184a3c9bc739",
     "semantic_hash": ""
   },
   "src/components/infra/ErrorBoundary.tsx": {
@@ -660,8 +660,8 @@
     "semantic_hash": ""
   },
   "render.yaml": {
-    "mtime": 1787838710.0082219,
-    "ast_hash": "8d9d86811728b9b15c8761607a5b3ee2",
+    "mtime": 1788025136.1884906,
+    "ast_hash": "8636fee54fd02ec54d6c62ffc86802d2",
     "semantic_hash": ""
   },
   "src/components/domain/AccountPrivacyPanel.tsx": {
@@ -705,8 +705,8 @@
     "semantic_hash": ""
   },
   "src/components/pwa/PwaInstallCard.tsx": {
-    "mtime": 1788011702.7767084,
-    "ast_hash": "1f4d81509924da6f7478f7201661b445",
+    "mtime": 1788025199.2392218,
+    "ast_hash": "9ca940176591df876f68f17797d45f60",
     "semantic_hash": ""
   },
   "src/components/pwa/PwaUpdatePrompt.tsx": {

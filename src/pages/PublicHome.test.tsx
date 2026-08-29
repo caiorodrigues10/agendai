@@ -49,7 +49,17 @@ vi.mock('../contexts/BarbershopContext', () => ({
 
 vi.mock('../contexts/SchedulingContext', () => ({
   useScheduling: () => ({
-    queue: [],
+    queue: [
+      {
+        id: 'q1',
+        customerId: 'client-1',
+        customerName: 'Cliente principal',
+        whatsapp: '11999999999',
+        serviceId: 's1',
+        joinedAt: Date.now(),
+        status: 'waiting',
+      },
+    ],
     appointments: [],
     availability: [],
     aiInsight: null,
