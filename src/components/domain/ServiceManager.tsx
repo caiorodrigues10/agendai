@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Service } from '../../types';
 import { ServiceForm } from './ServiceForm';
 import { DynamicIcon } from '../ui/DynamicIcon';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import { PackageCatalog } from './PackageCatalog';
 
@@ -22,6 +23,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
 
   return (
     <div className="mt-6">
@@ -62,11 +64,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 <Pencil size={18} />
               </button>
               <button
-                onClick={() => {
-                  if (confirm('Tem certeza que deseja excluir este serviÃ§o?')) {
-                    onDelete(service.id);
-                  }
-                }}
+                onClick={() => setServiceToDelete(service)}
                 className="min-h-10 min-w-10 rounded-lg p-2 text-text-secondary transition-colors hover:bg-danger/10 hover:text-danger"
                 title="Excluir"
               >
@@ -99,6 +97,24 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       )}
 
       <PackageCatalog services={services} canManage={canManagePackages} />
+
+      <ConfirmDialog
+        open={serviceToDelete !== null}
+        title="Excluir serviço"
+        message={
+          serviceToDelete
+            ? `Tem certeza que deseja excluir "${serviceToDelete.name}"? Essa ação não pode ser desfeita.`
+            : ''
+        }
+        variant="danger"
+        onConfirm={() => {
+          if (serviceToDelete) {
+            onDelete(serviceToDelete.id);
+            setServiceToDelete(null);
+          }
+        }}
+        onClose={() => setServiceToDelete(null)}
+      />
     </div>
   );
 };

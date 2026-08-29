@@ -1,5 +1,51 @@
 # Backlog Técnico — Frontend
 
+## 2026-08-29 — Componente reutilizável ConfirmDialog + substituição no ServiceManager
+
+**Arquivos afetados:**
+- NOVO: `src/components/ui/ConfirmDialog.tsx`
+- `src/components/domain/ServiceManager.tsx`
+
+**Motivo:** A confirmação de exclusão de serviço usava `window.confirm()`
+nativo do navegador, que renderiza um alerta cinza fora do design system do
+app. O projeto já tinha modais customizados (ReturnToQueueModal.tsx, etc.)
+com padrão visual consistente — overlay, FocusLock, card arredondado,
+botões estilizados. Faltava um componente genérico de confirmação que
+pudesse ser reaproveitado nos outros 7 arquivos que ainda usam
+`window.confirm()`.
+
+**Mudanças implementadas:**
+
+| Arquivo | Mudança |
+|---------|---------|
+| `ConfirmDialog.tsx` (NOVO) | Componente genérico de confirmação com props `open`, `title`, `message`, `variant`, `submitting`, `onConfirm`, `onClose` |
+| `ConfirmDialog.tsx` | Overlay `fixed inset-0 z-[80] bg-black/55`, fecha ao clicar fora ou pressionar Escape |
+| `ConfirmDialog.tsx` | `<FocusLock returnFocus>` envolvendo o card |
+| `ConfirmDialog.tsx` | Card `rounded-2xl border-border bg-surface p-5 shadow-xl max-w-sm` |
+| `ConfirmDialog.tsx` | Variant `danger`: botão confirmar `bg-danger text-white hover:opacity-90` |
+| `ConfirmDialog.tsx` | Variant `default`: botão confirmar `bg-accent text-accent-fg hover:bg-accent-hover` |
+| `ConfirmDialog.tsx` | `role="dialog" aria-modal="true"` com `aria-labelledby` |
+| `ServiceManager.tsx` | Novo estado `serviceToDelete` (replacing `confirm()`) |
+| `ServiceManager.tsx` | Clique na lixeira abre `<ConfirmDialog>` com nome do serviço na mensagem |
+| `ServiceManager.tsx` | `onConfirm` chama `onDelete(serviceToDelete.id)` e limpa o estado |
+
+**Arquivos com `window.confirm()` pendentes (fases futuras):**
+- `AppointmentCalendar.tsx`
+- `ProfileAvatarSection.tsx`
+- `SettingsManager.tsx`
+- `QueueItemCard.tsx`
+- `ClientsManager.tsx`
+- `PostsManager.tsx`
+- `BillingTab.tsx`
+- `MasterAdminDashboard.tsx`
+
+**Validação:**
+- `tsc --noEmit` frontend: zero erros novos nos arquivos afetados
+- Padrão visual idêntico ao ReturnToQueueModal (overlay, FocusLock, botões, Escape)
+- Cancelar fecha sem excluir. Confirmar exclui e fecha. Escape fecha sem excluir. Clicar fora fecha sem excluir.
+
+---
+
 ## 2026-08-29 — Redesign UX: unificar dois blocos de WhatsApp em Configurações
 
 **Arquivo afetado:** `src/components/domain/SettingsManager.tsx`
