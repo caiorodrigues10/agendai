@@ -1,6 +1,6 @@
 import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
-import { DaySchedule, Service, StaffMember, FeedPost, PostMode, PostConfig } from '../types';
+import { DaySchedule, Service, ServiceCatalogItem, ServiceCategory, StaffMember, FeedPost, PostMode, PostConfig } from '../types';
 import { mapScheduleToApi } from '../utils/schedulingUtils';
 
 function unwrap<T>(res: unknown): T {
@@ -19,6 +19,7 @@ type UpdateBarbershopPayload = Partial<BarbershopData>;
 
 type AddServicePayload = Omit<Service, 'id'>;
 type UpdateServicePayload = Partial<AddServicePayload>;
+type BulkServicePayload = Omit<Service, 'id' | 'barbershopId'> & { catalogItemId?: string };
 
 interface StaffPayload {
   name: string;
@@ -100,6 +101,22 @@ export const barbershopApi = {
     return apiClient<{ success: boolean; data: Service[] }>(`/api/services${qs}`).then(res =>
       unwrap<Service[]>(res)
     );
+  },
+  listServiceCategories: () => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient<{ success: boolean; data: ServiceCategory[] }>('/api/service-categories', 'GET', undefined, token).then(unwrap);
+  },
+  listServiceCatalog: (params?: { categoryId?: string; query?: string }) => {
+    const token = authStorage.getAccessToken() || '';
+    const search = new URLSearchParams();
+    if (params?.categoryId) search.set('categoryId', params.categoryId);
+    if (params?.query) search.set('query', params.query);
+    const suffix = search.size ? `?${search}` : '';
+    return apiClient<{ success: boolean; data: ServiceCatalogItem[] }>(`/api/service-catalog${suffix}`, 'GET', undefined, token).then(unwrap);
+  },
+  addServicesBulk: (services: BulkServicePayload[]) => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient<{ success: boolean; data: Service[] }>('/api/services/bulk', 'POST', { services }, token).then(unwrap);
   },
   addService: (payload: AddServicePayload) => {
     const token = authStorage.getAccessToken() || '';

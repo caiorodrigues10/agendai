@@ -1,10 +1,31 @@
 export interface Service {
   id: string;
+  categoryId?: string | null;
   name: string;
   price: number;
   avgTimeMinutes: number;
   icon: string;
   barbershopId?: string;
+}
+
+export interface ServiceCategory {
+  id: string;
+  name: string;
+  description?: string | null;
+  icon?: string | null;
+  color?: string | null;
+  isGlobal: boolean;
+}
+
+export interface ServiceCatalogItem {
+  id: string;
+  catalogKey: string;
+  categoryId: string;
+  name: string;
+  description?: string | null;
+  iconKey: string;
+  suggestedDurationMinutes: number;
+  category: Pick<ServiceCategory, 'id' | 'name' | 'icon' | 'color'>;
 }
 
 export interface QueueItem {
