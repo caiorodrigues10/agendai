@@ -124,6 +124,10 @@ export interface CreateExpenseBody {
   categoryId?: string | null;
   description?: string | null;
   notes?: string | null;
+  recurrence?: string;
+  dueDate?: string | null;
+  paymentMethod?: string | null;
+  supplierName?: string | null;
 }
 
 export interface FiadoPayment {
@@ -221,7 +225,16 @@ export const financialApi = {
       token()
     ).then(res => unwrap<FinancialSummary>(res)),
 
-  listExpenses: (params?: { page?: number; limit?: number; search?: string }) =>
+  listExpenses: (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    categoryId?: string;
+    type?: ExpenseType;
+    paid?: string;
+    from?: string;
+    to?: string;
+  }) =>
     apiClient<{ success: boolean; data: ExpenseItem[]; meta: ListMeta }>(
       `/api/expenses${buildQuery(params)}`,
       'GET',
@@ -237,8 +250,49 @@ export const financialApi = {
       res => unwrap<ExpenseItem>(res)
     ),
 
+  updateExpense: (id: string, body: Partial<CreateExpenseBody>) =>
+    apiClient<{ success: boolean; data: ExpenseItem }>(
+      `/api/expenses/${id}`,
+      'PATCH',
+      body,
+      token()
+    ).then(res => unwrap<ExpenseItem>(res)),
+
   deleteExpense: (id: string) =>
     apiClient<void>(`/api/expenses/${id}`, 'DELETE', undefined, token()),
+
+  exportExpensesCsv: async (params?: Record<string, string | undefined>) => {
+    const query = buildQuery(params);
+    const response = await fetch(`/api/expenses${query}`, {
+      headers: { Authorization: `Bearer ${token()}` },
+    });
+    const data = await response.json();
+    const items: ExpenseItem[] = data.data ?? data;
+    const header =
+      'Data ref.,Título,Tipo,Recorrência,Valor,Pago em,Fornecedor,Categoria,Forma pgto\n';
+    const rows = items
+      .map((e: ExpenseItem) =>
+        [
+          e.referenceDate?.slice(0, 10) ?? '',
+          `"${(e.title ?? '').replace(/"/g, '""')}"`,
+          e.type,
+          e.recurrence,
+          e.amount,
+          e.paidAt?.slice(0, 10) ?? '',
+          `"${(e.supplierName ?? '').replace(/"/g, '""')}"`,
+          `"${(e.categoryName ?? '').replace(/"/g, '""')}"`,
+          e.paymentMethod ?? '',
+        ].join(',')
+      )
+      .join('\n');
+    const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `despesas_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
 
   getExpenseSummary: () =>
     apiClient<{ success: boolean; data: ExpenseSummary }>(
@@ -271,6 +325,14 @@ export const financialApi = {
       body,
       token()
     ).then(res => unwrap<FiadoPayment>(res)),
+
+  chargeFiado: (id: string, body: { pixKey?: string; cardPaymentLink?: string }) =>
+    apiClient<{ success: boolean; message: string }>(
+      `/api/fiado/${id}/charge`,
+      'POST',
+      body,
+      token()
+    ),
 
   deleteFiado: (id: string) => apiClient<void>(`/api/fiado/${id}`, 'DELETE', undefined, token()),
 
