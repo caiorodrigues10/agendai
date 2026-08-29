@@ -28,7 +28,11 @@ function platformWhatsAppUnavailable(err: unknown): boolean {
   );
 }
 
-const SalonWhatsAppConnection: React.FC<{ barbershopId: string }> = ({ barbershopId }) => {
+const SalonWhatsAppConnection: React.FC<{
+  barbershopId: string;
+  whatsapp: string;
+  onWhatsappChange: (value: string) => void;
+}> = ({ barbershopId, whatsapp, onWhatsappChange }) => {
   const [data, setData] = useState<ShopWhatsAppStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -142,12 +146,15 @@ const SalonWhatsAppConnection: React.FC<{ barbershopId: string }> = ({ barbersho
   const platformDown = error === 'WhatsApp da plataforma indisponível.';
 
   return (
-    <div className="bg-surface border-2 border-accent/40 rounded-xl p-5">
-      <h3 className="text-lg font-bold text-text-primary mb-1">WhatsApp do salão</h3>
-      <p className="text-sm text-text-secondary mb-4">
-        Escaneie o QR com o celular que vai <span className="font-semibold text-text-primary">enviar</span>{' '}
-        os avisos (fila, lembretes e posts). Sem conexão, as mensagens não saem.
-      </p>
+    <div className="bg-surface border border-border rounded-xl p-5">
+      <h3 className="text-lg font-bold text-text-primary mb-1">WhatsApp</h3>
+
+      <div className="border-2 border-accent/40 rounded-xl p-5 mb-4">
+        <h4 className="text-sm font-bold text-text-primary mb-1">WhatsApp do salão</h4>
+        <p className="text-sm text-text-secondary mb-4">
+          Este é o número que <span className="font-semibold text-text-primary">envia</span> as
+          mensagens (fila, lembretes, posts).
+        </p>
 
       {loading ? (
         <div className="flex items-center gap-2 text-sm text-text-muted">
@@ -199,6 +206,29 @@ const SalonWhatsAppConnection: React.FC<{ barbershopId: string }> = ({ barbersho
           {error}
         </p>
       )}
+      </div>
+
+      <div>
+        <label className="block text-sm text-text-secondary mb-1.5">
+          Receber avisos em outro número (opcional)
+        </label>
+        <div className="relative">
+          <input
+            type="tel"
+            value={whatsapp}
+            onChange={e => onWhatsappChange(maskPhone(e.target.value))}
+            className="w-full bg-bg border border-border rounded-lg pl-10 pr-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
+            placeholder="(11) 99999-9999"
+          />
+          <Smartphone
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+            size={16}
+          />
+        </div>
+        <p className="mt-1.5 text-[11px] text-text-muted">
+          Deixe em branco para usar o mesmo número conectado acima.
+        </p>
+      </div>
     </div>
   );
 };
@@ -297,27 +327,6 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm text-text-secondary mb-1.5">WhatsApp de Avisos</label>
-            <div className="relative">
-              <input
-                type="tel"
-                value={whatsapp}
-                onChange={e => setWhatsapp(maskPhone(e.target.value))}
-                className="w-full bg-bg border border-border rounded-lg pl-10 pr-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
-                placeholder="(11) 99999-9999"
-              />
-              <Smartphone
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-                size={16}
-              />
-            </div>
-            <p className="mt-1.5 text-[11px] text-text-muted">
-              Número que recebe o aviso quando um cliente entra na fila. Quem envia é o WhatsApp
-              conectado no cartão abaixo.
-            </p>
-          </div>
-
-          <div>
             <label className="block text-sm text-text-secondary mb-2">Logo do Salão</label>
             <div className="flex items-center gap-3">
               <div className="w-16 h-16 rounded-lg bg-bg border border-border flex items-center justify-center overflow-hidden">
@@ -351,7 +360,13 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
         </div>
       </div>
 
-      {barbershopId && <SalonWhatsAppConnection barbershopId={barbershopId} />}
+      {barbershopId && (
+        <SalonWhatsAppConnection
+          barbershopId={barbershopId}
+          whatsapp={whatsapp}
+          onWhatsappChange={setWhatsapp}
+        />
+      )}
 
       <div className="bg-surface border border-border rounded-xl p-5">
         <h3 className="text-lg font-bold text-text-primary mb-4">Horários de Funcionamento</h3>

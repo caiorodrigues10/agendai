@@ -1,5 +1,38 @@
 # Backlog Técnico — Frontend
 
+## 2026-08-29 — Redesign UX: unificar dois blocos de WhatsApp em Configurações
+
+**Arquivo afetado:** `src/components/domain/SettingsManager.tsx`
+
+**Motivo:** Existiam dois blocos de WhatsApp em cards separados na tela de
+Configurações — o input "WhatsApp de Avisos" (dentro do card "Configurações
+Gerais") e o componente `<SalonWhatsAppConnection />` (card separado com QR
+code e status de conexão). O usuário dono confundia os dois, achando que
+estavam duplicados ou que eram a mesma coisa.
+
+**Mudanças implementadas:**
+
+| Item | Antes | Depois |
+|------|-------|--------|
+| Input "WhatsApp de Avisos" | Dentro do card "Configurações Gerais" (junto com Nome e Logo) | Movido para dentro do card unificado de WhatsApp |
+| Container visual | Dois cards separados e independentes | Um único `<div>` com título "WhatsApp" contendo ambos |
+| Sub-card de conexão | Título "WhatsApp do salão" com borda `border-accent/40` | Mantido, mas com subtítulo "Este é o número que **envia** as mensagens (fila, lembretes, posts)." |
+| Rótulo input de avisos | "WhatsApp de Avisos" | "Receber avisos em outro número (opcional)" |
+| Help text do input | "Número que recebe o aviso quando um cliente entra na fila. Quem envia é o WhatsApp conectado no cartão abaixo." | "Deixe em branco para usar o mesmo número conectado acima." |
+| Card "Configurações Gerais" | Nome + Logo + WhatsApp de Avisos | Só Nome + Logo |
+
+**Props do SalonWhatsAppConnection:**
+
+| Prop | Tipo | Descrição |
+|------|------|-----------|
+| `barbershopId` | `string` (obrigatório) | ID da barbearia para consulta de status |
+| `whatsapp` | `string` (novo) | Valor controlado do input de avisos |
+| `onWhatsappChange` | `(value: string) => void` (novo) | Callback para atualizar o valor |
+
+**Fluxo visual:** título "WhatsApp" → sub-card com QR/status → input "Receber avisos em outro número" → help text. Tudo num único card, sem ambiguidade.
+
+---
+
 ## 2026-08-29 — Fix: Erro cru do Google vazando pro usuário no upload de logo/avatar
 
 **Arquivos afetados:**
