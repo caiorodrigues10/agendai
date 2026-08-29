@@ -58,8 +58,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
       reset();
       setIsAdding(false);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Não foi possível cadastrar o funcionário';
+      const message = err instanceof Error ? err.message : 'Não foi possível cadastrar o funcionário';
       setFormError(message);
     } finally {
       setSaving(false);
@@ -96,9 +95,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
       });
       if (!putRes.ok) throw new Error('Falha ao enviar arquivo');
       await usersApi.confirmAvatar(avatarTargetId, publicUrl);
-      const updated = staff.map(m =>
-        m.id === avatarTargetId ? { ...m, avatarUrl: publicUrl } : m
-      );
+      const updated = staff.map(m => (m.id === avatarTargetId ? { ...m, avatarUrl: publicUrl } : m));
       await onUpdateTeam(updated);
     } catch (err) {
       setFormError(getErrorMessage(err, 'Erro ao enviar foto'));
@@ -115,12 +112,8 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
       const member = staff.find(m => m.id === memberId);
       if (!member) return;
       const current = member.permissions ?? [];
-      const updated = current.includes(perm)
-        ? current.filter(p => p !== perm)
-        : [...current, perm];
-      const newTeam = staff.map(m =>
-        m.id === memberId ? { ...m, permissions: updated } : m
-      );
+      const updated = current.includes(perm) ? current.filter(p => p !== perm) : [...current, perm];
+      const newTeam = staff.map(m => (m.id === memberId ? { ...m, permissions: updated } : m));
       await onUpdateTeam(newTeam);
     } catch (err) {
       setFormError(getErrorMessage(err, 'Erro ao atualizar permissões'));
@@ -138,21 +131,22 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
         onChange={handleAvatarUpload}
         className="hidden"
       />
-      <div className="flex justify-between items-center mb-4">
+
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-lg font-bold text-text-primary">Equipe & Acessos</h3>
         <button
           onClick={() => {
             setIsAdding(!isAdding);
             setFormError(null);
           }}
-          className="px-3 py-1.5 bg-accent/10 text-accent border border-accent/50 rounded-lg text-xs font-bold hover:bg-accent-hover hover:text-black transition-all flex items-center gap-1"
+          className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-accent/50 bg-accent/10 px-3 py-2 text-xs font-bold text-accent transition-all hover:bg-accent-hover hover:text-black"
         >
           <UserPlus size={14} /> Adicionar
         </button>
       </div>
 
       {formError && !isAdding && (
-        <div className="mb-3 text-xs text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2 flex items-center gap-1">
+        <div className="mb-3 flex items-center gap-1 rounded-lg border border-danger/20 bg-danger/10 px-3 py-2 text-xs text-danger">
           <AlertCircle size={12} /> {formError}
         </div>
       )}
@@ -161,85 +155,54 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
         <form
           onSubmit={handleSubmit(handleAddMember)}
           autoComplete="off"
-          className="bg-surface p-4 rounded-xl border border-border mb-4 animate-fade-in-down"
+          className="mb-4 rounded-xl border border-border bg-surface p-4 animate-fade-in-down"
         >
-          <h4 className="text-sm font-bold text-text-primary mb-3">Novo Membro</h4>
+          <h4 className="mb-3 text-sm font-bold text-text-primary">Novo Membro</h4>
           {formError && (
-            <div className="mb-3 text-xs text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2 flex items-center gap-1">
+            <div className="mb-3 flex items-center gap-1 rounded-lg border border-danger/20 bg-danger/10 px-3 py-2 text-xs text-danger">
               <AlertCircle size={12} /> {formError}
             </div>
           )}
           <div className="space-y-3">
-            <div>
-              <input
-                type="text"
-                placeholder="Nome (ex: Carlos)"
-                className={`w-full bg-bg border rounded px-3 py-2 text-text-primary text-sm focus:ring-1 focus:ring-accent outline-none ${errors.name ? 'border-danger' : 'border-border'}`}
-                {...register('name')}
-              />
-              {errors.name && (
-                <span className="text-danger text-[10px] flex items-center gap-1 mt-1">
-                  <AlertCircle size={10} /> {errors.name.message}
-                </span>
-              )}
-            </div>
-
-            <div>
-              <input
-                type="email"
-                placeholder="E-mail"
-                autoComplete="off"
-                className={`w-full bg-bg border rounded px-3 py-2 text-text-primary text-sm focus:ring-1 focus:ring-accent outline-none ${errors.email ? 'border-danger' : 'border-border'}`}
-                {...register('email')}
-              />
-              {errors.email && (
-                <span className="text-danger text-[10px] flex items-center gap-1 mt-1">
-                  <AlertCircle size={10} /> {errors.email.message}
-                </span>
-              )}
-            </div>
-
-            <div>
-              <input
-                type="text"
-                placeholder="CPF (somente números)"
-                className={`w-full bg-bg border rounded px-3 py-2 text-text-primary text-sm focus:ring-1 focus:ring-accent outline-none ${errors.cpf ? 'border-danger' : 'border-border'}`}
-                {...register('cpf')}
-              />
-              {errors.cpf && (
-                <span className="text-danger text-[10px] flex items-center gap-1 mt-1">
-                  <AlertCircle size={10} /> {errors.cpf.message}
-                </span>
-              )}
-            </div>
-
-            <div>
-              <input
-                type="password"
-                placeholder="Senha"
-                autoComplete="new-password"
-                className={`w-full bg-bg border rounded px-3 py-2 text-text-primary text-sm focus:ring-1 focus:ring-accent outline-none ${errors.password ? 'border-danger' : 'border-border'}`}
-                {...register('password')}
-              />
-              {errors.password && (
-                <span className="text-danger text-[10px] flex items-center gap-1 mt-1">
-                  <AlertCircle size={10} /> {errors.password.message}
-                </span>
-              )}
-            </div>
+            <input
+              type="text"
+              placeholder="Nome (ex: Carlos)"
+              className={`w-full rounded border px-3 py-3 text-sm text-text-primary outline-none focus:ring-1 focus:ring-accent ${errors.name ? 'border-danger' : 'border-border bg-bg'}`}
+              {...register('name')}
+            />
+            <input
+              type="email"
+              placeholder="E-mail"
+              autoComplete="off"
+              className={`w-full rounded border px-3 py-3 text-sm text-text-primary outline-none focus:ring-1 focus:ring-accent ${errors.email ? 'border-danger' : 'border-border bg-bg'}`}
+              {...register('email')}
+            />
+            <input
+              type="text"
+              placeholder="CPF (somente números)"
+              className={`w-full rounded border px-3 py-3 text-sm text-text-primary outline-none focus:ring-1 focus:ring-accent ${errors.cpf ? 'border-danger' : 'border-border bg-bg'}`}
+              {...register('cpf')}
+            />
+            <input
+              type="password"
+              placeholder="Senha"
+              autoComplete="new-password"
+              className={`w-full rounded border px-3 py-3 text-sm text-text-primary outline-none focus:ring-1 focus:ring-accent ${errors.password ? 'border-danger' : 'border-border bg-bg'}`}
+              {...register('password')}
+            />
 
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setIsAdding(false)}
-                className="flex-1 py-2 text-xs text-text-secondary bg-surface-2 rounded hover:bg-border-strong"
+                className="min-h-11 flex-1 rounded bg-surface-2 py-2 text-xs text-text-secondary"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 py-2 text-xs text-accent-fg font-bold bg-accent rounded hover:bg-accent-hover disabled:opacity-60"
+                className="min-h-11 flex-1 rounded bg-accent py-2 text-xs font-bold text-accent-fg disabled:opacity-60"
               >
                 {saving ? 'Salvando…' : 'Cadastrar'}
               </button>
@@ -255,26 +218,29 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
           const memberPerms = member.permissions ?? [];
 
           return (
-            <div key={member.id} className="bg-surface rounded-lg border border-border overflow-hidden">
-              <div className="p-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="relative group cursor-pointer" onClick={() => handleAvatarClick(member.id)}>
+            <div key={member.id} className="overflow-hidden rounded-lg border border-border bg-surface">
+              <div className="flex items-start justify-between gap-3 p-3 sm:items-center">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div
+                    className="relative cursor-pointer group"
+                    onClick={() => handleAvatarClick(member.id)}
+                  >
                     <Avatar src={member.avatarUrl} name={member.name} size="sm" />
-                    <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
                       {avatarUploadingId === member.id ? (
-                        <Loader2 size={14} className="text-white animate-spin" />
+                        <Loader2 size={14} className="animate-spin text-white" />
                       ) : (
                         <Camera size={14} className="text-white" />
                       )}
                     </div>
                   </div>
-                  <div>
-                    <h4 className="font-medium text-sm text-text-primary">
+                  <div className="min-w-0">
+                    <h4 className="truncate text-sm font-medium text-text-primary">
                       {member.name} {member.id === currentAdminId && '(Você)'}
                     </h4>
-                    <p className="text-xs text-text-muted flex items-center gap-1">
-                      {member.email}{' '}
-                      <span className="uppercase text-[0.6rem] border border-border px-1 rounded bg-bg">
+                    <p className="flex flex-wrap items-center gap-1 text-xs text-text-muted">
+                      <span className="truncate">{member.email}</span>
+                      <span className="rounded border border-border bg-bg px-1 uppercase text-[0.6rem]">
                         {member.role === 'MASTER_ADMIN'
                           ? 'Admin'
                           : member.role === 'OWNER'
@@ -290,22 +256,22 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
                     <>
                       <button
                         onClick={() => setEditingPermissionsId(isExpanded ? null : member.id)}
-                        className={`p-1.5 rounded-lg transition-colors ${isExpanded ? 'bg-accent/10 text-accent' : 'text-text-muted hover:text-accent hover:bg-accent/10'}`}
+                        className={`rounded-lg p-2 transition-colors min-h-10 min-w-10 ${isExpanded ? 'bg-accent/10 text-accent' : 'text-text-muted hover:bg-accent/10 hover:text-accent'}`}
                         title="Gerenciar permissões"
                       >
                         <Shield size={16} />
                       </button>
                       {deleteConfirmId === member.id ? (
-                        <div className="flex items-center gap-1 animate-fade-in">
+                        <div className="flex items-center gap-1">
                           <button
                             onClick={() => confirmDelete(member.id)}
-                            className="p-1.5 bg-danger text-white rounded hover:bg-danger/80"
+                            className="rounded bg-danger p-1.5 text-white"
                           >
                             <Check size={14} />
                           </button>
                           <button
                             onClick={() => setDeleteConfirmId(null)}
-                            className="p-1.5 bg-surface-2 text-text-secondary rounded hover:bg-border-strong"
+                            className="rounded bg-surface-2 p-1.5 text-text-secondary"
                           >
                             <X size={14} />
                           </button>
@@ -313,7 +279,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
                       ) : (
                         <button
                           onClick={() => setDeleteConfirmId(member.id)}
-                          className="p-1.5 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors"
+                          className="rounded-lg p-2 text-text-muted transition-colors hover:bg-danger/10 hover:text-danger min-h-10 min-w-10"
                         >
                           <Trash2 size={14} />
                         </button>
@@ -321,22 +287,20 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
                     </>
                   )}
                   {isEmployee && member.id === currentAdminId && (
-                    <span className="text-[10px] text-text-muted px-2">Você</span>
+                    <span className="px-2 text-[10px] text-text-muted">Você</span>
                   )}
-                  {!isEmployee && (
-                    <ChevronDown size={14} className="text-text-muted" />
-                  )}
+                  {!isEmployee && <ChevronDown size={14} className="text-text-muted" />}
                 </div>
               </div>
 
               {isExpanded && isEmployee && (
-                <div className="px-3 pb-3 border-t border-border pt-2 animate-fade-in-down">
-                  <p className="text-[10px] text-text-muted mb-2 uppercase font-bold">Permissões</p>
+                <div className="animate-fade-in-down border-t border-border px-3 pb-3 pt-2">
+                  <p className="mb-2 text-[10px] font-bold uppercase text-text-muted">Permissões</p>
                   <div className="grid grid-cols-2 gap-1">
                     {ALL_PERMISSIONS.map(perm => (
                       <label
                         key={perm}
-                        className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded cursor-pointer transition-colors ${
+                        className={`flex cursor-pointer items-center gap-1.5 rounded px-2 py-1 text-xs transition-colors ${
                           memberPerms.includes(perm)
                             ? 'bg-accent/10 text-accent'
                             : 'text-text-muted hover:bg-surface-2'
@@ -349,9 +313,9 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
                           onChange={() => handleTogglePermission(member.id, perm)}
                           className="sr-only"
                         />
-                        <div className={`w-3 h-3 rounded border flex items-center justify-center flex-shrink-0 ${
-                          memberPerms.includes(perm) ? 'bg-accent border-accent' : 'border-border'
-                        }`}>
+                        <div
+                          className={`flex h-3 w-3 flex-shrink-0 items-center justify-center rounded border ${memberPerms.includes(perm) ? 'border-accent bg-accent' : 'border-border'}`}
+                        >
                           {memberPerms.includes(perm) && <Check size={10} className="text-accent-fg" />}
                         </div>
                         <span className="leading-tight">{PERMISSION_LABELS[perm]}</span>
@@ -364,7 +328,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
           );
         })}
         {staff.length === 0 && (
-          <p className="text-center text-text-muted text-sm py-4">Nenhum membro na equipe.</p>
+          <p className="py-4 text-center text-sm text-text-muted">Nenhum membro na equipe.</p>
         )}
       </div>
     </div>

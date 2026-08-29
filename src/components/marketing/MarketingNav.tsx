@@ -8,7 +8,7 @@ import { staffHomePath } from '../../utils/subscriptionPaywall';
 /** Âncoras da landing (`/#id`). */
 const sectionLinks = [
   { id: 'recursos', label: 'Recursos' },
-  { id: 'tecnologia', label: 'Tecnologia' },
+  { id: 'instalar', label: 'Aplicativo' },
   { id: 'precos', label: 'Preços' },
 ] as const;
 
@@ -44,7 +44,7 @@ export const MarketingNav: React.FC = () => {
 
   const goStart = () => {
     setMobileOpen(false);
-    navigate(user ? staffHomePath(user.role) : '/planos');
+    navigate(user ? staffHomePath(user.role) : '/cadastro');
   };
 
   const goToSection = (id: string) => {
@@ -99,14 +99,14 @@ export const MarketingNav: React.FC = () => {
             onClick={goPanel}
             className="hidden text-xs font-bold uppercase tracking-tighter text-neutral-400 transition-colors hover:text-white md:block"
           >
-            Acessar Painel
+            {user ? 'Ir para o painel' : 'Entrar'}
           </button>
           <button
             type="button"
             onClick={goStart}
             className="hidden rounded-full bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-tighter text-black shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] sm:block"
           >
-            {user ? 'Ir para o painel' : 'Começar Agora'}
+            {user ? 'Ir para o painel' : 'Criar conta'}
           </button>
           <button
             type="button"
@@ -148,14 +148,14 @@ export const MarketingNav: React.FC = () => {
             onClick={goPanel}
             className="py-3 text-left transition-colors hover:text-white"
           >
-            Acessar Painel
+            {user ? 'Ir para o painel' : 'Entrar'}
           </button>
           <button
             type="button"
             onClick={goStart}
             className="mt-2 rounded-full bg-white px-5 py-3 text-xs font-bold uppercase tracking-tighter text-black"
           >
-            {user ? 'Ir para o painel' : 'Começar Agora'}
+            {user ? 'Ir para o painel' : 'Criar conta grátis'}
           </button>
         </div>
       )}

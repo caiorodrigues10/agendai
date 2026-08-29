@@ -484,7 +484,7 @@ export const FeaturesPage: React.FC = () => {
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start opacity-0"
             >
               <button
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/cadastro')}
                 className="bg-accent text-white px-8 py-4 rounded-2xl font-bold text-sm hover:bg-accent transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
               >
                 Começar grátis
@@ -1024,7 +1024,7 @@ export const FeaturesPage: React.FC = () => {
             <div className="flex w-full flex-col items-stretch gap-3 sm:items-start md:w-auto md:min-w-64">
               <button
                 type="button"
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/cadastro')}
                 className="group inline-flex items-center justify-center gap-3 rounded-full bg-black px-8 py-4 text-base font-black text-white transition duration-300 hover:-translate-y-0.5 hover:bg-accent hover:text-black"
               >
                 {trialCampaign.cta}

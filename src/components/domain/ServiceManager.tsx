@@ -25,13 +25,13 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
   return (
     <div className="mt-6">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-bold text-text-primary">Gerenciar Serviços</h3>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h3 className="text-lg font-bold text-text-primary">Gerenciar ServiÃ§os</h3>
         <button
           onClick={() => setIsAdding(true)}
-          className="px-3 py-1.5 bg-accent/10 text-accent border border-accent/50 rounded-lg text-xs font-bold hover:bg-accent-hover hover:text-black transition-all flex items-center gap-1"
+          className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-accent/50 bg-accent/10 px-3 py-2 text-xs font-bold text-accent transition-all hover:bg-accent-hover hover:text-black"
         >
-          <Plus size={14} /> Novo Serviço
+          <Plus size={14} /> Novo ServiÃ§o
         </button>
       </div>
 
@@ -39,34 +39,35 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
         {services.map(service => (
           <div
             key={service.id}
-            className="bg-surface p-3 rounded-lg border border-border flex items-center justify-between hover:border-border-strong transition-all"
+            className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-3 transition-all hover:border-border-strong sm:flex-row sm:items-center sm:justify-between"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-surface-2 flex items-center justify-center text-text-secondary">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-2 text-text-secondary">
                 <DynamicIcon name={service.icon} size={20} />
               </div>
-              <div>
+              <div className="min-w-0">
                 <h4 className="font-medium text-text-primary">{service.name}</h4>
-                <p className="text-xs text-text-secondary">
-                  {service.avgTimeMinutes} min • R$ {service.price.toFixed(2)}
+                <p className="break-words text-xs text-text-secondary">
+                  {service.avgTimeMinutes} min â€¢ R$ {service.price.toFixed(2)}
                 </p>
               </div>
             </div>
-            <div className="flex gap-2">
+
+            <div className="flex self-end gap-2 sm:self-auto">
               <button
                 onClick={() => setEditingId(service.id)}
-                className="p-2 text-text-secondary hover:text-accent transition-colors"
+                className="min-h-10 min-w-10 rounded-lg p-2 text-text-secondary transition-colors hover:bg-surface-2 hover:text-accent"
                 title="Editar"
               >
                 <Pencil size={18} />
               </button>
               <button
                 onClick={() => {
-                  if (confirm('Tem certeza que deseja excluir este serviço?')) {
+                  if (confirm('Tem certeza que deseja excluir este serviÃ§o?')) {
                     onDelete(service.id);
                   }
                 }}
-                className="p-2 text-text-secondary hover:text-danger transition-colors"
+                className="min-h-10 min-w-10 rounded-lg p-2 text-text-secondary transition-colors hover:bg-danger/10 hover:text-danger"
                 title="Excluir"
               >
                 <Trash2 size={18} />

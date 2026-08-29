@@ -87,7 +87,7 @@ export const PlansPage: React.FC = () => {
       navigate(`/checkout?planId=${plan.id}&billing=${billing}`);
       return;
     }
-    navigate(`/login?tab=register&planId=${encodeURIComponent(plan.id)}&billing=${billing}`);
+    navigate(`/cadastro?planId=${encodeURIComponent(plan.id)}&billing=${billing}`);
   };
 
   const isPro = (plan: Plan) => plan.hasDashboard !== false || /pro/i.test(plan.name);
@@ -129,7 +129,7 @@ export const PlansPage: React.FC = () => {
       navigate('/checkout');
       return;
     }
-    navigate(user ? staffHomePath(user.role) : '/login');
+    navigate(user ? staffHomePath(user.role) : '/cadastro');
   };
 
   const payCta = user ? 'Pagar com PIX ou cartão' : trialCampaign.cta;
@@ -180,7 +180,7 @@ export const PlansPage: React.FC = () => {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.16 }}
-              className="mx-auto mt-8 grid max-w-2xl grid-cols-3 gap-3"
+              className="mx-auto mt-8 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3"
             >
               {[
                 { value: 'R$ 14', label: 'Essencial / mês' },
@@ -477,6 +477,7 @@ export const PlansPage: React.FC = () => {
             </div>
 
             <div className="overflow-hidden rounded-4xl border border-white/10 bg-surface">
+              <div className="overflow-x-auto">
               <div className="grid grid-cols-[1.5fr_0.75fr_0.75fr] border-b border-white/8 px-5 py-4 text-[10px] font-black uppercase tracking-wider text-neutral-500 md:px-8 md:text-xs">
                 <span>Recurso</span>
                 <span className="text-center">Essencial</span>
@@ -504,6 +505,7 @@ export const PlansPage: React.FC = () => {
                   </span>
                 </div>
               ))}
+              </div>
             </div>
           </div>
         </section>

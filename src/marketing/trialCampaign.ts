@@ -1,26 +1,26 @@
-/** Copy canônico da campanha: 30 dias de Pro com cartão vaulted (sem cobrança no ato). */
+/** Copy canônico do trial: 30 dias de Pro sem cartão e assinatura opcional. */
 export const trialCampaign = {
-  eyebrow: '30 dias de Pro · cartão agora, cobra depois',
-  body: 'Essencial ou Pro: você começa com 30 dias de Pro completo. Cadastra o cartão na hora (sem cobrança) e só paga depois do trial.',
-  afterTrial: 'Ao fim dos 30 dias, cobramos o cartão e segue o plano que você escolheu.',
-  cta: 'Cadastrar cartão e começar',
-  ctaShort: 'Garantir Pro agora',
+  eyebrow: 'Comece sem cartão',
+  body: 'Sua conta começa com 30 dias de Pro completo, sem cartão.',
+  afterTrial: 'Depois, escolha Essencial ou Pro para continuar. Só há cobrança quando você contratar.',
+  cta: 'Criar conta grátis',
+  ctaShort: 'Criar conta',
   ctaGoToPanel: 'Ir para o painel',
-  heroSubline: '30 dias de Pro · cartão sem cobrança agora',
-  metricLabel: 'Pro completo no trial — com cartão salvo.',
-  planIncluded: 'Inclui 30 dias de Pro · cartão agora, paga depois',
-  afterTrialThenPro: 'Pro completo no trial · depois Pro',
-  afterTrialThenEssential: 'Pro completo no trial · depois Essencial',
+  heroSubline: '30 dias de Pro · sem cartão',
+  metricLabel: 'Pro completo para conhecer a plataforma.',
+  planIncluded: 'Inclui 30 dias de Pro sem cartão',
+  afterTrialThenPro: 'Depois do trial, continue no Pro se quiser',
+  afterTrialThenEssential: 'Depois do trial, continue no Essencial se quiser',
   signupHint:
-    'Escolha o plano, cadastre o cartão e libere o painel. Nos 30 dias não cobramos — a cobrança é só depois do trial.',
+    'Crie sua conta e use o Pro completo por 30 dias. Você não precisa escolher um plano nem informar cartão agora.',
   checkoutHint:
-    'Cartão obrigatório para liberar o trial. Não cobramos agora: a cobrança começa após os 30 dias de Pro.',
+    'Assinar durante o trial é opcional. A cobrança só é criada quando você confirma esta assinatura.',
   ownerEvaluate:
-    'Enquanto testa o Pro, já deixa o cartão pronto — assim você não perde o acesso no dia 31.',
+    'Use o período de teste para organizar o salão e decidir qual plano combina com a sua rotina.',
   optionalSubscribe:
-    'Garanta o plano agora: cadastre o cartão em menos de 1 minuto e continue sem interrupção.',
-  ctaSubscribeNow: 'Cadastrar cartão e garantir',
-  huntHeadline: 'Não espere o trial acabar sem cartão',
+    'Se já decidiu, você pode assinar agora e continuar sem interrupção quando o trial terminar.',
+  ctaSubscribeNow: 'Assinar agora',
+  huntHeadline: 'Continue organizado depois do trial',
   huntBody:
-    'Escolha o plano, salve o cartão agora e continue no Pro sem travar no dia 31. Cobrança só depois do trial.',
+    'Escolha Essencial ou Pro quando fizer sentido. O pagamento só é exigido para continuar após o período gratuito.',
 } as const;

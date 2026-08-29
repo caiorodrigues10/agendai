@@ -473,7 +473,7 @@ export const AboutPage: React.FC = () => {
             <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <button
                 type="button"
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/cadastro')}
                 className="group inline-flex items-center justify-center gap-3 rounded-full bg-accent px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-accent-light"
               >
                 {trialCampaign.cta}

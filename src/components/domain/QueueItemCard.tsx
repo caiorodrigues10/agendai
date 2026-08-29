@@ -124,6 +124,11 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
               {service && <DynamicIcon name={service.icon} size={14} />}
               <span>{service?.name}</span>
             </div>
+            {item.responsibleName && (
+              <div className="text-xs text-text-muted mt-1">
+                Dependente de {item.responsibleName}
+              </div>
+            )}
             <div className="flex items-center gap-1 text-xs text-text-muted mt-1">
               <Clock size={10} />
               <span>

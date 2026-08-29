@@ -571,7 +571,8 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
               Nenhum registro encontrado para este período.
             </div>
           ) : (
-            <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto">
+            <table className="min-w-[860px] w-full text-left border-collapse">
               <thead className="bg-bg text-text-muted text-[10px] uppercase tracking-wider sticky top-0">
                 <tr>
                   <th className="p-3 font-medium">Data/Hora</th>
@@ -632,6 +633,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </div>

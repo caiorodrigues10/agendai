@@ -10,7 +10,7 @@ import {
   CustomerQueueStaffFormData,
 } from '../../schemas';
 
-/** Enviado ao backend quando o staff não informa WhatsApp do cliente. */
+/** Enviado ao backend somente quando o staff não informa WhatsApp do cliente. */
 const STAFF_PLACEHOLDER_WHATSAPP = '00000000000';
 import { maskPhone, normalizeDocument } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
@@ -69,8 +69,10 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
     try {
       const raw = data.whatsapp.trim();
       const whatsapp =
-        (isStaffMode || isAdditionalPerson) && !raw
+        isStaffMode && !raw
           ? STAFF_PLACEHOLDER_WHATSAPP
+          : isAdditionalPerson && !raw
+            ? ''
           : normalizeDocument(raw);
       await onJoin(data.name, whatsapp, data.serviceId, isStaffMode);
     } catch (err) {
@@ -148,7 +150,7 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
             {!isStaffMode && (
               <p className="text-xs text-text-muted mt-1">
                 {isAdditionalPerson
-                  ? 'Opcional. Se o dependente não tiver WhatsApp, deixe em branco.'
+                  ? 'Opcional. Em branco, os avisos e a cobrança usam o telefone do responsável.'
                   : '*O dono será notificado e te avisaremos quando faltar 15min.'}
               </p>
             )}

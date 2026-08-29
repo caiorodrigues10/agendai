@@ -8,6 +8,7 @@ import { BarbershopFiltersProvider } from './contexts/BarbershopFiltersContext';
 import { SchedulingProvider } from './contexts/SchedulingContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
+import { PwaInstallProvider } from './contexts/PwaInstallContext';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -17,18 +18,20 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <BarbershopFiltersProvider>
-      <AuthProvider>
-        <ThemeProvider>
-          <SubscriptionProvider>
-            <BarbershopProvider>
-              <SchedulingProvider>
-                <App />
-              </SchedulingProvider>
-            </BarbershopProvider>
-          </SubscriptionProvider>
-        </ThemeProvider>
-      </AuthProvider>
-    </BarbershopFiltersProvider>
+    <PwaInstallProvider>
+      <BarbershopFiltersProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <SubscriptionProvider>
+              <BarbershopProvider>
+                <SchedulingProvider>
+                  <App />
+                </SchedulingProvider>
+              </BarbershopProvider>
+            </SubscriptionProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </BarbershopFiltersProvider>
+    </PwaInstallProvider>
   </React.StrictMode>
 );

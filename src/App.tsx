@@ -52,8 +52,8 @@ const App: React.FC = () => {
           <Route path="/termos" element={<TermsPage />} />
           <Route path="/queue" element={<PublicHome />} />
           <Route path="/queue/:id" element={<PublicHome />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/cadastro" element={<LoginPage />} />
+          <Route path="/login" element={<LoginPage mode="login" />} />
+          <Route path="/cadastro" element={<LoginPage mode="register" />} />
           <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
           <Route path="/verificar-codigo" element={<VerifyResetCodePage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />

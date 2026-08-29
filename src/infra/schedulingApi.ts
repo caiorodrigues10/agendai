@@ -22,6 +22,7 @@ interface JoinQueuePayload {
   serviceId: string;
   barbershopId: string;
   sessionId?: string;
+  responsibleSessionId?: string;
 }
 
 export interface QueueUpdatePayload {
@@ -55,10 +56,14 @@ export const schedulingApi = {
     return Array.isArray(data) ? data : [];
   },
   joinQueue: async (payload: JoinQueuePayload) => {
+    // No painel, o token permite ao backend reconhecer uma inclusão manual do staff.
+    // Na página pública continua anônimo quando não houver sessão autenticada.
+    const token = authStorage.getAccessToken() || undefined;
     const res = await apiClient<{ success: boolean; data: QueueItem }>(
       '/api/queue',
       'POST',
-      payload
+      payload,
+      token
     );
     return unwrap<QueueItem>(res);
   },

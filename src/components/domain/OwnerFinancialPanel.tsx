@@ -692,7 +692,7 @@ export const OwnerFinancialPanel: React.FC = () => {
             </button>
           </form>
 
-          <div className="bg-surface rounded-xl border border-border overflow-hidden">
+            <div className="bg-surface rounded-xl border border-border overflow-hidden">
             <div className="p-4 border-b border-border bg-surface/50 space-y-3">
               <div className="flex justify-between items-center">
                 <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
@@ -769,7 +769,8 @@ export const OwnerFinancialPanel: React.FC = () => {
                   Nenhuma despesa registrada.
                 </div>
               ) : (
-                <table className="w-full text-left border-collapse">
+                <div className="overflow-x-auto">
+                <table className="min-w-[920px] w-full text-left border-collapse">
                   <thead className="bg-bg text-text-muted text-[10px] uppercase tracking-wider sticky top-0">
                     <tr>
                       <th className="p-3 font-medium">Data ref.</th>
@@ -1020,6 +1021,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                     ))}
                   </tbody>
                 </table>
+                </div>
               )}
             </div>
             {expensesMeta.totalPages > 1 && (
@@ -1105,7 +1107,7 @@ export const OwnerFinancialPanel: React.FC = () => {
             </button>
           </form>
 
-          <div className="bg-surface rounded-xl border border-border overflow-hidden">
+            <div className="bg-surface rounded-xl border border-border overflow-hidden">
             <div className="p-4 border-b border-border flex justify-between items-center bg-surface/50">
               <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
                 <CreditCard size={16} className="text-accent" /> Fiados
@@ -1122,7 +1124,8 @@ export const OwnerFinancialPanel: React.FC = () => {
                   Nenhum fiado registrado.
                 </div>
               ) : (
-                <table className="w-full text-left border-collapse">
+                <div className="overflow-x-auto">
+                <table className="min-w-[980px] w-full text-left border-collapse">
                   <thead className="bg-bg text-text-muted text-[10px] uppercase tracking-wider sticky top-0">
                     <tr>
                       <th className="p-3 font-medium">Cliente</th>
@@ -1272,6 +1275,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                     ))}
                   </tbody>
                 </table>
+                </div>
               )}
             </div>
             {fiadosMeta.totalPages > 1 && (

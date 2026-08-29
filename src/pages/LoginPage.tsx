@@ -45,6 +45,10 @@ import { TrialExpiredPaywallModal } from '../components/domain/TrialExpiredPaywa
 type Tab = 'login' | 'register';
 type RegisterStep = 1 | 2;
 
+interface LoginPageProps {
+  mode?: Tab;
+}
+
 const inputClass = (hasError: boolean) =>
   `w-full bg-bg border rounded-xl py-2.5 pl-10 pr-4 text-text-primary text-sm
    outline-none transition-all placeholder:text-text-muted
@@ -224,11 +228,11 @@ const BrandPanel: React.FC = () => (
   </div>
 );
 
-export const LoginPage: React.FC = () => {
+export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, login, loginWithGoogle, register: registerUser } = useAuth();
-  const [tab, setTab] = useState<Tab>('login');
+  const [tab, setTab] = useState<Tab>(mode);
   const [registerStep, setRegisterStep] = useState<RegisterStep>(1);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
@@ -323,7 +327,11 @@ export const LoginPage: React.FC = () => {
     });
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
+    setTab(mode);
+  }, [mode]);
+
+  useEffect(() => {
     const ref = searchParams.get('ref');
     if (ref) {
       referralStorage.save(ref);
@@ -525,6 +533,14 @@ export const LoginPage: React.FC = () => {
     }
   };
 
+  const goToAuthMode = (next: Tab) => {
+    const params = new URLSearchParams(searchParams);
+    params.delete('tab');
+    const query = params.toString();
+    navigate(`${next === 'register' ? '/cadastro' : '/login'}${query ? `?${query}` : ''}`);
+    switchTab(next);
+  };
+
   const primaryBtn =
     'relative w-full py-3.5 bg-accent text-accent-fg hover:bg-accent-hover shadow-lg shadow-accent/25 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 disabled:opacity-60 overflow-hidden group/btn active:scale-[0.98] cursor-pointer';
 
@@ -574,39 +590,17 @@ export const LoginPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="relative flex w-full p-1 rounded-xl bg-bg border border-border mb-5">
-              {(
-                [
-                  { id: 'login' as const, label: 'Entrar' },
-                  { id: 'register' as const, label: 'Criar conta' },
-                ] as const
-              ).map(t => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => switchTab(t.id)}
-                  className="relative flex-1 py-2.5 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
-                >
-                  {tab === t.id && (
-                    <motion.span
-                      layoutId="login-tab-pill"
-                      className="absolute inset-0 rounded-lg bg-surface border border-border shadow-sm"
-                      transition={{
-                        type: 'spring',
-                        bounce: 0.2,
-                        duration: 0.45,
-                      }}
-                    />
-                  )}
-                  <span
-                    className={`relative z-10 ${
-                      tab === t.id ? 'text-accent' : 'text-text-muted hover:text-text-secondary'
-                    }`}
-                  >
-                    {t.label}
-                  </span>
-                </button>
-              ))}
+            <div className="w-full mb-5 rounded-2xl border border-border bg-bg/80 p-4 text-center">
+              <p className="text-xs font-medium text-text-secondary">
+                {tab === 'login' ? 'Ainda nao tem conta?' : 'Ja tem uma conta?'}
+              </p>
+              <button
+                type="button"
+                onClick={() => goToAuthMode(tab === 'login' ? 'register' : 'login')}
+                className="mt-3 inline-flex min-h-11 items-center justify-center rounded-xl border border-accent/30 bg-accent/10 px-4 text-sm font-bold text-accent transition hover:bg-accent/15"
+              >
+                {tab === 'login' ? 'Criar conta gratis' : 'Entrar'}
+              </button>
             </div>
 
             {tab === 'register' && (

@@ -26,9 +26,10 @@ import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
 import { TAB_GROUPS, ALL_TAB_IDS, getDefaultTab, canAccessTab } from '../config/tabRegistry';
 import { ClientsManager } from '../components/domain/ClientsManager';
 import { PublicLinkPanel } from '../components/domain/PublicLinkPanel';
+import { PwaInstallCard } from '../components/pwa/PwaInstallCard';
 import { getErrorMessage } from '../utils/errorMessage';
 import { QueueItem } from '../types';
-import { ChevronDown, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -74,7 +75,6 @@ export const StaffDashboard: React.FC = () => {
   const [returnToQueueItem, setReturnToQueueItem] = useState<QueueItem | null>(null);
   const [returningToQueue, setReturningToQueue] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'bot' | 'error' } | null>(null);
-  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
 
   const rawTab = location.pathname.split('/')[2] || 'queue';
   const activeTab = ALL_TAB_IDS.includes(rawTab) ? rawTab : 'queue';
@@ -108,14 +108,6 @@ export const StaffDashboard: React.FC = () => {
       navigate('/bloqueado', { replace: true });
     }
   }, [accessState, subscriptionLoading, navigate]);
-
-  // Find which group the active tab belongs to
-  const activeGroup = useMemo(() => {
-    for (const group of TAB_GROUPS) {
-      if (group.tabs.some(t => t.id === activeTab)) return group.id;
-    }
-    return TAB_GROUPS[0].id;
-  }, [activeTab]);
 
   // Visible groups (at least one accessible tab)
   const visibleGroups = useMemo(() => {
@@ -169,9 +161,10 @@ export const StaffDashboard: React.FC = () => {
   const currentInChair = activeQueue.find(q => q.status === 'in_chair');
   const isUserInQueue = activeQueue.some(q => q.customerId === clientId);
   const isOpen = isShopOpen();
+  const installVideoUrl = import.meta.env.VITE_PWA_INSTALL_VIDEO_URL as string | undefined;
 
   return (
-    <div className="min-h-screen pb-20 bg-bg text-text-primary">
+    <div className="min-h-screen pb-[max(5rem,env(safe-area-inset-bottom))] bg-bg text-text-primary">
       <Header
         currentUser={user}
         onOpenLogin={() => navigate('/login')}
@@ -185,60 +178,44 @@ export const StaffDashboard: React.FC = () => {
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       <main className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 pt-6">
-        {/* Grouped Navigation */}
-        <div className="mb-6 space-y-2">
+        {/* Navegação sempre visível: grupos servem apenas como rótulos, sem acordeões. */}
+        <nav
+          aria-label="Navegação do painel"
+          className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-xl border border-border bg-border"
+        >
           {visibleGroups.map(group => {
-            const isActiveGroup = activeGroup === group.id;
             const accessibleTabs = group.tabs.filter(tab => canAccessTab(tab.id, user?.role));
-            const activeTabDef = accessibleTabs.find(t => t.id === activeTab);
-            const GroupIcon = activeTabDef?.icon || accessibleTabs[0]?.icon;
 
             return (
-              <div key={group.id} className="bg-surface rounded-xl border border-border overflow-hidden">
-                <button
-                  onClick={() => setExpandedGroup(isActiveGroup && expandedGroup === group.id ? null : group.id)}
-                  className={`w-full flex items-center justify-between px-4 py-3 text-sm font-bold transition-colors ${
-                    isActiveGroup ? 'text-accent' : 'text-text-muted'
-                  }`}
+              <section key={group.id} className="bg-surface p-3" aria-labelledby={`nav-${group.id}`}>
+                <p
+                  id={`nav-${group.id}`}
+                  className="mb-2 px-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted"
                 >
-                  <span className="flex items-center gap-2">
-                    {GroupIcon && <GroupIcon size={16} />}
-                    {group.label}
-                    {isActiveGroup && activeTabDef && (
-                      <span className="text-text-muted font-normal">/ {activeTabDef.label}</span>
-                    )}
-                  </span>
-                  <ChevronDown
-                    size={16}
-                    className={`transition-transform ${expandedGroup === group.id ? 'rotate-180' : ''}`}
-                  />
-                </button>
-
-                {(expandedGroup === group.id || isActiveGroup) && (
-                  <div className="flex flex-wrap gap-1 px-3 pb-3">
-                    {accessibleTabs.map(tab => (
-                      <button
-                        key={tab.id}
-                        onClick={() => {
-                          navigate(`/app/${tab.id}`);
-                          setExpandedGroup(null);
-                        }}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                          activeTab === tab.id
-                            ? 'bg-accent/10 text-accent border border-accent/30'
-                            : 'text-text-secondary hover:bg-surface-2 border border-transparent'
-                        }`}
-                      >
-                        <tab.icon size={14} />
-                        {tab.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+                  {group.label}
+                </p>
+                <div className="flex flex-wrap gap-1">
+                  {accessibleTabs.map(tab => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => navigate(`/app/${tab.id}`)}
+                      aria-current={activeTab === tab.id ? 'page' : undefined}
+                      className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-semibold transition-all ${
+                        activeTab === tab.id
+                          ? 'border-accent/40 bg-accent text-accent-fg shadow-sm'
+                          : 'border-transparent text-text-secondary hover:bg-surface-2 hover:text-text-primary'
+                      }`}
+                    >
+                      <tab.icon size={14} />
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </section>
             );
           })}
-        </div>
+        </nav>
 
         {/* Tab Content */}
         {activeTab === 'overview' && (
@@ -275,6 +252,28 @@ export const StaffDashboard: React.FC = () => {
               inChairName={currentInChair?.customerName ?? null}
               showStaffStats
             />
+            <div className="grid gap-4 lg:grid-cols-[1fr_0.95fr]">
+              <PwaInstallCard
+                variant="panel"
+                videoUrl={installVideoUrl}
+              />
+              <div className="rounded-xl border border-border bg-surface p-4 sm:p-5">
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-accent">
+                  Onboarding
+                </p>
+                <h3 className="mt-2 text-lg font-bold text-text-primary">
+                  Vídeo de como colocar o salão na tela
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-text-secondary">
+                  Aqui entra o tutorial interno que mostra como abrir a operação, ativar a fila e
+                  instalar o PWA no celular da equipe. Esse material é para quem já entrou na
+                  plataforma, então ele não compete com a landing.
+                </p>
+                <div className="mt-4 rounded-xl border border-border bg-bg p-3 text-sm text-text-muted">
+                  Dica: mantenha esse vídeo vertical, curto e com passo a passo em tela cheia.
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -291,14 +290,12 @@ export const StaffDashboard: React.FC = () => {
             />
 
             <div className="flex items-center justify-end mb-4">
-              {!isUserInQueue && (
-                <button
-                  onClick={() => setShowJoinForm(true)}
-                  className="w-full sm:w-auto px-4 py-3 rounded-xl bg-accent text-accent-fg text-sm font-bold shadow-lg shadow-accent/20"
-                >
-                  Adicionar cliente
-                </button>
-              )}
+              <button
+                onClick={() => setShowJoinForm(true)}
+                className="w-full sm:w-auto px-4 py-3 rounded-xl bg-accent text-accent-fg text-sm font-bold shadow-lg shadow-accent/20"
+              >
+                Adicionar cliente
+              </button>
             </div>
 
             <div className="space-y-4">

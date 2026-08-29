@@ -117,6 +117,29 @@ body {
   font-family: var(--font-sans);
   background-color: var(--ag-bg);
   color: var(--ag-text-primary);
+  min-width: 320px;
+  min-height: 100dvh;
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Evita ícone nativo do date picker por cima do ícone do tema. */

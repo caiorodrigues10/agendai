@@ -119,7 +119,7 @@ export const PublicHome: React.FC = () => {
   const isOpen = isShopOpen();
 
   return (
-    <div className="min-h-screen pb-20 bg-bg text-text-primary">
+    <div className="min-h-screen pb-[max(5rem,env(safe-area-inset-bottom))] bg-bg text-text-primary">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       <main className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 pt-6">
@@ -253,7 +253,7 @@ export const PublicHome: React.FC = () => {
                 </div>
               )}
 
-              {isOpen && (
+              {isOpen && isUserInQueue && (
                 <button
                   type="button"
                   onClick={() => openJoinForm('dependent')}

@@ -5,7 +5,6 @@ import { trialCampaign } from '../../marketing/trialCampaign';
 
 const platformLinks = [
   { to: '/funcionalidades', label: 'Funcionalidades' },
-  { to: '/ia-preditiva', label: 'IA Preditiva' },
   { to: '/agendamento', label: 'Agendamento' },
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/planos', label: 'Planos' },
@@ -15,12 +14,12 @@ const companyLinks = [
   { to: '/sobre', label: 'Sobre' },
   { to: '/contato', label: 'Contato' },
   { to: '/login', label: 'Acessar painel' },
-  { to: '/login', label: trialCampaign.cta },
+  { to: '/cadastro', label: trialCampaign.cta },
 ];
 
 const exploreLinks = [
   { to: '/#recursos', label: 'Recursos' },
-  { to: '/#tecnologia', label: 'Tecnologia' },
+  { to: '/#instalar', label: 'Aplicativo' },
   { to: '/#precos', label: 'Preços' },
   { to: '/queue', label: 'Fila ao vivo' },
 ];

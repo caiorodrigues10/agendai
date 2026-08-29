@@ -115,7 +115,7 @@ export const SchedulingPage: React.FC = () => {
             >
               <button
                 type="button"
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/cadastro')}
                 className="group inline-flex items-center justify-center gap-3 rounded-full bg-white px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-accent-light"
               >
                 {trialCampaign.cta}
@@ -719,7 +719,7 @@ export const SchedulingPage: React.FC = () => {
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <button
                 type="button"
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/cadastro')}
                 className="group inline-flex items-center justify-center gap-3 rounded-full bg-white px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-1 hover:bg-accent-light"
               >
                 {trialCampaign.cta}

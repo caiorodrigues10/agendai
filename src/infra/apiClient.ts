@@ -250,11 +250,19 @@ export const apiClient = async <T>(
   // Defensivo: lê como texto primeiro para tratar 2xx com body vazio/inválido
   const bodyText = await res.text();
   if (!bodyText) {
-    throw new ApiError('Resposta vazia do servidor', res.status);
+    throw new ApiError(
+      'O servidor respondeu sem dados. Tente novamente em instantes.',
+      res.status,
+      'EMPTY_RESPONSE'
+    );
   }
   const parsed = tryParseJson(bodyText);
   if (!parsed) {
-    throw new ApiError('Resposta inválida do servidor', res.status);
+    throw new ApiError(
+      'O servidor enviou uma resposta inválida. Tente novamente em instantes.',
+      res.status,
+      'INVALID_RESPONSE'
+    );
   }
   return parsed as T;
 };
