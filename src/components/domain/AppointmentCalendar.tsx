@@ -78,11 +78,16 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   onDateChange,
 }) => {
   const [selectedDate, setSelectedDate] = useState(() => formatDateISO(new Date()));
+  const hasMultipleStaff = staff.length > 1;
   const [view, setView] = useState<AgendaView>(
     currentUserRole === 'EMPLOYEE' ? 'professional' : 'salon'
   );
   const [selectedStaffId, setSelectedStaffId] = useState<string>(
-    currentUserRole === 'EMPLOYEE' && currentUserId ? currentUserId : (staff[0]?.id ?? 'any')
+    currentUserRole === 'EMPLOYEE' && currentUserId
+      ? currentUserId
+      : hasMultipleStaff
+        ? 'any'
+        : (staff[0]?.id ?? 'any')
   );
   const [showBooking, setShowBooking] = useState(false);
   const [selectedAppt, setSelectedAppt] = useState<Appointment | null>(null);
@@ -98,6 +103,12 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
 
   const onDateChangeRef = useRef(onDateChange);
   onDateChangeRef.current = onDateChange;
+
+  useEffect(() => {
+    if (currentUserRole !== 'EMPLOYEE' && !hasMultipleStaff && view !== 'salon') {
+      setView('salon');
+    }
+  }, [hasMultipleStaff, view, currentUserRole]);
 
   useEffect(() => {
     onDateChangeRef.current?.(selectedDate);
@@ -134,7 +145,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   const columns = useMemo(() => {
     if (view === 'professional') {
       const id = selectedStaffId === 'any' ? null : selectedStaffId;
-      return [{ id, label: getStaffName(id, staff) }];
+      return [{ id, label: 'Horários' }];
     }
     const cols = staff.map(s => ({ id: s.id, label: s.name }));
     cols.push({ id: null as unknown as string, label: 'Sem prof.' });
@@ -204,24 +215,26 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
         </button>
       </div>
 
-      <div className="flex bg-surface p-1 rounded-xl border border-border">
-        <button
-          onClick={() => setView('salon')}
-          className={`flex-1 py-2 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-all ${
-            view === 'salon' ? 'bg-surface-2 text-text-primary' : 'text-text-muted'
-          }`}
-        >
-          <Users size={14} /> Salão
-        </button>
-        <button
-          onClick={() => setView('professional')}
-          className={`flex-1 py-2 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-all ${
-            view === 'professional' ? 'bg-surface-2 text-text-primary' : 'text-text-muted'
-          }`}
-        >
-          <User size={14} /> Profissional
-        </button>
-      </div>
+      {hasMultipleStaff && (
+        <div className="flex bg-surface p-1 rounded-xl border border-border">
+          <button
+            onClick={() => setView('salon')}
+            className={`flex-1 py-2 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-all ${
+              view === 'salon' ? 'bg-surface-2 text-text-primary' : 'text-text-muted'
+            }`}
+          >
+            <Users size={14} /> Salão
+          </button>
+          <button
+            onClick={() => setView('professional')}
+            className={`flex-1 py-2 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-all ${
+              view === 'professional' ? 'bg-surface-2 text-text-primary' : 'text-text-muted'
+            }`}
+          >
+            <User size={14} /> Profissional
+          </button>
+        </div>
+      )}
 
       {view === 'professional' && (
         <div ref={staffDropdownRef} className="relative">
@@ -291,6 +304,12 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
         </div>
       )}
 
+      {view === 'professional' && hasMultipleStaff && (
+        <p className="text-[10px] text-text-secondary text-center -mt-2">
+          Visão por profissional
+        </p>
+      )}
+
       <div className="relative" ref={calendarRef}>
         <div className="flex items-center justify-between bg-surface border border-border rounded-xl p-3">
           <button
@@ -304,7 +323,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
               onClick={() => setSelectedDate(formatDateISO(new Date()))}
               className="text-xs text-accent font-bold hover:underline mb-0.5"
             >
-              Hoje
+              {selectedDate === formatDateISO(new Date()) ? 'Hoje' : 'Voltar para hoje'}
             </button>
             <button
               onClick={() => {
