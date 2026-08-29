@@ -33,7 +33,7 @@ export interface Appointment {
   date: string;
   time: string;
   createdAt: number;
-  status: 'confirmed' | 'cancelled' | 'completed';
+  status: 'confirmed' | 'cancelled' | 'completed' | 'checked_in';
   serviceName?: string;
   staffName?: string;
   serviceDurationMinutes?: number;

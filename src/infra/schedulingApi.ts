@@ -132,4 +132,14 @@ export const schedulingApi = {
     const token = authStorage.getAccessToken() || '';
     return apiClient<void>(`/api/appointments/${id}`, 'DELETE', undefined, token);
   },
+  checkInAppointment: async (appointmentId: string) => {
+    const token = authStorage.getAccessToken() || '';
+    const res = await apiClient<{ success: boolean; data: { queueItemId: string; appointmentId: string } }>(
+      `/api/appointments/${appointmentId}/check-in`,
+      'POST',
+      undefined,
+      token
+    );
+    return unwrap<{ queueItemId: string; appointmentId: string }>(res);
+  },
 };

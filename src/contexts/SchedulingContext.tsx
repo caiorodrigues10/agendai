@@ -318,8 +318,11 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   };
 
   const checkInAppointment = async (appt: Appointment) => {
-    await joinQueue(appt.customerName, appt.whatsapp, appt.serviceId);
-    await cancelAppointment(appt.id);
+    await schedulingApi.checkInAppointment(appt.id);
+    setAppointments(prev =>
+      prev.map(a => (a.id === appt.id ? { ...a, status: 'CHECKED_IN' as const } : a))
+    );
+    await refreshQueue();
   };
 
   const value = useMemo(
