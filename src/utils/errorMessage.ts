@@ -5,6 +5,9 @@ const NETWORK_PATTERN =
 
 const TECHNICAL_PATTERN = /^HTTP\s*\d+$/i;
 
+const SDK_PATTERN =
+  /credentials|google-auth|cloud\.google\.com\/docs|could not load|default credentials|permission denied|unauthorized|invalid_grant/i;
+
 function isNetworkError(err: unknown): boolean {
   if (err instanceof ApiError) {
     return err.code === 'NETWORK_ERROR' || err.statusCode === 0;
@@ -102,7 +105,7 @@ export function getErrorMessage(
     ) {
       return 'Sua sessão expirou. Faça login novamente e tente de novo.';
     }
-    if (!raw || TECHNICAL_PATTERN.test(raw) || NETWORK_PATTERN.test(raw)) {
+    if (!raw || TECHNICAL_PATTERN.test(raw) || NETWORK_PATTERN.test(raw) || SDK_PATTERN.test(raw)) {
       return messageForStatus(err.statusCode, fallback);
     }
     return raw;
@@ -110,7 +113,7 @@ export function getErrorMessage(
 
   if (err instanceof Error) {
     const raw = err.message?.trim() ?? '';
-    if (!raw || NETWORK_PATTERN.test(raw) || TECHNICAL_PATTERN.test(raw)) {
+    if (!raw || NETWORK_PATTERN.test(raw) || TECHNICAL_PATTERN.test(raw) || SDK_PATTERN.test(raw)) {
       return fallback;
     }
     // Mensagens curtas em inglês genérico do browser
