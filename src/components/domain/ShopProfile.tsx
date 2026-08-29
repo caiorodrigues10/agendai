@@ -18,11 +18,14 @@ import {
   List,
   CalendarDays,
   ExternalLink,
+  Camera,
+  Loader2,
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { barbershopApi } from '../../infra/barbershopApi';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
+import { getErrorMessage } from '../../utils/errorMessage';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -37,6 +40,7 @@ interface ShopProfileProps {
   audience?: 'public' | 'staff';
   onGoQueue?: () => void;
   onGoAppointments?: () => void;
+  onNotify?: (message: string, type: 'success' | 'error') => void;
 }
 
 function digitsOnly(phone: string): string {
@@ -89,6 +93,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
   audience = 'public',
   onGoQueue,
   onGoAppointments,
+  onNotify,
 }) => {
   const navigate = useNavigate();
   const { services, isShopOpen, getTodayScheduleDisplay } = useBarbershop();
@@ -117,6 +122,71 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
   const [isPosting, setIsPosting] = useState(false);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const videoPreviewObjectUrl = useRef<string | null>(null);
+
+  const canEditLogo =
+    audience === 'staff' && Boolean(currentUser && currentUser.role === 'OWNER');
+  const [logoUrl, setLogoUrl] = useState<string | undefined>(settings.logoUrl);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setLogoUrl(settings.logoUrl);
+  }, [settings.logoUrl]);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !barbershopId) return;
+
+    setLogoUploading(true);
+    setLogoError(null);
+    try {
+      const { uploadUrl, publicUrl } = await barbershopApi.getLogoUploadUrl(
+        barbershopId,
+        file.type
+      );
+      const putRes = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: { 'Content-Type': file.type },
+      });
+      if (!putRes.ok) {
+        throw new Error(
+          `Falha ao enviar a imagem para o storage (${putRes.status}).`
+        );
+      }
+      await barbershopApi.confirmLogo(barbershopId, publicUrl);
+      setLogoUrl(publicUrl);
+      onNotify?.('Logo atualizada com sucesso!', 'success');
+    } catch (err) {
+      setLogoUrl(settings.logoUrl);
+      const msg = getErrorMessage(err, 'Não foi possível enviar a logo. Tente novamente.');
+      setLogoError(msg);
+      onNotify?.(msg, 'error');
+    } finally {
+      setLogoUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleDeleteLogo = async () => {
+    if (!barbershopId || !logoUrl) return;
+    if (!confirm('Remover a logo do salão?')) return;
+
+    setLogoUploading(true);
+    setLogoError(null);
+    try {
+      await barbershopApi.deleteLogo(barbershopId);
+      setLogoUrl(undefined);
+      onNotify?.('Logo removida.', 'success');
+    } catch (err) {
+      const msg = getErrorMessage(err, 'Erro ao remover a logo.');
+      setLogoError(msg);
+      onNotify?.(msg, 'error');
+    } finally {
+      setLogoUploading(false);
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -270,19 +340,68 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
         </div>
 
         <div className="px-5 pb-5 -mt-12 relative text-center">
-          <div className="mx-auto mb-3 w-24 h-24 rounded-2xl border-4 border-surface bg-bg shadow-lg overflow-hidden flex items-center justify-center">
-            {settings.logoUrl ? (
-              <img
-                src={settings.logoUrl}
-                alt={settings.shopName}
-                className="w-full h-full object-cover"
-              />
+          <div className="mx-auto mb-3 w-24 h-24">
+            {canEditLogo ? (
+              <div className="relative group w-full h-full rounded-2xl border-4 border-surface bg-bg shadow-lg overflow-hidden flex items-center justify-center">
+                {logoUploading ? (
+                  <Loader2 size={28} className="text-accent animate-spin" />
+                ) : logoUrl ? (
+                  <img
+                    src={logoUrl}
+                    alt={settings.shopName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-2xl font-black tracking-tight text-accent">
+                    {shopInitials(settings.shopName)}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => logoInputRef.current?.click()}
+                  disabled={logoUploading}
+                  className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                >
+                  <Camera size={24} className="text-white" />
+                </button>
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  onChange={handleLogoUpload}
+                  className="hidden"
+                  disabled={logoUploading}
+                />
+              </div>
             ) : (
-              <span className="text-2xl font-black tracking-tight text-accent">
-                {shopInitials(settings.shopName)}
-              </span>
+              <div className="w-full h-full rounded-2xl border-4 border-surface bg-bg shadow-lg overflow-hidden flex items-center justify-center">
+                {logoUrl ? (
+                  <img
+                    src={logoUrl}
+                    alt={settings.shopName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-2xl font-black tracking-tight text-accent">
+                    {shopInitials(settings.shopName)}
+                  </span>
+                )}
+              </div>
             )}
           </div>
+
+          {canEditLogo && logoUrl && !logoUploading && (
+            <button
+              type="button"
+              onClick={handleDeleteLogo}
+              className="mx-auto mb-2 px-3 py-1.5 text-[11px] font-medium text-danger bg-danger/10 rounded-lg border border-danger/20 hover:bg-danger/20 transition-colors flex items-center gap-1"
+            >
+              <Trash2 size={12} /> Remover logo
+            </button>
+          )}
+          {logoError && (
+            <p className="mx-auto mb-2 text-[11px] text-danger max-w-[200px]">{logoError}</p>
+          )}
 
           <h1 className="text-2xl font-bold text-text-primary tracking-tight">{settings.shopName}</h1>
 

@@ -403,6 +403,7 @@ export const StaffDashboard: React.FC = () => {
             }}
             onDeletePost={deletePost}
             onLikePost={likePost}
+            onNotify={showToast}
           />
         )}
 
