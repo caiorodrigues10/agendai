@@ -1,5 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { CalendarDays, Loader2, Package, Plus, Search, UserPlus } from 'lucide-react';
+import {
+  CalendarDays,
+  Edit3,
+  FileText,
+  History,
+  Loader2,
+  Package,
+  Plus,
+  Search,
+  Trash2,
+  UserPlus,
+} from 'lucide-react';
 import {
   ClientPackage,
   PackagePaymentMethod,
@@ -8,7 +19,7 @@ import {
   ShopSettings,
   StaffMember,
 } from '../../types';
-import { clientsApi } from '../../infra/clientsApi';
+import { clientsApi, ListMeta } from '../../infra/clientsApi';
 import { packagesApi } from '../../infra/packagesApi';
 import { maskPhone } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
@@ -21,6 +32,20 @@ const PAYMENT_LABEL: Record<PackagePaymentMethod, string> = {
   pix: 'PIX',
   card: 'Cartão',
   other: 'Outro',
+};
+
+const STATUS_STYLE: Record<string, string> = {
+  CONFIRMED: 'bg-blue-500/15 text-blue-400 border border-blue-500/30',
+  COMPLETED: 'bg-green-500/15 text-green-400 border border-green-500/30',
+  CANCELLED: 'bg-red-500/15 text-red-400 border border-red-500/30',
+  NO_SHOW: 'bg-gray-500/15 text-gray-400 border border-gray-500/30',
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  CONFIRMED: 'Confirmado',
+  COMPLETED: 'Concluído',
+  CANCELLED: 'Cancelado',
+  NO_SHOW: 'Não compareceu',
 };
 
 function clientPhoneLabel(whatsapp: string): string {
@@ -49,10 +74,16 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<SalonClient | null>(null);
 
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState<ListMeta>({ total: 0, page: 1, limit: 15, totalPages: 1 });
+
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [saving, setSaving] = useState(false);
+
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ name: '', whatsapp: '', notes: '' });
 
   const [catalog, setCatalog] = useState<Awaited<ReturnType<typeof packagesApi.listCatalog>>>([]);
   const [sellPackageId, setSellPackageId] = useState('');
@@ -65,14 +96,15 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
     setLoading(true);
     setError(null);
     try {
-      const result = await clientsApi.list({ search: search.trim() || undefined, limit: 50 });
+      const result = await clientsApi.list({ search: search.trim() || undefined, page, limit: 15 });
       setClients(result.data);
+      setMeta(result.meta);
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
-  }, [search]);
+  }, [search, page]);
 
   useEffect(() => {
     const t = setTimeout(loadList, 300);
@@ -88,6 +120,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
 
   const openDetail = async (id: string) => {
     setSelectedId(id);
+    setEditing(false);
     setError(null);
     try {
       const data = await clientsApi.get(id);
@@ -117,6 +150,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
       setName('');
       setWhatsapp('');
       setShowCreate(false);
+      setPage(1);
       await loadList();
       await openDetail(created.id);
     } catch (err) {
@@ -124,6 +158,45 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleEdit = async () => {
+    if (!detail) return;
+    setSaving(true);
+    setError(null);
+    try {
+      await clientsApi.update(detail.id, {
+        name: editForm.name.trim(),
+        whatsapp: editForm.whatsapp.replace(/\D/g, ''),
+        notes: editForm.notes.trim() || null,
+      });
+      setEditing(false);
+      await refreshDetail();
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!detail) return;
+    if (!confirm('Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.')) return;
+    setError(null);
+    try {
+      await clientsApi.delete(detail.id);
+      setSelectedId(null);
+      setDetail(null);
+      await loadList();
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
+  };
+
+  const startEdit = () => {
+    if (!detail) return;
+    setEditForm({ name: detail.name, whatsapp: detail.whatsapp, notes: detail.notes ?? '' });
+    setEditing(true);
   };
 
   const handleSell = async () => {
@@ -187,6 +260,10 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
     expiresAt: row.expiresAt,
   });
 
+  const sortedAppointments = [...(detail?.appointments ?? [])].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
+
   return (
     <div className="mt-2 space-y-4">
       <div className="flex items-center justify-between">
@@ -235,7 +312,10 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
           className="w-full bg-surface border border-border rounded-xl pl-10 pr-4 py-3 text-sm text-text-primary"
           placeholder="Buscar por nome ou WhatsApp"
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={e => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
         />
       </div>
 
@@ -247,32 +327,139 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
       ) : clients.length === 0 ? (
         <p className="text-sm text-text-muted text-center py-8">Nenhuma cliente cadastrada.</p>
       ) : (
-        <div className="space-y-2">
-          {clients.map(c => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => openDetail(c.id)}
-              className={`w-full text-left bg-surface border rounded-xl px-4 py-3 ${
-                selectedId === c.id ? 'border-accent' : 'border-border'
-              }`}
-            >
-              <p className="font-medium text-text-primary">{c.name}</p>
-              <p className="text-xs text-text-muted">
-                {clientPhoneLabel(c.whatsapp)} · {c.remainingSessions} sessão(ões) · {c.activePackageCount}{' '}
-                pacote(s)
-              </p>
-            </button>
-          ))}
-        </div>
+        <>
+          <div className="space-y-2">
+            {clients.map(c => (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => openDetail(c.id)}
+                className={`w-full text-left bg-surface border rounded-xl px-4 py-3 ${
+                  selectedId === c.id ? 'border-accent' : 'border-border'
+                }`}
+              >
+                <p className="font-medium text-text-primary">{c.name}</p>
+                <p className="text-xs text-text-muted">
+                  {clientPhoneLabel(c.whatsapp)} · {c.remainingSessions} sessão(ões) · {c.activePackageCount}{' '}
+                  pacote(s)
+                </p>
+              </button>
+            ))}
+          </div>
+
+          {meta.totalPages > 1 && (
+            <div className="flex items-center justify-between text-xs text-text-secondary">
+              <button
+                type="button"
+                disabled={page <= 1}
+                onClick={() => setPage(p => p - 1)}
+                className="px-3 py-1.5 rounded-lg border border-border disabled:opacity-40"
+              >
+                Anterior
+              </button>
+              <span>
+                Página {meta.page} de {meta.totalPages}
+              </span>
+              <button
+                type="button"
+                disabled={page >= meta.totalPages}
+                onClick={() => setPage(p => p + 1)}
+                className="px-3 py-1.5 rounded-lg border border-border disabled:opacity-40"
+              >
+                Próxima
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {detail && (
         <div className="bg-surface border border-border rounded-xl p-4 space-y-4">
-          <div>
-            <h4 className="font-bold text-text-primary">{detail.name}</h4>
-            <p className="text-xs text-text-muted">{clientPhoneLabel(detail.whatsapp)}</p>
-          </div>
+          {editing ? (
+            <div className="space-y-3">
+              <input
+                className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-sm text-text-primary"
+                placeholder="Nome"
+                value={editForm.name}
+                onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
+              />
+              <input
+                className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-sm text-text-primary"
+                placeholder="WhatsApp"
+                value={editForm.whatsapp}
+                onChange={e => setEditForm(f => ({ ...f, whatsapp: maskPhone(e.target.value) }))}
+              />
+              <textarea
+                className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-sm text-text-primary resize-none"
+                placeholder="Notas sobre o cliente"
+                rows={3}
+                value={editForm.notes}
+                onChange={e => setEditForm(f => ({ ...f, notes: e.target.value }))}
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={handleEdit}
+                  className="flex-1 py-2.5 rounded-xl font-bold text-accent-fg bg-accent disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {saving ? 'Salvando…' : 'Salvar'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditing(false)}
+                  className="px-4 py-2.5 rounded-xl font-bold border border-border text-text-secondary"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div className="flex items-start justify-between">
+                <div>
+                  <h4 className="font-bold text-text-primary">{detail.name}</h4>
+                  <p className="text-xs text-text-muted">{clientPhoneLabel(detail.whatsapp)}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={startEdit}
+                  className="p-1.5 rounded-lg text-text-muted hover:text-accent border border-border hover:border-accent/50"
+                >
+                  <Edit3 size={14} />
+                </button>
+              </div>
+
+              <div className="mt-3">
+                {detail.notes ? (
+                  <div className="bg-bg border border-border rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-1.5 text-text-muted">
+                        <FileText size={12} />
+                        <span className="text-[11px] font-bold uppercase tracking-wider">Notas</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={startEdit}
+                        className="text-[11px] text-accent font-bold"
+                      >
+                        Editar
+                      </button>
+                    </div>
+                    <p className="text-sm text-text-secondary whitespace-pre-wrap">{detail.notes}</p>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={startEdit}
+                    className="w-full bg-bg border border-dashed border-border rounded-lg p-3 text-sm text-text-muted hover:text-accent hover:border-accent/50 text-left"
+                  >
+                    Adicionar notas...
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <p className="text-[11px] uppercase font-bold tracking-wider text-text-muted">
@@ -364,22 +551,45 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
             )}
           </div>
 
-          {(detail.appointments ?? []).length > 0 && (
+          {sortedAppointments.length > 0 && (
             <div>
-              <p className="text-[11px] uppercase font-bold tracking-wider text-text-muted mb-2">
-                Próximos horários
+              <p className="text-[11px] uppercase font-bold tracking-wider text-text-muted mb-2 flex items-center gap-1.5">
+                <History size={12} /> Histórico
               </p>
-              <ul className="text-xs text-text-secondary space-y-1">
-                {(detail.appointments ?? [])
-                  .filter(a => a.status === 'CONFIRMED')
-                  .map(a => (
-                    <li key={a.id}>
-                      {new Date(a.date).toLocaleDateString('pt-BR')} {a.time} · {a.serviceName}
-                    </li>
-                  ))}
+              <ul className="text-xs space-y-1.5">
+                {sortedAppointments.map(a => (
+                  <li
+                    key={a.id}
+                    className="bg-bg border border-border rounded-lg px-3 py-2 flex items-center justify-between"
+                  >
+                    <div>
+                      <p className="text-text-primary font-medium">{a.serviceName}</p>
+                      <p className="text-text-muted">
+                        {new Date(a.date).toLocaleDateString('pt-BR')} {a.time}
+                      </p>
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                        STATUS_STYLE[a.status] ?? 'bg-gray-500/15 text-gray-400 border border-gray-500/30'
+                      }`}
+                    >
+                      {STATUS_LABEL[a.status] ?? a.status}
+                    </span>
+                  </li>
+                ))}
               </ul>
             </div>
           )}
+
+          <div className="pt-2 border-t border-border">
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="w-full py-2.5 rounded-xl font-bold text-danger border border-danger/30 hover:bg-danger/10 flex items-center justify-center gap-2 text-sm"
+            >
+              <Trash2 size={14} /> Excluir cliente
+            </button>
+          </div>
         </div>
       )}
 

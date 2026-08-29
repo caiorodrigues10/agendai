@@ -45,7 +45,7 @@ export const PERMISSION_LABELS: Record<EmployeePermission, string> = {
 export function usePermissions() {
   const { user } = useAuth();
 
-  const isOwnerOrAdmin = user?.role === 'owner' || user?.role === 'admin';
+  const isOwnerOrAdmin = user?.role === 'OWNER' || user?.role === 'MASTER_ADMIN';
   const permissions: EmployeePermission[] = isOwnerOrAdmin
     ? ALL_PERMISSIONS
     : (user as any)?.permissions ?? [];

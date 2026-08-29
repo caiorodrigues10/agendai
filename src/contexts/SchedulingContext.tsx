@@ -217,7 +217,9 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       whatsapp,
       serviceId,
       barbershopId,
-      ...(opts?.additionalPerson ? {} : { sessionId: clientId }),
+      ...(opts?.additionalPerson
+        ? { responsibleSessionId: clientId }
+        : { sessionId: clientId }),
     };
 
     try {
@@ -320,7 +322,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   const checkInAppointment = async (appt: Appointment) => {
     await schedulingApi.checkInAppointment(appt.id);
     setAppointments(prev =>
-      prev.map(a => (a.id === appt.id ? { ...a, status: 'CHECKED_IN' as const } : a))
+      prev.map(a => (a.id === appt.id ? { ...a, status: 'checked_in' as const } : a))
     );
     await refreshQueue();
   };

@@ -183,6 +183,8 @@ export interface SalonClient {
   notes: string | null;
   remainingSessions: number;
   activePackageCount: number;
+  createdAt: string;
+  updatedAt: string;
   packages?: SalonClientPackageSummary[];
   appointments?: SalonClientAppointment[];
 }

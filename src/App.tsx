@@ -7,6 +7,7 @@ import { ScrollToTop } from './components/infra/ScrollToTop';
 import { ReferralRefCapture } from './components/infra/ReferralRefCapture';
 import { Loader } from './components/ui/Loader';
 import { ErrorBoundary } from './components/infra/ErrorBoundary';
+import { PwaUpdatePrompt } from './components/pwa/PwaUpdatePrompt';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const FeaturesPage = lazy(() => import('./pages/marketing/FeaturesPage'));
@@ -36,6 +37,7 @@ const App: React.FC = () => {
       <ReferralRefCapture />
       <AccessBlockedListener />
       <CookieConsent />
+      <PwaUpdatePrompt />
       <ErrorBoundary>
         <Suspense fallback={<Loader />}>
           <Routes>
@@ -51,6 +53,7 @@ const App: React.FC = () => {
           <Route path="/queue" element={<PublicHome />} />
           <Route path="/queue/:id" element={<PublicHome />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/cadastro" element={<LoginPage />} />
           <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
           <Route path="/verificar-codigo" element={<VerifyResetCodePage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />

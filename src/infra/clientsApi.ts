@@ -76,4 +76,8 @@ export const clientsApi = {
     );
     return unwrap<SalonClient>(res);
   },
+
+  delete: async (id: string) => {
+    await apiClient<void>(`/api/clients/${id}`, 'DELETE', undefined, token());
+  },
 };
