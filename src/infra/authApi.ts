@@ -37,7 +37,7 @@ export const authApi = {
     apiClient<AuthResponse>('/api/auth/login', 'POST', { email, password, recaptchaToken, rememberMe }),
   register: (payload: RegisterPayload & { recaptchaToken?: string }) =>
     apiClient<AuthResponse>('/api/auth/register', 'POST', payload),
-  refresh: (refreshToken: string) =>
+  refresh: (refreshToken?: string) =>
     apiClient<AuthResponse>('/api/auth/refresh', 'POST', { refreshToken }),
   me: (token: string) => apiClient<{ user: AuthUser }>('/api/auth/me', 'GET', undefined, token),
   googleLogin: (idToken: string) =>

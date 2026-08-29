@@ -52,17 +52,13 @@ async function refreshAccessToken(): Promise<string | null> {
 
   refreshInFlight = (async () => {
     try {
+      // O refresh token atual fica em cookie HTTP-only. Versões antigas também
+      // podem tê-lo no storage, então mantemos esse valor apenas como compatibilidade.
       const refreshToken = authStorage.getRefreshToken();
-      if (!refreshToken) {
-        authStorage.clearTokens();
-        authStorage.clearUser();
-        window.dispatchEvent(new Event('agendai:session-expired'));
-        return null;
-      }
       const res = await fetch(`${API_BASE}/api/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
+        body: JSON.stringify(refreshToken ? { refreshToken } : {}),
         credentials: 'include',
       });
       if (!res.ok) {
@@ -164,21 +160,21 @@ const tryParseJson = (text: string): unknown => {
  * então também tentamos parsear esse caso para extrair `code`/`plans`/etc.
  */
 const buildApiError = (status: number, rawBody: string): ApiError => {
-  const body = tryParseJson(rawBody);
+  const body = tryParseJson(rawBody) as Record<string, unknown> | null;
   if (!body) {
     return new ApiError(rawBody || `HTTP ${status}`, status);
   }
 
   let message: string = typeof body.message === 'string' ? body.message : `HTTP ${status}`;
   let code: string | undefined = typeof body.code === 'string' ? body.code : undefined;
-  let data: unknown = { ...(body as Record<string, unknown>) };
+  let data: unknown = { ...body };
 
   // Compat: `message` pode ser um JSON serializado com { code, message, ... }
-  const nested = typeof body.message === 'string' ? tryParseJson(body.message) : null;
+  const nested = typeof body.message === 'string' ? tryParseJson(body.message) as Record<string, unknown> | null : null;
   if (nested && typeof nested === 'object' && nested !== null && 'code' in nested) {
     code = String(nested.code);
     message = typeof nested.message === 'string' ? nested.message : message;
-    data = { ...(data as Record<string, unknown>), ...(nested as Record<string, unknown>) };
+    data = { ...(data as Record<string, unknown>), ...nested };
   }
   (data as Record<string, unknown>).message = message;
 

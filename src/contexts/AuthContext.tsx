@@ -65,9 +65,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (!success) {
         const refreshToken = authStorage.getRefreshToken();
-        if (refreshToken) {
+        // A sessão persistente usa cookie HTTP-only; ele não é legível pelo
+        // JavaScript, mas o navegador o envia automaticamente neste request.
+        if (refreshToken || cachedUser) {
           try {
-            const resp = await authApi.refresh(refreshToken);
+            const resp = await authApi.refresh(refreshToken ?? undefined);
             const rememberMe = authStorage.isPersistent();
             authStorage.setTokens(resp.accessToken, resp.refreshToken, rememberMe);
             authStorage.setUser(resp.user, rememberMe);
