@@ -1,13 +1,14 @@
 import React, { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { StaffMember } from '../../types';
+import { StaffMember, EmployeePermission } from '../../types';
 import { TeamMemberSchema, TeamMemberFormData } from '../../schemas';
 import { v4 as uuidv4 } from 'uuid';
-import { Trash2, UserPlus, X, Check, AlertCircle, Camera, Loader2 } from 'lucide-react';
+import { Trash2, UserPlus, X, Check, AlertCircle, Camera, Loader2, ChevronDown, Shield } from 'lucide-react';
 import { Avatar } from '../ui/Avatar';
 import { usersApi } from '../../infra/usersApi';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { ALL_PERMISSIONS, PERMISSION_LABELS } from '../../hooks/usePermissions';
 
 interface TeamManagerProps {
   staff: StaffMember[];
@@ -27,6 +28,8 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
   const [avatarUploadingId, setAvatarUploadingId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarTargetId, setAvatarTargetId] = useState<string | null>(null);
+  const [editingPermissionsId, setEditingPermissionsId] = useState<string | null>(null);
+  const [permissionsSaving, setPermissionsSaving] = useState(false);
 
   const {
     register,
@@ -47,6 +50,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
       password: data.password,
       cpf: data.cpf,
       role: 'EMPLOYEE',
+      permissions: ['QUEUE_MANAGE', 'APPOINTMENTS_MANAGE', 'CLIENTS_MANAGE', 'PACKAGES_SELL'],
     };
 
     try {
@@ -102,6 +106,26 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
       setAvatarUploadingId(null);
       setAvatarTargetId(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleTogglePermission = async (memberId: string, perm: EmployeePermission) => {
+    setPermissionsSaving(true);
+    try {
+      const member = staff.find(m => m.id === memberId);
+      if (!member) return;
+      const current = member.permissions ?? [];
+      const updated = current.includes(perm)
+        ? current.filter(p => p !== perm)
+        : [...current, perm];
+      const newTeam = staff.map(m =>
+        m.id === memberId ? { ...m, permissions: updated } : m
+      );
+      await onUpdateTeam(newTeam);
+    } catch (err) {
+      setFormError(getErrorMessage(err, 'Erro ao atualizar permissões'));
+    } finally {
+      setPermissionsSaving(false);
     }
   };
 
@@ -225,67 +249,120 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
       )}
 
       <div className="space-y-2">
-        {staff.map(member => (
-          <div
-            key={member.id}
-            className="bg-surface p-3 rounded-lg border border-border flex items-center justify-between"
-          >
-            <div className="flex items-center gap-3">
-              <div className="relative group cursor-pointer" onClick={() => handleAvatarClick(member.id)}>
-                <Avatar src={member.avatarUrl} name={member.name} size="sm" />
-                <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  {avatarUploadingId === member.id ? (
-                    <Loader2 size={14} className="text-white animate-spin" />
-                  ) : (
-                    <Camera size={14} className="text-white" />
+        {staff.map(member => {
+          const isEmployee = member.role === 'EMPLOYEE';
+          const isExpanded = editingPermissionsId === member.id;
+          const memberPerms = member.permissions ?? [];
+
+          return (
+            <div key={member.id} className="bg-surface rounded-lg border border-border overflow-hidden">
+              <div className="p-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="relative group cursor-pointer" onClick={() => handleAvatarClick(member.id)}>
+                    <Avatar src={member.avatarUrl} name={member.name} size="sm" />
+                    <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      {avatarUploadingId === member.id ? (
+                        <Loader2 size={14} className="text-white animate-spin" />
+                      ) : (
+                        <Camera size={14} className="text-white" />
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm text-text-primary">
+                      {member.name} {member.id === currentAdminId && '(Você)'}
+                    </h4>
+                    <p className="text-xs text-text-muted flex items-center gap-1">
+                      {member.email}{' '}
+                      <span className="uppercase text-[0.6rem] border border-border px-1 rounded bg-bg">
+                        {member.role === 'MASTER_ADMIN'
+                          ? 'Admin'
+                          : member.role === 'OWNER'
+                            ? 'Dono'
+                            : 'Funcionário'}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1">
+                  {isEmployee && member.id !== currentAdminId && (
+                    <>
+                      <button
+                        onClick={() => setEditingPermissionsId(isExpanded ? null : member.id)}
+                        className={`p-1.5 rounded-lg transition-colors ${isExpanded ? 'bg-accent/10 text-accent' : 'text-text-muted hover:text-accent hover:bg-accent/10'}`}
+                        title="Gerenciar permissões"
+                      >
+                        <Shield size={16} />
+                      </button>
+                      {deleteConfirmId === member.id ? (
+                        <div className="flex items-center gap-1 animate-fade-in">
+                          <button
+                            onClick={() => confirmDelete(member.id)}
+                            className="p-1.5 bg-danger text-white rounded hover:bg-danger/80"
+                          >
+                            <Check size={14} />
+                          </button>
+                          <button
+                            onClick={() => setDeleteConfirmId(null)}
+                            className="p-1.5 bg-surface-2 text-text-secondary rounded hover:bg-border-strong"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setDeleteConfirmId(member.id)}
+                          className="p-1.5 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </>
+                  )}
+                  {isEmployee && member.id === currentAdminId && (
+                    <span className="text-[10px] text-text-muted px-2">Você</span>
+                  )}
+                  {!isEmployee && (
+                    <ChevronDown size={14} className="text-text-muted" />
                   )}
                 </div>
               </div>
-              <div>
-                <h4 className="font-medium text-sm text-text-primary">
-                  {member.name} {member.id === currentAdminId && '(Você)'}
-                </h4>
-                <p className="text-xs text-text-muted flex items-center gap-1">
-                  {member.email}{' '}
-                  <span className="uppercase text-[0.6rem] border border-border px-1 rounded bg-bg">
-                    {member.role === 'MASTER_ADMIN'
-                      ? 'Admin'
-                      : member.role === 'OWNER'
-                        ? 'Dono'
-                        : 'Funcionário'}
-                  </span>
-                </p>
-              </div>
-            </div>
 
-            {member.id !== currentAdminId &&
-              member.role === 'EMPLOYEE' &&
-              (deleteConfirmId === member.id ? (
-                <div className="flex items-center gap-2 animate-fade-in">
-                  <span className="text-[10px] text-danger font-bold">Excluir?</span>
-                  <button
-                    onClick={() => confirmDelete(member.id)}
-                    className="p-1.5 bg-danger text-white rounded hover:bg-danger/80"
-                  >
-                    <Check size={14} />
-                  </button>
-                  <button
-                    onClick={() => setDeleteConfirmId(null)}
-                    className="p-1.5 bg-surface-2 text-text-secondary rounded hover:bg-border-strong"
-                  >
-                    <X size={14} />
-                  </button>
+              {isExpanded && isEmployee && (
+                <div className="px-3 pb-3 border-t border-border pt-2 animate-fade-in-down">
+                  <p className="text-[10px] text-text-muted mb-2 uppercase font-bold">Permissões</p>
+                  <div className="grid grid-cols-2 gap-1">
+                    {ALL_PERMISSIONS.map(perm => (
+                      <label
+                        key={perm}
+                        className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded cursor-pointer transition-colors ${
+                          memberPerms.includes(perm)
+                            ? 'bg-accent/10 text-accent'
+                            : 'text-text-muted hover:bg-surface-2'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={memberPerms.includes(perm)}
+                          disabled={permissionsSaving}
+                          onChange={() => handleTogglePermission(member.id, perm)}
+                          className="sr-only"
+                        />
+                        <div className={`w-3 h-3 rounded border flex items-center justify-center flex-shrink-0 ${
+                          memberPerms.includes(perm) ? 'bg-accent border-accent' : 'border-border'
+                        }`}>
+                          {memberPerms.includes(perm) && <Check size={10} className="text-accent-fg" />}
+                        </div>
+                        <span className="leading-tight">{PERMISSION_LABELS[perm]}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              ) : (
-                <button
-                  onClick={() => setDeleteConfirmId(member.id)}
-                  className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors"
-                >
-                  <Trash2 size={16} />
-                </button>
-              ))}
-          </div>
-        ))}
+              )}
+            </div>
+          );
+        })}
         {staff.length === 0 && (
           <p className="text-center text-text-muted text-sm py-4">Nenhum membro na equipe.</p>
         )}

@@ -27,6 +27,7 @@ interface StaffPayload {
   cpf?: string;
   role: string;
   barbershopId: string;
+  permissions?: string[];
 }
 
 type AddPostPayload = Omit<FeedPost, 'id' | 'createdAt' | 'updatedAt' | 'likes'>;

@@ -50,6 +50,8 @@ export function mapStaffFromApi(raw: Record<string, unknown>): StaffMember {
       ? roleRaw
       : 'EMPLOYEE';
 
+  const perms = Array.isArray(raw.permissions) ? raw.permissions.map(String) : [];
+
   return {
     id: String(raw.id),
     name: String(raw.name),
@@ -57,6 +59,7 @@ export function mapStaffFromApi(raw: Record<string, unknown>): StaffMember {
     role,
     barbershopId: raw.barbershopId ? String(raw.barbershopId) : undefined,
     avatarUrl: raw.avatarUrl ? String(raw.avatarUrl) : null,
+    permissions: perms as any,
   };
 }
 

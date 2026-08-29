@@ -192,6 +192,12 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
     const newIds = new Set(team.map(member => member.id));
     const toAdd = team.filter(member => !currentIds.has(member.id));
     const toRemove = staff.filter(member => !newIds.has(member.id));
+    const toUpdate = team.filter(member => {
+      if (!currentIds.has(member.id)) return false;
+      const old = staff.find(s => s.id === member.id);
+      if (!old) return false;
+      return JSON.stringify(old.permissions) !== JSON.stringify(member.permissions);
+    });
     await Promise.all([
       ...toAdd.map(member =>
         barbershopApi.addStaff({
@@ -201,9 +207,13 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
           cpf: (member as StaffMember & { cpf?: string }).cpf,
           role: 'EMPLOYEE',
           barbershopId,
+          permissions: member.permissions,
         })
       ),
       ...toRemove.map(member => barbershopApi.deleteStaff(member.id)),
+      ...toUpdate.map(member =>
+        barbershopApi.updateStaff(member.id, { permissions: member.permissions })
+      ),
     ]);
     const staffData = await barbershopApi.listStaff(barbershopId);
     setStaff(Array.isArray(staffData) ? (staffData as Record<string, unknown>[]).map(mapStaffFromApi) : []);

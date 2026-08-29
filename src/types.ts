@@ -21,6 +21,8 @@ export interface QueueItem {
   completedBy?: string;
   finalPrice?: number;
   customerId?: string;
+  responsibleQueueItemId?: string | null;
+  responsibleName?: string | null;
 }
 
 export interface Appointment {
@@ -64,6 +66,18 @@ export interface AIInsight {
 
 export type StaffRole = 'MASTER_ADMIN' | 'OWNER' | 'EMPLOYEE' | 'CUSTOMER';
 
+export type EmployeePermission =
+  | 'QUEUE_MANAGE'
+  | 'APPOINTMENTS_MANAGE'
+  | 'APPOINTMENTS_VIEW_ALL'
+  | 'APPOINTMENTS_CANCEL'
+  | 'CLIENTS_MANAGE'
+  | 'PACKAGES_SELL'
+  | 'FINANCE_VIEW'
+  | 'FINANCE_MANAGE'
+  | 'REPORTS_VIEW'
+  | 'MARKETING_MANAGE';
+
 export interface StaffMember {
   id: string;
   name: string;
@@ -73,6 +87,7 @@ export interface StaffMember {
   barbershopId?: string;
   emailVerified?: boolean;
   avatarUrl?: string | null;
+  permissions?: EmployeePermission[];
 }
 
 export interface FeedPost {
