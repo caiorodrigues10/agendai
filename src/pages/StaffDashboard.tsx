@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+﻿import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '../components/ui/Header';
 import { QueueItemCard } from '../components/domain/QueueItemCard';
@@ -23,28 +23,12 @@ import { useBarbershop } from '../contexts/BarbershopContext';
 import { useScheduling } from '../contexts/SchedulingContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
-import {
-  Settings,
-  Scissors,
-  Users,
-  BarChart3,
-  Store,
-  List,
-  CalendarDays,
-  Loader2,
-  CreditCard,
-  Wallet,
-  Gift,
-  Megaphone,
-  Contact,
-  Link2,
-  ChevronRight,
-  ChevronLeft,
-} from 'lucide-react';
+import { TAB_GROUPS, ALL_TAB_IDS, getDefaultTab, canAccessTab } from '../config/tabRegistry';
 import { ClientsManager } from '../components/domain/ClientsManager';
 import { PublicLinkPanel } from '../components/domain/PublicLinkPanel';
 import { getErrorMessage } from '../utils/errorMessage';
 import { QueueItem } from '../types';
+import { ChevronDown, Loader2 } from 'lucide-react';
 
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -90,78 +74,33 @@ export const StaffDashboard: React.FC = () => {
   const [returnToQueueItem, setReturnToQueueItem] = useState<QueueItem | null>(null);
   const [returningToQueue, setReturningToQueue] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'bot' | 'error' } | null>(null);
+  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
 
-  const activeTab =
-    (location.pathname.split('/')[2] as
-      | 'queue'
-      | 'profile'
-      | 'appointments'
-      | 'clients'
-      | 'services'
-      | 'settings'
-      | 'team'
-      | 'reports'
-      | 'finance'
-      | 'subscription'
-      | 'referrals'
-      | 'posts'
-      | 'link') || 'queue';
+  const rawTab = location.pathname.split('/')[2] || 'queue';
+  const activeTab = ALL_TAB_IDS.includes(rawTab) ? rawTab : 'queue';
 
-  const tabsRef = useRef<HTMLDivElement>(null);
-  const subTabsRef = useRef<HTMLDivElement>(null);
-  const tabBtnRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
-  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
-  const [mainBarFades, setMainBarFades] = useState({ left: false, right: false });
-  const [subBarFades, setSubBarFades] = useState({ left: false, right: false });
-
-  const updateFades = (el: HTMLDivElement, set: typeof setMainBarFades) => {
-    set({
-      left: el.scrollLeft > 1,
-      right: el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
-    });
-  };
-
-  const edgeMaskStyle = (fades: { left: boolean; right: boolean }): React.CSSProperties | undefined => {
-    if (!fades.left && !fades.right) return undefined;
-    const parts: string[] = [];
-    if (fades.left) parts.push('transparent 0', '#000 36px');
-    else parts.push('#000 0');
-    if (fades.right) parts.push('#000 calc(100% - 44px)', 'transparent 100%');
-    else parts.push('#000 100%');
-    const image = `linear-gradient(to right, ${parts.join(', ')})`;
-    return { WebkitMaskImage: image, maskImage: image };
-  };
-
-  const measureIndicator = useCallback(() => {
-    const container = tabsRef.current;
-    const activeBtn = tabBtnRefs.current.get(activeTab);
-    if (!container || !activeBtn) return;
-    const containerRect = container.getBoundingClientRect();
-    const btnRect = activeBtn.getBoundingClientRect();
-    const newLeft = btnRect.left - containerRect.left + container.scrollLeft;
-    setIndicator({
-      left: newLeft,
-      width: btnRect.width,
-    });
-    const btnCenter = newLeft + btnRect.width / 2;
-    const viewportCenter = container.clientWidth / 2;
-    container.scrollTo({ left: btnCenter - viewportCenter, behavior: 'smooth' });
-  }, [activeTab]);
-
-  const remeasure = useCallback(() => {
-    measureIndicator();
-    if (tabsRef.current) updateFades(tabsRef.current, setMainBarFades);
-    if (subTabsRef.current) updateFades(subTabsRef.current, setSubBarFades);
-  }, [measureIndicator]);
-
+  // Redirect invalid tabs
   useEffect(() => {
-    const timer = setTimeout(remeasure, 100);
-    window.addEventListener('resize', remeasure);
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', remeasure);
-    };
-  }, [remeasure]);
+    if (rawTab !== activeTab) {
+      navigate(`/app/${getDefaultTab(user?.role)}`, { replace: true });
+    }
+  }, [rawTab, activeTab, user?.role, navigate]);
+
+  // Redirect if tab not accessible
+  useEffect(() => {
+    if (!user) return;
+    if (!canAccessTab(activeTab, user.role)) {
+      navigate(`/app/${getDefaultTab(user.role)}`, { replace: true });
+    }
+  }, [activeTab, user, navigate]);
+
+  // Re-check access including hasDashboard
+  useEffect(() => {
+    if (!user) return;
+    if ((activeTab === 'reports' || activeTab === 'finance') && !hasDashboard) {
+      navigate(`/app/${getDefaultTab(user.role)}`, { replace: true });
+    }
+  }, [activeTab, user, hasDashboard, navigate]);
 
   useEffect(() => {
     if (subscriptionLoading) return;
@@ -170,60 +109,20 @@ export const StaffDashboard: React.FC = () => {
     }
   }, [accessState, subscriptionLoading, navigate]);
 
-  const tabs = useMemo(() => {
-    const t = [
-      { id: 'queue', label: 'Fila', icon: List },
-      { id: 'appointments', label: 'Agenda', icon: CalendarDays },
-      { id: 'clients', label: 'Clientes', icon: Contact },
-    ];
-    if (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') {
-      t.push({ id: 'services', label: 'Serviços', icon: Scissors });
-      t.push({ id: 'team', label: 'Equipe', icon: Users });
+  // Find which group the active tab belongs to
+  const activeGroup = useMemo(() => {
+    for (const group of TAB_GROUPS) {
+      if (group.tabs.some(t => t.id === activeTab)) return group.id;
     }
-    t.push({ id: 'settings', label: 'Configurações', icon: Settings });
-    if (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') {
-      t.push({ id: 'subscription', label: 'Plano', icon: Wallet });
-    }
-    if ((user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && hasDashboard) {
-      t.push({ id: 'reports', label: 'Relatórios', icon: BarChart3 });
-      t.push({ id: 'finance', label: 'Financeiro', icon: CreditCard });
-    }
-    t.push({ id: 'profile', label: 'Perfil', icon: Store });
-    return t;
-  }, [user, hasDashboard]);
+    return TAB_GROUPS[0].id;
+  }, [activeTab]);
 
-  useEffect(() => {
-    if (!user) return;
-    const restrictedTabs = ['services', 'team'];
-    if (
-      restrictedTabs.includes(activeTab) &&
-      !(user.role === 'MASTER_ADMIN' || user.role === 'OWNER')
-    ) {
-      navigate('/app/queue');
-    }
-    // Redirecionar se tentar acessar reports sem permissão (caso acesse via URL direta)
-    if (activeTab === 'reports' && (user.role === 'EMPLOYEE' || !hasDashboard)) {
-      navigate('/app/queue');
-    }
-    if (
-      activeTab === 'finance' &&
-      (!(user.role === 'MASTER_ADMIN' || user.role === 'OWNER') || !hasDashboard)
-    ) {
-      navigate('/app/queue');
-    }
-    if (activeTab === 'subscription' && !(user.role === 'MASTER_ADMIN' || user.role === 'OWNER')) {
-      navigate('/app/queue');
-    }
-    if (activeTab === 'referrals' && !(user.role === 'MASTER_ADMIN' || user.role === 'OWNER')) {
-      navigate('/app/queue');
-    }
-    if (activeTab === 'posts' && !(user.role === 'MASTER_ADMIN' || user.role === 'OWNER')) {
-      navigate('/app/queue');
-    }
-    if (activeTab === 'link' && !(user.role === 'MASTER_ADMIN' || user.role === 'OWNER')) {
-      navigate('/app/queue');
-    }
-  }, [activeTab, user, navigate, hasDashboard]);
+  // Visible groups (at least one accessible tab)
+  const visibleGroups = useMemo(() => {
+    return TAB_GROUPS.filter(group =>
+      group.tabs.some(tab => canAccessTab(tab.id, user?.role))
+    );
+  }, [user?.role]);
 
   const showToast = (msg: string, type: 'success' | 'bot' | 'error' = 'success') => {
     setToast({ message: msg, type });
@@ -286,259 +185,98 @@ export const StaffDashboard: React.FC = () => {
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       <main className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 pt-6">
-        <div className="relative">
-          <div
-            ref={tabsRef}
-            onScroll={e => updateFades(e.currentTarget, setMainBarFades)}
-            style={edgeMaskStyle(mainBarFades)}
-            className="flex w-fit max-w-full mx-auto bg-surface p-1 rounded-xl mb-6 border border-border relative overflow-x-auto no-scrollbar"
-          >
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                ref={btn => { if (btn) tabBtnRefs.current.set(tab.id, btn); }}
-                onClick={() => navigate(`/app/${tab.id}`)}
-                className={`flex-shrink-0 px-3 py-2 text-[10px] sm:text-xs font-bold rounded-lg transition-all flex flex-col items-center justify-center gap-0.5 z-10 relative leading-tight
-                          ${activeTab === tab.id ? 'text-text-primary' : 'text-text-muted'}
-                      `}
-              >
-                <tab.icon size={16} />
-                <span>{tab.label}</span>
-              </button>
-            ))}
+        {/* Grouped Navigation */}
+        <div className="mb-6 space-y-2">
+          {visibleGroups.map(group => {
+            const isActiveGroup = activeGroup === group.id;
+            const accessibleTabs = group.tabs.filter(tab => canAccessTab(tab.id, user?.role));
+            const activeTabDef = accessibleTabs.find(t => t.id === activeTab);
+            const GroupIcon = activeTabDef?.icon || accessibleTabs[0]?.icon;
 
-            <div
-              className="absolute top-1 bottom-1 bg-surface-2 rounded-lg transition-all duration-300"
-              style={{ left: indicator.left, width: indicator.width }}
-            ></div>
-          </div>
-          {mainBarFades.right && (
-            <button
-              type="button"
-              aria-label="Rolar abas para a direita"
-              onClick={() => tabsRef.current?.scrollBy({ left: 140, behavior: 'smooth' })}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 p-1 rounded-full bg-surface-2 border border-border text-text-secondary shadow-md hover:text-text-primary transition-colors cursor-pointer"
-            >
-              <ChevronRight size={14} />
-            </button>
-          )}
-          {mainBarFades.left && (
-            <button
-              type="button"
-              aria-label="Rolar abas para a esquerda"
-              onClick={() => tabsRef.current?.scrollBy({ left: -140, behavior: 'smooth' })}
-              className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 p-1 rounded-full bg-surface-2 border border-border text-text-secondary shadow-md hover:text-text-primary transition-colors cursor-pointer"
-            >
-              <ChevronLeft size={14} />
-            </button>
-          )}
+            return (
+              <div key={group.id} className="bg-surface rounded-xl border border-border overflow-hidden">
+                <button
+                  onClick={() => setExpandedGroup(isActiveGroup && expandedGroup === group.id ? null : group.id)}
+                  className={`w-full flex items-center justify-between px-4 py-3 text-sm font-bold transition-colors ${
+                    isActiveGroup ? 'text-accent' : 'text-text-muted'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    {GroupIcon && <GroupIcon size={16} />}
+                    {group.label}
+                    {isActiveGroup && activeTabDef && (
+                      <span className="text-text-muted font-normal">/ {activeTabDef.label}</span>
+                    )}
+                  </span>
+                  <ChevronDown
+                    size={16}
+                    className={`transition-transform ${expandedGroup === group.id ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {(expandedGroup === group.id || isActiveGroup) && (
+                  <div className="flex flex-wrap gap-1 px-3 pb-3">
+                    {accessibleTabs.map(tab => (
+                      <button
+                        key={tab.id}
+                        onClick={() => {
+                          navigate(`/app/${tab.id}`);
+                          setExpandedGroup(null);
+                        }}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                          activeTab === tab.id
+                            ? 'bg-accent/10 text-accent border border-accent/30'
+                            : 'text-text-secondary hover:bg-surface-2 border border-transparent'
+                        }`}
+                      >
+                        <tab.icon size={14} />
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
-        {user && (user.role === 'MASTER_ADMIN' || user.role === 'OWNER') && (
-          <div className="relative mb-6">
-            <div
-              ref={subTabsRef}
-              onScroll={e => updateFades(e.currentTarget, setSubBarFades)}
-              style={edgeMaskStyle(subBarFades)}
-              className="flex w-fit max-w-full mx-auto gap-2 bg-surface p-1 rounded-lg border border-border overflow-x-auto no-scrollbar"
-            >
-            {(user.role === 'MASTER_ADMIN' || user.role === 'OWNER') && (
-              <>
-                <button
-                  onClick={() => navigate('/app/referrals')}
-                  className={`flex-shrink-0 px-3 py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'referrals' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
-                  title="Indique e ganhe"
-                >
-                  <Gift size={16} /> Indicar
-                </button>
-                <button
-                  onClick={() => navigate('/app/posts')}
-                  className={`flex-shrink-0 px-3 py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'posts' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
-                  title="Posts do salão"
-                >
-                  <Megaphone size={16} /> Posts
-                </button>
-                <button
-                  onClick={() => navigate('/app/link')}
-                  className={`flex-shrink-0 px-3 py-2 text-sm font-bold rounded-md transition-all flex items-center justify-center gap-1 ${activeTab === 'link' ? 'bg-surface-2 text-text-primary shadow' : 'text-text-secondary'}`}
-                  title="Link público do salão"
-                >
-                  <Link2 size={16} /> Link
-                </button>
-              </>
-            )}
-            </div>
-            {subBarFades.right && (
-              <button
-                type="button"
-                aria-label="Rolar ações para a direita"
-                onClick={() => subTabsRef.current?.scrollBy({ left: 140, behavior: 'smooth' })}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 p-1 rounded-full bg-surface-2 border border-border text-text-secondary shadow-md hover:text-text-primary transition-colors cursor-pointer"
-              >
-                <ChevronRight size={14} />
-              </button>
-            )}
-            {subBarFades.left && (
-              <button
-                type="button"
-                aria-label="Rolar ações para a esquerda"
-                onClick={() => subTabsRef.current?.scrollBy({ left: -140, behavior: 'smooth' })}
-                className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 p-1 rounded-full bg-surface-2 border border-border text-text-secondary shadow-md hover:text-text-primary transition-colors cursor-pointer"
-              >
-                <ChevronLeft size={14} />
-              </button>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'profile' && settings && (
-          <ShopProfile
-            settings={settings}
-            posts={feed}
-            currentUser={user}
-            audience="staff"
-            onAddPost={p => {
-              addPost(p);
-              showToast('Postado!');
-            }}
-            onDeletePost={deletePost}
-            onLikePost={likePost}
-            onNotify={showToast}
-          />
-        )}
-
-        {activeTab === 'appointments' && settings && (
-          <AppointmentCalendar
-            appointments={appointments}
-            services={services}
-            staff={staff}
-            settings={settings}
-            currentUserId={user?.id}
-            currentUserRole={user?.role}
-            occupancy={availability}
-            onBook={async d => {
-              await bookAppointment(d);
-              showToast('Agendado com sucesso!');
-            }}
-            onCancel={id => {
-              cancelAppointment(id);
-              showToast('Cancelado');
-            }}
-            onCheckIn={appt => {
-              checkInAppointment(appt);
-              showToast('Check-in realizado!');
-            }}
-            onDateChange={handleDateChange}
-          />
-        )}
-
-        {activeTab === 'appointments' && !settings && (
-          <div className="text-center py-12 bg-surface rounded-xl border border-border border-dashed">
-            <p className="text-text-muted">Carregando configurações do salão...</p>
-          </div>
-        )}
-
-        {user && activeTab === 'settings' && (
-          <div className="mt-6">
-            <ProfileAvatarSection
-              userId={user.id}
-              userName={user.name}
-              avatarUrl={user.avatarUrl}
-              onAvatarUpdated={url => {
-                updateUserAvatar(url);
-              }}
-              onNotify={showToast}
-            />
-          </div>
-        )}
-
-        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') &&
-          activeTab === 'settings' &&
-          settings && (
-            <SettingsManager
-              settings={settings}
-              barbershopId={barbershopId || undefined}
-              onSave={s => {
-                setSettings(s);
-                showToast('Salvo!');
-              }}
-              onNotify={showToast}
-            />
-          )}
-
-        {user &&
-          activeTab === 'settings' &&
-          !((user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && settings) && (
-            <div className="mt-6">
-              {user.role === 'EMPLOYEE' ? (
-                <AccountPrivacyPanel onNotify={showToast} />
-              ) : (
-                <div className="text-center py-12 bg-surface rounded-xl border border-border border-dashed">
-                  <p className="text-text-muted">Carregando configurações...</p>
+        {/* Tab Content */}
+        {activeTab === 'overview' && (
+          <div className="space-y-4">
+            <div className="bg-surface rounded-xl border border-border p-4">
+              <h2 className="text-lg font-bold mb-3">Visão Geral</h2>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="bg-surface-2 rounded-lg p-3">
+                  <p className="text-text-muted text-xs">Na fila</p>
+                  <p className="text-xl font-bold">{peopleWaiting}</p>
                 </div>
-              )}
+                <div className="bg-surface-2 rounded-lg p-3">
+                  <p className="text-text-muted text-xs">Atendidos hoje</p>
+                  <p className="text-xl font-bold">{completedCount}</p>
+                </div>
+                <div className="bg-surface-2 rounded-lg p-3">
+                  <p className="text-text-muted text-xs">Status</p>
+                  <p className={`text-sm font-bold ${isOpen ? 'text-green-400' : 'text-red-400'}`}>
+                    {isOpen ? 'Aberto' : 'Fechado'}
+                  </p>
+                </div>
+                <div className="bg-surface-2 rounded-lg p-3">
+                  <p className="text-text-muted text-xs">Em atendimento</p>
+                  <p className="text-sm font-bold">{currentInChair?.customerName || '—'}</p>
+                </div>
+              </div>
             </div>
-          )}
-
-        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'services' && (
-          <ServiceManager
-            services={services}
-            onAdd={addService}
-            onEdit={editService}
-            onDelete={deleteService}
-          />
-        )}
-
-        {user && activeTab === 'clients' && settings && (
-          <ClientsManager
-            services={services}
-            staff={staff}
-            settings={settings}
-            canCancelSale={user.role === 'MASTER_ADMIN' || user.role === 'OWNER'}
-          />
-        )}
-
-        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') &&
-          activeTab === 'team' &&
-          user && (
-            <TeamManager
-              staff={staff}
-              onUpdateTeam={async t => {
-                await updateTeam(t);
-                showToast('Equipe atualizada');
-              }}
-              currentAdminId={user.id}
+            <QueueStatusCard
+              shopName={settings?.shopName}
+              isOpen={isOpen}
+              insight={aiInsight}
+              peopleWaiting={peopleWaiting}
+              completedCount={completedCount}
+              inChairName={currentInChair?.customerName ?? null}
+              showStaffStats
             />
-          )}
-
-        {user && activeTab === 'reports' && (
-          <FinancialDashboard
-            queueHistory={queue}
-            services={services}
-            currentUser={user}
-            allStaff={staff}
-            onDeleteHistoryItem={deleteHistoryItem}
-          />
+          </div>
         )}
-
-        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'finance' && (
-          <OwnerFinancialPanel />
-        )}
-
-        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') &&
-          activeTab === 'subscription' && <OwnerSubscriptionPanel />}
-
-        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'referrals' && (
-          <OwnerReferralsPanel />
-        )}
-
-        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && activeTab === 'posts' && (
-          <PostsManager />
-        )}
-
-        {(user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') &&
-          activeTab === 'link' &&
-          barbershopId && <PublicLinkPanel barbershopId={barbershopId} />}
 
         {activeTab === 'queue' && (
           <>
@@ -591,6 +329,142 @@ export const StaffDashboard: React.FC = () => {
               )}
             </div>
           </>
+        )}
+
+        {activeTab === 'appointments' && settings && (
+          <AppointmentCalendar
+            appointments={appointments}
+            services={services}
+            staff={staff}
+            settings={settings}
+            currentUserId={user?.id}
+            currentUserRole={user?.role}
+            occupancy={availability}
+            onBook={async d => {
+              await bookAppointment(d);
+              showToast('Agendado com sucesso!');
+            }}
+            onCancel={id => {
+              cancelAppointment(id);
+              showToast('Cancelado');
+            }}
+            onCheckIn={appt => {
+              checkInAppointment(appt);
+              showToast('Check-in realizado!');
+            }}
+            onDateChange={handleDateChange}
+          />
+        )}
+
+        {activeTab === 'appointments' && !settings && (
+          <div className="text-center py-12 bg-surface rounded-xl border border-border border-dashed">
+            <p className="text-text-muted">Carregando configurações do salão...</p>
+          </div>
+        )}
+
+        {activeTab === 'clients' && settings && (
+          <ClientsManager
+            services={services}
+            staff={staff}
+            settings={settings}
+            canCancelSale={user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER'}
+          />
+        )}
+
+        {activeTab === 'services' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
+          <ServiceManager
+            services={services}
+            onAdd={addService}
+            onEdit={editService}
+            onDelete={deleteService}
+          />
+        )}
+
+        {activeTab === 'team' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && user && (
+          <TeamManager
+            staff={staff}
+            onUpdateTeam={async t => {
+              await updateTeam(t);
+              showToast('Equipe atualizada');
+            }}
+            currentAdminId={user.id}
+          />
+        )}
+
+        {activeTab === 'reports' && user && (
+          <FinancialDashboard
+            queueHistory={queue}
+            services={services}
+            currentUser={user}
+            allStaff={staff}
+            onDeleteHistoryItem={deleteHistoryItem}
+          />
+        )}
+
+        {activeTab === 'finance' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
+          <OwnerFinancialPanel />
+        )}
+
+        {activeTab === 'posts' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
+          <PostsManager />
+        )}
+
+        {activeTab === 'link' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && barbershopId && (
+          <PublicLinkPanel barbershopId={barbershopId} />
+        )}
+
+        {activeTab === 'referrals' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
+          <OwnerReferralsPanel />
+        )}
+
+        {activeTab === 'subscription' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
+          <OwnerSubscriptionPanel />
+        )}
+
+        {activeTab === 'settings' && user && (
+          <>
+            <ProfileAvatarSection
+              userId={user.id}
+              userName={user.name}
+              avatarUrl={user.avatarUrl}
+              onAvatarUpdated={url => updateUserAvatar(url)}
+              onNotify={showToast}
+            />
+            {(user.role === 'MASTER_ADMIN' || user.role === 'OWNER') && settings && (
+              <div className="mt-6">
+                <SettingsManager
+                  settings={settings}
+                  barbershopId={barbershopId || undefined}
+                  onSave={s => {
+                    setSettings(s);
+                    showToast('Salvo!');
+                  }}
+                  onNotify={showToast}
+                />
+              </div>
+            )}
+            {user.role === 'EMPLOYEE' && (
+              <div className="mt-6">
+                <AccountPrivacyPanel onNotify={showToast} />
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === 'profile' && settings && (
+          <ShopProfile
+            settings={settings}
+            posts={feed}
+            currentUser={user}
+            audience="staff"
+            onAddPost={p => {
+              addPost(p);
+              showToast('Postado!');
+            }}
+            onDeletePost={deletePost}
+            onLikePost={likePost}
+            onNotify={showToast}
+          />
         )}
       </main>
 

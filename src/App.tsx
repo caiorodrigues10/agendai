@@ -82,14 +82,14 @@ const App: React.FC = () => {
             path="/app/:tab"
             element={
               <PrivateRoute
-                roles={['OWNER', 'EMPLOYEE']}
+                roles={['OWNER', 'EMPLOYEE', 'MASTER_ADMIN']}
                 fallback={<Navigate to="/login" replace />}
               >
                 <StaffDashboard />
               </PrivateRoute>
             }
           />
-          <Route path="/app" element={<Navigate to="/app/queue" replace />} />
+          <Route path="/app" element={<Navigate to="/app/overview" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
