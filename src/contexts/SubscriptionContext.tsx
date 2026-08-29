@@ -70,7 +70,7 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
       setBlockInfo(null);
     } catch (err) {
       if (err instanceof ApiError && err.isAccessBlocked) {
-        setBlockInfo({ code: err.code, ...err.data });
+        setBlockInfo({ code: err.code, ...(err.data as Record<string, unknown>) });
       }
       // Outros erros (rede etc.): mantém estado anterior — o backend continua
       // sendo a fonte de verdade a cada request via ApiError/evento global.

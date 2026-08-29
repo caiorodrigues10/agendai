@@ -277,7 +277,7 @@ export const LoginPage: React.FC = () => {
 
   useEffect(() => {
     if (!googleClientId) return;
-    if (window.google?.accounts?.id) {
+    if ((window as Window & { google?: { accounts?: { id?: unknown } } }).google?.accounts?.id) {
       setGoogleLoaded(true);
       return;
     }
@@ -286,7 +286,7 @@ export const LoginPage: React.FC = () => {
     script.async = true;
     script.defer = true;
     script.onload = () => {
-      if (window.google?.accounts?.id) setGoogleLoaded(true);
+      if ((window as Window & { google?: { accounts?: { id?: unknown } } }).google?.accounts?.id) setGoogleLoaded(true);
     };
     script.onerror = () => setGoogleError('Falha ao carregar script do Google.');
     document.head.appendChild(script);
@@ -298,8 +298,8 @@ export const LoginPage: React.FC = () => {
   useEffect(() => {
     if (!googleClientId || !googleLoaded || tab !== 'login' || googleRenderedRef.current) return;
     try {
-      const google = window.google!;
-      google.accounts!.id!.initialize({
+      const google = (window as unknown as { google: { accounts: { id: { initialize: (opts: Record<string, unknown>) => void } } } }).google;
+      google.accounts.id.initialize({
         client_id: googleClientId,
         callback: ({ credential }: { credential?: string }) => {
           if (credential) handleGoogleCredential(credential);
@@ -314,8 +314,9 @@ export const LoginPage: React.FC = () => {
   }, [googleClientId, googleLoaded, tab]);
 
   const handleGoogleClick = () => {
-    if (!window.google?.accounts?.id) return;
-    window.google.accounts.id.prompt(notification => {
+    const w = window as unknown as { google: { accounts: { id: { prompt: (cb: (notification: { isNotDisplayed: () => boolean; isSkippedMoment: () => boolean }) => void) => void } } } };
+    if (!w.google?.accounts?.id) return;
+    w.google.accounts.id.prompt(notification => {
       if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
         setGoogleError('Não foi possível abrir o login com Google. Tente novamente.');
       }
@@ -751,7 +752,6 @@ export const LoginPage: React.FC = () => {
                           readOnly={!registerFieldsUnlocked}
                           onFocus={e => {
                             setRegisterFieldsUnlocked(true);
-                            void emailField.onFocus?.(e);
                           }}
                           className={inputClass(!!registerForm.formState.errors.email)}
                           placeholder="seu@email.com"
@@ -789,9 +789,8 @@ export const LoginPage: React.FC = () => {
                           readOnly={!registerFieldsUnlocked}
                           value={registerPassword}
                           {...passwordField}
-                          onFocus={e => {
+                          onFocus={() => {
                             setRegisterFieldsUnlocked(true);
-                            void passwordField.onFocus?.(e);
                           }}
                         />
                       </div>

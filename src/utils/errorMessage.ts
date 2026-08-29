@@ -85,7 +85,7 @@ export function getErrorMessage(
   }
 
   if (err instanceof ApiError) {
-    const fromFields = formatApiFieldErrors(err.data?.errors);
+    const fromFields = formatApiFieldErrors((err.data as Record<string, unknown>)?.errors);
     if (fromFields) return fromFields;
 
     if (err.code === 'WHATSAPP_NOT_CONNECTED') {

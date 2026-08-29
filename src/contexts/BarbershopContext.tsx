@@ -94,7 +94,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
 
       try {
         const staffData = await barbershopApi.listStaff(barbershopId);
-        setStaff(Array.isArray(staffData) ? staffData.map(mapStaffFromApi) : []);
+        setStaff(Array.isArray(staffData) ? (staffData as Record<string, unknown>[]).map(mapStaffFromApi) : []);
       } catch (e) {
         logger.error('Falha ao carregar equipe', e);
         setStaff([]);
@@ -206,7 +206,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
       ...toRemove.map(member => barbershopApi.deleteStaff(member.id)),
     ]);
     const staffData = await barbershopApi.listStaff(barbershopId);
-    setStaff(Array.isArray(staffData) ? staffData.map(mapStaffFromApi) : []);
+    setStaff(Array.isArray(staffData) ? (staffData as Record<string, unknown>[]).map(mapStaffFromApi) : []);
   };
 
   const addPost = async (post: FeedPost) => {
@@ -223,7 +223,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
   const likePost = async (id: string) => {
     const post = feed.find(p => p.id === id);
     if (!post) return;
-    const updated = await barbershopApi.updatePost(id, { likes: post.likes + 1 });
+    const updated = await barbershopApi.updatePost(id, { likes: post.likes + 1 } as Parameters<typeof barbershopApi.updatePost>[1]);
     setFeed(prev => prev.map(p => (p.id === id ? updated : p)));
   };
 
