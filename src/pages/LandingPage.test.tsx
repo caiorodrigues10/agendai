@@ -41,7 +41,7 @@ vi.mock('gsap', () => {
 });
 
 vi.mock('gsap/ScrollTrigger', () => ({
-  ScrollTrigger: {},
+  ScrollTrigger: { refresh: vi.fn() },
 }));
 
 describe('LandingPage smoke', () => {

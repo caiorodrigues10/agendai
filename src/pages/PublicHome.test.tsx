@@ -2,7 +2,9 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
+
+const mockJoinQueue = vi.fn();
 
 vi.mock('../contexts/AuthContext', () => ({
   useAuth: () => ({
@@ -67,7 +69,7 @@ vi.mock('../contexts/SchedulingContext', () => ({
     loading: false,
     clientId: 'client-1',
     refresh: vi.fn(),
-    joinQueue: vi.fn(),
+    joinQueue: mockJoinQueue,
     leaveQueue: vi.fn(),
     bookAppointmentPublic: vi.fn(),
     loadAvailability: vi.fn(),
@@ -89,5 +91,34 @@ describe('PublicHome smoke', () => {
       expect(screen.getByText(/salão teste/i)).toBeInTheDocument();
     });
     expect(screen.getByRole('button', { name: /adicionar dependente/i })).toBeInTheDocument();
+  });
+
+  it('envia dependente como pessoa adicional na fila', async () => {
+    mockJoinQueue.mockClear();
+    const { PublicHome } = await import('./PublicHome');
+    render(
+      <MemoryRouter initialEntries={['/queue/shop-1']}>
+        <Routes>
+          <Route path="/queue/:id" element={<PublicHome />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/salão teste/i)).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /adicionar dependente/i }));
+    fireEvent.change(screen.getByPlaceholderText(/ex: joão silva/i), {
+      target: { value: 'Maria Silva' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /adicionar à fila/i }));
+
+    expect(mockJoinQueue).toHaveBeenCalledWith(
+      'Maria Silva',
+      '',
+      's1',
+      { additionalPerson: true }
+    );
   });
 });

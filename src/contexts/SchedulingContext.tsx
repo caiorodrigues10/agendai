@@ -36,7 +36,7 @@ interface SchedulingContextValue {
   updateQueueStatus: (
     id: string,
     status: QueueItem['status'],
-    extras?: { insertAt?: number }
+    extras?: { insertAt?: number; paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado' }
   ) => Promise<void>;
   deleteHistoryItem: (id: string) => Promise<void>;
   bookAppointment: (data: any) => Promise<void>;
@@ -245,7 +245,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   const updateQueueStatus = async (
     id: string,
     status: QueueItem['status'],
-    extras?: { insertAt?: number }
+    extras?: { insertAt?: number; paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado' }
   ) => {
     const target = queue.find(item => item.id === id);
     if (!target) return;
@@ -254,6 +254,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       const service = services.find(s => s.id === target.serviceId);
       payload.finalPrice = service?.price || 0;
       payload.completedBy = user?.id || undefined;
+      payload.paymentMethod = extras?.paymentMethod;
     }
     if (status === 'waiting' && extras?.insertAt != null) {
       payload.insertAt = extras.insertAt;

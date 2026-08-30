@@ -9,8 +9,13 @@ import {
   Calendar,
   CheckCircle2,
   ChevronRight,
+  Cloud,
+  CloudRain,
+  CloudSun,
   Scissors,
   Smartphone,
+  Sun,
+  Thermometer,
   TrendingUp,
   Users,
   Zap,
@@ -112,6 +117,15 @@ const planFeatures = {
     'Insights de movimento',
   ],
 };
+
+const weatherTimeline = [
+  { day: 'Seg', date: '01/09', icon: Sun, temp: '28°', precip: '5%', barWidth: '5%', barColor: 'bg-emerald-400', risk: 'low', label: 'Normal', demand: '100%', demandColor: 'text-emerald-400' },
+  { day: 'Ter', date: '02/09', icon: CloudSun, temp: '24°', precip: '30%', barWidth: '30%', barColor: 'bg-yellow-400', risk: 'medium', label: 'Leve queda', demand: '85%', demandColor: 'text-yellow-400' },
+  { day: 'Qua', date: '03/09', icon: CloudRain, temp: '19°', precip: '85%', barWidth: '85%', barColor: 'bg-red-400', risk: 'high', label: '-35%', demand: '65%', demandColor: 'text-red-400' },
+  { day: 'Qui', date: '04/09', icon: CloudSun, temp: '22°', precip: '40%', barWidth: '40%', barColor: 'bg-yellow-400', risk: 'medium', label: 'Leve queda', demand: '88%', demandColor: 'text-yellow-400' },
+  { day: 'Sex', date: '05/09', icon: Sun, temp: '27°', precip: '10%', barWidth: '10%', barColor: 'bg-emerald-400', risk: 'low', label: 'Normal', demand: '105%', demandColor: 'text-emerald-400' },
+  { day: 'Sáb', date: '06/09', icon: Sun, temp: '30°', precip: '0%', barWidth: '3%', barColor: 'bg-emerald-400', risk: 'low', label: 'Movimento alto', demand: '120%', demandColor: 'text-emerald-300' },
+] as const;
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -1630,9 +1644,7 @@ export const LandingPage: React.FC = () => {
                       key={item}
                       className="flex items-start gap-4 text-lg font-semibold text-emerald-950 md:text-xl"
                     >
-                      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#07110b]">
-                        <CheckCircle2 className="h-4 w-4 text-emerald-300" />
-                      </span>
+                      <span className="mt-2.5 h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
                       {item}
                     </div>
                   ))}
@@ -1812,51 +1824,200 @@ export const LandingPage: React.FC = () => {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
 
+        {/* Weather Demand Forecast */}
+        <section className="relative overflow-hidden border-y border-white/8 bg-[#080a09] px-6 py-24 md:px-10 md:py-32 xl:px-12">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-emerald-400/40 to-transparent" />
+          <div className="pointer-events-none absolute left-1/2 top-0 h-64 w-2/3 -translate-x-1/2 rounded-full bg-emerald-500/6 blur-[120px]" />
+
+          <div className="relative z-10 mx-auto max-w-6xl">
+            <div data-reveal className="mb-16 max-w-3xl md:mb-20">
+              <span className="text-sm font-black uppercase tracking-[0.2em] text-emerald-400">
+                Previsão de demanda
+              </span>
+              <h2 className="mt-5 text-4xl font-black tracking-[-0.045em] text-white md:text-6xl xl:text-7xl">
+                O clima muda. Seu planejamento também.
+              </h2>
+              <p className="mt-6 max-w-2xl text-lg font-medium leading-relaxed text-neutral-400 md:text-xl">
+                O AgendAI cruza dados climáticos com o histórico do seu salão para prever
+                quando a demanda vai cair — e o que fazer antes que aconteça.
+              </p>
+            </div>
+
+            {/* Big Timeline */}
             <div
               data-reveal
-              className="mt-12 overflow-hidden rounded-[1.75rem] border border-emerald-400/20 bg-linear-to-r from-emerald-400/[0.09] via-white/[0.03] to-transparent p-5 sm:p-6 md:p-8"
+              className="rounded-[2rem] border border-white/10 bg-white/[0.02] p-6 md:p-10"
             >
-              <div className="flex flex-col gap-6 sm:gap-8 lg:flex-row lg:items-center lg:justify-between">
-                <div className="max-w-2xl space-y-4">
-                  <p className="text-xl font-black tracking-tight text-white sm:text-2xl md:text-3xl">
-                    Teste o Pro grátis por 30 dias.
+              <div className="mb-8 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-400/80">
+                    Previsão da semana
                   </p>
-                  <p className="text-sm font-medium leading-relaxed text-neutral-400 sm:text-base md:text-lg">
-                    {trialCampaign.body} {trialCampaign.afterTrial}
+                  <p className="mt-1 text-sm text-neutral-500">
+                    Previsão baseada no histórico de atendimentos + clima
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    {['Sem cartão', 'Cancele quando quiser', 'Equipe ilimitada'].map(item => (
-                      <span
-                        key={item}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs font-semibold text-neutral-300 sm:px-3.5 sm:py-1.5 sm:text-sm"
-                      >
-                        <CheckCircle2 className="h-3 w-3 text-emerald-400 sm:h-3.5 sm:w-3.5" />
-                        {item}
-                      </span>
-                    ))}
-                  </div>
                 </div>
+                <div className="hidden items-center gap-4 text-xs text-neutral-500 sm:flex">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-emerald-400" /> Normal
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-yellow-400" /> Leve queda
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-red-400" /> Queda forte
+                  </span>
+                </div>
+              </div>
 
-                <div className="flex w-full flex-col gap-3 sm:w-auto sm:min-w-52">
+              <div className="grid gap-3 sm:grid-cols-6">
+                {weatherTimeline.map((d, i) => {
+                  const Icon = d.icon;
+                  return (
+                    <div
+                      key={d.day}
+                      data-stagger-item
+                      className={`group relative rounded-2xl border p-5 text-center transition-all duration-300 ${
+                        d.risk === 'high'
+                          ? 'border-red-400/30 bg-red-400/[0.06] shadow-[0_0_30px_rgba(248,113,113,0.08)]'
+                          : d.risk === 'medium'
+                            ? 'border-yellow-400/20 bg-yellow-400/[0.04]'
+                            : 'border-white/8 bg-white/[0.02]'
+                      } hover:border-white/20 hover:bg-white/[0.04]`}
+                    >
+                      {d.risk === 'high' && (
+                        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
+                          <span className="rounded-full bg-red-400/90 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-black">
+                            Alerta
+                          </span>
+                        </div>
+                      )}
+
+                      <p className="text-xs font-bold text-neutral-500">{d.day}</p>
+                      <p className="text-[10px] text-neutral-600">{d.date}</p>
+
+                      <div className="my-4 flex justify-center">
+                        <div className={`rounded-xl p-3 ${
+                          d.risk === 'high'
+                            ? 'bg-red-400/15'
+                            : d.risk === 'medium'
+                              ? 'bg-yellow-400/10'
+                              : 'bg-emerald-400/10'
+                        }`}>
+                          <Icon className={`h-7 w-7 ${
+                            d.risk === 'high'
+                              ? 'text-red-400'
+                              : d.risk === 'medium'
+                                ? 'text-yellow-400'
+                                : 'text-emerald-400'
+                          }`} />
+                        </div>
+                      </div>
+
+                      <p className="text-2xl font-black text-white">{d.temp}</p>
+
+                      <div className="mt-3 space-y-2">
+                        <div>
+                          <div className="mb-1 flex justify-between text-[10px]">
+                            <span className="text-neutral-500">Chuva</span>
+                            <span className="text-neutral-400">{d.precip}</span>
+                          </div>
+                          <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
+                            <div
+                              className={`h-full rounded-full ${d.barColor} transition-all duration-500`}
+                              style={{ width: d.barWidth }}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="mb-1 flex justify-between text-[10px]">
+                            <span className="text-neutral-500">Demanda</span>
+                            <span className={`font-bold ${d.demandColor}`}>{d.demand}</span>
+                          </div>
+                          <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
+                            <div
+                              className={`h-full rounded-full ${
+                                d.risk === 'high'
+                                  ? 'bg-red-400'
+                                  : d.risk === 'medium'
+                                    ? 'bg-yellow-400'
+                                    : 'bg-emerald-400'
+                              } transition-all duration-500`}
+                              style={{ width: d.demand }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <p className={`mt-3 text-[10px] font-bold uppercase tracking-wider ${
+                        d.risk === 'high'
+                          ? 'text-red-400'
+                          : d.risk === 'medium'
+                            ? 'text-yellow-400'
+                            : 'text-emerald-400/70'
+                      }`}>
+                        {d.label}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Alert Banner */}
+              <div className="mt-6 rounded-xl border border-red-400/20 bg-red-400/[0.06] p-4 md:p-5">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-400/15">
+                      <CloudRain className="h-5 w-5 text-red-400" />
+                    </span>
+                    <div>
+                      <p className="text-sm font-bold text-red-300">
+                        Quarta-feira: chuva com 85% de probabilidade
+                      </p>
+                      <p className="mt-0.5 text-xs text-neutral-400">
+                        Baseado no histórico, espere <strong className="text-red-300">~35% menos clientes</strong>. Considere enviar confirmações por WhatsApp hoje.
+                      </p>
+                    </div>
+                  </div>
                   <button
                     type="button"
-                    data-sticky-cta-anchor
                     onClick={() => navigate('/login')}
-                    className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-white px-6 py-3.5 text-sm font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-300 sm:px-7 sm:py-4 sm:text-base"
+                    className="shrink-0 rounded-full border border-red-400/30 bg-red-400/10 px-5 py-2 text-xs font-bold text-red-300 transition hover:bg-red-400/20"
                   >
-                    {trialCampaign.cta}
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={event => scrollToSection(event, 'precos')}
-                    className="inline-flex items-center justify-center rounded-full border border-white/12 bg-white/3 px-6 py-3 text-xs font-bold text-neutral-400 transition hover:bg-white/8 hover:text-white sm:px-7 sm:py-3.5 sm:text-sm"
-                  >
-                    Ver planos
+                    Ver detalhes
                   </button>
                 </div>
               </div>
+            </div>
+
+            {/* Feature bullets */}
+            <div data-reveal className="mt-14 grid gap-6 sm:grid-cols-3">
+              {[
+                {
+                  title: 'Previsão de 16 dias',
+                  detail: 'Dados climáticos reais cruzados com o histórico de atendimentos do seu salão.',
+                },
+                {
+                  title: 'Alertas automáticos',
+                  detail: 'Avisa antes de dias ruins e sugere ações como reduzir equipe ou enviar lembretes.',
+                },
+                {
+                  title: 'Aprende com o tempo',
+                  detail: 'Quanto mais dados, mais preciso. O modelo melhora a cada semana.',
+                },
+              ].map(item => (
+                <div
+                  key={item.title}
+                  className="rounded-2xl border border-white/8 bg-white/[0.02] p-6"
+                >
+                  <p className="text-sm font-black text-white">{item.title}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-neutral-500">{item.detail}</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -2023,85 +2184,36 @@ export const LandingPage: React.FC = () => {
               </article>
             </div>
 
-            <div data-reveal className="mt-10 grid gap-3 sm:grid-cols-3">
+            <div data-reveal className="mt-10 grid gap-4 sm:grid-cols-3">
               {[
-                { label: '1 corte', detail: 'paga o mês do plano' },
-                { label: 'Equipe ∞', detail: 'sem taxa por pessoa' },
-                { label: 'Anual', detail: '2 meses de graça' },
+                { label: '1 corte', detail: 'paga o mês do plano', accent: true },
+                { label: 'Equipe ∞', detail: 'sem taxa por pessoa', accent: false },
+                { label: 'Anual', detail: '2 meses de graça', accent: false },
               ].map(item => (
                 <div
                   key={item.label}
-                  className="rounded-2xl border border-white/8 bg-white/3 px-5 py-4 text-center"
+                  className={`relative overflow-hidden rounded-2xl border px-6 py-6 text-center transition-all ${
+                    item.accent
+                      ? 'border-emerald-400/30 bg-emerald-400/[0.08] shadow-[0_0_40px_rgba(52,211,153,0.12)]'
+                      : 'border-white/10 bg-white/[0.04]'
+                  }`}
                 >
-                  <p className="text-sm font-black text-white">{item.label}</p>
-                  <p className="mt-1 text-xs font-medium text-neutral-500">{item.detail}</p>
+                  {item.accent && (
+                    <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-emerald-400/10 blur-[40px]" />
+                  )}
+                  <p className={`relative text-lg font-black ${item.accent ? 'text-emerald-300' : 'text-white'}`}>
+                    {item.label}
+                  </p>
+                  <p className="relative mt-1.5 text-sm font-medium text-neutral-400">{item.detail}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section data-sticky-cta-end className="px-6 pb-32 pt-12 md:pb-44">
-          <div
-            data-reveal
-            className="relative mx-auto max-w-375 overflow-hidden rounded-[2.75rem] border border-emerald-400/15 bg-[#0d1510] px-7 py-20 text-center md:rounded-[4rem] md:px-16 md:py-28"
-          >
-            <div className="absolute left-1/2 top-0 h-80 w-2/3 -translate-x-1/2 rounded-full bg-emerald-400/13 blur-[100px]" />
-            <div
-              className="absolute inset-0 opacity-[0.045]"
-              style={{
-                backgroundImage:
-                  'linear-gradient(rgba(255,255,255,.7) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.7) 1px, transparent 1px)',
-                backgroundSize: '46px 46px',
-                maskImage: 'radial-gradient(circle at center, black, transparent 72%)',
-              }}
-            />
-            <div className="relative z-10 mx-auto max-w-4xl space-y-6 text-center sm:text-left">
-              <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-300/80">
-                {trialCampaign.eyebrow}
-              </p>
-              <h2 className="text-4xl font-black leading-[1.08] tracking-[-0.05em] text-white sm:text-5xl md:text-7xl xl:text-8xl">
-                Teste o Pro grátis por 30 dias.
-              </h2>
-              <p className="mx-auto max-w-2xl text-base font-light leading-relaxed text-neutral-400 sm:text-lg md:text-xl sm:mx-0">
-                {trialCampaign.body} {trialCampaign.afterTrial}
-              </p>
-              <div className="flex flex-col justify-center gap-3 pt-2 sm:flex-row sm:justify-start sm:gap-4">
-                <button
-                  onClick={() => navigate('/login')}
-                  className="group inline-flex items-center justify-center gap-3 rounded-full bg-white px-7 py-3.5 text-sm font-black text-black transition duration-300 hover:-translate-y-1 hover:bg-emerald-300 sm:px-8 sm:py-4"
-                >
-                  {trialCampaign.cta}
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </button>
-                <button
-                  onClick={() => navigate('/contato')}
-                  className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/4 px-7 py-3.5 text-sm font-bold text-neutral-400 transition hover:bg-white/8 hover:text-white sm:px-8"
-                >
-                  Tirar uma dúvida
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
 
       <MarketingFooter />
-
-      <div
-        data-sticky-cta
-        className="fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 md:justify-end md:px-8 md:pb-6"
-        aria-hidden="true"
-      >
-        <button
-          type="button"
-          onClick={() => navigate('/login')}
-          className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-emerald-400 px-6 py-3.5 text-sm font-black text-black shadow-[0_16px_50px_rgba(16,185,129,0.45)] ring-1 ring-white/20 transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-300 md:px-7 md:py-4 md:text-base"
-        >
-          {trialCampaign.cta}
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-        </button>
-      </div>
     </div>
   );
 };

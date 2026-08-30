@@ -1,5 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
 import { logger } from '../../utils/logger';
+import { SystemStatePage } from './SystemStatePage';
 
 interface Props {
   children: ReactNode;
@@ -7,17 +9,16 @@ interface Props {
 
 interface State {
   hasError: boolean;
-  error: Error | null;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+  static getDerivedStateFromError(): State {
+    return { hasError: true };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -27,24 +28,22 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-bg flex items-center justify-center p-4">
-          <div className="w-full max-w-[420px] bg-surface border border-border rounded-3xl shadow-2xl p-8 text-center">
-            <div className="w-12 h-12 rounded-full bg-danger/10 flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl">!</span>
-            </div>
-            <h2 className="text-lg font-bold text-text-primary mb-2">Algo deu errado</h2>
-            <p className="text-sm text-text-muted leading-relaxed mb-6">
-              Ocorreu um erro inesperado. Tente recarregar a página.
-            </p>
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="w-full py-3 bg-accent text-accent-fg hover:bg-accent-hover rounded-xl font-bold text-xs uppercase tracking-widest transition-all"
-            >
-              Recarregar
-            </button>
-          </div>
-        </div>
+        <SystemStatePage
+          code="500"
+          title="Algo não saiu como esperado"
+          description="Não foi possível abrir esta tela agora. Recarregue a página e tente novamente."
+          icon={<AlertTriangle size={36} strokeWidth={1.8} aria-hidden="true" />}
+          primaryAction={{
+            label: 'Recarregar página',
+            onClick: () => window.location.reload(),
+            icon: <RefreshCw size={17} aria-hidden="true" />,
+          }}
+          secondaryAction={{
+            label: 'Voltar ao início',
+            href: '/',
+            icon: <Home size={17} aria-hidden="true" />,
+          }}
+        />
       );
     }
 

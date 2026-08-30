@@ -29,6 +29,7 @@ export interface QueueUpdatePayload {
   status: QueueItem['status'];
   finalPrice?: number;
   completedBy?: string;
+  paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado';
   insertAt?: number;
 }
 

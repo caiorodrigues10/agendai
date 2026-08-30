@@ -1,7 +1,19 @@
 import React, { useState } from 'react';
 import { QueueItem, Service } from '../../types';
 import { DynamicIcon } from '../ui/DynamicIcon';
-import { MessageCircle, Trash2, LogOut, CheckCircle, Bell, Clock, Undo2, Loader2 } from 'lucide-react';
+import {
+  MessageCircle,
+  Trash2,
+  LogOut,
+  CheckCircle,
+  Bell,
+  Clock,
+  Undo2,
+  Loader2,
+  CreditCard,
+  Banknote,
+  Smartphone,
+} from 'lucide-react';
 import { notificationsApi } from '../../infra/notificationsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 
@@ -13,7 +25,11 @@ interface QueueItemCardProps {
   isCurrentUser: boolean;
   shopName?: string;
   barbershopId?: string;
-  onStatusChange: (id: string, status: QueueItem['status']) => void;
+  onStatusChange: (
+    id: string,
+    status: QueueItem['status'],
+    extras?: { paymentMethod?: QueueItem['paymentMethod'] }
+  ) => void;
   onLeaveQueue: (id: string) => void;
   onReturnToQueue?: (item: QueueItem) => void;
   onNotify?: (message: string, type: 'success' | 'error' | 'bot') => void;
@@ -33,6 +49,8 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
   onNotify,
 }) => {
   const [sending, setSending] = useState<'reminder' | 'next' | null>(null);
+  const [showPaymentPicker, setShowPaymentPicker] = useState(false);
+  const [submittingFinalization, setSubmittingFinalization] = useState(false);
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'in_chair':
@@ -92,6 +110,23 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
 
   const hasValidPhone =
     item.whatsapp && item.whatsapp !== '00000000000' && item.whatsapp.replace(/\D/g, '').length > 5;
+
+  const paymentOptions = [
+    { value: 'pix' as const, label: 'PIX', icon: Smartphone },
+    { value: 'credit_card' as const, label: 'Cartão de crédito', icon: CreditCard },
+    { value: 'debit_card' as const, label: 'Cartão de débito', icon: CreditCard },
+    { value: 'fiado' as const, label: 'Fiado', icon: Banknote },
+  ];
+
+  const handleFinalize = async (paymentMethod: QueueItem['paymentMethod']) => {
+    setSubmittingFinalization(true);
+    try {
+      await onStatusChange(item.id, 'completed', { paymentMethod });
+      setShowPaymentPicker(false);
+    } finally {
+      setSubmittingFinalization(false);
+    }
+  };
 
   return (
     <div
@@ -226,13 +261,50 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
               )}
               <button
                 type="button"
-                onClick={() => onStatusChange(item.id, 'completed')}
+                onClick={() => setShowPaymentPicker(true)}
                 className="px-4 py-1.5 text-xs font-bold text-text-primary bg-success hover:bg-success/80 rounded shadow-md flex items-center justify-center gap-1 transition-colors cursor-pointer sm:flex-1"
               >
                 <CheckCircle size={14} /> Finalizar Serviço
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {showPaymentPicker && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl border border-border bg-surface p-5 shadow-2xl">
+            <h3 className="text-lg font-bold text-text-primary">Como foi o pagamento?</h3>
+            <p className="mt-1 text-sm text-text-secondary">
+              Selecione a forma usada para concluir este atendimento.
+            </p>
+
+            <div className="mt-4 grid grid-cols-1 gap-2">
+              {paymentOptions.map(option => {
+                const Icon = option.icon;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    disabled={submittingFinalization}
+                    onClick={() => void handleFinalize(option.value)}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-bg px-4 py-3 text-left text-sm font-semibold text-text-primary transition-colors hover:border-accent hover:bg-accent/10 disabled:opacity-50"
+                  >
+                    <Icon size={16} className="text-accent" />
+                    <span>{option.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowPaymentPicker(false)}
+              className="mt-4 w-full rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm font-bold text-text-secondary"
+            >
+              Cancelar
+            </button>
+          </div>
         </div>
       )}
     </div>
