@@ -59,4 +59,13 @@ export const referralsApi = {
     );
     return unwrap<ReferralDashboard>(res);
   },
+  applyCode: async (code: string) => {
+    const token = authStorage.getAccessToken();
+    return apiClient<{ success: boolean }>(
+      '/api/referrals/apply',
+      'POST',
+      { code },
+      token ?? undefined
+    );
+  },
 };

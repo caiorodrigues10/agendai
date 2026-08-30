@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { AlertCircle, Gift, Users, TrendingUp, XCircle } from 'lucide-react';
+import {
+  AlertCircle,
+  Check,
+  Gift,
+  Loader2,
+  Ticket,
+  Users,
+  TrendingUp,
+  XCircle,
+} from 'lucide-react';
 import { referralsApi, ReferralDashboard } from '../../infra/referralsApi';
 import { ReferralTierBadge } from './ReferralTierBadge';
 import { ShareReferralButton } from './ShareReferralButton';
@@ -23,6 +32,8 @@ export const OwnerReferralsPanel: React.FC = () => {
   const [data, setData] = useState<ReferralDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [referralCode, setReferralCode] = useState('');
+  const [applyingCode, setApplyingCode] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -81,6 +92,22 @@ export const OwnerReferralsPanel: React.FC = () => {
 
   const shareText = `Use meu link para se cadastrar no AGENDAI: ${data.shareUrl}`;
 
+  const handleApplyCode = async () => {
+    const code = referralCode.trim().toUpperCase();
+    if (!code) return;
+    setApplyingCode(true);
+    setError(null);
+    try {
+      await referralsApi.applyCode(code);
+      setReferralCode('');
+      await load();
+    } catch (err) {
+      setError(getErrorMessage(err, 'Não foi possível aplicar este código.'));
+    } finally {
+      setApplyingCode(false);
+    }
+  };
+
   return (
     <div className="space-y-5">
       <div>
@@ -98,6 +125,43 @@ export const OwnerReferralsPanel: React.FC = () => {
         convertedCount={data.convertedCount}
         nextTierIn={data.nextTierIn}
       />
+
+      <section className="rounded-2xl border border-accent/25 bg-accent/5 p-4">
+        <div className="flex items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-fg">
+            <Ticket size={19} />
+          </span>
+          <div className="min-w-0">
+            <h3 className="text-sm font-bold text-text-primary">Foi indicado por alguém?</h3>
+            <p className="mt-1 text-xs leading-relaxed text-text-secondary">
+              Informe o código recebido para registrar a indicação. Ele só pode ser usado uma vez
+              para este salão.
+            </p>
+          </div>
+        </div>
+        <div className="mt-3 flex gap-2">
+          <input
+            value={referralCode}
+            onChange={event => setReferralCode(event.target.value.toUpperCase())}
+            onKeyDown={event => {
+              if (event.key === 'Enter') void handleApplyCode();
+            }}
+            maxLength={32}
+            placeholder="EX.: EP6V4AAS"
+            className="min-w-0 flex-1 rounded-xl border border-border bg-bg px-3 py-2.5 text-sm font-bold tracking-wider text-text-primary outline-none focus:ring-2 focus:ring-accent"
+            aria-label="Código de indicação recebido"
+          />
+          <button
+            type="button"
+            onClick={() => void handleApplyCode()}
+            disabled={!referralCode.trim() || applyingCode}
+            className="inline-flex shrink-0 items-center justify-center gap-1 rounded-xl bg-accent px-3 py-2.5 text-xs font-bold text-accent-fg transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {applyingCode ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}
+            Aplicar
+          </button>
+        </div>
+      </section>
 
       <div className="rounded-2xl border border-border bg-surface p-4 space-y-3">
         <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">

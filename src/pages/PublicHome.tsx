@@ -52,11 +52,10 @@ export const PublicHome: React.FC = () => {
     }
   }, [id, barbershopId, setBarbershopId]);
 
-  // Suporte a ?tab=appointments vindo do CTA de posts
+  // Deep links used by the salon's public QR codes and post CTAs.
   React.useEffect(() => {
-    if (searchParams.get('tab') === 'appointments') {
-      setActiveTab('appointments');
-    }
+    const tab = searchParams.get('tab');
+    if (tab === 'appointments' || tab === 'profile' || tab === 'queue') setActiveTab(tab);
   }, [searchParams]);
 
   const showToast = (msg: string, type: 'success' | 'bot' = 'success') => {

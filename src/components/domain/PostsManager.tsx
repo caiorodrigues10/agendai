@@ -13,6 +13,7 @@ import {
   List,
   CheckCheck,
   Sparkles,
+  Palette,
   Download,
   Heart,
   MessageCircle,
@@ -58,6 +59,16 @@ const TONE_OPTIONS: {
   { id: 'informativo', label: 'Informativo' },
   { id: 'divertido', label: 'Descontraído' },
 ];
+
+const QUICK_PRESETS = [
+  { label: 'Hoje tem vaga', title: 'Horários abertos hoje!', ctaText: 'Reservar horário' },
+  {
+    label: 'Agenda da semana',
+    title: 'Sua próxima transformação começa aqui',
+    ctaText: 'Ver horários',
+  },
+  { label: 'Chamar no WhatsApp', title: 'Bora cuidar de você?', ctaText: 'Chamar no WhatsApp' },
+] as const;
 
 const MODE_LABEL: Record<PostMode, string> = {
   queue: 'Fila',
@@ -165,7 +176,8 @@ export const PostsManager: React.FC = () => {
     } catch (err: any) {
       if (err?.code === 'AI_DAILY_LIMIT_EXCEEDED') {
         const retryAfter = err?.data?.retryAfter;
-        let msg = 'Você atingiu o limite de gerações de post por hoje. Tente novamente amanhã ou preencha o post manualmente.';
+        let msg =
+          'Você atingiu o limite de gerações de post por hoje. Tente novamente amanhã ou preencha o post manualmente.';
         if (retryAfter) {
           const d = new Date(retryAfter);
           const hh = d.getHours().toString().padStart(2, '0');
@@ -226,7 +238,11 @@ export const PostsManager: React.FC = () => {
       return;
     }
     if (publishMode === 'now') {
-      if (!window.confirm('Publicar agora vai enviar este post por WhatsApp para todos os clientes cadastrados do salão. Continuar?')) {
+      if (
+        !window.confirm(
+          'Publicar agora vai enviar este post por WhatsApp para todos os clientes cadastrados do salão. Continuar?'
+        )
+      ) {
         return;
       }
     }
@@ -270,7 +286,11 @@ export const PostsManager: React.FC = () => {
   };
 
   const handlePublishNow = async (post: FeedPost) => {
-    if (!window.confirm('Publicar post e enviar imagem via WhatsApp para todos os clientes cadastrados?')) {
+    if (
+      !window.confirm(
+        'Publicar post e enviar imagem via WhatsApp para todos os clientes cadastrados?'
+      )
+    ) {
       return;
     }
     setPublishingId(post.id);
@@ -328,102 +348,140 @@ export const PostsManager: React.FC = () => {
   const openingTime = todaySchedule?.isOpen ? todaySchedule.openTime : null;
 
   return (
-    <div className="animate-fade-in space-y-6 pb-20">
+    <div className="animate-fade-in space-y-5 pb-20 sm:space-y-6">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-      <div className="rounded-2xl border border-border bg-surface p-5 shadow-lg overflow-hidden relative">
-        <div className="absolute inset-x-0 top-0 h-1 bg-accent" />
-        <div className="flex items-center gap-3">
-          <Logo size="sm" />
-          <div>
-            <h2 className="text-lg font-bold text-text-primary tracking-tight">Posts do salão</h2>
-            <p className="text-sm text-text-secondary mt-0.5 max-w-xl">
-              Arte 1080×1080 com a marca AgendAI. Escreva o título, veja a prévia e publique.
+      <div className="relative overflow-hidden rounded-3xl border border-border bg-surface px-5 py-5 shadow-[0_18px_44px_-32px_rgba(0,0,0,0.75)] sm:p-6">
+        <div
+          className="absolute -right-12 -top-16 h-40 w-40 rounded-full bg-accent/15 blur-3xl"
+          aria-hidden
+        />
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-accent via-emerald-300 to-accent" />
+        <div className="relative flex items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-accent text-accent-fg shadow-lg shadow-accent/20">
+            <Megaphone size={21} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+              Estúdio de conteúdo
+            </p>
+            <h2 className="mt-1 text-xl font-bold tracking-tight text-text-primary">
+              Crie posts que param o feed
+            </h2>
+            <p className="mt-1 text-sm leading-relaxed text-text-secondary">
+              Monte sua arte, revise no formato do Instagram e publique quando fizer sentido.
             </p>
           </div>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_400px] gap-6 items-start">
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-6">
         <div className="space-y-6">
-          <div className="bg-surface rounded-2xl border border-border p-5 shadow-lg space-y-5">
-            <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
-              <Megaphone size={20} className="text-accent" /> Novo post
-            </h3>
+          <div className="space-y-6 rounded-3xl border border-border bg-surface p-4 shadow-lg sm:p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-muted">
+                  01 · Criar
+                </p>
+                <h3 className="mt-1 text-lg font-bold text-text-primary">Novo post</h3>
+              </div>
+              <span className="rounded-full border border-accent/25 bg-accent/10 px-3 py-1 text-[11px] font-bold text-accent">
+                1080 × 1080
+              </span>
+            </div>
 
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
-                Tipo do post
+              <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-text-secondary">
+                Escolha o tema
               </label>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {TYPE_OPTIONS.map(opt => (
                   <button
                     key={opt.id}
                     type="button"
                     aria-pressed={type === opt.id}
                     onClick={() => setType(opt.id)}
-                    className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 border transition-all
-                      ${type === opt.id ? 'bg-accent border-accent text-accent-fg' : 'bg-bg border-border text-text-muted'}`}
+                    className={`flex min-h-20 flex-col items-center justify-center gap-2 rounded-2xl border px-2 py-3 text-xs font-bold transition-all
+                      ${type === opt.id ? 'border-accent bg-accent text-accent-fg shadow-lg shadow-accent/20' : 'border-border bg-bg text-text-muted hover:border-accent/35 hover:text-text-primary'}`}
                   >
-                    <opt.icon size={14} /> {opt.label}
+                    <opt.icon size={19} /> {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-bg p-3 sm:p-4">
+              <div className="mb-3 flex items-center gap-2">
+                <Palette size={15} className="text-accent" />
+                <label
+                  htmlFor="post-title"
+                  className="text-xs font-bold uppercase tracking-wider text-text-secondary"
+                >
+                  Mensagem do post
+                </label>
+              </div>
+              <div className="space-y-3">
+                <input
+                  id="post-title"
+                  type="text"
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                  maxLength={80}
+                  className="w-full rounded-xl border border-border bg-surface px-4 py-3.5 text-base font-semibold text-text-primary outline-none transition-shadow placeholder:font-normal focus:ring-2 focus:ring-accent"
+                  placeholder="Ex.: Corte + barba por R$ 40,00"
+                />
+                <input
+                  id="post-cta"
+                  type="text"
+                  value={ctaText}
+                  onChange={e => setCtaText(e.target.value)}
+                  maxLength={40}
+                  className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-text-primary outline-none transition-shadow focus:ring-2 focus:ring-accent"
+                  placeholder="Texto do botão: Agende agora"
+                />
+              </div>
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                {QUICK_PRESETS.map(preset => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => {
+                      setTitle(preset.title);
+                      setCtaText(preset.ctaText);
+                    }}
+                    className="shrink-0 rounded-full border border-border bg-surface px-3 py-2 text-[11px] font-bold text-text-secondary transition-colors hover:border-accent/40 hover:text-accent"
+                  >
+                    {preset.label}
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <label htmlFor="post-title" className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
-                Título
+              <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-text-secondary">
+                Destino do botão
               </label>
-              <input
-                id="post-title"
-                type="text"
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                maxLength={80}
-                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent"
-                placeholder="Ex.: Corte + barba por R$ 40,00"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="post-cta" className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
-                Texto do botão
-              </label>
-              <input
-                id="post-cta"
-                type="text"
-                value={ctaText}
-                onChange={e => setCtaText(e.target.value)}
-                maxLength={40}
-                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent"
-                placeholder="Ex.: Agende agora"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1.5 block">
-                Para onde o botão leva
-              </label>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {MODE_OPTIONS.map(opt => (
                   <button
                     key={opt.id}
                     type="button"
                     aria-pressed={postMode === opt.id}
                     onClick={() => setPostMode(opt.id)}
-                    className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 border transition-all
-                      ${postMode === opt.id ? 'bg-accent border-accent text-accent-fg' : 'bg-bg border-border text-text-muted'}`}
+                    className={`flex min-h-16 flex-col items-center justify-center gap-1.5 rounded-xl border px-2 py-2 text-[11px] font-bold transition-all
+                      ${postMode === opt.id ? 'border-accent bg-accent text-accent-fg' : 'border-border bg-bg text-text-muted hover:border-accent/35 hover:text-text-primary'}`}
                   >
-                    <opt.icon size={14} /> {opt.label}
+                    <opt.icon size={16} /> {opt.label}
                   </button>
                 ))}
               </div>
             </div>
 
-            <details className="rounded-xl border border-border bg-bg px-4 py-3">
-              <summary className="text-xs font-bold uppercase tracking-wider text-text-secondary cursor-pointer list-none flex items-center justify-between gap-2">
-                <span>Sugerir frases (opcional)</span>
+            <details className="rounded-2xl border border-border bg-bg px-4 py-3.5">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-xs font-bold uppercase tracking-wider text-text-secondary">
+                <span className="flex items-center gap-2">
+                  <Sparkles size={15} className="text-accent" /> Estilo e sugestões
+                </span>
                 <Sparkles size={14} className="text-text-muted" />
               </summary>
               <p className="text-[11px] text-text-muted mt-2 mb-3">
@@ -485,10 +543,14 @@ export const PostsManager: React.FC = () => {
                     </button>
                   ))}
                   {suggestionsSource === 'template' && (
-                    <p className="text-[11px] text-text-muted">Modelos locais · sem chamada a IA.</p>
+                    <p className="text-[11px] text-text-muted">
+                      Modelos locais · sem chamada a IA.
+                    </p>
                   )}
                   {suggestionsSource === 'ai' && (
-                    <p className="text-[11px] text-text-muted">Sugestão gerada por um provedor de texto.</p>
+                    <p className="text-[11px] text-text-muted">
+                      Sugestão gerada por um provedor de texto.
+                    </p>
                   )}
                 </div>
               )}
@@ -542,7 +604,7 @@ export const PostsManager: React.FC = () => {
             </button>
           </div>
 
-          <div className="bg-surface rounded-2xl border border-border p-5 shadow-lg">
+          <div className="rounded-2xl border border-border bg-surface p-4 shadow-lg sm:p-5">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
@@ -572,7 +634,7 @@ export const PostsManager: React.FC = () => {
           </div>
 
           <div>
-            <h3 className="text-sm font-bold text-text-primary flex items-center gap-2 mb-3">
+            <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-text-primary">
               <Megaphone size={16} className="text-accent" /> Agendados / Rascunhos
             </h3>
             {loadingList ? (
@@ -653,22 +715,26 @@ export const PostsManager: React.FC = () => {
           </div>
         </div>
 
-        <div className="lg:sticky lg:top-4 space-y-3">
-          <div className="rounded-2xl border border-border bg-black shadow-xl overflow-hidden">
-            <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/10">
+        <div className="order-first -mx-1 space-y-3 lg:sticky lg:top-4 lg:order-none lg:mx-0">
+          <div className="overflow-hidden rounded-3xl border border-border bg-black shadow-[0_24px_50px_-28px_rgba(0,0,0,0.9)]">
+            <div className="flex items-center justify-between border-b border-white/10 px-3.5 py-3">
               <div className="flex items-center gap-2.5 min-w-0">
-                <Logo size="sm" className="text-white shrink-0" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/5">
+                  <Logo size="sm" className="text-white" />
+                </div>
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-white truncate">
                     {settings?.shopName || 'Seu salão'}
                   </p>
-                  <p className="text-[10px] text-neutral-500">Feed · 1080×1080</p>
+                  <p className="text-[10px] text-neutral-400">Seu post no feed · 1080×1080</p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
                 <button
                   type="button"
-                  onClick={() => void regeneratePreview(postMode, type, title, ctaText, barbershopId)}
+                  onClick={() =>
+                    void regeneratePreview(postMode, type, title, ctaText, barbershopId)
+                  }
                   className="text-[11px] font-bold text-accent flex items-center gap-1 px-2 py-1 rounded-md hover:bg-white/5"
                 >
                   <RefreshCw size={12} className={previewLoading ? 'animate-spin' : ''} /> Atualizar
@@ -677,7 +743,7 @@ export const PostsManager: React.FC = () => {
               </div>
             </div>
 
-            <div className="aspect-square w-full bg-surface relative overflow-hidden">
+            <div className="relative aspect-square w-full overflow-hidden bg-surface">
               {!previewUrl && (
                 <>
                   <div className="absolute inset-x-0 top-0 h-1 bg-accent" />
@@ -716,7 +782,7 @@ export const PostsManager: React.FC = () => {
               )}
             </div>
 
-            <div className="px-3 py-2.5 flex items-center justify-between text-neutral-400">
+            <div className="flex items-center justify-between px-3.5 py-3 text-neutral-300">
               <div className="flex items-center gap-3">
                 <Heart size={18} />
                 <MessageCircle size={18} />
@@ -724,21 +790,28 @@ export const PostsManager: React.FC = () => {
               </div>
               <Bookmark size={18} />
             </div>
+            <div className="border-t border-white/10 px-3.5 py-3">
+              <p className="text-xs font-semibold text-white">
+                {settings?.shopName || 'Seu salão'}{' '}
+                <span className="font-normal text-neutral-400">acabou de publicar</span>
+              </p>
+              <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-neutral-300">
+                {title || 'Crie uma mensagem para o seu próximo post.'}
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center justify-between gap-2 px-1">
-            <p className="text-[11px] text-text-muted">
+          <div className="flex items-center justify-between gap-2 px-2">
+            <p className="text-[11px] font-medium text-text-muted">
               {settings?.shopName
-                ? `Prévia para ${settings.shopName}`
-                : 'Prévia gerada pelo sistema'}
+                ? `Prévia pronta para ${settings.shopName}`
+                : 'Prévia pronta para publicar'}
             </p>
             {previewUrl && (
               <button
                 type="button"
-                onClick={() =>
-                  downloadPostImage(previewUrl, `agendai-post-${Date.now()}.png`)
-                }
-                className="text-[11px] font-bold text-accent flex items-center gap-1 hover:underline"
+                onClick={() => downloadPostImage(previewUrl, `agendai-post-${Date.now()}.png`)}
+                className="flex items-center gap-1 text-[11px] font-bold text-accent hover:underline"
               >
                 <Download size={12} /> Baixar PNG
               </button>

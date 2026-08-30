@@ -1,80 +1,31 @@
 import React, { useState } from 'react';
-import { Link2, Copy, Check, QrCode, Share2 } from 'lucide-react';
+import { CalendarDays, Check, Copy, ExternalLink, QrCode, Store, Users } from 'lucide-react';
 
-interface PublicLinkPanelProps {
-  barbershopId: string;
-}
+interface PublicLinkPanelProps { barbershopId: string; }
+
+const qrUrl = (url: string) =>
+  `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(url)}&bgcolor=ffffff&color=000000`;
 
 export const PublicLinkPanel: React.FC<PublicLinkPanelProps> = ({ barbershopId }) => {
-  const [copied, setCopied] = useState(false);
-
-  const publicUrl = `${window.location.origin}/queue/${barbershopId}`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(publicUrl)}&bgcolor=1a1a2e&color=00c2b3`;
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(publicUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      const input = document.createElement('input');
-      input.value = publicUrl;
-      document.body.appendChild(input);
-      input.select();
-      document.execCommand('copy');
-      document.body.removeChild(input);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
+  const [copied, setCopied] = useState<string | null>(null);
+  const baseUrl = `${window.location.origin}/queue/${barbershopId}`;
+  const destinations = [
+    { id: 'profile', label: 'Perfil do salão', description: 'Serviços, horários e publicações.', url: `${baseUrl}?tab=profile`, icon: Store },
+    { id: 'queue', label: 'Entrar na fila', description: 'Fila ao vivo do seu salão.', url: baseUrl, icon: Users },
+    { id: 'appointments', label: 'Agendar horário', description: 'Agenda online para seus clientes.', url: `${baseUrl}?tab=appointments`, icon: CalendarDays },
+  ] as const;
+  const handleCopy = async (id: string, url: string) => {
+    await navigator.clipboard.writeText(url);
+    setCopied(id);
+    window.setTimeout(() => setCopied(null), 2000);
   };
-
-  return (
-    <div className="space-y-4">
-      <div className="bg-surface rounded-xl p-5 border border-border">
-        <div className="flex items-center gap-2 mb-4">
-          <Link2 size={18} className="text-accent" />
-          <h3 className="text-text-primary font-bold text-sm">Link público do salão</h3>
-        </div>
-
-        <p className="text-text-secondary text-xs mb-4">
-          Compartilhe esse link no Instagram, WhatsApp ou Google Meu Negócio pra clientes agendarem direto.
-        </p>
-
-        <div className="flex items-center gap-2 bg-surface-2 rounded-lg p-3 mb-4">
-          <span className="text-text-primary text-xs flex-1 truncate font-mono">{publicUrl}</span>
-          <button
-            onClick={handleCopy}
-            className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
-              copied
-                ? 'bg-success/15 text-success'
-                : 'bg-accent/15 text-accent hover:bg-accent/25'
-            }`}
-          >
-            {copied ? <Check size={14} /> : <Copy size={14} />}
-            {copied ? 'Copiado!' : 'Copiar'}
-          </button>
-        </div>
-
-        <div className="flex flex-col items-center gap-3">
-          <div className="bg-white rounded-xl p-3">
-            <img src={qrUrl} alt="QR Code do link público" width={160} height={160} className="rounded-lg" />
-          </div>
-          <div className="flex items-center gap-1.5 text-text-muted text-[11px]">
-            <QrCode size={12} />
-            <span>QR Code pronto pra compartilhar</span>
-          </div>
-        </div>
-      </div>
-
-      <a
-        href={publicUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-surface border border-border text-text-secondary text-xs font-bold hover:bg-surface-2 transition-all"
-      >
-        <Share2 size={14} />
-        Abrir página pública
-      </a>
-    </div>
-  );
+  return <section className="space-y-4">
+    <header className="rounded-2xl border border-border bg-surface p-4 sm:p-5"><p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent">Links públicos</p><h3 className="mt-1 text-lg font-bold text-text-primary">Compartilhe o destino certo</h3><p className="mt-1 text-sm text-text-secondary">Cada link tem um QR Code próprio, pronto para imprimir ou divulgar.</p></header>
+    <div className="grid gap-4 xl:grid-cols-3">{destinations.map(item => { const Icon = item.icon; const isCopied = copied === item.id; return <article key={item.id} className="rounded-2xl border border-border bg-surface p-4 shadow-lg">
+      <div className="flex items-start gap-3"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/12 text-accent"><Icon size={19} /></span><div><h4 className="text-sm font-bold text-text-primary">{item.label}</h4><p className="mt-1 text-xs text-text-secondary">{item.description}</p></div></div>
+      <div className="mt-4 flex justify-center rounded-2xl bg-white p-3"><img src={qrUrl(item.url)} alt={`QR Code para ${item.label}`} width={180} height={180} className="h-44 w-44 rounded-lg" /></div><p className="mt-2 flex items-center justify-center gap-1 text-[11px] text-text-muted"><QrCode size={12} /> QR Code preto e branco</p>
+      <code className="mt-3 block truncate rounded-xl border border-border bg-bg px-3 py-2 text-[11px] text-text-secondary">{item.url}</code>
+      <div className="mt-2 grid grid-cols-2 gap-2"><button type="button" onClick={() => void handleCopy(item.id, item.url)} className="inline-flex items-center justify-center gap-1 rounded-xl border border-border bg-bg px-3 py-2.5 text-xs font-bold text-text-primary">{isCopied ? <Check size={14} className="text-success" /> : <Copy size={14} />}{isCopied ? 'Copiado' : 'Copiar'}</button><a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-1 rounded-xl bg-accent px-3 py-2.5 text-xs font-bold text-accent-fg"><ExternalLink size={14} /> Abrir</a></div>
+    </article>; })}</div>
+  </section>;
 };
