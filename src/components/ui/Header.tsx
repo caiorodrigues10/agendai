@@ -16,7 +16,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogout, logoUrl }) => {
   return (
     <header className="sticky top-0 z-50 bg-bg/95 backdrop-blur-sm border-b border-accent/20 shadow-lg shadow-accent/5">
-      <div className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 lg:px-6">
         <Logo size="sm" customImageUrl={logoUrl} />
         <div className="flex items-center gap-2">
           <ThemeToggle />

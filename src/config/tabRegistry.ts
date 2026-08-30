@@ -51,8 +51,18 @@ export const TAB_GROUPS: TabGroup[] = [
     tabs: [
       { id: 'services', label: 'Serviços', icon: RiScissorsLine, roles: ['OWNER', 'MASTER_ADMIN'] },
       { id: 'team', label: 'Equipe', icon: RiTeamLine, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'reports', label: 'Relatórios', icon: RiBarChartBoxLine, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'finance', label: 'Financeiro', icon: RiBankCardLine, roles: ['OWNER', 'MASTER_ADMIN'] },
+      {
+        id: 'reports',
+        label: 'Relatórios',
+        icon: RiBarChartBoxLine,
+        roles: ['OWNER', 'MASTER_ADMIN'],
+      },
+      {
+        id: 'finance',
+        label: 'Financeiro',
+        icon: RiBankCardLine,
+        roles: ['OWNER', 'MASTER_ADMIN'],
+      },
     ],
   },
   {
@@ -74,6 +84,9 @@ export const TAB_GROUPS: TabGroup[] = [
     ],
   },
 ];
+
+/** Primary destinations kept visible in the compact bottom navigation. */
+export const MOBILE_PRIMARY_TAB_IDS = ['overview', 'queue', 'appointments', 'clients'] as const;
 
 /** Flat lookup of all tab IDs */
 export const ALL_TAB_IDS = TAB_GROUPS.flatMap(g => g.tabs.map(t => t.id));
