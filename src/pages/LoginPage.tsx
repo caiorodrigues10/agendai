@@ -21,6 +21,7 @@ import {
   Smartphone,
   CreditCard,
   Building2,
+  MapPin,
   CalendarCheck,
   Users,
   TrendingUp,
@@ -356,6 +357,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       cpf: '',
       barbershopName: '',
       whatsapp: '',
+      address: '',
+      city: '',
       cnpj: '',
       termsVersion: '1.0',
       termsAccepted: false,
@@ -481,6 +484,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       cpf,
       barbershopName: data.barbershopName.trim(),
       whatsapp: normalizeDocument(data.whatsapp),
+      address: data.address?.trim() || undefined,
+      city: data.city.trim(),
       cnpj: data.cnpj ? normalizeDocument(data.cnpj) : undefined,
       referralCode,
       termsVersion: data.termsVersion,
@@ -524,6 +529,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
         cpf: '',
         barbershopName: '',
         whatsapp: '',
+        address: '',
+        city: '',
         cnpj: '',
         termsVersion: '1.0',
         termsAccepted: false,
@@ -832,6 +839,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                           }
                         />
                       </Field>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <Field label="Cidade" icon={MapPin} error={registerForm.formState.errors.city?.message}>
+                          <input className={inputClass(!!registerForm.formState.errors.city)} placeholder="São Paulo" {...registerForm.register('city')} />
+                        </Field>
+                        <Field label="Endereço" icon={MapPin} optional>
+                          <input className={inputClass(false)} placeholder="Rua, número e bairro" {...registerForm.register('address')} />
+                        </Field>
+                      </div>
 
                       <Field label="CNPJ" icon={Building2} optional>
                         <input

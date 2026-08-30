@@ -12,6 +12,7 @@ interface BarbershopData {
   name?: string;
   whatsapp?: string;
   address?: string | null;
+  city?: string | null;
   logoUrl?: string | null;
   latitude?: number | null;
   longitude?: number | null;

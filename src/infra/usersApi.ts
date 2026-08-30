@@ -13,6 +13,10 @@ function unwrap<T>(res: unknown): T {
 }
 
 export const usersApi = {
+  updateMe: (payload: { name?: string; email?: string; currentPassword?: string; newPassword?: string }) =>
+    apiClient<{ success: boolean; data: { id: string; name: string; email: string; role: string; barbershopId?: string; avatarUrl?: string | null; permissions?: string[] } }>(
+      '/api/users/me', 'PATCH', payload, token()
+    ).then(res => unwrap<{ id: string; name: string; email: string; role: string; barbershopId?: string; avatarUrl?: string | null; permissions?: string[] }>(res)),
   getAvatarUploadUrl: (userId: string, mimeType: string) =>
     apiClient<{ success: boolean; data: { uploadUrl: string; publicUrl: string; objectName: string } }>(
       `/api/users/${userId}/avatar/upload-url?mimeType=${encodeURIComponent(mimeType)}`,

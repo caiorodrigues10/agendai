@@ -4,6 +4,7 @@ import { authStorage } from '../infra/authStorage';
 import { ApiError } from '../infra/apiClient';
 import { getErrorMessage } from '../utils/errorMessage';
 import { StaffMember } from '../types';
+import { usersApi } from '../infra/usersApi';
 
 export type AuthResult = { ok: true } | { ok: false; message: string };
 
@@ -16,6 +17,7 @@ interface AuthContextValue {
   logout: () => void;
   hasRole: (roles: StaffMember['role'][]) => boolean;
   updateUserAvatar: (avatarUrl: string | null) => void;
+  updateUserProfile: (payload: { name?: string; email?: string; currentPassword?: string; newPassword?: string }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -186,9 +188,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   }, []);
 
+  const updateUserProfile = useCallback(async (payload: { name?: string; email?: string; currentPassword?: string; newPassword?: string }) => {
+    const updated = await usersApi.updateMe(payload);
+    setUser(prev => {
+      if (!prev) return prev;
+      const next = { ...prev, ...updated } as StaffMember;
+      authStorage.setUser(next as any, authStorage.isPersistent());
+      return next;
+    });
+  }, []);
+
   const value = useMemo(
-    () => ({ user, loading, login, loginWithGoogle, register, logout, hasRole, updateUserAvatar }),
-    [user, loading, updateUserAvatar]
+    () => ({ user, loading, login, loginWithGoogle, register, logout, hasRole, updateUserAvatar, updateUserProfile }),
+    [user, loading, updateUserAvatar, updateUserProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -771,6 +771,13 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
             >
               Tentar novamente
             </button>
+            <button
+              type="button"
+              onClick={() => navigate('/planos')}
+              className="ml-2 px-5 py-2.5 rounded-xl border border-border text-text-secondary font-bold text-sm hover:border-accent hover:text-accent transition-colors"
+            >
+              Ver planos
+            </button>
           </div>
         )}
       </main>

@@ -35,6 +35,8 @@ export const RegisterSchema = z.object({
       message: 'CNPJ inválido (dígitos verificadores incorretos)',
     })
     .transform(v => (v ? normalizeDocument(v) : v)),
+  address: z.string().max(500).optional(),
+  city: z.string().min(2, 'Informe a cidade').max(120),
   termsVersion: z.string().min(1),
   termsAccepted: z.boolean().refine(v => v === true, 'É necessário aceitar os Termos de Uso'),
   marketingOptIn: z.boolean().optional().default(false),

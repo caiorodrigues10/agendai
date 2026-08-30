@@ -23,6 +23,10 @@ export interface RegisterPayload {
   cpf: string;
   barbershopName: string;
   whatsapp: string;
+  address?: string;
+  city?: string;
+  latitude?: number;
+  longitude?: number;
   cnpj?: string;
   referralCode?: string;
   termsVersion: string;

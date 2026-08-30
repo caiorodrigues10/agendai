@@ -113,6 +113,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
           name?: string;
           whatsapp?: string;
           address?: string | null;
+          city?: string | null;
           logoUrl?: string | null;
           latitude?: number | null;
           longitude?: number | null;
@@ -142,6 +143,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
             shopName: shopData.name ?? 'Salão',
             whatsapp: shopData.whatsapp ?? '',
             address: shopData.address ?? undefined,
+            city: shopData.city ?? undefined,
             latitude: shopData.latitude ?? undefined,
             longitude: shopData.longitude ?? undefined,
             schedule,
@@ -165,6 +167,8 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
     const shopPayload: Record<string, string | number | undefined> = {
       name: newSettings.shopName,
       whatsapp: newSettings.whatsapp,
+      address: newSettings.address,
+      city: newSettings.city,
     };
     if (newSettings.logoUrl && !newSettings.logoUrl.startsWith('data:')) {
       shopPayload.logoUrl = newSettings.logoUrl;

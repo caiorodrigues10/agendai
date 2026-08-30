@@ -57,6 +57,7 @@ export interface ShopSettings {
   schedule: DaySchedule[];
   logoUrl?: string;
   address?: string;
+  city?: string;
   latitude?: number;
   longitude?: number;
 }

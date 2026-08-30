@@ -255,6 +255,8 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
   const [logoError, setLogoError] = useState<string | null>(null);
   const [latitude, setLatitude] = useState(settings.latitude?.toString() || '');
   const [longitude, setLongitude] = useState(settings.longitude?.toString() || '');
+  const [address, setAddress] = useState(settings.address || '');
+  const [city, setCity] = useState(settings.city || '');
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
 
@@ -309,6 +311,8 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
     onSave({
       shopName,
       whatsapp,
+      address,
+      city,
       schedule,
       logoUrl,
       latitude: latitude ? parseFloat(latitude) : undefined,
@@ -330,6 +334,16 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
               onChange={e => setShopName(e.target.value)}
               className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
             />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm text-text-secondary mb-1.5">Endereço</label>
+              <input value={address} onChange={e => setAddress(e.target.value)} className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent" placeholder="Rua, número e bairro" />
+            </div>
+            <div>
+              <label className="block text-sm text-text-secondary mb-1.5">Cidade</label>
+              <input value={city} onChange={e => setCity(e.target.value)} className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent" placeholder="São Paulo" />
+            </div>
           </div>
 
           <div>
