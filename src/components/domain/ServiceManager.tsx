@@ -28,12 +28,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   return (
     <div className="mt-6">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h3 className="text-lg font-bold text-text-primary">Gerenciar ServiÃ§os</h3>
+        <h3 className="text-lg font-bold text-text-primary">Gerenciar Serviços</h3>
         <button
           onClick={() => setIsAdding(true)}
           className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-accent/50 bg-accent/10 px-3 py-2 text-xs font-bold text-accent transition-all hover:bg-accent-hover hover:text-black"
         >
-          <Plus size={14} /> Novo ServiÃ§o
+          <Plus size={14} /> Novo Serviço
         </button>
       </div>
 
@@ -50,7 +50,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               <div className="min-w-0">
                 <h4 className="font-medium text-text-primary">{service.name}</h4>
                 <p className="break-words text-xs text-text-secondary">
-                  {service.avgTimeMinutes} min â€¢ R$ {service.price.toFixed(2)}
+                  {service.avgTimeMinutes} min • R$ {service.price.toFixed(2)}
                 </p>
               </div>
             </div>

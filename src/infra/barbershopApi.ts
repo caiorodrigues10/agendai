@@ -13,6 +13,8 @@ interface BarbershopData {
   whatsapp?: string;
   address?: string | null;
   logoUrl?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 type UpdateBarbershopPayload = Partial<BarbershopData>;

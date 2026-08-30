@@ -16,6 +16,7 @@ import {
   AlertCircle,
   UserMinus,
   Scissors,
+  Cloud,
 } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '../ui/chart';
@@ -25,6 +26,7 @@ import {
   type InsightsPeriod,
 } from '../../infra/financialApi';
 import { ApiError } from '../../infra/apiClient';
+import { WeatherForecastWidget } from './WeatherForecastWidget';
 
 interface FinancialDashboardProps {
   queueHistory: QueueItem[];
@@ -247,6 +249,13 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                     </li>
                   ))}
                 </ul>
+              </div>
+
+              <div className="bg-surface p-5 rounded-xl border border-border">
+                <h3 className="text-sm font-bold text-text-primary mb-4 flex items-center gap-2">
+                  <Cloud size={16} className="text-accent" /> Previsão Climática (7 dias)
+                </h3>
+                <WeatherForecastWidget />
               </div>
 
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

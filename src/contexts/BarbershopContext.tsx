@@ -114,6 +114,8 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
           whatsapp?: string;
           address?: string | null;
           logoUrl?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
         } | null;
         let schedule = mapScheduleFromApi(null);
         try {
@@ -140,6 +142,8 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
             shopName: shopData.name ?? 'Salão',
             whatsapp: shopData.whatsapp ?? '',
             address: shopData.address ?? undefined,
+            latitude: shopData.latitude ?? undefined,
+            longitude: shopData.longitude ?? undefined,
             schedule,
             logoUrl: shopData.logoUrl ?? undefined,
           });
@@ -158,13 +162,15 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const setSettings = async (newSettings: ShopSettings) => {
     if (!barbershopId) return;
-    const shopPayload: Record<string, string | undefined> = {
+    const shopPayload: Record<string, string | number | undefined> = {
       name: newSettings.shopName,
       whatsapp: newSettings.whatsapp,
     };
     if (newSettings.logoUrl && !newSettings.logoUrl.startsWith('data:')) {
       shopPayload.logoUrl = newSettings.logoUrl;
     }
+    if (newSettings.latitude !== undefined) shopPayload.latitude = newSettings.latitude;
+    if (newSettings.longitude !== undefined) shopPayload.longitude = newSettings.longitude;
     await barbershopApi.updateBarbershop(barbershopId, shopPayload);
     await barbershopApi.updateSchedule(barbershopId, newSettings.schedule);
     setSettingsState(newSettings);

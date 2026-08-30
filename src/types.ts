@@ -20,6 +20,7 @@ export interface QueueItem {
   completedAt?: number;
   completedBy?: string;
   finalPrice?: number;
+  paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado';
   customerId?: string;
   responsibleQueueItemId?: string | null;
   responsibleName?: string | null;
@@ -56,6 +57,8 @@ export interface ShopSettings {
   schedule: DaySchedule[];
   logoUrl?: string;
   address?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface AIInsight {

@@ -198,6 +198,34 @@ export interface BarbershopInsights {
   highlights: string[];
 }
 
+export interface WeatherDemandPrediction {
+  date: string;
+  condition: string;
+  predictedQueue: number;
+  confidenceLow: number;
+  confidenceHigh: number;
+  baselineAvg: number;
+  dropPct: number;
+  topFactors: Array<{ feature: string; impact: number }>;
+  recommendation: string;
+  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+}
+
+export interface WeatherInsights {
+  barbershopName: string;
+  location: { lat: number; lng: number };
+  historicalDays: number;
+  modelTrained: boolean;
+  predictions: WeatherDemandPrediction[];
+  summary: {
+    avgDropPct: number;
+    highRiskCount: number;
+    bestDay: WeatherDemandPrediction;
+    worstDay: WeatherDemandPrediction;
+  };
+  highlights: string[];
+}
+
 const buildQuery = (params?: Record<string, string | number | undefined>) => {
   const qs = new URLSearchParams();
   if (!params) return '';
@@ -343,4 +371,12 @@ export const financialApi = {
       undefined,
       token()
     ).then(res => unwrap<ExpenseCategory[]>(res)),
+
+  getWeatherInsights: (days: number = 7) =>
+    apiClient<{ success: boolean; data: WeatherInsights }>(
+      `/api/barbershop/weather-insights${buildQuery({ days })}`,
+      'GET',
+      undefined,
+      token()
+    ).then(res => unwrap<WeatherInsights>(res)),
 };

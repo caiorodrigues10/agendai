@@ -30,6 +30,7 @@ import { PwaInstallCard } from '../components/pwa/PwaInstallCard';
 import { getErrorMessage } from '../utils/errorMessage';
 import { QueueItem } from '../types';
 import { Loader2 } from 'lucide-react';
+import { DemandAlertBanner } from '../components/domain/DemandAlertBanner';
 
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -181,33 +182,37 @@ export const StaffDashboard: React.FC = () => {
         {/* Navegação sempre visível: grupos servem apenas como rótulos, sem acordeões. */}
         <nav
           aria-label="Navegação do painel"
-          className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-xl border border-border bg-border"
+          className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4"
         >
           {visibleGroups.map(group => {
             const accessibleTabs = group.tabs.filter(tab => canAccessTab(tab.id, user?.role));
 
             return (
-              <section key={group.id} className="bg-surface p-3" aria-labelledby={`nav-${group.id}`}>
+              <section
+                key={group.id}
+                className="rounded-xl border border-border bg-surface p-3 shadow-sm shadow-black/5"
+                aria-labelledby={`nav-${group.id}`}
+              >
                 <p
                   id={`nav-${group.id}`}
-                  className="mb-2 px-2 text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted"
+                  className="mb-3 px-1 text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted"
                 >
                   {group.label}
                 </p>
-                <div className="flex flex-wrap gap-1">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-1">
                   {accessibleTabs.map(tab => (
                     <button
                       key={tab.id}
                       type="button"
                       onClick={() => navigate(`/app/${tab.id}`)}
                       aria-current={activeTab === tab.id ? 'page' : undefined}
-                      className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-2 text-xs font-semibold transition-all ${
+                      className={`flex min-h-11 items-center gap-2 rounded-lg border px-3 py-2 text-[13px] font-semibold transition-all ${
                         activeTab === tab.id
-                          ? 'border-accent/40 bg-accent text-accent-fg shadow-sm'
-                          : 'border-transparent text-text-secondary hover:bg-surface-2 hover:text-text-primary'
+                          ? 'border-accent/40 bg-accent text-accent-fg shadow-sm shadow-accent/10'
+                          : 'border-border bg-bg text-text-secondary hover:border-border-strong hover:bg-surface-2 hover:text-text-primary'
                       }`}
                     >
-                      <tab.icon size={14} />
+                      <tab.icon size={15} className="shrink-0" />
                       {tab.label}
                     </button>
                   ))}
@@ -220,6 +225,7 @@ export const StaffDashboard: React.FC = () => {
         {/* Tab Content */}
         {activeTab === 'overview' && (
           <div className="space-y-4">
+            <DemandAlertBanner />
             <div className="bg-surface rounded-xl border border-border p-4">
               <h2 className="text-lg font-bold mb-3">Visão Geral</h2>
               <div className="grid grid-cols-2 gap-3 text-sm">
