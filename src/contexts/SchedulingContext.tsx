@@ -30,7 +30,7 @@ interface SchedulingContextValue {
     name: string,
     whatsapp: string,
     serviceId: string,
-    opts?: { additionalPerson?: boolean }
+    opts?: { additionalPerson?: boolean; responsibleSessionId?: string }
   ) => Promise<void>;
   leaveQueue: (id: string) => Promise<void>;
   updateQueueStatus: (
@@ -209,7 +209,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     name: string,
     whatsapp: string,
     serviceId: string,
-    opts?: { additionalPerson?: boolean }
+    opts?: { additionalPerson?: boolean; responsibleSessionId?: string }
   ) => {
     if (!barbershopId) return;
     const payload = {
@@ -218,7 +218,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       serviceId,
       barbershopId,
       ...(opts?.additionalPerson
-        ? { responsibleSessionId: clientId }
+        ? { responsibleSessionId: opts.responsibleSessionId ?? clientId }
         : { sessionId: clientId }),
     };
 

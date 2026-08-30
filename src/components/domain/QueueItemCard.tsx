@@ -13,6 +13,7 @@ import {
   CreditCard,
   Banknote,
   Smartphone,
+  UserPlus,
 } from 'lucide-react';
 import { notificationsApi } from '../../infra/notificationsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
@@ -32,6 +33,7 @@ interface QueueItemCardProps {
   ) => void;
   onLeaveQueue: (id: string) => void;
   onReturnToQueue?: (item: QueueItem) => void;
+  onAddDependent?: (item: QueueItem) => void;
   onNotify?: (message: string, type: 'success' | 'error' | 'bot') => void;
 }
 
@@ -46,6 +48,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
   onStatusChange,
   onLeaveQueue,
   onReturnToQueue,
+  onAddDependent,
   onNotify,
 }) => {
   const [sending, setSending] = useState<'reminder' | 'next' | null>(null);
@@ -234,6 +237,13 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
                   </button>
                 </>
               )}
+              <button
+                type="button"
+                onClick={() => onAddDependent?.(item)}
+                className="px-3 py-1.5 text-xs text-text-secondary bg-surface-2 border border-border hover:border-accent hover:text-accent rounded flex items-center gap-1 transition-colors"
+              >
+                <UserPlus size={14} /> Dependente
+              </button>
               <button
                 onClick={() => onStatusChange(item.id, 'cancelled')}
                 className="px-3 py-1.5 text-xs text-danger hover:bg-danger/10 rounded flex items-center gap-1 transition-colors"

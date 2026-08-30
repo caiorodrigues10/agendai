@@ -75,6 +75,7 @@ export const StaffDashboard: React.FC = () => {
     loadAvailability,
   } = useScheduling();
   const [showJoinForm, setShowJoinForm] = useState(false);
+  const [dependentResponsible, setDependentResponsible] = useState<QueueItem | null>(null);
   const [returnToQueueItem, setReturnToQueueItem] = useState<QueueItem | null>(null);
   const [returningToQueue, setReturningToQueue] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'bot' | 'error' } | null>(
@@ -122,6 +123,16 @@ export const StaffDashboard: React.FC = () => {
     await joinQueue(name, whatsapp, serviceId);
     setShowJoinForm(false);
     showToast('Cliente adicionado!');
+  };
+
+  const handleAddDependent = async (name: string, whatsapp: string, serviceId: string) => {
+    if (!dependentResponsible?.customerId) return;
+    await joinQueue(name, whatsapp, serviceId, {
+      additionalPerson: true,
+      responsibleSessionId: dependentResponsible.customerId,
+    });
+    showToast(`${name} adicionado como dependente de ${dependentResponsible.customerName}.`);
+    setDependentResponsible(null);
   };
 
   const handleConfirmReturnToQueue = async (insertAt: number) => {
@@ -287,6 +298,7 @@ export const StaffDashboard: React.FC = () => {
                       isCurrentUser={item.customerId === clientId}
                       onStatusChange={updateQueueStatus}
                       onReturnToQueue={setReturnToQueueItem}
+                      onAddDependent={setDependentResponsible}
                       onNotify={showToast}
                       onLeaveQueue={id => {
                         leaveQueue(id);
@@ -445,6 +457,14 @@ export const StaffDashboard: React.FC = () => {
           onJoin={handleJoinQueue}
           onCancel={() => setShowJoinForm(false)}
           isStaffMode={true}
+        />
+      )}
+      {dependentResponsible && (
+        <AddCustomerForm
+          services={services}
+          onJoin={handleAddDependent}
+          onCancel={() => setDependentResponsible(null)}
+          isAdditionalPerson
         />
       )}
       {returnToQueueItem && (
