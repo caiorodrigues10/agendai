@@ -3,7 +3,7 @@ import { Service } from '../../types';
 import { ServiceForm } from './ServiceForm';
 import { DynamicIcon } from '../ui/DynamicIcon';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
-import { Pencil, Trash2, Plus } from 'lucide-react';
+import { RiAddLine, RiPencilLine, RiDeleteBin6Line } from 'react-icons/ri';
 import { PackageCatalog } from './PackageCatalog';
 
 interface ServiceManagerProps {
@@ -31,9 +31,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
         <h3 className="text-lg font-bold text-text-primary">Gerenciar Serviços</h3>
         <button
           onClick={() => setIsAdding(true)}
-          className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-accent/50 bg-accent/10 px-3 py-2 text-xs font-bold text-accent transition-all hover:bg-accent-hover hover:text-black"
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-accent/40 bg-gradient-to-r from-accent/15 to-accent/10 px-4 py-2.5 text-xs font-bold text-accent transition-all hover:border-accent/60 hover:from-accent/20 hover:to-accent/15 hover:shadow-lg hover:shadow-accent/10"
         >
-          <Plus size={14} /> Novo Serviço
+          <RiAddLine size={16} /> Novo Serviço
         </button>
       </div>
 
@@ -58,17 +58,17 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             <div className="flex self-end gap-2 sm:self-auto">
               <button
                 onClick={() => setEditingId(service.id)}
-                className="min-h-10 min-w-10 rounded-lg p-2 text-text-secondary transition-colors hover:bg-surface-2 hover:text-accent"
+                className="min-h-10 min-w-10 rounded-xl border border-border bg-bg p-2 text-text-secondary transition-all hover:border-accent/30 hover:bg-accent/10 hover:text-accent"
                 title="Editar"
               >
-                <Pencil size={18} />
+                <RiPencilLine size={18} />
               </button>
               <button
                 onClick={() => setServiceToDelete(service)}
-                className="min-h-10 min-w-10 rounded-lg p-2 text-text-secondary transition-colors hover:bg-danger/10 hover:text-danger"
+                className="min-h-10 min-w-10 rounded-xl border border-border bg-bg p-2 text-text-secondary transition-all hover:border-danger/30 hover:bg-danger/10 hover:text-danger"
                 title="Excluir"
               >
-                <Trash2 size={18} />
+                <RiDeleteBin6Line size={18} />
               </button>
             </div>
           </div>

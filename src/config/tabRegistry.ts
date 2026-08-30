@@ -1,27 +1,27 @@
+import type { IconType } from 'react-icons';
 import {
-  List,
-  CalendarDays,
-  Contact,
-  Scissors,
-  Users,
-  BarChart3,
-  CreditCard,
-  Wallet,
-  Gift,
-  Megaphone,
-  Link2,
-  Settings,
-  Store,
-  LayoutDashboard,
-  type LucideIcon,
-} from 'lucide-react';
+  RiDashboardLine,
+  RiListCheck2,
+  RiCalendarScheduleLine,
+  RiContactsLine,
+  RiScissorsLine,
+  RiTeamLine,
+  RiBarChartBoxLine,
+  RiBankCardLine,
+  RiWalletLine,
+  RiGiftLine,
+  RiMegaphoneLine,
+  RiLinkM,
+  RiSettings4Line,
+  RiStore2Line,
+} from 'react-icons/ri';
 
 export type TabRole = 'OWNER' | 'EMPLOYEE' | 'MASTER_ADMIN';
 
 export interface TabDef {
   id: string;
   label: string;
-  icon: LucideIcon;
+  icon: IconType;
   /** If empty → visible to all authenticated users */
   roles?: TabRole[];
   /** Optional capability required (future use) */
@@ -39,38 +39,38 @@ export const TAB_GROUPS: TabGroup[] = [
     id: 'operacao',
     label: 'Operação',
     tabs: [
-      { id: 'overview', label: 'Visão Geral', icon: LayoutDashboard },
-      { id: 'queue', label: 'Fila', icon: List },
-      { id: 'appointments', label: 'Agenda', icon: CalendarDays },
-      { id: 'clients', label: 'Clientes', icon: Contact },
+      { id: 'overview', label: 'Visão Geral', icon: RiDashboardLine },
+      { id: 'queue', label: 'Fila', icon: RiListCheck2 },
+      { id: 'appointments', label: 'Agenda', icon: RiCalendarScheduleLine },
+      { id: 'clients', label: 'Clientes', icon: RiContactsLine },
     ],
   },
   {
     id: 'gestao',
     label: 'Gestão',
     tabs: [
-      { id: 'services', label: 'Serviços', icon: Scissors, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'team', label: 'Equipe', icon: Users, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'reports', label: 'Relatórios', icon: BarChart3, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'finance', label: 'Financeiro', icon: CreditCard, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'services', label: 'Serviços', icon: RiScissorsLine, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'team', label: 'Equipe', icon: RiTeamLine, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'reports', label: 'Relatórios', icon: RiBarChartBoxLine, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'finance', label: 'Financeiro', icon: RiBankCardLine, roles: ['OWNER', 'MASTER_ADMIN'] },
     ],
   },
   {
     id: 'crescimento',
     label: 'Crescimento',
     tabs: [
-      { id: 'posts', label: 'Posts', icon: Megaphone, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'link', label: 'Link Público', icon: Link2, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'referrals', label: 'Indicações', icon: Gift, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'posts', label: 'Posts', icon: RiMegaphoneLine, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'link', label: 'Link Público', icon: RiLinkM, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'referrals', label: 'Indicações', icon: RiGiftLine, roles: ['OWNER', 'MASTER_ADMIN'] },
     ],
   },
   {
     id: 'conta',
     label: 'Conta',
     tabs: [
-      { id: 'settings', label: 'Configurações', icon: Settings },
-      { id: 'subscription', label: 'Plano', icon: Wallet, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'profile', label: 'Perfil', icon: Store },
+      { id: 'settings', label: 'Configurações', icon: RiSettings4Line },
+      { id: 'subscription', label: 'Plano', icon: RiWalletLine, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'profile', label: 'Perfil', icon: RiStore2Line },
     ],
   },
 ];

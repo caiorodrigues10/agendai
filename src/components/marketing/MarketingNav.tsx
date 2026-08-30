@@ -60,7 +60,7 @@ export const MarketingNav: React.FC = () => {
   };
 
   return (
-    <nav className="fixed top-0 z-50 w-full border-b border-white/5 bg-black/50 px-5 py-4 backdrop-blur-2xl sm:px-8 xl:px-12">
+    <nav className="fixed top-0 z-50 w-full border-b border-white/5 bg-black/50 px-5 pb-4 pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-2xl sm:px-8 xl:px-12">
       <div className="mx-auto flex max-w-400 items-center justify-between gap-4">
         <Link
           to="/"
@@ -111,7 +111,7 @@ export const MarketingNav: React.FC = () => {
           <button
             type="button"
             onClick={() => setMobileOpen(v => !v)}
-            className="p-2 -mr-2 text-white lg:hidden"
+            className="-mr-2 flex min-h-11 min-w-11 items-center justify-center rounded-xl text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 lg:hidden"
             aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
             aria-expanded={mobileOpen}
           >
@@ -121,7 +121,7 @@ export const MarketingNav: React.FC = () => {
       </div>
 
       {mobileOpen && (
-        <div className="mx-auto mt-4 flex max-w-400 flex-col gap-0.5 border-t border-white/5 pb-2 pt-4 text-sm font-bold uppercase tracking-widest text-neutral-300 lg:hidden">
+        <div className="mx-auto mt-4 flex max-h-[calc(100dvh-4.25rem)] max-w-400 flex-col gap-0.5 overflow-y-auto overscroll-contain border-t border-white/5 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-4 text-sm font-bold uppercase tracking-widest text-neutral-300 lg:hidden">
           {sectionLinks.map(link => (
             <button
               key={link.id}

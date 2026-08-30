@@ -4,7 +4,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { StaffMember, EmployeePermission } from '../../types';
 import { TeamMemberSchema, TeamMemberFormData } from '../../schemas';
 import { v4 as uuidv4 } from 'uuid';
-import { Trash2, UserPlus, X, Check, AlertCircle, Camera, Loader2, ChevronDown, Shield } from 'lucide-react';
+import {
+  RiAddLine,
+  RiDeleteBin6Line,
+  RiCloseLine,
+  RiCheckLine,
+  RiAlertLine,
+  RiCameraLine,
+  RiLoader4Line,
+  RiShieldLine,
+} from 'react-icons/ri';
 import { Avatar } from '../ui/Avatar';
 import { usersApi } from '../../infra/usersApi';
 import { getErrorMessage } from '../../utils/errorMessage';
@@ -139,15 +148,15 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
             setIsAdding(!isAdding);
             setFormError(null);
           }}
-          className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-accent/50 bg-accent/10 px-3 py-2 text-xs font-bold text-accent transition-all hover:bg-accent-hover hover:text-black"
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-accent/40 bg-gradient-to-r from-accent/15 to-accent/10 px-4 py-2.5 text-xs font-bold text-accent transition-all hover:border-accent/60 hover:from-accent/20 hover:to-accent/15 hover:shadow-lg hover:shadow-accent/10"
         >
-          <UserPlus size={14} /> Adicionar
+          <RiAddLine size={16} /> Adicionar
         </button>
       </div>
 
       {formError && !isAdding && (
         <div className="mb-3 flex items-center gap-1 rounded-lg border border-danger/20 bg-danger/10 px-3 py-2 text-xs text-danger">
-          <AlertCircle size={12} /> {formError}
+          <RiAlertLine size={12} /> {formError}
         </div>
       )}
 
@@ -160,7 +169,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
           <h4 className="mb-3 text-sm font-bold text-text-primary">Novo Membro</h4>
           {formError && (
             <div className="mb-3 flex items-center gap-1 rounded-lg border border-danger/20 bg-danger/10 px-3 py-2 text-xs text-danger">
-              <AlertCircle size={12} /> {formError}
+              <RiAlertLine size={12} /> {formError}
             </div>
           )}
           <div className="space-y-3">
@@ -221,19 +230,21 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
             <div key={member.id} className="overflow-hidden rounded-lg border border-border bg-surface">
               <div className="flex items-start justify-between gap-3 p-3 sm:items-center">
                 <div className="flex min-w-0 items-center gap-3">
-                  <div
-                    className="relative cursor-pointer group"
+                  <button
+                    type="button"
                     onClick={() => handleAvatarClick(member.id)}
+                    className="group relative cursor-pointer"
+                    title="Alterar foto"
                   >
                     <Avatar src={member.avatarUrl} name={member.name} size="sm" />
-                    <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                    <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
                       {avatarUploadingId === member.id ? (
-                        <Loader2 size={14} className="animate-spin text-white" />
+                        <RiLoader4Line size={14} className="animate-spin text-white" />
                       ) : (
-                        <Camera size={14} className="text-white" />
+                        <RiCameraLine size={14} className="text-white" />
                       )}
                     </div>
-                  </div>
+                  </button>
                   <div className="min-w-0">
                     <h4 className="truncate text-sm font-medium text-text-primary">
                       {member.name} {member.id === currentAdminId && '(Você)'}
@@ -254,34 +265,34 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
                 <div className="flex items-center gap-1">
                   {isEmployee && member.id !== currentAdminId && (
                     <>
-                      <button
-                        onClick={() => setEditingPermissionsId(isExpanded ? null : member.id)}
-                        className={`rounded-lg p-2 transition-colors min-h-10 min-w-10 ${isExpanded ? 'bg-accent/10 text-accent' : 'text-text-muted hover:bg-accent/10 hover:text-accent'}`}
-                        title="Gerenciar permissões"
-                      >
-                        <Shield size={16} />
-                      </button>
+                        <button
+                          onClick={() => setEditingPermissionsId(isExpanded ? null : member.id)}
+                          className={`rounded-lg p-2 transition-colors min-h-10 min-w-10 ${isExpanded ? 'bg-accent/10 text-accent' : 'text-text-muted hover:bg-accent/10 hover:text-accent'}`}
+                          title="Gerenciar permissões"
+                        >
+                        <RiShieldLine size={16} />
+                        </button>
                       {deleteConfirmId === member.id ? (
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => confirmDelete(member.id)}
-                            className="rounded bg-danger p-1.5 text-white"
+                            className="rounded-lg bg-danger p-2 text-white shadow-lg shadow-danger/20"
                           >
-                            <Check size={14} />
+                            <RiCheckLine size={14} />
                           </button>
                           <button
                             onClick={() => setDeleteConfirmId(null)}
-                            className="rounded bg-surface-2 p-1.5 text-text-secondary"
+                            className="rounded-lg bg-surface-2 p-2 text-text-secondary"
                           >
-                            <X size={14} />
+                            <RiCloseLine size={14} />
                           </button>
                         </div>
                       ) : (
                         <button
                           onClick={() => setDeleteConfirmId(member.id)}
-                          className="rounded-lg p-2 text-text-muted transition-colors hover:bg-danger/10 hover:text-danger min-h-10 min-w-10"
+                          className="rounded-xl border border-border bg-bg p-2 text-text-muted transition-all hover:border-danger/30 hover:bg-danger/10 hover:text-danger min-h-10 min-w-10"
                         >
-                          <Trash2 size={14} />
+                          <RiDeleteBin6Line size={14} />
                         </button>
                       )}
                     </>
@@ -316,7 +327,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
                         <div
                           className={`flex h-3 w-3 flex-shrink-0 items-center justify-center rounded border ${memberPerms.includes(perm) ? 'border-accent bg-accent' : 'border-border'}`}
                         >
-                          {memberPerms.includes(perm) && <Check size={10} className="text-accent-fg" />}
+                          {memberPerms.includes(perm) && <RiCheckLine size={10} className="text-accent-fg" />}
                         </div>
                         <span className="leading-tight">{PERMISSION_LABELS[perm]}</span>
                       </label>

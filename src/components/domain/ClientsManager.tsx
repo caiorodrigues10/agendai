@@ -1,16 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  CalendarDays,
-  Edit3,
-  FileText,
-  History,
-  Loader2,
-  Package,
-  Plus,
-  Search,
-  Trash2,
-  UserPlus,
-} from 'lucide-react';
+  RiCalendarScheduleLine,
+  RiEditLine,
+  RiFileTextLine,
+  RiHistoryLine,
+  RiLoader4Line,
+  RiBox3Line,
+  RiAddLine,
+  RiSearchLine,
+  RiDeleteBin6Line,
+  RiUserAddLine,
+} from 'react-icons/ri';
 import {
   ClientPackage,
   PackagePaymentMethod,
@@ -273,7 +273,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
           onClick={() => setShowCreate(v => !v)}
           className="px-3 py-1.5 bg-accent/10 text-accent border border-accent/50 rounded-lg text-xs font-bold flex items-center gap-1"
         >
-          <Plus size={14} /> Cadastrar
+          <RiAddLine size={14} /> Cadastrar
         </button>
       </div>
 
@@ -301,13 +301,13 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
             disabled={saving}
             className="w-full py-3 rounded-xl font-bold text-accent-fg bg-accent disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            <UserPlus size={16} /> {saving ? 'Salvando…' : 'Salvar cliente'}
+            <RiUserAddLine size={16} /> {saving ? 'Salvando…' : 'Salvar cliente'}
           </button>
         </form>
       )}
 
       <div className="relative">
-        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
+        <RiSearchLine size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
         <input
           className="w-full bg-surface border border-border rounded-xl pl-10 pr-4 py-3 text-sm text-text-primary"
           placeholder="Buscar por nome ou WhatsApp"
@@ -321,7 +321,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
 
       {loading ? (
         <div className="flex items-center justify-center py-10 text-text-muted gap-2">
-          <Loader2 size={18} className="animate-spin text-accent" />
+          <RiLoader4Line size={18} className="animate-spin text-accent" />
           Carregando...
         </div>
       ) : clients.length === 0 ? (
@@ -426,7 +426,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
                   onClick={startEdit}
                   className="p-1.5 rounded-lg text-text-muted hover:text-accent border border-border hover:border-accent/50"
                 >
-                  <Edit3 size={14} />
+                  <RiEditLine size={14} />
                 </button>
               </div>
 
@@ -435,7 +435,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
                   <div className="bg-bg border border-border rounded-lg p-3">
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-1.5 text-text-muted">
-                        <FileText size={12} />
+                        <RiFileTextLine size={12} />
                         <span className="text-[11px] font-bold uppercase tracking-wider">Notas</span>
                       </div>
                       <button
@@ -499,7 +499,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
               onClick={handleSell}
               className="w-full py-3 rounded-xl font-bold text-accent-fg bg-accent disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              <Package size={16} /> {selling ? 'Registrando…' : 'Fechar pacote'}
+              <RiBox3Line size={16} /> {selling ? 'Registrando…' : 'Fechar pacote'}
             </button>
           </div>
 
@@ -524,7 +524,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
                         onClick={() => setBookingPkg(toClientPackage(p))}
                         className="flex-1 py-2 rounded-lg text-xs font-bold bg-accent/10 text-accent border border-accent/30 flex items-center justify-center gap-1"
                       >
-                        <CalendarDays size={14} /> Agendar
+                        <RiCalendarScheduleLine size={14} /> Agendar
                       </button>
                       <button
                         type="button"
@@ -554,7 +554,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
           {sortedAppointments.length > 0 && (
             <div>
               <p className="text-[11px] uppercase font-bold tracking-wider text-text-muted mb-2 flex items-center gap-1.5">
-                <History size={12} /> Histórico
+                <RiHistoryLine size={12} /> Histórico
               </p>
               <ul className="text-xs space-y-1.5">
                 {sortedAppointments.map(a => (
@@ -587,7 +587,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
               onClick={handleDelete}
               className="w-full py-2.5 rounded-xl font-bold text-danger border border-danger/30 hover:bg-danger/10 flex items-center justify-center gap-2 text-sm"
             >
-              <Trash2 size={14} /> Excluir cliente
+              <RiDeleteBin6Line size={14} /> Excluir cliente
             </button>
           </div>
         </div>

@@ -676,21 +676,21 @@ export const LandingPage: React.FC = () => {
       <MarketingNav />
 
       <main className="relative z-10">
-        <section className="relative flex min-h-screen items-center overflow-hidden px-5 pb-24 pt-28 sm:px-8 md:pt-32 xl:px-12 xl:pb-28 xl:pt-36">
+        <section className="relative flex min-h-screen items-center overflow-hidden px-5 pb-20 pt-24 sm:px-8 sm:pb-24 sm:pt-28 md:pt-32 xl:px-12 xl:pb-28 xl:pt-36">
           <FloatingPathsBackground
             position={-1}
             className="pointer-events-none absolute inset-0 z-0 opacity-70"
           />
-          <div className="relative z-10 mx-auto grid w-full max-w-400 items-center gap-16 xl:grid-cols-[minmax(0,0.95fr)_minmax(560px,1.05fr)] xl:gap-16 2xl:gap-24">
+          <div className="relative z-10 mx-auto grid w-full max-w-400 items-center gap-12 sm:gap-16 xl:grid-cols-[minmax(0,0.95fr)_minmax(560px,1.05fr)] xl:gap-16 2xl:gap-24">
             <div className="relative z-20 max-w-3xl">
               <p
                 data-hero-badge
-                className="mb-6 text-[11px] font-medium uppercase tracking-[0.28em] text-emerald-400/90"
+                className="mb-5 text-[11px] font-medium uppercase tracking-[0.28em] text-emerald-400/90 sm:mb-6"
               >
                 Fila · agenda · financeiro
               </p>
 
-              <h1 className="max-w-200 text-[clamp(3.6rem,4.7vw,5.6rem)] font-black leading-none tracking-[-0.06em] text-white">
+              <h1 className="max-w-200 text-[clamp(2.9rem,13vw,3.6rem)] font-black leading-none tracking-[-0.06em] text-white sm:text-[clamp(3.6rem,4.7vw,5.6rem)]">
                 <span className="-mb-[0.12em] block overflow-hidden pb-[0.2em]">
                   <span data-hero-line className="block md:whitespace-nowrap">
                     Fila e agenda
@@ -713,7 +713,7 @@ export const LandingPage: React.FC = () => {
 
               <p
                 data-hero-copy
-                className="mt-7 max-w-2xl text-base font-light leading-relaxed text-neutral-400 sm:text-lg xl:text-xl"
+                className="mt-6 max-w-2xl text-base font-light leading-relaxed text-neutral-400 sm:mt-7 sm:text-lg xl:text-xl"
               >
                 Fila pública com estimativa de espera, agendamento online e financeiro no mesmo
                 painel. A equipe opera em tempo real; você acompanha o resultado.
@@ -721,7 +721,7 @@ export const LandingPage: React.FC = () => {
 
               <div
                 data-hero-action
-                className="mt-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:gap-10"
+                className="mt-8 flex flex-col gap-5 sm:mt-10 sm:flex-row sm:items-end sm:gap-10"
               >
                 <button
                   type="button"
@@ -752,8 +752,8 @@ export const LandingPage: React.FC = () => {
                 </button>
               </div>
 
-              <div data-hero-action className="mt-10 max-w-2xl border-t border-white/10 pt-6">
-                <div className="grid gap-6 sm:grid-cols-3 sm:gap-0">
+              <div data-hero-action className="mt-8 max-w-2xl border-t border-white/10 pt-5 sm:mt-10 sm:pt-6">
+                <div className="grid gap-5 sm:grid-cols-3 sm:gap-0">
                   {[
                     {
                       value: '30',
@@ -988,36 +988,36 @@ export const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        <section id="produto" className="relative scroll-mt-20 px-6 py-28 md:py-40">
-          <div className="mx-auto max-w-375">
-            <div data-reveal className="mb-16 max-w-3xl">
+        <section id="produto" className="relative scroll-mt-20 px-5 py-20 sm:px-8 sm:py-28 md:py-40">
+          <div className="mx-auto min-w-0 max-w-375">
+            <div data-reveal className="mb-12 min-w-0 max-w-3xl sm:mb-16">
               <span className="text-[10px] font-black uppercase tracking-[0.28em] text-emerald-400">
                 Da chegada ao resultado
               </span>
-              <h2 className="mt-5 text-5xl font-black tracking-[-0.05em] text-white md:text-7xl">
+              <h2 className="mt-4 text-4xl font-black tracking-[-0.05em] text-white sm:mt-5 sm:text-5xl md:text-7xl">
                 A fila anda. A agenda encaixa. O caixa fecha.
               </h2>
-              <p className="mt-6 max-w-xl text-lg font-light leading-relaxed text-neutral-400 md:text-xl">
+              <p className="mt-5 max-w-xl text-base font-light leading-relaxed text-neutral-400 sm:mt-6 sm:text-lg md:text-xl">
                 O link público organiza a chegada, o painel coordena a equipe e o financeiro mostra
                 o resultado — sem papel na recepção ou planilha paralela.
               </p>
             </div>
 
-            <div id="recursos" className="scroll-mt-28 space-y-28 md:space-y-36">
+            <div id="recursos" className="scroll-mt-28 min-w-0 space-y-20 sm:space-y-28 md:space-y-36">
               {/* Sessão 1 — Fila */}
               <article
                 data-reveal
                 data-queue-card
-                className="grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-16"
+                className="grid min-w-0 items-center gap-10 sm:gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-16"
               >
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-400">
                     Link público + painel
                   </p>
-                  <h3 className="mt-4 text-4xl font-black tracking-tight text-white md:text-6xl">
+                  <h3 className="mt-4 text-3xl font-black tracking-tight text-white sm:text-4xl md:text-6xl">
                     O cliente espera onde quiser.
                   </h3>
-                  <p className="mt-6 max-w-md text-lg font-medium leading-relaxed text-neutral-400">
+                  <p className="mt-5 max-w-md text-base font-medium leading-relaxed text-neutral-400 sm:mt-6 sm:text-lg">
                     Entra pelo link, vê a posição e a estimativa. No painel, a equipe chama, inicia
                     e conclui — sem gritar nome na porta.
                   </p>
@@ -1038,7 +1038,7 @@ export const LandingPage: React.FC = () => {
                   </ul>
                 </div>
 
-                <div className="rounded-[1.75rem] border border-white/8 bg-[#0d110e] p-5 md:p-6">
+                <div className="min-w-0 rounded-[1.75rem] border border-white/8 bg-[#0d110e] p-5 md:p-6">
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div>
                       <p className="text-base font-bold text-white">Fila ao vivo</p>
@@ -1104,10 +1104,10 @@ export const LandingPage: React.FC = () => {
               <article
                 data-reveal
                 data-booking-card
-                className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16"
+                className="grid min-w-0 items-center gap-10 sm:gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16"
               >
-                <div className="order-2 lg:order-1">
-                  <div className="rounded-[1.75rem] border border-white/8 bg-[#0b0e0c] p-5 md:p-6">
+                <div className="order-2 min-w-0 lg:order-1">
+                  <div className="min-w-0 rounded-[1.75rem] border border-white/8 bg-[#0b0e0c] p-5 md:p-6">
                     <div className="mb-5 flex items-baseline justify-between gap-3">
                       <div>
                         <p className="text-base font-bold text-white">Agendar</p>
@@ -1191,14 +1191,14 @@ export const LandingPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="order-1 lg:order-2">
+                <div className="order-1 min-w-0 lg:order-2">
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-300">
                     Agendamento público
                   </p>
-                  <h3 className="mt-4 text-4xl font-black tracking-tight text-white md:text-6xl">
+                  <h3 className="mt-4 text-3xl font-black tracking-tight text-white sm:text-4xl md:text-6xl">
                     Horário livre — e só o livre.
                   </h3>
-                  <p className="mt-6 max-w-md text-lg font-medium leading-relaxed text-neutral-400">
+                  <p className="mt-5 max-w-md text-base font-medium leading-relaxed text-neutral-400 sm:mt-6 sm:text-lg">
                     Expediente, profissional e duração do serviço entram no cálculo. O cliente marca
                     sem “tem vaga?” no WhatsApp.
                   </p>
@@ -1223,16 +1223,16 @@ export const LandingPage: React.FC = () => {
               {/* Sessão 3 — Financeiro */}
               <article
                 data-reveal
-                className="grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-16"
+                className="grid min-w-0 items-center gap-10 sm:gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-16"
               >
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-200">
                     Despesas + fiado
                   </p>
-                  <h3 className="mt-4 text-4xl font-black tracking-tight text-white md:text-6xl">
+                  <h3 className="mt-4 text-3xl font-black tracking-tight text-white sm:text-4xl md:text-6xl">
                     O que sobrou — sem planilha.
                   </h3>
-                  <p className="mt-6 max-w-md text-lg font-medium leading-relaxed text-neutral-400">
+                  <p className="mt-5 max-w-md text-base font-medium leading-relaxed text-neutral-400 sm:mt-6 sm:text-lg">
                     Entradas, custos e fiado no mesmo resumo. Você vê o líquido e o que ainda está
                     na rua.
                   </p>
@@ -1253,8 +1253,8 @@ export const LandingPage: React.FC = () => {
                   </ul>
                 </div>
 
-                <div className="rounded-[1.75rem] border border-white/8 bg-[#0d110e] p-5 md:p-6">
-                  <div className="flex items-end justify-between gap-4">
+                <div className="min-w-0 rounded-[1.75rem] border border-white/8 bg-[#0d110e] p-5 md:p-6">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                       <p className="text-xs font-black uppercase tracking-wider text-neutral-500">
                         Líquido do mês
@@ -1366,16 +1366,16 @@ export const LandingPage: React.FC = () => {
               <article
                 data-reveal
                 data-roles-card
-                className="grid items-start gap-12 lg:grid-cols-[1fr_1.15fr] lg:gap-16"
+                className="grid min-w-0 items-start gap-10 sm:gap-12 lg:grid-cols-[1fr_1.15fr] lg:gap-16"
               >
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-300">
                     Quem vê o quê
                   </p>
-                  <h3 className="mt-4 text-4xl font-black tracking-tight text-white md:text-6xl">
+                  <h3 className="mt-4 text-3xl font-black tracking-tight text-white sm:text-4xl md:text-6xl">
                     Funcionário opera. Dono decide.
                   </h3>
-                  <p className="mt-6 max-w-md text-lg font-medium leading-relaxed text-neutral-400">
+                  <p className="mt-5 max-w-md text-base font-medium leading-relaxed text-neutral-400 sm:mt-6 sm:text-lg">
                     O login define a tela: a equipe opera fila, agenda e serviços; o dono cuida de
                     caixa, relatórios e assinatura.
                   </p>
@@ -1384,8 +1384,8 @@ export const LandingPage: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="grid gap-3 sm:grid-cols-2">
+                <div className="min-w-0 space-y-4">
+                  <div className="grid min-w-0 gap-3 sm:grid-cols-2">
                     <div
                       data-role-panel
                       className="rounded-[1.5rem] border border-emerald-400/25 bg-[#0d110e] p-5"
@@ -1516,13 +1516,13 @@ export const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        <section className="relative z-10 border-y border-white/5 bg-[#080a09] px-6 py-24 md:py-32 lg:px-10 xl:px-12">
-          <div className="mx-auto grid max-w-375 gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start lg:gap-16 xl:gap-20">
-            <div data-reveal className="lg:sticky lg:top-32 lg:self-start">
+        <section className="relative z-10 border-y border-white/5 bg-[#080a09] px-5 py-20 sm:px-8 sm:py-28 md:px-10 md:py-32 xl:px-12">
+          <div className="mx-auto grid min-w-0 max-w-375 gap-10 sm:gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start lg:gap-16 xl:gap-20">
+            <div data-reveal className="min-w-0 lg:sticky lg:top-32 lg:self-start">
               <span className="text-xs font-black uppercase tracking-[0.28em] text-emerald-400">
                 Como funciona
               </span>
-              <h2 className="mt-5 max-w-lg text-4xl font-black tracking-[-0.05em] text-white md:text-5xl xl:text-6xl">
+              <h2 className="mt-4 max-w-lg text-3xl font-black tracking-[-0.05em] text-white sm:mt-5 sm:text-4xl md:text-5xl xl:text-6xl">
                 Três passos. Um dia mais leve.
               </h2>
               <p className="mt-6 max-w-md text-base font-light leading-relaxed text-neutral-400 md:text-lg">
@@ -1539,7 +1539,7 @@ export const LandingPage: React.FC = () => {
               </button>
             </div>
 
-            <div data-stack className="relative space-y-5 md:space-y-6 md:pl-8">
+            <div data-stack className="relative min-w-0 space-y-5 md:space-y-6 md:pl-8">
               <div
                 aria-hidden
                 className="pointer-events-none absolute bottom-3 left-[0.4rem] top-3 hidden w-px bg-white/10 md:block"
@@ -1612,29 +1612,29 @@ export const LandingPage: React.FC = () => {
 
         <section
           id="tecnologia"
-          className="relative z-20 scroll-mt-20 bg-[#050706] px-6 py-28 md:rounded-t-[2.75rem] md:py-40 md:shadow-[0_-30px_80px_rgba(0,0,0,0.4)]"
+          className="relative z-20 scroll-mt-20 bg-[#050706] px-5 py-20 sm:px-8 sm:py-28 md:rounded-t-[2.75rem] md:py-40 md:shadow-[0_-30px_80px_rgba(0,0,0,0.4)]"
         >
           <div
             data-reveal
-            className="relative mx-auto max-w-375 overflow-hidden rounded-[2.75rem] bg-[#ecfdf5] text-[#07110b] md:rounded-[4rem]"
+            className="relative mx-auto min-w-0 max-w-375 overflow-hidden rounded-[2.25rem] bg-[#ecfdf5] text-[#07110b] md:rounded-[4rem]"
           >
             <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-emerald-300/60 blur-[110px]" />
             <div className="absolute -bottom-48 left-1/3 h-96 w-96 rounded-full bg-cyan-200/55 blur-[120px]" />
 
-            <div className="relative z-10 grid gap-14 p-8 md:p-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:p-24">
-              <div>
+            <div className="relative z-10 grid min-w-0 gap-10 p-5 sm:gap-14 sm:p-8 md:p-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:p-24">
+              <div className="min-w-0">
                 <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-emerald-800/70">
                   Dados com contexto
                 </p>
-                <h2 className="mt-8 text-5xl font-black leading-[1.08] tracking-[-0.045em] md:text-6xl xl:text-7xl">
+                <h2 className="mt-5 text-4xl font-black leading-[1.08] tracking-[-0.045em] sm:mt-8 sm:text-5xl md:text-6xl xl:text-7xl">
                   Decisões com contexto, não achismo.
                 </h2>
-                <p className="mt-8 max-w-2xl text-xl font-medium leading-relaxed text-emerald-950/75 md:text-2xl">
+                <p className="mt-6 max-w-2xl text-base font-medium leading-relaxed text-emerald-950/75 sm:mt-8 sm:text-xl md:text-2xl">
                   Acompanhe movimento, tempo de espera e resultado financeiro. A AgendAI transforma
                   a rotina do estabelecimento em uma visão simples para agir.
                 </p>
 
-                <div className="mt-10 space-y-5">
+                <div className="mt-8 space-y-4 sm:mt-10 sm:space-y-5">
                   {[
                     'Estimativas baseadas no movimento real da fila',
                     'Indicadores de atendimento e faturamento no Pro',
@@ -1642,7 +1642,7 @@ export const LandingPage: React.FC = () => {
                   ].map(item => (
                     <div
                       key={item}
-                      className="flex items-start gap-4 text-lg font-semibold text-emerald-950 md:text-xl"
+                      className="flex min-w-0 items-start gap-3 text-base font-semibold text-emerald-950 sm:gap-4 sm:text-lg md:text-xl"
                     >
                       <span className="mt-2.5 h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
                       {item}
@@ -1651,21 +1651,21 @@ export const LandingPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="relative">
-                <div className="rounded-4xl border border-emerald-950/10 bg-white/75 p-6 shadow-[0_30px_80px_rgba(6,78,59,0.12)] backdrop-blur-xl md:p-9">
-                  <div className="flex items-end justify-between gap-4">
+              <div className="relative min-w-0">
+                <div className="min-w-0 rounded-4xl border border-emerald-950/10 bg-white/75 p-4 shadow-[0_30px_80px_rgba(6,78,59,0.12)] backdrop-blur-xl sm:p-6 md:p-9">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
                     <div>
                       <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-emerald-800/65">
                         Movimento semanal
                       </p>
-                      <p className="mt-2 text-4xl font-black tracking-tight md:text-5xl">
+                      <p className="mt-2 text-3xl font-black tracking-tight sm:text-4xl md:text-5xl">
                         128 atendimentos
                       </p>
                       <p className="mt-2 text-base text-emerald-950/55 md:text-lg">
                         Visão ilustrativa do dashboard Pro
                       </p>
                     </div>
-                    <p className="shrink-0 pb-1 text-right text-sm font-semibold tabular-nums text-emerald-700">
+                    <p className="shrink-0 pb-1 text-left text-sm font-semibold tabular-nums text-emerald-700 sm:text-right">
                       +12%
                       <span className="mt-0.5 block text-[10px] font-medium uppercase tracking-[0.16em] text-emerald-950/45">
                         vs. semana
@@ -1673,7 +1673,7 @@ export const LandingPage: React.FC = () => {
                     </p>
                   </div>
 
-                  <div className="relative mt-10 h-56">
+                  <div className="relative mt-8 h-44 sm:mt-10 sm:h-56">
                     <div className="absolute inset-0 flex flex-col justify-between">
                       {[0, 1, 2, 3, 4].map(line => (
                         <div key={line} className="h-px w-full bg-emerald-950/10" />
@@ -1711,14 +1711,14 @@ export const LandingPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="mt-14 grid grid-cols-2 gap-4">
-                    <div className="rounded-2xl bg-emerald-950/5 p-5">
+                  <div className="mt-12 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-4">
+                    <div className="rounded-2xl bg-emerald-950/5 p-4 sm:p-5">
                       <p className="text-xs font-black uppercase tracking-widest text-emerald-950/50 md:text-sm">
                         Pico de movimento
                       </p>
                       <p className="mt-2 text-2xl font-black md:text-3xl">Sábado · 11h</p>
                     </div>
-                    <div className="rounded-2xl bg-emerald-950/5 p-5">
+                    <div className="rounded-2xl bg-emerald-950/5 p-4 sm:p-5">
                       <p className="text-xs font-black uppercase tracking-widest text-emerald-950/50 md:text-sm">
                         Espera média
                       </p>
@@ -1731,19 +1731,19 @@ export const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        <section className="relative overflow-hidden border-y border-white/8 bg-[#080a09] px-6 py-24 md:px-10 md:py-32 xl:px-12">
+        <section className="relative overflow-hidden border-y border-white/8 bg-[#080a09] px-5 py-20 sm:px-8 sm:py-28 md:px-10 md:py-32 xl:px-12">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-emerald-400/40 to-transparent" />
           <div className="pointer-events-none absolute left-1/2 top-0 h-64 w-2/3 -translate-x-1/2 rounded-full bg-emerald-500/6 blur-[120px]" />
 
-          <div className="relative z-10 mx-auto max-w-375">
-            <div data-reveal className="mb-14 max-w-3xl md:mb-20">
+          <div className="relative z-10 mx-auto min-w-0 max-w-375">
+            <div data-reveal className="mb-12 min-w-0 max-w-3xl sm:mb-14 md:mb-20">
               <span className="text-sm font-black uppercase tracking-[0.2em] text-emerald-400">
                 Por que começar agora
               </span>
-              <h2 className="mt-5 text-4xl font-black tracking-[-0.045em] text-white md:text-6xl xl:text-7xl">
+              <h2 className="mt-4 text-3xl font-black tracking-[-0.045em] text-white sm:mt-5 sm:text-4xl md:text-6xl xl:text-7xl">
                 Números que removem a desculpa.
               </h2>
-              <p className="mt-6 max-w-2xl text-lg font-medium leading-relaxed text-neutral-400 md:text-xl">
+              <p className="mt-5 max-w-2xl text-base font-medium leading-relaxed text-neutral-400 sm:mt-6 sm:text-lg md:text-xl">
                 Trial completo, agenda o dia inteiro, anual com desconto real e entrada acessível.
                 Sem cartão na porta — e sem surpresa na saída.
               </p>
@@ -1751,7 +1751,7 @@ export const LandingPage: React.FC = () => {
 
             <div
               data-stagger-group
-              className="grid gap-8 border-t border-white/10 pt-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-0 lg:pt-0"
+              className="grid gap-6 border-t border-white/10 pt-8 sm:grid-cols-2 sm:gap-8 sm:pt-10 lg:grid-cols-4 lg:gap-0 lg:pt-0"
             >
               {[
                 {
@@ -1805,8 +1805,8 @@ export const LandingPage: React.FC = () => {
                       data-suffix={fact.suffix}
                       className={`font-black tracking-[-0.06em] text-white ${
                         fact.featured
-                          ? 'text-6xl md:text-7xl xl:text-8xl'
-                          : 'text-5xl md:text-6xl xl:text-7xl'
+                          ? 'text-5xl sm:text-6xl md:text-7xl xl:text-8xl'
+                          : 'text-4xl sm:text-5xl md:text-6xl xl:text-7xl'
                       }`}
                     >
                       {fact.prefix ?? ''}0{fact.suffix ?? ''}
@@ -1828,19 +1828,19 @@ export const LandingPage: React.FC = () => {
         </section>
 
         {/* Weather Demand Forecast */}
-        <section className="relative overflow-hidden border-y border-white/8 bg-[#080a09] px-6 py-24 md:px-10 md:py-32 xl:px-12">
+        <section className="relative overflow-hidden border-y border-white/8 bg-[#080a09] px-5 py-20 sm:px-8 sm:py-28 md:px-10 md:py-32 xl:px-12">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-emerald-400/40 to-transparent" />
           <div className="pointer-events-none absolute left-1/2 top-0 h-64 w-2/3 -translate-x-1/2 rounded-full bg-emerald-500/6 blur-[120px]" />
 
-          <div className="relative z-10 mx-auto max-w-6xl">
-            <div data-reveal className="mb-16 max-w-3xl md:mb-20">
+          <div className="relative z-10 mx-auto min-w-0 max-w-6xl">
+            <div data-reveal className="mb-12 min-w-0 max-w-3xl sm:mb-16 md:mb-20">
               <span className="text-sm font-black uppercase tracking-[0.2em] text-emerald-400">
                 Previsão de demanda
               </span>
-              <h2 className="mt-5 text-4xl font-black tracking-[-0.045em] text-white md:text-6xl xl:text-7xl">
+              <h2 className="mt-4 text-3xl font-black tracking-[-0.045em] text-white sm:mt-5 sm:text-4xl md:text-6xl xl:text-7xl">
                 O clima muda. Seu planejamento também.
               </h2>
-              <p className="mt-6 max-w-2xl text-lg font-medium leading-relaxed text-neutral-400 md:text-xl">
+              <p className="mt-5 max-w-2xl text-base font-medium leading-relaxed text-neutral-400 sm:mt-6 sm:text-lg md:text-xl">
                 O AgendAI cruza dados climáticos com o histórico do seu salão para prever
                 quando a demanda vai cair — e o que fazer antes que aconteça.
               </p>
@@ -1849,9 +1849,9 @@ export const LandingPage: React.FC = () => {
             {/* Big Timeline */}
             <div
               data-reveal
-              className="rounded-[2rem] border border-white/10 bg-white/[0.02] p-6 md:p-10"
+              className="min-w-0 rounded-[2rem] border border-white/10 bg-white/[0.02] p-4 sm:p-6 md:p-10"
             >
-              <div className="mb-8 flex items-center justify-between">
+              <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-400/80">
                     Previsão da semana
@@ -1873,14 +1873,14 @@ export const LandingPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-6">
+              <div className="grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
                 {weatherTimeline.map((d, i) => {
                   const Icon = d.icon;
                   return (
                     <div
                       key={d.day}
                       data-stagger-item
-                      className={`group relative rounded-2xl border p-5 text-center transition-all duration-300 ${
+                      className={`group relative min-w-0 rounded-2xl border p-3 text-center transition-all duration-300 sm:p-5 ${
                         d.risk === 'high'
                           ? 'border-red-400/30 bg-red-400/[0.06] shadow-[0_0_30px_rgba(248,113,113,0.08)]'
                           : d.risk === 'medium'
@@ -1968,14 +1968,14 @@ export const LandingPage: React.FC = () => {
               </div>
 
               {/* Alert Banner */}
-              <div className="mt-6 rounded-xl border border-red-400/20 bg-red-400/[0.06] p-4 md:p-5">
-                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-center gap-3">
+              <div className="mt-6 rounded-xl border border-red-400/20 bg-red-400/[0.06] p-3 sm:p-4 md:p-5">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div className="flex min-w-0 items-start gap-3">
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-400/15">
                       <CloudRain className="h-5 w-5 text-red-400" />
                     </span>
                     <div>
-                      <p className="text-sm font-bold text-red-300">
+                      <p className="text-sm font-bold leading-snug text-red-300">
                         Quarta-feira: chuva com 85% de probabilidade
                       </p>
                       <p className="mt-0.5 text-xs text-neutral-400">
@@ -1986,7 +1986,7 @@ export const LandingPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => navigate('/login')}
-                    className="shrink-0 rounded-full border border-red-400/30 bg-red-400/10 px-5 py-2 text-xs font-bold text-red-300 transition hover:bg-red-400/20"
+                    className="w-full shrink-0 rounded-full border border-red-400/30 bg-red-400/10 px-5 py-3 text-xs font-bold text-red-300 transition hover:bg-red-400/20 sm:w-auto sm:py-2"
                   >
                     Ver detalhes
                   </button>
@@ -1995,7 +1995,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Feature bullets */}
-            <div data-reveal className="mt-14 grid gap-6 sm:grid-cols-3">
+            <div data-reveal className="mt-12 grid gap-5 sm:mt-14 sm:grid-cols-3 sm:gap-6">
               {[
                 {
                   title: 'Previsão de 16 dias',
@@ -2012,7 +2012,7 @@ export const LandingPage: React.FC = () => {
               ].map(item => (
                 <div
                   key={item.title}
-                  className="rounded-2xl border border-white/8 bg-white/[0.02] p-6"
+                  className="rounded-2xl border border-white/8 bg-white/[0.02] p-5 sm:p-6"
                 >
                   <p className="text-sm font-black text-white">{item.title}</p>
                   <p className="mt-2 text-sm leading-relaxed text-neutral-500">{item.detail}</p>
@@ -2022,17 +2022,17 @@ export const LandingPage: React.FC = () => {
           </div>
         </section>
 
-        <section id="precos" className="relative scroll-mt-16 px-6 py-28 md:py-40">
+        <section id="precos" className="relative scroll-mt-16 px-5 py-20 sm:px-8 sm:py-28 md:py-40">
           <div className="absolute left-1/2 top-0 h-80 w-3/4 -translate-x-1/2 rounded-full bg-emerald-500/6 blur-[130px]" />
-          <div className="relative z-10 mx-auto max-w-6xl">
-            <div data-reveal className="mx-auto mb-12 max-w-3xl text-center">
+          <div className="relative z-10 mx-auto min-w-0 max-w-6xl">
+            <div data-reveal className="mx-auto mb-10 min-w-0 max-w-3xl text-center sm:mb-12">
               <span className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-400/90">
                 Preço simples
               </span>
-              <h2 className="mt-5 text-5xl font-black tracking-[-0.055em] text-white md:text-7xl">
+              <h2 className="mt-4 text-4xl font-black tracking-[-0.055em] text-white sm:mt-5 sm:text-5xl md:text-7xl">
                 Escolha o quanto quer enxergar.
               </h2>
-              <p className="mx-auto mt-6 max-w-2xl text-lg font-light leading-relaxed text-neutral-400">
+              <p className="mx-auto mt-5 max-w-2xl text-base font-light leading-relaxed text-neutral-400 sm:mt-6 sm:text-lg">
                 {trialCampaign.body} {trialCampaign.afterTrial} A diferença depois é só R$ 6 por
                 mês.
               </p>
@@ -2049,7 +2049,7 @@ export const LandingPage: React.FC = () => {
               {/* Essencial */}
               <article
                 data-stagger-item
-                className="group relative flex flex-col overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#0c100e] p-8 transition duration-500 hover:border-white/18 md:p-9"
+                className="group relative flex min-w-0 flex-col overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#0c100e] p-5 transition duration-500 hover:border-white/18 sm:p-8 md:p-9"
               >
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.04),_transparent_55%)]" />
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-linear-to-t from-[#050706] via-[#050706]/70 to-transparent" />
@@ -2071,7 +2071,7 @@ export const LandingPage: React.FC = () => {
                 <div className="relative z-10 mt-8">
                   <div className="flex items-end gap-2">
                     <span className="mb-2 text-base font-bold text-neutral-500">R$</span>
-                    <span className="text-6xl font-black tracking-[-0.06em] text-white md:text-7xl">
+                    <span className="text-5xl font-black tracking-[-0.06em] text-white sm:text-6xl md:text-7xl">
                       14
                     </span>
                     <span className="mb-3 text-sm text-neutral-500">/mês</span>
@@ -2116,7 +2116,7 @@ export const LandingPage: React.FC = () => {
               {/* Pro */}
               <article
                 data-stagger-item
-                className="group relative flex flex-col overflow-hidden rounded-[1.75rem] border border-emerald-400/40 bg-[#08140f] p-8 shadow-[0_0_90px_rgba(52,211,153,0.14)] transition duration-500 hover:border-emerald-400/60 hover:shadow-[0_0_110px_rgba(52,211,153,0.22)] md:p-9 lg:-translate-y-1"
+                className="group relative flex min-w-0 flex-col overflow-hidden rounded-[1.75rem] border border-emerald-400/40 bg-[#08140f] p-5 shadow-[0_0_90px_rgba(52,211,153,0.14)] transition duration-500 hover:border-emerald-400/60 hover:shadow-[0_0_110px_rgba(52,211,153,0.22)] sm:p-8 md:p-9 lg:-translate-y-1"
               >
                 <div className="pointer-events-none absolute -inset-px rounded-[1.75rem] bg-linear-to-br from-emerald-400/25 via-transparent to-cyan-400/15 opacity-80" />
                 <div className="pointer-events-none absolute inset-[1px] rounded-[1.7rem] bg-[#08140f]" />
@@ -2140,7 +2140,7 @@ export const LandingPage: React.FC = () => {
                 <div className="relative z-10 mt-8">
                   <div className="flex items-end gap-2">
                     <span className="mb-2 text-base font-bold text-emerald-400">R$</span>
-                    <span className="text-6xl font-black tracking-[-0.06em] text-white md:text-7xl">
+                    <span className="text-5xl font-black tracking-[-0.06em] text-white sm:text-6xl md:text-7xl">
                       20
                     </span>
                     <span className="mb-3 text-sm text-neutral-400">/mês</span>
@@ -2184,7 +2184,7 @@ export const LandingPage: React.FC = () => {
               </article>
             </div>
 
-            <div data-reveal className="mt-10 grid gap-4 sm:grid-cols-3">
+            <div data-reveal className="mt-8 grid gap-4 sm:mt-10 sm:grid-cols-3">
               {[
                 { label: '1 corte', detail: 'paga o mês do plano', accent: true },
                 { label: 'Equipe ∞', detail: 'sem taxa por pessoa', accent: false },
