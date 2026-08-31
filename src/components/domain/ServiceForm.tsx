@@ -26,6 +26,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
       price: initialService?.price || 0,
       avgTimeMinutes: initialService?.avgTimeMinutes || 30,
       icon: initialService?.icon || 'Scissors',
+      commissionPercent: initialService?.commissionPercent ?? 0,
     },
   });
 
@@ -44,6 +45,22 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
         </h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-text-secondary mb-1.5">
+              Comissão do serviço (%)
+            </label>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
+              className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none"
+              placeholder="Ex.: 40"
+              {...register('commissionPercent', { valueAsNumber: true })}
+            />
+            <p className="text-[11px] text-text-muted mt-1">Percentual total para distribuir entre as profissionais.</p>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-1.5">
               Nome do Serviço

@@ -103,6 +103,7 @@ export const ServiceSchema = z.object({
   price: z.number({ invalid_type_error: 'Preço inválido' }).min(0, 'O preço não pode ser negativo'),
   avgTimeMinutes: z.number({ invalid_type_error: 'Tempo inválido' }).min(5, 'Mínimo 5 minutos'),
   icon: z.string().min(1, 'Ícone é obrigatório'),
+  commissionPercent: z.number({ invalid_type_error: 'Comissão inválida' }).min(0).max(100),
 });
 
 export type ServiceFormData = z.infer<typeof ServiceSchema>;

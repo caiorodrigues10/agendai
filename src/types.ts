@@ -5,6 +5,7 @@ export interface Service {
   avgTimeMinutes: number;
   icon: string;
   barbershopId?: string;
+  commissionPercent?: number;
 }
 
 export interface QueueItem {
