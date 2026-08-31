@@ -163,6 +163,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
   const trial = detail?.trial;
   const inCalendarTrial = Boolean(trial && !trial.isExpired);
   const needsCard = inCalendarTrial && !sub?.hasPaymentMethod;
+  const hasPendingPayment = sub?.latestInvoice?.status === 'PENDING';
   const onYearly = economics?.currentBillingCycle === 'YEARLY';
   const onMonthly = economics?.currentBillingCycle === 'MONTHLY';
 
@@ -357,8 +358,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
             <div>
               <p className="text-sm font-bold text-warning">{trialCampaign.huntHeadline}</p>
               <p className="text-xs text-text-secondary mt-0.5">
-                {trial?.daysRemainingInTrial ?? 30} dia(s) de Pro restantes — escolha o plano abaixo
-                e cadastre o cartão em menos de 1 minuto. Sem cobrança agora.
+                {trial?.daysRemainingInTrial ?? 30} dias restantes no trial.
               </p>
             </div>
           </div>
@@ -372,17 +372,6 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                   Plano atual
                 </p>
                 <p className="text-xl font-bold">{sub.planName}</p>
-                <p className="text-sm text-text-secondary">
-                  {brl(sub.planPrice)}
-                  {sub.planBillingCycle === 'YEARLY' || onYearly ? '/ano' : '/mês'}
-                </p>
-                {sub.hasPaymentMethod && sub.cardLast4 && (
-                  <p className="text-xs text-text-muted mt-1 flex items-center gap-1.5">
-                    <ShieldCheck size={12} className="text-success" />
-                    Cartão •••• {sub.cardLast4}
-                    {sub.cardBrand ? ` (${sub.cardBrand})` : ''}
-                  </p>
-                )}
               </div>
               <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full border border-border bg-surface-2">
                 {STATUS_LABEL[sub.status] ?? sub.status}
@@ -391,31 +380,18 @@ export const OwnerSubscriptionPanel: React.FC = () => {
             {trial && !trial.isExpired && (
               <div className="rounded-xl border border-accent/25 bg-accent/10 px-3 py-2.5">
                 <p className="text-xs font-bold text-accent">
-                  Trial Pro · {trial.daysRemainingInTrial} dia(s) restantes
-                </p>
-                <p className="mt-0.5 text-[11px] text-text-secondary">
-                  Acesso Pro completo até {new Date(trial.trialEndsAt).toLocaleDateString('pt-BR')}.{' '}
-                  {trialCampaign.ownerEvaluate}
+                  Trial Pro · {trial.daysRemainingInTrial} dias restantes
                 </p>
               </div>
             )}
-            <div className="grid grid-cols-2 gap-3 text-xs text-text-secondary">
-              <div className="flex items-center gap-1.5">
-                <Calendar size={13} className="text-accent" />
-                Início:{' '}
-                <span className="text-text-primary font-medium">
-                  {new Date(sub.startDate).toLocaleDateString('pt-BR')}
-                </span>
+            {hasPendingPayment && (
+              <div className="rounded-xl border border-warning/35 bg-warning/10 px-3 py-2.5">
+                <p className="text-xs font-bold text-warning">Pagamento aguardando confirmação</p>
+                <p className="mt-0.5 text-xs text-text-secondary">
+                  O plano só será ativado depois que o PIX ou cartão for confirmado.
+                </p>
               </div>
-              {sub.endDate && (
-                <div>
-                  Vence:{' '}
-                  <span className="text-text-primary font-medium">
-                    {new Date(sub.endDate).toLocaleDateString('pt-BR')}
-                  </span>
-                </div>
-              )}
-            </div>
+            )}
           </>
         ) : trial ? (
           <div>
@@ -426,19 +402,6 @@ export const OwnerSubscriptionPanel: React.FC = () => {
               {trial.isExpired
                 ? 'Trial expirado'
                 : `${trial.daysRemainingInTrial} dia(s) restantes`}
-            </p>
-            <p className="text-xs text-text-secondary mt-1">
-              {trial.isExpired ? (
-                <>
-                  Pro completo até {new Date(trial.trialEndsAt).toLocaleDateString('pt-BR')}.{' '}
-                  {trialCampaign.afterTrial}
-                </>
-              ) : (
-                <>
-                  Pro completo até {new Date(trial.trialEndsAt).toLocaleDateString('pt-BR')}.{' '}
-                  {trialCampaign.huntBody}
-                </>
-              )}
             </p>
           </div>
         ) : (
@@ -473,6 +436,10 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                 ? 'Checkout direto — cartão em 1 minuto, sem cobrança no trial.'
                 : 'Anual = 2 meses grátis. Troque quando quiser.'}
             </p>
+            <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[11px] font-semibold text-accent">
+              <ArrowRight size={12} />
+              Toque no plano abaixo para seguir com o pagamento
+            </p>
           </div>
           <div className="flex bg-surface border border-border rounded-xl p-0.5 text-xs font-bold">
             <button
@@ -499,7 +466,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
         <div className="grid gap-3 sm:grid-cols-2">
           {displayPlans.map(plan => {
             const isPro = plan.hasDashboard !== false || /pro/i.test(plan.name);
-            const isCurrent = sub?.planId === plan.id;
+            const isCurrent = sub?.planId === plan.id && sub.status === 'ACTIVE';
             return (
               <div
                 key={plan.id}

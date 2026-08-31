@@ -8,6 +8,7 @@ import React, {
   useRef,
   ReactNode,
 } from 'react';
+import { useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { Appointment, QueueItem, AIInsight } from '../types';
 import { schedulingApi, QueueUpdatePayload } from '../infra/schedulingApi';
@@ -53,6 +54,7 @@ const SchedulingContext = createContext<SchedulingContextValue | undefined>(unde
 const POLLING_INTERVAL_MS = 15_000;
 
 export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { pathname } = useLocation();
   const { barbershopId } = useBarbershopFilters();
   const { user } = useAuth();
   const { services, settings } = useBarbershop();
@@ -70,6 +72,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     return cid;
   });
   const [completedCount, setCompletedCount] = useState(0);
+  const shouldPoll = pathname.startsWith('/app') || pathname.startsWith('/queue') || pathname.startsWith('/agendamento');
 
   const loadAvailability = useCallback(
     async (date: string, staffId?: string) => {
@@ -127,6 +130,10 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   );
 
   useEffect(() => {
+    if (!shouldPoll) {
+      return;
+    }
+
     const load = async () => {
       if (!barbershopId) {
         setLoading(false);
@@ -151,7 +158,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       setLoading(false);
     };
     load();
-  }, [barbershopId, refreshQueue, refreshAppointments, loadAvailability]);
+  }, [barbershopId, refreshQueue, refreshAppointments, loadAvailability, shouldPoll]);
 
   // Polling: refetch periódico da fila e agendamentos, pausado com a aba oculta.
   const isPollingFetchInFlight = useRef(false);
@@ -172,7 +179,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   });
 
   useEffect(() => {
-    if (!barbershopId) return;
+    if (!barbershopId || !shouldPoll) return;
 
     const tick = () => {
       if (document.visibilityState !== 'visible') return;
@@ -192,10 +199,10 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       clearInterval(interval);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [barbershopId]);
+  }, [barbershopId, shouldPoll]);
 
   useEffect(() => {
-    if (!services.length) return;
+    if (!services.length || !shouldPoll) return;
     const fetchInsight = async () => {
       const insight = await getQueueInsight(queue, services);
       setAiInsight(insight);
@@ -203,7 +210,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     fetchInsight();
     const interval = setInterval(fetchInsight, 30000);
     return () => clearInterval(interval);
-  }, [queue, services]);
+  }, [queue, services, shouldPoll]);
 
   const joinQueue = async (
     name: string,
