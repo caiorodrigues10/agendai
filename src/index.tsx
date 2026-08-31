@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App';
 import { AuthProvider } from './contexts/AuthContext';
@@ -18,20 +19,22 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <PwaInstallProvider>
-      <BarbershopFiltersProvider>
-        <AuthProvider>
-          <ThemeProvider>
-            <SubscriptionProvider>
-              <BarbershopProvider>
-                <SchedulingProvider>
-                  <App />
-                </SchedulingProvider>
-              </BarbershopProvider>
-            </SubscriptionProvider>
-          </ThemeProvider>
-        </AuthProvider>
-      </BarbershopFiltersProvider>
-    </PwaInstallProvider>
+    <BrowserRouter>
+      <PwaInstallProvider>
+        <BarbershopFiltersProvider>
+          <AuthProvider>
+            <ThemeProvider>
+              <SubscriptionProvider>
+                <BarbershopProvider>
+                  <SchedulingProvider>
+                    <App />
+                  </SchedulingProvider>
+                </BarbershopProvider>
+              </SubscriptionProvider>
+            </ThemeProvider>
+          </AuthProvider>
+        </BarbershopFiltersProvider>
+      </PwaInstallProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );

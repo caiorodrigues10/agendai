@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { PrivateRoute } from './components/infra/PrivateRoute';
 import { AccessBlockedListener } from './components/infra/AccessBlockedListener';
 import { CookieConsent } from './components/infra/CookieConsent';
@@ -33,7 +33,7 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 const App: React.FC = () => {
   return (
-    <BrowserRouter>
+    <>
       <ScrollToTop />
       <ReferralRefCapture />
       <AccessBlockedListener />
@@ -98,7 +98,7 @@ const App: React.FC = () => {
         </Routes>
       </Suspense>
       </ErrorBoundary>
-    </BrowserRouter>
+    </>
   );
 };
 
