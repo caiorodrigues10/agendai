@@ -27,6 +27,7 @@ import {
 } from '../../infra/financialApi';
 import { ApiError } from '../../infra/apiClient';
 import { WeatherForecastWidget } from './WeatherForecastWidget';
+import { commissionsApi, type CommissionSummary } from '../../infra/commissionsApi';
 
 interface FinancialDashboardProps {
   queueHistory: QueueItem[];
@@ -60,6 +61,10 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
   const [insights, setInsights] = useState<BarbershopInsights | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
   const [insightsError, setInsightsError] = useState<string | null>(null);
+  const [commissionSummary, setCommissionSummary] = useState<CommissionSummary | null>(null);
+  const [commissionLoading, setCommissionLoading] = useState(false);
+  const [commissionError, setCommissionError] = useState<string | null>(null);
+  const [commissionProfessionalId, setCommissionProfessionalId] = useState('');
 
   useEffect(() => {
     if (!owner || viewMode !== 'shop') return;
@@ -88,6 +93,46 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
       cancelled = true;
     };
   }, [owner, viewMode, period]);
+
+  useEffect(() => {
+    if (!owner || viewMode !== 'shop') return;
+    let cancelled = false;
+    const today = new Date();
+    const from = new Date(today);
+    from.setDate(today.getDate() - (period === '7d' ? 6 : period === '30d' ? 29 : 89));
+    const to = new Date(today);
+    to.setDate(today.getDate() + 1);
+    const formatDate = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    setCommissionLoading(true);
+    setCommissionError(null);
+    commissionsApi
+      .summary({
+        from: formatDate(from),
+        to: formatDate(to),
+        professionalId: commissionProfessionalId || undefined,
+      })
+      .then(data => {
+        if (!cancelled) setCommissionSummary(data);
+      })
+      .catch(error => {
+        if (cancelled) return;
+        setCommissionSummary(null);
+        setCommissionError(error instanceof Error ? error.message : 'Não foi possível carregar comissões.');
+      })
+      .finally(() => {
+        if (!cancelled) setCommissionLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [owner, viewMode, period, commissionProfessionalId]);
 
   const getStaffName = (id?: string) => allStaff.find(s => s.id === id)?.name || 'Desconhecido';
   const getServiceName = (id: string) =>
@@ -223,6 +268,70 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
 
       {owner && viewMode === 'shop' && (
         <>
+          <div className="bg-surface p-5 rounded-xl border border-border">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
+                  <DollarSign size={16} className="text-accent" /> Comissões
+                </h3>
+                <p className="mt-1 text-xs text-text-muted">Calculadas sobre o valor final recebido.</p>
+              </div>
+              <select
+                value={commissionProfessionalId}
+                onChange={event => setCommissionProfessionalId(event.target.value)}
+                className="rounded-lg border border-border bg-bg px-3 py-2 text-xs text-text-primary"
+                aria-label="Filtrar comissões por profissional"
+              >
+                <option value="">Todos os profissionais</option>
+                {allStaff.map(member => (
+                  <option key={member.id} value={member.id}>{member.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {commissionLoading && (
+              <div className="mt-4 flex items-center gap-2 text-sm text-text-muted">
+                <Loader2 size={16} className="animate-spin text-accent" /> Carregando comissões...
+              </div>
+            )}
+            {commissionError && !commissionLoading && (
+              <div className="mt-4 flex items-center gap-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
+                <AlertCircle size={15} /> {commissionError}
+              </div>
+            )}
+            {!commissionLoading && !commissionError && commissionSummary && (
+              <>
+                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  <div className="rounded-lg bg-bg p-3">
+                    <p className="text-[10px] font-bold uppercase text-text-muted">Total bruto</p>
+                    <p className="mt-1 text-lg font-bold text-text-primary">{brl(commissionSummary.grossTotal)}</p>
+                  </div>
+                  <div className="rounded-lg bg-bg p-3">
+                    <p className="text-[10px] font-bold uppercase text-text-muted">Comissões</p>
+                    <p className="mt-1 text-lg font-bold text-accent">{brl(commissionSummary.commissionTotal)}</p>
+                  </div>
+                  <div className="col-span-2 rounded-lg bg-bg p-3 sm:col-span-1">
+                    <p className="text-[10px] font-bold uppercase text-text-muted">Profissionais</p>
+                    <p className="mt-1 text-lg font-bold text-text-primary">{commissionSummary.byProfessional.length}</p>
+                  </div>
+                </div>
+                {commissionSummary.byProfessional.length > 0 && (
+                  <div className="mt-4 divide-y divide-border rounded-lg border border-border">
+                    {commissionSummary.byProfessional.map(professional => (
+                      <div key={professional.professionalId} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
+                        <span className="truncate text-text-secondary">{professional.professionalName}</span>
+                        <span className="shrink-0 font-bold text-text-primary">{brl(professional.commissionTotal)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {commissionSummary.byProfessional.length === 0 && (
+                  <p className="mt-4 text-sm text-text-muted">Nenhuma comissão no período selecionado.</p>
+                )}
+              </>
+            )}
+          </div>
+
           {insightsLoading && (
             <div className="flex items-center justify-center py-12 text-accent">
               <Loader2 className="animate-spin" size={28} />

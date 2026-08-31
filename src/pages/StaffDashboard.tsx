@@ -295,6 +295,8 @@ export const StaffDashboard: React.FC = () => {
                       isAdmin={true}
                       shopName={settings?.shopName}
                       barbershopId={barbershopId || item.barbershopId}
+                      staff={staff}
+                      currentUserId={user?.id}
                       isCurrentUser={item.customerId === clientId}
                       onStatusChange={updateQueueStatus}
                       onReturnToQueue={setReturnToQueueItem}

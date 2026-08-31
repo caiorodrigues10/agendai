@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { QueueItem, Service } from '../../types';
+import { QueueItem, Service, StaffMember } from '../../types';
 import { DynamicIcon } from '../ui/DynamicIcon';
 import {
   MessageCircle,
@@ -26,10 +26,12 @@ interface QueueItemCardProps {
   isCurrentUser: boolean;
   shopName?: string;
   barbershopId?: string;
+  staff?: StaffMember[];
+  currentUserId?: string;
   onStatusChange: (
     id: string,
     status: QueueItem['status'],
-    extras?: { paymentMethod?: QueueItem['paymentMethod'] }
+    extras?: { paymentMethod?: QueueItem['paymentMethod']; commissionSplits?: Array<{ professionalId: string; percentage: number }> }
   ) => void;
   onLeaveQueue: (id: string) => void;
   onReturnToQueue?: (item: QueueItem) => void;
@@ -45,6 +47,8 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
   isCurrentUser,
   shopName = 'salão',
   barbershopId,
+  staff = [],
+  currentUserId,
   onStatusChange,
   onLeaveQueue,
   onReturnToQueue,
@@ -54,6 +58,11 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
   const [sending, setSending] = useState<'reminder' | 'next' | null>(null);
   const [showPaymentPicker, setShowPaymentPicker] = useState(false);
   const [submittingFinalization, setSubmittingFinalization] = useState(false);
+  const [commissionSplits, setCommissionSplits] = useState<Array<{ professionalId: string; percentage: number }>>(() => {
+    const percent = service?.commissionPercent ?? 0;
+    const professionalId = currentUserId || staff[0]?.id;
+    return percent > 0 && professionalId ? [{ professionalId, percentage: percent }] : [];
+  });
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'in_chair':
@@ -124,7 +133,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
   const handleFinalize = async (paymentMethod: QueueItem['paymentMethod']) => {
     setSubmittingFinalization(true);
     try {
-      await onStatusChange(item.id, 'completed', { paymentMethod });
+      await onStatusChange(item.id, 'completed', { paymentMethod, commissionSplits: commissionSplits.length ? commissionSplits : undefined });
       setShowPaymentPicker(false);
     } finally {
       setSubmittingFinalization(false);
@@ -290,6 +299,27 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
             </p>
 
             <div className="mt-4 grid grid-cols-1 gap-2">
+              {(service?.commissionPercent ?? 0) > 0 && (
+                <div className="rounded-xl border border-border bg-bg p-3 text-sm">
+                  <p className="font-semibold text-text-primary">Divisão da comissão ({service?.commissionPercent}%)</p>
+                  {commissionSplits.map((split, index) => (
+                    <div key={`${split.professionalId}-${index}`} className="mt-2 grid grid-cols-[1fr_90px] gap-2">
+                      <select value={split.professionalId} onChange={e => setCommissionSplits(prev => prev.map((x, i) => i === index ? { ...x, professionalId: e.target.value } : x))} className="min-w-0 rounded-lg border border-border bg-surface px-2 py-2 text-text-primary">
+                        {staff.map(member => <option key={member.id} value={member.id}>{member.name}</option>)}
+                      </select>
+                      <input type="number" min="0" max="100" step="0.01" value={split.percentage} onChange={e => setCommissionSplits(prev => prev.map((x, i) => i === index ? { ...x, percentage: Number(e.target.value) } : x))} className="rounded-lg border border-border bg-surface px-2 py-2 text-text-primary" />
+                    </div>
+                  ))}
+                  <p className={`mt-2 text-xs ${Math.abs(commissionSplits.reduce((sum, split) => sum + split.percentage, 0) - (service?.commissionPercent ?? 0)) < 0.01 ? 'text-success' : 'text-danger'}`}>
+                    Total: {commissionSplits.reduce((sum, split) => sum + split.percentage, 0).toFixed(2)}%
+                  </p>
+                  {staff.length > 1 && commissionSplits.length < 2 && (
+                    <button type="button" className="mt-2 text-xs font-semibold text-accent" onClick={() => setCommissionSplits(prev => [...prev, { professionalId: staff.find(member => member.id !== prev[0]?.professionalId)?.id || staff[0].id, percentage: 0 }])}>
+                      + Dividir com outro profissional
+                    </button>
+                  )}
+                </div>
+              )}
               {paymentOptions.map(option => {
                 const Icon = option.icon;
                 return (

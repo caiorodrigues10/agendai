@@ -114,11 +114,13 @@ describe('PublicHome smoke', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: /adicionar à fila/i }));
 
-    expect(mockJoinQueue).toHaveBeenCalledWith(
-      'Maria Silva',
-      '',
-      's1',
-      { additionalPerson: true }
-    );
+    await waitFor(() => {
+      expect(mockJoinQueue).toHaveBeenCalledWith(
+        'Maria Silva',
+        '',
+        's1',
+        { additionalPerson: true }
+      );
+    });
   });
 });

@@ -37,7 +37,7 @@ interface SchedulingContextValue {
   updateQueueStatus: (
     id: string,
     status: QueueItem['status'],
-    extras?: { insertAt?: number; paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado' }
+    extras?: { insertAt?: number; paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado'; commissionSplits?: Array<{ professionalId: string; percentage: number }> }
   ) => Promise<void>;
   deleteHistoryItem: (id: string) => Promise<void>;
   bookAppointment: (data: any) => Promise<void>;
@@ -262,6 +262,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       payload.finalPrice = service?.price || 0;
       payload.completedBy = user?.id || undefined;
       payload.paymentMethod = extras?.paymentMethod;
+      payload.commissionSplits = extras?.commissionSplits;
     }
     if (status === 'waiting' && extras?.insertAt != null) {
       payload.insertAt = extras.insertAt;
