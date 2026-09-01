@@ -251,7 +251,15 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
     if (!settings?.schedule?.length) return false;
     const day = new Date().getDay();
     const today = settings.schedule[day];
-    return !!today?.isOpen;
+    if (!today?.isOpen) return false;
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const [openHour, openMinute] = today.openTime.split(':').map(Number);
+    const [closeHour, closeMinute] = today.closeTime.split(':').map(Number);
+    const openMinutes = openHour * 60 + openMinute;
+    const closeMinutes = closeHour * 60 + closeMinute;
+    if (!Number.isFinite(openMinutes) || !Number.isFinite(closeMinutes)) return true;
+    return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
   };
 
   const getTodayScheduleDisplay = () => {

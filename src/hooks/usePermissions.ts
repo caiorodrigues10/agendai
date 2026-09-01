@@ -10,7 +10,9 @@ export type EmployeePermission =
   | 'FINANCE_VIEW'
   | 'FINANCE_MANAGE'
   | 'REPORTS_VIEW'
-  | 'MARKETING_MANAGE';
+  | 'MARKETING_MANAGE'
+  | 'CRM_ANALYTICS_VIEW'
+  | 'CRM_CAMPAIGNS_MANAGE';
 
 export const ALL_PERMISSIONS: EmployeePermission[] = [
   'QUEUE_MANAGE',
@@ -23,6 +25,8 @@ export const ALL_PERMISSIONS: EmployeePermission[] = [
   'FINANCE_MANAGE',
   'REPORTS_VIEW',
   'MARKETING_MANAGE',
+  'CRM_ANALYTICS_VIEW',
+  'CRM_CAMPAIGNS_MANAGE',
 ];
 
 export const PERMISSION_LABELS: Record<EmployeePermission, string> = {
@@ -36,6 +40,8 @@ export const PERMISSION_LABELS: Record<EmployeePermission, string> = {
   FINANCE_MANAGE: 'Gerenciar financeiro',
   REPORTS_VIEW: 'Ver relatórios',
   MARKETING_MANAGE: 'Gerenciar marketing',
+  CRM_ANALYTICS_VIEW: 'Ver inteligência do CRM',
+  CRM_CAMPAIGNS_MANAGE: 'Gerenciar campanhas CRM',
 };
 
 /**

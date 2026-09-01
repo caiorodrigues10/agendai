@@ -33,11 +33,15 @@ import { QueueItem } from '../types';
 import { Loader2 } from 'lucide-react';
 import { DemandAlertBanner } from '../components/domain/DemandAlertBanner';
 import { StaffNavigation } from '../components/ui/StaffNavigation';
+import { ClosedSalonJoinModal } from '../components/domain/ClosedSalonJoinModal';
+import { CrmIntelligencePanel } from '../components/domain/CrmIntelligencePanel';
+import { usePermissions } from '../hooks/usePermissions';
 
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout, updateUserAvatar } = useAuth();
+  const { hasPermission, isOwnerOrAdmin } = usePermissions();
   const { hasDashboard, accessState, loading: subscriptionLoading } = useSubscription();
   const {
     services,
@@ -75,6 +79,9 @@ export const StaffDashboard: React.FC = () => {
     loadAvailability,
   } = useScheduling();
   const [showJoinForm, setShowJoinForm] = useState(false);
+  const [showClosedSalonModal, setShowClosedSalonModal] = useState(false);
+  const [pendingJoin, setPendingJoin] = useState<{ name: string; whatsapp: string; serviceId: string } | null>(null);
+  const [joiningClosedSalon, setJoiningClosedSalon] = useState(false);
   const [dependentResponsible, setDependentResponsible] = useState<QueueItem | null>(null);
   const [returnToQueueItem, setReturnToQueueItem] = useState<QueueItem | null>(null);
   const [returningToQueue, setReturningToQueue] = useState(false);
@@ -120,9 +127,32 @@ export const StaffDashboard: React.FC = () => {
   };
 
   const handleJoinQueue = async (name: string, whatsapp: string, serviceId: string) => {
+    if (!isShopOpen()) {
+      setPendingJoin({ name, whatsapp, serviceId });
+      setShowClosedSalonModal(true);
+      return;
+    }
+    await addClientToQueue(name, whatsapp, serviceId);
+  };
+
+  const addClientToQueue = async (name: string, whatsapp: string, serviceId: string) => {
     await joinQueue(name, whatsapp, serviceId);
     setShowJoinForm(false);
     showToast('Cliente adicionado!');
+  };
+
+  const handleAddWhileClosed = async () => {
+    if (!pendingJoin) return;
+    setJoiningClosedSalon(true);
+    try {
+      await addClientToQueue(pendingJoin.name, pendingJoin.whatsapp, pendingJoin.serviceId);
+      setPendingJoin(null);
+      setShowClosedSalonModal(false);
+    } catch (error) {
+      showToast(getErrorMessage(error, 'Não foi possível adicionar o cliente.'), 'error');
+    } finally {
+      setJoiningClosedSalon(false);
+    }
   };
 
   const handleAddDependent = async (name: string, whatsapp: string, serviceId: string) => {
@@ -345,12 +375,19 @@ export const StaffDashboard: React.FC = () => {
           )}
 
           {activeTab === 'clients' && settings && (
-            <ClientsManager
-              services={services}
-              staff={staff}
-              settings={settings}
-              canCancelSale={user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER'}
-            />
+            <>
+              <CrmIntelligencePanel
+                canAnalytics={hasDashboard && (isOwnerOrAdmin || hasPermission('CRM_ANALYTICS_VIEW'))}
+                canCampaigns={isOwnerOrAdmin || hasPermission('CRM_CAMPAIGNS_MANAGE')}
+                onNotify={showToast}
+              />
+              <ClientsManager
+                services={services}
+                staff={staff}
+                settings={settings}
+                canCancelSale={user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER'}
+              />
+            </>
           )}
 
           {activeTab === 'services' &&
@@ -461,6 +498,21 @@ export const StaffDashboard: React.FC = () => {
           isStaffMode={true}
         />
       )}
+      <ClosedSalonJoinModal
+        open={showClosedSalonModal}
+        schedule={settings?.schedule || []}
+        submitting={joiningClosedSalon}
+        onAddAnyway={() => void handleAddWhileClosed()}
+        onOpenSettings={() => {
+          setShowClosedSalonModal(false);
+          setPendingJoin(null);
+          setShowJoinForm(false);
+          navigate('/app/settings');
+        }}
+        onClose={() => {
+          if (!joiningClosedSalon) setShowClosedSalonModal(false);
+        }}
+      />
       {dependentResponsible && (
         <AddCustomerForm
           services={services}

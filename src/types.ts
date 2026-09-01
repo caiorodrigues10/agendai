@@ -23,6 +23,7 @@ export interface QueueItem {
   finalPrice?: number;
   paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado';
   customerId?: string;
+  clientId?: string | null;
   responsibleQueueItemId?: string | null;
   responsibleName?: string | null;
 }
@@ -81,7 +82,9 @@ export type EmployeePermission =
   | 'FINANCE_VIEW'
   | 'FINANCE_MANAGE'
   | 'REPORTS_VIEW'
-  | 'MARKETING_MANAGE';
+  | 'MARKETING_MANAGE'
+  | 'CRM_ANALYTICS_VIEW'
+  | 'CRM_CAMPAIGNS_MANAGE';
 
 export interface StaffMember {
   id: string;
