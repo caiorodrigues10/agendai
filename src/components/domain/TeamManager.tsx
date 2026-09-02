@@ -241,7 +241,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
           return (
             <div key={member.id} className="overflow-hidden rounded-lg border border-border bg-surface">
               <div
-                className={`flex items-start justify-between gap-3 p-3 sm:items-center ${
+                className={`flex items-center justify-between gap-3 p-3 ${
                   !isEmployee ? 'cursor-pointer hover:bg-bg/50' : ''
                 }`}
                 role={!isEmployee ? 'button' : undefined}
@@ -300,7 +300,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
                         <button
                           type="button"
                           onClick={togglePermissions}
-                          className={`rounded-lg p-2 transition-colors min-h-10 min-w-10 ${isPermissionsExpanded ? 'bg-accent/10 text-accent' : 'text-text-muted hover:bg-accent/10 hover:text-accent'}`}
+                          className={`flex items-center justify-center rounded-lg p-2 min-h-10 min-w-10 transition-colors ${isPermissionsExpanded ? 'bg-accent/10 text-accent' : 'text-text-muted hover:bg-accent/10 hover:text-accent'}`}
                           title="Gerenciar permissões"
                         >
                         <RiShieldLine size={16} />
@@ -324,7 +324,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
                         <button
                           type="button"
                           onClick={() => setDeleteConfirmId(member.id)}
-                          className="rounded-xl border border-border bg-bg p-2 text-text-muted transition-all hover:border-danger/30 hover:bg-danger/10 hover:text-danger min-h-10 min-w-10"
+                          className="flex items-center justify-center rounded-xl border border-border bg-bg p-2 text-text-muted transition-all hover:border-danger/30 hover:bg-danger/10 hover:text-danger min-h-10 min-w-10"
                         >
                           <RiDeleteBin6Line size={14} />
                         </button>
