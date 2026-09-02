@@ -131,6 +131,12 @@ textarea {
   touch-action: manipulation;
 }
 
+button:not([disabled]),
+a[href],
+[role="button"] {
+  cursor: pointer;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
