@@ -253,12 +253,8 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
   const [logoUrl, setLogoUrl] = useState<string | undefined>(settings.logoUrl);
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoError, setLogoError] = useState<string | null>(null);
-  const [latitude, setLatitude] = useState(settings.latitude?.toString() || '');
-  const [longitude, setLongitude] = useState(settings.longitude?.toString() || '');
   const [address, setAddress] = useState(settings.address || '');
   const [city, setCity] = useState(settings.city || '');
-  const [geoLoading, setGeoLoading] = useState(false);
-  const [geoError, setGeoError] = useState<string | null>(null);
 
   const handleDayChange = (index: number, field: keyof DaySchedule, value: string | boolean) => {
     const newSchedule = [...schedule];
@@ -315,8 +311,6 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
       city,
       schedule,
       logoUrl,
-      latitude: latitude ? parseFloat(latitude) : undefined,
-      longitude: longitude ? parseFloat(longitude) : undefined,
     });
   };
 
@@ -448,64 +442,8 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
           Necessária para previsão de demanda baseada no clima.
         </p>
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm text-text-secondary mb-1.5">Latitude</label>
-              <input
-                type="text"
-                value={latitude}
-                onChange={e => setLatitude(e.target.value)}
-                placeholder="-23.5505"
-                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-text-secondary mb-1.5">Longitude</label>
-              <input
-                type="text"
-                value={longitude}
-                onChange={e => setLongitude(e.target.value)}
-                placeholder="-46.6333"
-                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent"
-              />
-            </div>
-          </div>
-          <button
-            type="button"
-            disabled={geoLoading}
-            onClick={() => {
-              setGeoLoading(true);
-              setGeoError(null);
-              if (!navigator.geolocation) {
-                setGeoError('Geolocalização não suportada pelo navegador.');
-                setGeoLoading(false);
-                return;
-              }
-              navigator.geolocation.getCurrentPosition(
-                pos => {
-                  setLatitude(pos.coords.latitude.toFixed(6));
-                  setLongitude(pos.coords.longitude.toFixed(6));
-                  setGeoLoading(false);
-                },
-                () => {
-                  setGeoError('Não foi possível obter a localização. Preencha manualmente.');
-                  setGeoLoading(false);
-                }
-              );
-            }}
-            className="w-full py-2.5 text-xs font-bold rounded-lg border border-border bg-surface-2 text-text-secondary hover:bg-border-strong flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {geoLoading ? (
-              <><Loader2 size={14} className="animate-spin" /> Obtendo localização...</>
-            ) : (
-              'Usar minha localização atual'
-            )}
-          </button>
-          {geoError && (
-            <p className="text-xs text-danger" role="alert">{geoError}</p>
-          )}
           <p className="text-[11px] text-text-muted">
-            Use o botão acima ou preencha manualmente. Encontre suas coordenadas em Google Maps (clique direito → "O que fica aqui?").
+            Informe a cidade e o sistema localizará automaticamente as coordenadas necessárias para a previsão do tempo.
           </p>
         </div>
       </div>
