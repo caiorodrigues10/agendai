@@ -113,7 +113,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             setServiceToDelete(null);
           }
         }}
-        onClose={() => setServiceToDelete(null)}
+        onCancel={() => setServiceToDelete(null)}
       />
     </div>
   );

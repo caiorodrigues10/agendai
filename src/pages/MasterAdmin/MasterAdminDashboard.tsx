@@ -55,6 +55,7 @@ import {
   AuditLog,
 } from '../../infra/adminApi';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { maskPhone } from '../../utils/documentUtils';
 import { BillingTab } from './BillingTab';
 import { ReferralsTab } from './ReferralsTab';
 
@@ -709,6 +710,10 @@ const BarbershopsTab: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [page, setPage] = useState(1);
   const [managedShop, setManagedShop] = useState<BarbershopListItem | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [createForm, setCreateForm] = useState({ name: '', whatsapp: '', address: '', cnpj: '' });
 
   const fetchShops = useCallback(async () => {
     setLoading(true);
@@ -733,6 +738,37 @@ const BarbershopsTab: React.FC = () => {
     return () => clearTimeout(timer);
   }, [fetchShops]);
 
+  const handleCreateShop = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (createForm.name.trim().length < 2) {
+      setCreateError('Informe o nome do salão.');
+      return;
+    }
+    const whatsapp = createForm.whatsapp.replace(/\D/g, '');
+    if (whatsapp.length < 10) {
+      setCreateError('Informe um WhatsApp válido.');
+      return;
+    }
+    setCreating(true);
+    setCreateError(null);
+    try {
+      await adminApi.createBarbershop({
+        name: createForm.name.trim(),
+        whatsapp,
+        address: createForm.address.trim() || undefined,
+        cnpj: createForm.cnpj.replace(/\D/g, '') || undefined,
+      });
+      setShowCreate(false);
+      setCreateForm({ name: '', whatsapp: '', address: '', cnpj: '' });
+      setPage(1);
+      await fetchShops();
+    } catch (err) {
+      setCreateError(getErrorMessage(err, 'Não foi possível cadastrar o salão.'));
+    } finally {
+      setCreating(false);
+    }
+  };
+
   return (
     <div className="space-y-5">
       {/* Header */}
@@ -744,6 +780,17 @@ const BarbershopsTab: React.FC = () => {
             {meta.total !== 1 ? 's' : ''}
           </p>
         </div>
+        <button
+          type="button"
+          onClick={() => {
+            setCreateError(null);
+            setShowCreate(true);
+          }}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-violet-500 px-4 py-2.5 text-xs font-bold text-black hover:bg-violet-400"
+        >
+          <Building2 size={16} />
+          Novo salão
+        </button>
       </div>
 
       {/* Filters */}
@@ -879,6 +926,69 @@ const BarbershopsTab: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {showCreate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          <form
+            onSubmit={handleCreateShop}
+            className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl"
+          >
+            <h3 className="text-lg font-bold text-text-primary">Cadastrar salão</h3>
+            <p className="mt-1 text-xs text-text-muted">
+              Cria o salão com serviços e horários padrão. Depois vincule um dono em Usuários.
+            </p>
+            {createError && (
+              <p className="mt-3 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
+                {createError}
+              </p>
+            )}
+            <div className="mt-4 space-y-3">
+              <input
+                className="w-full rounded-xl border border-border bg-bg px-4 py-3 text-sm text-text-primary"
+                placeholder="Nome do salão"
+                value={createForm.name}
+                onChange={e => setCreateForm(f => ({ ...f, name: e.target.value }))}
+              />
+              <input
+                className="w-full rounded-xl border border-border bg-bg px-4 py-3 text-sm text-text-primary"
+                placeholder="WhatsApp"
+                value={createForm.whatsapp}
+                onChange={e =>
+                  setCreateForm(f => ({ ...f, whatsapp: maskPhone(e.target.value) }))
+                }
+              />
+              <input
+                className="w-full rounded-xl border border-border bg-bg px-4 py-3 text-sm text-text-primary"
+                placeholder="Endereço (opcional)"
+                value={createForm.address}
+                onChange={e => setCreateForm(f => ({ ...f, address: e.target.value }))}
+              />
+              <input
+                className="w-full rounded-xl border border-border bg-bg px-4 py-3 text-sm text-text-primary"
+                placeholder="CNPJ (opcional)"
+                value={createForm.cnpj}
+                onChange={e => setCreateForm(f => ({ ...f, cnpj: e.target.value }))}
+              />
+            </div>
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowCreate(false)}
+                className="flex-1 rounded-xl border border-border py-3 text-sm font-bold text-text-secondary"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={creating}
+                className="flex-1 rounded-xl bg-violet-500 py-3 text-sm font-bold text-black disabled:opacity-50"
+              >
+                {creating ? 'Salvando…' : 'Cadastrar'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {managedShop && (
         <ManageBarbershopModal

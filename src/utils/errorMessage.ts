@@ -97,6 +97,15 @@ export function getErrorMessage(
     if (err.code === 'EVOLUTION_NOT_CONFIGURED') {
       return err.message?.trim() || 'WhatsApp da plataforma indisponível.';
     }
+    if (err.code === 'RECAPTCHA_REQUIRED') {
+      return 'Não foi possível validar a proteção antiabuso. Recarregue a página e tente novamente.';
+    }
+    if (err.code === 'RECAPTCHA_REJECTED') {
+      return 'Validação de segurança recusada. Aguarde alguns segundos e tente de novo.';
+    }
+    if (err.code === 'RECAPTCHA_UNAVAILABLE') {
+      return 'Cadastro temporariamente indisponível. Tente novamente em instantes.';
+    }
 
     const raw = err.message?.trim() ?? '';
     if (

@@ -37,6 +37,7 @@ export interface Payment {
   createdAt: string;
   updatedAt: string;
   pixQrCode: PixQrCode | null;
+  pixState?: 'AVAILABLE' | 'EXPIRED' | 'UNAVAILABLE';
 }
 
 export interface Refund {
@@ -45,7 +46,7 @@ export interface Refund {
   barbershopId: string;
   amount: number;
   reason: string;
-  status: 'PENDING' | 'SUCCEEDED' | 'FAILED';
+  status: 'PENDING' | 'SUCCEEDED' | 'FAILED' | 'RECONCILIATION_REQUIRED';
   provider: 'ABACATEPAY' | 'MERCADOPAGO' | 'ASAAS';
   providerRefundId: string | null;
   requestedById: string | null;
@@ -83,12 +84,13 @@ export const paymentsApi = {
       data: Payment[];
       meta: { total: number; page: number; limit: number; totalPages: number };
     }>(`/api/payments?page=${page}&limit=${limit}`, 'GET', undefined, token()),
-  refundPayment: (paymentId: string, reason: string) =>
+  refundPayment: (paymentId: string, reason: string, idempotencyKey = crypto.randomUUID()) =>
     apiClient<{ success: boolean; data: Refund }>(
       `/api/payments/${paymentId}/refund`,
       'POST',
       { reason },
-      token()
+      token(),
+      { headers: { 'Idempotency-Key': idempotencyKey } }
     ).then(res => unwrap<Refund>(res)),
   listRefunds: async (params?: { barbershopId?: string }) => {
     const qs = new URLSearchParams();

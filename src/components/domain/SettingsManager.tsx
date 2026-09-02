@@ -6,6 +6,7 @@ import { ApiError } from '../../infra/apiClient';
 import { maskPhone } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { AccountPrivacyPanel } from './AccountPrivacyPanel';
+import { OwnerNotificationsPanel } from './OwnerNotificationsPanel';
 import {
   Save,
   Clock,
@@ -238,6 +239,7 @@ interface SettingsManagerProps {
   barbershopId?: string;
   onSave: (settings: ShopSettings) => void;
   onNotify: (message: string, type: 'success' | 'error') => void;
+  showNotifications?: boolean;
 }
 
 export const SettingsManager: React.FC<SettingsManagerProps> = ({
@@ -245,6 +247,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
   barbershopId,
   onSave,
   onNotify,
+  showNotifications = false,
 }) => {
   const navigate = useNavigate();
   const [shopName, setShopName] = useState(settings.shopName);
@@ -464,6 +467,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
       </button>
 
       <AccountPrivacyPanel onNotify={onNotify} />
+      {showNotifications && barbershopId && <OwnerNotificationsPanel onNotify={onNotify} />}
     </div>
   );
 };

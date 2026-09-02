@@ -337,6 +337,20 @@ export const adminApi = {
       getAuthHeader()
     ),
 
+  createBarbershop: (body: {
+    name: string;
+    whatsapp: string;
+    cnpj?: string | null;
+    address?: string;
+    active?: boolean;
+  }) =>
+    apiClient<{ success: boolean; data: BarbershopListItem }>(
+      '/api/admin/barbershops',
+      'POST',
+      body,
+      getAuthHeader()
+    ),
+
   // ─── Faturamento: financeiro consolidado ────────────────────────────────
 
   getFinancialOverview: () =>

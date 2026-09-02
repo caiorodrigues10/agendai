@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { StaffMember, EmployeePermission } from '../../types';
 import { TeamMemberSchema, TeamMemberFormData } from '../../schemas';
 import { v4 as uuidv4 } from 'uuid';
@@ -39,6 +40,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarTargetId, setAvatarTargetId] = useState<string | null>(null);
   const [editingPermissionsId, setEditingPermissionsId] = useState<string | null>(null);
+  const [expandedMemberId, setExpandedMemberId] = useState<string | null>(null);
   const [permissionsSaving, setPermissionsSaving] = useState(false);
 
   const {
@@ -224,16 +226,45 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
       <div className="space-y-2">
         {staff.map(member => {
           const isEmployee = member.role === 'EMPLOYEE';
-          const isExpanded = editingPermissionsId === member.id;
+          const isPermissionsExpanded = editingPermissionsId === member.id;
+          const isOwnerRowExpanded = expandedMemberId === member.id;
           const memberPerms = member.permissions ?? [];
+
+          const toggleOwnerRow = () => {
+            setExpandedMemberId(isOwnerRowExpanded ? null : member.id);
+          };
+
+          const togglePermissions = () => {
+            setEditingPermissionsId(isPermissionsExpanded ? null : member.id);
+          };
 
           return (
             <div key={member.id} className="overflow-hidden rounded-lg border border-border bg-surface">
-              <div className="flex items-start justify-between gap-3 p-3 sm:items-center">
+              <div
+                className={`flex items-start justify-between gap-3 p-3 sm:items-center ${
+                  !isEmployee ? 'cursor-pointer hover:bg-bg/50' : ''
+                }`}
+                role={!isEmployee ? 'button' : undefined}
+                tabIndex={!isEmployee ? 0 : undefined}
+                onClick={!isEmployee ? toggleOwnerRow : undefined}
+                onKeyDown={
+                  !isEmployee
+                    ? e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          toggleOwnerRow();
+                        }
+                      }
+                    : undefined
+                }
+              >
                 <div className="flex min-w-0 items-center gap-3">
                   <button
                     type="button"
-                    onClick={() => handleAvatarClick(member.id)}
+                    onClick={e => {
+                      e.stopPropagation();
+                      handleAvatarClick(member.id);
+                    }}
                     className="group relative cursor-pointer"
                     title="Alterar foto"
                   >
@@ -263,12 +294,13 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                   {isEmployee && member.id !== currentAdminId && (
                     <>
                         <button
-                          onClick={() => setEditingPermissionsId(isExpanded ? null : member.id)}
-                          className={`rounded-lg p-2 transition-colors min-h-10 min-w-10 ${isExpanded ? 'bg-accent/10 text-accent' : 'text-text-muted hover:bg-accent/10 hover:text-accent'}`}
+                          type="button"
+                          onClick={togglePermissions}
+                          className={`rounded-lg p-2 transition-colors min-h-10 min-w-10 ${isPermissionsExpanded ? 'bg-accent/10 text-accent' : 'text-text-muted hover:bg-accent/10 hover:text-accent'}`}
                           title="Gerenciar permissões"
                         >
                         <RiShieldLine size={16} />
@@ -290,6 +322,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
                         </div>
                       ) : (
                         <button
+                          type="button"
                           onClick={() => setDeleteConfirmId(member.id)}
                           className="rounded-xl border border-border bg-bg p-2 text-text-muted transition-all hover:border-danger/30 hover:bg-danger/10 hover:text-danger min-h-10 min-w-10"
                         >
@@ -301,11 +334,44 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
                   {isEmployee && member.id === currentAdminId && (
                     <span className="px-2 text-[10px] text-text-muted">Você</span>
                   )}
-                  {!isEmployee && <ChevronDown size={14} className="text-text-muted" />}
+                  {!isEmployee && (
+                    <ChevronDown
+                      size={14}
+                      className={`text-text-muted transition-transform ${
+                        isOwnerRowExpanded ? 'rotate-180' : ''
+                      }`}
+                    />
+                  )}
                 </div>
               </div>
 
-              {isExpanded && isEmployee && (
+              {isOwnerRowExpanded && !isEmployee && (
+                <div className="animate-fade-in-down border-t border-border px-3 pb-3 pt-2">
+                  <p className="text-xs text-text-secondary">
+                    {member.role === 'MASTER_ADMIN'
+                      ? 'Administrador da plataforma com acesso total.'
+                      : 'Como dono, você tem acesso completo ao painel e às configurações do salão.'}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Link
+                      to="/app/profile"
+                      className="inline-flex min-h-9 items-center rounded-lg border border-border bg-bg px-3 text-xs font-bold text-text-primary hover:border-accent/50"
+                    >
+                      Editar perfil
+                    </Link>
+                    {member.role === 'OWNER' && (
+                      <Link
+                        to="/app/settings"
+                        className="inline-flex min-h-9 items-center rounded-lg border border-accent/40 bg-accent/10 px-3 text-xs font-bold text-accent hover:bg-accent/15"
+                      >
+                        Configurações do salão
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {isPermissionsExpanded && isEmployee && (
                 <div className="animate-fade-in-down border-t border-border px-3 pb-3 pt-2">
                   <p className="mb-2 text-[10px] font-bold uppercase text-text-muted">Permissões</p>
                   <div className="grid grid-cols-2 gap-1">

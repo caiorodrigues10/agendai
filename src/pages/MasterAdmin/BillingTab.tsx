@@ -36,6 +36,8 @@ import {
 } from '../../infra/adminApi';
 import { paymentsApi, Refund } from '../../infra/paymentsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { NotificationDeliveriesPanel } from '../../components/domain/NotificationDeliveriesPanel';
+import { NotificationHealthPanel } from '../../components/domain/NotificationHealthPanel';
 
 // ─────────────────────────────────────────────
 // Helpers
@@ -1713,6 +1715,10 @@ const REFUND_STATUS_CONFIG: Record<string, { label: string; className: string }>
     label: 'Pendente',
     className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
   },
+  RECONCILIATION_REQUIRED: {
+    label: 'Conciliação pendente',
+    className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+  },
 };
 
 const RefundStatusBadge: React.FC<{ status: string }> = ({ status }) => {
@@ -1886,7 +1892,19 @@ export const BillingTab: React.FC = () => {
       {section === 'subscriptions' && <SubscriptionsSection />}
       {section === 'plans' && <PlansSection />}
       {section === 'blocked' && <BlockedSection />}
-      {section === 'notifications' && <NotificationsSection />}
+      {section === 'notifications' && (
+        <div className="space-y-8">
+          <NotificationHealthPanel />
+          <NotificationDeliveriesPanel
+            masterAdmin
+            barbershops={Array.from(shopNames, ([id, name]) => ({ id, name }))}
+          />
+          <div>
+            <h3 className="mb-3 text-lg font-bold text-text-primary">Alertas administrativos</h3>
+            <NotificationsSection />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -25,7 +25,7 @@ import { useScheduling } from '../contexts/SchedulingContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
 import { ALL_TAB_IDS, getDefaultTab, canAccessTab } from '../config/tabRegistry';
-import { ClientsManager } from '../components/domain/ClientsManager';
+import { ClientsTab } from '../components/domain/ClientsTab';
 import { PublicLinkPanel } from '../components/domain/PublicLinkPanel';
 import { PwaInstallCard } from '../components/pwa/PwaInstallCard';
 import { getErrorMessage } from '../utils/errorMessage';
@@ -34,7 +34,6 @@ import { Loader2 } from 'lucide-react';
 import { DemandAlertBanner } from '../components/domain/DemandAlertBanner';
 import { StaffNavigation } from '../components/ui/StaffNavigation';
 import { ClosedSalonJoinModal } from '../components/domain/ClosedSalonJoinModal';
-import { CrmIntelligencePanel } from '../components/domain/CrmIntelligencePanel';
 import { usePermissions } from '../hooks/usePermissions';
 import { ActivationChecklist } from '../components/domain/ActivationChecklist';
 
@@ -378,19 +377,26 @@ export const StaffDashboard: React.FC = () => {
           )}
 
           {activeTab === 'clients' && settings && (
-            <>
-              <CrmIntelligencePanel
-                canAnalytics={hasDashboard && (isOwnerOrAdmin || hasPermission('CRM_ANALYTICS_VIEW'))}
-                canCampaigns={isOwnerOrAdmin || hasPermission('CRM_CAMPAIGNS_MANAGE')}
-                onNotify={showToast}
-              />
-              <ClientsManager
-                services={services}
-                staff={staff}
-                settings={settings}
-                canCancelSale={user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER'}
-              />
-            </>
+            <ClientsTab
+              services={services}
+              staff={staff}
+              settings={settings}
+              canAnalytics={
+                hasDashboard && (isOwnerOrAdmin || hasPermission('CRM_ANALYTICS_VIEW'))
+              }
+              canCampaigns={isOwnerOrAdmin || hasPermission('CRM_CAMPAIGNS_MANAGE')}
+              canCancelSale={user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER'}
+              showUpgradeHint={
+                (user?.role === 'OWNER' || user?.role === 'MASTER_ADMIN') &&
+                !hasDashboard
+              }
+              availability={availability}
+              onBook={async d => {
+                await bookAppointment(d);
+                showToast('Agendamento confirmado');
+              }}
+              onNotify={showToast}
+            />
           )}
 
           {activeTab === 'services' &&
@@ -464,6 +470,7 @@ export const StaffDashboard: React.FC = () => {
                       showToast('Salvo!');
                     }}
                     onNotify={showToast}
+                    showNotifications={user.role === 'OWNER'}
                   />
                 </div>
               )}

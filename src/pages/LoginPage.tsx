@@ -367,7 +367,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       marketingOptIn: false,
       lgpdConsent: false,
     },
-    mode: 'onTouched',
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
   });
   const [registerFieldsUnlocked, setRegisterFieldsUnlocked] = useState(false);
 
@@ -440,9 +441,29 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     await navigateAfterAuth();
   };
 
+  const showRegisterValidationError = () => {
+    const errors = registerForm.formState.errors;
+    const first = [
+      errors.ownerName,
+      errors.email,
+      errors.cpf,
+      errors.password,
+      errors.barbershopName,
+      errors.whatsapp,
+      errors.city,
+      errors.cnpj,
+      errors.termsAccepted,
+      errors.lgpdConsent,
+    ].find(e => e?.message);
+    showErrorToast(first?.message ?? 'Preencha todos os campos obrigatórios.');
+  };
+
   const goToRegisterStep2 = async () => {
     const ok = await registerForm.trigger(['ownerName', 'email', 'cpf', 'password']);
-    if (!ok) return;
+    if (!ok) {
+      showRegisterValidationError();
+      return;
+    }
     const cpf = normalizeDocument(registerForm.getValues('cpf') ?? '');
     if (!isValidDocument('CPF', cpf)) {
       showErrorToast('CPF inválido. Confira o número digitado.');
@@ -718,7 +739,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                       void goToRegisterStep2();
                       return;
                     }
-                    void registerForm.handleSubmit(handleRegister)(e);
+                    void registerForm.handleSubmit(handleRegister, () => {
+                      showRegisterValidationError();
+                    })(e);
                   }}
                   className="w-full space-y-3"
                 >

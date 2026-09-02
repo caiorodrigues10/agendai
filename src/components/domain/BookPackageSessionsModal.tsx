@@ -109,7 +109,7 @@ export const BookPackageSessionsModal: React.FC<BookPackageSessionsModalProps> =
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 p-4 backdrop-blur-[2px]"
+      className="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 p-4 backdrop-blur-[2px]"
       onClick={onClose}
     >
       <div

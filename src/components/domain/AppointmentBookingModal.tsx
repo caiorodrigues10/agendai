@@ -26,6 +26,7 @@ interface AppointmentBookingModalProps {
   defaultDate?: string;
   defaultTime?: string;
   defaultStaffId?: string;
+  defaultClient?: { id: string; name: string; whatsapp: string };
   onBook: (data: AppointmentFormData) => Promise<void>;
   onClose: () => void;
 }
@@ -51,12 +52,27 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
   defaultDate,
   defaultTime,
   defaultStaffId,
+  defaultClient,
   onBook,
   onClose,
 }) => {
   const [submitting, setSubmitting] = React.useState(false);
   const [clientHits, setClientHits] = React.useState<SalonClient[]>([]);
-  const [selectedClient, setSelectedClient] = React.useState<SalonClient | null>(null);
+  const [selectedClient, setSelectedClient] = React.useState<SalonClient | null>(
+    defaultClient
+      ? {
+          id: defaultClient.id,
+          barbershopId: '',
+          name: defaultClient.name,
+          whatsapp: defaultClient.whatsapp,
+          notes: null,
+          remainingSessions: 0,
+          activePackageCount: 0,
+          createdAt: '',
+          updatedAt: '',
+        }
+      : null
+  );
   const [clientPackages, setClientPackages] = React.useState<ClientPackage[]>([]);
   const [usePackage, setUsePackage] = React.useState(false);
 
@@ -73,8 +89,8 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
       serviceId: '',
       date: defaultDate ?? toLocalISO(new Date()),
       time: defaultTime ?? '',
-      customerName: '',
-      whatsapp: '',
+      customerName: defaultClient?.name ?? '',
+      whatsapp: defaultClient?.whatsapp ? maskPhone(defaultClient.whatsapp) : '',
     },
   });
 
@@ -175,7 +191,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
     ) : null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))]">
       <button type="button" aria-label="Fechar agendamento" onClick={onClose} className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-[2px]" />
       <div
         className="relative bg-surface border border-border rounded-2xl w-full max-w-md max-h-[min(88dvh,calc(100dvh-2.5rem))] flex flex-col shadow-2xl animate-fade-in"
