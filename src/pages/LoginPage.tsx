@@ -70,10 +70,10 @@ interface FieldProps {
 
 const Field: React.FC<FieldProps> = ({ label, icon: Icon, error, optional, children }) => (
   <div className="space-y-1">
-    <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+    <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
       {label}
       {optional && <span className="text-text-muted font-normal normal-case"> (opcional)</span>}
-    </label>
+    </span>
     <div className="relative group">
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
         <Icon
@@ -83,7 +83,9 @@ const Field: React.FC<FieldProps> = ({ label, icon: Icon, error, optional, child
           }`}
         />
       </div>
-      {children}
+      {React.isValidElement(children)
+        ? React.cloneElement(children as React.ReactElement<React.InputHTMLAttributes<HTMLInputElement>>, { 'aria-label': label })
+        : children}
     </div>
     {error && (
       <span className="text-[10px] font-medium text-danger flex items-center gap-1">
@@ -652,17 +654,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                       type="email"
                       className={inputClass(!!loginForm.formState.errors.email)}
                       placeholder="seu@email.com"
-                      autoFocus
                       {...loginForm.register('email')}
                       autoComplete="username"
                     />
                   </Field>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                    <label htmlFor="login-password" className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
                       Senha
                     </label>
                     <PasswordInput
+                      id="login-password"
                       showPassword={showPassword}
                       onToggleShow={() => setShowPassword(v => !v)}
                       error={loginForm.formState.errors.password?.message}
@@ -734,7 +736,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                         <input
                           className={inputClass(!!registerForm.formState.errors.ownerName)}
                           placeholder="João Silva"
-                          autoFocus
                           {...registerForm.register('ownerName')}
                         />
                       </Field>
@@ -777,10 +778,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                       </Field>
 
                       <div className="space-y-1">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                        <label htmlFor="register-password" className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
                           Senha
                         </label>
                         <PasswordInput
+                          id="register-password"
                           showStrength
                           showPassword={showPassword}
                           onToggleShow={() => setShowPassword(v => !v)}
@@ -818,7 +820,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                         <input
                           className={inputClass(!!registerForm.formState.errors.barbershopName)}
                           placeholder="Salão Beleza & Estilo"
-                          autoFocus
                           {...registerForm.register('barbershopName')}
                         />
                       </Field>

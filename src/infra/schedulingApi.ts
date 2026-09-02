@@ -31,7 +31,7 @@ export interface QueueUpdatePayload {
   completedBy?: string;
   paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado';
   insertAt?: number;
-  commissionSplits?: Array<{ professionalId: string; percentage: number }>;
+  commissionSplits?: { professionalId: string; percentage: number }[];
 }
 
 function buildQuery(params: Record<string, string | undefined>): string {

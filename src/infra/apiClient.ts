@@ -1,6 +1,11 @@
 import { authStorage } from './authStorage';
+import { setLastCorrelationId } from '../utils/correlationIdStore';
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+export interface ApiRequestOptions {
+  headers?: Record<string, string>;
+  retried?: boolean;
+}
 
 /**
  * Em produção (Render Static Site), o frontend é servido em um domínio diferente do backend.
@@ -200,10 +205,10 @@ export const apiClient = async <T>(
   method: HttpMethod = 'GET',
   body?: unknown,
   token?: string,
-  _retried = false
+  options: ApiRequestOptions = {}
 ): Promise<T> => {
   checkRateLimit();
-  const headers: Record<string, string> = {};
+  const headers: Record<string, string> = { ...(options.headers ?? {}) };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   const hasJsonBody = body !== undefined && body !== null;
   if (hasJsonBody) {
@@ -227,17 +232,23 @@ export const apiClient = async <T>(
     );
   }
 
+  // Track correlation ID from response for error reporting
+  const corrId = res.headers.get('x-correlation-id');
+  if (corrId) {
+    setLastCorrelationId(corrId);
+  }
+
   if (!res.ok) {
     const shouldRefresh =
       res.status === 401 &&
       Boolean(token) &&
-      !_retried &&
+      !options.retried &&
       !NO_REFRESH_PATHS.some(p => url.startsWith(p));
 
     if (shouldRefresh) {
       const nextToken = await refreshAccessToken();
       if (nextToken) {
-        return apiClient<T>(url, method, body, nextToken, true);
+        return apiClient<T>(url, method, body, nextToken, { ...options, retried: true });
       }
     }
 

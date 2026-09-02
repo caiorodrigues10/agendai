@@ -175,16 +175,16 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
     ) : null;
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 p-4 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))] backdrop-blur-[2px]"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+      <button type="button" aria-label="Fechar agendamento" onClick={onClose} className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-[2px]" />
       <div
-        className="bg-surface border border-border rounded-2xl w-full max-w-md max-h-[min(88dvh,calc(100dvh-2.5rem))] flex flex-col shadow-2xl animate-fade-in"
-        onClick={e => e.stopPropagation()}
+        className="relative bg-surface border border-border rounded-2xl w-full max-w-md max-h-[min(88dvh,calc(100dvh-2.5rem))] flex flex-col shadow-2xl animate-fade-in"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="appointment-booking-title"
       >
         <div className="shrink-0 px-5 pt-5 pb-4 border-b border-border flex items-center justify-between">
-          <h3 className="text-lg font-bold text-text-primary">Novo agendamento</h3>
+          <h3 id="appointment-booking-title" className="text-lg font-bold text-text-primary">Novo agendamento</h3>
           <button
             type="button"
             onClick={onClose}
@@ -198,9 +198,9 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col min-h-0 flex-1">
           <div className="flex-1 overflow-y-auto ag-scroll px-5 py-5 space-y-6">
             <section className="space-y-3">
-              <label className="text-[11px] text-text-secondary font-bold uppercase tracking-wider">
+              <p className="text-[11px] text-text-secondary font-bold uppercase tracking-wider">
                 Serviço
-              </label>
+              </p>
               <div
                 className={`grid grid-cols-1 gap-2 pr-1 ${
                   services.length > 4 ? 'max-h-56 overflow-y-auto ag-scroll' : ''
@@ -241,9 +241,9 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
             </section>
 
             <section className="space-y-3">
-              <label className="text-[11px] text-text-secondary font-bold uppercase tracking-wider">
+              <p className="text-[11px] text-text-secondary font-bold uppercase tracking-wider">
                 Profissional
-              </label>
+              </p>
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
@@ -270,9 +270,9 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
             </section>
 
             <section className="space-y-3">
-              <label className="text-[11px] text-text-secondary font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <p className="text-[11px] text-text-secondary font-bold uppercase tracking-wider flex items-center gap-1.5">
                 <Calendar size={12} /> Data
-              </label>
+              </p>
               <p className="text-sm text-text-primary font-medium capitalize -mt-1">
                 {dateLabel || 'Selecione um dia'}
               </p>
@@ -290,9 +290,9 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
             </section>
 
             <section className="space-y-3">
-              <label className="text-[11px] text-text-secondary font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <p className="text-[11px] text-text-secondary font-bold uppercase tracking-wider flex items-center gap-1.5">
                 <Clock size={12} /> Horário
-              </label>
+              </p>
               {isDateClosed ? (
                 <p className="text-sm text-danger bg-danger/10 border border-danger/30 rounded-xl px-3 py-3 flex items-center gap-2">
                   <AlertCircle size={16} className="shrink-0" />
@@ -328,7 +328,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
             </section>
 
             <section className="space-y-3">
-              <label className="text-[11px] text-text-secondary font-bold uppercase tracking-wider">
+              <label htmlFor="appointment-customer-name" className="text-[11px] text-text-secondary font-bold uppercase tracking-wider">
                 Cliente
               </label>
               <div className="relative">
@@ -337,6 +337,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
                   className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none"
                 />
                 <input
+                  id="appointment-customer-name"
                   type="text"
                   placeholder="Nome completo"
                   className={`${fieldClass(Boolean(errors.customerName))} pl-10`}

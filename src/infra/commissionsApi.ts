@@ -16,12 +16,12 @@ export interface CommissionEntry {
 export interface CommissionSummary {
   grossTotal: number;
   commissionTotal: number;
-  byProfessional: Array<{
+  byProfessional: {
     professionalId: string;
     professionalName: string;
     commissionTotal: number;
     entryCount: number;
-  }>;
+  }[];
 }
 
 function unwrap<T>(response: unknown): T {

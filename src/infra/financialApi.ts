@@ -206,7 +206,7 @@ export interface WeatherDemandPrediction {
   confidenceHigh: number;
   baselineAvg: number;
   dropPct: number;
-  topFactors: Array<{ feature: string; impact: number }>;
+  topFactors: { feature: string; impact: number }[];
   recommendation: string;
   riskLevel: 'low' | 'medium' | 'high' | 'critical';
 }
@@ -372,7 +372,7 @@ export const financialApi = {
       token()
     ).then(res => unwrap<ExpenseCategory[]>(res)),
 
-  getWeatherInsights: (days: number = 7) =>
+  getWeatherInsights: (days = 7) =>
     apiClient<{ success: boolean; data: WeatherInsights }>(
       `/api/barbershop/weather-insights${buildQuery({ days })}`,
       'GET',

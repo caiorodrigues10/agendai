@@ -37,19 +37,20 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   if (!open) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-4 bg-black/55"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="confirm-dialog-title"
-      onClick={() => {
-        if (!submitting) onClose();
-      }}
-    >
+    <div className="fixed inset-0 z-[80] flex items-end justify-center p-4 sm:items-center">
+      <button
+        type="button"
+        aria-label="Fechar confirmação"
+        className="absolute inset-0 cursor-default bg-black/55"
+        disabled={submitting}
+        onClick={onClose}
+      />
       <FocusLock returnFocus>
         <div
-          className="w-full max-w-sm rounded-2xl border border-border bg-surface p-5 shadow-xl"
-          onClick={e => e.stopPropagation()}
+          className="relative w-full max-w-sm rounded-2xl border border-border bg-surface p-5 shadow-xl"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="confirm-dialog-title"
         >
           <h2 id="confirm-dialog-title" className="text-base font-bold text-text-primary mb-2">
             {title}

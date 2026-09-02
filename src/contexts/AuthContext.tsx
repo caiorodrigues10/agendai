@@ -166,6 +166,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
+    const token = authStorage.getAccessToken();
+    if (token) {
+      // A limpeza local não depende da rede, mas o backend deve receber a
+      // tentativa para invalidar refresh tokens e encerrar a sessão de fato.
+      void authApi.logout(token).catch(() => undefined);
+    }
     authStorage.clearTokens();
     authStorage.clearUser();
     sessionStorage.removeItem('agendai:access-block-info');

@@ -36,6 +36,7 @@ import { StaffNavigation } from '../components/ui/StaffNavigation';
 import { ClosedSalonJoinModal } from '../components/domain/ClosedSalonJoinModal';
 import { CrmIntelligencePanel } from '../components/domain/CrmIntelligencePanel';
 import { usePermissions } from '../hooks/usePermissions';
+import { ActivationChecklist } from '../components/domain/ActivationChecklist';
 
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -71,6 +72,7 @@ export const StaffDashboard: React.FC = () => {
     updateQueueStatus,
     bookAppointment,
     cancelAppointment,
+    markAppointmentNoShow,
     checkInAppointment,
     deleteHistoryItem,
     clientId,
@@ -232,6 +234,14 @@ export const StaffDashboard: React.FC = () => {
           {/* Tab Content */}
           {activeTab === 'overview' && (
             <div className="space-y-4">
+              {(user?.role === 'OWNER' || user?.role === 'MASTER_ADMIN') && settings && barbershopId && (
+                <ActivationChecklist
+                  barbershopId={barbershopId}
+                  settings={settings}
+                  services={services}
+                  onNavigate={tab => navigate(`/app/${tab}`)}
+                />
+              )}
               <DemandAlertBanner />
               <div className="bg-surface rounded-xl border border-border p-4">
                 <h2 className="text-lg font-bold mb-3">Visão Geral</h2>
@@ -270,20 +280,9 @@ export const StaffDashboard: React.FC = () => {
               <div className="grid gap-4 lg:grid-cols-[1fr_0.95fr]">
                 <PwaInstallCard variant="panel" videoUrl={installVideoUrl} />
                 <div className="rounded-xl border border-border bg-surface p-4 sm:p-5">
-                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-accent">
-                    Onboarding
-                  </p>
-                  <h3 className="mt-2 text-lg font-bold text-text-primary">
-                    Vídeo de como colocar o salão na tela
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-text-secondary">
-                    Aqui entra o tutorial interno que mostra como abrir a operação, ativar a fila e
-                    instalar o PWA no celular da equipe. Esse material é para quem já entrou na
-                    plataforma, então ele não compete com a landing.
-                  </p>
-                  <div className="mt-4 rounded-xl border border-border bg-bg p-3 text-sm text-text-muted">
-                    Dica: mantenha esse vídeo vertical, curto e com passo a passo em tela cheia.
-                  </div>
+                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-accent">Ajuda rápida</p>
+                  <h3 className="mt-2 text-lg font-bold text-text-primary">Instale o AgendAI no celular da equipe</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-text-secondary">Use o cartão ao lado para instalar o PWA. A fila e a agenda continuam disponíveis mesmo sem WhatsApp configurado.</p>
                 </div>
               </div>
             </div>
@@ -363,6 +362,10 @@ export const StaffDashboard: React.FC = () => {
               onCheckIn={appt => {
                 checkInAppointment(appt);
                 showToast('Check-in realizado!');
+              }}
+              onNoShow={async id => {
+                await markAppointmentNoShow(id);
+                showToast('Cliente marcado como não compareceu');
               }}
               onDateChange={handleDateChange}
             />

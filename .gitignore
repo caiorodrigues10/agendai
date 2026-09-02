@@ -36,3 +36,7 @@ dist-ssr
 
 # Graphify
 graphify-out/cache/
+
+# Playwright artifacts
+test-results/
+playwright-report/

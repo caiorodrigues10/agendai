@@ -37,12 +37,13 @@ interface SchedulingContextValue {
   updateQueueStatus: (
     id: string,
     status: QueueItem['status'],
-    extras?: { insertAt?: number; paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado'; commissionSplits?: Array<{ professionalId: string; percentage: number }> }
+    extras?: { insertAt?: number; paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado'; commissionSplits?: { professionalId: string; percentage: number }[] }
   ) => Promise<void>;
   deleteHistoryItem: (id: string) => Promise<void>;
   bookAppointment: (data: any) => Promise<void>;
   bookAppointmentPublic: (data: any) => Promise<void>;
   cancelAppointment: (id: string) => Promise<void>;
+  markAppointmentNoShow: (id: string) => Promise<void>;
   checkInAppointment: (appt: Appointment) => Promise<void>;
   refreshAppointments: (date?: string) => Promise<void>;
   loadAvailability: (date: string, staffId?: string) => Promise<void>;
@@ -252,7 +253,11 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   const updateQueueStatus = async (
     id: string,
     status: QueueItem['status'],
-    extras?: { insertAt?: number; paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado' }
+    extras?: {
+      insertAt?: number;
+      paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado';
+      commissionSplits?: { professionalId: string; percentage: number }[];
+    }
   ) => {
     const target = queue.find(item => item.id === id);
     if (!target) return;
@@ -328,6 +333,11 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     setAppointments(prev => prev.filter(a => a.id !== id));
   };
 
+  const markAppointmentNoShow = async (id: string) => {
+    await schedulingApi.updateAppointment(id, { status: 'NO_SHOW' });
+    setAppointments(prev => prev.map(item => item.id === id ? { ...item, status: 'no_show' as const } : item));
+  };
+
   const checkInAppointment = async (appt: Appointment) => {
     await schedulingApi.checkInAppointment(appt.id);
     setAppointments(prev =>
@@ -351,6 +361,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       deleteHistoryItem,
       bookAppointment,
       cancelAppointment,
+      markAppointmentNoShow,
       checkInAppointment,
       refreshAppointments,
       loadAvailability,

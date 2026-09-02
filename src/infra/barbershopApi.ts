@@ -351,7 +351,7 @@ export const barbershopApi = {
     const formData = new FormData();
     formData.append('video', file);
 
-    const response = await fetch(`/api/feed/video?barbershopId=${barbershopId}`, {
+    const response = await fetch(`/api/feed/${encodeURIComponent(barbershopId)}/video`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,

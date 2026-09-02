@@ -31,7 +31,7 @@ interface QueueItemCardProps {
   onStatusChange: (
     id: string,
     status: QueueItem['status'],
-    extras?: { paymentMethod?: QueueItem['paymentMethod']; commissionSplits?: Array<{ professionalId: string; percentage: number }> }
+    extras?: { paymentMethod?: QueueItem['paymentMethod']; commissionSplits?: { professionalId: string; percentage: number }[] }
   ) => void;
   onLeaveQueue: (id: string) => void;
   onReturnToQueue?: (item: QueueItem) => void;
@@ -58,7 +58,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
   const [sending, setSending] = useState<'reminder' | 'next' | null>(null);
   const [showPaymentPicker, setShowPaymentPicker] = useState(false);
   const [submittingFinalization, setSubmittingFinalization] = useState(false);
-  const [commissionSplits, setCommissionSplits] = useState<Array<{ professionalId: string; percentage: number }>>(() => {
+  const [commissionSplits, setCommissionSplits] = useState<{ professionalId: string; percentage: number }[]>(() => {
     const percent = service?.commissionPercent ?? 0;
     const professionalId = currentUserId || staff[0]?.id;
     return percent > 0 && professionalId ? [{ professionalId, percentage: percent }] : [];

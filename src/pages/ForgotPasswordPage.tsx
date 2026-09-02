@@ -4,15 +4,7 @@ import { authApi } from '../infra/authApi';
 import { getRecaptchaToken } from '../utils/recaptcha';
 import { Logo } from '../components/ui/Logo';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
-import {
-  ArrowRight,
-  LockKeyhole,
-  AlertCircle,
-  Mail,
-  MessageCircle,
-  Loader2,
-  CheckCircle,
-} from 'lucide-react';
+import { ArrowRight, LockKeyhole, AlertCircle, Mail, Loader2, CheckCircle } from 'lucide-react';
 
 const inputClass = (hasError: boolean) =>
   `w-full bg-bg border rounded-xl py-3 pl-10 pr-4 text-text-primary text-sm
@@ -30,42 +22,18 @@ export const ForgotPasswordPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [step, setStep] = useState<'email' | 'choose'>('email');
 
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isValidEmail) return;
-    setStep('choose');
-  };
-
-  const handleSendEmail = async () => {
     setSubmitting(true);
     setError(null);
     try {
       const token = await getRecaptchaToken('forgot_password');
       await authApi.forgotPassword(email.trim(), token);
       setSuccess(true);
-    } catch {
-      setSuccess(true);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleSendWhatsApp = async () => {
-    setSubmitting(true);
-    setError(null);
-    try {
-      const result = await authApi.requestWhatsAppReset(email.trim());
-      if (result.requestId) {
-        navigate(
-          `/verificar-codigo?requestId=${result.requestId}&maskedPhone=${encodeURIComponent(result.maskedPhone ?? '')}`
-        );
-      } else {
-        setSuccess(true);
-      }
     } catch {
       setSuccess(true);
     } finally {
@@ -143,8 +111,7 @@ export const ForgotPasswordPage: React.FC = () => {
             </div>
           )}
 
-          {step === 'email' ? (
-            <form onSubmit={handleEmailSubmit} className="w-full space-y-6">
+          <form onSubmit={handleEmailSubmit} className="w-full space-y-6">
               <div className="space-y-4">
                 <p className="text-[11px] text-text-muted text-center leading-relaxed">
                   Informe o e-mail associado à sua conta para recuperar sua senha.
@@ -174,62 +141,12 @@ export const ForgotPasswordPage: React.FC = () => {
 
               <button
                 type="submit"
-                disabled={!isValidEmail}
+                disabled={!isValidEmail || submitting}
                 className="w-full py-4 bg-accent text-accent-fg hover:bg-accent-hover shadow-lg shadow-accent/20 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 disabled:opacity-60"
               >
-                Continuar <ArrowRight size={14} />
+                {submitting ? <Loader2 size={14} className="animate-spin" /> : <>Enviar instruções <ArrowRight size={14} /></>}
               </button>
             </form>
-          ) : (
-            <div className="w-full space-y-6">
-              <p className="text-[11px] text-text-muted text-center leading-relaxed">
-                Como deseja receber o código de redefinição para{' '}
-                <strong className="text-text-secondary">{email}</strong>?
-              </p>
-
-              <div className="space-y-3">
-                <button
-                  type="button"
-                  disabled={submitting}
-                  onClick={handleSendEmail}
-                  className="w-full py-4 bg-bg border border-border hover:border-accent/50 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 text-text-primary hover:text-accent disabled:opacity-60"
-                >
-                  {submitting ? (
-                    <Loader2 size={14} className="animate-spin" />
-                  ) : (
-                    <>
-                      <Mail size={16} />
-                      Enviar por e-mail
-                    </>
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  disabled={submitting}
-                  onClick={handleSendWhatsApp}
-                  className="w-full py-4 bg-[#25d366] hover:bg-[#1da851] text-white rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 disabled:opacity-60"
-                >
-                  {submitting ? (
-                    <Loader2 size={14} className="animate-spin" />
-                  ) : (
-                    <>
-                      <MessageCircle size={16} />
-                      Enviar por WhatsApp
-                    </>
-                  )}
-                </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setStep('email')}
-                className="w-full text-[11px] text-text-muted hover:text-accent transition-colors text-center"
-              >
-                Usar outro e-mail
-              </button>
-            </div>
-          )}
 
           <button
             type="button"

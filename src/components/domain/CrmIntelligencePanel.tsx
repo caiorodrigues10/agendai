@@ -1,41 +1,144 @@
-import React, { useEffect, useState } from 'react';
-import { BarChart3, BrainCircuit, Megaphone, RefreshCw, Users } from 'lucide-react';
-import { crmApi, CrmForecast, CrmOverview, CrmSegment } from '../../infra/crmApi';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { BarChart3, BrainCircuit, ChevronLeft, ChevronRight, Megaphone, RefreshCw, Search, Users, X } from 'lucide-react';
+import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { crmApi, CrmCampaign, CrmClientMetric, CrmForecast, CrmOverview, CrmSegment } from '../../infra/crmApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 
-type Props = { canAnalytics: boolean; canCampaigns: boolean; onNotify?: (message: string, type?: 'success' | 'error' | 'bot') => void };
+interface Props { canAnalytics: boolean; canCampaigns: boolean; onNotify?: (message: string, type?: 'success' | 'error' | 'bot') => void }
+type Tab = 'overview' | 'clients' | 'intelligence' | 'campaigns';
+type Profile = CrmClientMetric & { client?: { notes?: string | null }; timeline?: { id: string; kind: string; grossAmount: number; receivedAmount: number; outstandingDelta: number; occurredAt: string }[]; appointments?: { id: string; date: string; time: string; status: string; service?: { name: string } }[]; fiados?: unknown[]; packages?: unknown[] };
+
 const money = (value: unknown) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value ?? 0));
+const shortDate = (value: string) => new Date(`${value.slice(0, 10)}T12:00:00`).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+const inputDate = (date: Date) => date.toISOString().slice(0, 10);
+const initialPeriod = () => ({ from: inputDate(new Date(Date.now() - 29 * 86_400_000)), to: inputDate(new Date()) });
+const segmentOptions: { value: CrmSegment; label: string }[] = [
+  { value: 'all', label: 'Todos' }, { value: 'new', label: 'Novos' }, { value: 'recurring', label: 'Recorrentes' },
+  { value: 'vip', label: 'VIP' }, { value: 'at_risk', label: 'Em risco' }, { value: 'inactive_30', label: 'Inativos 30d' },
+  { value: 'inactive_60', label: 'Inativos 60d' }, { value: 'inactive_90', label: 'Inativos 90d' }, { value: 'debtors', label: 'Devedores' },
+];
+const statusLabel: Record<CrmCampaign['status'], string> = { DRAFT: 'Rascunho', QUEUED: 'Enviando', SENT: 'Enviada', PARTIAL: 'Parcial', FAILED: 'Falhou', CANCELED: 'Cancelada' };
+
+function Kpi({ label, value, moneyValue = true }: { label: string; value: unknown; moneyValue?: boolean }) {
+  return <div className="rounded-xl border border-border bg-bg p-3"><p className="text-xs text-text-muted">{label}</p><strong className="mt-1 block text-base text-text-primary">{moneyValue ? money(value) : String(value ?? 0)}</strong></div>;
+}
+
+function Empty({ children }: React.PropsWithChildren) {
+  return <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-text-muted">{children}</p>;
+}
 
 export const CrmIntelligencePanel: React.FC<Props> = ({ canAnalytics, canCampaigns, onNotify }) => {
-  const [tab, setTab] = useState<'overview' | 'intelligence' | 'campaigns'>('overview');
+  const [tab, setTab] = useState<Tab>('overview');
+  const [period, setPeriod] = useState(initialPeriod);
   const [overview, setOverview] = useState<CrmOverview | null>(null);
+  const [overviewState, setOverviewState] = useState<'idle' | 'loading' | 'error'>('idle');
+  const [overviewError, setOverviewError] = useState('');
   const [forecast, setForecast] = useState<CrmForecast | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [forecastHorizon, setForecastHorizon] = useState<7 | 30 | 90>(7);
+  const [forecastError, setForecastError] = useState('');
+  const [forecastLoading, setForecastLoading] = useState(false);
+  const [clients, setClients] = useState<CrmClientMetric[]>([]);
+  const [clientsMeta, setClientsMeta] = useState({ total: 0, page: 1, totalPages: 1 });
+  const [clientsLoading, setClientsLoading] = useState(false);
+  const [clientsError, setClientsError] = useState('');
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [segment, setSegment] = useState<CrmSegment>('all');
+  const [sort, setSort] = useState<'ltv' | 'lastVisit' | 'outstanding'>('ltv');
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [campaigns, setCampaigns] = useState<CrmCampaign[]>([]);
+  const [campaignsLoading, setCampaignsLoading] = useState(false);
   const [campaign, setCampaign] = useState({ name: 'Reativação de clientes', segment: 'inactive_30' as CrmSegment, message: 'Oi! Sentimos sua falta. Temos horários disponíveis esta semana — quer agendar?' });
-  const [preview, setPreview] = useState<number | null>(null);
+  const [preview, setPreview] = useState<{ eligibleCount: number; sample: { id: string; name: string }[] } | null>(null);
 
-  const load = async () => {
+  useEffect(() => { const timer = window.setTimeout(() => setDebouncedSearch(search.trim()), 300); return () => window.clearTimeout(timer); }, [search]);
+
+  const loadOverview = useCallback(async () => {
     if (!canAnalytics) return;
-    setLoading(true); setError(null);
-    try { const [nextOverview, nextForecast] = await Promise.all([crmApi.overview({ compare: true }), crmApi.forecast(7)]); setOverview(nextOverview); setForecast(nextForecast); }
-    catch (err) { setError(getErrorMessage(err, 'Não foi possível carregar a inteligência do CRM.')); }
-    finally { setLoading(false); }
+    setOverviewState('loading'); setOverviewError('');
+    try { setOverview(await crmApi.overview({ ...period, compare: true })); setOverviewState('idle'); }
+    catch (error) { setOverviewError(getErrorMessage(error, 'Não foi possível carregar o resumo do CRM.')); setOverviewState('error'); }
+  }, [canAnalytics, period]);
+
+  const loadForecast = useCallback(async () => {
+    setForecastLoading(true); setForecastError('');
+    try { setForecast(await crmApi.forecast(forecastHorizon)); }
+    catch (error) { setForecastError(getErrorMessage(error, 'Não foi possível carregar a previsão.')); }
+    finally { setForecastLoading(false); }
+  }, [forecastHorizon]);
+
+  const loadClients = useCallback(async (page = 1) => {
+    setClientsLoading(true); setClientsError('');
+    try {
+      const result = await crmApi.clients({ page, limit: 20, search: debouncedSearch || undefined, segment, sort, ...period });
+      setClients(result.data); setClientsMeta({ total: result.meta.total, page: result.meta.page, totalPages: result.meta.totalPages });
+    } catch (error) { setClientsError(getErrorMessage(error, 'Não foi possível carregar os clientes.')); }
+    finally { setClientsLoading(false); }
+  }, [debouncedSearch, period, segment, sort]);
+
+  const loadCampaigns = useCallback(async () => {
+    if (!canCampaigns) return;
+    setCampaignsLoading(true);
+    try { const result = await crmApi.campaigns({ limit: 20, ...period }); setCampaigns(result.data); }
+    catch (error) { onNotify?.(getErrorMessage(error, 'Não foi possível carregar as campanhas.'), 'error'); }
+    finally { setCampaignsLoading(false); }
+  }, [canCampaigns, onNotify, period]);
+
+  useEffect(() => { void loadOverview(); }, [loadOverview]);
+  useEffect(() => { if (tab === 'clients') void loadClients(1); }, [loadClients, tab]);
+  useEffect(() => { if (tab === 'intelligence') void loadForecast(); }, [loadForecast, tab]);
+  useEffect(() => { if (tab === 'campaigns') void loadCampaigns(); }, [loadCampaigns, tab]);
+
+  const openProfile = async (clientId: string) => {
+    setProfileLoading(true);
+    try { setProfile(await crmApi.profile(clientId, period) as unknown as Profile); }
+    catch (error) { onNotify?.(getErrorMessage(error, 'Não foi possível carregar o perfil.'), 'error'); }
+    finally { setProfileLoading(false); }
   };
-  useEffect(() => { void load(); }, [canAnalytics]);
-  if (!canAnalytics) return null;
+
+  const calculateAudience = async () => {
+    try { setPreview(await crmApi.previewCampaign(campaign)); }
+    catch (error) { onNotify?.(getErrorMessage(error, 'Não foi possível calcular o público.'), 'error'); }
+  };
+  const confirmCampaign = async () => {
+    if (!preview || !window.confirm(`Confirmar o envio para ${preview.eligibleCount} cliente(s)?`)) return;
+    try { await crmApi.createCampaign(campaign); setPreview(null); await loadCampaigns(); onNotify?.('Campanha confirmada e adicionada à fila.', 'success'); }
+    catch (error) { onNotify?.(getErrorMessage(error, 'Não foi possível confirmar a campanha.'), 'error'); }
+  };
+
   const kpis = overview?.kpis ?? {};
-  const previewCampaign = async () => { try { const result = await crmApi.previewCampaign(campaign); setPreview(result.eligibleCount); } catch (err) { onNotify?.(getErrorMessage(err, 'Não foi possível calcular o público.'), 'error'); } };
-  const confirmCampaign = async () => { try { await crmApi.createCampaign(campaign); setPreview(null); onNotify?.('Campanha confirmada e enviada para a fila.', 'success'); } catch (err) { onNotify?.(getErrorMessage(err, 'Não foi possível confirmar a campanha.'), 'error'); } };
+  const chartData = useMemo(() => overview?.byDay.map(item => ({ ...item, label: shortDate(item.date) })) ?? [], [overview]);
+  if (!canAnalytics) return null;
+
   return <section className="mb-6 overflow-hidden rounded-2xl border border-accent/25 bg-surface shadow-sm">
-    <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between">
+    <header className="flex flex-col gap-3 border-b border-border p-4 lg:flex-row lg:items-center lg:justify-between">
       <div><p className="text-xs font-bold uppercase tracking-[.18em] text-accent">Super CRM</p><h2 className="text-lg font-bold text-text-primary">Clientes, receita e previsão no mesmo lugar</h2></div>
-      <button onClick={() => void load()} disabled={loading} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-border px-3 text-xs font-bold text-text-secondary"><RefreshCw size={14} className={loading ? 'animate-spin' : ''} />Atualizar</button>
-    </div>
-    <div className="flex overflow-x-auto border-b border-border px-3"><button onClick={() => setTab('overview')} className={`min-h-11 px-3 text-xs font-bold ${tab === 'overview' ? 'border-b-2 border-accent text-accent' : 'text-text-muted'}`}><BarChart3 className="mr-1 inline" size={14}/>Visão geral</button><button onClick={() => setTab('intelligence')} className={`min-h-11 px-3 text-xs font-bold ${tab === 'intelligence' ? 'border-b-2 border-accent text-accent' : 'text-text-muted'}`}><BrainCircuit className="mr-1 inline" size={14}/>Inteligência</button>{canCampaigns && <button onClick={() => setTab('campaigns')} className={`min-h-11 px-3 text-xs font-bold ${tab === 'campaigns' ? 'border-b-2 border-accent text-accent' : 'text-text-muted'}`}><Megaphone className="mr-1 inline" size={14}/>Campanhas</button>}<span className="min-h-11 px-3 py-3 text-xs font-bold text-text-muted"><Users className="mr-1 inline" size={14}/>Clientes abaixo</span></div>
-    {error && <p className="m-4 rounded-lg bg-danger/10 p-3 text-sm text-danger">{error}</p>}
-    {tab === 'overview' && <div className="p-4"><div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{[['Faturamento bruto', kpis.grossRevenue], ['Recebido', kpis.receivedRevenue], ['Fiado em aberto', kpis.outstanding], ['Ticket médio', kpis.avgTicket]].map(([label, value]) => <div key={String(label)} className="rounded-xl border border-border bg-bg p-3"><p className="text-xs text-text-muted">{label}</p><strong className="mt-1 block text-base text-text-primary">{money(value)}</strong></div>)}</div><div className="mt-4 grid gap-3 lg:grid-cols-2"><div className="rounded-xl border border-border p-3"><p className="mb-2 text-sm font-bold text-text-primary">Clientes que mais retornam valor</p>{overview?.topClients.slice(0, 5).map(client => <div key={client.clientId} className="flex justify-between border-t border-border py-2 text-sm"><span>{client.name}<small className="ml-2 text-text-muted">{client.visits} visitas</small></span><strong>{money(client.ltv)}</strong></div>) || <p className="text-sm text-text-muted">Carregando dados...</p>}</div><div className="rounded-xl border border-border p-3"><p className="mb-2 text-sm font-bold text-text-primary">Segmentos acionáveis</p>{overview?.segments.slice(0, 5).map(segment => <div key={segment.segment} className="flex justify-between border-t border-border py-2 text-sm"><span>{segment.label}</span><span className="text-text-muted">{segment.count} · {money(segment.potential)}</span></div>)}</div></div></div>}
-    {tab === 'intelligence' && <div className="p-4"><div className="mb-3 rounded-xl bg-accent/10 p-3 text-sm text-text-secondary">Modelo {forecast?.maturity === 'trained' ? 'treinado' : forecast?.maturity === 'preliminary' ? 'preliminar' : 'ainda precisa de mais histórico'}. {forecast?.historicalDays ?? 0} dias de dados analisados.</div><div className="space-y-2">{forecast?.predictions.map(item => <div key={item.date} className="rounded-xl border border-border p-3"><div className="flex flex-wrap items-center justify-between gap-2"><strong>{new Date(`${item.date}T12:00:00`).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' })}</strong><span className={item.risk === 'high' ? 'text-danger' : item.risk === 'medium' ? 'text-warning' : 'text-success'}>{item.weather ?? 'Sazonalidade'}</span><strong>{money(item.predictedRevenue)}</strong></div><p className="mt-1 text-xs text-text-muted">{item.predictedVisits} atendimentos · faixa {money(item.confidenceLow)}–{money(item.confidenceHigh)} · {item.factors.join(' · ')}</p></div>)}</div></div>}
-    {tab === 'campaigns' && canCampaigns && <div className="space-y-3 p-4"><p className="text-sm text-text-secondary">A campanha só é enviada depois da sua confirmação e apenas para clientes que autorizaram comunicação.</p><input value={campaign.name} onChange={event => setCampaign({ ...campaign, name: event.target.value })} className="w-full rounded-lg border border-border bg-bg p-3 text-sm" placeholder="Nome da campanha"/><select value={campaign.segment} onChange={event => setCampaign({ ...campaign, segment: event.target.value as CrmSegment })} className="w-full rounded-lg border border-border bg-bg p-3 text-sm"><option value="inactive_30">Inativos há 30 dias</option><option value="at_risk">Em risco</option><option value="vip">VIP</option><option value="debtors">Devedores</option></select><textarea value={campaign.message} onChange={event => setCampaign({ ...campaign, message: event.target.value })} className="min-h-24 w-full rounded-lg border border-border bg-bg p-3 text-sm"/><div className="flex flex-wrap gap-2"><button onClick={() => void previewCampaign()} className="min-h-11 rounded-lg border border-accent px-4 text-sm font-bold text-accent">Calcular público</button>{preview !== null && <button onClick={() => void confirmCampaign()} className="min-h-11 rounded-lg bg-accent px-4 text-sm font-bold text-accent-fg">Confirmar para {preview} cliente(s)</button>}</div></div>}
+      <div className="flex flex-wrap items-end gap-2">
+        <label className="text-xs text-text-muted">De<input type="date" value={period.from} max={period.to} onChange={event => setPeriod(current => ({ ...current, from: event.target.value }))} className="mt-1 block min-h-10 rounded-lg border border-border bg-bg px-2 text-text-primary" /></label>
+        <label className="text-xs text-text-muted">Até<input type="date" value={period.to} min={period.from} onChange={event => setPeriod(current => ({ ...current, to: event.target.value }))} className="mt-1 block min-h-10 rounded-lg border border-border bg-bg px-2 text-text-primary" /></label>
+        <button type="button" onClick={() => void loadOverview()} disabled={overviewState === 'loading'} className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-border px-3 text-xs font-bold text-text-secondary"><RefreshCw size={14} className={overviewState === 'loading' ? 'animate-spin' : ''} />Atualizar</button>
+      </div>
+    </header>
+
+    <nav aria-label="Áreas do CRM" className="flex overflow-x-auto border-b border-border px-2">
+      {([['overview', 'Visão geral', BarChart3], ['clients', 'Clientes', Users], ['intelligence', 'Inteligência', BrainCircuit], ...(canCampaigns ? [['campaigns', 'Campanhas', Megaphone] as const] : [])] as [Tab, string, React.ComponentType<{ size?: number; className?: string }>][]).map(([id, label, Icon]) => <button type="button" key={id} onClick={() => setTab(id)} className={`min-h-11 whitespace-nowrap px-3 text-xs font-bold ${tab === id ? 'border-b-2 border-accent text-accent' : 'text-text-muted'}`}><Icon className="mr-1 inline" size={14}/>{label}</button>)}
+    </nav>
+
+    {tab === 'overview' && <div className="space-y-4 p-4">
+      {overviewError && <p className="rounded-lg bg-danger/10 p-3 text-sm text-danger">{overviewError}</p>}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4"><Kpi label="Faturamento bruto" value={kpis.grossRevenue}/><Kpi label="Recebido" value={kpis.receivedRevenue}/><Kpi label="Fiado em aberto" value={kpis.outstanding}/><Kpi label="Ticket médio" value={kpis.avgTicket}/><Kpi label="Clientes recorrentes" value={kpis.recurringCustomers} moneyValue={false}/><Kpi label="Receita em risco" value={kpis.revenueAtRisk}/><Kpi label="Não compareceram" value={kpis.noShows} moneyValue={false}/><Kpi label="Comparecimento" value={`${kpis.attendanceRate ?? 0}%`} moneyValue={false}/></div>
+      <div className="rounded-xl border border-border p-3"><h3 className="mb-3 text-sm font-bold text-text-primary">Receita e recebimento por dia</h3>{chartData.length ? <div className="h-64 w-full"><ResponsiveContainer><LineChart data={chartData}><CartesianGrid strokeDasharray="3 3" opacity={0.2}/><XAxis dataKey="label" fontSize={11}/><YAxis fontSize={11}/><Tooltip formatter={value => money(value)}/><Line type="monotone" dataKey="grossRevenue" name="Bruto" stroke="var(--color-chart-1)" strokeWidth={2}/><Line type="monotone" dataKey="receivedRevenue" name="Recebido" stroke="var(--color-chart-2)" strokeWidth={2}/></LineChart></ResponsiveContainer></div> : <Empty>Ainda não há lançamentos neste período.</Empty>}</div>
+      <div className="grid gap-4 xl:grid-cols-3">{([['Serviços', overview?.byService], ['Categorias', overview?.byCategory], ['Profissionais', overview?.byProfessional]] as const).map(([label, values]) => <div key={label} className="rounded-xl border border-border p-3"><h3 className="mb-3 text-sm font-bold text-text-primary">Receita por {label.toLowerCase()}</h3>{values?.length ? <div className="h-52"><ResponsiveContainer><BarChart data={values.slice(0, 8)} layout="vertical"><XAxis type="number" hide/><YAxis dataKey="name" type="category" width={85} fontSize={10}/><Tooltip formatter={value => money(value)}/><Bar dataKey="revenue" fill="var(--color-chart-1)" radius={[0, 5, 5, 0]}/></BarChart></ResponsiveContainer></div> : <Empty>Sem dados.</Empty>}</div>)}</div>
+      <div className="grid gap-3 lg:grid-cols-2"><div className="rounded-xl border border-border p-3"><h3 className="mb-2 text-sm font-bold text-text-primary">Clientes de maior valor</h3>{overview?.topClients.length ? overview.topClients.slice(0, 6).map(client => <button type="button" key={client.clientId} onClick={() => { setTab('clients'); void openProfile(client.clientId); }} className="flex w-full justify-between border-t border-border py-2 text-left text-sm"><span>{client.name}<small className="ml-2 text-text-muted">{client.visits} visitas</small></span><strong>{money(client.ltv)}</strong></button>) : <Empty>Sem clientes no período.</Empty>}</div><div className="rounded-xl border border-border p-3"><h3 className="mb-2 text-sm font-bold text-text-primary">Segmentos acionáveis</h3>{overview?.segments.map(item => <div key={item.segment} className="flex justify-between border-t border-border py-2 text-sm"><span>{item.label}</span><span className="text-text-muted">{item.count} · {money(item.potential)}</span></div>)}</div></div>
+    </div>}
+
+    {tab === 'clients' && <div className="space-y-4 p-4"><div className="grid gap-2 md:grid-cols-[1fr_auto_auto]"><label className="relative"><Search size={16} className="absolute left-3 top-3 text-text-muted"/><input aria-label="Buscar cliente" value={search} onChange={event => setSearch(event.target.value)} className="min-h-11 w-full rounded-lg border border-border bg-bg pl-9 pr-3 text-sm" placeholder="Buscar cliente ou WhatsApp"/></label><select aria-label="Filtrar segmento" value={segment} onChange={event => setSegment(event.target.value as CrmSegment)} className="min-h-11 rounded-lg border border-border bg-bg px-3 text-sm">{segmentOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select><select aria-label="Ordenar clientes" value={sort} onChange={event => setSort(event.target.value as typeof sort)} className="min-h-11 rounded-lg border border-border bg-bg px-3 text-sm"><option value="ltv">Maior LTV</option><option value="lastVisit">Visita recente</option><option value="outstanding">Maior dívida</option></select></div>{clientsError && <p className="rounded-lg bg-danger/10 p-3 text-sm text-danger">{clientsError}</p>}{clientsLoading ? <Empty>Carregando clientes...</Empty> : clients.length ? <div className="overflow-x-auto rounded-xl border border-border"><table className="w-full min-w-[680px] text-sm"><thead className="bg-bg text-left text-xs text-text-muted"><tr><th className="p-3">Cliente</th><th className="p-3">Segmento</th><th className="p-3">Visitas</th><th className="p-3">LTV</th><th className="p-3">Dívida</th><th className="p-3">Última visita</th></tr></thead><tbody>{clients.map(client => <tr key={client.clientId} onClick={() => void openProfile(client.clientId)} className="cursor-pointer border-t border-border hover:bg-bg"><td className="p-3 font-semibold">{client.name}<small className="block text-text-muted">{client.whatsapp || 'Sem WhatsApp'}</small></td><td className="p-3">{segmentOptions.find(item => item.value === client.segment)?.label ?? client.segment}</td><td className="p-3">{client.visits}</td><td className="p-3">{money(client.ltv)}</td><td className="p-3">{money(client.outstanding)}</td><td className="p-3">{client.lastVisitAt ? shortDate(client.lastVisitAt) : '—'}</td></tr>)}</tbody></table></div> : <Empty>Nenhum cliente encontrado.</Empty>}<div className="flex items-center justify-between text-sm text-text-muted"><span>{clientsMeta.total} cliente(s)</span><div className="flex items-center gap-2"><button type="button" aria-label="Página anterior" disabled={clientsMeta.page <= 1} onClick={() => void loadClients(clientsMeta.page - 1)} className="rounded-lg border border-border p-2 disabled:opacity-40"><ChevronLeft size={16}/></button><span>{clientsMeta.page}/{clientsMeta.totalPages}</span><button type="button" aria-label="Próxima página" disabled={clientsMeta.page >= clientsMeta.totalPages} onClick={() => void loadClients(clientsMeta.page + 1)} className="rounded-lg border border-border p-2 disabled:opacity-40"><ChevronRight size={16}/></button></div></div></div>}
+
+    {tab === 'intelligence' && <div className="space-y-4 p-4"><div className="flex flex-wrap gap-2">{([7, 30, 90] as const).map(horizon => <button type="button" key={horizon} onClick={() => setForecastHorizon(horizon)} className={`min-h-10 rounded-lg px-4 text-sm font-bold ${forecastHorizon === horizon ? 'bg-accent text-accent-fg' : 'border border-border text-text-secondary'}`}>{horizon} dias</button>)}</div>{forecastError && <p className="rounded-lg bg-danger/10 p-3 text-sm text-danger">{forecastError}</p>}{forecastLoading ? <Empty>Calculando previsão...</Empty> : forecast && <><div className="rounded-xl bg-accent/10 p-3 text-sm text-text-secondary"><strong>Modelo {forecast.maturity === 'trained' ? 'treinado' : forecast.maturity === 'preliminary' ? 'preliminar' : 'com dados insuficientes'}.</strong> {forecast.historicalDays} dias analisados. MAE: {forecast.backtest.mae == null ? 'indisponível' : money(forecast.backtest.mae)} · MAPE: {forecast.backtest.mape == null ? 'indisponível' : `${forecast.backtest.mape}%`}.</div><div className="h-64 rounded-xl border border-border p-3"><ResponsiveContainer><LineChart data={forecast.predictions.map(item => ({ ...item, label: shortDate(item.date) }))}><CartesianGrid strokeDasharray="3 3" opacity={0.2}/><XAxis dataKey="label" fontSize={10}/><YAxis fontSize={11}/><Tooltip formatter={value => money(value)}/><Line type="monotone" dataKey="predictedRevenue" name="Previsão" stroke="var(--color-chart-3)" strokeWidth={2}/><Line type="monotone" dataKey="confidenceLow" name="Mínimo" stroke="var(--color-chart-4)" strokeDasharray="4 4"/><Line type="monotone" dataKey="confidenceHigh" name="Máximo" stroke="var(--color-chart-5)" strokeDasharray="4 4"/></LineChart></ResponsiveContainer></div><div className="grid gap-2 lg:grid-cols-2">{forecast.predictions.map(item => <div key={item.date} className="rounded-xl border border-border p-3"><div className="flex justify-between gap-2"><strong>{shortDate(item.date)}</strong><strong>{money(item.predictedRevenue)}</strong></div><p className="mt-1 text-xs text-text-muted">{item.predictedVisits} atendimentos · {item.factors.join(' · ')}</p></div>)}</div></>}</div>}
+
+    {tab === 'campaigns' && canCampaigns && <div className="grid gap-4 p-4 xl:grid-cols-2"><div className="space-y-3 rounded-xl border border-border p-4"><h3 className="font-bold text-text-primary">Preparar campanha</h3><p className="text-sm text-text-secondary">Somente clientes com consentimento e WhatsApp válido entram no público.</p><input aria-label="Nome da campanha" value={campaign.name} onChange={event => setCampaign(current => ({ ...current, name: event.target.value }))} className="min-h-11 w-full rounded-lg border border-border bg-bg p-3 text-sm" placeholder="Nome da campanha"/><select aria-label="Segmento da campanha" value={campaign.segment} onChange={event => setCampaign(current => ({ ...current, segment: event.target.value as CrmSegment }))} className="min-h-11 w-full rounded-lg border border-border bg-bg p-3 text-sm">{segmentOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select><textarea aria-label="Mensagem da campanha" value={campaign.message} onChange={event => setCampaign(current => ({ ...current, message: event.target.value }))} className="min-h-28 w-full rounded-lg border border-border bg-bg p-3 text-sm"/><div className="flex flex-wrap gap-2"><button type="button" onClick={() => void calculateAudience()} className="min-h-11 rounded-lg border border-accent px-4 text-sm font-bold text-accent">Calcular público</button>{preview && <button type="button" onClick={() => void confirmCampaign()} className="min-h-11 rounded-lg bg-accent px-4 text-sm font-bold text-accent-fg">Confirmar para {preview.eligibleCount}</button>}</div>{preview && <div className="rounded-lg bg-bg p-3 text-sm"><strong>{preview.eligibleCount} elegíveis.</strong><p className="mt-1 text-text-muted">Amostra: {preview.sample.map(item => item.name).join(', ') || 'nenhum cliente'}</p></div>}</div><div className="rounded-xl border border-border p-4"><div className="mb-3 flex items-center justify-between"><h3 className="font-bold text-text-primary">Histórico</h3>{campaignsLoading && <RefreshCw size={15} className="animate-spin text-text-muted"/>}</div>{campaigns.length ? <div className="space-y-2">{campaigns.map(item => <div key={item.id} className="rounded-lg border border-border bg-bg p-3"><div className="flex justify-between gap-2"><strong className="text-sm">{item.name}</strong><span className="text-xs font-bold text-accent">{statusLabel[item.status]}</span></div><p className="mt-1 text-xs text-text-muted">{item.recipientCount} destinatários · {item.sentCount} enviados · {item.failedCount} falhas · {item.skippedCount} ignorados</p></div>)}</div> : <Empty>Nenhuma campanha no período.</Empty>}</div></div>}
+
+    {(profile || profileLoading) && <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 p-3 sm:items-center" role="dialog" aria-modal="true" aria-label="Perfil financeiro do cliente"><div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-border bg-surface p-5"><div className="flex items-start justify-between"><div><p className="text-xs font-bold uppercase tracking-wide text-accent">Perfil financeiro</p><h3 className="text-xl font-bold text-text-primary">{profile?.name ?? 'Carregando...'}</h3></div><button type="button" onClick={() => setProfile(null)} aria-label="Fechar perfil" className="rounded-lg p-2 text-text-muted hover:bg-bg"><X size={18}/></button></div>{profile && <div className="mt-4 space-y-4"><div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><Kpi label="LTV" value={profile.ltv}/><Kpi label="Produzido" value={profile.grossRevenue}/><Kpi label="Recebido" value={profile.receivedRevenue}/><Kpi label="Dívida" value={profile.outstanding}/></div><div className="grid gap-3 rounded-xl border border-border p-3 text-sm sm:grid-cols-2"><p><span className="text-text-muted">Visitas:</span> {profile.visits}</p><p><span className="text-text-muted">Ticket:</span> {money(profile.avgTicket)}</p><p><span className="text-text-muted">Serviço preferido:</span> {profile.favoriteService ?? '—'}</p><p><span className="text-text-muted">Risco:</span> {profile.risk}</p><p><span className="text-text-muted">Última visita:</span> {profile.lastVisitAt ? shortDate(profile.lastVisitAt) : '—'}</p><p><span className="text-text-muted">Próxima esperada:</span> {profile.nextExpectedVisitAt ? shortDate(profile.nextExpectedVisitAt) : '—'}</p></div><div><h4 className="mb-2 text-sm font-bold text-text-primary">Timeline financeira</h4>{profile.timeline?.length ? profile.timeline.map(event => <div key={event.id} className="flex flex-wrap justify-between gap-2 border-t border-border py-2 text-sm"><span>{event.kind.replaceAll('_', ' ')}<small className="ml-2 text-text-muted">{shortDate(event.occurredAt)}</small></span><span>Bruto {money(event.grossAmount)} · Recebido {money(event.receivedAmount)}</span></div>) : <Empty>Sem eventos neste período.</Empty>}</div></div>}</div></div>}
   </section>;
 };

@@ -35,4 +35,11 @@ export const usersApi = {
 
   deleteAvatar: (userId: string) =>
     apiClient<void>(`/api/users/${userId}/avatar`, 'DELETE', undefined, token()),
+  requestDeletion: (reason?: string) =>
+    apiClient<{ success: boolean; data: { id: string; status: string }; message: string }>(
+      '/api/users/me/deletion-request',
+      'POST',
+      reason ? { reason } : {},
+      token()
+    ),
 };

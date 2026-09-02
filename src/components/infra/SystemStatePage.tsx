@@ -16,6 +16,7 @@ interface SystemStatePageProps {
   icon: ReactNode;
   primaryAction: SystemStateAction;
   secondaryAction?: SystemStateAction;
+  footer?: ReactNode;
 }
 
 const actionClassName = {
@@ -62,6 +63,7 @@ export const SystemStatePage: React.FC<SystemStatePageProps> = ({
   icon,
   primaryAction,
   secondaryAction,
+  footer,
 }) => (
   <div className="relative min-h-screen overflow-hidden bg-bg text-text-primary">
     <div
@@ -106,6 +108,8 @@ export const SystemStatePage: React.FC<SystemStatePageProps> = ({
           {secondaryAction && <StateAction action={secondaryAction} variant="secondary" />}
           <StateAction action={primaryAction} variant="primary" />
         </div>
+
+        {footer}
 
         <a
           href="/contato"

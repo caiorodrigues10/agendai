@@ -87,6 +87,11 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const idempotencyKeys = useRef({
+    PIX: crypto.randomUUID(),
+    CREDIT_CARD: crypto.randomUUID(),
+    TRIAL: crypto.randomUUID(),
+  });
 
   // Dados do pagador
   const [payerEmail, setPayerEmail] = useState(user?.email ?? '');
@@ -95,7 +100,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
   const [docType, setDocType] = useState<'CPF' | 'CNPJ'>('CPF');
   const [docNumber, setDocNumber] = useState('');
 
-  // Cartão Asaas (tokenizado no navegador — nunca passa pelo backend)
+  // Cartão Asaas: o fluxo atual envia os dados ao backend sem persistência/log.
   const [asaasCardName, setAsaasCardName] = useState('');
   const [asaasCardNumber, setAsaasCardNumber] = useState('');
   const [asaasCardExpiry, setAsaasCardExpiry] = useState('');
@@ -265,7 +270,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
     };
   };
 
-  const submitAsaasPix = async () => {
+  const submitAsaasPix = async (newAttempt = false) => {
     const validationError = validatePayerForm();
     if (validationError) {
       setError(validationError);
@@ -274,10 +279,11 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
     setError(null);
     setSubmitting(true);
     try {
+      if (newAttempt) idempotencyKeys.current.PIX = crypto.randomUUID();
       const subscription = await subscriptionsApi.subscribe({
         ...buildBasePayload(),
         asaasBillingType: 'PIX',
-      });
+      }, idempotencyKeys.current.PIX);
       const payment = subscription.payment;
       if (!payment?.pixQrCode?.qrCode) {
         throw new Error(
@@ -328,7 +334,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
           payerLastName: lastName.trim() || undefined,
           payerIdentification: { type: docType, number: doc },
           asaasCreditCard: card,
-        });
+        }, idempotencyKeys.current.TRIAL);
         await refreshSubscription();
         if (sub.hasPaymentMethod || sub.status === 'TRIALING') {
           setSuccess(true);
@@ -343,7 +349,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
         ...buildBasePayload(),
         asaasBillingType: 'CREDIT_CARD',
         asaasCreditCard: card,
-      });
+      }, idempotencyKeys.current.CREDIT_CARD);
       setError(
         'Pagamento processado. Assim que for confirmado, seu acesso será liberado automaticamente.'
       );
@@ -516,7 +522,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
                   onClick={() => {
                     setPixPayment(null);
                     setPixExpired(false);
-                    submitAsaasPix();
+                    submitAsaasPix(true);
                   }}
                   disabled={submitting}
                   className="px-6 py-3 rounded-xl bg-accent text-accent-fg font-bold text-sm hover:bg-accent-hover transition-colors disabled:opacity-60"
@@ -534,10 +540,11 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
                 </h2>
 
                 <div>
-                  <label className="text-xs font-bold text-text-secondary block mb-1">
+                  <label htmlFor="payer-email" className="text-xs font-bold text-text-secondary block mb-1">
                     E-mail *
                   </label>
                   <input
+                    id="payer-email"
                     type="email"
                     className={inputClass}
                     placeholder="seu@email.com"
@@ -548,8 +555,9 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-bold text-text-secondary block mb-1">Nome</label>
+                    <label htmlFor="payer-first-name" className="text-xs font-bold text-text-secondary block mb-1">Nome</label>
                     <input
+                      id="payer-first-name"
                       className={inputClass}
                       placeholder="Nome"
                       value={firstName}
@@ -557,10 +565,11 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-text-secondary block mb-1">
+                    <label htmlFor="payer-last-name" className="text-xs font-bold text-text-secondary block mb-1">
                       Sobrenome
                     </label>
                     <input
+                      id="payer-last-name"
                       className={inputClass}
                       placeholder="Sobrenome"
                       value={lastName}
@@ -571,9 +580,9 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
 
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-[148px_1fr]">
                   <div>
-                    <label className="text-xs font-bold text-text-secondary block mb-1">
+                    <p className="text-xs font-bold text-text-secondary block mb-1">
                       Documento
-                    </label>
+                    </p>
                     <div
                       role="group"
                       aria-label="Tipo de documento"
@@ -604,10 +613,11 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-text-secondary block mb-1">
+                    <label htmlFor="payer-document" className="text-xs font-bold text-text-secondary block mb-1">
                       Número {asaasBillingType === 'CREDIT_CARD' ? '*' : '(opcional para PIX)'}
                     </label>
                     <input
+                      id="payer-document"
                       className={inputClass}
                       placeholder={docType === 'CPF' ? '000.000.000-00' : '00.000.000/0000-00'}
                       value={docNumber}
@@ -688,10 +698,11 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-xs font-bold text-text-secondary block mb-1">
+                        <label htmlFor="billing-postal-code" className="text-xs font-bold text-text-secondary block mb-1">
                           CEP *
                         </label>
                         <input
+                          id="billing-postal-code"
                           className={inputClass}
                           placeholder="00000-000"
                           inputMode="numeric"
@@ -703,10 +714,11 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
                         />
                       </div>
                       <div>
-                        <label className="text-xs font-bold text-text-secondary block mb-1">
+                        <label htmlFor="billing-address-number" className="text-xs font-bold text-text-secondary block mb-1">
                           Nº endereço *
                         </label>
                         <input
+                          id="billing-address-number"
                           className={inputClass}
                           placeholder="123"
                           value={asaasAddressNumber}
@@ -716,10 +728,11 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
                     </div>
 
                     <div>
-                      <label className="text-xs font-bold text-text-secondary block mb-1">
+                      <label htmlFor="billing-phone" className="text-xs font-bold text-text-secondary block mb-1">
                         Telefone do titular *
                       </label>
                       <input
+                        id="billing-phone"
                         className={inputClass}
                         placeholder="(00) 00000-0000"
                         inputMode="numeric"
@@ -732,7 +745,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
 
                 <button
                   type="button"
-                  onClick={asaasBillingType === 'CREDIT_CARD' ? submitAsaasCard : submitAsaasPix}
+                  onClick={asaasBillingType === 'CREDIT_CARD' ? submitAsaasCard : () => submitAsaasPix(false)}
                   disabled={submitting}
                   className="w-full py-4 rounded-xl bg-accent text-accent-fg font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-accent-hover transition-colors disabled:opacity-60"
                 >

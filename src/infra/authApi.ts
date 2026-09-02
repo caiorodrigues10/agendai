@@ -44,21 +44,12 @@ export const authApi = {
   refresh: (refreshToken?: string) =>
     apiClient<AuthResponse>('/api/auth/refresh', 'POST', { refreshToken }),
   me: (token: string) => apiClient<{ user: AuthUser }>('/api/auth/me', 'GET', undefined, token),
+  logout: (token: string) =>
+    apiClient<{ message: string }>('/api/auth/logout', 'POST', undefined, token),
   googleLogin: (idToken: string) =>
     apiClient<AuthResponse>('/api/auth/google', 'POST', { idToken }),
   forgotPassword: (email: string, recaptchaToken?: string) =>
     apiClient<{ message: string }>('/api/auth/forgot-password', 'POST', { email, recaptchaToken }),
-  requestWhatsAppReset: (email: string) =>
-    apiClient<{ message: string; requestId?: string; maskedPhone?: string }>(
-      '/api/auth/forgot-password/whatsapp',
-      'POST',
-      { email }
-    ),
-  verifyWhatsAppResetCode: (requestId: string, code: string) =>
-    apiClient<{ token: string }>('/api/auth/forgot-password/whatsapp/verify', 'POST', {
-      requestId,
-      code,
-    }),
   resetPassword: (token: string, newPassword: string) =>
     apiClient<{ message: string }>('/api/auth/reset-password', 'POST', { token, newPassword }),
 };

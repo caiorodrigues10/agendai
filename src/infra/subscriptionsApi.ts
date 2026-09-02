@@ -152,19 +152,21 @@ export const subscriptionsApi = {
       undefined,
       token()
     ).then(res => unwrap<MySubscription>(res)),
-  subscribe: (payload: SubscribePayload) =>
+  subscribe: (payload: SubscribePayload, idempotencyKey = crypto.randomUUID()) =>
     apiClient<{ success: boolean; data: Subscription }>(
       '/api/subscriptions',
       'POST',
       payload,
-      token()
+      token(),
+      { headers: { 'Idempotency-Key': idempotencyKey } }
     ).then(res => unwrap<Subscription>(res)),
-  setupTrialCard: (payload: SetupTrialCardPayload) =>
+  setupTrialCard: (payload: SetupTrialCardPayload, idempotencyKey = crypto.randomUUID()) =>
     apiClient<{ success: boolean; data: Subscription }>(
       '/api/subscriptions/setup-trial-card',
       'POST',
       payload,
-      token()
+      token(),
+      { headers: { 'Idempotency-Key': idempotencyKey } }
     ).then(res => unwrap<Subscription>(res)),
   cancel: (payload?: { cancelReason?: string; pixKey?: string; pixKeyType?: string }) => {
     const body: Record<string, string> = {};

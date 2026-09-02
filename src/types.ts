@@ -38,7 +38,7 @@ export interface Appointment {
   date: string;
   time: string;
   createdAt: number;
-  status: 'confirmed' | 'cancelled' | 'completed' | 'checked_in';
+    status: 'confirmed' | 'cancelled' | 'completed' | 'checked_in' | 'no_show';
   serviceName?: string;
   staffName?: string;
   serviceDurationMinutes?: number;

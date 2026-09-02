@@ -20,6 +20,7 @@ import {
   User,
   CheckCircle,
   Trash2,
+  UserX,
   Phone,
   ChevronDown,
 } from 'lucide-react';
@@ -61,6 +62,7 @@ interface AppointmentCalendarProps {
   onBook: (data: any) => Promise<void>;
   onCancel: (id: string) => void;
   onCheckIn: (appointment: Appointment) => void;
+  onNoShow: (id: string) => void;
   onDateChange?: (date: string) => void;
 }
 
@@ -75,6 +77,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   onBook,
   onCancel,
   onCheckIn,
+  onNoShow,
   onDateChange,
 }) => {
   const [selectedDate, setSelectedDate] = useState(() => formatDateISO(new Date()));
@@ -513,6 +516,19 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                 <Trash2 size={14} />
               </button>
             </div>
+            {selectedAppt.status === 'confirmed' && (
+              <button
+                onClick={() => {
+                  if (confirm('Marcar este cliente como não compareceu?')) {
+                    onNoShow(selectedAppt.id);
+                    setSelectedAppt(null);
+                  }
+                }}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface-2 py-2.5 text-xs font-bold text-text-secondary hover:text-text-primary"
+              >
+                <UserX size={14} /> Não compareceu
+              </button>
+            )}
             <button
               onClick={() => setSelectedAppt(null)}
               className="w-full py-2 text-text-secondary text-sm hover:text-text-primary"

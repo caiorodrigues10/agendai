@@ -1,18 +1,18 @@
 /** Copy canônico do trial: período de teste sem cartão e assinatura opcional. */
 export const trialCampaign = {
   eyebrow: 'Comece sem cartão',
-  body: 'Sua conta começa com um período de teste de Pro completo, sem cartão.',
+  body: 'Sua conta começa com 30 dias de teste do Pro completo, sem cartão.',
   afterTrial: 'Depois, escolha Essencial ou Pro para continuar. Só há cobrança quando você contratar.',
   cta: 'Criar conta grátis',
   ctaShort: 'Criar conta',
   ctaGoToPanel: 'Ir para o painel',
-  heroSubline: 'Teste de Pro · sem cartão',
+  heroSubline: '30 dias de Pro · sem cartão',
   metricLabel: 'Pro completo para conhecer a plataforma.',
-  planIncluded: 'Inclui período de teste sem cartão',
+  planIncluded: 'Inclui 30 dias de teste sem cartão',
   afterTrialThenPro: 'Depois do teste, continue no Pro se quiser',
   afterTrialThenEssential: 'Depois do teste, continue no Essencial se quiser',
   signupHint:
-    'Crie sua conta e use o Pro completo durante o período de teste. Você não precisa escolher um plano nem informar cartão agora.',
+    'Crie sua conta e use o Pro completo por 30 dias. Você não precisa escolher um plano nem informar cartão agora.',
   checkoutHint:
     'Assinar durante o trial é opcional. A cobrança só é criada quando você confirma esta assinatura.',
   ownerEvaluate:

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { apiClient } from '../../infra/apiClient';
 import { authStorage } from '../../infra/authStorage';
+import { usersApi } from '../../infra/usersApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import {
   Download,
@@ -28,12 +27,10 @@ interface AccountPrivacyPanelProps {
 }
 
 export const AccountPrivacyPanel: React.FC<AccountPrivacyPanelProps> = ({ onNotify }) => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [exporting, setExporting] = useState<'json' | 'csv' | null>(null);
-  const [deleting, setDeleting] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState(false);
-  const [deletePassword, setDeletePassword] = useState('');
+  const [requestingDeletion, setRequestingDeletion] = useState(false);
+  const [deletionRequested, setDeletionRequested] = useState(false);
 
   const handleExport = async (format: 'json' | 'csv') => {
     setExporting(format);
@@ -63,23 +60,16 @@ export const AccountPrivacyPanel: React.FC<AccountPrivacyPanelProps> = ({ onNoti
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (!deletePassword) {
-      onNotify('Digite sua senha para confirmar.', 'error');
-      return;
-    }
-    setDeleting(true);
+  const handleDeletionRequest = async () => {
+    setRequestingDeletion(true);
     try {
-      await apiClient<void>('/api/users/me', 'DELETE', { password: deletePassword }, token());
-      onNotify('Conta excluída com sucesso.', 'success');
-      logout();
-      navigate('/login');
+      await usersApi.requestDeletion();
+      setDeletionRequested(true);
+      onNotify('Solicitação de exclusão registrada.', 'success');
     } catch (err) {
-      onNotify(getErrorMessage(err, 'Não foi possível excluir a conta.'), 'error');
+      onNotify(getErrorMessage(err, 'Não foi possível solicitar a exclusão.'), 'error');
     } finally {
-      setDeleting(false);
-      setDeleteConfirm(false);
-      setDeletePassword('');
+      setRequestingDeletion(false);
     }
   };
 
@@ -167,56 +157,17 @@ export const AccountPrivacyPanel: React.FC<AccountPrivacyPanelProps> = ({ onNoti
           Excluir conta
         </h3>
         <p className="text-xs text-text-muted mb-4">
-          Ação irreversível. Seus dados pessoais são anonimizados; registros da barbearia, auditoria
-          e pagamentos permanecem por obrigação legal.
+          Envie uma solicitação para análise. Dados que precisem ser mantidos por obrigação legal serão preservados pelo prazo aplicável.
         </p>
-        {!deleteConfirm ? (
-          <button
-            type="button"
-            onClick={() => setDeleteConfirm(true)}
-            className="px-3 py-2 text-xs font-bold rounded-lg bg-danger/10 border border-danger/30 text-danger hover:bg-danger/20 flex items-center gap-1.5"
-          >
-            <Trash2 size={14} />
-            Solicitar exclusão
-          </button>
-        ) : (
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm text-text-secondary mb-1.5">
-                Digite sua senha para confirmar
-              </label>
-              <input
-                type="password"
-                value={deletePassword}
-                onChange={e => setDeletePassword(e.target.value)}
-                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
-                placeholder="••••••••"
-                autoComplete="current-password"
-              />
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => void handleDeleteAccount()}
-                disabled={deleting}
-                className="px-3 py-2 text-xs font-bold rounded-lg bg-danger text-white hover:opacity-90 disabled:opacity-50 flex items-center gap-1.5"
-              >
-                {deleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-                Confirmar exclusão
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setDeleteConfirm(false);
-                  setDeletePassword('');
-                }}
-                className="px-3 py-2 text-xs font-bold rounded-lg bg-surface-2 border border-border text-text-secondary hover:bg-border-strong"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        )}
+        <button
+          type="button"
+          onClick={() => void handleDeletionRequest()}
+          disabled={requestingDeletion || deletionRequested}
+          className="px-3 py-2 text-xs font-bold rounded-lg bg-danger/10 border border-danger/30 text-danger hover:bg-danger/20 disabled:opacity-50 flex items-center gap-1.5"
+        >
+          {requestingDeletion ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+          {deletionRequested ? 'Solicitação em análise' : 'Solicitar exclusão'}
+        </button>
       </div>
     </div>
   );

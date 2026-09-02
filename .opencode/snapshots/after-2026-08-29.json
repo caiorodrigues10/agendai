@@ -1,0 +1,141 @@
+{
+  "timestamp": "2026-08-29T11:09:00",
+  "repository": "D:\\Programação\\agendai\\agendai",
+  "description": "State after completing CRM and Financeiro frontend features",
+  "before_snapshot": null,
+  "git": {
+    "branch": "main",
+    "head_commit": "5ffc4aa feat: Financeiro frontend — expanded expense form, filters, CSV export",
+    "is_git_repo": true,
+    "tracked_files_count": 195,
+    "uncommitted_modified_files": [
+      "graphify-out/.graphify_labels.json",
+      "graphify-out/GRAPH_REPORT.md",
+      "graphify-out/graph.html",
+      "graphify-out/graph.json",
+      "graphify-out/manifest.json",
+      "index.html",
+      "package-lock.json",
+      "package.json",
+      "src/components/domain/AddCustomerForm.tsx",
+      "src/components/domain/QueueItemCard.tsx",
+      "src/components/marketing/MarketingFooter.tsx",
+      "src/components/marketing/MarketingNav.tsx",
+      "src/index.css",
+      "src/index.tsx",
+      "src/infra/schedulingApi.ts",
+      "src/marketing/trialCampaign.ts",
+      "src/pages/PlansPage.tsx",
+      "src/pages/PublicHome.tsx",
+      "src/pages/StaffDashboard.tsx",
+      "src/pages/marketing/AboutPage.tsx",
+      "src/pages/marketing/DashboardPage.tsx",
+      "src/pages/marketing/FeaturesPage.tsx",
+      "src/pages/marketing/SchedulingPage.tsx",
+      "src/vite-env.d.ts",
+      "vite.config.ts"
+    ],
+    "uncommitted_new_files": [
+      "graphify-out/2026-08-29/.graphify_labels.json",
+      "graphify-out/2026-08-29/GRAPH_REPORT.md",
+      "graphify-out/2026-08-29/graph.json",
+      "graphify-out/2026-08-29/manifest.json",
+      "public/icons/icon-maskable.svg",
+      "src/components/pwa/PwaInstallCard.tsx",
+      "src/components/pwa/PwaUpdatePrompt.tsx",
+      "src/contexts/PwaInstallContext.tsx"
+    ]
+  },
+  "crm_and_financeiro_commits": {
+    "commits": [
+      {
+        "hash": "5ffc4aa",
+        "message": "feat: Financeiro frontend — expanded expense form, filters, CSV export"
+      },
+      {
+        "hash": "b9837c7",
+        "message": "feat: CRM frontend — edit client, notes, pagination, history, delete"
+      }
+    ],
+    "files_changed": 8,
+    "insertions": 946,
+    "deletions": 103,
+    "files": [
+      {
+        "status": "M",
+        "file": "src/App.tsx",
+        "insertions": 3,
+        "deletions": 0
+      },
+      {
+        "status": "M",
+        "file": "src/components/domain/ClientsManager.tsx",
+        "insertions": 248,
+        "deletions": 38
+      },
+      {
+        "status": "M",
+        "file": "src/components/domain/OwnerFinancialPanel.tsx",
+        "insertions": 621,
+        "deletions": 61
+      },
+      {
+        "status": "M",
+        "file": "src/contexts/SchedulingContext.tsx",
+        "insertions": 4,
+        "deletions": 2
+      },
+      {
+        "status": "M",
+        "file": "src/hooks/usePermissions.ts",
+        "insertions": 1,
+        "deletions": 1
+      },
+      {
+        "status": "M",
+        "file": "src/infra/clientsApi.ts",
+        "insertions": 4,
+        "deletions": 0
+      },
+      {
+        "status": "M",
+        "file": "src/infra/financialApi.ts",
+        "insertions": 63,
+        "deletions": 1
+      },
+      {
+        "status": "M",
+        "file": "src/types.ts",
+        "insertions": 2,
+        "deletions": 0
+      }
+    ]
+  },
+  "comparison": {
+    "note": "No before snapshot was captured (BASELINE NOT CAPTURED). This snapshot captures the state after CRM and Financeiro features.",
+    "crm_features_added": [
+      "Client editing (ClientsManager.tsx +248 lines)",
+      "Client notes system",
+      "Client pagination",
+      "Client history tracking",
+      "Client deletion",
+      "Clients API extensions (+4 lines)"
+    ],
+    "financeiro_features_added": [
+      "Expanded expense form (OwnerFinancialPanel.tsx +621 lines)",
+      "Expense filters",
+      "CSV export",
+      "Financial API extensions (+63 lines)"
+    ],
+    "supporting_changes": [
+      "App.tsx: +3 lines (new routes/features)",
+      "SchedulingContext.tsx: +4/-2 lines (context updates)",
+      "usePermissions.ts: +1/-1 line (permission adjustments)",
+      "types.ts: +2 lines (new type definitions)"
+    ],
+    "uncommitted_work": {
+      "25_modified_files": "Ongoing development in marketing, PWA, config",
+      "4_new_files": "PWA components (PwaInstallCard, PwaUpdatePrompt, PwaInstallContext), icons"
+    }
+  }
+}
