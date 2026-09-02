@@ -1,6 +1,6 @@
 import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
-import { DaySchedule, Service, StaffMember, FeedPost, PostMode, PostConfig } from '../types';
+import { DaySchedule, Service, StaffMember, FeedPost, PostMode, PostConfig, OperationMode } from '../types';
 import { mapScheduleToApi } from '../utils/schedulingUtils';
 
 function unwrap<T>(res: unknown): T {
@@ -16,6 +16,7 @@ interface BarbershopData {
   logoUrl?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  operationMode?: OperationMode;
 }
 
 type UpdateBarbershopPayload = Partial<BarbershopData>;
@@ -45,6 +46,12 @@ interface CreatePostPayload {
   content?: string;
   imageUrl?: string;
   scheduledFor?: string;
+  templateKey?: string;
+  format?: 'square' | 'portrait' | 'story';
+  primaryMediaId?: string | null;
+  secondaryMediaId?: string | null;
+  paletteKey?: string;
+  designOptions?: { focalX?: number; focalY?: number; overlay?: number };
 }
 
 export interface PostAiSuggestion {
@@ -215,13 +222,17 @@ export const barbershopApi = {
     postMode: PostMode,
     type: string,
     title?: string,
-    ctaText?: string
+    ctaText?: string,
+    templateKey = 'agenda-aberta',
+    format: 'square' | 'portrait' | 'story' = 'square'
   ) => {
     const token = authStorage.getAccessToken() || '';
     const params = new URLSearchParams({
       barbershopId,
       postMode,
       type,
+      templateKey,
+      format,
     });
     if (title?.trim()) params.set('title', title.trim());
     if (ctaText?.trim()) params.set('ctaText', ctaText.trim());
@@ -366,6 +377,31 @@ export const barbershopApi = {
 
     const result = await response.json();
     return result.data;
+  },
+
+  updateOperationMode: async (
+    barbershopId: string,
+    operationMode: OperationMode
+  ): Promise<{
+    operationMode: OperationMode;
+    capabilities: { queue: boolean; appointments: boolean };
+    pending: { manualQueue: number; futureAppointments: number };
+  }> => {
+    const token = authStorage.getAccessToken() || '';
+    const res = await apiClient<{
+      success: boolean;
+      data: {
+        operationMode: OperationMode;
+        capabilities: { queue: boolean; appointments: boolean };
+        pending: { manualQueue: number; futureAppointments: number };
+      };
+    }>(
+      `/api/barbershops/${barbershopId}/operation-mode`,
+      'PATCH',
+      { operationMode },
+      token
+    );
+    return (res as { data: { operationMode: OperationMode; capabilities: { queue: boolean; appointments: boolean }; pending: { manualQueue: number; futureAppointments: number } } }).data;
   },
 
   uploadPostVideo: async (barbershopId: string, file: File): Promise<{ videoUrl: string }> => {

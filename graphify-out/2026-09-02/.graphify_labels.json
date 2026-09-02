@@ -82,5 +82,16 @@
   "80": "ShopProfile.tsx",
   "81": "MarketingNav.tsx",
   "82": "credit-card-form.tsx",
-  "83": "clsx"
+  "83": "clsx",
+  "84": "QueueStatusCard.tsx",
+  "85": "eslint-plugin-jsx-a11y",
+  "86": "framer-motion",
+  "87": "@google/genai",
+  "88": "gsap",
+  "89": "react-dom",
+  "90": "react-focus-lock",
+  "91": "react-router-dom",
+  "92": "tailwind-merge",
+  "93": "uuid",
+  "94": "zod"
 }

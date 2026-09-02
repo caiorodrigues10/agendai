@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
 import { barbershopApi } from '../infra/barbershopApi';
-import { StaffMember, Service, ShopSettings, FeedPost } from '../types';
+import { StaffMember, Service, ShopSettings, FeedPost, OperationMode } from '../types';
 import { mapScheduleFromApi, mapStaffFromApi } from '../utils/schedulingUtils';
 import { useBarbershopFilters } from './BarbershopFiltersContext';
 import { useAuth } from './AuthContext';
@@ -13,6 +13,7 @@ interface BarbershopContextValue {
   settings: ShopSettings | null;
   feed: FeedPost[];
   setSettings: (settings: ShopSettings) => Promise<void>;
+  setOperationMode: (mode: OperationMode) => Promise<void>;
   addService: (data: Omit<Service, 'id'>) => Promise<void>;
   editService: (id: string, data: Omit<Service, 'id'>) => Promise<void>;
   deleteService: (id: string) => Promise<void>;
@@ -117,6 +118,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
           logoUrl?: string | null;
           latitude?: number | null;
           longitude?: number | null;
+          operationMode?: import('../types').OperationMode;
         } | null;
         let schedule = mapScheduleFromApi(null);
         try {
@@ -146,6 +148,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
             city: shopData.city ?? undefined,
             latitude: shopData.latitude ?? undefined,
             longitude: shopData.longitude ?? undefined,
+            operationMode: shopData.operationMode ?? 'HYBRID',
             schedule,
             logoUrl: shopData.logoUrl ?? undefined,
           });
@@ -178,6 +181,18 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
     await barbershopApi.updateBarbershop(barbershopId, shopPayload);
     await barbershopApi.updateSchedule(barbershopId, newSettings.schedule);
     setSettingsState(newSettings);
+  };
+
+  const setOperationMode = async (mode: import('../types').OperationMode) => {
+    if (!barbershopId || !settings) return;
+    const prev = settings.operationMode;
+    setSettingsState({ ...settings, operationMode: mode });
+    try {
+      await barbershopApi.updateOperationMode(barbershopId, mode);
+    } catch {
+      setSettingsState({ ...settings, operationMode: prev ?? 'HYBRID' });
+      throw new Error('Não foi possível alterar o modo de atendimento.');
+    }
   };
 
   const addService = async (data: Omit<Service, 'id'>) => {
@@ -278,6 +293,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
       settings,
       feed,
       setSettings,
+      setOperationMode,
       addService,
       editService,
       deleteService,

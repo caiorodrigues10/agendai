@@ -15,6 +15,7 @@ import {
   RiSettings4Line,
   RiStore2Line,
 } from 'react-icons/ri';
+import type { OperationMode } from '../types';
 
 export type TabRole = 'OWNER' | 'EMPLOYEE' | 'MASTER_ADMIN';
 
@@ -24,6 +25,8 @@ export interface TabDef {
   icon: IconType;
   /** If empty → visible to all authenticated users */
   roles?: TabRole[];
+  /** If empty → visible in all operation modes */
+  modes?: OperationMode[];
   /** Optional capability required (future use) */
   requires?: string;
 }
@@ -40,8 +43,8 @@ export const TAB_GROUPS: TabGroup[] = [
     label: 'Operação',
     tabs: [
       { id: 'overview', label: 'Visão Geral', icon: RiDashboardLine },
-      { id: 'queue', label: 'Fila', icon: RiListCheck2 },
-      { id: 'appointments', label: 'Agenda', icon: RiCalendarScheduleLine },
+      { id: 'queue', label: 'Fila', icon: RiListCheck2, modes: ['HYBRID', 'QUEUE_ONLY'] },
+      { id: 'appointments', label: 'Agenda', icon: RiCalendarScheduleLine, modes: ['HYBRID', 'APPOINTMENTS_ONLY'] },
       { id: 'clients', label: 'Clientes', icon: RiContactsLine },
     ],
   },
@@ -91,18 +94,6 @@ export const MOBILE_PRIMARY_TAB_IDS = ['overview', 'queue', 'appointments', 'cli
 /** Flat lookup of all tab IDs */
 export const ALL_TAB_IDS = TAB_GROUPS.flatMap(g => g.tabs.map(t => t.id));
 
-/** Returns the first tab the user can access, or 'queue' as fallback */
-export function getDefaultTab(userRole?: string): string {
-  for (const group of TAB_GROUPS) {
-    for (const tab of group.tabs) {
-      if (!tab.roles || tab.roles.includes(userRole as TabRole)) {
-        return tab.id;
-      }
-    }
-  }
-  return 'queue';
-}
-
 /** Check if a tab is valid and accessible */
 export function canAccessTab(tabId: string, userRole?: string): boolean {
   for (const group of TAB_GROUPS) {
@@ -112,4 +103,27 @@ export function canAccessTab(tabId: string, userRole?: string): boolean {
     return tab.roles.includes(userRole as TabRole);
   }
   return false;
+}
+
+/** Check if a tab is accessible for the given operation mode */
+export function canAccessTabByMode(tabId: string, mode?: OperationMode): boolean {
+  for (const group of TAB_GROUPS) {
+    const tab = group.tabs.find(t => t.id === tabId);
+    if (!tab) continue;
+    if (!tab.modes) return true;
+    return tab.modes.includes(mode ?? 'HYBRID');
+  }
+  return false;
+}
+
+/** Returns the first tab the user can access for the given mode */
+export function getDefaultTab(userRole?: string, mode?: OperationMode): string {
+  for (const group of TAB_GROUPS) {
+    for (const tab of group.tabs) {
+      if (tab.roles && !tab.roles.includes(userRole as TabRole)) continue;
+      if (tab.modes && !tab.modes.includes(mode ?? 'HYBRID')) continue;
+      return tab.id;
+    }
+  }
+  return 'overview';
 }

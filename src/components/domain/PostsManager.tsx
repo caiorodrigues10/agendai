@@ -24,7 +24,7 @@ import { barbershopApi, PostAiSuggestion } from '../../infra/barbershopApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { getErrorMessage } from '../../utils/errorMessage';
-import { FeedPost, PostMode } from '../../types';
+import { FeedPost, PostFormat, PostMode } from '../../types';
 import { Toast } from '../ui/Toast';
 import { Logo } from '../ui/Logo';
 
@@ -60,6 +60,21 @@ const TONE_OPTIONS: {
   { id: 'divertido', label: 'Descontraído' },
 ];
 
+const TEMPLATE_OPTIONS = [
+  ['agenda-aberta', 'Agenda aberta', 'Horários e serviços'],
+  ['ultimas-vagas', 'Últimas vagas', 'Urgência elegante'],
+  ['promocao-relampago', 'Promoção relâmpago', 'Oferta em destaque'],
+  ['servico-destaque', 'Serviço destaque', 'Preço e benefício'],
+  ['antes-depois', 'Antes e depois', 'Dois resultados'],
+  ['transformacao', 'Transformação', 'Resultado final'],
+  ['profissional-destaque', 'Profissional', 'Apresente sua equipe'],
+  ['depoimento', 'Depoimento', 'Prova social'],
+  ['menu-servicos', 'Menu de serviços', 'Serviços principais'],
+  ['horario-especial', 'Horário especial', 'Avisos importantes'],
+  ['novidade', 'Novidade', 'Lançamentos'],
+  ['editorial-minimalista', 'Minimalista', 'Visual limpo'],
+] as const;
+
 const QUICK_PRESETS = [
   { label: 'Hoje tem vaga', title: 'Horários abertos hoje!', ctaText: 'Reservar horário' },
   {
@@ -90,6 +105,8 @@ export const PostsManager: React.FC = () => {
   const { settings } = useBarbershop();
 
   const [type, setType] = useState<PostType>('haircut');
+  const [templateKey, setTemplateKey] = useState('agenda-aberta');
+  const [format, setFormat] = useState<PostFormat>('square');
   const [postMode, setPostMode] = useState<PostMode>('queue');
   const [tone, setTone] = useState<PostTone>(null);
   const [extra, setExtra] = useState('');
@@ -198,7 +215,7 @@ export const PostsManager: React.FC = () => {
       if (!id) return;
       setPreviewLoading(true);
       try {
-        const res = await barbershopApi.getPostPreview(id, mode, t, ti, ct);
+        const res = await barbershopApi.getPostPreview(id, mode, t, ti, ct, templateKey, format);
         setPreviewUrl(res?.imageUrl || null);
       } catch (err) {
         setPreviewUrl(null);
@@ -207,10 +224,10 @@ export const PostsManager: React.FC = () => {
         setPreviewLoading(false);
       }
     },
-    [showToast]
+    [showToast, templateKey, format]
   );
 
-  const previewKey = `${type}|${postMode}|${title}|${ctaText}`;
+  const previewKey = `${type}|${postMode}|${title}|${ctaText}|${templateKey}|${format}`;
 
   useEffect(() => {
     if (!barbershopId) return;
@@ -255,6 +272,8 @@ export const PostsManager: React.FC = () => {
         content: title.trim() || ctaText.trim() || 'Novo post',
         ctaText: ctaText.trim() || undefined,
         postMode,
+        templateKey,
+        format,
       };
       if (publishMode === 'schedule' && scheduledFor) {
         payload.scheduledFor = new Date(scheduledFor).toISOString();
@@ -375,7 +394,7 @@ export const PostsManager: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-6">
+      <div className="grid items-start gap-5 lg:grid-cols-1 lg:gap-6">
         <div className="space-y-6">
           <div className="space-y-6 rounded-3xl border border-border bg-surface p-4 shadow-lg sm:p-5">
             <div className="flex items-start justify-between gap-3">
@@ -388,6 +407,33 @@ export const PostsManager: React.FC = () => {
               <span className="rounded-full border border-accent/25 bg-accent/10 px-3 py-1 text-[11px] font-bold text-accent">
                 1080 × 1080
               </span>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-text-secondary">
+                Modelo visual
+              </label>
+              <div className="flex gap-2 overflow-x-auto pb-2 snap-x">
+                {TEMPLATE_OPTIONS.map(([id, label, description]) => (
+                  <button key={id} type="button" aria-pressed={templateKey === id} onClick={() => setTemplateKey(id)}
+                    className={`min-w-[142px] snap-start rounded-2xl border p-3 text-left transition-all ${templateKey === id ? 'border-accent bg-accent/15 ring-1 ring-accent' : 'border-border bg-bg hover:border-accent/40'}`}>
+                    <span className="mb-2 block h-16 rounded-xl bg-gradient-to-br from-accent/70 via-surface-2 to-bg" />
+                    <span className="block text-xs font-bold text-text-primary">{label}</span>
+                    <span className="mt-1 block text-[10px] text-text-muted">{description}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-text-secondary">Formato</label>
+              <div className="grid grid-cols-3 gap-2">
+                {([['square', 'Quadrado', '1080×1080'], ['portrait', 'Feed vertical', '1080×1350'], ['story', 'Story', '1080×1920']] as const).map(([id, label, size]) => (
+                  <button key={id} type="button" aria-pressed={format === id} onClick={() => setFormat(id)} className={`min-h-16 rounded-xl border px-2 py-2 text-center transition-all ${format === id ? 'border-accent bg-accent text-accent-fg' : 'border-border bg-bg text-text-muted hover:border-accent/35'}`}>
+                    <span className="block text-xs font-bold">{label}</span><span className="text-[10px] opacity-80">{size}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div>
@@ -715,7 +761,7 @@ export const PostsManager: React.FC = () => {
           </div>
         </div>
 
-        <div className="order-first -mx-1 space-y-3 lg:sticky lg:top-4 lg:order-none lg:mx-0">
+        <div className="order-last -mx-1 space-y-3 lg:mx-0">
           <div className="overflow-hidden rounded-3xl border border-border bg-black shadow-[0_24px_50px_-28px_rgba(0,0,0,0.9)]">
             <div className="flex items-center justify-between border-b border-white/10 px-3.5 py-3">
               <div className="flex items-center gap-2.5 min-w-0">
@@ -726,7 +772,7 @@ export const PostsManager: React.FC = () => {
                   <p className="text-xs font-bold text-white truncate">
                     {settings?.shopName || 'Seu salão'}
                   </p>
-                  <p className="text-[10px] text-neutral-400">Seu post no feed · 1080×1080</p>
+                   <p className="text-[10px] text-neutral-400">Seu post no feed · {format === 'square' ? '1080×1080' : format === 'portrait' ? '1080×1350' : '1080×1920'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
@@ -743,7 +789,7 @@ export const PostsManager: React.FC = () => {
               </div>
             </div>
 
-            <div className="relative aspect-square w-full overflow-hidden bg-surface">
+             <div className={`relative w-full overflow-hidden bg-surface ${format === 'square' ? 'aspect-square' : format === 'portrait' ? 'aspect-[4/5]' : 'aspect-[9/16]'}`}>
               {!previewUrl && (
                 <>
                   <div className="absolute inset-x-0 top-0 h-1 bg-accent" />

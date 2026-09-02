@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
 import { CalendarDays, Check, Copy, ExternalLink, QrCode, Store, Users } from 'lucide-react';
+import type { OperationMode } from '../../types';
 
-interface PublicLinkPanelProps { barbershopId: string; }
+interface PublicLinkPanelProps { barbershopId: string; operationMode?: OperationMode; }
 
 const qrUrl = (url: string) =>
   `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(url)}&bgcolor=ffffff&color=000000`;
 
-export const PublicLinkPanel: React.FC<PublicLinkPanelProps> = ({ barbershopId }) => {
+export const PublicLinkPanel: React.FC<PublicLinkPanelProps> = ({ barbershopId, operationMode }) => {
   const [copied, setCopied] = useState<string | null>(null);
   const baseUrl = `${window.location.origin}/queue/${barbershopId}`;
-  const destinations = [
-    { id: 'profile', label: 'Perfil do salão', description: 'Serviços, horários e publicações.', url: `${baseUrl}?tab=profile`, icon: Store },
-    { id: 'queue', label: 'Entrar na fila', description: 'Fila ao vivo do seu salão.', url: baseUrl, icon: Users },
-    { id: 'appointments', label: 'Agendar horário', description: 'Agenda online para seus clientes.', url: `${baseUrl}?tab=appointments`, icon: CalendarDays },
+
+  const allDestinations = [
+    { id: 'profile', label: 'Perfil do salão', description: 'Serviços, horários e publicações.', url: `${baseUrl}?tab=profile`, icon: Store, modes: undefined },
+    { id: 'queue', label: 'Entrar na fila', description: 'Fila ao vivo do seu salão.', url: baseUrl, icon: Users, modes: ['HYBRID', 'QUEUE_ONLY'] as OperationMode[] },
+    { id: 'appointments', label: 'Agendar horário', description: 'Agenda online para seus clientes.', url: `${baseUrl}?tab=appointments`, icon: CalendarDays, modes: ['HYBRID', 'APPOINTMENTS_ONLY'] as OperationMode[] },
   ] as const;
+
+  const destinations = allDestinations.filter(d => !d.modes || d.modes.includes(operationMode ?? 'HYBRID'));
   const handleCopy = async (id: string, url: string) => {
     await navigator.clipboard.writeText(url);
     setCopied(id);

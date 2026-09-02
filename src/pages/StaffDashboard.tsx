@@ -24,7 +24,7 @@ import { useBarbershop } from '../contexts/BarbershopContext';
 import { useScheduling } from '../contexts/SchedulingContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
-import { ALL_TAB_IDS, getDefaultTab, canAccessTab } from '../config/tabRegistry';
+import { ALL_TAB_IDS, getDefaultTab, canAccessTab, canAccessTabByMode } from '../config/tabRegistry';
 import { ClientsTab } from '../components/domain/ClientsTab';
 import { PublicLinkPanel } from '../components/domain/PublicLinkPanel';
 import { PwaInstallCard } from '../components/pwa/PwaInstallCard';
@@ -90,31 +90,39 @@ export const StaffDashboard: React.FC = () => {
     null
   );
 
-  const rawTab = location.pathname.split('/')[2] || 'queue';
-  const activeTab = ALL_TAB_IDS.includes(rawTab) ? rawTab : 'queue';
+  const rawTab = location.pathname.split('/')[2] || 'overview';
+  const operationMode = settings?.operationMode ?? 'HYBRID';
+  const activeTab = ALL_TAB_IDS.includes(rawTab) ? rawTab : getDefaultTab(user?.role, operationMode);
 
   // Redirect invalid tabs
   useEffect(() => {
     if (rawTab !== activeTab) {
-      navigate(`/app/${getDefaultTab(user?.role)}`, { replace: true });
+      navigate(`/app/${getDefaultTab(user?.role, operationMode)}`, { replace: true });
     }
-  }, [rawTab, activeTab, user?.role, navigate]);
+  }, [rawTab, activeTab, user?.role, operationMode, navigate]);
 
-  // Redirect if tab not accessible
+  // Redirect if tab not accessible by role
   useEffect(() => {
     if (!user) return;
     if (!canAccessTab(activeTab, user.role)) {
-      navigate(`/app/${getDefaultTab(user.role)}`, { replace: true });
+      navigate(`/app/${getDefaultTab(user.role, operationMode)}`, { replace: true });
     }
-  }, [activeTab, user, navigate]);
+  }, [activeTab, user, operationMode, navigate]);
+
+  // Redirect if tab not accessible by operation mode
+  useEffect(() => {
+    if (!canAccessTabByMode(activeTab, operationMode)) {
+      navigate(`/app/${getDefaultTab(user?.role, operationMode)}`, { replace: true });
+    }
+  }, [activeTab, operationMode, user?.role, navigate]);
 
   // Re-check access including hasDashboard
   useEffect(() => {
     if (!user) return;
     if ((activeTab === 'reports' || activeTab === 'finance') && !hasDashboard) {
-      navigate(`/app/${getDefaultTab(user.role)}`, { replace: true });
+      navigate(`/app/${getDefaultTab(user.role, operationMode)}`, { replace: true });
     }
-  }, [activeTab, user, hasDashboard, navigate]);
+  }, [activeTab, user, hasDashboard, operationMode, navigate]);
 
   useEffect(() => {
     if (subscriptionLoading) return;
@@ -442,7 +450,7 @@ export const StaffDashboard: React.FC = () => {
 
           {activeTab === 'link' &&
             (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') &&
-            barbershopId && <PublicLinkPanel barbershopId={barbershopId} />}
+            barbershopId && <PublicLinkPanel barbershopId={barbershopId} operationMode={settings?.operationMode} />}
 
           {activeTab === 'referrals' &&
             (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && <OwnerReferralsPanel />}

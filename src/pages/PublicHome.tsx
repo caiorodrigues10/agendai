@@ -12,6 +12,17 @@ import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
 import { useScheduling } from '../contexts/SchedulingContext';
 import { DynamicIcon } from '../components/ui/DynamicIcon';
 import { List, CalendarDays, Store, Coffee, Loader2 } from 'lucide-react';
+import type { OperationMode } from '../types';
+
+type PublicTab = 'queue' | 'appointments' | 'profile';
+
+function visiblePublicTabs(mode?: OperationMode): PublicTab[] {
+  const tabs: PublicTab[] = [];
+  if (!mode || mode === 'QUEUE_ONLY' || mode === 'HYBRID') tabs.push('queue');
+  if (!mode || mode === 'APPOINTMENTS_ONLY' || mode === 'HYBRID') tabs.push('appointments');
+  tabs.push('profile');
+  return tabs;
+}
 
 export const PublicHome: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -43,7 +54,9 @@ export const PublicHome: React.FC = () => {
   } = useScheduling();
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [joinMode, setJoinMode] = useState<'self' | 'dependent'>('self');
-  const [activeTab, setActiveTab] = useState<'queue' | 'profile' | 'appointments'>('queue');
+  const operationMode = settings?.operationMode ?? 'HYBRID';
+  const tabs = visiblePublicTabs(operationMode);
+  const [activeTab, setActiveTab] = useState<PublicTab>(tabs[0]);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'bot' } | null>(null);
 
   React.useEffect(() => {
@@ -54,9 +67,9 @@ export const PublicHome: React.FC = () => {
 
   // Deep links used by the salon's public QR codes and post CTAs.
   React.useEffect(() => {
-    const tab = searchParams.get('tab');
-    if (tab === 'appointments' || tab === 'profile' || tab === 'queue') setActiveTab(tab);
-  }, [searchParams]);
+    const tab = searchParams.get('tab') as PublicTab | null;
+    if (tab && tabs.includes(tab)) setActiveTab(tab);
+  }, [searchParams, tabs]);
 
   const showToast = (msg: string, type: 'success' | 'bot' = 'success') => {
     setToast({ message: msg, type });
@@ -123,10 +136,10 @@ export const PublicHome: React.FC = () => {
 
       <main className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 pt-6">
         <div className="flex bg-surface p-1 rounded-xl mb-6 border border-border relative">
-          {['queue', 'appointments', 'profile'].map(tab => (
+          {tabs.map(tab => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab as any)}
+              onClick={() => setActiveTab(tab)}
               className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 z-10 relative
                         ${activeTab === tab ? 'text-text-primary' : 'text-text-muted'}
                     `}
@@ -150,8 +163,13 @@ export const PublicHome: React.FC = () => {
           ))}
 
           <div
-            className={`absolute top-1 bottom-1 w-[calc(33.3%-2px)] bg-surface-2 rounded-lg transition-all duration-300
-                ${activeTab === 'queue' ? 'left-1' : activeTab === 'appointments' ? 'left-[calc(33.3%+2px)]' : 'left-[calc(66.6%+2px)]'}`}
+            className={`absolute top-1 bottom-1 bg-surface-2 rounded-lg transition-all duration-300
+                ${tabs.length === 3
+                  ? `w-[calc(33.3%-2px)] ${activeTab === 'queue' ? 'left-1' : activeTab === 'appointments' ? 'left-[calc(33.3%+2px)]' : 'left-[calc(66.6%+2px)]'}`
+                  : tabs.length === 2
+                    ? `w-[calc(50%-2px)] ${activeTab === tabs[0] ? 'left-1' : 'left-[calc(50%+2px)]'}`
+                    : 'w-[calc(100%-8px)] left-1'
+                }`}
           ></div>
         </div>
 

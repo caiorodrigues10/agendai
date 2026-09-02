@@ -53,6 +53,8 @@ export interface DaySchedule {
   closeTime: string;
 }
 
+export type OperationMode = 'QUEUE_ONLY' | 'APPOINTMENTS_ONLY' | 'HYBRID';
+
 export interface ShopSettings {
   shopName: string;
   whatsapp: string;
@@ -62,6 +64,7 @@ export interface ShopSettings {
   city?: string;
   latitude?: number;
   longitude?: number;
+  operationMode?: OperationMode;
 }
 
 export interface AIInsight {
@@ -114,12 +117,35 @@ export interface FeedPost {
   publishedAt?: number | null;
   postMode?: 'queue' | 'appointments' | 'both';
   ctaText?: string | null;
+  templateKey?: string;
+  format?: 'square' | 'portrait' | 'story';
+  primaryMediaId?: string | null;
+  secondaryMediaId?: string | null;
+  paletteKey?: string;
+  designOptions?: { focalX?: number; focalY?: number; overlay?: number } | null;
 }
 
 export type PostMode = 'queue' | 'appointments' | 'both';
 
 export interface PostConfig {
   autoPostEnabled: boolean;
+}
+
+export type PostFormat = 'square' | 'portrait' | 'story';
+export interface PostTemplate {
+  key: string;
+  name: string;
+  description: string;
+  previewUrl: string;
+  requiredMedia: 0 | 1 | 2;
+  formats: PostFormat[];
+}
+export interface PostMedia {
+  id: string;
+  url: string;
+  mimeType: string;
+  size: number;
+  createdAt: string;
 }
 
 export type PackagePaymentMethod = 'cash' | 'pix' | 'card' | 'other';
