@@ -28,6 +28,7 @@ import {
   CrmOverview,
   CrmSegment,
 } from '../../infra/crmApi';
+import { SmartSelect } from '../ui/SmartSelect';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { CRM_SEGMENT_LABEL } from '../../utils/clientLabels';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -530,28 +531,22 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
                   placeholder="Buscar cliente ou WhatsApp"
                 />
               </label>
-              <select
+              <SmartSelect
+                mode="single"
+                options={segmentOptions}
                 aria-label="Filtrar segmento"
                 value={segment}
-                onChange={event => setSegment(event.target.value as CrmSegment)}
-                className="min-h-11 rounded-lg border border-border bg-bg px-3 text-sm"
-              >
-                {segmentOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <select
+                onChange={value => setSegment(value as CrmSegment)}
+                searchable="auto"
+              />
+              <SmartSelect
+                mode="single"
+                options={[{ value: 'ltv', label: 'Maior LTV' }, { value: 'lastVisit', label: 'Visita recente' }, { value: 'outstanding', label: 'Maior dívida' }]}
                 aria-label="Ordenar clientes"
                 value={sort}
-                onChange={event => setSort(event.target.value as typeof sort)}
-                className="min-h-11 rounded-lg border border-border bg-bg px-3 text-sm"
-              >
-                <option value="ltv">Maior LTV</option>
-                <option value="lastVisit">Visita recente</option>
-                <option value="outstanding">Maior dívida</option>
-              </select>
+                onChange={value => setSort(value as typeof sort)}
+                searchable={false}
+              />
             </div>
             {clientsError && (
               <p className="rounded-lg bg-danger/10 p-3 text-sm text-danger">{clientsError}</p>
@@ -738,23 +733,14 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
                 className="min-h-11 w-full rounded-lg border border-border bg-bg p-3 text-sm"
                 placeholder="Nome da campanha"
               />
-              <select
+              <SmartSelect
+                mode="single"
+                options={segmentOptions}
                 aria-label="Segmento da campanha"
                 value={campaign.segment}
-                onChange={event =>
-                  setCampaign(current => ({
-                    ...current,
-                    segment: event.target.value as CrmSegment,
-                  }))
-                }
-                className="min-h-11 w-full rounded-lg border border-border bg-bg p-3 text-sm"
-              >
-                {segmentOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                onChange={value => setCampaign(current => ({ ...current, segment: value as CrmSegment }))}
+                searchable="auto"
+              />
               <textarea
                 aria-label="Mensagem da campanha"
                 value={campaign.message}

@@ -27,6 +27,7 @@ import {
 } from '../../infra/financialApi';
 import { ApiError } from '../../infra/apiClient';
 import { WeatherForecastWidget } from './WeatherForecastWidget';
+import { SmartSelect } from '../ui/SmartSelect';
 import { commissionsApi, type CommissionSummary } from '../../infra/commissionsApi';
 
 interface FinancialDashboardProps {
@@ -276,17 +277,15 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                 </h3>
                 <p className="mt-1 text-xs text-text-muted">Calculadas sobre o valor final recebido.</p>
               </div>
-              <select
+              <SmartSelect
+                mode="single"
+                options={[{ value: '', label: 'Todos os profissionais' }, ...allStaff.map(member => ({ value: member.id, label: member.name }))]}
                 value={commissionProfessionalId}
-                onChange={event => setCommissionProfessionalId(event.target.value)}
-                className="rounded-lg border border-border bg-bg px-3 py-2 text-xs text-text-primary"
+                onChange={value => setCommissionProfessionalId(value ?? '')}
+                searchable="auto"
+                size="sm"
                 aria-label="Filtrar comissões por profissional"
-              >
-                <option value="">Todos os profissionais</option>
-                {allStaff.map(member => (
-                  <option key={member.id} value={member.id}>{member.name}</option>
-                ))}
-              </select>
+              />
             </div>
 
             {commissionLoading && (

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { SmartSelect } from '../../components/ui/SmartSelect';
 import {
   Search,
   RefreshCcw,
@@ -1083,16 +1084,13 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
               <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
                 Ciclo
               </label>
-              <select
+              <SmartSelect
+                mode="single"
+                options={[{ value: 'MONTHLY', label: 'Mensal' }, { value: 'YEARLY', label: 'Anual' }]}
                 value={form.billingCycle}
-                onChange={e =>
-                  setForm({ ...form, billingCycle: e.target.value as 'MONTHLY' | 'YEARLY' })
-                }
-                className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-all"
-              >
-                <option value="MONTHLY">Mensal</option>
-                <option value="YEARLY">Anual</option>
-              </select>
+                onChange={value => setForm({ ...form, billingCycle: (value ?? 'MONTHLY') as 'MONTHLY' | 'YEARLY' })}
+                searchable={false}
+              />
             </div>
           </div>
           <div>
