@@ -346,6 +346,28 @@ export const barbershopApi = {
     return apiClient<void>(`/api/barbershops/${barbershopId}/logo`, 'DELETE', undefined, token);
   },
 
+  uploadLogoDirect: async (barbershopId: string, file: File): Promise<{ logoUrl: string }> => {
+    const token = authStorage.getAccessToken() || '';
+    const formData = new FormData();
+    formData.append('logo', file);
+
+    const response = await fetch(`/api/barbershops/${encodeURIComponent(barbershopId)}/logo/upload`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw new Error(body.message || `Falha ao enviar logo (${response.status})`);
+    }
+
+    const result = await response.json();
+    return result.data;
+  },
+
   uploadPostVideo: async (barbershopId: string, file: File): Promise<{ videoUrl: string }> => {
     const token = authStorage.getAccessToken() || '';
     const formData = new FormData();

@@ -257,13 +257,21 @@ function MobileNavigationItem({
       type="button"
       onClick={() => onNavigate(tab.id)}
       aria-current={active ? 'page' : undefined}
-      className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-semibold transition-colors ${
+      className={`group flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-semibold transition-colors ${
         active
           ? 'bg-accent text-accent-fg shadow-lg shadow-accent/20'
           : 'text-text-muted hover:bg-bg hover:text-text-primary'
       }`}
     >
-      <tab.icon size={18} />
+      <span
+        className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+          active
+            ? 'bg-black/15 text-accent-fg shadow-inner shadow-black/10'
+            : 'bg-surface-2 text-text-muted group-hover:text-accent'
+        }`}
+      >
+        <tab.icon size={18} />
+      </span>
       <span className="max-w-full truncate leading-tight">{tab.label}</span>
     </button>
   );

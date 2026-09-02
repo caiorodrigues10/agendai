@@ -569,23 +569,17 @@ export const OwnerSubscriptionPanel: React.FC = () => {
               <>
                 <p className="text-2xl font-bold text-success">{brl(economics.savedSoFar)}</p>
                 <p className="text-xs text-text-secondary mt-1">
-                  Já economizado vs. pagar o mensal no mesmo período (
-                  {economics.monthsActive.toFixed(1)} mese(s)).
+                  Economia acumulada por usar o plano anual.
                 </p>
                 <p className="text-xs text-text-muted mt-2">
-                  Projeção em 12 meses: {brl(economics.projectedYearlySavings)} (
-                  {brl(economics.yearlySavingsPerYear)}/ano de desconto).
+                  Economia total em 12 meses: {brl(economics.projectedYearlySavings)}.
                 </p>
               </>
             ) : (
               <>
-                <p className="text-2xl font-bold text-text-muted">{brl(0)}</p>
+                <p className="text-2xl font-bold text-success">{brl(economics.yearlySavingsPerYear)}<span className="ml-1 text-sm font-semibold">/ano</span></p>
                 <p className="text-xs text-text-secondary mt-1">
-                  Você ainda não está no anual. Economia possível:{' '}
-                  <span className="text-success font-bold">
-                    {brl(economics.yearlySavingsPerYear)}/ano
-                  </span>
-                  .
+                  Esta é a economia possível ao escolher o plano anual em vez do mensal.
                 </p>
               </>
             )}
@@ -596,18 +590,15 @@ export const OwnerSubscriptionPanel: React.FC = () => {
               <TrendingDown size={18} />
               <h3 className="font-bold text-sm">
                 {onMonthly
-                  ? 'Quanto você deixa de economizar'
-                  : 'Receita que a plataforma deixa de cobrar'}
+                ? 'Economia disponível no plano anual'
+                  : 'Desconto concedido no plano anual'}
               </h3>
             </div>
             {onMonthly ? (
               <>
-                <p className="text-2xl font-bold text-warning">
-                  {brl(economics.missedSavingsSoFar)}
-                </p>
+                <p className="text-2xl font-bold text-warning">{brl(economics.missedSavingsPerYear)}<span className="ml-1 text-sm font-semibold">/ano</span></p>
                 <p className="text-xs text-text-secondary mt-1">
-                  Acumulado no período atual permanecendo no mensal. Por ano:{' '}
-                  {brl(economics.missedSavingsPerYear)}.
+                  Ao permanecer no mensal, você deixa de aproveitar essa economia todos os anos.
                 </p>
               </>
             ) : onYearly ? (
@@ -616,8 +607,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                   {brl(economics.platformForegoneRevenueSoFar)}
                 </p>
                 <p className="text-xs text-text-secondary mt-1">
-                  Desconto que o AGENDAI deixou de faturar no seu plano anual neste período (
-                  {brl(economics.platformForegoneRevenuePerYear)}/ano).
+                  Esse é o desconto concedido pelo AGENDAI por você escolher o plano anual.
                 </p>
               </>
             ) : (

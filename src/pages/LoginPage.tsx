@@ -26,6 +26,8 @@ import {
   Users,
   TrendingUp,
   ShieldCheck,
+  Sparkles,
+  Check,
   LucideIcon,
 } from 'lucide-react';
 import {
@@ -36,7 +38,6 @@ import {
   isValidDocument,
 } from '../utils/documentUtils';
 import { referralStorage } from '../utils/referralStorage';
-import { trialCampaign } from '../marketing/trialCampaign';
 import { getRecaptchaToken, useRecaptchaBadge } from '../utils/recaptcha';
 import { plansApi, Plan } from '../infra/plansApi';
 import { subscriptionsApi } from '../infra/subscriptionsApi';
@@ -51,9 +52,9 @@ interface LoginPageProps {
 }
 
 const inputClass = (hasError: boolean) =>
-  `w-full bg-bg border rounded-xl py-2.5 pl-10 pr-4 text-text-primary text-sm
+  `w-full min-h-12 bg-bg/80 border rounded-xl py-3 pl-10 pr-4 text-text-primary text-sm
    outline-none transition-all placeholder:text-text-muted
-   focus:shadow-[0_0_18px_rgba(16,185,129,0.18)]
+   focus:bg-bg focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--ag-accent)_12%,transparent),0_12px_32px_rgba(0,0,0,0.14)]
    ${
      hasError
        ? 'border-danger/40 text-danger focus:border-danger'
@@ -572,7 +573,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   };
 
   const primaryBtn =
-    'relative w-full py-3.5 bg-accent text-accent-fg hover:bg-accent-hover shadow-lg shadow-accent/25 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 disabled:opacity-60 overflow-hidden group/btn active:scale-[0.98] cursor-pointer';
+    'relative w-full min-h-12 px-5 bg-accent text-accent-fg hover:bg-accent-hover shadow-[0_12px_30px_color-mix(in_srgb,var(--ag-accent)_25%,transparent)] rounded-xl font-black text-xs uppercase tracking-[0.16em] flex items-center justify-center gap-3 transition-all duration-300 disabled:opacity-60 overflow-hidden group/btn active:scale-[0.98] cursor-pointer';
 
   return (
     <div className="min-h-screen bg-bg grid lg:grid-cols-2">
@@ -593,7 +594,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
           initial={{ opacity: 0, y: 24, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="relative w-full max-w-md bg-surface/90 backdrop-blur-xl border border-border rounded-3xl shadow-2xl overflow-hidden"
+          className="relative w-full max-w-lg bg-surface/92 backdrop-blur-2xl border border-border rounded-[2rem] shadow-[0_28px_90px_rgba(0,0,0,0.32)] overflow-hidden"
         >
           <div
             className="h-1 w-full"
@@ -602,8 +603,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
             }}
           />
 
-          <div className="p-5 sm:p-7 flex flex-col items-center">
-            <div className="mb-5 flex flex-col items-center gap-2">
+          <div className="p-5 sm:p-8 flex flex-col items-center">
+            <div className="mb-6 flex w-full flex-col items-center">
               <button
                 type="button"
                 onClick={handleLogoClick}
@@ -611,40 +612,62 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
               >
                 <Logo size="md" />
               </button>
-              <p className="text-xs text-text-muted text-center">
-                {tab === 'login'
-                  ? 'Bem-vindo(a) de volta ao seu painel.'
-                  : registerStep === 1
-                    ? 'Passo 1 de 2 — seus dados'
-                    : 'Passo 2 de 2 — dados do salão'}
-              </p>
+              {tab === 'register' ? (
+                <>
+                  <span className="mt-5 inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-accent">
+                    <Sparkles size={12} /> 30 dias grátis no Pro
+                  </span>
+                  <h1 className="mt-4 text-center text-2xl font-black tracking-tight text-text-primary sm:text-3xl">
+                    {registerStep === 1 ? 'Comece pelo seu acesso' : 'Agora, configure seu salão'}
+                  </h1>
+                  <p className="mt-2 max-w-sm text-center text-sm leading-relaxed text-text-muted">
+                    {registerStep === 1
+                      ? 'Crie sua conta em poucos minutos. Sem cartão e sem compromisso.'
+                      : 'Essas informações deixam sua agenda pronta para receber clientes.'}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h1 className="mt-5 text-center text-2xl font-black tracking-tight text-text-primary sm:text-3xl">Bem-vindo de volta</h1>
+                  <p className="mt-2 text-center text-sm text-text-muted">Entre para continuar cuidando do seu salão.</p>
+                </>
+              )}
             </div>
 
-            <div className="w-full mb-5 rounded-2xl border border-border bg-bg/80 p-4 text-center">
-              <p className="text-xs font-medium text-text-secondary">
-                {tab === 'login' ? 'Ainda nao tem conta?' : 'Ja tem uma conta?'}
-              </p>
+            <div className="mb-6 flex w-full items-center justify-center gap-2 text-center text-xs text-text-muted">
+              <span>{tab === 'login' ? 'Ainda não tem uma conta?' : 'Já possui uma conta?'}</span>
               <button
                 type="button"
                 onClick={() => goToAuthMode(tab === 'login' ? 'register' : 'login')}
-                className="mt-3 inline-flex min-h-11 items-center justify-center rounded-xl border border-accent/30 bg-accent/10 px-4 text-sm font-bold text-accent transition hover:bg-accent/15"
+                className="font-bold text-accent underline decoration-accent/30 underline-offset-4 transition hover:decoration-accent"
               >
-                {tab === 'login' ? 'Criar conta gratis' : 'Entrar'}
+                {tab === 'login' ? 'Criar conta grátis' : 'Entrar agora'}
               </button>
             </div>
 
             {tab === 'register' && (
-              <div className="w-full flex items-center gap-2 mb-4">
+              <div className="relative mb-6 w-full px-2">
+                <div className="absolute left-[20%] right-[20%] top-4 h-px bg-border" />
                 <div
-                  className={`h-1 flex-1 rounded-full transition-colors ${
-                    registerStep >= 1 ? 'bg-accent' : 'bg-border'
-                  }`}
+                  className={`absolute left-[20%] top-4 h-px bg-accent transition-all duration-500 ${registerStep === 2 ? 'w-[60%]' : 'w-0'}`}
                 />
-                <div
-                  className={`h-1 flex-1 rounded-full transition-colors ${
-                    registerStep >= 2 ? 'bg-accent' : 'bg-border'
-                  }`}
-                />
+                <div className="relative flex items-start justify-between">
+                  {[
+                    { step: 1 as const, label: 'Seus dados' },
+                    { step: 2 as const, label: 'Seu salão' },
+                  ].map(item => {
+                    const complete = registerStep > item.step;
+                    const active = registerStep === item.step;
+                    return (
+                      <div key={item.step} className="flex w-28 flex-col items-center gap-2">
+                        <div className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-black transition-all ${active || complete ? 'border-accent bg-accent text-accent-fg shadow-[0_0_20px_color-mix(in_srgb,var(--ag-accent)_28%,transparent)]' : 'border-border bg-bg text-text-muted'}`}>
+                          {complete ? <Check size={14} /> : item.step}
+                        </div>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider ${active ? 'text-text-primary' : 'text-text-muted'}`}>{item.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
@@ -747,9 +770,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                 >
                   {registerStep === 1 ? (
                     <>
-                      <p className="text-[11px] text-text-muted text-center leading-relaxed pb-1">
-                        {trialCampaign.signupHint}
-                      </p>
+                      <div className="grid grid-cols-3 gap-2 pb-2">
+                        {['Sem cartão', 'Acesso Pro', 'Cancele quando quiser'].map(item => (
+                          <div key={item} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-border bg-bg/55 px-2 text-center">
+                            <Check size={13} className="text-accent" />
+                            <span className="text-[9px] font-semibold leading-tight text-text-secondary sm:text-[10px]">{item}</span>
+                          </div>
+                        ))}
+                      </div>
 
                       <Field
                         label="Seu nome"
@@ -905,18 +933,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                                 >
                                   <button
                                     type="button"
+                                    aria-pressed={day.isOpen}
+                                    aria-label={`${day.isOpen ? 'Desmarcar' : 'Selecionar'} ${label}`}
+                                    title={`${day.isOpen ? 'Clique para fechar' : 'Clique para abrir'} neste dia`}
                                     onClick={() =>
                                       setScheduleDays(prev => ({
                                         ...prev,
                                         [i]: { ...prev[i], isOpen: !prev[i].isOpen },
                                       }))
                                     }
-                                    className={`w-10 shrink-0 rounded-md px-2 py-1 text-[11px] font-bold border transition-all ${
+                                    className={`flex min-h-8 w-14 shrink-0 cursor-pointer items-center justify-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${
                                       day.isOpen
-                                        ? 'bg-accent border-accent text-accent-fg'
-                                        : 'bg-bg border-border text-text-muted'
+                                        ? 'bg-accent border-accent text-accent-fg shadow-sm shadow-accent/20'
+                                        : 'bg-bg border-border text-text-muted hover:border-accent/40 hover:text-text-secondary'
                                     }`}
                                   >
+                                    <Check size={12} className={`shrink-0 transition-opacity ${day.isOpen ? 'opacity-100' : 'opacity-35'}`} />
                                     {label}
                                   </button>
                                   {day.isOpen ? (
@@ -1071,10 +1103,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
               </div>
             )}
 
-            <p className="mt-5 text-[10px] text-text-muted flex items-center gap-1.5">
+            <div className="mt-6 flex items-center gap-2 rounded-full border border-border/80 bg-bg/50 px-3 py-1.5 text-[10px] text-text-muted">
               <ShieldCheck size={12} className="text-accent" />
-              Conexão segura · Seus dados estão protegidos
-            </p>
+              Ambiente seguro e dados protegidos
+            </div>
           </div>
         </motion.div>
       </div>

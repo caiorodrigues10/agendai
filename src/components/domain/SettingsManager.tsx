@@ -272,22 +272,8 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
     setLogoUploading(true);
     setLogoError(null);
     try {
-      const { uploadUrl, publicUrl } = await barbershopApi.getLogoUploadUrl(
-        barbershopId,
-        file.type
-      );
-      const putRes = await fetch(uploadUrl, {
-        method: 'PUT',
-        body: file,
-        headers: { 'Content-Type': file.type },
-      });
-      if (!putRes.ok) {
-        throw new Error(
-          `Falha ao enviar a imagem para o storage (${putRes.status}). Verifique CORS do bucket e as credenciais GCS.`
-        );
-      }
-      await barbershopApi.confirmLogo(barbershopId, publicUrl);
-      setLogoUrl(publicUrl);
+      const { logoUrl: newLogoUrl } = await barbershopApi.uploadLogoDirect(barbershopId, file);
+      setLogoUrl(newLogoUrl);
     } catch (err) {
       setLogoUrl(settings.logoUrl);
       setLogoError(getErrorMessage(err, 'Não foi possível enviar a logo. Tente novamente.'));
