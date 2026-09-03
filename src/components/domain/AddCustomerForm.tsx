@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Service } from '../../types';
 import { ServiceCard } from './ServiceCard';
-import { maskPhone, normalizeDocument } from '../../utils/documentUtils';
+import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
 import {
   X,
@@ -81,7 +81,7 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
           ? STAFF_PLACEHOLDER_WHATSAPP
           : isAdditionalPerson && !raw
             ? ''
-            : normalizeDocument(raw);
+            : normalizePhoneBR(raw);
       await onJoin(data.name, whatsapp, data.serviceId, isStaffMode || isAdditionalPerson);
     } catch (err) {
       setSubmitError(getErrorMessage(err, 'Não foi possível entrar na fila. Tente de novo.'));

@@ -7,7 +7,7 @@ import {
 } from 'react-icons/ri';
 import { SalonClient } from '../../types';
 import { clientsApi, ListMeta } from '../../infra/clientsApi';
-import { maskPhone } from '../../utils/documentUtils';
+import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
 
 function clientPhoneLabel(whatsapp: string): string {
@@ -66,7 +66,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
     try {
       const created = await clientsApi.create({
         name: name.trim(),
-        whatsapp: whatsapp.replace(/\D/g, ''),
+        whatsapp: normalizePhoneBR(whatsapp),
       });
       setName('');
       setWhatsapp('');

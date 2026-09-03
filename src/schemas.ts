@@ -1,6 +1,28 @@
 import { z } from 'zod';
-import { isValidCpf, normalizeDocument, isValidCnpj, isValidPhoneBR } from './utils/documentUtils';
+import {
+  isValidCpf,
+  normalizeDocument,
+  isValidCnpj,
+  isValidPhoneBR,
+  normalizePhoneBR,
+} from './utils/documentUtils';
 import { isValidDate, isNotPast, isWithinHorizon, isBusinessHour } from './utils/dateUtils';
+
+const whatsappRequired = z
+  .string()
+  .transform(v => normalizePhoneBR(v))
+  .refine(v => isValidPhoneBR(v), {
+    message: 'Telefone inválido (DDD + número com 8 ou 9 dígitos)',
+  });
+
+const whatsappOptional = z
+  .string()
+  .optional()
+  .or(z.literal(''))
+  .transform(v => normalizePhoneBR(v ?? ''))
+  .refine(v => v === '' || isValidPhoneBR(v), {
+    message: 'Telefone inválido (DDD + número com 8 ou 9 dígitos)',
+  });
 
 // --- Login Schema ---
 export const LoginSchema = z.object({
@@ -21,13 +43,7 @@ export const RegisterSchema = z.object({
     .transform(v => normalizeDocument(v))
     .refine(v => isValidCpf(v), { message: 'CPF inválido (dígitos verificadores incorretos)' }),
   barbershopName: z.string().min(3, 'Nome do salão é obrigatório'),
-  whatsapp: z
-    .string()
-    .min(10, 'WhatsApp inválido (mínimo 10 dígitos)')
-    .transform(v => normalizeDocument(v))
-    .refine(v => isValidPhoneBR(v), {
-      message: 'Telefone inválido (DDD + número com 8 ou 9 dígitos)',
-    }),
+  whatsapp: whatsappRequired,
   cnpj: z
     .string()
     .optional()
@@ -65,14 +81,7 @@ export const CustomerQueueSchema = z.object({
     .string()
     .min(3, 'O nome deve ter pelo menos 3 caracteres')
     .max(50, 'O nome é muito longo'),
-  whatsapp: z
-    .string()
-    .min(10, 'Telefone inválido (mínimo 10 dígitos com DDD)')
-    .max(15, 'Número muito longo')
-    .transform(v => normalizeDocument(v))
-    .refine(v => isValidPhoneBR(v), {
-      message: 'Telefone inválido (DDD + número com 8 ou 9 dígitos)',
-    }),
+  whatsapp: whatsappRequired,
   serviceId: z.string().min(1, 'Selecione um serviço'),
 });
 
@@ -80,19 +89,7 @@ export type CustomerQueueFormData = z.infer<typeof CustomerQueueSchema>;
 
 /** Fila adicionada pelo staff ou dependente — WhatsApp opcional. */
 export const CustomerQueueStaffSchema = CustomerQueueSchema.extend({
-  whatsapp: z
-    .string()
-    .optional()
-    .or(z.literal(''))
-    .transform(v => v ?? '')
-    .refine(
-      v =>
-        v === '' ||
-        (normalizeDocument(v).length >= 10 &&
-          normalizeDocument(v).length <= 15 &&
-          isValidPhoneBR(normalizeDocument(v))),
-      { message: 'Telefone inválido (DDD + número com 8 ou 9 dígitos)' }
-    ),
+  whatsapp: whatsappOptional,
 });
 
 export type CustomerQueueStaffFormData = z.infer<typeof CustomerQueueStaffSchema>;
@@ -136,13 +133,7 @@ export const AppointmentSchema = z.object({
     .min(1, 'Selecione um horário')
     .refine(v => isBusinessHour(v), { message: 'Horário fora do comercial (07:00–22:00)' }),
   customerName: z.string().min(3, 'O nome deve ter pelo menos 3 caracteres'),
-  whatsapp: z
-    .string()
-    .min(10, 'Telefone inválido (mínimo 10 dígitos)')
-    .transform(v => normalizeDocument(v))
-    .refine(v => isValidPhoneBR(v), {
-      message: 'Telefone inválido (DDD + número com 8 ou 9 dígitos)',
-    }),
+  whatsapp: whatsappRequired,
   clientId: z.string().uuid().optional(),
   clientPackageId: z.string().uuid().optional(),
 });

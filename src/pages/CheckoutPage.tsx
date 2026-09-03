@@ -28,6 +28,7 @@ import {
   maskCpf,
   maskCnpj,
   maskPhone,
+  normalizePhoneBR,
   isValidDocument,
 } from '../utils/documentUtils';
 
@@ -251,7 +252,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
     if (normalizeDocument(asaasPostalCode).length !== 8)
       return 'Informe um CEP válido (8 dígitos).';
     if (!asaasAddressNumber.trim()) return 'Informe o número do endereço do titular.';
-    const phoneDigits = normalizeDocument(asaasPhone);
+    const phoneDigits = normalizePhoneBR(asaasPhone);
     if (phoneDigits.length < 10 || phoneDigits.length > 11) {
       return 'Informe um telefone válido com DDD.';
     }
@@ -317,7 +318,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
         ccv: asaasCardCvv.trim(),
         postalCode: normalizeDocument(asaasPostalCode),
         addressNumber: asaasAddressNumber.trim(),
-        phone: normalizeDocument(asaasPhone),
+        phone: normalizePhoneBR(asaasPhone),
       };
       const doc = normalizeDocument(docNumber);
 

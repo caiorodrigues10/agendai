@@ -18,7 +18,7 @@ import {
   Wallet,
   X,
 } from 'lucide-react';
-import { isValidPhoneBR, maskPhone, normalizeDocument } from '../../utils/documentUtils';
+import { isValidPhoneBR, maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import {
@@ -311,7 +311,7 @@ export const OwnerFinancialPanel: React.FC = () => {
     const amount = parseFloat(fiadoForm.amount.replace(',', '.'));
     const description = fiadoForm.description.trim();
     const customerName = fiadoForm.customerName.trim();
-    const whatsapp = normalizeDocument(fiadoForm.whatsapp);
+    const whatsapp = normalizePhoneBR(fiadoForm.whatsapp);
     const errors: {
       customerName?: string;
       whatsapp?: string;

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ShopSettings, DaySchedule, OperationMode, BusinessSegment } from '../../types';
 import { barbershopApi, ShopWhatsAppStatus } from '../../infra/barbershopApi';
 import { ApiError } from '../../infra/apiClient';
-import { maskPhone } from '../../utils/documentUtils';
+import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { AccountPrivacyPanel } from './AccountPrivacyPanel';
 import { OwnerNotificationsPanel } from './OwnerNotificationsPanel';
@@ -70,7 +70,7 @@ const SalonWhatsAppConnection: React.FC<{
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [method, setMethod] = useState<'qr' | 'pairing_code'>('pairing_code');
-  const [phoneNumber, setPhoneNumber] = useState(whatsapp);
+  const [phoneNumber, setPhoneNumber] = useState(() => maskPhone(whatsapp));
   const [copied, setCopied] = useState(false);
   const [showDisconnectModal, setShowDisconnectModal] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -151,7 +151,9 @@ const SalonWhatsAppConnection: React.FC<{
       }
       const next = await barbershopApi.connectWhatsApp(
         barbershopId,
-        selectedMethod === 'qr' ? { method: 'qr' } : { method: 'pairing_code', phoneNumber }
+        selectedMethod === 'qr'
+          ? { method: 'qr' }
+          : { method: 'pairing_code', phoneNumber: normalizePhoneBR(phoneNumber) }
       );
       applyStatus(next);
       if (!next.connected) startPoll();
@@ -559,7 +561,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
 }) => {
   const navigate = useNavigate();
   const [shopName, setShopName] = useState(settings.shopName);
-  const [whatsapp, setWhatsapp] = useState(settings.whatsapp || '');
+  const [whatsapp, setWhatsapp] = useState(() => maskPhone(settings.whatsapp || ''));
   const [schedule, setSchedule] = useState<DaySchedule[]>(settings.schedule || []);
   const [logoUrl, setLogoUrl] = useState<string | undefined>(settings.logoUrl);
   const [logoUploading, setLogoUploading] = useState(false);
@@ -604,7 +606,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
     onSave({
       ...settings,
       shopName,
-      whatsapp,
+      whatsapp: normalizePhoneBR(whatsapp),
       address,
       city,
       schedule,

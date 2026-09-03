@@ -21,7 +21,7 @@ import {
 import { clientsApi } from '../../infra/clientsApi';
 import { crmApi, CrmClientProfile } from '../../infra/crmApi';
 import { packagesApi } from '../../infra/packagesApi';
-import { maskPhone } from '../../utils/documentUtils';
+import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { buildWhatsAppUrl } from '../../utils/whatsappUtils';
 import {
@@ -194,7 +194,7 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
     try {
       await clientsApi.update(detail.id, {
         name: editForm.name.trim(),
-        whatsapp: editForm.whatsapp.replace(/\D/g, ''),
+        whatsapp: normalizePhoneBR(editForm.whatsapp),
         notes: editForm.notes.trim() || null,
       });
       setEditing(false);

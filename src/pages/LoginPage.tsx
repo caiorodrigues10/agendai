@@ -35,6 +35,7 @@ import {
   maskCpf,
   maskCnpj,
   maskPhone,
+  normalizePhoneBR,
   isValidDocument,
 } from '../utils/documentUtils';
 import { referralStorage } from '../utils/referralStorage';
@@ -507,7 +508,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       password: data.password,
       cpf,
       barbershopName: data.barbershopName.trim(),
-      whatsapp: normalizeDocument(data.whatsapp),
+      whatsapp: normalizePhoneBR(data.whatsapp),
       address: data.address?.trim() || undefined,
       city: data.city.trim(),
       cnpj: data.cnpj ? normalizeDocument(data.cnpj) : undefined,

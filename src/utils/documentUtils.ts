@@ -6,6 +6,22 @@
 
 export const normalizeDocument = (value: string): string => value.replace(/\D/g, '');
 
+/**
+ * DDD + número local (10 ou 11 dígitos).
+ * Remove DDI 55 apenas quando o valor já inclui o número completo (12–13 dígitos).
+ * Não altera DDD 55 (RS) em números de 11 dígitos.
+ */
+export const normalizePhoneBR = (value: string): string => {
+  let d = normalizeDocument(value);
+  if (d.startsWith('55') && d.length >= 12) {
+    d = d.slice(2);
+  }
+  if (d.startsWith('0') && d.length >= 11) {
+    d = d.slice(1);
+  }
+  return d.slice(0, 11);
+};
+
 // --- Máscaras ---
 
 export const maskCpf = (value: string): string => {
@@ -25,13 +41,22 @@ export const maskCnpj = (value: string): string => {
     .replace(/^(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d)/, '$1.$2.$3/$4-$5');
 };
 
-/** (00) 00000-0000 ou (00) 0000-0000 — máscara BR */
+/** (00) 00000-0000 (celular) ou (00) 0000-0000 (fixo) */
 export const maskPhone = (value: string): string => {
-  const d = normalizeDocument(value).slice(0, 11);
-  if (d.length <= 10) {
-    return d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2');
+  const d = normalizePhoneBR(value);
+  if (d.length === 0) return '';
+  if (d.length <= 2) return d;
+
+  const ddd = d.slice(0, 2);
+  const rest = d.slice(2);
+  // Celular: agrupa 5+4 assim que o nono dígito (9 após o DDD) aparece,
+  // para o hífen não saltar no 11º dígito e o iOS/Android engolir a tecla.
+  if (rest.startsWith('9')) {
+    if (rest.length <= 5) return `(${ddd}) ${rest}`;
+    return `(${ddd}) ${rest.slice(0, 5)}-${rest.slice(5, 9)}`;
   }
-  return d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
+  if (rest.length <= 4) return `(${ddd}) ${rest}`;
+  return `(${ddd}) ${rest.slice(0, 4)}-${rest.slice(4, 8)}`;
 };
 
 // --- Validações ---
@@ -73,11 +98,9 @@ export const isValidCnpj = (raw: string): boolean => {
 
 /** Valida telefone BR: 10-11 dígitos (DDD + 8 ou 9 dígitos) */
 export const isValidPhoneBR = (raw: string): boolean => {
-  const digits = normalizeDocument(raw);
+  const digits = normalizePhoneBR(raw);
   if (digits.length < 10 || digits.length > 11) return false;
-  // DDD não pode ser 00
   if (digits.startsWith('00')) return false;
-  // Celular (11 dígitos) deve começar com 9
   if (digits.length === 11 && digits[2] !== '9') return false;
   return true;
 };
