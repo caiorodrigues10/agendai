@@ -270,7 +270,13 @@ const SalonWhatsAppConnection: React.FC<{
             className="w-full py-3.5 bg-accent hover:bg-accent-hover text-accent-fg font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-accent/20 disabled:opacity-50 text-base"
           >
             {busy ? <Loader2 size={20} className="animate-spin" /> : method === 'qr' ? <QrCode size={20} /> : <KeyRound size={20} />}
-            {method === 'qr' ? (qr ? 'Gerar QR novamente' : 'Conectar com QR Code') : (pairingCode ? 'Gerar novo código' : 'Conectar com código')}
+            {busy
+              ? method === 'pairing_code'
+                ? 'Gerando código (até ~30s)...'
+                : 'Gerando QR...'
+              : method === 'qr'
+                ? (qr ? 'Gerar QR novamente' : 'Conectar com QR Code')
+                : (pairingCode ? 'Gerar novo código' : 'Conectar com código')}
           </button>
         </div>
       )}
