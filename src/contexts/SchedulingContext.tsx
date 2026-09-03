@@ -12,6 +12,8 @@ import { useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { Appointment, QueueItem, AIInsight } from '../types';
 import { schedulingApi, QueueUpdatePayload } from '../infra/schedulingApi';
+import { authStorage } from '../infra/authStorage';
+import { realtimeWsUrl } from '../infra/realtimeWs';
 import { useBarbershopFilters } from './BarbershopFiltersContext';
 import { useAuth } from './AuthContext';
 import { getQueueInsight } from '../services/geminiService';
@@ -51,8 +53,17 @@ interface SchedulingContextValue {
 
 const SchedulingContext = createContext<SchedulingContextValue | undefined>(undefined);
 
-/** Intervalo de polling da fila e agendamentos (ms). */
-const POLLING_INTERVAL_MS = 15_000;
+/** Fallback de polling quando o WebSocket está desconectado (ms). */
+const POLLING_INTERVAL_MS = 60_000;
+const WS_RECONNECT_MAX_MS = 30_000;
+
+function sameSnapshot(a: unknown, b: unknown): boolean {
+  try {
+    return JSON.stringify(a) === JSON.stringify(b);
+  } catch {
+    return false;
+  }
+}
 
 export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { pathname } = useLocation();
@@ -73,7 +84,9 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     return cid;
   });
   const [completedCount, setCompletedCount] = useState(0);
-  const shouldPoll = pathname.startsWith('/app') || pathname.startsWith('/queue') || pathname.startsWith('/agendamento');
+  const shouldPoll = pathname.startsWith('/app') || pathname.startsWith('/queue');
+  const lastAppointmentQueryRef = useRef<{ date?: string; from?: string; to?: string } | null>(null);
+  const wsConnectedRef = useRef(false);
 
   const loadAvailability = useCallback(
     async (date: string, staffId?: string) => {
@@ -92,8 +105,8 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     async (options?: { silent?: boolean }) => {
       if (!barbershopId) return;
       try {
-        const queueData = await schedulingApi.listQueue(barbershopId, clientId);
-        setQueue(queueData as QueueItem[]);
+        const queueData = (await schedulingApi.listQueue(barbershopId, clientId)) as QueueItem[];
+        setQueue(prev => (sameSnapshot(prev, queueData) ? prev : queueData));
       } catch (error) {
         if (options?.silent) return; // polling: mantém dados anteriores
         logger.error('Falha ao carregar fila', error);
@@ -104,24 +117,31 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   );
 
   const refreshAppointments = useCallback(
-    async (date?: string, options?: { silent?: boolean }) => {
+    async (date?: string, options?: { silent?: boolean; reuseLast?: boolean }) => {
       if (!barbershopId) return;
+      if (!authStorage.getAccessToken()) return;
       try {
-        const params: { barbershopId: string; date?: string; from?: string; to?: string } = {
+        let params: { barbershopId: string; date?: string; from?: string; to?: string } = {
           barbershopId,
         };
-        if (date) {
+        if (options?.reuseLast && lastAppointmentQueryRef.current) {
+          params = { barbershopId, ...lastAppointmentQueryRef.current };
+        } else if (date) {
           params.date = date;
+          lastAppointmentQueryRef.current = { date };
         } else {
           const today = new Date();
           const from = today.toISOString().split('T')[0];
           const toDate = new Date(today);
           toDate.setDate(toDate.getDate() + 30);
+          const to = toDate.toISOString().split('T')[0];
           params.from = from;
-          params.to = toDate.toISOString().split('T')[0];
+          params.to = to;
+          lastAppointmentQueryRef.current = { from, to };
         }
         const data = await schedulingApi.listAppointments(params);
-        setAppointments((data ?? []).map(mapAppointmentFromApi));
+        const mapped = (data ?? []).map(mapAppointmentFromApi);
+        setAppointments(prev => (sameSnapshot(prev, mapped) ? prev : mapped));
       } catch {
         if (options?.silent) return; // polling: mantém dados anteriores
         setAppointments([]);
@@ -144,14 +164,15 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
 
       await refreshQueue();
 
-      try {
-        const metrics = await schedulingApi.getQueueMetrics(barbershopId);
-        setCompletedCount(metrics.completedCount);
-      } catch (error) {
-        logger.error('Falha ao carregar métricas', error);
+      if (authStorage.getAccessToken()) {
+        try {
+          const metrics = await schedulingApi.getQueueMetrics(barbershopId);
+          setCompletedCount(metrics.completedCount);
+        } catch (error) {
+          logger.error('Falha ao carregar métricas', error);
+        }
+        await refreshAppointments();
       }
-
-      await refreshAppointments();
 
       const today = new Date().toISOString().split('T')[0];
       await loadAvailability(today);
@@ -161,7 +182,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     load();
   }, [barbershopId, refreshQueue, refreshAppointments, loadAvailability, shouldPoll]);
 
-  // Polling: refetch periódico da fila e agendamentos, pausado com a aba oculta.
+  // Refetch sob demanda (WS e fallback de polling).
   const isPollingFetchInFlight = useRef(false);
   const pollRef = useRef<() => Promise<void>>(() => Promise.resolve());
   useEffect(() => {
@@ -171,7 +192,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       try {
         await Promise.all([
           refreshQueue({ silent: true }),
-          refreshAppointments(undefined, { silent: true }),
+          refreshAppointments(undefined, { silent: true, reuseLast: true }),
         ]);
       } finally {
         isPollingFetchInFlight.current = false;
@@ -179,28 +200,109 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     };
   });
 
+  const queueDebounceRef = useRef<number | null>(null);
+  const apptDebounceRef = useRef<number | null>(null);
+  const scheduleQueueRefresh = useCallback(() => {
+    if (queueDebounceRef.current) return;
+    queueDebounceRef.current = window.setTimeout(() => {
+      queueDebounceRef.current = null;
+      void refreshQueue({ silent: true });
+    }, 150);
+  }, [refreshQueue]);
+  const scheduleAppointmentsRefresh = useCallback(() => {
+    if (apptDebounceRef.current) return;
+    apptDebounceRef.current = window.setTimeout(() => {
+      apptDebounceRef.current = null;
+      void refreshAppointments(undefined, { silent: true, reuseLast: true });
+    }, 150);
+  }, [refreshAppointments]);
+
   useEffect(() => {
     if (!barbershopId || !shouldPoll) return;
 
-    const tick = () => {
-      if (document.visibilityState !== 'visible') return;
-      void pollRef.current();
+    let stopped = false;
+    let socket: WebSocket | null = null;
+    let reconnectTimer: number | null = null;
+    let attempt = 0;
+
+    const disconnect = () => {
+      if (reconnectTimer) {
+        window.clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
+      if (socket) {
+        socket.onopen = null;
+        socket.onmessage = null;
+        socket.onclose = null;
+        socket.onerror = null;
+        socket.close();
+        socket = null;
+      }
+      wsConnectedRef.current = false;
     };
 
-    const interval = setInterval(tick, POLLING_INTERVAL_MS);
+    const connect = () => {
+      if (stopped || document.visibilityState !== 'visible') return;
+      disconnect();
+      const next = new WebSocket(realtimeWsUrl(barbershopId));
+      socket = next;
+      next.onopen = () => {
+        attempt = 0;
+        wsConnectedRef.current = true;
+        void pollRef.current();
+      };
+      next.onmessage = event => {
+        if (typeof event.data !== 'string') return;
+        if (event.data === 'pong') return;
+        try {
+          const msg = JSON.parse(event.data) as { type?: string };
+          if (msg.type === 'queue:changed') scheduleQueueRefresh();
+          if (msg.type === 'appointments:changed') scheduleAppointmentsRefresh();
+        } catch {
+          /* ignore */
+        }
+      };
+      next.onclose = () => {
+        wsConnectedRef.current = false;
+        if (stopped || document.visibilityState !== 'visible') return;
+        const delay = Math.min(1000 * 2 ** attempt, WS_RECONNECT_MAX_MS);
+        attempt += 1;
+        reconnectTimer = window.setTimeout(connect, delay);
+      };
+      next.onerror = () => {
+        next.close();
+      };
+    };
+
+    connect();
+
+    const interval = window.setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      if (wsConnectedRef.current) return;
+      void pollRef.current();
+    }, POLLING_INTERVAL_MS);
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
+        stopped = false;
+        if (!wsConnectedRef.current) connect();
         void pollRef.current();
+      } else {
+        stopped = true;
+        disconnect();
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      clearInterval(interval);
+      stopped = true;
+      window.clearInterval(interval);
+      if (queueDebounceRef.current) window.clearTimeout(queueDebounceRef.current);
+      if (apptDebounceRef.current) window.clearTimeout(apptDebounceRef.current);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      disconnect();
     };
-  }, [barbershopId, shouldPoll]);
+  }, [barbershopId, shouldPoll, scheduleQueueRefresh, scheduleAppointmentsRefresh]);
 
   useEffect(() => {
     if (!services.length || !shouldPoll) return;

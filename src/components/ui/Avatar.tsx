@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 type AvatarSize = 'xs' | 'sm' | 'md' | 'lg';
 
@@ -41,8 +41,9 @@ function getColorClass(name: string): string {
 
 export const Avatar: React.FC<AvatarProps> = ({ src, name, size = 'md', className = '' }) => {
   const { container, text } = SIZE_MAP[size];
+  const [failed, setFailed] = useState(false);
 
-  if (src) {
+  if (src && !failed) {
     return (
       <div className={`${container} rounded-full overflow-hidden shrink-0 ${className}`}>
         <img
@@ -50,6 +51,8 @@ export const Avatar: React.FC<AvatarProps> = ({ src, name, size = 'md', classNam
           alt={name}
           className="w-full h-full object-cover"
           loading="lazy"
+          referrerPolicy="no-referrer"
+          onError={() => setFailed(true)}
         />
       </div>
     );

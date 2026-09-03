@@ -169,12 +169,21 @@ const SalonWhatsAppConnection: React.FC<{
   };
 
   const handleDisconnect = async () => {
-    setShowDisconnectModal(false);
     setBusy(true);
     setError(null);
     try {
-      const next = await barbershopApi.disconnectWhatsApp(barbershopId);
+      const next = await Promise.race([
+        barbershopApi.disconnectWhatsApp(barbershopId),
+        new Promise<never>((_, reject) => {
+          window.setTimeout(
+            () => reject(new Error('Tempo esgotado ao desconectar. Tente novamente.')),
+            20_000
+          );
+        }),
+      ]);
+      stopPoll();
       applyStatus(next);
+      setShowDisconnectModal(false);
     } catch (err) {
       setError(getErrorMessage(err, 'Não foi possível desconectar o WhatsApp.'));
     } finally {
@@ -210,7 +219,10 @@ const SalonWhatsAppConnection: React.FC<{
           <button
             type="button"
             disabled={busy}
-            onClick={() => setShowDisconnectModal(true)}
+            onClick={() => {
+              setError(null);
+              setShowDisconnectModal(true);
+            }}
             className="px-4 py-3 text-sm font-bold rounded-xl border border-danger/30 text-danger bg-danger/10 hover:bg-danger/20 disabled:opacity-50 flex items-center gap-2"
           >
             {busy ? <Loader2 size={16} className="animate-spin" /> : <Unplug size={16} />}
@@ -292,11 +304,46 @@ const SalonWhatsAppConnection: React.FC<{
       </div>
 
       {showDisconnectModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" role="presentation">
-          <div role="dialog" aria-modal="true" aria-labelledby="disconnect-whatsapp-title" className="w-full max-w-md rounded-2xl bg-surface border border-border p-5 shadow-2xl">
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4"
+          role="presentation"
+          onClick={() => {
+            if (!busy) setShowDisconnectModal(false);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="disconnect-whatsapp-title"
+            className="w-full max-w-md rounded-2xl bg-surface border border-border p-5 shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          >
             <h4 id="disconnect-whatsapp-title" className="text-lg font-bold text-text-primary">Desconectar WhatsApp?</h4>
             <p className="mt-2 text-sm text-text-secondary">Fila, agenda, lembretes e campanhas deixarão de enviar mensagens até uma nova conexão.</p>
-            <div className="mt-5 flex justify-end gap-2"><button type="button" onClick={() => setShowDisconnectModal(false)} className="px-4 py-3 rounded-xl text-sm font-bold text-text-secondary">Cancelar</button><button type="button" onClick={() => void handleDisconnect()} className="px-4 py-3 rounded-xl bg-danger text-white text-sm font-bold">Desconectar</button></div>
+            {error && (
+              <p className="mt-3 text-sm text-danger" role="alert">
+                {error}
+              </p>
+            )}
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => setShowDisconnectModal(false)}
+                className="px-4 py-3 rounded-xl text-sm font-bold text-text-secondary disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void handleDisconnect()}
+                className="px-4 py-3 rounded-xl bg-danger text-white text-sm font-bold disabled:opacity-50 flex items-center gap-2"
+              >
+                {busy ? <Loader2 size={16} className="animate-spin" /> : null}
+                Desconectar
+              </button>
+            </div>
           </div>
         </div>
       )}

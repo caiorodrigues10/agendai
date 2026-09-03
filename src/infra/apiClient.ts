@@ -12,7 +12,7 @@ export interface ApiRequestOptions {
  * A VITE_API_URL permite apontar as chamadas /api/* para o backend correto.
  * Em dev, o Vite proxy já redireciona /api → localhost:3333.
  */
-const API_BASE = (import.meta as any).env?.VITE_API_URL ?? '';
+export const API_BASE = (import.meta as any).env?.VITE_API_URL ?? '';
 
 const RATE_LIMIT_MAX = 500;
 const RATE_LIMIT_WINDOW_MS = 60_000;

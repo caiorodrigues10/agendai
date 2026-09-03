@@ -10,7 +10,10 @@ export default defineConfig(({ mode }) => {
 			port: 3003,
 			host: '0.0.0.0',
 			proxy: {
-				'/api': 'http://127.0.0.1:3333',
+				'/api': {
+					target: 'http://127.0.0.1:3333',
+					ws: true,
+				},
 			},
 			allowedHosts: [
 				'ngrok.com',
@@ -131,7 +134,10 @@ export default defineConfig(({ mode }) => {
 							},
 						},
 						{
-							urlPattern: /\.(?:png|jpg|jpeg|svg|webp|avif)$/i,
+							urlPattern: ({ url }) =>
+								url.hostname !== 'storage.googleapis.com' &&
+								!url.hostname.endsWith('.googleapis.com') &&
+								/\.(?:png|jpg|jpeg|svg|webp|avif)$/i.test(url.pathname),
 							handler: 'CacheFirst',
 							options: {
 								cacheName: 'agendai-static-images',

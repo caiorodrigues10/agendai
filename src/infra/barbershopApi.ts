@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient';
+import { API_BASE, apiClient } from './apiClient';
 import { authStorage } from './authStorage';
 import { DaySchedule, Service, StaffMember, FeedPost, PostMode, PostConfig, OperationMode, OpeningMode, ManualShopStatus, ShopOpenState, ScheduleException, BusinessSegment } from '../types';
 import { mapScheduleToApi } from '../utils/schedulingUtils';
@@ -96,6 +96,50 @@ export interface ShopWhatsAppStatus {
 
 export interface QueueAlertSettings {
   enabled: boolean; threshold: number; phone: string | null; currentWaiting: number; exceeded: boolean; whatsappConnected: boolean; queueEnabled: boolean;
+}
+
+async function uploadLogoMultipart(barbershopId: string, file: File): Promise<{ logoUrl: string }> {
+  const token = authStorage.getAccessToken() || '';
+  const formData = new FormData();
+  formData.append('logo', file);
+
+  const response = await fetch(`${API_BASE}/api/barbershops/${encodeURIComponent(barbershopId)}/logo/upload`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    credentials: 'include',
+    body: formData,
+  });
+
+  const bodyText = await response.text();
+  if (!response.ok) {
+    let message = `Falha ao enviar logo (${response.status})`;
+    if (bodyText) {
+      try {
+        const parsed = JSON.parse(bodyText) as { message?: string };
+        if (parsed.message) message = parsed.message;
+      } catch {
+        /* ignore malformed error body */
+      }
+    }
+    throw new Error(message);
+  }
+
+  if (!bodyText) {
+    throw new Error('O servidor respondeu sem dados ao enviar a logo. Verifique se a API está no ar.');
+  }
+
+  let parsed: { data?: { logoUrl?: string } };
+  try {
+    parsed = JSON.parse(bodyText) as { data?: { logoUrl?: string } };
+  } catch {
+    throw new Error('Resposta inválida do servidor ao enviar a logo.');
+  }
+
+  if (!parsed.data?.logoUrl) {
+    throw new Error('Resposta inválida: logoUrl ausente.');
+  }
+
+  return { logoUrl: parsed.data.logoUrl };
 }
 
 export const barbershopApi = {
@@ -414,7 +458,7 @@ export const barbershopApi = {
       'PATCH',
       { logoUrl },
       token
-    ).then(unwrap);
+    ).then(res => unwrap<BarbershopData>(res));
   },
 
   deleteLogo: (barbershopId: string) => {
@@ -423,25 +467,32 @@ export const barbershopApi = {
   },
 
   uploadLogoDirect: async (barbershopId: string, file: File): Promise<{ logoUrl: string }> => {
-    const token = authStorage.getAccessToken() || '';
-    const formData = new FormData();
-    formData.append('logo', file);
+    const mimeType = file.type === 'image/jpg' ? 'image/jpeg' : file.type || 'image/jpeg';
 
-    const response = await fetch(`/api/barbershops/${encodeURIComponent(barbershopId)}/logo/upload`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}));
-      throw new Error(body.message || `Falha ao enviar logo (${response.status})`);
+    try {
+      const { uploadUrl, publicUrl } = await barbershopApi.getLogoUploadUrl(barbershopId, mimeType);
+      const putRes = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': mimeType },
+        body: file,
+      });
+      if (!putRes.ok) {
+        throw new Error(`Falha ao enviar arquivo para o storage (${putRes.status})`);
+      }
+      const confirmed = await barbershopApi.confirmLogo(barbershopId, publicUrl);
+      return { logoUrl: confirmed.logoUrl ?? publicUrl };
+    } catch (signedUrlErr) {
+      // Fallback: multipart via backend (útil quando CORS do GCS não está configurado)
+      try {
+        return await uploadLogoMultipart(barbershopId, file);
+      } catch (multipartErr) {
+        throw multipartErr instanceof Error && multipartErr.message
+          ? multipartErr
+          : signedUrlErr instanceof Error
+            ? signedUrlErr
+            : new Error('Não foi possível enviar a logo.');
+      }
     }
-
-    const result = await response.json();
-    return result.data;
   },
 
   updateOperationMode: async (

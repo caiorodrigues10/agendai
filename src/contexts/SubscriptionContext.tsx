@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useMemo,
   useEffect,
+  useRef,
   ReactNode,
 } from 'react';
 import { subscriptionsApi, MySubscription } from '../infra/subscriptionsApi';
@@ -55,6 +56,7 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
   const [data, setData] = useState<MySubscription | null>(null);
   const [blockInfo, setBlockInfo] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(false);
+  const lastFocusRefreshAt = useRef(0);
 
   const refresh = useCallback(async () => {
     // MASTER_ADMIN não tem barbearia — isento de assinatura
@@ -84,9 +86,13 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     refresh();
   }, [refresh]);
 
-  // Refetch ao voltar o foco para a aba (ex.: usuário pagou o PIX em outro app)
   useEffect(() => {
-    const onFocus = () => refresh();
+    const onFocus = () => {
+      const now = Date.now();
+      if (now - lastFocusRefreshAt.current < 60_000) return;
+      lastFocusRefreshAt.current = now;
+      void refresh();
+    };
     window.addEventListener('focus', onFocus);
     return () => window.removeEventListener('focus', onFocus);
   }, [refresh]);
