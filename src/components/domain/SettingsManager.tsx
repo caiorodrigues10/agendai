@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { ShopSettings, DaySchedule, OperationMode, BusinessSegment } from '../../types';
 import { barbershopApi, ShopWhatsAppStatus } from '../../infra/barbershopApi';
@@ -303,50 +304,57 @@ const SalonWhatsAppConnection: React.FC<{
         </p>
       </div>
 
-      {showDisconnectModal && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4"
-          role="presentation"
-          onClick={() => {
-            if (!busy) setShowDisconnectModal(false);
-          }}
-        >
+      {showDisconnectModal &&
+        createPortal(
           <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="disconnect-whatsapp-title"
-            className="w-full max-w-md rounded-2xl bg-surface border border-border p-5 shadow-2xl"
-            onClick={e => e.stopPropagation()}
+            className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 p-4"
+            role="presentation"
+            onClick={() => {
+              if (!busy) setShowDisconnectModal(false);
+            }}
           >
-            <h4 id="disconnect-whatsapp-title" className="text-lg font-bold text-text-primary">Desconectar WhatsApp?</h4>
-            <p className="mt-2 text-sm text-text-secondary">Fila, agenda, lembretes e campanhas deixarão de enviar mensagens até uma nova conexão.</p>
-            {error && (
-              <p className="mt-3 text-sm text-danger" role="alert">
-                {error}
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="disconnect-whatsapp-title"
+              className="w-full max-w-md rounded-2xl bg-surface border border-border p-5 shadow-2xl"
+              onClick={e => e.stopPropagation()}
+            >
+              <h4 id="disconnect-whatsapp-title" className="text-lg font-bold text-text-primary">
+                Desconectar WhatsApp?
+              </h4>
+              <p className="mt-2 text-sm text-text-secondary">
+                Fila, agenda, lembretes e campanhas deixarão de enviar mensagens até uma nova
+                conexão.
               </p>
-            )}
-            <div className="mt-5 flex justify-end gap-2">
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => setShowDisconnectModal(false)}
-                className="px-4 py-3 rounded-xl text-sm font-bold text-text-secondary disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => void handleDisconnect()}
-                className="px-4 py-3 rounded-xl bg-danger text-white text-sm font-bold disabled:opacity-50 flex items-center gap-2"
-              >
-                {busy ? <Loader2 size={16} className="animate-spin" /> : null}
-                Desconectar
-              </button>
+              {error && (
+                <p className="mt-3 text-sm text-danger" role="alert">
+                  {error}
+                </p>
+              )}
+              <div className="mt-5 flex justify-end gap-2">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setShowDisconnectModal(false)}
+                  className="px-4 py-3 rounded-xl text-sm font-bold text-text-secondary disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void handleDisconnect()}
+                  className="px-4 py-3 rounded-xl bg-danger text-white text-sm font-bold disabled:opacity-50 flex items-center gap-2"
+                >
+                  {busy ? <Loader2 size={16} className="animate-spin" /> : null}
+                  Desconectar
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };
