@@ -14,6 +14,8 @@ import {
   RiLinkM,
   RiSettings4Line,
   RiStore2Line,
+  RiRocketLine,
+  RiShoppingBag3Line,
 } from 'react-icons/ri';
 import type { OperationMode } from '../types';
 
@@ -43,9 +45,11 @@ export const TAB_GROUPS: TabGroup[] = [
     label: 'Operação',
     tabs: [
       { id: 'overview', label: 'Visão Geral', icon: RiDashboardLine },
+      { id: 'onboarding', label: 'Configuração inicial', icon: RiRocketLine, roles: ['OWNER', 'MASTER_ADMIN'] },
       { id: 'queue', label: 'Fila', icon: RiListCheck2, modes: ['HYBRID', 'QUEUE_ONLY'] },
       { id: 'appointments', label: 'Agenda', icon: RiCalendarScheduleLine, modes: ['HYBRID', 'APPOINTMENTS_ONLY'] },
       { id: 'clients', label: 'Clientes', icon: RiContactsLine },
+      { id: 'products', label: 'Produtos', icon: RiShoppingBag3Line },
     ],
   },
   {
@@ -95,10 +99,21 @@ export const MOBILE_PRIMARY_TAB_IDS = ['overview', 'queue', 'appointments', 'cli
 export const ALL_TAB_IDS = TAB_GROUPS.flatMap(g => g.tabs.map(t => t.id));
 
 /** Check if a tab is valid and accessible */
-export function canAccessTab(tabId: string, userRole?: string): boolean {
+export function canAccessTab(
+  tabId: string,
+  userRole?: string,
+  extras?: { hasDashboard?: boolean; permissions?: string[] }
+): boolean {
   for (const group of TAB_GROUPS) {
     const tab = group.tabs.find(t => t.id === tabId);
     if (!tab) continue;
+    if (tabId === 'products') {
+      const privileged = userRole === 'OWNER' || userRole === 'MASTER_ADMIN';
+      const permitted = extras?.permissions?.some(perm =>
+        ['RETAIL_SELL', 'PRODUCTS_VIEW', 'PRODUCTS_MANAGE', 'INVENTORY_MANAGE'].includes(perm)
+      );
+      return Boolean(extras?.hasDashboard && (privileged || permitted));
+    }
     if (!tab.roles) return true;
     return tab.roles.includes(userRole as TabRole);
   }

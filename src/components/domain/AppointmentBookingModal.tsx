@@ -8,6 +8,7 @@ import {
   AvailabilitySlot,
   generateTimeSlots,
   getDaySchedule,
+  isShopDayClosed,
   isSlotAvailable,
   addDays,
 } from '../../utils/schedulingUtils';
@@ -108,7 +109,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
     return getDaySchedule(new Date(date + 'T12:00:00'), settings.schedule);
   }, [date, settings.schedule]);
 
-  const isDateClosed = !daySchedule || !daySchedule.isOpen;
+  const isDateClosed = !date || isShopDayClosed(new Date(date + 'T12:00:00'), settings);
 
   const timeSlots = useMemo(() => {
     if (!date || isDateClosed || !daySchedule) return [];
@@ -297,7 +298,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
                   value={date}
                   min={today}
                   max={maxDate}
-                  isDayDisabled={day => !getDaySchedule(day, settings.schedule).isOpen}
+                  isDayDisabled={day => isShopDayClosed(day, settings)}
                   onChange={iso => setValue('date', iso, { shouldValidate: true })}
                 />
               </div>

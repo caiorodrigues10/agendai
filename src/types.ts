@@ -54,6 +54,30 @@ export interface DaySchedule {
 }
 
 export type OperationMode = 'QUEUE_ONLY' | 'APPOINTMENTS_ONLY' | 'HYBRID';
+export type OpeningMode = 'SCHEDULE' | 'MANUAL';
+export type BusinessSegment =
+  | 'BARBERSHOP'
+  | 'HAIR_SALON'
+  | 'BEAUTY_STUDIO'
+  | 'NAIL_STUDIO'
+  | 'LASH_BROW_STUDIO'
+  | 'AESTHETICS'
+  | 'SPA'
+  | 'OTHER';
+export type ManualShopStatus = 'AUTO' | 'OPEN' | 'CLOSED';
+
+export interface ShopOpenState {
+  open: boolean;
+  reason: string;
+  queueClosed: boolean;
+}
+
+export interface ScheduleException {
+  id: string;
+  date: string;
+  isOpen: boolean;
+  reason: string | null;
+}
 
 export interface ShopSettings {
   shopName: string;
@@ -65,6 +89,11 @@ export interface ShopSettings {
   latitude?: number;
   longitude?: number;
   operationMode?: OperationMode;
+  openingMode?: OpeningMode;
+  businessSegment?: BusinessSegment;
+  manualStatus?: ManualShopStatus;
+  openState?: ShopOpenState;
+  scheduleExceptions?: ScheduleException[];
 }
 
 export interface AIInsight {
@@ -87,7 +116,13 @@ export type EmployeePermission =
   | 'REPORTS_VIEW'
   | 'MARKETING_MANAGE'
   | 'CRM_ANALYTICS_VIEW'
-  | 'CRM_CAMPAIGNS_MANAGE';
+  | 'CRM_CAMPAIGNS_MANAGE'
+  | 'PRODUCTS_VIEW'
+  | 'PRODUCTS_MANAGE'
+  | 'INVENTORY_MANAGE'
+  | 'RETAIL_SELL'
+  | 'RETAIL_REFUND'
+  | 'PRODUCT_REPORTS_VIEW';
 
 export interface StaffMember {
   id: string;

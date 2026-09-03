@@ -536,31 +536,6 @@ export const PlansPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Final CTA */}
-        <section className="px-6 py-24 md:px-10 md:pb-36 xl:px-12">
-          <div className="relative mx-auto max-w-5xl overflow-hidden rounded-[2.5rem] border border-accent/15 bg-surface px-8 py-16 text-center md:rounded-[3.5rem] md:px-16 md:py-20">
-            <div className="absolute left-1/2 top-0 h-64 w-2/3 -translate-x-1/2 rounded-full bg-accent/12 blur-[100px]" />
-            <div className="relative z-10">
-              <p className="text-xs font-bold uppercase tracking-[0.28em] text-accent-light/80">
-                {trialCampaign.eyebrow}
-              </p>
-              <h2 className="mt-5 text-4xl font-black tracking-[-0.04em] text-white md:text-6xl">
-                Comece com 30 dias de Pro. Veja se faz sentido para o seu negócio.
-              </h2>
-              <p className="mx-auto mt-5 max-w-xl text-lg font-medium text-neutral-400">
-                {trialCampaign.body} {trialCampaign.afterTrial}
-              </p>
-              <button
-                type="button"
-                onClick={startPro}
-                className="group mt-10 inline-flex items-center justify-center gap-3 rounded-full bg-white px-8 py-4 text-base font-black text-black transition hover:-translate-y-0.5 hover:bg-accent-light"
-              >
-                {heroCta}
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </button>
-            </div>
-          </div>
-        </section>
       </main>
 
       <MarketingFooter />

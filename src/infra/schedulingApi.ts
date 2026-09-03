@@ -32,6 +32,7 @@ export interface QueueUpdatePayload {
   paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado';
   insertAt?: number;
   commissionSplits?: { professionalId: string; percentage: number }[];
+  retailSale?: import('./productsApi').RetailSalePayload;
 }
 
 function buildQuery(params: Record<string, string | undefined>): string {
@@ -85,8 +86,12 @@ export const schedulingApi = {
   },
   getQueueMetrics: async (barbershopId?: string) => {
     const qs = barbershopId ? `?barbershopId=${barbershopId}` : '';
+    const token = authStorage.getAccessToken() || '';
     const res = await apiClient<{ success: boolean; data: { completedCount: number } }>(
-      `/api/queue/metrics${qs}`
+      `/api/queue/metrics${qs}`,
+      'GET',
+      undefined,
+      token
     );
     return unwrap<{ completedCount: number }>(res);
   },
@@ -106,6 +111,12 @@ export const schedulingApi = {
       `/api/appointments/availability${qs}`
     ).then(res => unwrap<AvailabilitySlot[]>(res));
   },
+  getAppointmentSlots: (barbershopId: string, serviceId: string, date: string, staffId?: string) => {
+    const qs = buildQuery({ barbershopId, serviceId, date, staffId });
+    return apiClient<{ success: boolean; data: { time: string; staffId: string | null; durationMinutes: number }[] }>(
+      `/api/appointments/slots${qs}`
+    ).then(res => unwrap<{ time: string; staffId: string | null; durationMinutes: number }[]>(res));
+  },
   bookAppointment: async (payload: unknown) => {
     // Backend exige staff autenticado para criar agendamento
     const token = authStorage.getAccessToken() || undefined;
@@ -124,6 +135,30 @@ export const schedulingApi = {
       payload
     );
     return unwrap<unknown>(res);
+  },
+  exchangePublicAppointmentToken: async (token: string) => {
+    const res = await apiClient<{ success: boolean; data: { appointment: unknown; sessionToken: string } }>(
+      '/api/appointments/public/session', 'POST', { token }
+    );
+    return unwrap<{ appointment: unknown; sessionToken: string }>(res);
+  },
+  getPublicAppointment: async (sessionToken: string) => {
+    const res = await apiClient<{ success: boolean; data: unknown }>(
+      '/api/appointments/public/manage', 'GET', undefined, sessionToken
+    );
+    return unwrap<unknown>(res);
+  },
+  cancelPublicAppointment: async (sessionToken: string, reason?: string) => {
+    const res = await apiClient<{ success: boolean; data: unknown }>(
+      '/api/appointments/public/cancel', 'POST', { reason }, sessionToken
+    );
+    return unwrap<unknown>(res);
+  },
+  reschedulePublicAppointment: async (sessionToken: string, date: string, time: string) => {
+    const res = await apiClient<{ success: boolean; data: { appointment: unknown; manageToken: string } }>(
+      '/api/appointments/public/reschedule', 'POST', { date, time }, sessionToken
+    );
+    return unwrap<{ appointment: unknown; manageToken: string }>(res);
   },
   updateAppointment: async (id: string, payload: unknown) => {
     const token = authStorage.getAccessToken() || '';

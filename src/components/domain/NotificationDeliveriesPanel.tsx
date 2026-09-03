@@ -97,7 +97,7 @@ const EMPTY_META: NotificationListMeta = { total: 0, page: 1, limit: PAGE_SIZE, 
 
 export interface NotificationDeliveriesPanelProps {
   masterAdmin?: boolean;
-  barbershops?: Array<{ id: string; name: string }>;
+  barbershops?: { id: string; name: string }[];
   onNotify?: (message: string, type: 'success' | 'error') => void;
 }
 

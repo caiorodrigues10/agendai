@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useNavigate, useParams, useSearchParams, Navigate } from 'react-router-dom';
 import { QueueItemCard } from '../components/domain/QueueItemCard';
 import { AddCustomerForm } from '../components/domain/AddCustomerForm';
@@ -10,9 +10,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { useBarbershop } from '../contexts/BarbershopContext';
 import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
 import { useScheduling } from '../contexts/SchedulingContext';
+import { schedulingApi } from '../infra/schedulingApi';
 import { DynamicIcon } from '../components/ui/DynamicIcon';
 import { List, CalendarDays, Store, Coffee, Loader2 } from 'lucide-react';
 import type { OperationMode } from '../types';
+import { toLocalISO } from '../components/ui/ThemedCalendar';
 
 type PublicTab = 'queue' | 'appointments' | 'profile';
 
@@ -39,6 +41,7 @@ export const PublicHome: React.FC = () => {
     deletePost,
     likePost,
     isShopOpen,
+    isQueueClosed,
     loading: shopLoading,
   } = useBarbershop();
   const {
@@ -58,6 +61,21 @@ export const PublicHome: React.FC = () => {
   const tabs = visiblePublicTabs(operationMode);
   const [activeTab, setActiveTab] = useState<PublicTab>(tabs[0]);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'bot' } | null>(null);
+  const [publicSlots, setPublicSlots] = useState<string[] | undefined>();
+
+  const handleDateChange = useCallback(
+    (date: string, staffId?: string, serviceId?: string) => {
+      loadAvailability(date, staffId);
+      if (!serviceId || !barbershopId) {
+        setPublicSlots(undefined);
+        return;
+      }
+      schedulingApi.getAppointmentSlots(barbershopId, serviceId, date, staffId)
+        .then(slots => setPublicSlots(slots.map(slot => slot.time)))
+        .catch(() => setPublicSlots([]));
+    },
+    [barbershopId, loadAvailability]
+  );
 
   React.useEffect(() => {
     if (id && id !== barbershopId) {
@@ -129,6 +147,21 @@ export const PublicHome: React.FC = () => {
   const currentInChair = activeQueue.find(q => q.status === 'in_chair');
   const isUserInQueue = activeQueue.some(q => q.customerId === clientId);
   const isOpen = isShopOpen();
+  const queueClosed = isQueueClosed();
+  const canJoinQueue = isOpen && !queueClosed;
+  const todayIso = toLocalISO(new Date());
+  const todayException = settings.scheduleExceptions?.find(
+    item => !item.isOpen && item.date.slice(0, 10) === todayIso
+  );
+  const closedBanner = !isOpen
+    ? settings.openState?.reason === 'MANUAL_MODE_NOT_OPENED'
+      ? 'O salão ainda não abriu hoje.'
+      : settings.openState?.reason === 'EXCEPTION'
+        ? `Fechado em ${new Date(`${todayIso}T12:00:00`).toLocaleDateString('pt-BR')}${todayException?.reason ? ` (${todayException.reason})` : ''}`
+        : 'Fechado no momento'
+    : queueClosed
+      ? 'Fila encerrada por hoje'
+      : null;
 
   return (
     <div className="min-h-screen pb-[max(5rem,env(safe-area-inset-bottom))] bg-bg text-text-primary">
@@ -196,10 +229,12 @@ export const PublicHome: React.FC = () => {
             staff={staff}
             settings={settings}
             occupancy={availability}
+            availableSlots={publicSlots}
             onBook={async d => {
               try {
-                await bookAppointmentPublic(d);
+                const created = await bookAppointmentPublic(d);
                 showToast('Agendado com sucesso!');
+                return created;
               } catch (err) {
                 const { getErrorMessage } = await import('../utils/errorMessage');
                 showToast(
@@ -209,7 +244,7 @@ export const PublicHome: React.FC = () => {
                 throw err;
               }
             }}
-            onDateChange={(date, staffId) => loadAvailability(date, staffId)}
+            onDateChange={handleDateChange}
           />
         )}
 
@@ -218,8 +253,20 @@ export const PublicHome: React.FC = () => {
             <QueueStatusCard
               shopName={settings?.shopName}
               isOpen={isOpen}
+              queueClosed={queueClosed}
               insight={aiInsight}
             />
+
+            {closedBanner && (
+              <div className="mb-6 rounded-xl border border-border bg-surface px-4 py-3 text-sm text-text-secondary">
+                <p className="font-bold text-text-primary">{closedBanner}</p>
+                <p className="text-xs mt-1">
+                  {!isOpen
+                    ? 'A entrada na fila está indisponível até o salão reabrir.'
+                    : 'Quem já está na fila continua sendo atendido. Agendamentos seguem liberados.'}
+                </p>
+              </div>
+            )}
 
             {/* STATS GRID */}
             <div className="grid grid-cols-2 gap-4 mb-8">
@@ -244,10 +291,10 @@ export const PublicHome: React.FC = () => {
             {/* ACTIONS */}
             <div className="mb-8 space-y-2">
               {!isUserInQueue &&
-                (!isOpen ? (
+                (!canJoinQueue ? (
                   <div className="w-full bg-surface border border-border text-text-muted font-bold text-lg py-4 rounded-xl flex items-center justify-center gap-3 opacity-75 cursor-not-allowed">
                     <Coffee size={24} />
-                    <span>Fechado hoje</span>
+                    <span>{queueClosed && isOpen ? 'Fila encerrada por hoje' : 'Fechado no momento'}</span>
                   </div>
                 ) : (
                   <button
@@ -270,7 +317,7 @@ export const PublicHome: React.FC = () => {
                 </div>
               )}
 
-              {isOpen && isUserInQueue && (
+              {canJoinQueue && isUserInQueue && (
                 <button
                   type="button"
                   onClick={() => openJoinForm('dependent')}
@@ -304,7 +351,7 @@ export const PublicHome: React.FC = () => {
                     <Coffee size={48} strokeWidth={1.5} />
                   </div>
                   <p className="text-text-muted font-medium">Nenhum cliente na fila.</p>
-                  {!isUserInQueue && isOpen && (
+                  {!isUserInQueue && canJoinQueue && (
                     <button
                       type="button"
                       onClick={() => openJoinForm('self')}

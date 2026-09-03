@@ -57,7 +57,7 @@ export const PwaUpdatePrompt: React.FC = () => {
         <button
           type="button"
           onClick={() => void updateServiceWorker(true)}
-          className="min-h-10 shrink-0 rounded-xl bg-accent px-3 text-xs font-bold text-accent-fg"
+          className="min-h-11 shrink-0 rounded-xl bg-accent px-3 text-xs font-bold text-accent-fg"
         >
           Atualizar
         </button>
@@ -65,7 +65,7 @@ export const PwaUpdatePrompt: React.FC = () => {
         <button
           type="button"
           onClick={dismiss}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-text-muted hover:bg-surface-2 hover:text-text-primary"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-text-muted hover:bg-surface-2 hover:text-text-primary"
           aria-label="Fechar aviso"
         >
           <X size={18} />

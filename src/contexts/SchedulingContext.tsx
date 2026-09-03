@@ -37,11 +37,11 @@ interface SchedulingContextValue {
   updateQueueStatus: (
     id: string,
     status: QueueItem['status'],
-    extras?: { insertAt?: number; paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado'; commissionSplits?: { professionalId: string; percentage: number }[] }
+    extras?: { insertAt?: number; paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado'; commissionSplits?: { professionalId: string; percentage: number }[]; retailSale?: import('../infra/productsApi').RetailSalePayload }
   ) => Promise<void>;
   deleteHistoryItem: (id: string) => Promise<void>;
   bookAppointment: (data: any) => Promise<void>;
-  bookAppointmentPublic: (data: any) => Promise<void>;
+  bookAppointmentPublic: (data: any) => Promise<unknown>;
   cancelAppointment: (id: string) => Promise<void>;
   markAppointmentNoShow: (id: string) => Promise<void>;
   checkInAppointment: (appt: Appointment) => Promise<void>;
@@ -257,6 +257,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       insertAt?: number;
       paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado';
       commissionSplits?: { professionalId: string; percentage: number }[];
+      retailSale?: import('../infra/productsApi').RetailSalePayload;
     }
   ) => {
     const target = queue.find(item => item.id === id);
@@ -268,6 +269,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       payload.completedBy = user?.id || undefined;
       payload.paymentMethod = extras?.paymentMethod;
       payload.commissionSplits = extras?.commissionSplits;
+      payload.retailSale = extras?.retailSale;
     }
     if (status === 'waiting' && extras?.insertAt != null) {
       payload.insertAt = extras.insertAt;
@@ -318,12 +320,13 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     async (data: any) => {
       if (!barbershopId) throw new Error('Barbearia não selecionada');
 
-      await schedulingApi.bookAppointmentPublic({
+      const created = await schedulingApi.bookAppointmentPublic({
         ...data,
         barbershopId,
         staffId: data.staffId === 'any' ? null : data.staffId,
       });
       await loadAvailability(data.date, data.staffId !== 'any' ? data.staffId : undefined);
+      return created;
     },
     [barbershopId, loadAvailability]
   );

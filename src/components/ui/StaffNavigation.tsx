@@ -12,21 +12,24 @@ import {
 interface StaffNavigationProps {
   activeTab: string;
   userRole?: string;
+  hasDashboard?: boolean;
+  permissions?: string[];
   onNavigate: (tabId: string) => void;
 }
 
-const visibleTabs = (group: TabGroup, userRole?: string) =>
-  group.tabs.filter(tab => canAccessTab(tab.id, userRole));
+const visibleTabs = (group: TabGroup, userRole?: string, extras?: { hasDashboard?: boolean; permissions?: string[] }) =>
+  group.tabs.filter(tab => canAccessTab(tab.id, userRole, extras));
 
-export function StaffNavigation({ activeTab, userRole, onNavigate }: StaffNavigationProps) {
+export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions, onNavigate }: StaffNavigationProps) {
   const [moreOpen, setMoreOpen] = useState(false);
+  const extras = { hasDashboard, permissions };
 
   const groups = useMemo(
     () =>
-      TAB_GROUPS.map(group => ({ ...group, tabs: visibleTabs(group, userRole) })).filter(
+      TAB_GROUPS.map(group => ({ ...group, tabs: visibleTabs(group, userRole, extras) })).filter(
         group => group.tabs.length > 0
       ),
-    [userRole]
+    [userRole, hasDashboard, permissions]
   );
 
   const primaryTabs = useMemo(() => {

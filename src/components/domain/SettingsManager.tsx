@@ -1,12 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShopSettings, DaySchedule, OperationMode } from '../../types';
+import { ShopSettings, DaySchedule, OperationMode, BusinessSegment } from '../../types';
 import { barbershopApi, ShopWhatsAppStatus } from '../../infra/barbershopApi';
 import { ApiError } from '../../infra/apiClient';
 import { maskPhone } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { AccountPrivacyPanel } from './AccountPrivacyPanel';
 import { OwnerNotificationsPanel } from './OwnerNotificationsPanel';
+import { QueueAlertSettings } from './QueueAlertSettings';
+import { ShopFloorControls } from './ShopFloorControls';
+import { ThemedCalendar, toLocalISO } from '../ui/ThemedCalendar';
+import { addDays } from '../../utils/schedulingUtils';
 import {
   Save,
   Clock,
@@ -15,16 +19,39 @@ import {
   Smartphone,
   Loader2,
   QrCode,
+  Copy,
+  KeyRound,
   Unplug,
   Wallet,
   Users,
   CalendarCheck,
   LayoutGrid,
+  Trash2,
 } from 'lucide-react';
 import { useBarbershop } from '../../contexts/BarbershopContext';
+import type { AppointmentPolicy } from '../../infra/barbershopApi';
 
 const WA_POLL_MS = 2000;
-const WA_POLL_TIMEOUT_MS = 40_000;
+const WA_POLL_TIMEOUT_MS = 90_000;
+
+const DEFAULT_APPOINTMENT_POLICY: AppointmentPolicy = {
+  bookingNoticeMinutes: 60,
+  cancelNoticeMinutes: 120,
+  rescheduleNoticeMinutes: 120,
+  bookingHorizonDays: 60,
+  allowPublicCancellation: true,
+  allowPublicReschedule: true,
+  requestReview: true,
+};
+
+const AppointmentPolicySection: React.FC<{ barbershopId: string; onNotify: SettingsManagerProps['onNotify'] }> = ({ barbershopId, onNotify }) => {
+  const [policy, setPolicy] = useState<AppointmentPolicy>(DEFAULT_APPOINTMENT_POLICY);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => { barbershopApi.getAppointmentPolicy(barbershopId).then(setPolicy).catch(() => undefined); }, [barbershopId]);
+  const update = (field: keyof AppointmentPolicy, value: number | boolean) => setPolicy(current => ({ ...current, [field]: value }));
+  const save = async () => { setSaving(true); try { const next = await barbershopApi.updateAppointmentPolicy(barbershopId, policy); setPolicy(next); onNotify('Regras da agenda atualizadas.', 'success'); } catch (err) { onNotify(getErrorMessage(err, 'Não foi possível salvar as regras da agenda.'), 'error'); } finally { setSaving(false); } };
+  return <div className="bg-surface border border-border rounded-xl p-5"><h3 className="text-lg font-bold text-text-primary mb-1">Regras da agenda pública</h3><p className="text-xs text-text-muted mb-4">Defina até quando o cliente pode reservar, cancelar ou remarcar.</p><div className="grid gap-3 sm:grid-cols-3">{([['bookingNoticeMinutes', 'Antecedência para reservar'], ['cancelNoticeMinutes', 'Prazo para cancelar'], ['rescheduleNoticeMinutes', 'Prazo para remarcar']] as const).map(([field, label]) => <label key={field} className="text-xs text-text-secondary">{label}<input type="number" min={0} max={10080} value={policy[field]} onChange={event => update(field, Number(event.target.value))} className="mt-1 w-full rounded-lg bg-bg border border-border p-2 text-text-primary" /><span className="text-[10px] text-text-muted">minutos</span></label>)}</div><label className="block text-xs text-text-secondary mt-3">Reservas até<input type="number" min={1} max={365} value={policy.bookingHorizonDays} onChange={event => update('bookingHorizonDays', Number(event.target.value))} className="mt-1 w-32 rounded-lg bg-bg border border-border p-2 text-text-primary" /> <span className="text-[10px] text-text-muted">dias no futuro</span></label><div className="grid gap-2 sm:grid-cols-3 mt-4">{([['allowPublicCancellation', 'Permitir cancelamento'], ['allowPublicReschedule', 'Permitir remarcação'], ['requestReview', 'Pedir avaliação']] as const).map(([field, label]) => <label key={field} className="flex items-center gap-2 text-sm text-text-secondary"><input type="checkbox" checked={policy[field]} onChange={event => update(field, event.target.checked)} />{label}</label>)}</div><button type="button" disabled={saving} onClick={() => void save()} className="mt-4 rounded-lg bg-accent px-4 py-2 text-sm font-bold text-accent-fg disabled:opacity-50">{saving ? 'Salvando...' : 'Salvar regras'}</button></div>;
+};
 
 function platformWhatsAppUnavailable(err: unknown): boolean {
   return (
@@ -42,6 +69,10 @@ const SalonWhatsAppConnection: React.FC<{
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [method, setMethod] = useState<'qr' | 'pairing_code'>('pairing_code');
+  const [phoneNumber, setPhoneNumber] = useState(whatsapp);
+  const [copied, setCopied] = useState(false);
+  const [showDisconnectModal, setShowDisconnectModal] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopPoll = useCallback(() => {
@@ -92,12 +123,7 @@ const SalonWhatsAppConnection: React.FC<{
     (async () => {
       setLoading(true);
       const next = await loadStatus();
-      if (
-        !cancelled &&
-        next &&
-        !next.connected &&
-        (next.qrcodeBase64 || next.status === 'connecting')
-      ) {
+      if (!cancelled && next && !next.connected && next.status === 'connecting') {
         startPoll();
       }
       if (!cancelled) setLoading(false);
@@ -108,11 +134,25 @@ const SalonWhatsAppConnection: React.FC<{
     };
   }, [loadStatus, startPoll, stopPoll]);
 
-  const handleConnect = async () => {
+  useEffect(() => {
+    if (data?.connected) {
+      void barbershopApi.updateOnboardingStep(barbershopId, 'WHATSAPP').catch(() => undefined);
+    }
+  }, [barbershopId, data?.connected]);
+
+  const handleConnect = async (selectedMethod: 'qr' | 'pairing_code' = method) => {
     setBusy(true);
     setError(null);
+    setData(prev => prev ? { ...prev, qrcodeBase64: null, pairingCode: null } : prev);
     try {
-      const next = await barbershopApi.connectWhatsApp(barbershopId);
+      if (selectedMethod === 'pairing_code' && !phoneNumber.trim()) {
+        setError('Informe o número do WhatsApp que será conectado.');
+        return;
+      }
+      const next = await barbershopApi.connectWhatsApp(
+        barbershopId,
+        selectedMethod === 'qr' ? { method: 'qr' } : { method: 'pairing_code', phoneNumber }
+      );
       applyStatus(next);
       if (!next.connected) startPoll();
     } catch (err) {
@@ -127,13 +167,7 @@ const SalonWhatsAppConnection: React.FC<{
   };
 
   const handleDisconnect = async () => {
-    if (
-      !confirm(
-        'Desconectar o WhatsApp deste salão? As mensagens deixam de ser enviadas até conectar de novo.'
-      )
-    ) {
-      return;
-    }
+    setShowDisconnectModal(false);
     setBusy(true);
     setError(null);
     try {
@@ -148,6 +182,7 @@ const SalonWhatsAppConnection: React.FC<{
 
   const connected = Boolean(data?.connected);
   const qr = data?.qrcodeBase64;
+  const pairingCode = data?.pairingCode;
   const platformDown = error === 'WhatsApp da plataforma indisponível.';
 
   return (
@@ -173,7 +208,7 @@ const SalonWhatsAppConnection: React.FC<{
           <button
             type="button"
             disabled={busy}
-            onClick={() => void handleDisconnect()}
+            onClick={() => setShowDisconnectModal(true)}
             className="px-4 py-3 text-sm font-bold rounded-xl border border-danger/30 text-danger bg-danger/10 hover:bg-danger/20 disabled:opacity-50 flex items-center gap-2"
           >
             {busy ? <Loader2 size={16} className="animate-spin" /> : <Unplug size={16} />}
@@ -182,7 +217,18 @@ const SalonWhatsAppConnection: React.FC<{
         </div>
       ) : (
         <div className="space-y-4">
-          {qr && (
+          <div className="grid grid-cols-2 gap-2 rounded-xl bg-bg p-1">
+            <button type="button" onClick={() => { setMethod('pairing_code'); setError(null); setData(prev => prev ? { ...prev, qrcodeBase64: null, pairingCode: null } : prev); }} className={`rounded-lg px-3 py-3 text-sm font-bold flex items-center justify-center gap-2 ${method === 'pairing_code' ? 'bg-accent text-accent-fg' : 'text-text-secondary'}`}><KeyRound size={17} /> Código</button>
+            <button type="button" onClick={() => { setMethod('qr'); setError(null); setData(prev => prev ? { ...prev, qrcodeBase64: null, pairingCode: null } : prev); }} className={`rounded-lg px-3 py-3 text-sm font-bold flex items-center justify-center gap-2 ${method === 'qr' ? 'bg-accent text-accent-fg' : 'text-text-secondary'}`}><QrCode size={17} /> QR Code</button>
+          </div>
+          {method === 'pairing_code' && (
+            <div className="space-y-3">
+              <label className="block text-sm font-semibold text-text-secondary" htmlFor="whatsapp-pairing-phone">Número do WhatsApp que será conectado</label>
+              <input id="whatsapp-pairing-phone" type="tel" value={phoneNumber} onChange={e => setPhoneNumber(maskPhone(e.target.value))} placeholder="(11) 99999-9999" className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent" />
+              <p className="text-xs text-text-muted">Usado somente para gerar o código de pareamento.</p>
+            </div>
+          )}
+          {qr && method === 'qr' && (
             <div className="flex flex-col items-center gap-2">
               <img
                 src={qr}
@@ -194,14 +240,22 @@ const SalonWhatsAppConnection: React.FC<{
               </p>
             </div>
           )}
+          {pairingCode && method === 'pairing_code' && (
+            <div className="rounded-xl bg-bg border border-accent/40 p-5 text-center space-y-3">
+              <p className="text-sm font-semibold text-text-secondary">Digite este código no WhatsApp</p>
+              <p className="text-3xl sm:text-4xl tracking-[0.28em] font-black text-accent break-all">{pairingCode}</p>
+              <button type="button" onClick={() => { void navigator.clipboard?.writeText(pairingCode).then(() => { setCopied(true); window.setTimeout(() => setCopied(false), 1800); }); }} className="mx-auto px-4 py-2.5 rounded-lg border border-accent/40 text-accent font-bold flex items-center gap-2"><Copy size={16} /> {copied ? 'Código copiado' : 'Copiar código'}</button>
+              <p className="text-xs text-text-muted">WhatsApp → Aparelhos conectados → Conectar um aparelho → Conectar com número de telefone.</p>
+            </div>
+          )}
           <button
             type="button"
             disabled={busy}
-            onClick={() => void handleConnect()}
+            onClick={() => void handleConnect(method)}
             className="w-full py-3.5 bg-accent hover:bg-accent-hover text-accent-fg font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-accent/20 disabled:opacity-50 text-base"
           >
-            {busy ? <Loader2 size={20} className="animate-spin" /> : <QrCode size={20} />}
-            {qr ? 'Gerar QR novamente' : 'Conectar WhatsApp'}
+            {busy ? <Loader2 size={20} className="animate-spin" /> : method === 'qr' ? <QrCode size={20} /> : <KeyRound size={20} />}
+            {method === 'qr' ? (qr ? 'Gerar QR novamente' : 'Conectar com QR Code') : (pairingCode ? 'Gerar novo código' : 'Conectar com código')}
           </button>
         </div>
       )}
@@ -234,6 +288,65 @@ const SalonWhatsAppConnection: React.FC<{
           Deixe em branco para usar o mesmo número conectado acima.
         </p>
       </div>
+
+      {showDisconnectModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" role="presentation">
+          <div role="dialog" aria-modal="true" aria-labelledby="disconnect-whatsapp-title" className="w-full max-w-md rounded-2xl bg-surface border border-border p-5 shadow-2xl">
+            <h4 id="disconnect-whatsapp-title" className="text-lg font-bold text-text-primary">Desconectar WhatsApp?</h4>
+            <p className="mt-2 text-sm text-text-secondary">Fila, agenda, lembretes e campanhas deixarão de enviar mensagens até uma nova conexão.</p>
+            <div className="mt-5 flex justify-end gap-2"><button type="button" onClick={() => setShowDisconnectModal(false)} className="px-4 py-3 rounded-xl text-sm font-bold text-text-secondary">Cancelar</button><button type="button" onClick={() => void handleDisconnect()} className="px-4 py-3 rounded-xl bg-danger text-white text-sm font-bold">Desconectar</button></div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const SEGMENT_OPTIONS: { value: BusinessSegment; label: string }[] = [
+  { value: 'BARBERSHOP', label: 'Barbearia' },
+  { value: 'HAIR_SALON', label: 'Salão de cabelo' },
+  { value: 'BEAUTY_STUDIO', label: 'Studio de beleza' },
+  { value: 'NAIL_STUDIO', label: 'Unhas' },
+  { value: 'LASH_BROW_STUDIO', label: 'Cílios e sobrancelhas' },
+  { value: 'AESTHETICS', label: 'Estética' },
+  { value: 'SPA', label: 'Spa' },
+  { value: 'OTHER', label: 'Outro' },
+];
+
+const BusinessSegmentSection: React.FC<{
+  settings: ShopSettings;
+  onNotify: (message: string, type: 'success' | 'error') => void;
+  onSave: (settings: ShopSettings) => void;
+}> = ({ settings, onNotify, onSave }) => {
+  const [saving, setSaving] = useState(false);
+  const current = settings.businessSegment ?? 'OTHER';
+  return (
+    <div className="bg-surface border border-border rounded-xl p-5">
+      <h3 className="text-lg font-bold text-text-primary mb-1">Tipo do estabelecimento</h3>
+      <p className="text-xs text-text-muted mb-4">
+        Só orienta sugestões de catálogo. Não altera plano, URL pública, fila ou agenda.
+      </p>
+      <select
+        disabled={saving}
+        value={current}
+        onChange={async event => {
+          const businessSegment = event.target.value as BusinessSegment;
+          setSaving(true);
+          try {
+            await onSave({ ...settings, businessSegment });
+            onNotify('Tipo do estabelecimento atualizado.', 'success');
+          } catch (err) {
+            onNotify(getErrorMessage(err, 'Não foi possível salvar o tipo.'), 'error');
+          } finally {
+            setSaving(false);
+          }
+        }}
+        className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text-primary"
+      >
+        {SEGMENT_OPTIONS.map(option => (
+          <option key={option.value} value={option.value}>{option.label}</option>
+        ))}
+      </select>
     </div>
   );
 };
@@ -325,6 +438,110 @@ const OperationModeSection: React.FC<OperationModeSectionProps> = ({
   );
 };
 
+const ScheduleExceptionsSection: React.FC<{
+  onNotify: (message: string, type: 'success' | 'error') => void;
+}> = ({ onNotify }) => {
+  const { settings, addScheduleExceptions, removeScheduleException } = useBarbershop();
+  const [from, setFrom] = useState(toLocalISO(new Date()));
+  const [to, setTo] = useState('');
+  const [reason, setReason] = useState('');
+  const [saving, setSaving] = useState(false);
+  const exceptions = (settings?.scheduleExceptions ?? []).filter(item => !item.isOpen);
+  const today = toLocalISO(new Date());
+  const maxDate = toLocalISO(addDays(new Date(), 90));
+
+  const add = async () => {
+    setSaving(true);
+    try {
+      await addScheduleExceptions(from, to || undefined, reason.trim() || undefined);
+      setReason('');
+      setTo('');
+      onNotify('Data de fechamento adicionada.', 'success');
+    } catch (err) {
+      onNotify(getErrorMessage(err, 'Não foi possível salvar a data de fechamento.'), 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="bg-surface border border-border rounded-xl p-5">
+      <h3 className="text-lg font-bold text-text-primary mb-1">Datas de fechamento</h3>
+      <p className="text-xs text-text-muted mb-4">
+        Feriados, férias ou folgas planejadas. Bloqueia fila pública e agendamento nesses dias.
+      </p>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-2">De</p>
+          <div className="rounded-xl border border-border bg-bg px-2 py-2">
+            <ThemedCalendar value={from} min={today} max={maxDate} onChange={setFrom} />
+          </div>
+        </div>
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-2">Até (opcional)</p>
+          <div className="rounded-xl border border-border bg-bg px-2 py-2">
+            <ThemedCalendar value={to || from} min={from} max={maxDate} onChange={setTo} />
+          </div>
+          {to && (
+            <button type="button" onClick={() => setTo('')} className="mt-2 text-xs text-text-muted hover:underline">
+              Usar só um dia
+            </button>
+          )}
+        </div>
+      </div>
+      <label className="block text-xs text-text-secondary mt-4">
+        Motivo (opcional)
+        <input
+          value={reason}
+          onChange={e => setReason(e.target.value)}
+          maxLength={200}
+          placeholder="Feriado, férias..."
+          className="mt-1 w-full rounded-lg bg-bg border border-border p-2 text-text-primary"
+        />
+      </label>
+      <button
+        type="button"
+        disabled={saving}
+        onClick={() => void add()}
+        className="mt-3 rounded-lg bg-accent px-4 py-2 text-sm font-bold text-accent-fg disabled:opacity-50"
+      >
+        {saving ? 'Salvando...' : 'Adicionar fechamento'}
+      </button>
+      <ul className="mt-4 space-y-2">
+        {exceptions.length === 0 && (
+          <li className="text-xs text-text-muted">Nenhuma data de fechamento cadastrada.</li>
+        )}
+        {exceptions.map(item => (
+          <li
+            key={item.id}
+            className="flex items-center justify-between gap-3 rounded-lg border border-border bg-bg px-3 py-2"
+          >
+            <div>
+              <p className="text-sm font-bold text-text-primary">
+                {new Date(`${item.date.slice(0, 10)}T12:00:00`).toLocaleDateString('pt-BR')}
+              </p>
+              {item.reason && <p className="text-xs text-text-muted">{item.reason}</p>}
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                void removeScheduleException(item.id).then(
+                  () => onNotify('Data removida.', 'success'),
+                  err => onNotify(getErrorMessage(err, 'Não foi possível remover.'), 'error')
+                )
+              }
+              className="p-2 rounded-lg text-danger hover:bg-danger/10"
+              aria-label="Remover data"
+            >
+              <Trash2 size={16} />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
 interface SettingsManagerProps {
   settings: ShopSettings;
   barbershopId?: string;
@@ -385,6 +602,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
       }
     }
     onSave({
+      ...settings,
       shopName,
       whatsapp,
       address,
@@ -463,6 +681,12 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
       )}
 
       <OperationModeSection settings={settings} barbershopId={barbershopId} onNotify={onNotify} />
+      <BusinessSegmentSection settings={settings} onNotify={onNotify} onSave={onSave} />
+
+      {barbershopId && <ShopFloorControls variant="full" onNotify={onNotify} />}
+      {barbershopId && <ScheduleExceptionsSection onNotify={onNotify} />}
+
+      {barbershopId && <AppointmentPolicySection barbershopId={barbershopId} onNotify={onNotify} />}
 
       <div className="bg-surface border border-border rounded-xl p-5">
         <h3 className="text-lg font-bold text-text-primary mb-4">Horários de Funcionamento</h3>
@@ -547,6 +771,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
 
       <AccountPrivacyPanel onNotify={onNotify} />
       {showNotifications && barbershopId && <OwnerNotificationsPanel onNotify={onNotify} />}
+      {showNotifications && barbershopId && <QueueAlertSettings barbershopId={barbershopId} onNotify={onNotify} />}
     </div>
   );
 };

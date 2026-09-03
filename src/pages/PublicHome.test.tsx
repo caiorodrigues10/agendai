@@ -41,6 +41,7 @@ vi.mock('../contexts/BarbershopContext', () => ({
     feed: [],
     loading: false,
     isShopOpen: () => true,
+    isQueueClosed: () => false,
     addPost: vi.fn(),
     deletePost: vi.fn(),
     likePost: vi.fn(),

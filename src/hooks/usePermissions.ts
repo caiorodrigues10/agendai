@@ -12,7 +12,13 @@ export type EmployeePermission =
   | 'REPORTS_VIEW'
   | 'MARKETING_MANAGE'
   | 'CRM_ANALYTICS_VIEW'
-  | 'CRM_CAMPAIGNS_MANAGE';
+  | 'CRM_CAMPAIGNS_MANAGE'
+  | 'PRODUCTS_VIEW'
+  | 'PRODUCTS_MANAGE'
+  | 'INVENTORY_MANAGE'
+  | 'RETAIL_SELL'
+  | 'RETAIL_REFUND'
+  | 'PRODUCT_REPORTS_VIEW';
 
 export const ALL_PERMISSIONS: EmployeePermission[] = [
   'QUEUE_MANAGE',
@@ -27,6 +33,12 @@ export const ALL_PERMISSIONS: EmployeePermission[] = [
   'MARKETING_MANAGE',
   'CRM_ANALYTICS_VIEW',
   'CRM_CAMPAIGNS_MANAGE',
+  'PRODUCTS_VIEW',
+  'PRODUCTS_MANAGE',
+  'INVENTORY_MANAGE',
+  'RETAIL_SELL',
+  'RETAIL_REFUND',
+  'PRODUCT_REPORTS_VIEW',
 ];
 
 export const PERMISSION_LABELS: Record<EmployeePermission, string> = {
@@ -42,6 +54,12 @@ export const PERMISSION_LABELS: Record<EmployeePermission, string> = {
   MARKETING_MANAGE: 'Gerenciar marketing',
   CRM_ANALYTICS_VIEW: 'Ver inteligência do CRM',
   CRM_CAMPAIGNS_MANAGE: 'Gerenciar campanhas CRM',
+  PRODUCTS_VIEW: 'Ver produtos',
+  PRODUCTS_MANAGE: 'Gerenciar catálogo',
+  INVENTORY_MANAGE: 'Ajustar estoque e compras',
+  RETAIL_SELL: 'Vender produtos',
+  RETAIL_REFUND: 'Estornar vendas de produtos',
+  PRODUCT_REPORTS_VIEW: 'Ver relatórios de produtos',
 };
 
 /**

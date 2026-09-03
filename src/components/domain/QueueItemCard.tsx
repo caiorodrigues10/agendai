@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { notificationsApi } from '../../infra/notificationsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { RetailCheckoutBlock } from './RetailCheckoutBlock';
+import type { RetailSalePayload } from '../../infra/productsApi';
 
 interface QueueItemCardProps {
   item: QueueItem;
@@ -28,10 +30,13 @@ interface QueueItemCardProps {
   barbershopId?: string;
   staff?: StaffMember[];
   currentUserId?: string;
+  /** Staff + Pro only. Public queue must omit this so the card stays provider-free. */
+  enableProductSales?: boolean;
+  canOverrideProductPrice?: boolean;
   onStatusChange: (
     id: string,
     status: QueueItem['status'],
-    extras?: { paymentMethod?: QueueItem['paymentMethod']; commissionSplits?: { professionalId: string; percentage: number }[] }
+    extras?: { paymentMethod?: QueueItem['paymentMethod']; commissionSplits?: { professionalId: string; percentage: number }[]; retailSale?: import('../../infra/productsApi').RetailSalePayload }
   ) => void;
   onLeaveQueue: (id: string) => void;
   onReturnToQueue?: (item: QueueItem) => void;
@@ -49,12 +54,17 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
   barbershopId,
   staff = [],
   currentUserId,
+  enableProductSales = false,
+  canOverrideProductPrice = false,
   onStatusChange,
   onLeaveQueue,
   onReturnToQueue,
   onAddDependent,
   onNotify,
 }) => {
+  const canSellProducts = Boolean(enableProductSales);
+  const canOverridePrice = Boolean(canOverrideProductPrice);
+  const [retailSale, setRetailSale] = useState<(RetailSalePayload & { total: number }) | null>(null);
   const [sending, setSending] = useState<'reminder' | 'next' | null>(null);
   const [showPaymentPicker, setShowPaymentPicker] = useState(false);
   const [submittingFinalization, setSubmittingFinalization] = useState(false);
@@ -133,7 +143,11 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
   const handleFinalize = async (paymentMethod: QueueItem['paymentMethod']) => {
     setSubmittingFinalization(true);
     try {
-      await onStatusChange(item.id, 'completed', { paymentMethod, commissionSplits: commissionSplits.length ? commissionSplits : undefined });
+      await onStatusChange(item.id, 'completed', {
+        paymentMethod,
+        commissionSplits: commissionSplits.length ? commissionSplits : undefined,
+        retailSale: retailSale ? { paymentMethod: retailSale.paymentMethod, items: retailSale.items, discount: retailSale.discount, clientId: retailSale.clientId } : undefined,
+      });
       setShowPaymentPicker(false);
     } finally {
       setSubmittingFinalization(false);
@@ -292,7 +306,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
 
       {showPaymentPicker && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-2xl border border-border bg-surface p-5 shadow-2xl">
+          <div className="w-full max-w-sm max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-surface p-5 shadow-2xl">
             <h3 className="text-lg font-bold text-text-primary">Como foi o pagamento?</h3>
             <p className="mt-1 text-sm text-text-secondary">
               Selecione a forma usada para concluir este atendimento.
@@ -335,6 +349,18 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
                   </button>
                 );
               })}
+              {canSellProducts && (
+                <div className="space-y-2">
+                  <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Produtos (pagamento separado)</p>
+                  <RetailCheckoutBlock canOverridePrice={canOverridePrice} onChange={setRetailSale} />
+                  {retailSale && (
+                    <div className="rounded-xl bg-surface-2 p-3 text-xs text-text-secondary">
+                      <p>Serviços e produtos entram separados no financeiro.</p>
+                      <p className="mt-1 font-semibold text-text-primary">Produtos: R$ {retailSale.total.toFixed(2)} ({retailSale.paymentMethod})</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <button

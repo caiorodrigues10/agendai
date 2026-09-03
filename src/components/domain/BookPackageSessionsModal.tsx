@@ -9,6 +9,7 @@ import {
   AvailabilitySlot,
   generateTimeSlots,
   getDaySchedule,
+  isShopDayClosed,
   isSlotAvailable,
   addDays,
 } from '../../utils/schedulingUtils';
@@ -64,7 +65,7 @@ export const BookPackageSessionsModal: React.FC<BookPackageSessionsModalProps> =
     () => getDaySchedule(new Date(date + 'T12:00:00'), settings.schedule),
     [date, settings.schedule]
   );
-  const isDateClosed = !daySchedule.isOpen;
+  const isDateClosed = isShopDayClosed(new Date(date + 'T12:00:00'), settings);
   const timeSlots = useMemo(() => {
     if (isDateClosed) return [];
     return generateTimeSlots(daySchedule.openTime, daySchedule.closeTime).filter(slot =>
@@ -172,7 +173,7 @@ export const BookPackageSessionsModal: React.FC<BookPackageSessionsModalProps> =
             value={date}
             min={today}
             max={maxDate}
-            isDayDisabled={day => !getDaySchedule(day, settings.schedule).isOpen}
+            isDayDisabled={day => isShopDayClosed(day, settings)}
             onChange={setDate}
           />
 

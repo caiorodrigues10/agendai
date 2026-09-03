@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
 import { barbershopApi } from '../infra/barbershopApi';
-import { StaffMember, Service, ShopSettings, FeedPost, OperationMode } from '../types';
+import { StaffMember, Service, ShopSettings, FeedPost, OperationMode, OpeningMode, ManualShopStatus, ShopOpenState, ScheduleException } from '../types';
 import { mapScheduleFromApi, mapStaffFromApi } from '../utils/schedulingUtils';
 import { useBarbershopFilters } from './BarbershopFiltersContext';
 import { useAuth } from './AuthContext';
 import { logger } from '../utils/logger';
+import type { ShopStatusPayload } from '../infra/barbershopApi';
 
 interface BarbershopContextValue {
   loading: boolean;
@@ -14,6 +15,11 @@ interface BarbershopContextValue {
   feed: FeedPost[];
   setSettings: (settings: ShopSettings) => Promise<void>;
   setOperationMode: (mode: OperationMode) => Promise<void>;
+  setOpeningMode: (mode: OpeningMode) => Promise<void>;
+  setManualStatus: (status: ManualShopStatus) => Promise<void>;
+  setQueueClosed: (closed: boolean) => Promise<void>;
+  addScheduleExceptions: (from: string, to?: string, reason?: string) => Promise<void>;
+  removeScheduleException: (exceptionId: string) => Promise<void>;
   addService: (data: Omit<Service, 'id'>) => Promise<void>;
   editService: (id: string, data: Omit<Service, 'id'>) => Promise<void>;
   deleteService: (id: string) => Promise<void>;
@@ -22,6 +28,7 @@ interface BarbershopContextValue {
   deletePost: (id: string) => Promise<void>;
   likePost: (id: string) => Promise<void>;
   isShopOpen: () => boolean;
+  isQueueClosed: () => boolean;
   getTodayScheduleDisplay: () => string;
 }
 
@@ -118,7 +125,12 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
           logoUrl?: string | null;
           latitude?: number | null;
           longitude?: number | null;
-          operationMode?: import('../types').OperationMode;
+          operationMode?: OperationMode;
+          openingMode?: OpeningMode;
+          businessSegment?: import('../types').BusinessSegment;
+          manualStatus?: ManualShopStatus;
+          openState?: ShopOpenState;
+          scheduleExceptions?: ScheduleException[];
         } | null;
         let schedule = mapScheduleFromApi(null);
         try {
@@ -149,6 +161,11 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
             latitude: shopData.latitude ?? undefined,
             longitude: shopData.longitude ?? undefined,
             operationMode: shopData.operationMode ?? 'HYBRID',
+            openingMode: shopData.openingMode ?? 'SCHEDULE',
+            businessSegment: shopData.businessSegment ?? 'OTHER',
+            manualStatus: shopData.manualStatus ?? 'AUTO',
+            openState: shopData.openState,
+            scheduleExceptions: shopData.scheduleExceptions ?? [],
             schedule,
             logoUrl: shopData.logoUrl ?? undefined,
           });
@@ -178,6 +195,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
     }
     if (newSettings.latitude !== undefined) shopPayload.latitude = newSettings.latitude;
     if (newSettings.longitude !== undefined) shopPayload.longitude = newSettings.longitude;
+    if (newSettings.businessSegment) shopPayload.businessSegment = newSettings.businessSegment;
     await barbershopApi.updateBarbershop(barbershopId, shopPayload);
     await barbershopApi.updateSchedule(barbershopId, newSettings.schedule);
     setSettingsState(newSettings);
@@ -193,6 +211,80 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
       setSettingsState({ ...settings, operationMode: prev ?? 'HYBRID' });
       throw new Error('Não foi possível alterar o modo de atendimento.');
     }
+  };
+
+  const applyShopStatus = (payload: ShopStatusPayload) => {
+    setSettingsState(prev =>
+      prev
+        ? {
+            ...prev,
+            openingMode: payload.openingMode,
+            manualStatus: payload.manualStatus,
+            openState: payload.openState,
+            scheduleExceptions: payload.scheduleExceptions ?? prev.scheduleExceptions,
+          }
+        : prev
+    );
+  };
+
+  const setOpeningMode = async (mode: OpeningMode) => {
+    if (!barbershopId || !settings) return;
+    const prev = settings.openingMode;
+    setSettingsState({ ...settings, openingMode: mode });
+    try {
+      await barbershopApi.updateBarbershop(barbershopId, { openingMode: mode });
+      const shop = await barbershopApi.getBarbershop(barbershopId);
+      setSettingsState(current =>
+        current
+          ? {
+              ...current,
+              openingMode: shop.openingMode ?? mode,
+              manualStatus: shop.manualStatus ?? current.manualStatus,
+              openState: shop.openState ?? current.openState,
+              scheduleExceptions: shop.scheduleExceptions ?? current.scheduleExceptions,
+            }
+          : current
+      );
+    } catch {
+      setSettingsState({ ...settings, openingMode: prev ?? 'SCHEDULE' });
+      throw new Error('Não foi possível alterar o modo de abertura.');
+    }
+  };
+
+  const setManualStatus = async (status: ManualShopStatus) => {
+    if (!barbershopId) return;
+    const payload = await barbershopApi.setManualStatus(barbershopId, status);
+    applyShopStatus(payload);
+  };
+
+  const setQueueClosed = async (closed: boolean) => {
+    if (!barbershopId) return;
+    const payload = await barbershopApi.setQueueStatus(barbershopId, closed);
+    applyShopStatus(payload);
+  };
+
+  const addScheduleExceptions = async (from: string, to?: string, reason?: string) => {
+    if (!barbershopId) return;
+    await barbershopApi.createScheduleExceptions(barbershopId, { from, to, reason, isOpen: false });
+    const shop = await barbershopApi.getBarbershop(barbershopId);
+    setSettingsState(current =>
+      current
+        ? { ...current, scheduleExceptions: shop.scheduleExceptions ?? [], openState: shop.openState ?? current.openState }
+        : current
+    );
+  };
+
+  const removeScheduleException = async (exceptionId: string) => {
+    if (!barbershopId) return;
+    await barbershopApi.deleteScheduleException(barbershopId, exceptionId);
+    setSettingsState(current =>
+      current
+        ? {
+            ...current,
+            scheduleExceptions: (current.scheduleExceptions ?? []).filter(item => item.id !== exceptionId),
+          }
+        : current
+    );
   };
 
   const addService = async (data: Omit<Service, 'id'>) => {
@@ -263,6 +355,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
   };
 
   const isShopOpen = () => {
+    if (settings?.openState) return settings.openState.open;
     if (!settings?.schedule?.length) return false;
     const day = new Date().getDay();
     const today = settings.schedule[day];
@@ -276,6 +369,8 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
     if (!Number.isFinite(openMinutes) || !Number.isFinite(closeMinutes)) return true;
     return currentMinutes >= openMinutes && currentMinutes < closeMinutes;
   };
+
+  const isQueueClosed = () => Boolean(settings?.openState?.queueClosed);
 
   const getTodayScheduleDisplay = () => {
     if (!settings?.schedule?.length) return '';
@@ -294,6 +389,11 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
       feed,
       setSettings,
       setOperationMode,
+      setOpeningMode,
+      setManualStatus,
+      setQueueClosed,
+      addScheduleExceptions,
+      removeScheduleException,
       addService,
       editService,
       deleteService,
@@ -302,6 +402,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
       deletePost,
       likePost,
       isShopOpen,
+      isQueueClosed,
       getTodayScheduleDisplay,
     }),
     [loading, services, staff, settings, feed]

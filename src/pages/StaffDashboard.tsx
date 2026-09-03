@@ -34,8 +34,14 @@ import { Loader2 } from 'lucide-react';
 import { DemandAlertBanner } from '../components/domain/DemandAlertBanner';
 import { StaffNavigation } from '../components/ui/StaffNavigation';
 import { ClosedSalonJoinModal } from '../components/domain/ClosedSalonJoinModal';
+import { ShopFloorControls } from '../components/domain/ShopFloorControls';
 import { usePermissions } from '../hooks/usePermissions';
 import { ActivationChecklist } from '../components/domain/ActivationChecklist';
+import { OnboardingMissions } from '../components/domain/OnboardingMissions';
+import { QueueCapacityBanner } from '../components/domain/QueueCapacityBanner';
+import { barbershopApi } from '../infra/barbershopApi';
+import { ProductsHub } from '../components/domain/ProductsHub';
+import { productsApi } from '../infra/productsApi';
 
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -57,6 +63,7 @@ export const StaffDashboard: React.FC = () => {
     deleteService,
     updateTeam,
     isShopOpen,
+    isQueueClosed,
     loading: shopLoading,
   } = useBarbershop();
   const { barbershopId } = useBarbershopFilters();
@@ -83,6 +90,7 @@ export const StaffDashboard: React.FC = () => {
   const [showClosedSalonModal, setShowClosedSalonModal] = useState(false);
   const [pendingJoin, setPendingJoin] = useState<{ name: string; whatsapp: string; serviceId: string } | null>(null);
   const [joiningClosedSalon, setJoiningClosedSalon] = useState(false);
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
   const [dependentResponsible, setDependentResponsible] = useState<QueueItem | null>(null);
   const [returnToQueueItem, setReturnToQueueItem] = useState<QueueItem | null>(null);
   const [returningToQueue, setReturningToQueue] = useState(false);
@@ -94,6 +102,14 @@ export const StaffDashboard: React.FC = () => {
   const operationMode = settings?.operationMode ?? 'HYBRID';
   const activeTab = ALL_TAB_IDS.includes(rawTab) ? rawTab : getDefaultTab(user?.role, operationMode);
 
+  useEffect(() => {
+    if (!user || !barbershopId || (user.role !== 'OWNER' && user.role !== 'MASTER_ADMIN') || onboardingChecked) return;
+    setOnboardingChecked(true);
+    void barbershopApi.getOnboarding(barbershopId).then(data => {
+      if (!data.welcomeSeen && !data.dismissed && !data.completed && rawTab !== 'onboarding') navigate('/app/onboarding', { replace: true });
+    }).catch(() => undefined);
+  }, [user, barbershopId, onboardingChecked, rawTab, navigate]);
+
   // Redirect invalid tabs
   useEffect(() => {
     if (rawTab !== activeTab) {
@@ -104,10 +120,10 @@ export const StaffDashboard: React.FC = () => {
   // Redirect if tab not accessible by role
   useEffect(() => {
     if (!user) return;
-    if (!canAccessTab(activeTab, user.role)) {
+    if (!canAccessTab(activeTab, user.role, { hasDashboard, permissions: user.permissions })) {
       navigate(`/app/${getDefaultTab(user.role, operationMode)}`, { replace: true });
     }
-  }, [activeTab, user, operationMode, navigate]);
+  }, [activeTab, user, hasDashboard, operationMode, navigate]);
 
   // Redirect if tab not accessible by operation mode
   useEffect(() => {
@@ -119,7 +135,7 @@ export const StaffDashboard: React.FC = () => {
   // Re-check access including hasDashboard
   useEffect(() => {
     if (!user) return;
-    if ((activeTab === 'reports' || activeTab === 'finance') && !hasDashboard) {
+    if ((activeTab === 'reports' || activeTab === 'finance' || activeTab === 'products') && !hasDashboard) {
       navigate(`/app/${getDefaultTab(user.role, operationMode)}`, { replace: true });
     }
   }, [activeTab, user, hasDashboard, operationMode, navigate]);
@@ -208,6 +224,7 @@ export const StaffDashboard: React.FC = () => {
   const peopleWaiting = activeQueue.filter(q => q.status === 'waiting').length;
   const currentInChair = activeQueue.find(q => q.status === 'in_chair');
   const isOpen = isShopOpen();
+  const queueClosed = isQueueClosed();
   const installVideoUrl = import.meta.env.VITE_PWA_INSTALL_VIDEO_URL as string | undefined;
 
   return (
@@ -235,21 +252,23 @@ export const StaffDashboard: React.FC = () => {
           key={activeTab}
           activeTab={activeTab}
           userRole={user?.role}
+          hasDashboard={hasDashboard}
+          permissions={user?.permissions}
           onNavigate={tabId => navigate(`/app/${tabId}`)}
         />
         <main id="main-content" className="min-w-0 flex-1">
           {/* Tab Content */}
           {activeTab === 'overview' && (
             <div className="space-y-4">
+              <QueueCapacityBanner barbershopId={barbershopId} waiting={peopleWaiting} onNavigate={tab => navigate(`/app/${tab}`)} canConfigure={user?.role === 'OWNER' || user?.role === 'MASTER_ADMIN'} />
               {(user?.role === 'OWNER' || user?.role === 'MASTER_ADMIN') && settings && barbershopId && (
                 <ActivationChecklist
                   barbershopId={barbershopId}
-                  settings={settings}
-                  services={services}
                   onNavigate={tab => navigate(`/app/${tab}`)}
                 />
               )}
               <DemandAlertBanner />
+              {hasDashboard && isOwnerOrAdmin && <LowStockBanner />}
               <div className="bg-surface rounded-xl border border-border p-4">
                 <h2 className="text-lg font-bold mb-3">Visão Geral</h2>
                 <div className="grid grid-cols-2 gap-3 text-sm">
@@ -278,6 +297,7 @@ export const StaffDashboard: React.FC = () => {
               <QueueStatusCard
                 shopName={settings?.shopName}
                 isOpen={isOpen}
+                queueClosed={queueClosed}
                 insight={aiInsight}
                 peopleWaiting={peopleWaiting}
                 completedCount={completedCount}
@@ -295,17 +315,37 @@ export const StaffDashboard: React.FC = () => {
             </div>
           )}
 
+          {activeTab === 'onboarding' && user && barbershopId && (
+            <OnboardingMissions
+              barbershopId={barbershopId}
+              shopName={settings?.shopName || ''}
+              onNavigate={tab => navigate(`/app/${tab}`)}
+              onDone={() => navigate('/app/overview')}
+            />
+          )}
+
           {activeTab === 'queue' && (
             <>
+              <QueueCapacityBanner barbershopId={barbershopId} waiting={peopleWaiting} onNavigate={tab => navigate(`/app/${tab}`)} canConfigure={user?.role === 'OWNER' || user?.role === 'MASTER_ADMIN'} />
               <QueueStatusCard
                 shopName={settings?.shopName}
                 isOpen={isOpen}
+                queueClosed={queueClosed}
                 insight={aiInsight}
                 peopleWaiting={peopleWaiting}
                 completedCount={completedCount}
                 inChairName={currentInChair?.customerName ?? null}
                 showStaffStats
               />
+
+              {isOwnerOrAdmin && (
+                <div className="mb-4">
+                  <ShopFloorControls
+                    variant="compact"
+                    onNotify={(message, type) => showToast(message, type === 'error' ? 'error' : 'success')}
+                  />
+                </div>
+              )}
 
               <div className="flex items-center justify-end mb-4">
                 <button
@@ -333,6 +373,10 @@ export const StaffDashboard: React.FC = () => {
                       barbershopId={barbershopId || item.barbershopId}
                       staff={staff}
                       currentUserId={user?.id}
+                      enableProductSales={
+                        hasDashboard && (isOwnerOrAdmin || hasPermission('RETAIL_SELL'))
+                      }
+                      canOverrideProductPrice={isOwnerOrAdmin || hasPermission('PRODUCTS_MANAGE')}
                       isCurrentUser={item.customerId === clientId}
                       onStatusChange={updateQueueStatus}
                       onReturnToQueue={setReturnToQueueItem}
@@ -382,6 +426,10 @@ export const StaffDashboard: React.FC = () => {
             <div className="text-center py-12 bg-surface rounded-xl border border-border border-dashed">
               <p className="text-text-muted">Carregando configurações do salão...</p>
             </div>
+          )}
+
+          {activeTab === 'products' && hasDashboard && (
+            <ProductsHub onNotify={(message, type) => showToast(message, type === 'error' ? 'error' : 'success')} />
           )}
 
           {activeTab === 'clients' && settings && (
@@ -551,6 +599,19 @@ export const StaffDashboard: React.FC = () => {
           }}
         />
       )}
+    </div>
+  );
+};
+
+const LowStockBanner: React.FC = () => {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    productsApi.listProducts({ lowStock: 'true', limit: 50 }).then(rows => setCount(rows.length)).catch(() => undefined);
+  }, []);
+  if (!count) return null;
+  return (
+    <div className="rounded-xl border border-warning/40 bg-warning/10 p-3 text-sm text-text-primary">
+      {count} produto(s) abaixo do estoque mínimo. A venda continua liberada.
     </div>
   );
 };

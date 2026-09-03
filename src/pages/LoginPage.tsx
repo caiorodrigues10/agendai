@@ -639,7 +639,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
               <button
                 type="button"
                 onClick={() => goToAuthMode(tab === 'login' ? 'register' : 'login')}
-                className="font-bold text-accent underline decoration-accent/30 underline-offset-4 transition hover:decoration-accent"
+                className="inline-flex min-h-11 items-center font-bold text-accent underline decoration-accent/30 underline-offset-4 transition hover:decoration-accent"
               >
                 {tab === 'login' ? 'Criar conta grátis' : 'Entrar agora'}
               </button>
@@ -728,7 +728,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                     <button
                       type="button"
                       onClick={() => navigate('/esqueci-senha')}
-                      className="text-[11px] text-text-muted hover:text-accent transition-colors shrink-0"
+                      className="inline-flex min-h-11 items-center text-[11px] text-text-muted hover:text-accent transition-colors shrink-0"
                     >
                       Esqueci minha senha
                     </button>
@@ -787,6 +787,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                         <input
                           className={inputClass(!!registerForm.formState.errors.ownerName)}
                           placeholder="João Silva"
+                          autoComplete="name"
                           {...registerForm.register('ownerName')}
                         />
                       </Field>
@@ -799,7 +800,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                         <input
                           type="email"
                           {...emailField}
-                          autoComplete="off"
+                          autoComplete="email"
                           autoCorrect="off"
                           spellCheck={false}
                           readOnly={!registerFieldsUnlocked}

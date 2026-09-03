@@ -54,4 +54,26 @@ describe('StaffNavigation', () => {
     await user.keyboard('{Escape}');
     expect(screen.queryByRole('dialog', { name: 'Mais opções' })).not.toBeInTheDocument();
   });
+
+  it('mostra Produtos na folha Mais só com dashboard Pro', async () => {
+    const user = userEvent.setup();
+
+    const hidden = render(
+      <StaffNavigation activeTab="overview" userRole="OWNER" onNavigate={vi.fn()} />
+    );
+    await user.click(screen.getByRole('button', { name: 'Mais' }));
+    expect(screen.queryByRole('button', { name: 'Produtos' })).not.toBeInTheDocument();
+    hidden.unmount();
+
+    render(
+      <StaffNavigation
+        activeTab="overview"
+        userRole="OWNER"
+        hasDashboard
+        onNavigate={vi.fn()}
+      />
+    );
+    await user.click(screen.getByRole('button', { name: 'Mais' }));
+    expect(screen.getByRole('button', { name: 'Produtos' })).toBeInTheDocument();
+  });
 });

@@ -212,6 +212,8 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
   } | null>(null);
   const [confirmCampaignOpen, setConfirmCampaignOpen] = useState(false);
   const [confirmCampaignLoading, setConfirmCampaignLoading] = useState(false);
+  const [selectedCampaign, setSelectedCampaign] = useState<CrmCampaign | null>(null);
+  const [campaignDetailLoading, setCampaignDetailLoading] = useState(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedSearch(search.trim()), 300);
@@ -318,6 +320,18 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
       onNotify?.(getErrorMessage(error, 'Não foi possível confirmar a campanha.'), 'error');
     } finally {
       setConfirmCampaignLoading(false);
+    }
+  };
+
+  const openCampaignDetail = async (item: CrmCampaign) => {
+    setSelectedCampaign(item);
+    setCampaignDetailLoading(true);
+    try {
+      setSelectedCampaign(await crmApi.campaign(item.id));
+    } catch (error) {
+      onNotify?.(getErrorMessage(error, 'Não foi possível carregar os detalhes da campanha.'), 'error');
+    } finally {
+      setCampaignDetailLoading(false);
     }
   };
 
@@ -787,7 +801,7 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
               {campaigns.length ? (
                 <div className="space-y-2">
                   {campaigns.map(item => (
-                    <div key={item.id} className="rounded-lg border border-border bg-bg p-3">
+                    <button key={item.id} type="button" onClick={() => void openCampaignDetail(item)} className="w-full rounded-lg border border-border bg-bg p-3 text-left transition hover:border-accent/40">
                       <div className="flex justify-between gap-2">
                         <strong className="text-sm">{item.name}</strong>
                         <span className="text-xs font-bold text-accent">
@@ -798,7 +812,7 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
                         {item.recipientCount} destinatários · {item.sentCount} enviados ·{' '}
                         {item.failedCount} falhas · {item.skippedCount} ignorados
                       </p>
-                    </div>
+                    </button>
                   ))}
                 </div>
               ) : (
@@ -808,6 +822,27 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
           </div>
         )}
       </section>
+
+      {selectedCampaign && (
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 p-4 sm:items-center" role="dialog" aria-modal="true" aria-label="Detalhes da campanha">
+          <button type="button" aria-label="Fechar detalhes" onClick={() => setSelectedCampaign(null)} className="absolute inset-0" />
+          <div className="relative max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-surface p-5 shadow-2xl">
+            <div className="flex items-start justify-between gap-3">
+              <div><p className="text-xs font-bold uppercase tracking-wider text-accent">Campanha</p><h3 className="mt-1 text-lg font-bold text-text-primary">{selectedCampaign.name}</h3></div>
+              <button type="button" onClick={() => setSelectedCampaign(null)} className="min-h-11 min-w-11 rounded-xl text-text-muted hover:bg-bg" aria-label="Fechar">×</button>
+            </div>
+            <p className="mt-3 rounded-xl bg-bg p-3 text-sm text-text-secondary">{selectedCampaign.message}</p>
+            {campaignDetailLoading ? <div className="py-8 text-center text-sm text-text-muted"><RefreshCw size={18} className="mx-auto mb-2 animate-spin" />Carregando destinatários...</div> : (
+              <div className="mt-4 space-y-2">
+                <p className="text-xs font-bold uppercase tracking-wider text-text-muted">Destinatários</p>
+                {(selectedCampaign.recipients ?? []).length === 0 ? <Empty>Detalhes de destinatários ainda não disponíveis.</Empty> : selectedCampaign.recipients?.map(recipient => (
+                  <div key={recipient.id} className="flex items-start justify-between gap-3 rounded-xl border border-border bg-bg p-3 text-sm"><div><p className="font-semibold text-text-primary">{recipient.client?.name ?? 'Cliente'}</p><p className="text-xs text-text-muted">{recipient.client?.whatsapp ?? 'Sem WhatsApp'}</p></div><div className="text-right"><p className="font-bold text-text-primary">{recipient.status}</p>{recipient.error && <p className="mt-1 max-w-[180px] text-xs text-danger">{recipient.error}</p>}</div></div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <ConfirmDialog
         open={confirmCampaignOpen}

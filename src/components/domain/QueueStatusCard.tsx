@@ -43,6 +43,7 @@ function busyStyles(isOpen: boolean, level?: BusyLevel) {
 interface QueueStatusCardProps {
   shopName?: string;
   isOpen: boolean;
+  queueClosed?: boolean;
   insight: AIInsight | null;
   peopleWaiting?: number;
   completedCount?: number;
@@ -54,6 +55,7 @@ interface QueueStatusCardProps {
 export const QueueStatusCard: React.FC<QueueStatusCardProps> = ({
   shopName,
   isOpen,
+  queueClosed = false,
   insight,
   peopleWaiting = 0,
   completedCount = 0,
@@ -81,7 +83,7 @@ export const QueueStatusCard: React.FC<QueueStatusCardProps> = ({
             </h2>
             <p className="mt-1 flex items-center gap-1.5 text-xs text-text-secondary">
               <Store size={13} className="text-accent shrink-0" />
-              {isOpen ? 'Aberto agora' : 'Fechado agora'}
+              {queueClosed && isOpen ? 'Fila encerrada por hoje' : isOpen ? 'Aberto agora' : 'Fechado agora'}
             </p>
           </div>
           <span
@@ -133,7 +135,9 @@ export const QueueStatusCard: React.FC<QueueStatusCardProps> = ({
           <Sparkles size={16} className="text-accent shrink-0 mt-0.5" />
           <p className="text-sm text-text-secondary leading-relaxed">
             {insight?.message ||
-              (isOpen
+              (queueClosed && isOpen
+                ? 'O salão continua aberto, mas a fila de hoje já foi encerrada.'
+                : isOpen
                 ? 'O salão está pronto para atender.'
                 : 'Fora do horário de funcionamento.')}
           </p>

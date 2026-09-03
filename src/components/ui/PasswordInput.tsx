@@ -83,7 +83,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
               <button
                 type="button"
                 onClick={onToggleShow}
-                className="text-text-muted hover:text-accent transition-colors focus:outline-none cursor-pointer"
+                className="flex h-11 w-11 items-center justify-center text-text-muted hover:text-accent transition-colors focus:outline-none cursor-pointer"
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}

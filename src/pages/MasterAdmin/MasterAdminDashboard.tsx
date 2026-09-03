@@ -1569,6 +1569,7 @@ export const MasterAdminDashboard: React.FC = () => {
   );
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const { logout, user } = useAuth();
   const navigate = useNavigate();
 
@@ -1587,6 +1588,26 @@ export const MasterAdminDashboard: React.FC = () => {
   useEffect(() => {
     if (activeTab === 'overview') fetchDashboard();
   }, [fetchDashboard, activeTab]);
+
+  const fetchUnreadNotifications = useCallback(async () => {
+    try {
+      const response = await adminApi.unreadNotificationsCount();
+      setUnreadNotifications(response.data?.count ?? 0);
+    } catch {
+      // O badge é auxiliar e não deve bloquear o painel.
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchUnreadNotifications();
+    const refresh = () => void fetchUnreadNotifications();
+    window.addEventListener('focus', refresh);
+    const interval = window.setInterval(refresh, 60_000);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      window.clearInterval(interval);
+    };
+  }, [fetchUnreadNotifications]);
 
   const handleLogout = () => {
     logout();
@@ -1633,7 +1654,12 @@ export const MasterAdminDashboard: React.FC = () => {
               }`}
             >
               {icon}
-              {label}
+              <span className="min-w-0 flex-1 text-left">{label}</span>
+              {tab === 'billing' && unreadNotifications > 0 && (
+                <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-danger px-1.5 py-0.5 text-[10px] font-bold text-white" aria-label={`${unreadNotifications} notificações não lidas`}>
+                  {unreadNotifications > 99 ? '99+' : unreadNotifications}
+                </span>
+              )}
             </button>
           ))}
         </nav>

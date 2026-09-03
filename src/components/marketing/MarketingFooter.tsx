@@ -19,16 +19,12 @@ const companyLinks = [
 
 const exploreLinks = [
   { to: '/#recursos', label: 'Recursos' },
-  { to: '/#instalar', label: 'Aplicativo' },
+  { to: '/#produto', label: 'Aplicativo' },
   { to: '/#precos', label: 'Preços' },
-  { to: '/queue', label: 'Fila ao vivo' },
+  { to: '/#produto', label: 'Ver demonstração' },
 ];
 
-const socialLinks = [
-  { href: '#', label: 'Instagram' },
-  { href: '#', label: 'X' },
-  { href: '#', label: 'LinkedIn' },
-];
+const socialLinks: { href?: string; label: string }[] = [];
 
 function FooterColumn({
   title,
@@ -122,7 +118,7 @@ export const MarketingFooter: React.FC = () => {
               <FooterColumn title="Explorar" links={exploreLinks} />
               <FooterColumn title="Plataforma" links={platformLinks} />
               <FooterColumn title="Empresa" links={companyLinks} />
-              <FooterColumn title="Rede" links={socialLinks} />
+              {socialLinks.length > 0 && <FooterColumn title="Rede" links={socialLinks} />}
             </div>
           </div>
         </div>

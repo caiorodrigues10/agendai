@@ -20,9 +20,11 @@ import {
 } from 'lucide-react';
 import { isValidPhoneBR, maskPhone, normalizeDocument } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import {
   ExpenseCategory,
   ExpenseItem,
+  ExpenseSummary,
   ExpenseType,
   FiadoItem,
   FiadoStatus,
@@ -98,6 +100,7 @@ export const OwnerFinancialPanel: React.FC = () => {
 
   const [summary, setSummary] = useState<FinancialSummary | null>(null);
   const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
+  const [expenseSummary, setExpenseSummary] = useState<ExpenseSummary | null>(null);
   const [expensesMeta, setExpensesMeta] = useState<ListMeta>(EMPTY_META);
   const [expensesPage, setExpensesPage] = useState(1);
 
@@ -116,6 +119,8 @@ export const OwnerFinancialPanel: React.FC = () => {
     type: '',
     paid: '',
     search: '',
+    from: '',
+    to: '',
   });
   const [editingExpense, setEditingExpense] = useState<ExpenseItem | null>(null);
 
@@ -141,6 +146,8 @@ export const OwnerFinancialPanel: React.FC = () => {
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentNotes, setPaymentNotes] = useState('');
   const [paymentSubmitting, setPaymentSubmitting] = useState(false);
+  const [deleteFiadoId, setDeleteFiadoId] = useState<string | null>(null);
+  const [deleteFiadoLoading, setDeleteFiadoLoading] = useState(false);
 
   useEffect(() => {
     if (tab === 'despesas') {
@@ -162,16 +169,25 @@ export const OwnerFinancialPanel: React.FC = () => {
         const data = await financialApi.getSummary();
         setSummary(data);
       } else if (tab === 'despesas') {
-        const result = await financialApi.listExpenses({
-          page: expensesPage,
-          limit: 20,
-          search: expenseFilters.search || undefined,
-          categoryId: expenseFilters.categoryId || undefined,
-          type: (expenseFilters.type as ExpenseType) || undefined,
-          paid: expenseFilters.paid || undefined,
-        });
+        const [result, summaryResult] = await Promise.all([
+          financialApi.listExpenses({
+            page: expensesPage,
+            limit: 20,
+            search: expenseFilters.search || undefined,
+            categoryId: expenseFilters.categoryId || undefined,
+            type: (expenseFilters.type as ExpenseType) || undefined,
+            paid: expenseFilters.paid || undefined,
+            from: expenseFilters.from || undefined,
+            to: expenseFilters.to || undefined,
+          }),
+          financialApi.getExpenseSummary({
+            from: expenseFilters.from || undefined,
+            to: expenseFilters.to || undefined,
+          }).catch(() => null),
+        ]);
         setExpenses(result.data);
         setExpensesMeta(result.meta ?? EMPTY_META);
+        setExpenseSummary(summaryResult);
       } else {
         const result = await financialApi.listFiados({ page: fiadosPage });
         setFiados(result.data);
@@ -285,6 +301,8 @@ export const OwnerFinancialPanel: React.FC = () => {
     if (expenseFilters.categoryId) params.categoryId = expenseFilters.categoryId;
     if (expenseFilters.type) params.type = expenseFilters.type;
     if (expenseFilters.paid) params.paid = expenseFilters.paid;
+    if (expenseFilters.from) params.from = expenseFilters.from;
+    if (expenseFilters.to) params.to = expenseFilters.to;
     financialApi.exportExpensesCsv(Object.keys(params).length ? params : undefined);
   };
 
@@ -322,6 +340,21 @@ export const OwnerFinancialPanel: React.FC = () => {
       setError(errorMessage(err));
     } finally {
       setFiadoSubmitting(false);
+    }
+  };
+
+  const handleDeleteFiado = async () => {
+    if (!deleteFiadoId) return;
+    setDeleteFiadoLoading(true);
+    setError(null);
+    try {
+      await financialApi.deleteFiado(deleteFiadoId);
+      setDeleteFiadoId(null);
+      handleRefresh();
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setDeleteFiadoLoading(false);
     }
   };
 
@@ -382,6 +415,7 @@ export const OwnerFinancialPanel: React.FC = () => {
   };
 
   return (
+    <>
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-4 bg-surface p-4 rounded-xl border border-border">
         <div className="flex justify-between items-center gap-3">
@@ -517,6 +551,23 @@ export const OwnerFinancialPanel: React.FC = () => {
                       tone="positive"
                     />
                   </div>
+                </>
+              )}
+
+              {summary.products && (
+                <>
+                  <p className="text-xs text-text-muted uppercase font-bold tracking-wider pt-2">
+                    Produtos
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <SummaryCard icon={<Wallet size={48} />} label="Receita de produtos" value={brl.format(summary.products.revenue)} />
+                    <SummaryCard icon={<CreditCard size={48} />} label="CMV" value={brl.format(summary.products.cogs)} />
+                    <SummaryCard icon={<Wallet size={48} />} label="Margem bruta" value={brl.format(summary.products.margin)} tone="positive" />
+                    <SummaryCard icon={<Receipt size={48} />} label="Compras de estoque" value={brl.format(summary.products.stockPurchases)} />
+                    <SummaryCard icon={<Wallet size={48} />} label="Valor em estoque" value={brl.format(summary.products.inventoryValue)} />
+                    <SummaryCard icon={<AlertCircle size={48} />} label="Abaixo do mínimo" value={String(summary.products.lowStockCount)} isCount tone="negative" />
+                  </div>
+                  <p className="text-xs text-text-muted">Resultado de caixa não desconta o CMV. A margem de varejo usa o custo congelado da venda.</p>
                 </>
               )}
 
@@ -743,9 +794,23 @@ export const OwnerFinancialPanel: React.FC = () => {
                   <option value="true">Pagas</option>
                   <option value="false">Pendentes</option>
                 </select>
+                <input
+                  type="date"
+                  aria-label="Data inicial"
+                  value={expenseFilters.from}
+                  onChange={e => setExpenseFilters(f => ({ ...f, from: e.target.value }))}
+                  className="bg-bg border border-border rounded-lg px-3 py-1.5 text-xs text-text-primary focus:outline-none focus:border-accent"
+                />
+                <input
+                  type="date"
+                  aria-label="Data final"
+                  value={expenseFilters.to}
+                  onChange={e => setExpenseFilters(f => ({ ...f, to: e.target.value }))}
+                  className="bg-bg border border-border rounded-lg px-3 py-1.5 text-xs text-text-primary focus:outline-none focus:border-accent"
+                />
                 <button
                   onClick={() =>
-                    setExpenseFilters({ categoryId: '', type: '', paid: '', search: '' })
+                    setExpenseFilters({ categoryId: '', type: '', paid: '', search: '', from: '', to: '' })
                   }
                   className="px-3 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary border border-border rounded-lg hover:bg-surface-2 transition-colors flex items-center gap-1"
                 >
@@ -758,6 +823,24 @@ export const OwnerFinancialPanel: React.FC = () => {
                   <Download size={12} /> CSV
                 </button>
               </div>
+              {expenseSummary && (
+                <>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    <SummaryCard icon={<TrendingDown size={42} />} label="Total" value={brl.format(expenseSummary.totalAmount)} tone="negative" />
+                    <SummaryCard icon={<Check size={42} />} label="Pagas" value={brl.format(expenseSummary.totalPaid)} tone="positive" />
+                    <SummaryCard icon={<Receipt size={42} />} label="Pendentes" value={brl.format(expenseSummary.totalPending)} />
+                    <SummaryCard icon={<Wallet size={42} />} label="Categorias" value={String(expenseSummary.byCategory.length)} isCount />
+                  </div>
+                  {expenseSummary.byCategory.length > 0 && (
+                    <div className="mt-3 rounded-xl border border-border bg-bg p-3">
+                      <p className="mb-2 text-xs font-bold uppercase tracking-wider text-text-muted">Por categoria</p>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {expenseSummary.byCategory.map(row => <div key={row.categoryId ?? 'uncategorized'} className="flex items-center justify-between gap-2 text-xs"><span className="text-text-secondary">{row.categoryName ?? 'Sem categoria'} <span className="text-text-muted">({row.count})</span></span><strong className="text-text-primary">{brl.format(row.total)}</strong></div>)}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
             <div className="max-h-[420px] overflow-y-auto">
               {loading ? (
@@ -1169,6 +1252,13 @@ export const OwnerFinancialPanel: React.FC = () => {
                                 >
                                   Pagamento
                                 </button>
+                                <button
+                                  onClick={() => setDeleteFiadoId(item.id)}
+                                  title="Excluir fiado"
+                                  className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-text-muted hover:bg-danger/10 hover:text-danger"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
                               </div>
                             )}
                           </td>
@@ -1290,6 +1380,17 @@ export const OwnerFinancialPanel: React.FC = () => {
         </div>
       )}
     </div>
+    <ConfirmDialog
+      open={!!deleteFiadoId}
+      title="Excluir fiado?"
+      message="Esse lançamento e seus pagamentos serão removidos permanentemente."
+      confirmLabel="Excluir"
+      variant="danger"
+      loading={deleteFiadoLoading}
+      onConfirm={() => void handleDeleteFiado()}
+      onCancel={() => setDeleteFiadoId(null)}
+    />
+    </>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Service, StaffMember, ShopSettings } from '../../types';
@@ -7,6 +7,7 @@ import {
   AvailabilitySlot,
   generateTimeSlots,
   getDaySchedule,
+  isShopDayClosed,
   isSlotAvailable,
   addDays,
 } from '../../utils/schedulingUtils';
@@ -27,15 +28,16 @@ interface AppointmentSchedulerProps {
   staff: StaffMember[];
   settings: ShopSettings;
   occupancy?: AvailabilitySlot[];
-  onBook: (data: any) => void;
-  onDateChange?: (date: string, staffId?: string) => void;
+  availableSlots?: string[];
+  onBook: (data: any) => Promise<unknown>;
+  onDateChange?: (date: string, staffId?: string, serviceId?: string) => void;
 }
 
-function firstOpenDate(schedule: ShopSettings['schedule']): string {
+function firstOpenDate(settings: ShopSettings): string {
   const start = new Date();
   for (let i = 0; i < 14; i++) {
     const day = addDays(start, i);
-    if (getDaySchedule(day, schedule).isOpen) return toLocalISO(day);
+    if (!isShopDayClosed(day, settings)) return toLocalISO(day);
   }
   return toLocalISO(start);
 }
@@ -45,10 +47,12 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
   staff,
   settings,
   occupancy = [],
+  availableSlots,
   onBook,
   onDateChange,
 }) => {
   const [bookingComplete, setBookingComplete] = useState(false);
+  const [manageToken, setManageToken] = useState<string | null>(null);
 
   const {
     register,
@@ -61,7 +65,7 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
     defaultValues: {
       staffId: 'any',
       serviceId: '',
-      date: firstOpenDate(settings.schedule),
+      date: firstOpenDate(settings),
       time: '',
       customerName: '',
       whatsapp: '',
@@ -76,15 +80,17 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
   const today = toLocalISO(new Date());
   const maxDate = toLocalISO(addDays(new Date(), 30));
 
-  React.useEffect(() => {
-    if (date) onDateChange?.(date, selectedStaffId !== 'any' ? selectedStaffId : undefined);
-  }, [date, selectedStaffId, onDateChange]);
+  const onDateChangeRef = useRef(onDateChange);
+  onDateChangeRef.current = onDateChange;
+
+  useEffect(() => {
+    if (date) onDateChangeRef.current?.(date, selectedStaffId !== 'any' ? selectedStaffId : undefined, selectedServiceId || undefined);
+  }, [date, selectedStaffId, selectedServiceId]);
 
   const isDateClosed = useMemo(() => {
     if (!date) return false;
-    const daySchedule = getDaySchedule(new Date(date + 'T12:00:00'), settings.schedule);
-    return !daySchedule || !daySchedule.isOpen;
-  }, [date, settings.schedule]);
+    return isShopDayClosed(new Date(date + 'T12:00:00'), settings);
+  }, [date, settings]);
 
   const selectedService = services.find(s => s.id === selectedServiceId);
 
@@ -94,9 +100,10 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
     const daySchedule = getDaySchedule(new Date(date + 'T12:00:00'), settings.schedule);
     if (!daySchedule?.isOpen) return [];
 
+    if (availableSlots) return availableSlots;
     const slots = generateTimeSlots(daySchedule.openTime, daySchedule.closeTime);
     return slots.filter(slot => isSlotAvailable(slot, selectedStaffId, occupancy, staff.length));
-  }, [date, isDateClosed, settings.schedule, selectedStaffId, occupancy, staff.length]);
+  }, [date, isDateClosed, settings.schedule, selectedStaffId, occupancy, staff.length, availableSlots]);
 
   const dateLabel = date
     ? new Date(date + 'T12:00:00').toLocaleDateString('pt-BR', {
@@ -106,8 +113,9 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
       })
     : '';
 
-  const onSubmit = (data: AppointmentFormData) => {
-    onBook(data);
+  const onSubmit = async (data: AppointmentFormData) => {
+    const created = await onBook(data) as { manageToken?: string } | undefined;
+    setManageToken(created?.manageToken ?? null);
     setBookingComplete(true);
   };
 
@@ -120,7 +128,7 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
       end: endTime,
       title: `${selectedService.name} - ${settings.shopName}`,
       details: `Agendamento na ${settings.shopName}. Serviço: ${selectedService.name}`,
-      location: settings.shopName,
+      location: [settings.shopName, settings.address].filter(Boolean).join(', '),
     };
   };
 
@@ -129,6 +137,19 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
     if (!evt) return '#';
     const fmt = (d: Date) => d.toISOString().replace(/-|:|\.\d\d\d/g, '');
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(evt.title)}&dates=${fmt(evt.start)}/${fmt(evt.end)}&details=${encodeURIComponent(evt.details)}&location=${encodeURIComponent(evt.location)}`;
+  };
+
+  const generateIcsLink = () => {
+    const evt = getEventDetails();
+    if (!evt) return '#';
+    const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+    const ics = [
+      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//AgendAI//Appointment//PT-BR',
+      'BEGIN:VEVENT', `UID:${Date.now()}@agendai`, `DTSTART:${fmt(evt.start)}`, `DTEND:${fmt(evt.end)}`,
+      `SUMMARY:${evt.title}`, `DESCRIPTION:${evt.details}`, `LOCATION:${evt.location}`,
+      'END:VEVENT', 'END:VCALENDAR',
+    ].join('\r\n');
+    return `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
   };
 
   if (bookingComplete) {
@@ -154,6 +175,21 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
           >
             <Calendar size={16} className="text-blue-400" /> Adicionar ao Google Agenda
           </a>
+          <a
+            href={generateIcsLink()}
+            download="agendamento.ics"
+            className="w-full py-3 bg-surface-2 hover:bg-border-strong text-text-primary text-xs font-bold rounded-xl flex items-center justify-center gap-2 border border-border-strong"
+          >
+            <Calendar size={16} className="text-accent" /> Baixar arquivo para Apple/Outlook
+          </a>
+          {manageToken && (
+            <a
+              href={`/agendamento/gerenciar#token=${encodeURIComponent(manageToken)}`}
+              className="w-full py-3 bg-accent/10 hover:bg-accent/20 text-accent text-xs font-bold rounded-xl flex items-center justify-center gap-2 border border-accent/30"
+            >
+              Gerenciar agendamento
+            </a>
+          )}
           <button
             onClick={() => {
               setBookingComplete(false);
@@ -269,7 +305,7 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
                     value={date}
                     min={today}
                     max={maxDate}
-                    isDayDisabled={day => !getDaySchedule(day, settings.schedule).isOpen}
+                    isDayDisabled={day => isShopDayClosed(day, settings)}
                     onChange={iso => {
                       setValue('date', iso, { shouldValidate: true });
                       setValue('time', '', { shouldValidate: false });

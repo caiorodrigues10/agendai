@@ -75,6 +75,154 @@ const TEMPLATE_OPTIONS = [
   ['editorial-minimalista', 'Minimalista', 'Visual limpo'],
 ] as const;
 
+/** Acento/fundo de cada template — espelha TEMPLATE_STYLE do backend. */
+const TEMPLATE_COLORS: Record<string, { accent: string; bg: string; light?: boolean }> = {
+  'agenda-aberta': { accent: '#10B981', bg: '#0F0F0F' },
+  'ultimas-vagas': { accent: '#FB7185', bg: '#180D12' },
+  'promocao-relampago': { accent: '#F59E0B', bg: '#17120A' },
+  'servico-destaque': { accent: '#60A5FA', bg: '#0B1220' },
+  'antes-depois': { accent: '#C084FC', bg: '#160E20' },
+  'transformacao': { accent: '#2DD4BF', bg: '#071716' },
+  'profissional-destaque': { accent: '#F472B6', bg: '#1B0D18' },
+  'depoimento': { accent: '#A3E635', bg: '#111806' },
+  'menu-servicos': { accent: '#38BDF8', bg: '#08151D' },
+  'horario-especial': { accent: '#FBBF24', bg: '#181306' },
+  'novidade': { accent: '#818CF8', bg: '#0E1020' },
+  'editorial-minimalista': { accent: '#171717', bg: '#F5F5F4', light: true },
+};
+
+/** Miniatura fiel à composição de cada template (mesma estrutura do SVG do backend). */
+const TemplateThumb: React.FC<{ templateKey: string }> = ({ templateKey }) => {
+  const { accent, bg, light } = TEMPLATE_COLORS[templateKey] ?? TEMPLATE_COLORS['agenda-aberta'];
+  const fg = light ? '#171717' : '#F1F1F1';
+  const surface = light ? '#FFFFFF' : '#212121';
+  const line = (w: string, h = 5, color = surface) => (
+    <span className="block rounded-sm" style={{ width: w, height: h, backgroundColor: color }} />
+  );
+  const middle = (() => {
+    switch (templateKey) {
+      case 'ultimas-vagas':
+        return (
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-[9px] font-extrabold leading-none" style={{ color: accent }}>ÚLTIMAS</span>
+            <span className="text-[7px] font-extrabold leading-none" style={{ color: fg }}>VAGAS HOJE</span>
+          </div>
+        );
+      case 'promocao-relampago':
+        return (
+          <div className="flex flex-col items-center gap-0.5">
+            <svg width="12" height="16" viewBox="0 0 12 16"><path d="M7 0 2 9h3l-1 7 6-10H6l1-6z" fill={accent} /></svg>
+            <span className="text-[8px] font-extrabold leading-none" style={{ color: accent }}>R$ 40</span>
+          </div>
+        );
+      case 'servico-destaque':
+        return (
+          <span
+            className="flex h-9 w-4/5 flex-col items-center justify-center gap-0.5 rounded-md border-t-2"
+            style={{ backgroundColor: surface, borderColor: accent }}
+          >
+            {line('60%', 4, fg)}
+            <span className="text-[8px] font-extrabold leading-none" style={{ color: accent }}>R$ 45</span>
+          </span>
+        );
+      case 'antes-depois':
+        return (
+          <div className="flex w-4/5 gap-1">
+            <span className="h-8 flex-1 rounded" style={{ backgroundColor: surface }} />
+            <span className="h-8 flex-1 rounded" style={{ backgroundColor: accent, opacity: 0.75 }} />
+          </div>
+        );
+      case 'transformacao':
+        return (
+          <div className="flex w-4/5 flex-col gap-1">
+            <span className="h-8 rounded" style={{ backgroundColor: surface }} />
+            <span className="h-1 rounded" style={{ backgroundColor: accent }} />
+            {line('70%', 4, fg)}
+          </div>
+        );
+      case 'profissional-destaque':
+        return (
+          <div className="flex flex-col items-center gap-1">
+            <span className="h-8 w-8 rounded-full border-2" style={{ borderColor: accent, backgroundColor: surface }} />
+            {line('50%', 4, fg)}
+          </div>
+        );
+      case 'depoimento':
+        return (
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-sm font-extrabold leading-none" style={{ color: accent }}>&ldquo;&rdquo;</span>
+            {line('70%', 4, fg)}
+            <span className="text-[7px] leading-none tracking-widest" style={{ color: accent }}>★★★★★</span>
+          </div>
+        );
+      case 'menu-servicos':
+        return (
+          <div className="flex w-4/5 flex-col gap-1">
+            {[0, 1, 2].map(i => (
+              <span key={i} className="flex h-2.5 items-center rounded-sm pl-0.5" style={{ backgroundColor: surface }}>
+                <span className="h-full w-0.5 rounded-sm" style={{ backgroundColor: accent }} />
+              </span>
+            ))}
+          </div>
+        );
+      case 'horario-especial':
+        return (
+          <div className="flex flex-col items-center gap-1">
+            <span className="relative h-8 w-8 rounded-full border-2" style={{ borderColor: accent }}>
+              <span className="absolute left-1/2 top-1.5 h-2.5 w-0.5 -translate-x-1/2" style={{ backgroundColor: fg }} />
+              <span className="absolute left-1/2 top-1/2 h-0.5 w-2 origin-left rotate-[30deg]" style={{ backgroundColor: accent }} />
+            </span>
+            {line('55%', 4, fg)}
+          </div>
+        );
+      case 'novidade':
+        return (
+          <div className="flex flex-col items-center gap-1">
+            <span className="-rotate-6 rounded px-1.5 py-0.5 text-[8px] font-extrabold leading-none" style={{ backgroundColor: accent, color: light ? '#FFF' : '#052E1F' }}>
+              NOVO
+            </span>
+            {line('65%', 4, fg)}
+          </div>
+        );
+      case 'editorial-minimalista':
+        return (
+          <div className="flex w-4/5 flex-col gap-1.5">
+            <span className="h-px w-full" style={{ backgroundColor: '#171717' }} />
+            {line('75%', 5, '#171717')}
+            <span className="h-px w-full" style={{ backgroundColor: '#D6D3D1' }} />
+            <span className="h-px w-3/4" style={{ backgroundColor: '#D6D3D1' }} />
+          </div>
+        );
+      default:
+        // agenda-aberta
+        return (
+          <div className="flex w-4/5 flex-col gap-1">
+            {line('60%', 4, fg)}
+            <span className="flex h-3 items-center rounded-sm pl-0.5" style={{ backgroundColor: surface }}>
+              <span className="text-[6px] font-bold leading-none pl-0.5" style={{ color: accent }}>HOJE</span>
+            </span>
+            {[0, 1].map(i => (
+              <span key={i} className="flex h-2.5 items-center rounded-sm pl-0.5" style={{ backgroundColor: surface }}>
+                <span className="h-full w-0.5 rounded-sm" style={{ backgroundColor: accent }} />
+              </span>
+            ))}
+          </div>
+        );
+    }
+  })();
+
+  return (
+    <span
+      className="mb-2 flex h-16 flex-col items-center justify-between overflow-hidden rounded-xl pb-1.5"
+      style={{ backgroundColor: bg }}
+    >
+      <span className="h-0.5 w-full" style={{ backgroundColor: accent }} />
+      <span className="flex flex-1 w-full items-center justify-center">{middle}</span>
+      <span className="h-2 w-1/2 rounded-full" style={{ backgroundColor: accent }} />
+    </span>
+  );
+};
+
 const QUICK_PRESETS = [
   { label: 'Hoje tem vaga', title: 'Horários abertos hoje!', ctaText: 'Reservar horário' },
   {
@@ -417,7 +565,7 @@ export const PostsManager: React.FC = () => {
                 {TEMPLATE_OPTIONS.map(([id, label, description]) => (
                   <button key={id} type="button" aria-pressed={templateKey === id} onClick={() => setTemplateKey(id)}
                     className={`min-w-[142px] snap-start rounded-2xl border p-3 text-left transition-all ${templateKey === id ? 'border-accent bg-accent/15 ring-1 ring-accent' : 'border-border bg-bg hover:border-accent/40'}`}>
-                    <span className="mb-2 block h-16 rounded-xl bg-gradient-to-br from-accent/70 via-surface-2 to-bg" />
+                    <TemplateThumb templateKey={id} />
                     <span className="block text-xs font-bold text-text-primary">{label}</span>
                     <span className="mt-1 block text-[10px] text-text-muted">{description}</span>
                   </button>

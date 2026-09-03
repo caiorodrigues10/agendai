@@ -1,6 +1,6 @@
 import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
-import { DaySchedule, Service, StaffMember, FeedPost, PostMode, PostConfig, OperationMode } from '../types';
+import { DaySchedule, Service, StaffMember, FeedPost, PostMode, PostConfig, OperationMode, OpeningMode, ManualShopStatus, ShopOpenState, ScheduleException, BusinessSegment } from '../types';
 import { mapScheduleToApi } from '../utils/schedulingUtils';
 
 function unwrap<T>(res: unknown): T {
@@ -17,6 +17,19 @@ interface BarbershopData {
   latitude?: number | null;
   longitude?: number | null;
   operationMode?: OperationMode;
+  openingMode?: OpeningMode;
+  businessSegment?: BusinessSegment;
+  manualStatus?: ManualShopStatus;
+  openState?: ShopOpenState;
+  scheduleExceptions?: ScheduleException[];
+}
+
+export interface ShopStatusPayload {
+  id?: string;
+  openingMode: OpeningMode;
+  manualStatus: ManualShopStatus;
+  openState: ShopOpenState;
+  scheduleExceptions: ScheduleException[];
 }
 
 type UpdateBarbershopPayload = Partial<BarbershopData>;
@@ -76,18 +89,34 @@ interface PostConfigPayload {
 export interface ShopWhatsAppStatus {
   status: 'disconnected' | 'connecting' | 'open';
   connected: boolean;
+  method: 'qr' | 'pairing_code' | null;
   qrcodeBase64: string | null;
+  pairingCode: string | null;
+}
+
+export interface QueueAlertSettings {
+  enabled: boolean; threshold: number; phone: string | null; currentWaiting: number; exceeded: boolean; whatsappConnected: boolean; queueEnabled: boolean;
 }
 
 export const barbershopApi = {
   listBarbershops: () =>
     apiClient<{ success: boolean; data: BarbershopData[] }>('/api/barbershops').then(unwrap),
   getBarbershop: (id: string) =>
-    apiClient<{ success: boolean; data: BarbershopData }>(`/api/barbershops/${id}`).then(unwrap),
+    apiClient<{ success: boolean; data: BarbershopData }>(`/api/barbershops/${id}`).then(res =>
+      unwrap<BarbershopData>(res)
+    ),
   getSchedule: (id: string) =>
     apiClient<{ success: boolean; data: DaySchedule[] }>(`/api/barbershops/${id}/schedule`).then(
       unwrap
     ),
+  getAppointmentPolicy: (id: string) => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient<{ success: boolean; data: AppointmentPolicy }>(`/api/barbershops/${id}/appointment-policy`, 'GET', undefined, token).then(res => unwrap<AppointmentPolicy>(res));
+  },
+  updateAppointmentPolicy: (id: string, payload: Partial<AppointmentPolicy>) => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient<{ success: boolean; data: AppointmentPolicy }>(`/api/barbershops/${id}/appointment-policy`, 'PATCH', payload, token).then(res => unwrap<AppointmentPolicy>(res));
+  },
   updateBarbershop: (id: string, payload: UpdateBarbershopPayload) => {
     const token = authStorage.getAccessToken() || '';
     return apiClient<{ success: boolean; data: BarbershopData }>(
@@ -312,12 +341,12 @@ export const barbershopApi = {
     ).then(res => unwrap<ShopWhatsAppStatus>(res));
   },
 
-  connectWhatsApp: (barbershopId: string) => {
+  connectWhatsApp: (barbershopId: string, input: { method: 'qr' } | { method: 'pairing_code'; phoneNumber: string } = { method: 'qr' }) => {
     const token = authStorage.getAccessToken() || '';
     return apiClient<{ success: boolean; data: ShopWhatsAppStatus }>(
       `/api/barbershops/${barbershopId}/whatsapp/connect`,
       'POST',
-      undefined,
+      input,
       token
     ).then(res => unwrap<ShopWhatsAppStatus>(res));
   },
@@ -330,6 +359,42 @@ export const barbershopApi = {
       undefined,
       token
     ).then(res => unwrap<ShopWhatsAppStatus>(res));
+  },
+
+  getQueueAlert: (id: string) => apiClient<{ success: boolean; data: QueueAlertSettings }>(`/api/barbershops/${id}/queue-alert`, 'GET', undefined, authStorage.getAccessToken() || '').then(res => unwrap<QueueAlertSettings>(res)),
+  updateQueueAlert: (id: string, payload: { enabled: boolean; threshold: number; phone?: string | null }) => apiClient<{ success: boolean; data: Partial<QueueAlertSettings> }>(`/api/barbershops/${id}/queue-alert`, 'PATCH', payload, authStorage.getAccessToken() || '').then(res => unwrap<Partial<QueueAlertSettings>>(res)),
+  testQueueAlert: (id: string) => apiClient<{ success: boolean; data: { sent: boolean } }>(`/api/barbershops/${id}/queue-alert/test`, 'POST', undefined, authStorage.getAccessToken() || '').then(res => unwrap<{ sent: boolean }>(res)),
+
+  updateOnboardingStep: (barbershopId: string, step: string) => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient<{ success: boolean }>(
+      `/api/barbershops/${barbershopId}/onboarding/steps`,
+      'POST',
+      { step },
+      token
+    );
+  },
+
+  getOnboarding: (barbershopId: string) => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient<{ success: boolean; data: { steps: { key: string; label: string; completed: boolean; required: boolean }[]; progress: number; nextStep: string | null; completed: boolean; welcomeSeen: boolean; dismissed: boolean } }>(
+      `/api/barbershops/${barbershopId}/onboarding`, 'GET', undefined, token
+    ).then(res => unwrap<{ steps: { key: string; label: string; completed: boolean; required: boolean }[]; progress: number; nextStep: string | null; completed: boolean; welcomeSeen: boolean; dismissed: boolean }>(res));
+  },
+
+  markOnboardingWelcomeSeen: (barbershopId: string) => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient(`/api/barbershops/${barbershopId}/onboarding/welcome-seen`, 'POST', undefined, token);
+  },
+
+  dismissOnboarding: (barbershopId: string) => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient(`/api/barbershops/${barbershopId}/onboarding/dismiss`, 'POST', undefined, token);
+  },
+
+  reopenOnboarding: (barbershopId: string) => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient(`/api/barbershops/${barbershopId}/onboarding/reopen`, 'POST', undefined, token);
   },
 
   getLogoUploadUrl: (barbershopId: string, mimeType: string) => {
@@ -404,6 +469,59 @@ export const barbershopApi = {
     return (res as { data: { operationMode: OperationMode; capabilities: { queue: boolean; appointments: boolean }; pending: { manualQueue: number; futureAppointments: number } } }).data;
   },
 
+  setManualStatus: (id: string, status: ManualShopStatus) => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient<{ success: boolean; data: ShopStatusPayload }>(
+      `/api/barbershops/${id}/manual-status`,
+      'PATCH',
+      { status },
+      token
+    ).then(res => unwrap<ShopStatusPayload>(res));
+  },
+
+  setQueueStatus: (id: string, closed: boolean) => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient<{ success: boolean; data: ShopStatusPayload }>(
+      `/api/barbershops/${id}/queue-status`,
+      'PATCH',
+      { closed },
+      token
+    ).then(res => unwrap<ShopStatusPayload>(res));
+  },
+
+  listScheduleExceptions: (id: string) => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient<{ success: boolean; data: ScheduleException[] }>(
+      `/api/barbershops/${id}/schedule-exceptions`,
+      'GET',
+      undefined,
+      token
+    ).then(res => unwrap<ScheduleException[]>(res));
+  },
+
+  createScheduleExceptions: (
+    id: string,
+    payload: { from: string; to?: string; reason?: string; isOpen?: boolean }
+  ) => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient<{ success: boolean; data: ScheduleException[] }>(
+      `/api/barbershops/${id}/schedule-exceptions`,
+      'POST',
+      payload,
+      token
+    ).then(res => unwrap<ScheduleException[]>(res));
+  },
+
+  deleteScheduleException: (id: string, exceptionId: string) => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient<{ success: boolean }>(
+      `/api/barbershops/${id}/schedule-exceptions/${exceptionId}`,
+      'DELETE',
+      undefined,
+      token
+    );
+  },
+
   uploadPostVideo: async (barbershopId: string, file: File): Promise<{ videoUrl: string }> => {
     const token = authStorage.getAccessToken() || '';
     const formData = new FormData();
@@ -426,3 +544,13 @@ export const barbershopApi = {
     return result.data;
   },
 };
+
+export interface AppointmentPolicy {
+  bookingNoticeMinutes: number;
+  cancelNoticeMinutes: number;
+  rescheduleNoticeMinutes: number;
+  bookingHorizonDays: number;
+  allowPublicCancellation: boolean;
+  allowPublicReschedule: boolean;
+  requestReview: boolean;
+}

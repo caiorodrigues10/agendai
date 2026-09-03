@@ -40,6 +40,16 @@ export interface FinancialSummary {
     count: number;
     totalPaid: number;
   };
+  products?: {
+    revenue: number;
+    refunded: number;
+    cogs: number;
+    margin: number;
+    saleCount: number;
+    inventoryValue: number;
+    lowStockCount: number;
+    stockPurchases: number;
+  };
 }
 
 export interface ExpenseItem {
@@ -62,6 +72,8 @@ export interface ExpenseItem {
   createdById: string;
   createdAt: string;
   updatedAt: string;
+  locked?: boolean;
+  inventoryReceiptId?: string | null;
 }
 
 export interface ExpenseSummary {
@@ -322,9 +334,9 @@ export const financialApi = {
     URL.revokeObjectURL(url);
   },
 
-  getExpenseSummary: () =>
+  getExpenseSummary: (params?: { from?: string; to?: string }) =>
     apiClient<{ success: boolean; data: ExpenseSummary }>(
-      '/api/expenses/summary',
+      `/api/expenses/summary${buildQuery(params)}`,
       'GET',
       undefined,
       token()

@@ -107,6 +107,17 @@ export function getDaySchedule(
   return safeSchedule[dayOfWeek] ?? DEFAULT_SCHEDULE[dayOfWeek];
 }
 
+export function isExceptionClosedDate(isoDate: string, settings?: ShopSettings | null): boolean {
+  const ymd = isoDate.slice(0, 10);
+  return Boolean(settings?.scheduleExceptions?.some(item => !item.isOpen && item.date.slice(0, 10) === ymd));
+}
+
+export function isShopDayClosed(date: Date, settings?: ShopSettings | null): boolean {
+  const iso = formatDateISO(date);
+  if (isExceptionClosedDate(iso, settings)) return true;
+  return !getDaySchedule(date, settings?.schedule).isOpen;
+}
+
 export function isSlotAvailable(
   time: string,
   staffId: string | null | undefined,
