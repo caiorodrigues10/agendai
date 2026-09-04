@@ -352,7 +352,12 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
               {canSellProducts && (
                 <div className="space-y-2">
                   <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Produtos (pagamento separado)</p>
-                  <RetailCheckoutBlock canOverridePrice={canOverridePrice} onChange={setRetailSale} />
+                  <RetailCheckoutBlock
+                    canOverridePrice={canOverridePrice}
+                    requireClientForFiado
+                    defaultClientId={item.clientId}
+                    onChange={setRetailSale}
+                  />
                   {retailSale && (
                     <div className="rounded-xl bg-surface-2 p-3 text-xs text-text-secondary">
                       <p>Serviços e produtos entram separados no financeiro.</p>

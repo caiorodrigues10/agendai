@@ -106,6 +106,12 @@ export function getErrorMessage(
     if (err.code === 'RECAPTCHA_UNAVAILABLE') {
       return 'Cadastro temporariamente indisponível. Tente novamente em instantes.';
     }
+    if (err.code === 'INSUFFICIENT_STOCK' || err.code === 'PRODUCTS_INVENTORY_REQUIRED') {
+      return err.message?.trim() || fallback;
+    }
+    if (err.code === 'PRODUCT_SKU_DUPLICATE' || err.code === 'PRODUCT_BARCODE_DUPLICATE' || err.code === 'PRODUCT_CODE_DUPLICATE') {
+      return err.message?.trim() || 'Já existe um produto com este SKU/código neste salão.';
+    }
 
     const raw = err.message?.trim() ?? '';
     if (

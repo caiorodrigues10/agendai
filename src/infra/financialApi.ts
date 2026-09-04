@@ -43,6 +43,7 @@ export interface FinancialSummary {
   };
   products?: {
     revenue: number;
+    netRevenue?: number;
     refunded: number;
     cogs: number;
     margin: number;

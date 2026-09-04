@@ -623,7 +623,7 @@ export const StaffDashboard: React.FC = () => {
 const LowStockBanner: React.FC = () => {
   const [count, setCount] = useState(0);
   useEffect(() => {
-    productsApi.listProducts({ lowStock: 'true', limit: 50 }).then(rows => setCount(rows.length)).catch(() => undefined);
+    productsApi.listProducts({ lowStock: 'true', limit: 1, page: 1 }).then(res => setCount(res.meta.total)).catch(() => undefined);
   }, []);
   if (!count) return null;
   return (

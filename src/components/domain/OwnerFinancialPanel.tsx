@@ -560,14 +560,17 @@ export const OwnerFinancialPanel: React.FC = () => {
                     Produtos
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <SummaryCard icon={<Wallet size={48} />} label="Receita de produtos" value={brl.format(summary.products.revenue)} />
+                    <SummaryCard icon={<Wallet size={48} />} label="Receita de produtos" value={brl.format(summary.products.netRevenue ?? summary.products.revenue)} />
+                    {summary.products.refunded > 0 && (
+                      <SummaryCard icon={<Receipt size={48} />} label="Estornos" value={brl.format(summary.products.refunded)} tone="negative" />
+                    )}
                     <SummaryCard icon={<CreditCard size={48} />} label="CMV" value={brl.format(summary.products.cogs)} />
                     <SummaryCard icon={<Wallet size={48} />} label="Margem bruta" value={brl.format(summary.products.margin)} tone="positive" />
                     <SummaryCard icon={<Receipt size={48} />} label="Compras de estoque" value={brl.format(summary.products.stockPurchases)} />
                     <SummaryCard icon={<Wallet size={48} />} label="Valor em estoque" value={brl.format(summary.products.inventoryValue)} />
                     <SummaryCard icon={<AlertCircle size={48} />} label="Abaixo do mínimo" value={String(summary.products.lowStockCount)} isCount tone="negative" />
                   </div>
-                  <p className="text-xs text-text-muted">Resultado de caixa não desconta o CMV. A margem de varejo usa o custo congelado da venda.</p>
+                  <p className="text-xs text-text-muted">A margem de varejo usa o custo congelado da venda e já desconta estornos na receita líquida.</p>
                 </>
               )}
 
