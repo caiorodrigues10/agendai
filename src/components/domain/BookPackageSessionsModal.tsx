@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AlertCircle, CheckCircle, Clock, X } from 'lucide-react';
 import { ClientPackage, ShopSettings, StaffMember } from '../../types';
+import { Avatar } from '../ui/Avatar';
 import { schedulingApi } from '../../infra/schedulingApi';
 import { packagesApi } from '../../infra/packagesApi';
 import { getErrorMessage } from '../../utils/errorMessage';
@@ -158,12 +159,13 @@ export const BookPackageSessionsModal: React.FC<BookPackageSessionsModalProps> =
                 key={member.id}
                 type="button"
                 onClick={() => setStaffId(member.id)}
-                className={`px-3 py-2 rounded-xl border text-sm font-semibold ${
+                className={`px-3 py-2 rounded-xl border text-sm font-semibold flex items-center gap-2 ${
                   staffId === member.id
                     ? 'bg-accent/15 border-accent'
                     : 'bg-bg border-border text-text-secondary'
                 }`}
               >
+                <Avatar src={member.avatarUrl} name={member.name} size="xxs" />
                 {member.name}
               </button>
             ))}

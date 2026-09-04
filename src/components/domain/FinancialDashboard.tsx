@@ -28,6 +28,7 @@ import {
 import { ApiError } from '../../infra/apiClient';
 import { WeatherForecastWidget } from './WeatherForecastWidget';
 import { SmartSelect } from '../ui/SmartSelect';
+import { Avatar } from '../ui/Avatar';
 import { commissionsApi, type CommissionSummary } from '../../infra/commissionsApi';
 
 interface FinancialDashboardProps {
@@ -279,7 +280,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
               </div>
               <SmartSelect
                 mode="single"
-                options={[{ value: '', label: 'Todos os profissionais' }, ...allStaff.map(member => ({ value: member.id, label: member.name }))]}
+                options={[{ value: '', label: 'Todos os profissionais' }, ...allStaff.map(member => ({ value: member.id, label: member.name, icon: <Avatar src={member.avatarUrl} name={member.name} size="xxs" /> }))]}
                 value={commissionProfessionalId}
                 onChange={value => setCommissionProfessionalId(value ?? '')}
                 searchable="auto"

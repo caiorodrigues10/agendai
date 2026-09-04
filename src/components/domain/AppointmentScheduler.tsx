@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { DynamicIcon } from '../ui/DynamicIcon';
 import { ThemedCalendar, toLocalISO } from '../ui/ThemedCalendar';
+import { Avatar } from '../ui/Avatar';
 
 interface AppointmentSchedulerProps {
   services: Service[];
@@ -276,9 +277,7 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
                                 ${selectedStaffId === member.id ? 'bg-accent/15 border-accent' : 'bg-bg border-border hover:border-border-strong'}
                             `}
                 >
-                  <span className="text-base font-bold text-text-primary">
-                    {member.name.charAt(0)}
-                  </span>
+                  <Avatar src={member.avatarUrl} name={member.name} size="xs" />
                   <span className="font-bold text-xs text-text-primary">{member.name}</span>
                 </div>
               ))}

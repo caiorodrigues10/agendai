@@ -24,6 +24,7 @@ import {
   Phone,
   ChevronDown,
 } from 'lucide-react';
+import { Avatar } from '../ui/Avatar';
 
 type AgendaView = 'salon' | 'professional';
 
@@ -293,9 +294,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                       : 'text-text-primary hover:bg-surface-2'
                   }`}
                 >
-                  <div
-                    className={`w-2 h-2 rounded-full ${selectedStaffId === s.id ? 'bg-accent' : 'bg-text-muted'}`}
-                  />
+                  <Avatar src={s.avatarUrl} name={s.name} size="xxs" />
                   {s.name}
                   {selectedStaffId === s.id && (
                     <CheckCircle size={14} className="ml-auto text-accent" />

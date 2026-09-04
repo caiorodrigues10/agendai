@@ -16,6 +16,7 @@ import { maskPhone } from '../../utils/documentUtils';
 import { clientsApi } from '../../infra/clientsApi';
 import { packagesApi } from '../../infra/packagesApi';
 import { X, Calendar, User, Smartphone, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { Avatar } from '../ui/Avatar';
 import { DynamicIcon } from '../ui/DynamicIcon';
 import { ThemedCalendar, toLocalISO } from '../ui/ThemedCalendar';
 
@@ -276,10 +277,11 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
                     key={member.id}
                     type="button"
                     onClick={() => setValue('staffId', member.id, { shouldValidate: true })}
-                    className={`px-3.5 py-2.5 rounded-xl border text-sm font-semibold min-h-[44px] transition-all ${
+                    className={`px-3.5 py-2.5 rounded-xl border text-sm font-semibold min-h-[44px] transition-all flex items-center gap-2 ${
                       selectedStaffId === member.id ? selectedCard : idleCard
                     }`}
                   >
+                    <Avatar src={member.avatarUrl} name={member.name} size="xxs" />
                     {member.name}
                   </button>
                 ))}
