@@ -75,6 +75,11 @@ const SalonWhatsAppConnection: React.FC<{
   const [copied, setCopied] = useState(false);
   const [showDisconnectModal, setShowDisconnectModal] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pendingCredentialsRef = useRef<{
+    pairingCode: string | null;
+    qrcodeBase64: string | null;
+    method: ShopWhatsAppStatus['method'];
+  }>({ pairingCode: null, qrcodeBase64: null, method: null });
 
   const stopPoll = useCallback(() => {
     if (pollRef.current) {
@@ -84,8 +89,28 @@ const SalonWhatsAppConnection: React.FC<{
   }, []);
 
   const applyStatus = useCallback(
-    (next: ShopWhatsAppStatus) => {
-      setData(next);
+    (next: ShopWhatsAppStatus, source: 'poll' | 'action' = 'action') => {
+      if (next.connected) {
+        pendingCredentialsRef.current = { pairingCode: null, qrcodeBase64: null, method: null };
+      } else if (source === 'action' && (next.pairingCode || next.qrcodeBase64)) {
+        pendingCredentialsRef.current = {
+          pairingCode: next.pairingCode,
+          qrcodeBase64: next.qrcodeBase64,
+          method: next.method,
+        };
+      }
+
+      setData(prev => {
+        if (next.connected) return next;
+        const held = pendingCredentialsRef.current;
+        if (source !== 'poll') return next;
+        return {
+          ...next,
+          qrcodeBase64: next.qrcodeBase64 ?? prev?.qrcodeBase64 ?? held.qrcodeBase64,
+          pairingCode: next.pairingCode ?? prev?.pairingCode ?? held.pairingCode,
+          method: next.method ?? prev?.method ?? held.method,
+        };
+      });
       if (next.connected) stopPoll();
     },
     [stopPoll]
@@ -94,7 +119,7 @@ const SalonWhatsAppConnection: React.FC<{
   const loadStatus = useCallback(async () => {
     try {
       const next = await barbershopApi.getWhatsAppStatus(barbershopId);
-      applyStatus(next);
+      applyStatus(next, 'poll');
       setError(null);
       return next;
     } catch (err) {
@@ -142,9 +167,11 @@ const SalonWhatsAppConnection: React.FC<{
   }, [barbershopId, data?.connected]);
 
   const handleConnect = async (selectedMethod: 'qr' | 'pairing_code' = method) => {
+    if (busy) return;
     setBusy(true);
     setError(null);
-    setData(prev => prev ? { ...prev, qrcodeBase64: null, pairingCode: null } : prev);
+    pendingCredentialsRef.current = { pairingCode: null, qrcodeBase64: null, method: selectedMethod };
+    setData(prev => (prev ? { ...prev, qrcodeBase64: null, pairingCode: null, method: selectedMethod } : prev));
     try {
       if (selectedMethod === 'pairing_code' && !phoneNumber.trim()) {
         setError('Informe o número do WhatsApp que será conectado.');
@@ -156,7 +183,7 @@ const SalonWhatsAppConnection: React.FC<{
           ? { method: 'qr' }
           : { method: 'pairing_code', phoneNumber: normalizePhoneBR(phoneNumber) }
       );
-      applyStatus(next);
+      applyStatus(next, 'action');
       if (!next.connected) startPoll();
     } catch (err) {
       setError(
@@ -183,7 +210,8 @@ const SalonWhatsAppConnection: React.FC<{
         }),
       ]);
       stopPoll();
-      applyStatus(next);
+      pendingCredentialsRef.current = { pairingCode: null, qrcodeBase64: null, method: null };
+      applyStatus(next, 'action');
       setShowDisconnectModal(false);
     } catch (err) {
       setError(getErrorMessage(err, 'Não foi possível desconectar o WhatsApp.'));
@@ -261,6 +289,7 @@ const SalonWhatsAppConnection: React.FC<{
               <p className="text-3xl sm:text-4xl tracking-[0.28em] font-black text-accent break-all">{pairingCode}</p>
               <button type="button" onClick={() => { void navigator.clipboard?.writeText(pairingCode).then(() => { setCopied(true); window.setTimeout(() => setCopied(false), 1800); }); }} className="mx-auto px-4 py-2.5 rounded-lg border border-accent/40 text-accent font-bold flex items-center gap-2"><Copy size={16} /> {copied ? 'Código copiado' : 'Copiar código'}</button>
               <p className="text-xs text-text-muted">WhatsApp → Aparelhos conectados → Conectar um aparelho → Conectar com número de telefone.</p>
+              <p className="text-xs text-text-secondary">O código permanece visível até o WhatsApp conectar. Não saia desta tela.</p>
             </div>
           )}
           <button
