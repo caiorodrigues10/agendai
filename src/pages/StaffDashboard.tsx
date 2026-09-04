@@ -508,31 +508,48 @@ export const StaffDashboard: React.FC = () => {
 
           {activeTab === 'settings' && user && (
             <>
-              <ProfileAvatarSection
-                userId={user.id}
-                userName={user.name}
-                avatarUrl={user.avatarUrl}
-                onAvatarUpdated={url => updateUserAvatar(url)}
-                onNotify={showToast}
-              />
-              <div className="mt-6"><ProfileSettingsPanel onNotify={showToast} /></div>
-              {(user.role === 'MASTER_ADMIN' || user.role === 'OWNER') && settings && (
-                <div className="mt-6">
-                  <SettingsManager
-                    settings={settings}
-                    barbershopId={barbershopId || undefined}
-                    onSave={s => {
-                      setSettings(s);
-                      showToast('Salvo!');
-                    }}
-                    onNotify={showToast}
-                    showNotifications={user.role === 'OWNER'}
-                  />
-                </div>
-              )}
-              {user.role === 'EMPLOYEE' && (
-                <div className="mt-6">
-                  <AccountPrivacyPanel onNotify={showToast} />
+              {(user.role === 'MASTER_ADMIN' || user.role === 'OWNER') && settings ? (
+                <SettingsManager
+                  settings={settings}
+                  barbershopId={barbershopId || undefined}
+                  onSave={async s => {
+                    await setSettings(s);
+                    showToast('Salvo!');
+                  }}
+                  onNotify={showToast}
+                  showNotifications={user.role === 'OWNER'}
+                  accountSection={
+                    <div className="space-y-6">
+                      <ProfileAvatarSection
+                        userId={user.id}
+                        userName={user.name}
+                        avatarUrl={user.avatarUrl}
+                        onAvatarUpdated={url => updateUserAvatar(url)}
+                        onNotify={showToast}
+                      />
+                      <ProfileSettingsPanel onNotify={showToast} />
+                    </div>
+                  }
+                />
+              ) : (
+                <div className="space-y-8 animate-fade-in">
+                  <section className="space-y-4">
+                    <h2 className="text-lg font-bold text-text-primary">Conta</h2>
+                    <ProfileAvatarSection
+                      userId={user.id}
+                      userName={user.name}
+                      avatarUrl={user.avatarUrl}
+                      onAvatarUpdated={url => updateUserAvatar(url)}
+                      onNotify={showToast}
+                    />
+                    <ProfileSettingsPanel onNotify={showToast} />
+                  </section>
+                  {user.role === 'EMPLOYEE' && (
+                    <section className="space-y-4">
+                      <h2 className="text-lg font-bold text-text-primary">Privacidade e dados</h2>
+                      <AccountPrivacyPanel onNotify={showToast} />
+                    </section>
+                  )}
                 </div>
               )}
             </>

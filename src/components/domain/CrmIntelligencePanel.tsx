@@ -15,11 +15,10 @@ import {
   CartesianGrid,
   Line,
   LineChart,
-  ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '../ui/chart';
 import {
   crmApi,
   CrmCampaign,
@@ -31,6 +30,7 @@ import {
 import { SmartSelect } from '../ui/SmartSelect';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { CRM_SEGMENT_LABEL } from '../../utils/clientLabels';
+import { METRIC_LABEL, SORT_BY_LTV_LABEL } from '../../utils/metricLabels';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 interface Props {
@@ -130,7 +130,7 @@ function ClientCard({
       </div>
       <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
         <div>
-          <p className="text-text-muted">LTV</p>
+          <p className="text-text-muted">{METRIC_LABEL.LTV}</p>
           <p className="font-bold text-text-primary">{money(client.ltv)}</p>
         </div>
         <div>
@@ -183,6 +183,15 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
   onOpenClient,
   onNotify,
 }) => {
+  const crmChartConfig: ChartConfig = {
+    grossRevenue: { label: 'Bruto', color: 'var(--chart-1)' },
+    receivedRevenue: { label: 'Recebido', color: 'var(--chart-2)' },
+    revenue: { label: 'Receita', color: 'var(--chart-1)' },
+    predictedRevenue: { label: 'Previsão', color: 'var(--chart-3)' },
+    confidenceLow: { label: 'Mínimo', color: 'var(--chart-4)' },
+    confidenceHigh: { label: 'Máximo', color: 'var(--chart-5)' },
+  };
+
   const [tab, setTab] = useState<Tab>('overview');
   const [overview, setOverview] = useState<CrmOverview | null>(null);
   const [overviewState, setOverviewState] = useState<'idle' | 'loading' | 'error'>('idle');
@@ -432,12 +441,12 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
               </h3>
               {chartData.length ? (
                 <div className="h-64 w-full">
-                  <ResponsiveContainer>
+                  <ChartContainer config={crmChartConfig} className="h-full w-full">
                     <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                      <XAxis dataKey="label" fontSize={11} />
-                      <YAxis fontSize={11} />
-                      <Tooltip formatter={value => money(value)} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                      <XAxis dataKey="label" fontSize={11} tick={{ fill: 'var(--color-text-muted)' }} />
+                      <YAxis fontSize={11} tick={{ fill: 'var(--color-text-muted)' }} />
+                      <ChartTooltip content={<ChartTooltipContent formatter={v => money(v)} />} />
                       <Line
                         type="monotone"
                         dataKey="grossRevenue"
@@ -453,7 +462,7 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
                         strokeWidth={2}
                       />
                     </LineChart>
-                  </ResponsiveContainer>
+                  </ChartContainer>
                 </div>
               ) : (
                 <Empty>Ainda não há lançamentos neste período.</Empty>
@@ -473,18 +482,19 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
                   </h3>
                   {values?.length ? (
                     <div className="h-52">
-                      <ResponsiveContainer>
+                      <ChartContainer config={crmChartConfig} className="h-full w-full">
                         <BarChart data={values.slice(0, 8)} layout="vertical">
+                          <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="var(--color-border)" />
                           <XAxis type="number" hide />
-                          <YAxis dataKey="name" type="category" width={85} fontSize={10} />
-                          <Tooltip formatter={value => money(value)} />
+                          <YAxis dataKey="name" type="category" width={85} fontSize={10} tick={{ fill: 'var(--color-text-muted)' }} />
+                          <ChartTooltip content={<ChartTooltipContent formatter={v => money(v)} />} />
                           <Bar
                             dataKey="revenue"
                             fill="var(--color-chart-1)"
                             radius={[0, 5, 5, 0]}
                           />
                         </BarChart>
-                      </ResponsiveContainer>
+                      </ChartContainer>
                     </div>
                   ) : (
                     <Empty>Sem dados.</Empty>
@@ -555,7 +565,7 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
               />
               <SmartSelect
                 mode="single"
-                options={[{ value: 'ltv', label: 'Maior LTV' }, { value: 'lastVisit', label: 'Visita recente' }, { value: 'outstanding', label: 'Maior dívida' }]}
+                options={[{ value: 'ltv', label: SORT_BY_LTV_LABEL }, { value: 'lastVisit', label: 'Visita recente' }, { value: 'outstanding', label: 'Maior dívida' }]}
                 aria-label="Ordenar clientes"
                 value={sort}
                 onChange={value => setSort(value as typeof sort)}
@@ -585,7 +595,7 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
                         <th className="p-3">Cliente</th>
                         <th className="p-3">Segmento</th>
                         <th className="p-3">Visitas</th>
-                        <th className="p-3">LTV</th>
+                        <th className="p-3">{METRIC_LABEL.LTV}</th>
                         <th className="p-3">Dívida</th>
                         <th className="p-3">Última visita</th>
                       </tr>
@@ -670,26 +680,26 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
                           : 'com dados insuficientes'}
                       .
                     </strong>{' '}
-                    {forecast.historicalDays} dias analisados. MAE:{' '}
+                    {forecast.historicalDays} dias analisados. {METRIC_LABEL.MAE}:{' '}
                     {forecast.backtest.mae == null ? 'indisponível' : money(forecast.backtest.mae)}{' '}
-                    · MAPE:{' '}
+                    · {METRIC_LABEL.MAPE}:{' '}
                     {forecast.backtest.mape == null
                       ? 'indisponível'
                       : `${forecast.backtest.mape}%`}
                     .
                   </div>
                   <div className="h-64 rounded-xl border border-border p-3">
-                    <ResponsiveContainer>
+                    <ChartContainer config={crmChartConfig} className="h-full w-full">
                       <LineChart
                         data={forecast.predictions.map(item => ({
                           ...item,
                           label: shortDate(item.date),
                         }))}
                       >
-                        <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                        <XAxis dataKey="label" fontSize={10} />
-                        <YAxis fontSize={11} />
-                        <Tooltip formatter={value => money(value)} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                        <XAxis dataKey="label" fontSize={10} tick={{ fill: 'var(--color-text-muted)' }} />
+                        <YAxis fontSize={11} tick={{ fill: 'var(--color-text-muted)' }} />
+                        <ChartTooltip content={<ChartTooltipContent formatter={v => money(v)} />} />
                         <Line
                           type="monotone"
                           dataKey="predictedRevenue"
@@ -712,7 +722,7 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
                           strokeDasharray="4 4"
                         />
                       </LineChart>
-                    </ResponsiveContainer>
+                    </ChartContainer>
                   </div>
                   <div className="grid gap-2 lg:grid-cols-2">
                     {forecast.predictions.map(item => (

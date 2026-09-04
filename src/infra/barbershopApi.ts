@@ -24,6 +24,24 @@ interface BarbershopData {
   scheduleExceptions?: ScheduleException[];
 }
 
+export interface ShopWeatherDay {
+  date: string;
+  weatherCode: number;
+  tempMax: number;
+  tempMin: number;
+  precipMm: number;
+  precipProbability: number;
+  condition: string;
+  conditionIcon: string;
+}
+
+export interface ShopWeatherForecast {
+  city: string | null;
+  latitude: number;
+  longitude: number;
+  forecast: ShopWeatherDay[];
+}
+
 export interface ShopStatusPayload {
   id?: string;
   openingMode: OpeningMode;
@@ -168,7 +186,7 @@ export const barbershopApi = {
       'PATCH',
       payload,
       token
-    ).then(unwrap);
+    ).then(res => unwrap<BarbershopData>(res));
   },
   updateSchedule: (id: string, schedule: DaySchedule[]) => {
     const token = authStorage.getAccessToken() || '';
@@ -373,6 +391,16 @@ export const barbershopApi = {
   deleteScheduledPost: (id: string) => {
     const token = authStorage.getAccessToken() || '';
     return apiClient<void>(`/api/posts/${id}`, 'DELETE', undefined, token);
+  },
+
+  getWeatherForecast: (barbershopId: string, days = 7) => {
+    const token = authStorage.getAccessToken() || '';
+    return apiClient<{ success: boolean; data: ShopWeatherForecast }>(
+      `/api/barbershops/${barbershopId}/weather?days=${days}`,
+      'GET',
+      undefined,
+      token
+    ).then(res => unwrap<ShopWeatherForecast>(res));
   },
 
   getWhatsAppStatus: (barbershopId: string) => {

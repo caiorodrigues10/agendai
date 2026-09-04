@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { ShopSettings, DaySchedule, OperationMode, BusinessSegment } from '../../types';
-import { barbershopApi, ShopWhatsAppStatus } from '../../infra/barbershopApi';
+import { barbershopApi, ShopWhatsAppStatus, ShopWeatherDay } from '../../infra/barbershopApi';
 import { ApiError } from '../../infra/apiClient';
 import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
@@ -28,6 +28,14 @@ import {
   CalendarCheck,
   LayoutGrid,
   Trash2,
+  MapPin,
+  UserRound,
+  Store,
+  ShieldCheck,
+  Cloud,
+  CloudRain,
+  CloudSun,
+  Sun,
 } from 'lucide-react';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import type { AppointmentPolicy } from '../../infra/barbershopApi';
@@ -43,6 +51,107 @@ const DEFAULT_APPOINTMENT_POLICY: AppointmentPolicy = {
   allowPublicCancellation: true,
   allowPublicReschedule: true,
   requestReview: true,
+};
+
+function weatherIcon(code: number) {
+  if (code <= 1) return <Sun size={16} className="text-warning" />;
+  if (code <= 3) return <CloudSun size={16} className="text-text-secondary" />;
+  if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82) || code >= 95) {
+    return <CloudRain size={16} className="text-blue-400" />;
+  }
+  return <Cloud size={16} className="text-text-muted" />;
+}
+
+function weatherDayLabel(dateStr: string) {
+  const day = new Date(`${dateStr}T12:00:00`);
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+  if (day.toDateString() === today.toDateString()) return 'Hoje';
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  if (day.toDateString() === tomorrow.toDateString()) return 'Amanhã';
+  return day.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
+}
+
+const ShopCityField: React.FC<{
+  barbershopId?: string;
+  city: string;
+  onCityChange: (value: string) => void;
+  settings: ShopSettings;
+}> = ({ barbershopId, city, onCityChange, settings }) => {
+  const [forecast, setForecast] = useState<ShopWeatherDay[] | null>(null);
+  const [weatherFailed, setWeatherFailed] = useState(false);
+  const cityTrim = city.trim();
+  const locationReady =
+    cityTrim.toLowerCase() === (settings.city || '').trim().toLowerCase() &&
+    settings.latitude != null &&
+    settings.longitude != null;
+
+  useEffect(() => {
+    if (!barbershopId || settings.latitude == null || settings.longitude == null) return;
+    let cancelled = false;
+    barbershopApi
+      .getWeatherForecast(barbershopId, 7)
+      .then(data => {
+        if (!cancelled) {
+          setWeatherFailed(false);
+          setForecast(data.forecast);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setWeatherFailed(true);
+          setForecast(null);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [barbershopId, settings.latitude, settings.longitude]);
+
+  return (
+    <div>
+      <label className="block text-sm text-text-secondary mb-1.5" htmlFor="shop-city">Cidade</label>
+      <input
+        id="shop-city"
+        value={city}
+        onChange={e => onCityChange(e.target.value)}
+        className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
+        placeholder="São Paulo"
+      />
+      <p className={`mt-1.5 text-[11px] flex items-start gap-1.5 ${locationReady ? 'text-success' : 'text-text-muted'}`}>
+        <MapPin size={12} className="mt-0.5 shrink-0" />
+        <span>
+          {locationReady
+            ? `Previsão do tempo ativa para ${settings.city || cityTrim}.`
+            : cityTrim
+              ? 'Clique em Salvar Configurações para localizar a cidade e carregar o clima.'
+              : 'Necessária para a previsão de demanda baseada no clima.'}
+        </span>
+      </p>
+      {locationReady && !forecast && !weatherFailed && (
+        <p className="mt-2 text-[11px] text-text-muted flex items-center gap-1.5">
+          <Loader2 size={12} className="animate-spin" /> Carregando clima...
+        </p>
+      )}
+      {locationReady && forecast && forecast.length > 0 && (
+        <div className="mt-3 grid grid-cols-4 sm:grid-cols-7 gap-2">
+          {forecast.slice(0, 7).map(day => (
+            <div key={day.date} className="rounded-lg border border-border bg-bg p-2 text-center">
+              <p className="text-[10px] font-bold text-text-muted">{weatherDayLabel(day.date)}</p>
+              <div className="my-1 flex justify-center">{weatherIcon(day.weatherCode)}</div>
+              <p className="text-[11px] font-bold text-text-primary">{Math.round(day.tempMax)}°</p>
+              <p className="text-[10px] text-text-muted">{Math.round(day.tempMin)}°</p>
+              <p className="mt-1 text-[10px] text-text-secondary leading-tight line-clamp-2">{day.condition}</p>
+              {day.precipProbability > 0 && (
+                <p className="mt-0.5 text-[10px] text-blue-400">{Math.round(day.precipProbability)}%</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
 
 const AppointmentPolicySection: React.FC<{ barbershopId: string; onNotify: SettingsManagerProps['onNotify'] }> = ({ barbershopId, onNotify }) => {
@@ -634,12 +743,23 @@ const ScheduleExceptionsSection: React.FC<{
   );
 };
 
+type SettingsSection = 'account' | 'shop' | 'whatsapp' | 'operation' | 'privacy';
+
+const SETTINGS_SECTIONS: { id: SettingsSection; label: string; icon: React.ElementType }[] = [
+  { id: 'account', label: 'Conta', icon: UserRound },
+  { id: 'shop', label: 'Estabelecimento', icon: Store },
+  { id: 'whatsapp', label: 'WhatsApp', icon: Smartphone },
+  { id: 'operation', label: 'Funcionamento', icon: Clock },
+  { id: 'privacy', label: 'Privacidade', icon: ShieldCheck },
+];
+
 interface SettingsManagerProps {
   settings: ShopSettings;
   barbershopId?: string;
-  onSave: (settings: ShopSettings) => void;
+  onSave: (settings: ShopSettings) => void | Promise<void>;
   onNotify: (message: string, type: 'success' | 'error') => void;
   showNotifications?: boolean;
+  accountSection?: React.ReactNode;
 }
 
 export const SettingsManager: React.FC<SettingsManagerProps> = ({
@@ -648,8 +768,10 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
   onSave,
   onNotify,
   showNotifications = false,
+  accountSection,
 }) => {
   const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState<SettingsSection>('account');
   const [shopName, setShopName] = useState(settings.shopName);
   const [whatsapp, setWhatsapp] = useState(() => maskPhone(settings.whatsapp || ''));
   const [schedule, setSchedule] = useState<DaySchedule[]>(settings.schedule || []);
@@ -658,6 +780,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
   const [logoError, setLogoError] = useState<string | null>(null);
   const [address, setAddress] = useState(settings.address || '');
   const [city, setCity] = useState(settings.city || '');
+  const [saving, setSaving] = useState(false);
 
   const handleDayChange = (index: number, field: keyof DaySchedule, value: string | boolean) => {
     const newSchedule = [...schedule];
@@ -683,7 +806,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     for (const day of schedule) {
       if (day.isOpen && day.openTime >= day.closeTime) {
         onNotify(
@@ -693,177 +816,244 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
         return;
       }
     }
-    onSave({
-      ...settings,
-      shopName,
-      whatsapp: normalizePhoneBR(whatsapp),
-      address,
-      city,
-      schedule,
-      logoUrl,
-    });
+    setSaving(true);
+    try {
+      await onSave({
+        ...settings,
+        shopName,
+        whatsapp: normalizePhoneBR(whatsapp),
+        address,
+        city,
+        schedule,
+        logoUrl,
+      });
+    } catch (err) {
+      onNotify(getErrorMessage(err, 'Não foi possível salvar as configurações.'), 'error');
+    } finally {
+      setSaving(false);
+    }
   };
 
+  const saveButton = (
+    <button
+      type="button"
+      onClick={() => void handleSave()}
+      disabled={saving}
+      className="w-full py-3 bg-accent hover:bg-accent-hover text-accent-fg font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-accent/20 disabled:opacity-50"
+    >
+      {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+      {saving ? 'Salvando...' : 'Salvar Configurações'}
+    </button>
+  );
+
   return (
-    <div className="mt-6 space-y-6 animate-fade-in">
-      <div className="bg-surface border border-border rounded-xl p-5">
-        <h3 className="text-lg font-bold text-text-primary mb-4">Configurações Gerais</h3>
+    <div className="space-y-6 animate-fade-in">
+      <nav
+        className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1"
+        aria-label="Seções de configurações"
+      >
+        {SETTINGS_SECTIONS.map(section => {
+          const Icon = section.icon;
+          const active = activeSection === section.id;
+          return (
+            <button
+              key={section.id}
+              type="button"
+              onClick={() => setActiveSection(section.id)}
+              className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-bold border transition-colors ${
+                active
+                  ? 'bg-accent text-accent-fg border-accent'
+                  : 'bg-surface text-text-secondary border-border hover:border-border-strong'
+              }`}
+            >
+              <Icon size={14} />
+              {section.label}
+            </button>
+          );
+        })}
+      </nav>
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm text-text-secondary mb-1.5">Nome do Salão</label>
-            <input
-              type="text"
-              value={shopName}
-              onChange={e => setShopName(e.target.value)}
-              className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
-            />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="block text-sm text-text-secondary mb-1.5">Endereço</label>
-              <input value={address} onChange={e => setAddress(e.target.value)} className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent" placeholder="Rua, número e bairro" />
-            </div>
-            <div>
-              <label className="block text-sm text-text-secondary mb-1.5">Cidade</label>
-              <input value={city} onChange={e => setCity(e.target.value)} className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent" placeholder="São Paulo" />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm text-text-secondary mb-2">Logo do Salão</label>
-            <div className="flex items-center gap-3">
-              <div className="w-16 h-16 rounded-lg bg-bg border border-border flex items-center justify-center overflow-hidden">
-                {logoUploading ? (
-                  <Loader2 className="text-accent animate-spin" size={20} />
-                ) : logoUrl ? (
-                  <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
-                ) : (
-                  <Upload className="text-text-muted" size={20} />
-                )}
-              </div>
-              <label
-                className={`px-3 py-2 text-xs bg-surface-2 text-text-secondary rounded-lg border border-border-strong cursor-pointer hover:bg-border-strong ${logoUploading ? 'opacity-50 pointer-events-none' : ''}`}
-              >
-                {logoUploading ? 'Enviando...' : 'Escolher arquivo'}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  disabled={logoUploading}
-                />
-              </label>
-            </div>
-            {logoError && (
-              <p className="mt-2 text-xs text-danger" role="alert">
-                {logoError}
-              </p>
-            )}
-          </div>
+      {activeSection === 'account' && (
+        <div className="space-y-6">
+          {accountSection}
+          <button
+            type="button"
+            onClick={() => navigate('/app/subscription')}
+            className="w-full py-3 bg-accent/15 hover:bg-accent/25 text-accent font-bold rounded-xl flex items-center justify-center gap-2 border border-accent/40"
+          >
+            <Wallet size={16} /> Pagar ou gerenciar plano
+          </button>
         </div>
-      </div>
-
-      {barbershopId && (
-        <SalonWhatsAppConnection
-          barbershopId={barbershopId}
-          whatsapp={whatsapp}
-          onWhatsappChange={setWhatsapp}
-        />
       )}
 
-      <OperationModeSection settings={settings} barbershopId={barbershopId} onNotify={onNotify} />
-      <BusinessSegmentSection settings={settings} onNotify={onNotify} onSave={onSave} />
+      {activeSection === 'shop' && (
+        <div className="space-y-6">
+          <div className="bg-surface border border-border rounded-xl p-5">
+            <h3 className="text-lg font-bold text-text-primary mb-1">Dados do estabelecimento</h3>
+            <p className="text-xs text-text-muted mb-4">
+              Nome, endereço, cidade e logo visíveis para os clientes.
+            </p>
 
-      {barbershopId && <ShopFloorControls variant="full" onNotify={onNotify} />}
-      {barbershopId && <ScheduleExceptionsSection onNotify={onNotify} />}
-
-      {barbershopId && <AppointmentPolicySection barbershopId={barbershopId} onNotify={onNotify} />}
-
-      <div className="bg-surface border border-border rounded-xl p-5">
-        <h3 className="text-lg font-bold text-text-primary mb-4">Horários de Funcionamento</h3>
-
-        <div className="space-y-3">
-          {schedule.map((day, index) => (
-            <div key={day.dayName} className="bg-bg border border-border rounded-lg p-3">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <CalendarDays className="text-text-muted" size={16} />
-                  <span className="text-sm font-bold text-text-primary">{day.dayName}</span>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-text-secondary mb-1.5">Nome do Salão</label>
+                <input
+                  type="text"
+                  value={shopName}
+                  onChange={e => setShopName(e.target.value)}
+                  className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
+                />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block text-sm text-text-secondary mb-1.5">Endereço</label>
+                  <input
+                    value={address}
+                    onChange={e => setAddress(e.target.value)}
+                    className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
+                    placeholder="Rua, número e bairro"
+                  />
                 </div>
-                <button
-                  onClick={() => handleDayChange(index, 'isOpen', !day.isOpen)}
-                  className={`px-2 py-1 text-[10px] rounded-full font-bold ${
-                    day.isOpen ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'
-                  }`}
-                >
-                  {day.isOpen ? 'Aberto' : 'Fechado'}
-                </button>
+                <div>
+                  <ShopCityField
+                    barbershopId={barbershopId}
+                    city={city}
+                    onCityChange={setCity}
+                    settings={settings}
+                  />
+                </div>
               </div>
 
-              {day.isOpen && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="relative">
-                    <Clock
-                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted"
-                      size={14}
-                    />
-                    <input
-                      type="time"
-                      value={day.openTime}
-                      onChange={e => handleDayChange(index, 'openTime', e.target.value)}
-                      className="w-full bg-surface border border-border rounded-lg pl-8 pr-2 py-2 text-text-primary text-xs outline-none"
-                    />
+              <div>
+                <label className="block text-sm text-text-secondary mb-2">Logo do Salão</label>
+                <div className="flex items-center gap-3">
+                  <div className="w-16 h-16 rounded-lg bg-bg border border-border flex items-center justify-center overflow-hidden">
+                    {logoUploading ? (
+                      <Loader2 className="text-accent animate-spin" size={20} />
+                    ) : logoUrl ? (
+                      <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                    ) : (
+                      <Upload className="text-text-muted" size={20} />
+                    )}
                   </div>
-                  <div className="relative">
-                    <Clock
-                      className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted"
-                      size={14}
-                    />
+                  <label
+                    className={`px-3 py-2 text-xs bg-surface-2 text-text-secondary rounded-lg border border-border-strong cursor-pointer hover:bg-border-strong ${logoUploading ? 'opacity-50 pointer-events-none' : ''}`}
+                  >
+                    {logoUploading ? 'Enviando...' : 'Escolher arquivo'}
                     <input
-                      type="time"
-                      value={day.closeTime}
-                      onChange={e => handleDayChange(index, 'closeTime', e.target.value)}
-                      className="w-full bg-surface border border-border rounded-lg pl-8 pr-2 py-2 text-text-primary text-xs outline-none"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      disabled={logoUploading}
                     />
-                  </div>
+                  </label>
                 </div>
-              )}
+                {logoError && (
+                  <p className="mt-2 text-xs text-danger" role="alert">
+                    {logoError}
+                  </p>
+                )}
+              </div>
             </div>
-          ))}
+          </div>
+
+          <BusinessSegmentSection settings={settings} onNotify={onNotify} onSave={onSave} />
+          {saveButton}
         </div>
-      </div>
+      )}
 
-      <div className="bg-surface border border-border rounded-xl p-5">
-        <h3 className="text-lg font-bold text-text-primary mb-4">Localização</h3>
-        <p className="text-sm text-text-secondary mb-4">
-          Necessária para previsão de demanda baseada no clima.
-        </p>
-        <div className="space-y-4">
-          <p className="text-[11px] text-text-muted">
-            Informe a cidade e o sistema localizará automaticamente as coordenadas necessárias para a previsão do tempo.
-          </p>
+      {activeSection === 'whatsapp' && (
+        <div className="space-y-6">
+          {barbershopId ? (
+            <SalonWhatsAppConnection
+              barbershopId={barbershopId}
+              whatsapp={whatsapp}
+              onWhatsappChange={setWhatsapp}
+            />
+          ) : (
+            <div className="bg-surface border border-border rounded-xl p-5">
+              <h3 className="text-lg font-bold text-text-primary mb-1">WhatsApp</h3>
+              <p className="text-sm text-text-secondary">
+                Conecte um estabelecimento para configurar o WhatsApp.
+              </p>
+            </div>
+          )}
+          {showNotifications && barbershopId && <OwnerNotificationsPanel onNotify={onNotify} />}
+          {showNotifications && barbershopId && (
+            <QueueAlertSettings barbershopId={barbershopId} onNotify={onNotify} />
+          )}
+          {saveButton}
         </div>
-      </div>
+      )}
 
-      <button
-        onClick={handleSave}
-        className="w-full py-3 bg-accent hover:bg-accent-hover text-accent-fg font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-accent/20"
-      >
-        <Save size={16} /> Salvar Configurações
-      </button>
+      {activeSection === 'operation' && (
+        <div className="space-y-6">
+          <OperationModeSection settings={settings} barbershopId={barbershopId} onNotify={onNotify} />
+          {barbershopId && <ShopFloorControls variant="full" onNotify={onNotify} />}
+          {barbershopId && <ScheduleExceptionsSection onNotify={onNotify} />}
 
-      <button
-        type="button"
-        onClick={() => navigate('/app/subscription')}
-        className="w-full py-3 bg-accent/15 hover:bg-accent/25 text-accent font-bold rounded-xl flex items-center justify-center gap-2 border border-accent/40"
-      >
-        <Wallet size={16} /> Pagar ou gerenciar plano
-      </button>
+          <div className="bg-surface border border-border rounded-xl p-5">
+            <h3 className="text-lg font-bold text-text-primary mb-4">Horários de Funcionamento</h3>
 
-      <AccountPrivacyPanel onNotify={onNotify} />
-      {showNotifications && barbershopId && <OwnerNotificationsPanel onNotify={onNotify} />}
-      {showNotifications && barbershopId && <QueueAlertSettings barbershopId={barbershopId} onNotify={onNotify} />}
+            <div className="space-y-3">
+              {schedule.map((day, index) => (
+                <div key={day.dayName} className="bg-bg border border-border rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <CalendarDays className="text-text-muted" size={16} />
+                      <span className="text-sm font-bold text-text-primary">{day.dayName}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDayChange(index, 'isOpen', !day.isOpen)}
+                      className={`px-2 py-1 text-[10px] rounded-full font-bold ${
+                        day.isOpen ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'
+                      }`}
+                    >
+                      {day.isOpen ? 'Aberto' : 'Fechado'}
+                    </button>
+                  </div>
+
+                  {day.isOpen && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="relative">
+                        <Clock
+                          className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted"
+                          size={14}
+                        />
+                        <input
+                          type="time"
+                          value={day.openTime}
+                          onChange={e => handleDayChange(index, 'openTime', e.target.value)}
+                          className="w-full bg-surface border border-border rounded-lg pl-8 pr-2 py-2 text-text-primary text-xs outline-none"
+                        />
+                      </div>
+                      <div className="relative">
+                        <Clock
+                          className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted"
+                          size={14}
+                        />
+                        <input
+                          type="time"
+                          value={day.closeTime}
+                          onChange={e => handleDayChange(index, 'closeTime', e.target.value)}
+                          className="w-full bg-surface border border-border rounded-lg pl-8 pr-2 py-2 text-text-primary text-xs outline-none"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {barbershopId && <AppointmentPolicySection barbershopId={barbershopId} onNotify={onNotify} />}
+          {saveButton}
+        </div>
+      )}
+
+      {activeSection === 'privacy' && <AccountPrivacyPanel onNotify={onNotify} />}
     </div>
   );
 };

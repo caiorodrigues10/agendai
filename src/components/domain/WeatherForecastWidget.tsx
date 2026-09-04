@@ -114,19 +114,20 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
     );
   }
 
-  if (!insights || insights.predictions.length === 0) {
+  if (!insights || (insights.predictions.length === 0 && (!insights.forecast || insights.forecast.length === 0))) {
     return (
       <div className="rounded-xl border border-border bg-surface p-6 text-center">
         <Calendar className="mx-auto h-8 w-8 text-text-muted" />
         <p className="mt-3 text-sm text-text-muted">Sem dados suficientes para previsão.</p>
         <p className="mt-1 text-xs text-text-muted">
-          O modelo precisa de pelo menos 14 dias de histórico.
+          Informe a cidade do salão em Configurações para ver o clima.
         </p>
       </div>
     );
   }
 
   const { predictions, summary, highlights } = insights;
+  const forecast = insights.forecast ?? [];
 
   if (compact) {
     const tomorrow = predictions[0];
@@ -150,7 +151,7 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
 
   return (
     <div className="space-y-4">
-      {highlights.length > 0 && (
+      {highlights?.length > 0 && (
         <div className="space-y-2">
           {highlights.map((h, i) => (
             <div key={i} className="flex items-start gap-2 text-sm text-text-secondary">
@@ -161,7 +162,8 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
         </div>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {predictions.length > 0 && summary?.bestDay && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="rounded-xl border border-border bg-surface p-3">
           <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Média semana</p>
           <p className={`mt-1 text-lg font-black ${summary.avgDropPct <= -10 ? 'text-red-400' : 'text-emerald-400'}`}>
@@ -188,36 +190,50 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
           </p>
           <p className="text-[10px] text-text-muted">{summary.worstDay.condition}</p>
         </div>
-      </div>
+        </div>
+      )}
 
       <div className="grid gap-2 sm:grid-cols-7">
-        {predictions.map(p => {
-          const style = RISK_STYLES[p.riskLevel];
+        {(forecast.length > 0 ? forecast : predictions).map((p, index) => {
+          const prediction = predictions[index];
+          const style = RISK_STYLES[prediction?.riskLevel ?? 'low'];
+          const weatherCode = 'weatherCode' in p ? p.weatherCode : 0;
+          const tempMax = 'tempMax' in p ? p.tempMax : undefined;
+          const tempMin = 'tempMin' in p ? p.tempMin : undefined;
+          const condition = p.condition;
+          const date = p.date;
           return (
             <div
-              key={p.date}
+              key={date}
               className={`rounded-xl border ${style.border} ${style.bg} p-3 text-center transition-all hover:scale-[1.02]`}
             >
-              <p className="text-[10px] font-bold text-text-muted">{formatDate(p.date)}</p>
-              <div className="my-2 flex justify-center">{getWeatherIcon(0)}</div>
-              <p className="text-xs font-bold text-text-secondary">{p.condition}</p>
-              <div className="mt-2">
-                <div className="h-1 rounded-full bg-white/5">
-                  <div
-                    className={`h-full rounded-full ${
-                      p.riskLevel === 'high' || p.riskLevel === 'critical'
-                        ? 'bg-red-400'
-                        : p.riskLevel === 'medium'
-                          ? 'bg-yellow-400'
-                          : 'bg-emerald-400'
-                    }`}
-                    style={{ width: `${Math.max(5, 100 + p.dropPct)}%` }}
-                  />
-                </div>
-                <p className={`mt-1 text-[10px] font-bold ${style.text}`}>
-                  {p.dropPct > 0 ? '+' : ''}{p.dropPct}%
+              <p className="text-[10px] font-bold text-text-muted">{formatDate(date)}</p>
+              <div className="my-2 flex justify-center">{getWeatherIcon(weatherCode)}</div>
+              <p className="text-xs font-bold text-text-secondary">{condition}</p>
+              {tempMax != null && (
+                <p className="mt-1 text-[11px] font-bold text-text-primary">
+                  {Math.round(tempMax)}° <span className="font-normal text-text-muted">{tempMin != null ? `${Math.round(tempMin)}°` : ''}</span>
                 </p>
-              </div>
+              )}
+              {prediction && (
+                <div className="mt-2">
+                  <div className="h-1 rounded-full bg-white/5">
+                    <div
+                      className={`h-full rounded-full ${
+                        prediction.riskLevel === 'high' || prediction.riskLevel === 'critical'
+                          ? 'bg-red-400'
+                          : prediction.riskLevel === 'medium'
+                            ? 'bg-yellow-400'
+                            : 'bg-emerald-400'
+                      }`}
+                      style={{ width: `${Math.max(5, 100 + prediction.dropPct)}%` }}
+                    />
+                  </div>
+                  <p className={`mt-1 text-[10px] font-bold ${style.text}`}>
+                    {prediction.dropPct > 0 ? '+' : ''}{prediction.dropPct}%
+                  </p>
+                </div>
+              )}
             </div>
           );
         })}

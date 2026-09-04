@@ -4,6 +4,7 @@ import { Sparkles } from 'lucide-react';
 import { Service, ShopSettings, StaffMember } from '../../types';
 import { AppointmentFormData } from '../../schemas';
 import { AvailabilitySlot } from '../../utils/schedulingUtils';
+import { METRIC_LABEL } from '../../utils/metricLabels';
 import { ClientsManager } from './ClientsManager';
 import { CrmIntelligencePanel } from './CrmIntelligencePanel';
 import { ClientProfileSheet } from './ClientProfileSheet';
@@ -56,7 +57,7 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
             <div>
               <p className="text-sm font-bold text-text-primary">Inteligência de clientes no plano Pro</p>
               <p className="text-xs text-text-secondary">
-                LTV, segmentos, previsão de receita e campanhas WhatsApp.
+                {METRIC_LABEL.LTV}, segmentos, previsão de receita e campanhas WhatsApp.
               </p>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
+import type { ShopWeatherDay } from './barbershopApi';
 
 function unwrap<T>(res: unknown): T {
   if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
@@ -229,6 +230,7 @@ export interface WeatherInsights {
   historicalDays: number;
   modelTrained: boolean;
   predictions: WeatherDemandPrediction[];
+  forecast?: ShopWeatherDay[];
   summary: {
     avgDropPct: number;
     highRiskCount: number;

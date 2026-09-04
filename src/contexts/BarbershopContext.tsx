@@ -193,12 +193,22 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
     if (newSettings.logoUrl && !newSettings.logoUrl.startsWith('data:')) {
       shopPayload.logoUrl = newSettings.logoUrl;
     }
-    if (newSettings.latitude !== undefined) shopPayload.latitude = newSettings.latitude;
-    if (newSettings.longitude !== undefined) shopPayload.longitude = newSettings.longitude;
+    const cityChanged =
+      (newSettings.city || '').trim().toLowerCase() !== (settings?.city || '').trim().toLowerCase();
+    const missingCoords = newSettings.latitude == null || newSettings.longitude == null;
+    if (!cityChanged && !missingCoords) {
+      shopPayload.latitude = newSettings.latitude;
+      shopPayload.longitude = newSettings.longitude;
+    }
     if (newSettings.businessSegment) shopPayload.businessSegment = newSettings.businessSegment;
-    await barbershopApi.updateBarbershop(barbershopId, shopPayload);
+    const updated = await barbershopApi.updateBarbershop(barbershopId, shopPayload);
     await barbershopApi.updateSchedule(barbershopId, newSettings.schedule);
-    setSettingsState(newSettings);
+    setSettingsState({
+      ...newSettings,
+      city: updated.city ?? newSettings.city,
+      latitude: updated.latitude ?? undefined,
+      longitude: updated.longitude ?? undefined,
+    });
   };
 
   const setOperationMode = async (mode: import('../types').OperationMode) => {

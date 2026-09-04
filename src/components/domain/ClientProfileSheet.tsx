@@ -31,6 +31,7 @@ import {
   PACKAGE_STATUS_LABEL,
   RISK_LABEL,
 } from '../../utils/clientLabels';
+import { METRIC_LABEL } from '../../utils/metricLabels';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { BookPackageSessionsModal } from './BookPackageSessionsModal';
 import { AppointmentBookingModal } from './AppointmentBookingModal';
@@ -471,7 +472,7 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                           <p className="font-bold text-text-primary">{crmProfile.visits}</p>
                         </div>
                         <div className="rounded-lg border border-border bg-bg p-3">
-                          <p className="text-xs text-text-muted">LTV</p>
+                          <p className="text-xs text-text-muted">{METRIC_LABEL.LTV}</p>
                           <p className="font-bold text-text-primary">{brl.format(crmProfile.ltv)}</p>
                         </div>
                         <div className="rounded-lg border border-border bg-bg p-3">
@@ -636,7 +637,7 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {[
-                    ['LTV', crmProfile.ltv],
+                    [METRIC_LABEL.LTV, crmProfile.ltv],
                     ['Produzido', crmProfile.grossRevenue],
                     ['Recebido', crmProfile.receivedRevenue],
                     ['Dívida', crmProfile.outstanding],
