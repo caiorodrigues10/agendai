@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+Disallow: /app
+Disallow: /app/
+Disallow: /master
+Disallow: /master/
+Disallow: /checkout
+Disallow: /bloqueado
+Disallow: /agendamento/gerenciar
+Disallow: /reset-password
+Disallow: /esqueci-senha
+Disallow: /email-verificado
+
+# Preview de imagens grandes nos resultados de busca
+User-agent: Googlebot
+Allow: /
+
+Sitemap: https://agendai.com.br/sitemap.xml

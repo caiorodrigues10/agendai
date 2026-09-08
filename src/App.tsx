@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { PrivateRoute } from './components/infra/PrivateRoute';
 import { AccessBlockedListener } from './components/infra/AccessBlockedListener';
 import { CookieConsent } from './components/infra/CookieConsent';
+import { AnalyticsListener } from './components/infra/AnalyticsListener';
 import { ScrollToTop } from './components/infra/ScrollToTop';
 import { ReferralRefCapture } from './components/infra/ReferralRefCapture';
 import { Loader } from './components/ui/Loader';
@@ -30,6 +31,7 @@ const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const MasterAdminDashboard = lazy(() => import('./pages/MasterAdmin/MasterAdminDashboard'));
 const StaffDashboard = lazy(() => import('./pages/StaffDashboard'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const CommercialIntentPage = lazy(() => import('./pages/marketing/CommercialIntentPage'));
 
 const App: React.FC = () => {
   return (
@@ -38,6 +40,7 @@ const App: React.FC = () => {
       <ReferralRefCapture />
       <AccessBlockedListener />
       <CookieConsent />
+      <AnalyticsListener />
       <PwaUpdatePrompt />
       <ErrorBoundary>
         <Suspense fallback={<Loader />}>
@@ -62,6 +65,10 @@ const App: React.FC = () => {
           <Route path="/email-verificado" element={<EmailVerifiedPage />} />
           <Route path="/bloqueado" element={<AccessBlockedPage />} />
           <Route path="/planos" element={<PlansPage />} />
+          <Route path="/software-para-salao-de-beleza" element={<CommercialIntentPage />} />
+          <Route path="/sistema-para-barbearia" element={<CommercialIntentPage />} />
+          <Route path="/app-para-agendamento-de-salao" element={<CommercialIntentPage />} />
+          <Route path="/sistema-para-fila-de-barbearia" element={<CommercialIntentPage />} />
           <Route
             path="/checkout"
             element={

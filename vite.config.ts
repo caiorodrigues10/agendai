@@ -110,7 +110,7 @@ export default defineConfig(({ mode }) => {
 					clientsClaim: true,
 					skipWaiting: false,
 					navigateFallback: '/index.html',
-					navigateFallbackDenylist: [/^\/api\//],
+					navigateFallbackDenylist: [/^\/api\//, /^\/robots\.txt$/, /^\/sitemap\.xml$/],
 					runtimeCaching: [
 						{
 							urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
