@@ -19,6 +19,7 @@ import { X, Calendar, User, Smartphone, CheckCircle, AlertCircle, Clock } from '
 import { Avatar } from '../ui/Avatar';
 import { DynamicIcon } from '../ui/DynamicIcon';
 import { ThemedCalendar, toLocalISO } from '../ui/ThemedCalendar';
+import { formatCurrencyBRL } from '../../utils/formatters';
 
 interface AppointmentBookingModalProps {
   services: Service[];
@@ -32,9 +33,6 @@ interface AppointmentBookingModalProps {
   onBook: (data: AppointmentFormData) => Promise<void>;
   onClose: () => void;
 }
-
-const formatPrice = (price: number) =>
-  price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 const fieldClass = (hasError: boolean) =>
   `w-full bg-bg border rounded-xl px-4 py-3 text-text-primary text-sm outline-none transition-all placeholder:text-text-muted focus:ring-2 focus:ring-accent/40 ${
@@ -194,7 +192,12 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
 
   return createPortal(
     <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-      <button type="button" aria-label="Fechar agendamento" onClick={onClose} className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-[2px]" />
+      <button
+        type="button"
+        aria-label="Fechar agendamento"
+        onClick={onClose}
+        className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-[2px]"
+      />
       <div
         className="relative bg-surface border border-border rounded-2xl w-full max-w-md max-h-[min(88dvh,calc(100dvh-2.5rem))] flex flex-col shadow-2xl animate-fade-in"
         role="dialog"
@@ -202,7 +205,9 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
         aria-labelledby="appointment-booking-title"
       >
         <div className="shrink-0 px-5 pt-5 pb-4 border-b border-border flex items-center justify-between">
-          <h3 id="appointment-booking-title" className="text-lg font-bold text-text-primary">Novo agendamento</h3>
+          <h3 id="appointment-booking-title" className="text-lg font-bold text-text-primary">
+            Novo agendamento
+          </h3>
           <button
             type="button"
             onClick={onClose}
@@ -247,7 +252,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
                           {service.name}
                         </span>
                         <p className="text-xs text-text-muted mt-0.5">
-                          ~{service.avgTimeMinutes} min · {formatPrice(service.price)}
+                          ~{service.avgTimeMinutes} min · {formatCurrencyBRL(service.price)}
                         </p>
                       </div>
                       {selected && <CheckCircle size={16} className="text-accent shrink-0" />}
@@ -347,7 +352,10 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
             </section>
 
             <section className="space-y-3">
-              <label htmlFor="appointment-customer-name" className="text-[11px] text-text-secondary font-bold uppercase tracking-wider">
+              <label
+                htmlFor="appointment-customer-name"
+                className="text-[11px] text-text-secondary font-bold uppercase tracking-wider"
+              >
                 Cliente
               </label>
               <div className="relative">

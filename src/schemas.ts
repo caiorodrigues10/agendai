@@ -139,3 +139,132 @@ export const AppointmentSchema = z.object({
 });
 
 export type AppointmentFormData = z.infer<typeof AppointmentSchema>;
+
+// --- Product Schema ---
+export const ProductSchema = z.object({
+  name: z.string().min(1, 'Nome é obrigatório'),
+  description: z.string().optional().default(''),
+  salePrice: z.coerce.number({ invalid_type_error: 'Preço inválido' }).min(0, 'Preço não pode ser negativo'),
+  sku: z.string().optional().default(''),
+  barcode: z.string().optional().default(''),
+  categoryId: z.string().optional().default(''),
+  type: z.enum(['RETAIL', 'CONSUMABLE', 'BOTH']),
+  unitLabel: z.string().min(1, 'Unidade é obrigatória').default('unidade'),
+  minStock: z.coerce.number({ invalid_type_error: 'Estoque inválido' }).min(0).default(0),
+  trackStock: z.boolean().default(true),
+});
+
+export type ProductFormData = z.infer<typeof ProductSchema>;
+
+// --- Client Create Schema ---
+export const ClientCreateSchema = z.object({
+  name: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
+  whatsapp: whatsappOptional,
+});
+
+export type ClientCreateFormData = z.infer<typeof ClientCreateSchema>;
+
+// --- Client Edit Schema ---
+export const ClientEditSchema = z.object({
+  name: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
+  whatsapp: whatsappOptional,
+  notes: z.string().optional().default(''),
+});
+
+export type ClientEditFormData = z.infer<typeof ClientEditSchema>;
+
+// --- Package Catalog Schema ---
+export const PackageCatalogSchema = z.object({
+  name: z.string().min(1, 'Nome é obrigatório'),
+  serviceId: z.string().min(1, 'Selecione um serviço'),
+  sessionCount: z.coerce.number({ invalid_type_error: 'Sessões inválido' }).min(2, 'Sessões deve ser ≥ 2'),
+  price: z.coerce.number({ invalid_type_error: 'Preço inválido' }).min(0.01, 'Preço deve ser maior que zero'),
+  validityDays: z.coerce.number().int().positive().optional().nullable(),
+});
+
+export type PackageCatalogFormData = z.infer<typeof PackageCatalogSchema>;
+
+// --- Profile Settings Schema ---
+export const ProfileSettingsSchema = z.object({
+  name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
+  email: z.string().email('E-mail inválido'),
+  currentPassword: z.string().optional().default(''),
+  newPassword: z.string().optional().default(''),
+}).superRefine((data, ctx) => {
+  if (data.newPassword && data.newPassword.length < 6) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Nova senha deve ter no mínimo 6 caracteres',
+      path: ['newPassword'],
+    });
+  }
+  if (data.newPassword && !data.currentPassword) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Informe sua senha atual para criar uma nova',
+      path: ['currentPassword'],
+    });
+  }
+});
+
+export type ProfileSettingsFormData = z.infer<typeof ProfileSettingsSchema>;
+
+// --- Refund Schema ---
+export const RefundSaleSchema = z.object({
+  reason: z.string().min(1, 'Informe o motivo do estorno'),
+  restock: z.boolean().default(true),
+  refundMethod: z.string().min(1, 'Selecione a forma de estorno'),
+});
+
+export type RefundSaleFormData = z.infer<typeof RefundSaleSchema>;
+
+// --- Stock Receipt Schema ---
+export const StockReceiptSchema = z.object({
+  productId: z.string().min(1, 'Selecione um produto'),
+  quantity: z.coerce.number({ invalid_type_error: 'Quantidade inválida' }).min(0.01, 'Quantidade deve ser maior que zero'),
+  unitCost: z.coerce.number({ invalid_type_error: 'Custo inválido' }).min(0, 'Custo não pode ser negativo'),
+  supplierId: z.string().optional().default(''),
+});
+
+export type StockReceiptFormData = z.infer<typeof StockReceiptSchema>;
+
+// --- Stock Adjustment Schema ---
+export const StockAdjustmentSchema = z.object({
+  productId: z.string().min(1, 'Selecione um produto'),
+  quantity: z.coerce.number({ invalid_type_error: 'Quantidade inválida' }),
+  type: z.enum(['MANUAL_ADJUSTMENT', 'INTERNAL_CONSUMPTION']),
+  reason: z.string().min(3, 'Informe um motivo com pelo menos 3 caracteres'),
+});
+
+export type StockAdjustmentFormData = z.infer<typeof StockAdjustmentSchema>;
+
+// --- Expense Schema ---
+export const ExpenseSchema = z.object({
+  title: z.string().min(2, 'Título deve ter no mínimo 2 caracteres'),
+  amount: z.coerce.number({ invalid_type_error: 'Valor inválido' }).min(0.01, 'Valor deve ser maior que zero'),
+  type: z.enum(['FIXED', 'VARIABLE', 'INVESTMENT']),
+  referenceDate: z.string().min(1, 'Data de referência é obrigatória'),
+  categoryId: z.string().optional().default(''),
+  description: z.string().optional().default(''),
+  notes: z.string().optional().default(''),
+  recurrence: z.enum(['ONCE', 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY']),
+  dueDate: z.string().optional().default(''),
+  paymentMethod: z.string().optional().default(''),
+  supplierName: z.string().optional().default(''),
+});
+
+export type ExpenseFormData = z.infer<typeof ExpenseSchema>;
+
+// --- Fiado Schema ---
+export const FiadoSchema = z.object({
+  customerName: z.string().min(2, 'Informe o nome do cliente'),
+  whatsapp: z
+    .string()
+    .transform(v => normalizePhoneBR(v))
+    .refine(v => isValidPhoneBR(v), { message: 'Informe um telefone válido com DDD' }),
+  description: z.string().min(2, 'Descrição deve ter no mínimo 2 caracteres'),
+  amount: z.coerce.number({ invalid_type_error: 'Valor inválido' }).min(0.01, 'Valor deve ser maior que zero'),
+  dueDate: z.string().optional().default(''),
+});
+
+export type FiadoFormData = z.infer<typeof FiadoSchema>;

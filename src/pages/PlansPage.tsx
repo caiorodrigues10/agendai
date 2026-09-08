@@ -11,9 +11,7 @@ import { PricingPersuasionCharts } from '../components/marketing/PricingPersuasi
 import { getErrorMessage } from '../utils/errorMessage';
 import { trialCampaign } from '../marketing/trialCampaign';
 import { isPaidSubscription, staffHomePath } from '../utils/subscriptionPaywall';
-
-const formatPrice = (price: number) =>
-  price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+import { formatCurrencyBRL } from '../utils/formatters';
 
 const ESSENTIAL_MONTHLY = 14;
 const PRO_MONTHLY = 20;
@@ -81,8 +79,7 @@ export const PlansPage: React.FC = () => {
 
   const handleSubscribe = (plan: Plan) => {
     const billing = (plan.billingCycle ?? (isYearly ? 'YEARLY' : 'MONTHLY')) as
-      | 'MONTHLY'
-      | 'YEARLY';
+      'MONTHLY' | 'YEARLY';
     if (user) {
       navigate(`/checkout?planId=${plan.id}&billing=${billing}`);
       return;
@@ -367,19 +364,19 @@ export const PlansPage: React.FC = () => {
                               currentIsPro ? 'text-accent' : 'text-white'
                             }`}
                           >
-                            {formatPrice(price)}
+                            {formatCurrencyBRL(price)}
                           </span>
                           <span className="text-sm text-neutral-500">/{period}</span>
                         </div>
                         {monthlyEquivalent != null && (
                           <p className="mt-2 text-sm font-semibold text-accent-light">
-                            ≈ {formatPrice(monthlyEquivalent)}/mês · economize{' '}
-                            {formatPrice(yearlySavings)}
+                            ≈ {formatCurrencyBRL(monthlyEquivalent)}/mês · economize{' '}
+                            {formatCurrencyBRL(yearlySavings)}
                           </p>
                         )}
                         {!isYearly && (
                           <p className="mt-2 text-sm text-neutral-500">
-                            Ou {formatPrice(currentIsPro ? PRO_YEARLY : ESSENTIAL_YEARLY)}
+                            Ou {formatCurrencyBRL(currentIsPro ? PRO_YEARLY : ESSENTIAL_YEARLY)}
                             /ano (2 meses grátis)
                           </p>
                         )}
@@ -437,7 +434,11 @@ export const PlansPage: React.FC = () => {
                               : 'border border-white/15 bg-white/5 text-white hover:bg-white/10'
                         }`}
                       >
-                        {isCurrent ? 'Assinado' : user ? 'Pagar com PIX ou cartão' : trialCampaign.cta}
+                        {isCurrent
+                          ? 'Assinado'
+                          : user
+                            ? 'Pagar com PIX ou cartão'
+                            : trialCampaign.cta}
                         {!isCurrent && (
                           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                         )}
@@ -478,33 +479,33 @@ export const PlansPage: React.FC = () => {
 
             <div className="overflow-hidden rounded-4xl border border-white/10 bg-surface">
               <div className="overflow-x-auto">
-              <div className="grid grid-cols-[1.5fr_0.75fr_0.75fr] border-b border-white/8 px-5 py-4 text-[10px] font-black uppercase tracking-wider text-neutral-500 md:px-8 md:text-xs">
-                <span>Recurso</span>
-                <span className="text-center">Essencial</span>
-                <span className="text-center text-accent-light">Pro</span>
-              </div>
-              {matrix.map(row => (
-                <div
-                  key={row.label}
-                  className="grid grid-cols-[1.5fr_0.75fr_0.75fr] items-center border-b border-white/6 px-5 py-4 last:border-b-0 md:px-8"
-                >
-                  <span className="text-sm font-semibold text-neutral-200">{row.label}</span>
-                  <span className="flex justify-center">
-                    {row.essential ? (
-                      <CheckCircle2 className="h-5 w-5 text-neutral-400" />
-                    ) : (
-                      <X className="h-5 w-5 text-neutral-700" />
-                    )}
-                  </span>
-                  <span className="flex justify-center">
-                    {row.pro ? (
-                      <CheckCircle2 className="h-5 w-5 text-accent" />
-                    ) : (
-                      <X className="h-5 w-5 text-neutral-700" />
-                    )}
-                  </span>
+                <div className="grid grid-cols-[1.5fr_0.75fr_0.75fr] border-b border-white/8 px-5 py-4 text-[10px] font-black uppercase tracking-wider text-neutral-500 md:px-8 md:text-xs">
+                  <span>Recurso</span>
+                  <span className="text-center">Essencial</span>
+                  <span className="text-center text-accent-light">Pro</span>
                 </div>
-              ))}
+                {matrix.map(row => (
+                  <div
+                    key={row.label}
+                    className="grid grid-cols-[1.5fr_0.75fr_0.75fr] items-center border-b border-white/6 px-5 py-4 last:border-b-0 md:px-8"
+                  >
+                    <span className="text-sm font-semibold text-neutral-200">{row.label}</span>
+                    <span className="flex justify-center">
+                      {row.essential ? (
+                        <CheckCircle2 className="h-5 w-5 text-neutral-400" />
+                      ) : (
+                        <X className="h-5 w-5 text-neutral-700" />
+                      )}
+                    </span>
+                    <span className="flex justify-center">
+                      {row.pro ? (
+                        <CheckCircle2 className="h-5 w-5 text-accent" />
+                      ) : (
+                        <X className="h-5 w-5 text-neutral-700" />
+                      )}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -535,7 +536,6 @@ export const PlansPage: React.FC = () => {
             </div>
           </div>
         </section>
-
       </main>
 
       <MarketingFooter />

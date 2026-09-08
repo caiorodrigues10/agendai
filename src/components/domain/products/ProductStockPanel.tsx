@@ -1,9 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { productsApi, type InventoryReceipt, type Product, type Supplier } from '../../../infra/productsApi';
 import { SmartSelect } from '../../ui/SmartSelect';
+import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_GRID } from '../../ui/Field';
 import { getErrorMessage } from '../../../utils/errorMessage';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { MOVEMENT_LABEL, productMoney } from './productMoney';
+import { StockReceiptSchema, StockReceiptFormData, StockAdjustmentSchema, StockAdjustmentFormData } from '../../../schemas';
 
 interface Props {
   loadError: string | null;
@@ -17,9 +21,32 @@ export const ProductStockPanel: React.FC<Props> = ({ loadError, onNotify, onRelo
   const [movements, setMovements] = useState<Awaited<ReturnType<typeof productsApi.listMovements>>['data']>([]);
   const [receipts, setReceipts] = useState<InventoryReceipt[]>([]);
   const [supplierId, setSupplierId] = useState('');
+  const [adjProductId, setAdjProductId] = useState('');
   const [newSupplier, setNewSupplier] = useState('');
   const [reverseReceipt, setReverseReceipt] = useState<InventoryReceipt | null>(null);
   const [reverseReason, setReverseReason] = useState('');
+
+  const {
+    register: registerReceipt,
+    handleSubmit: handleReceiptSubmit,
+    control: receiptControl,
+    formState: { errors: receiptErrors },
+    reset: resetReceipt,
+  } = useForm<StockReceiptFormData>({
+    resolver: zodResolver(StockReceiptSchema),
+    defaultValues: { productId: '', quantity: 1, unitCost: 0, supplierId: '' },
+  });
+
+  const {
+    register: registerAdj,
+    handleSubmit: handleAdjSubmit,
+    control: adjControl,
+    formState: { errors: adjErrors },
+    reset: resetAdj,
+  } = useForm<StockAdjustmentFormData>({
+    resolver: zodResolver(StockAdjustmentSchema),
+    defaultValues: { productId: '', quantity: 0, type: 'MANUAL_ADJUSTMENT', reason: '' },
+  });
 
   const load = useCallback(async () => {
     try {
@@ -33,6 +60,9 @@ export const ProductStockPanel: React.FC<Props> = ({ loadError, onNotify, onRelo
       setSuppliers(sups);
       setMovements(mov.data);
       setReceipts(rec.data);
+      if (list.data.length) {
+        setAdjProductId(prev => prev || list.data[0].id);
+      }
     } catch (err) {
       onNotify?.(getErrorMessage(err, 'Não foi possível carregar estoque.'), 'error');
     }
@@ -41,6 +71,8 @@ export const ProductStockPanel: React.FC<Props> = ({ loadError, onNotify, onRelo
   useEffect(() => { void load(); }, [load]);
 
   if (loadError) return <p className="text-sm text-danger">{loadError}</p>;
+
+  const productOptions = products.map(p => ({ value: p.id, label: p.name }));
 
   const addSupplier = async () => {
     if (!newSupplier.trim()) return;
@@ -55,86 +87,134 @@ export const ProductStockPanel: React.FC<Props> = ({ loadError, onNotify, onRelo
     }
   };
 
+  const onReceiptSubmit = async (data: StockReceiptFormData) => {
+    try {
+      await productsApi.createReceipt({
+        items: [{ productId: data.productId, quantity: data.quantity, unitCost: data.unitCost }],
+        supplierId: data.supplierId || null,
+        createExpense: true,
+      });
+      onNotify?.('Compra registrada e estoque atualizado.', 'success');
+      resetReceipt({ productId: products[0]?.id ?? '', quantity: 1, unitCost: 0, supplierId: '' });
+      await load();
+      onReload();
+    } catch (err) {
+      onNotify?.(getErrorMessage(err, 'Não foi possível registrar a compra.'), 'error');
+    }
+  };
+
+  const onAdjSubmit = async (data: StockAdjustmentFormData) => {
+    try {
+      await productsApi.adjustStock({ productId: data.productId, quantity: data.quantity, reason: data.reason, type: data.type });
+      onNotify?.('Estoque ajustado.', 'success');
+      resetAdj({ productId: products[0]?.id ?? '', quantity: 0, type: 'MANUAL_ADJUSTMENT', reason: '' });
+      await load();
+      onReload();
+    } catch (err) {
+      onNotify?.(getErrorMessage(err, 'Não foi possível ajustar o estoque.'), 'error');
+    }
+  };
+
   return (
     <div className="space-y-4">
       <form
-        className="space-y-2 rounded-xl border border-border bg-surface p-4"
-        onSubmit={async e => {
-          e.preventDefault();
-          const form = e.currentTarget;
-          const productId = (form.elements.namedItem('productId') as HTMLSelectElement).value;
-          const quantity = Number((form.elements.namedItem('quantity') as HTMLInputElement).value);
-          const unitCost = Number((form.elements.namedItem('unitCost') as HTMLInputElement).value);
-          try {
-            await productsApi.createReceipt({
-              items: [{ productId, quantity, unitCost }],
-              supplierId: supplierId || null,
-              createExpense: true,
-            });
-            onNotify?.('Compra registrada e estoque atualizado.', 'success');
-            await load();
-            onReload();
-            form.reset();
-          } catch (err) {
-            onNotify?.(getErrorMessage(err, 'Não foi possível registrar a compra.'), 'error');
-          }
-        }}
+        onSubmit={handleReceiptSubmit(onReceiptSubmit)}
+        className="space-y-4 rounded-xl border border-border bg-surface p-4"
       >
         <p className="font-bold text-text-primary">Entrada de mercadoria</p>
-        <select name="productId" required className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text-primary">
-          {products.map(product => <option key={product.id} value={product.id}>{product.name}</option>)}
-        </select>
-        <div className="grid grid-cols-2 gap-2">
-          <input name="quantity" type="number" min={0.01} step="0.01" required placeholder="Qtd" className="rounded-lg border border-border bg-bg px-3 py-2 text-sm" />
-          <input name="unitCost" type="number" min={0} step="0.01" required placeholder="Custo unitário" className="rounded-lg border border-border bg-bg px-3 py-2 text-sm" />
+        <Controller
+          control={receiptControl}
+          name="productId"
+          render={({ field, fieldState }) => (
+            <SmartSelect
+              label="Produto"
+              value={field.value || null}
+              onChange={value => field.onChange(value ?? '')}
+              error={fieldState.error?.message}
+              options={productOptions}
+              searchable="auto"
+            />
+          )}
+        />
+        <div className={FORM_GRID}>
+          <Field label="Quantidade" error={receiptErrors.quantity?.message}>
+            <input type="number" min={0.01} step="0.01" placeholder="0" className={receiptErrors.quantity ? FIELD_CONTROL_ERROR : FIELD_CONTROL} {...registerReceipt('quantity')} />
+          </Field>
+          <Field label="Custo unitário (R$)" error={receiptErrors.unitCost?.message}>
+            <input type="number" min={0} step="0.01" placeholder="0,00" className={receiptErrors.unitCost ? FIELD_CONTROL_ERROR : FIELD_CONTROL} {...registerReceipt('unitCost')} />
+          </Field>
         </div>
-        <SmartSelect
-          label="Fornecedor"
-          value={supplierId || null}
-          onChange={value => setSupplierId(value ?? '')}
-          options={[{ value: '', label: 'Sem fornecedor' }, ...suppliers.map(s => ({ value: s.id, label: s.name }))]}
-          searchable="auto"
+        <Controller
+          control={receiptControl}
+          name="supplierId"
+          render={({ field }) => (
+            <SmartSelect
+              label="Fornecedor"
+              value={field.value || null}
+              onChange={value => field.onChange(value ?? '')}
+              options={[{ value: '', label: 'Sem fornecedor' }, ...suppliers.map(s => ({ value: s.id, label: s.name }))]}
+              searchable="auto"
+            />
+          )}
         />
         <div className="flex gap-2">
-          <input value={newSupplier} onChange={e => setNewSupplier(e.target.value)} placeholder="Novo fornecedor" className="flex-1 rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text-primary" />
-          <button type="button" onClick={() => void addSupplier()} className="rounded-lg border border-border px-3 text-xs font-bold text-text-secondary">Adicionar</button>
+          <input
+            value={newSupplier}
+            onChange={e => setNewSupplier(e.target.value)}
+            placeholder="Novo fornecedor"
+            className={`${FIELD_CONTROL} flex-1`}
+          />
+          <button type="button" onClick={() => void addSupplier()} className="min-h-11 shrink-0 rounded-lg border border-border px-3 text-xs font-bold text-text-secondary">
+            Adicionar
+          </button>
         </div>
-        <button type="submit" className="rounded-xl bg-accent px-4 py-2 text-sm font-bold text-accent-fg">Confirmar compra</button>
+        <button type="submit" className="min-h-11 w-full rounded-xl bg-accent px-4 py-2 text-sm font-bold text-accent-fg">
+          Confirmar compra
+        </button>
       </form>
 
       <form
-        className="space-y-2 rounded-xl border border-border bg-surface p-4"
-        onSubmit={async e => {
-          e.preventDefault();
-          const form = e.currentTarget;
-          const productId = (form.elements.namedItem('adjProductId') as HTMLSelectElement).value;
-          const quantity = Number((form.elements.namedItem('adjQty') as HTMLInputElement).value);
-          const reason = (form.elements.namedItem('adjReason') as HTMLInputElement).value;
-          const type = (form.elements.namedItem('adjType') as HTMLSelectElement).value as 'MANUAL_ADJUSTMENT' | 'INTERNAL_CONSUMPTION';
-          try {
-            await productsApi.adjustStock({ productId, quantity, reason, type });
-            onNotify?.('Estoque ajustado.', 'success');
-            await load();
-            onReload();
-            form.reset();
-          } catch (err) {
-            onNotify?.(getErrorMessage(err, 'Não foi possível ajustar o estoque.'), 'error');
-          }
-        }}
+        onSubmit={handleAdjSubmit(onAdjSubmit)}
+        className="space-y-4 rounded-xl border border-border bg-surface p-4"
       >
         <p className="font-bold text-text-primary">Ajuste / consumo interno</p>
-        <select name="adjProductId" required className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text-primary">
-          {products.map(product => <option key={product.id} value={product.id}>{product.name}</option>)}
-        </select>
-        <div className="grid grid-cols-2 gap-2">
-          <input name="adjQty" type="number" step="0.001" required placeholder="Qtd (+/-)" className="rounded-lg border border-border bg-bg px-3 py-2 text-sm" />
-          <select name="adjType" className="rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text-primary">
-            <option value="MANUAL_ADJUSTMENT">Ajuste manual</option>
-            <option value="INTERNAL_CONSUMPTION">Consumo interno</option>
-          </select>
+        <Controller
+          control={adjControl}
+          name="productId"
+          render={({ field, fieldState }) => (
+            <SmartSelect
+              label="Produto"
+              value={field.value || null}
+              onChange={value => field.onChange(value ?? '')}
+              error={fieldState.error?.message}
+              options={productOptions}
+              searchable="auto"
+            />
+          )}
+        />
+        <div className={FORM_GRID}>
+          <Field label="Quantidade" hint="Use valor negativo para saída" error={adjErrors.quantity?.message}>
+            <input type="number" step="0.001" placeholder="+/- 0" className={adjErrors.quantity ? FIELD_CONTROL_ERROR : FIELD_CONTROL} {...registerAdj('quantity')} />
+          </Field>
+          <Controller
+            control={adjControl}
+            name="type"
+            render={({ field }) => (
+              <Field label="Tipo" error={adjErrors.type?.message}>
+                <select className={FIELD_CONTROL} value={field.value} onChange={e => field.onChange(e.target.value as 'MANUAL_ADJUSTMENT' | 'INTERNAL_CONSUMPTION')}>
+                  <option value="MANUAL_ADJUSTMENT">Ajuste manual</option>
+                  <option value="INTERNAL_CONSUMPTION">Consumo interno</option>
+                </select>
+              </Field>
+            )}
+          />
         </div>
-        <input name="adjReason" required minLength={3} placeholder="Motivo" className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text-primary" />
-        <button type="submit" className="rounded-xl border border-border px-4 py-2 text-sm font-bold text-text-secondary">Aplicar ajuste</button>
+        <Field label="Motivo" error={adjErrors.reason?.message}>
+          <input placeholder="Descreva o motivo do ajuste" className={adjErrors.reason ? FIELD_CONTROL_ERROR : FIELD_CONTROL} {...registerAdj('reason')} />
+        </Field>
+        <button type="submit" className="min-h-11 w-full rounded-xl border border-border px-4 py-2 text-sm font-bold text-text-secondary">
+          Aplicar ajuste
+        </button>
       </form>
 
       <div className="rounded-xl border border-border bg-surface p-4">
@@ -193,7 +273,9 @@ export const ProductStockPanel: React.FC<Props> = ({ loadError, onNotify, onRelo
       />
       {reverseReceipt && (
         <div className="rounded-xl border border-border bg-surface p-3">
-          <input value={reverseReason} onChange={e => setReverseReason(e.target.value)} placeholder="Motivo do estorno" className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text-primary" />
+          <Field label="Motivo do estorno">
+            <input value={reverseReason} onChange={e => setReverseReason(e.target.value)} placeholder="Descreva o motivo" className={FIELD_CONTROL} />
+          </Field>
         </div>
       )}
     </div>

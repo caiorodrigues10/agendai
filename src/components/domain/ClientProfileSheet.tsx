@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   RiBox3Line,
   RiCalendarScheduleLine,
@@ -23,6 +25,7 @@ import { crmApi, CrmClientProfile } from '../../infra/crmApi';
 import { packagesApi } from '../../infra/packagesApi';
 import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_FOOTER, FORM_GRID } from '../ui/Field';
 import { buildWhatsAppUrl } from '../../utils/whatsappUtils';
 import {
   APPOINTMENT_STATUS_LABEL,
@@ -35,7 +38,7 @@ import { METRIC_LABEL } from '../../utils/metricLabels';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { BookPackageSessionsModal } from './BookPackageSessionsModal';
 import { AppointmentBookingModal } from './AppointmentBookingModal';
-import { AppointmentFormData } from '../../schemas';
+import { AppointmentFormData, ClientEditSchema, ClientEditFormData } from '../../schemas';
 import { AvailabilitySlot } from '../../utils/schedulingUtils';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -96,7 +99,6 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   const [editing, setEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ name: '', whatsapp: '', notes: '' });
   const [saving, setSaving] = useState(false);
 
   const [catalog, setCatalog] = useState<Awaited<ReturnType<typeof packagesApi.listCatalog>>>([]);
@@ -114,6 +116,16 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
     | null
   >(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors: editErrors },
+  } = useForm<ClientEditFormData>({
+    resolver: zodResolver(ClientEditSchema),
+    defaultValues: { name: '', whatsapp: '', notes: '' },
+  });
 
   const tabs = useMemo(
     () =>
@@ -184,19 +196,19 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
 
   const startEdit = () => {
     if (!detail) return;
-    setEditForm({ name: detail.name, whatsapp: detail.whatsapp, notes: detail.notes ?? '' });
+    reset({ name: detail.name, whatsapp: detail.whatsapp, notes: detail.notes ?? '' });
     setEditing(true);
   };
 
-  const handleEdit = async () => {
+  const handleEdit = async (data: ClientEditFormData) => {
     if (!detail) return;
     setSaving(true);
     setError(null);
     try {
       await clientsApi.update(detail.id, {
-        name: editForm.name.trim(),
-        whatsapp: normalizePhoneBR(editForm.whatsapp),
-        notes: editForm.notes.trim() || null,
+        name: data.name.trim(),
+        whatsapp: normalizePhoneBR(data.whatsapp),
+        notes: data.notes?.trim() || null,
       });
       setEditing(false);
       await refresh();
@@ -395,46 +407,52 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
             {tab === 'geral' && detail && (
               <div className="space-y-4">
                 {editing ? (
-                  <div className="space-y-3">
-                    <input
-                      className="w-full rounded-xl border border-border bg-bg px-4 py-3 text-sm text-text-primary"
-                      placeholder="Nome"
-                      value={editForm.name}
-                      onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
-                    />
-                    <input
-                      className="w-full rounded-xl border border-border bg-bg px-4 py-3 text-sm text-text-primary"
-                      placeholder="WhatsApp"
-                      value={editForm.whatsapp}
-                      onChange={e =>
-                        setEditForm(f => ({ ...f, whatsapp: maskPhone(e.target.value) }))
-                      }
-                    />
-                    <textarea
-                      className="w-full resize-none rounded-xl border border-border bg-bg px-4 py-3 text-sm text-text-primary"
-                      placeholder="Notas sobre o cliente"
-                      rows={3}
-                      value={editForm.notes}
-                      onChange={e => setEditForm(f => ({ ...f, notes: e.target.value }))}
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        disabled={saving}
-                        onClick={() => void handleEdit()}
-                        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-accent py-2.5 font-bold text-accent-fg disabled:opacity-50"
-                      >
-                        {saving ? 'Salvando…' : 'Salvar'}
-                      </button>
+                  <form onSubmit={handleSubmit(handleEdit)} className="space-y-4">
+                    <div className={FORM_GRID}>
+                      <Field label="Nome" error={editErrors.name?.message}>
+                        <input
+                          className={editErrors.name ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                          placeholder="Nome do cliente"
+                          {...register('name')}
+                        />
+                      </Field>
+                      <Field label="WhatsApp" error={editErrors.whatsapp?.message}>
+                        <input
+                          className={editErrors.whatsapp ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                          placeholder="(00) 00000-0000"
+                          {...register('whatsapp', {
+                            onChange: e => {
+                              e.target.value = maskPhone(e.target.value);
+                            },
+                          })}
+                        />
+                      </Field>
+                    </div>
+                    <Field label="Notas" error={editErrors.notes?.message}>
+                      <textarea
+                        className={`${editErrors.notes ? FIELD_CONTROL_ERROR : FIELD_CONTROL} resize-none`}
+                        placeholder="Observações sobre o cliente"
+                        rows={3}
+                        {...register('notes')}
+                      />
+                    </Field>
+                    <div className={FORM_FOOTER}>
                       <button
                         type="button"
                         onClick={() => setEditing(false)}
-                        className="rounded-xl border border-border px-4 py-2.5 font-bold text-text-secondary"
+                        className="min-h-11 flex-1 rounded-xl bg-surface-2 py-3 text-sm font-bold text-text-secondary"
                       >
                         Cancelar
                       </button>
+                      <button
+                        type="submit"
+                        disabled={saving}
+                        className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-accent py-3 text-sm font-bold text-accent-fg disabled:opacity-50"
+                      >
+                        {saving ? 'Salvando…' : 'Salvar'}
+                      </button>
                     </div>
-                  </div>
+                  </form>
                 ) : (
                   <>
                     <div className="flex items-start justify-between">

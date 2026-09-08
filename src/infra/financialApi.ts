@@ -1,6 +1,7 @@
 import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
 import type { ShopWeatherDay } from './barbershopApi';
+import { buildQuery } from '../utils/query';
 
 function unwrap<T>(res: unknown): T {
   if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
@@ -240,16 +241,6 @@ export interface WeatherInsights {
   };
   highlights: string[];
 }
-
-const buildQuery = (params?: Record<string, string | number | undefined>) => {
-  const qs = new URLSearchParams();
-  if (!params) return '';
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== '') qs.set(key, String(value));
-  });
-  const str = qs.toString();
-  return str ? `?${str}` : '';
-};
 
 export const financialApi = {
   getInsights: (period: InsightsPeriod = '30d') =>

@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   RiAddLine,
   RiLoader4Line,
@@ -9,6 +11,8 @@ import { SalonClient } from '../../types';
 import { clientsApi, ListMeta } from '../../infra/clientsApi';
 import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_GRID } from '../ui/Field';
+import { ClientCreateSchema, ClientCreateFormData } from '../../schemas';
 
 function clientPhoneLabel(whatsapp: string): string {
   const digits = whatsapp.replace(/\D/g, '');
@@ -35,9 +39,17 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
   const [meta, setMeta] = useState<ListMeta>({ total: 0, page: 1, limit: 15, totalPages: 1 });
 
   const [showCreate, setShowCreate] = useState(false);
-  const [name, setName] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
   const [saving, setSaving] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ClientCreateFormData>({
+    resolver: zodResolver(ClientCreateSchema),
+    defaultValues: { name: '', whatsapp: '' },
+  });
 
   const loadList = useCallback(async () => {
     setLoading(true);
@@ -58,18 +70,15 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
     return () => clearTimeout(t);
   }, [loadList, refreshSignal]);
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (name.trim().length < 2) return;
+  const handleCreate = async (data: ClientCreateFormData) => {
     setSaving(true);
     setError(null);
     try {
       const created = await clientsApi.create({
-        name: name.trim(),
-        whatsapp: normalizePhoneBR(whatsapp),
+        name: data.name.trim(),
+        whatsapp: normalizePhoneBR(data.whatsapp),
       });
-      setName('');
-      setWhatsapp('');
+      reset();
       setShowCreate(false);
       setPage(1);
       await loadList();
@@ -101,25 +110,33 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
 
       {showCreate && (
         <form
-          onSubmit={handleCreate}
-          className="space-y-3 rounded-xl border border-border bg-surface p-4"
+          onSubmit={handleSubmit(handleCreate)}
+          className="space-y-4 rounded-xl border border-border bg-surface p-4"
         >
-          <input
-            className="w-full rounded-xl border border-border bg-bg px-4 py-3 text-sm text-text-primary"
-            placeholder="Nome do cliente"
-            value={name}
-            onChange={e => setName(e.target.value)}
-          />
-          <input
-            className="w-full rounded-xl border border-border bg-bg px-4 py-3 text-sm text-text-primary"
-            placeholder="WhatsApp"
-            value={whatsapp}
-            onChange={e => setWhatsapp(maskPhone(e.target.value))}
-          />
+          <div className={FORM_GRID}>
+            <Field label="Nome" error={errors.name?.message}>
+              <input
+                className={errors.name ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                placeholder="Nome do cliente"
+                {...register('name')}
+              />
+            </Field>
+            <Field label="WhatsApp" error={errors.whatsapp?.message}>
+              <input
+                className={errors.whatsapp ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                placeholder="(00) 00000-0000"
+                {...register('whatsapp', {
+                  onChange: e => {
+                    e.target.value = maskPhone(e.target.value);
+                  },
+                })}
+              />
+            </Field>
+          </div>
           <button
             type="submit"
             disabled={saving}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent py-3 font-bold text-accent-fg disabled:opacity-50"
+            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-accent py-3 font-bold text-accent-fg disabled:opacity-50"
           >
             <RiUserAddLine size={16} /> {saving ? 'Salvando…' : 'Salvar cliente'}
           </button>

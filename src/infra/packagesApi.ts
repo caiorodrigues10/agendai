@@ -1,6 +1,7 @@
 import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
 import { ClientPackage, PackagePaymentMethod, ServicePackage } from '../types';
+import { buildQuery } from '../utils/query';
 
 function unwrap<T>(res: unknown): T {
   if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
@@ -9,16 +10,6 @@ function unwrap<T>(res: unknown): T {
 
 function token() {
   return authStorage.getAccessToken() || '';
-}
-
-function buildQuery(params?: Record<string, string | number | boolean | undefined>) {
-  const qs = new URLSearchParams();
-  if (!params) return '';
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== '') qs.set(key, String(value));
-  });
-  const str = qs.toString();
-  return str ? `?${str}` : '';
 }
 
 export const packagesApi = {

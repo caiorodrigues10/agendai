@@ -20,6 +20,7 @@ import { Avatar } from '../ui/Avatar';
 import { usersApi } from '../../infra/usersApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { ALL_PERMISSIONS, PERMISSION_LABELS } from '../../hooks/usePermissions';
+import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_FOOTER, FORM_GRID } from '../ui/Field';
 
 interface TeamManagerProps {
   staff: StaffMember[];
@@ -175,46 +176,56 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
               <RiAlertLine size={12} /> {formError}
             </div>
           )}
-          <div className="space-y-3">
-            <input
-              type="text"
-              placeholder="Nome (ex: Carlos)"
-              className={`w-full rounded border px-3 py-3 text-sm text-text-primary outline-none focus:ring-1 focus:ring-accent ${errors.name ? 'border-danger' : 'border-border bg-bg'}`}
-              {...register('name')}
-            />
-            <input
-              type="email"
-              placeholder="E-mail"
-              autoComplete="off"
-              className={`w-full rounded border px-3 py-3 text-sm text-text-primary outline-none focus:ring-1 focus:ring-accent ${errors.email ? 'border-danger' : 'border-border bg-bg'}`}
-              {...register('email')}
-            />
-            <input
-              type="text"
-              placeholder="CPF (somente números)"
-              className={`w-full rounded border px-3 py-3 text-sm text-text-primary outline-none focus:ring-1 focus:ring-accent ${errors.cpf ? 'border-danger' : 'border-border bg-bg'}`}
-              {...register('cpf')}
-            />
-            <input
-              type="password"
-              placeholder="Senha"
-              autoComplete="new-password"
-              className={`w-full rounded border px-3 py-3 text-sm text-text-primary outline-none focus:ring-1 focus:ring-accent ${errors.password ? 'border-danger' : 'border-border bg-bg'}`}
-              {...register('password')}
-            />
+          <div className="space-y-4">
+            <Field label="Nome" error={errors.name?.message}>
+              <input
+                type="text"
+                placeholder="Ex.: Carlos"
+                className={errors.name ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                {...register('name')}
+              />
+            </Field>
+            <div className={FORM_GRID}>
+              <Field label="E-mail" error={errors.email?.message}>
+                <input
+                  type="email"
+                  placeholder="email@exemplo.com"
+                  autoComplete="off"
+                  className={errors.email ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                  {...register('email')}
+                />
+              </Field>
+              <Field label="CPF" error={errors.cpf?.message}>
+                <input
+                  type="text"
+                  placeholder="Somente números"
+                  className={errors.cpf ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                  {...register('cpf')}
+                />
+              </Field>
+            </div>
+            <Field label="Senha" error={errors.password?.message}>
+              <input
+                type="password"
+                placeholder="Senha de acesso"
+                autoComplete="new-password"
+                className={errors.password ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                {...register('password')}
+              />
+            </Field>
 
-            <div className="flex gap-2">
+            <div className={FORM_FOOTER}>
               <button
                 type="button"
                 onClick={() => setIsAdding(false)}
-                className="min-h-11 flex-1 rounded bg-surface-2 py-2 text-xs text-text-secondary"
+                className="min-h-11 flex-1 rounded-xl bg-surface-2 py-3 text-sm font-bold text-text-secondary"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="min-h-11 flex-1 rounded bg-accent py-2 text-xs font-bold text-accent-fg disabled:opacity-60"
+                className="min-h-11 flex-1 rounded-xl bg-accent py-3 text-sm font-bold text-accent-fg disabled:opacity-60"
               >
                 {saving ? 'Salvando…' : 'Cadastrar'}
               </button>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { CloudRain, Loader2, Sun, Cloud, CloudSun, AlertTriangle } from 'lucide-react';
 import { financialApi, WeatherDemandPrediction } from '../../infra/financialApi';
+import { formatWeatherDayLabel } from '../../utils/weatherUtils';
 
 interface DemandAlertBannerProps {
   compact?: boolean;
@@ -11,18 +12,6 @@ function getWeatherIcon(code: number): React.ReactNode {
   if (code <= 3) return <CloudSun className="h-4 w-4 text-neutral-400" />;
   if (code >= 51) return <CloudRain className="h-4 w-4 text-blue-400" />;
   return <Cloud className="h-4 w-4 text-neutral-400" />;
-}
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + 'T12:00:00');
-  const today = new Date();
-  today.setHours(12, 0, 0, 0);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  if (d.toDateString() === today.toDateString()) return 'Hoje';
-  if (d.toDateString() === tomorrow.toDateString()) return 'Amanhã';
-  return d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
 }
 
 const RISK_STYLES: Record<string, { bg: string; border: string; text: string; icon: string }> = {
@@ -68,7 +57,7 @@ export const DemandAlertBanner: React.FC<DemandAlertBannerProps> = ({ compact = 
         <AlertTriangle className={`h-4 w-4 shrink-0 ${style.icon}`} />
         <div className="min-w-0">
           <p className={`text-xs font-bold ${style.text}`}>
-            {formatDate(tomorrow.date)}: {tomorrow.condition} — {Math.abs(tomorrow.dropPct)}% menos clientes
+            {formatWeatherDayLabel(tomorrow.date)}: {tomorrow.condition} — {Math.abs(tomorrow.dropPct)}% menos clientes
           </p>
           {!compact && (
             <p className="mt-0.5 text-[11px] text-text-muted truncate">{tomorrow.recommendation}</p>

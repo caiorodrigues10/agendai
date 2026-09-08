@@ -12,8 +12,7 @@ import {
 } from 'lucide-react';
 import { financialApi, WeatherDemandPrediction, WeatherInsights } from '../../infra/financialApi';
 import { getErrorMessage } from '../../utils/errorMessage';
-
-const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+import { formatWeatherDayLabel } from '../../utils/weatherUtils';
 
 const RISK_STYLES: Record<string, { bg: string; border: string; text: string; icon: string }> = {
   low: {
@@ -49,19 +48,6 @@ function getWeatherIcon(code: number): React.ReactNode {
   if (code >= 80 && code <= 82) return <CloudRain className="h-6 w-6 text-blue-400" />;
   if (code >= 95) return <CloudRain className="h-6 w-6 text-purple-400" />;
   return <Cloud className="h-6 w-6 text-neutral-400" />;
-}
-
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + 'T12:00:00');
-  const today = new Date();
-  today.setHours(12, 0, 0, 0);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  if (d.toDateString() === today.toDateString()) return 'Hoje';
-  if (d.toDateString() === tomorrow.toDateString()) return 'Amanhã';
-
-  return d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
 }
 
 interface WeatherForecastWidgetProps {
@@ -179,14 +165,14 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
         <div className="rounded-xl border border-border bg-surface p-3">
           <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Melhor dia</p>
           <p className="mt-1 text-sm font-bold text-emerald-400">
-            {formatDate(summary.bestDay.date)}
+            {formatWeatherDayLabel(summary.bestDay.date)}
           </p>
           <p className="text-[10px] text-text-muted">{summary.bestDay.condition}</p>
         </div>
         <div className="rounded-xl border border-border bg-surface p-3">
           <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Pior dia</p>
           <p className="mt-1 text-sm font-bold text-red-400">
-            {formatDate(summary.worstDay.date)}
+            {formatWeatherDayLabel(summary.worstDay.date)}
           </p>
           <p className="text-[10px] text-text-muted">{summary.worstDay.condition}</p>
         </div>
@@ -207,7 +193,7 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
               key={date}
               className={`rounded-xl border ${style.border} ${style.bg} p-3 text-center transition-all hover:scale-[1.02]`}
             >
-              <p className="text-[10px] font-bold text-text-muted">{formatDate(date)}</p>
+              <p className="text-[10px] font-bold text-text-muted">{formatWeatherDayLabel(date)}</p>
               <div className="my-2 flex justify-center">{getWeatherIcon(weatherCode)}</div>
               <p className="text-xs font-bold text-text-secondary">{condition}</p>
               {tempMax != null && (

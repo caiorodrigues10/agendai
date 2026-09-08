@@ -1,37 +1,23 @@
-## Diretrizes universais para IAs
+## Diretrizes para IAs — Frontend
 
-> **Contexto completo do projeto:** leia [`../../AGENTS.md`](../../AGENTS.md) na raiz do monorepo antes de qualquer tarefa (arquitetura, rotas, bugs conhecidos, o que já existe no backend).
-
+> **Manual canônico:** [`../AGENTS.md`](../AGENTS.md) e inventários em [`agents/`](./agents/).
+> Este arquivo legado **não** substitui o AGENTS.md. Em conflito, prevalece o AGENTS.md.
 
 ### Convenções de commits
-- Padrão: conventional-changelog
-- Formato: tipo(escopo): mensagem
-- Tipos recomendados: feat, fix, docs, chore, refactor, test, perf
+- Preferir conventional commits: `tipo(escopo): mensagem`
+- Tipos comuns: feat, fix, docs, chore, refactor, test, perf
 
-### Fluxo de branches (GitFlow)
-- main: releases estáveis
-- develop: integração contínua
-- feature/*: novas funcionalidades
-- bugfix/*: correções não críticas
-- hotfix/*: correções urgentes em produção
-- release/*: preparação para release
+### Qualidade
+- Rodar `typecheck`, testes e `lint` conforme o risco da mudança
+- Não há meta universal obrigatória de 80% de cobertura neste projeto
+- CSS do painel: **Tailwind v4 + tokens semânticos** (`bg-bg`, `text-text-primary`, …). Landing pode usar estilo marketing próprio. Não exigir BEM/CSS Modules.
 
-### Qualidade e testes
-- Cobertura mínima: 80% em testes unitários
-- Priorizar testes de regras de negócio, autenticação e rotas
-- Testes devem rodar em CI antes de merge
-
-### Padrão de CSS
-- BEM obrigatório em classes customizadas
-- Preferir CSS Modules quando possível
-
-### Checklist de PR
-- Lint executado
-- Testes executados
-- Build executado
-- Análise de segurança OWASP ZAP
-
-### Diretrizes de arquitetura
-- Separar UI, domain e infra
+### Arquitetura
+- Separar UI, domain e infra (`*Api.ts`)
 - Contexts com responsabilidade única
-- Evitar dependências globais e acoplamento entre features
+- Reutilizar `Field`, `SmartSelect` e demais componentes em `components/ui`
+
+### Checklist de PR (orientação)
+- `npm run docs:check` se mudou pacotes/scripts/estrutura documentada
+- Testes relevantes executados
+- Build/typecheck conforme CI

@@ -1,6 +1,7 @@
 import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
 import type { BusinessSegment } from '../types';
+import { buildQuery } from '../utils/query';
 
 function unwrap<T>(res: unknown): T {
   if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
@@ -16,19 +17,15 @@ function token() {
   return authStorage.getAccessToken() || '';
 }
 
-function buildQuery(params?: Record<string, string | number | undefined>) {
-  const qs = new URLSearchParams();
-  if (!params) return '';
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== '') qs.set(key, String(value));
-  });
-  const str = qs.toString();
-  return str ? `?${str}` : '';
-}
-
 export type ProductType = 'RETAIL' | 'CONSUMABLE' | 'BOTH';
 export type RetailPaymentMethod = 'cash' | 'pix' | 'credit_card' | 'debit_card' | 'fiado';
-export type StockMovementType = 'PURCHASE_RECEIPT' | 'SALE' | 'SALE_REFUND' | 'INTERNAL_CONSUMPTION' | 'MANUAL_ADJUSTMENT' | 'PURCHASE_REVERSAL';
+export type StockMovementType =
+  | 'PURCHASE_RECEIPT'
+  | 'SALE'
+  | 'SALE_REFUND'
+  | 'INTERNAL_CONSUMPTION'
+  | 'MANUAL_ADJUSTMENT'
+  | 'PURCHASE_REVERSAL';
 
 export interface ListMeta {
   total: number;
@@ -164,7 +161,14 @@ export interface CatalogTemplatePreview {
 }
 
 export interface ProductReports {
-  byProduct: { productId: string; name: string; quantity: number; revenue: number; cost: number; margin: number }[];
+  byProduct: {
+    productId: string;
+    name: string;
+    quantity: number;
+    revenue: number;
+    cost: number;
+    margin: number;
+  }[];
   lowStock: Product[];
   idleProducts: { id: string; name: string; stockQty: number }[];
   inventoryValue: number;
@@ -182,21 +186,58 @@ export const productsApi = {
     return { data: unwrap<Product[]>(res), meta: metaOf(res) };
   },
   createProduct: (payload: Partial<Product>) =>
-    apiClient<{ success: boolean; data: Product }>('/api/products', 'POST', payload, token()).then(res => unwrap<Product>(res)),
+    apiClient<{ success: boolean; data: Product }>('/api/products', 'POST', payload, token()).then(
+      res => unwrap<Product>(res)
+    ),
   updateProduct: (id: string, payload: Partial<Product>) =>
-    apiClient<{ success: boolean; data: Product }>(`/api/products/${id}`, 'PATCH', payload, token()).then(res => unwrap<Product>(res)),
+    apiClient<{ success: boolean; data: Product }>(
+      `/api/products/${id}`,
+      'PATCH',
+      payload,
+      token()
+    ).then(res => unwrap<Product>(res)),
   listCategories: () =>
-    apiClient<{ success: boolean; data: ProductCategory[] }>('/api/product-categories', 'GET', undefined, token()).then(res => unwrap<ProductCategory[]>(res)),
+    apiClient<{ success: boolean; data: ProductCategory[] }>(
+      '/api/product-categories',
+      'GET',
+      undefined,
+      token()
+    ).then(res => unwrap<ProductCategory[]>(res)),
   createCategory: (payload: Partial<ProductCategory>) =>
-    apiClient<{ success: boolean; data: ProductCategory }>('/api/product-categories', 'POST', payload, token()).then(res => unwrap<ProductCategory>(res)),
+    apiClient<{ success: boolean; data: ProductCategory }>(
+      '/api/product-categories',
+      'POST',
+      payload,
+      token()
+    ).then(res => unwrap<ProductCategory>(res)),
   updateCategory: (id: string, payload: Partial<ProductCategory>) =>
-    apiClient<{ success: boolean; data: ProductCategory }>(`/api/product-categories/${id}`, 'PATCH', payload, token()).then(res => unwrap<ProductCategory>(res)),
+    apiClient<{ success: boolean; data: ProductCategory }>(
+      `/api/product-categories/${id}`,
+      'PATCH',
+      payload,
+      token()
+    ).then(res => unwrap<ProductCategory>(res)),
   listSuppliers: () =>
-    apiClient<{ success: boolean; data: Supplier[] }>('/api/suppliers', 'GET', undefined, token()).then(res => unwrap<Supplier[]>(res)),
+    apiClient<{ success: boolean; data: Supplier[] }>(
+      '/api/suppliers',
+      'GET',
+      undefined,
+      token()
+    ).then(res => unwrap<Supplier[]>(res)),
   createSupplier: (payload: Partial<Supplier>) =>
-    apiClient<{ success: boolean; data: Supplier }>('/api/suppliers', 'POST', payload, token()).then(res => unwrap<Supplier>(res)),
+    apiClient<{ success: boolean; data: Supplier }>(
+      '/api/suppliers',
+      'POST',
+      payload,
+      token()
+    ).then(res => unwrap<Supplier>(res)),
   updateSupplier: (id: string, payload: Partial<Supplier>) =>
-    apiClient<{ success: boolean; data: Supplier }>(`/api/suppliers/${id}`, 'PATCH', payload, token()).then(res => unwrap<Supplier>(res)),
+    apiClient<{ success: boolean; data: Supplier }>(
+      `/api/suppliers/${id}`,
+      'PATCH',
+      payload,
+      token()
+    ).then(res => unwrap<Supplier>(res)),
   listMovements: async (params: { page?: number; limit?: number } = {}) => {
     const res = await apiClient<{ success: boolean; data: StockMovement[]; meta?: ListMeta }>(
       `/api/inventory/movements${buildQuery(params)}`,
@@ -223,11 +264,32 @@ export const productsApi = {
     createExpense?: boolean;
     skipExpenseReason?: string;
     items: { productId: string; quantity: number; unitCost: number }[];
-  }) => apiClient<{ success: boolean; data: unknown }>('/api/inventory/receipts', 'POST', payload, token()).then(res => unwrap(res)),
+  }) =>
+    apiClient<{ success: boolean; data: unknown }>(
+      '/api/inventory/receipts',
+      'POST',
+      payload,
+      token()
+    ).then(res => unwrap(res)),
   reverseReceipt: (id: string, payload: { reason: string }) =>
-    apiClient<{ success: boolean; data: unknown }>(`/api/inventory/receipts/${id}/reverse`, 'POST', payload, token()).then(res => unwrap(res)),
-  adjustStock: (payload: { productId: string; quantity: number; reason: string; type?: 'MANUAL_ADJUSTMENT' | 'INTERNAL_CONSUMPTION' }) =>
-    apiClient<{ success: boolean; data: Product }>('/api/inventory/adjustments', 'POST', payload, token()).then(res => unwrap<Product>(res)),
+    apiClient<{ success: boolean; data: unknown }>(
+      `/api/inventory/receipts/${id}/reverse`,
+      'POST',
+      payload,
+      token()
+    ).then(res => unwrap(res)),
+  adjustStock: (payload: {
+    productId: string;
+    quantity: number;
+    reason: string;
+    type?: 'MANUAL_ADJUSTMENT' | 'INTERNAL_CONSUMPTION';
+  }) =>
+    apiClient<{ success: boolean; data: Product }>(
+      '/api/inventory/adjustments',
+      'POST',
+      payload,
+      token()
+    ).then(res => unwrap<Product>(res)),
   listSales: async (params: { page?: number; limit?: number } = {}) => {
     const res = await apiClient<{ success: boolean; data: RetailSale[]; meta?: ListMeta }>(
       `/api/retail-sales${buildQuery(params)}`,
@@ -238,11 +300,34 @@ export const productsApi = {
     return { data: unwrap<RetailSale[]>(res), meta: metaOf(res) };
   },
   getSale: (id: string) =>
-    apiClient<{ success: boolean; data: RetailSale }>(`/api/retail-sales/${id}`, 'GET', undefined, token()).then(res => unwrap<RetailSale>(res)),
+    apiClient<{ success: boolean; data: RetailSale }>(
+      `/api/retail-sales/${id}`,
+      'GET',
+      undefined,
+      token()
+    ).then(res => unwrap<RetailSale>(res)),
   createSale: (payload: RetailSalePayload) =>
-    apiClient<{ success: boolean; data: RetailSale }>('/api/retail-sales', 'POST', payload, token()).then(res => unwrap<RetailSale>(res)),
-  refundSale: (id: string, payload: { reason: string; restock: boolean; refundMethod: string; items: { productId: string; quantity: number }[] }) =>
-    apiClient<{ success: boolean; data: RetailSale }>(`/api/retail-sales/${id}/refunds`, 'POST', payload, token()).then(res => unwrap<RetailSale>(res)),
+    apiClient<{ success: boolean; data: RetailSale }>(
+      '/api/retail-sales',
+      'POST',
+      payload,
+      token()
+    ).then(res => unwrap<RetailSale>(res)),
+  refundSale: (
+    id: string,
+    payload: {
+      reason: string;
+      restock: boolean;
+      refundMethod: string;
+      items: { productId: string; quantity: number }[];
+    }
+  ) =>
+    apiClient<{ success: boolean; data: RetailSale }>(
+      `/api/retail-sales/${id}/refunds`,
+      'POST',
+      payload,
+      token()
+    ).then(res => unwrap<RetailSale>(res)),
   reports: (from?: string, to?: string) =>
     apiClient<{ success: boolean; data: ProductReports }>(
       `/api/products/reports${buildQuery({ from, to })}`,
@@ -259,11 +344,14 @@ export const productsApi = {
       token()
     ).then(res => unwrap<CatalogTemplatePreview>(res));
   },
-  installTemplate: (barbershopId: string, payload: { segment?: BusinessSegment; include?: Record<string, boolean> } = {}) =>
-    apiClient<{ success: boolean; data: { alreadyInstalled: boolean; created: Record<string, number> } }>(
-      `/api/barbershops/${barbershopId}/catalog-template/install`,
-      'POST',
-      payload,
-      token()
-    ).then(res => unwrap<{ alreadyInstalled: boolean; created: Record<string, number> }>(res)),
+  installTemplate: (
+    barbershopId: string,
+    payload: { segment?: BusinessSegment; include?: Record<string, boolean> } = {}
+  ) =>
+    apiClient<{
+      success: boolean;
+      data: { alreadyInstalled: boolean; created: Record<string, number> };
+    }>(`/api/barbershops/${barbershopId}/catalog-template/install`, 'POST', payload, token()).then(
+      res => unwrap<{ alreadyInstalled: boolean; created: Record<string, number> }>(res)
+    ),
 };

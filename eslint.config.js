@@ -5,7 +5,18 @@ import jsxA11yPlugin from 'eslint-plugin-jsx-a11y';
 import prettierConfig from 'eslint-config-prettier';
 
 export default tseslint.config(
-  { ignores: ['dist/', 'node_modules/', 'graphify-out/', '*.config.js', '*.config.ts', 'coverage/', '.vite/', '*.stackdump'] },
+  {
+    ignores: [
+      'dist/',
+      'node_modules/',
+      'graphify-out/',
+      '*.config.js',
+      '*.config.ts',
+      'coverage/',
+      '.vite/',
+      '*.stackdump',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   ...tseslint.configs.stylistic,
@@ -32,6 +43,9 @@ export default tseslint.config(
       'react-hooks/exhaustive-deps': 'warn',
       'react-hooks/set-state-in-effect': 'warn',
       'react-hooks/refs': 'warn',
+      'max-lines': ['warn', { max: 500, skipBlankLines: true, skipComments: true }],
+      'max-lines-per-function': ['warn', { max: 180, skipBlankLines: true, skipComments: true }],
+      complexity: ['warn', 20],
     },
     languageOptions: {
       parserOptions: {
@@ -42,6 +56,23 @@ export default tseslint.config(
     },
     settings: {
       react: { version: '18.3' },
+    },
+  },
+  {
+    files: ['src/components/ui/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'warn',
+        {
+          patterns: [
+            {
+              group: ['../../infra/*', '../../../infra/*', '@/infra/*'],
+              message:
+                'Componentes de UI não podem depender da camada HTTP. Use uma feature ou hook de domínio.',
+            },
+          ],
+        },
+      ],
     },
   }
 );

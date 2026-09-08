@@ -97,7 +97,7 @@ export const MarketingNav: React.FC = () => {
           <button
             type="button"
             onClick={goPanel}
-            className="hidden text-xs font-bold uppercase tracking-tighter text-neutral-400 transition-colors hover:text-white md:block"
+            className="hidden text-xs font-bold uppercase tracking-tighter text-white/90 transition-colors hover:text-white md:block"
           >
             {user ? 'Ir para o painel' : 'Entrar'}
           </button>
@@ -146,7 +146,7 @@ export const MarketingNav: React.FC = () => {
           <button
             type="button"
             onClick={goPanel}
-            className="py-3 text-left transition-colors hover:text-white"
+            className="mt-2 rounded-full border border-white/30 bg-white/5 py-3 text-center text-xs font-bold uppercase tracking-tighter text-white transition-colors hover:border-white/50 hover:bg-white/10"
           >
             {user ? 'Ir para o painel' : 'Entrar'}
           </button>

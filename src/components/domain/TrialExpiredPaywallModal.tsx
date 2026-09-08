@@ -3,9 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import FocusLock from 'react-focus-lock';
 import { ArrowRight, Check, Users, X } from 'lucide-react';
 import { Plan } from '../../infra/plansApi';
-
-const formatPrice = (price: number) =>
-  price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+import { formatCurrencyBRL } from '../../utils/formatters';
 
 interface TrialExpiredPaywallModalProps {
   open: boolean;
@@ -82,7 +80,9 @@ export const TrialExpiredPaywallModal: React.FC<TrialExpiredPaywallModalProps> =
                 >
                   <h3 className="font-bold text-text-primary mb-1">{plan.name}</h3>
                   <div className="mb-3">
-                    <span className="text-xl font-bold text-accent">{formatPrice(plan.price)}</span>
+                    <span className="text-xl font-bold text-accent">
+                      {formatCurrencyBRL(plan.price)}
+                    </span>
                     <span className="text-xs text-text-muted">
                       {plan.billingCycle === 'YEARLY' ? ' /ano' : ' /mês'}
                     </span>

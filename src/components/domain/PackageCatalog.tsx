@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Pencil, Plus, Package } from 'lucide-react';
 import { Service, ServicePackage } from '../../types';
 import { packagesApi } from '../../infra/packagesApi';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_FOOTER, FORM_GRID } from '../ui/Field';
+import { SmartSelect } from '../ui/SmartSelect';
+import { PackageCatalogSchema, PackageCatalogFormData } from '../../schemas';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -11,23 +16,30 @@ interface PackageCatalogProps {
   canManage: boolean;
 }
 
-const emptyForm = {
-  name: '',
-  serviceId: '',
-  sessionCount: '5',
-  price: '',
-  validityDays: '90',
-};
-
 export const PackageCatalog: React.FC<PackageCatalogProps> = ({ services, canManage }) => {
   const [packages, setPackages] = useState<ServicePackage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
-  const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
-  const [formErrors, setFormErrors] = useState<{ name?: string; sessionCount?: string; price?: string }>({});
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm<PackageCatalogFormData>({
+    resolver: zodResolver(PackageCatalogSchema),
+    defaultValues: {
+      name: '',
+      serviceId: '',
+      sessionCount: 5,
+      price: 0,
+      validityDays: 90,
+    },
+  });
 
   const load = async () => {
     setLoading(true);
@@ -49,42 +61,31 @@ export const PackageCatalog: React.FC<PackageCatalogProps> = ({ services, canMan
   const startEdit = (pkg: ServicePackage) => {
     setEditingId(pkg.id);
     setIsAdding(false);
-    setForm({
+    reset({
       name: pkg.name,
       serviceId: pkg.serviceId,
-      sessionCount: String(pkg.sessionCount),
-      price: String(pkg.price),
-      validityDays: pkg.validityDays != null ? String(pkg.validityDays) : '',
+      sessionCount: pkg.sessionCount,
+      price: pkg.price,
+      validityDays: pkg.validityDays ?? null,
     });
   };
 
   const resetForm = () => {
     setIsAdding(false);
     setEditingId(null);
-    setForm(emptyForm);
+    reset({ name: '', serviceId: services[0]?.id ?? '', sessionCount: 5, price: 0, validityDays: 90 });
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const sessionCount = Number(form.sessionCount);
-    const price = Number(String(form.price).replace(',', '.'));
-    const validityDays = form.validityDays.trim() ? Number(form.validityDays) : null;
-    const errors: { name?: string; sessionCount?: string; price?: string } = {};
-    if (!form.name.trim()) errors.name = 'Nome é obrigatório.';
-    if (Number.isNaN(sessionCount) || sessionCount < 2) errors.sessionCount = 'Sessões deve ser ≥ 2.';
-    if (Number.isNaN(price) || price <= 0) errors.price = 'Preço deve ser um número maior que zero.';
-    setFormErrors(errors);
-    if (Object.keys(errors).length > 0) return;
-
+  const onSubmit = async (data: PackageCatalogFormData) => {
     setSaving(true);
     setError(null);
     try {
       const payload = {
-        name: form.name.trim(),
-        serviceId: form.serviceId,
-        sessionCount,
-        price,
-        validityDays,
+        name: data.name.trim(),
+        serviceId: data.serviceId,
+        sessionCount: data.sessionCount,
+        price: data.price,
+        validityDays: data.validityDays ?? null,
       };
       if (editingId) {
         await packagesApi.updateCatalog(editingId, payload);
@@ -122,7 +123,7 @@ export const PackageCatalog: React.FC<PackageCatalogProps> = ({ services, canMan
             onClick={() => {
               setIsAdding(true);
               setEditingId(null);
-              setForm({ ...emptyForm, serviceId: services[0]?.id ?? '' });
+              reset({ name: '', serviceId: services[0]?.id ?? '', sessionCount: 5, price: 0, validityDays: 90 });
             }}
             className="px-3 py-1.5 bg-accent/10 text-accent border border-accent/50 rounded-lg text-xs font-bold hover:bg-accent-hover hover:text-black transition-all flex items-center gap-1"
           >
@@ -181,76 +182,74 @@ export const PackageCatalog: React.FC<PackageCatalogProps> = ({ services, canMan
 
       {(isAdding || editingId) && canManage && (
         <form
-          onSubmit={handleSave}
-          className="mt-4 bg-surface border border-border rounded-xl p-4 space-y-3"
+          onSubmit={handleSubmit(onSubmit)}
+          className="mt-4 space-y-4 rounded-xl border border-border bg-surface p-4"
         >
-          <div>
+          <Field label="Nome" error={errors.name?.message}>
             <input
-              className={`w-full bg-bg border rounded-xl px-4 py-3 text-sm text-text-primary ${formErrors.name ? 'border-danger' : 'border-border'}`}
-              placeholder="Nome (ex.: Pacote 5 cortes)"
-              value={form.name}
-              onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+              className={errors.name ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+              placeholder="Ex.: Pacote 5 cortes"
+              {...register('name')}
             />
-            {formErrors.name && <p className="mt-1 text-[11px] text-danger">{formErrors.name}</p>}
-          </div>
-          <select
-            className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-sm text-text-primary"
-            value={form.serviceId}
-            onChange={e => setForm(f => ({ ...f, serviceId: e.target.value }))}
-          >
-            <option value="">Serviço de cada sessão</option>
-            {services.map(s => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-          <div className="grid grid-cols-3 gap-2">
-            <div>
+          </Field>
+          <Controller
+            control={control}
+            name="serviceId"
+            render={({ field, fieldState }) => (
+              <SmartSelect
+                label="Serviço de cada sessão"
+                value={field.value || null}
+                onChange={value => field.onChange(value ?? '')}
+                error={fieldState.error?.message}
+                options={[
+                  { value: '', label: 'Selecione um serviço' },
+                  ...services.map(s => ({ value: s.id, label: s.name })),
+                ]}
+                searchable="auto"
+              />
+            )}
+          />
+          <div className={FORM_GRID}>
+            <Field label="Sessões" error={errors.sessionCount?.message}>
               <input
                 type="number"
                 min={2}
-                className={`w-full bg-bg border rounded-xl px-3 py-3 text-sm text-text-primary ${formErrors.sessionCount ? 'border-danger' : 'border-border'}`}
-                placeholder="Sessões"
-                value={form.sessionCount}
-                onChange={e => setForm(f => ({ ...f, sessionCount: e.target.value }))}
+                className={errors.sessionCount ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                placeholder="5"
+                {...register('sessionCount')}
               />
-              {formErrors.sessionCount && <p className="mt-1 text-[11px] text-danger">{formErrors.sessionCount}</p>}
-            </div>
-            <div>
+            </Field>
+            <Field label="Preço (R$)" error={errors.price?.message}>
               <input
-                className={`w-full bg-bg border rounded-xl px-3 py-3 text-sm text-text-primary ${formErrors.price ? 'border-danger' : 'border-border'}`}
-                placeholder="Preço"
-                value={form.price}
-                onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
+                className={errors.price ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                placeholder="0,00"
+                {...register('price')}
               />
-              {formErrors.price && <p className="mt-1 text-[11px] text-danger">{formErrors.price}</p>}
-            </div>
-            <div>
-              <input
-                type="number"
-                min={1}
-                className="w-full bg-bg border border-border rounded-xl px-3 py-3 text-sm text-text-primary"
-                placeholder="Validade (dias)"
-                value={form.validityDays}
-                onChange={e => setForm(f => ({ ...f, validityDays: e.target.value }))}
-              />
-            </div>
+            </Field>
           </div>
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={saving}
-              className="flex-1 py-3 rounded-xl font-bold text-accent-fg bg-accent hover:bg-accent-hover disabled:opacity-50"
-            >
-              {saving ? 'Salvando…' : 'Salvar pacote'}
-            </button>
+          <Field label="Validade (dias)" hint="Deixe em branco para sem validade" error={errors.validityDays?.message}>
+            <input
+              type="number"
+              min={1}
+              className={FIELD_CONTROL}
+              placeholder="90"
+              {...register('validityDays')}
+            />
+          </Field>
+          <div className={FORM_FOOTER}>
             <button
               type="button"
               onClick={resetForm}
-              className="px-4 py-3 rounded-xl border border-border text-text-secondary"
+              className="min-h-11 flex-1 rounded-xl bg-surface-2 py-3 text-sm font-bold text-text-secondary"
             >
               Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="min-h-11 flex-1 rounded-xl bg-accent py-3 text-sm font-bold text-accent-fg hover:bg-accent-hover disabled:opacity-50"
+            >
+              {saving ? 'Salvando…' : 'Salvar pacote'}
             </button>
           </div>
         </form>

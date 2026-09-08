@@ -5,6 +5,7 @@ import { Service } from '../../types';
 import { DynamicIcon, ICON_OPTIONS } from '../ui/DynamicIcon';
 import { ServiceSchema, ServiceFormData } from '../../schemas';
 import { AlertCircle } from 'lucide-react';
+import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_FOOTER, FORM_GRID } from '../ui/Field';
 
 interface ServiceFormProps {
   initialService?: Service;
@@ -45,74 +46,50 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
         </h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-text-secondary mb-1.5">
-              Comissão do serviço (%)
-            </label>
+          <Field label="Nome do Serviço" error={errors.name?.message}>
+            <input
+              type="text"
+              className={errors.name ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+              placeholder="Ex: Corte Degrade"
+              {...register('name')}
+            />
+          </Field>
+
+          <div className={FORM_GRID}>
+            <Field label="Preço (R$)" error={errors.price?.message}>
+              <input
+                type="number"
+                step="0.01"
+                className={errors.price ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                placeholder="0.00"
+                {...register('price', { valueAsNumber: true })}
+              />
+            </Field>
+            <Field label="Tempo (min)" error={errors.avgTimeMinutes?.message}>
+              <input
+                type="number"
+                className={errors.avgTimeMinutes ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                placeholder="30"
+                {...register('avgTimeMinutes', { valueAsNumber: true })}
+              />
+            </Field>
+          </div>
+
+          <Field
+            label="Comissão do serviço (%)"
+            hint="Percentual total para distribuir entre as profissionais."
+            error={errors.commissionPercent?.message}
+          >
             <input
               type="number"
               min="0"
               max="100"
               step="0.01"
-              className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none"
+              className={errors.commissionPercent ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
               placeholder="Ex.: 40"
               {...register('commissionPercent', { valueAsNumber: true })}
             />
-            <p className="text-[11px] text-text-muted mt-1">Percentual total para distribuir entre as profissionais.</p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-text-secondary mb-1.5">
-              Nome do Serviço
-            </label>
-            <input
-              type="text"
-              className={`w-full bg-bg border rounded-lg px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all placeholder:text-text-muted ${errors.name ? 'border-danger' : 'border-border'}`}
-              placeholder="Ex: Corte Degrade"
-              {...register('name')}
-            />
-            {errors.name && (
-              <span className="text-danger text-xs flex items-center gap-1 mt-1">
-                <AlertCircle size={10} /> {errors.name.message}
-              </span>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-text-secondary mb-1.5">
-                Preço (R$)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                className={`w-full bg-bg border rounded-lg px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all placeholder:text-text-muted ${errors.price ? 'border-danger' : 'border-border'}`}
-                placeholder="0.00"
-                {...register('price', { valueAsNumber: true })}
-              />
-              {errors.price && (
-                <span className="text-danger text-xs flex items-center gap-1 mt-1">
-                  <AlertCircle size={10} /> {errors.price.message}
-                </span>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-text-secondary mb-1.5">
-                Tempo (min)
-              </label>
-              <input
-                type="number"
-                className={`w-full bg-bg border rounded-lg px-4 py-3 text-text-primary focus:ring-2 focus:ring-accent outline-none transition-all placeholder:text-text-muted ${errors.avgTimeMinutes ? 'border-danger' : 'border-border'}`}
-                placeholder="30"
-                {...register('avgTimeMinutes', { valueAsNumber: true })}
-              />
-              {errors.avgTimeMinutes && (
-                <span className="text-danger text-xs flex items-center gap-1 mt-1">
-                  <AlertCircle size={10} /> {errors.avgTimeMinutes.message}
-                </span>
-              )}
-            </div>
-          </div>
+          </Field>
 
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-2">Ícone</label>
@@ -136,17 +113,17 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4 border-t border-border mt-6">
+          <div className={FORM_FOOTER}>
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 py-3 rounded-xl font-bold text-text-secondary bg-surface-2 hover:bg-border-strong transition-colors"
+              className="min-h-11 flex-1 rounded-xl font-bold text-text-secondary bg-surface-2 hover:bg-border-strong transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 rounded-xl font-bold text-text-primary bg-accent hover:bg-accent-hover shadow-lg shadow-accent/20 transition-colors"
+              className="min-h-11 flex-1 rounded-xl font-bold text-text-primary bg-accent hover:bg-accent-hover shadow-lg shadow-accent/20 transition-colors"
             >
               Salvar
             </button>

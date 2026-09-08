@@ -2,6 +2,7 @@ import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
 import { QueueItem } from '../types';
 import { AvailabilitySlot } from '../utils/schedulingUtils';
+import { buildQuery } from '../utils/query';
 
 function unwrap<T>(res: unknown): T {
   if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
@@ -33,14 +34,6 @@ export interface QueueUpdatePayload {
   insertAt?: number;
   commissionSplits?: { professionalId: string; percentage: number }[];
   retailSale?: import('./productsApi').RetailSalePayload;
-}
-
-function buildQuery(params: Record<string, string | undefined>): string {
-  const qs = Object.entries(params)
-    .filter(([, v]) => v)
-    .map(([k, v]) => `${k}=${encodeURIComponent(v!)}`)
-    .join('&');
-  return qs ? `?${qs}` : '';
 }
 
 export const schedulingApi = {
@@ -111,11 +104,19 @@ export const schedulingApi = {
       `/api/appointments/availability${qs}`
     ).then(res => unwrap<AvailabilitySlot[]>(res));
   },
-  getAppointmentSlots: (barbershopId: string, serviceId: string, date: string, staffId?: string) => {
+  getAppointmentSlots: (
+    barbershopId: string,
+    serviceId: string,
+    date: string,
+    staffId?: string
+  ) => {
     const qs = buildQuery({ barbershopId, serviceId, date, staffId });
-    return apiClient<{ success: boolean; data: { time: string; staffId: string | null; durationMinutes: number }[] }>(
-      `/api/appointments/slots${qs}`
-    ).then(res => unwrap<{ time: string; staffId: string | null; durationMinutes: number }[]>(res));
+    return apiClient<{
+      success: boolean;
+      data: { time: string; staffId: string | null; durationMinutes: number }[];
+    }>(`/api/appointments/slots${qs}`).then(res =>
+      unwrap<{ time: string; staffId: string | null; durationMinutes: number }[]>(res)
+    );
   },
   bookAppointment: async (payload: unknown) => {
     // Backend exige staff autenticado para criar agendamento
@@ -137,27 +138,35 @@ export const schedulingApi = {
     return unwrap<unknown>(res);
   },
   exchangePublicAppointmentToken: async (token: string) => {
-    const res = await apiClient<{ success: boolean; data: { appointment: unknown; sessionToken: string } }>(
-      '/api/appointments/public/session', 'POST', { token }
-    );
+    const res = await apiClient<{
+      success: boolean;
+      data: { appointment: unknown; sessionToken: string };
+    }>('/api/appointments/public/session', 'POST', { token });
     return unwrap<{ appointment: unknown; sessionToken: string }>(res);
   },
   getPublicAppointment: async (sessionToken: string) => {
     const res = await apiClient<{ success: boolean; data: unknown }>(
-      '/api/appointments/public/manage', 'GET', undefined, sessionToken
+      '/api/appointments/public/manage',
+      'GET',
+      undefined,
+      sessionToken
     );
     return unwrap<unknown>(res);
   },
   cancelPublicAppointment: async (sessionToken: string, reason?: string) => {
     const res = await apiClient<{ success: boolean; data: unknown }>(
-      '/api/appointments/public/cancel', 'POST', { reason }, sessionToken
+      '/api/appointments/public/cancel',
+      'POST',
+      { reason },
+      sessionToken
     );
     return unwrap<unknown>(res);
   },
   reschedulePublicAppointment: async (sessionToken: string, date: string, time: string) => {
-    const res = await apiClient<{ success: boolean; data: { appointment: unknown; manageToken: string } }>(
-      '/api/appointments/public/reschedule', 'POST', { date, time }, sessionToken
-    );
+    const res = await apiClient<{
+      success: boolean;
+      data: { appointment: unknown; manageToken: string };
+    }>('/api/appointments/public/reschedule', 'POST', { date, time }, sessionToken);
     return unwrap<{ appointment: unknown; manageToken: string }>(res);
   },
   updateAppointment: async (id: string, payload: unknown) => {
@@ -176,12 +185,10 @@ export const schedulingApi = {
   },
   checkInAppointment: async (appointmentId: string) => {
     const token = authStorage.getAccessToken() || '';
-    const res = await apiClient<{ success: boolean; data: { queueItemId: string; appointmentId: string } }>(
-      `/api/appointments/${appointmentId}/check-in`,
-      'POST',
-      undefined,
-      token
-    );
+    const res = await apiClient<{
+      success: boolean;
+      data: { queueItemId: string; appointmentId: string };
+    }>(`/api/appointments/${appointmentId}/check-in`, 'POST', undefined, token);
     return unwrap<{ queueItemId: string; appointmentId: string }>(res);
   },
 };

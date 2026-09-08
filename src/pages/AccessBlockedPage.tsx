@@ -7,6 +7,7 @@ import { Plan } from '../infra/plansApi';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { Logo } from '../components/ui/Logo';
 import { BLOCK_INFO_STORAGE_KEY } from '../components/infra/AccessBlockedListener';
+import { formatCurrencyBRL } from '../utils/formatters';
 
 interface BlockInfo {
   code?: 'SUBSCRIPTION_REQUIRED' | 'CPF_BLOCKED' | string;
@@ -16,9 +17,6 @@ interface BlockInfo {
   blockedAt?: string;
   subscriptionStatus?: string;
 }
-
-const formatPrice = (price: number) =>
-  price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 const formatDate = (iso?: string) => {
   if (!iso) return null;
@@ -117,7 +115,9 @@ export const AccessBlockedPage: React.FC = () => {
               >
                 <h2 className="font-bold mb-1">{plan.name}</h2>
                 <div className="mb-3">
-                  <span className="text-2xl font-bold text-accent">{formatPrice(plan.price)}</span>
+                  <span className="text-2xl font-bold text-accent">
+                    {formatCurrencyBRL(plan.price)}
+                  </span>
                   <span className="text-xs text-text-muted"> /mês</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-text-secondary mb-3">
