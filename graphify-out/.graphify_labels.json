@@ -89,5 +89,15 @@
   "87": "audit-frontend-structure.mjs",
   "88": "PaginationBar.tsx",
   "89": "copilot-instructions.md",
-  "90": "formatWhatsapp"
+  "90": "formatWhatsapp",
+  "91": "CheckoutPage.tsx",
+  "92": "AccessBlockedPage.tsx",
+  "93": "credit-card-form.tsx",
+  "94": "ForgotPasswordPage.tsx",
+  "95": "errorMessage",
+  "96": "FeaturesPage.tsx",
+  "97": "Mapa de domínio — Frontend ↔ API",
+  "98": "ApiError",
+  "99": "PublicAppointmentManagePage.tsx",
+  "100": "goalsApi.ts"
 }

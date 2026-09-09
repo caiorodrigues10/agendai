@@ -42,6 +42,11 @@ import { QueueCapacityBanner } from '../components/domain/QueueCapacityBanner';
 import { barbershopApi } from '../infra/barbershopApi';
 import { ProductsHub } from '../components/domain/ProductsHub';
 import { productsApi } from '../infra/productsApi';
+import { CashPanel } from '../components/domain/CashPanel';
+import { LoyaltyPanel } from '../components/domain/LoyaltyPanel';
+import { GoalsPanel } from '../components/domain/GoalsPanel';
+import { EnhancedForecastPanel } from '../components/domain/EnhancedForecastPanel';
+import { RecommendationsPanel } from '../components/domain/RecommendationsPanel';
 
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -479,17 +484,26 @@ export const StaffDashboard: React.FC = () => {
             )}
 
           {activeTab === 'reports' && user && (
-            <FinancialDashboard
-              queueHistory={queue}
-              services={services}
-              currentUser={user}
-              allStaff={staff}
-              onDeleteHistoryItem={deleteHistoryItem}
-            />
+            <div className="space-y-6">
+              <FinancialDashboard
+                queueHistory={queue}
+                services={services}
+                currentUser={user}
+                allStaff={staff}
+                onDeleteHistoryItem={deleteHistoryItem}
+              />
+              <EnhancedForecastPanel />
+              <RecommendationsPanel />
+            </div>
           )}
 
           {activeTab === 'finance' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
-            <OwnerFinancialPanel />
+            <div className="space-y-6">
+              <OwnerFinancialPanel />
+              <CashPanel />
+              <LoyaltyPanel />
+              <GoalsPanel />
+            </div>
           )}
 
           {activeTab === 'posts' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
