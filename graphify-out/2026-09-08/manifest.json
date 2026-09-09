@@ -375,8 +375,8 @@
     "semantic_hash": ""
   },
   "src/pages/StaffDashboard.tsx": {
-    "mtime": 1788878231.3509426,
-    "ast_hash": "553e25d85fbce3a698571118ce311962",
+    "mtime": 1788919121.5364673,
+    "ast_hash": "566352ab64994b4df31c6351451d9916",
     "semantic_hash": ""
   },
   "src/pages/marketing/AboutPage.tsx": {
@@ -1207,6 +1207,56 @@
   "public/robots.txt": {
     "mtime": 1788911860.2249832,
     "ast_hash": "a5f6ba86bc1018e724ccdd38570fb70c",
+    "semantic_hash": ""
+  },
+  "src/components/domain/CashPanel.tsx": {
+    "mtime": 1788918998.6233644,
+    "ast_hash": "f65c1adc3ab727a57fdeb56dfdbbda1f",
+    "semantic_hash": ""
+  },
+  "src/components/domain/EnhancedForecastPanel.tsx": {
+    "mtime": 1788919001.9408536,
+    "ast_hash": "31db8b2b794ba8e9e0744cb164fb971c",
+    "semantic_hash": ""
+  },
+  "src/components/domain/GoalsPanel.tsx": {
+    "mtime": 1788919022.3662312,
+    "ast_hash": "3e194239024208fb4a34b57462b8ecc5",
+    "semantic_hash": ""
+  },
+  "src/components/domain/LoyaltyPanel.tsx": {
+    "mtime": 1788918999.6932008,
+    "ast_hash": "77df3eb591cdeccfbd55580c79418e9c",
+    "semantic_hash": ""
+  },
+  "src/components/domain/RecommendationsPanel.tsx": {
+    "mtime": 1788919002.9528556,
+    "ast_hash": "062e97a8ee8547119797aceb127582e9",
+    "semantic_hash": ""
+  },
+  "src/infra/cashApi.ts": {
+    "mtime": 1788918789.4245052,
+    "ast_hash": "473071b0e8796b701f497fe5c921be8a",
+    "semantic_hash": ""
+  },
+  "src/infra/enhancedForecastApi.ts": {
+    "mtime": 1788918798.9004033,
+    "ast_hash": "4eb271b8a08e922ee8b1d7bd094604bb",
+    "semantic_hash": ""
+  },
+  "src/infra/goalsApi.ts": {
+    "mtime": 1788918796.4936645,
+    "ast_hash": "b332e58565c8745cb5bf92e6dcb9503c",
+    "semantic_hash": ""
+  },
+  "src/infra/loyaltyApi.ts": {
+    "mtime": 1788918793.2727365,
+    "ast_hash": "c05caa222683a8aeb6b8e96db728113b",
+    "semantic_hash": ""
+  },
+  "src/infra/recommendationsApi.ts": {
+    "mtime": 1788918799.567288,
+    "ast_hash": "e7357b3be934fbb4304899a05e44cafa",
     "semantic_hash": ""
   }
 }

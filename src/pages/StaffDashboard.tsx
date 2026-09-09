@@ -47,6 +47,9 @@ import { LoyaltyPanel } from '../components/domain/LoyaltyPanel';
 import { GoalsPanel } from '../components/domain/GoalsPanel';
 import { EnhancedForecastPanel } from '../components/domain/EnhancedForecastPanel';
 import { RecommendationsPanel } from '../components/domain/RecommendationsPanel';
+import { DepositPolicyPanel } from '../components/domain/DepositPolicyPanel';
+import { WaitlistPanel } from '../components/domain/WaitlistPanel';
+import { MembershipsPanel } from '../components/domain/MembershipsPanel';
 
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -501,6 +504,9 @@ export const StaffDashboard: React.FC = () => {
             <div className="space-y-6">
               <OwnerFinancialPanel />
               <CashPanel />
+              <DepositPolicyPanel />
+              <WaitlistPanel />
+              <MembershipsPanel />
               <LoyaltyPanel />
               <GoalsPanel />
             </div>

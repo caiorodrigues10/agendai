@@ -375,8 +375,8 @@
     "semantic_hash": ""
   },
   "src/pages/StaffDashboard.tsx": {
-    "mtime": 1788919121.5364673,
-    "ast_hash": "566352ab64994b4df31c6351451d9916",
+    "mtime": 1788919907.7464488,
+    "ast_hash": "3393dd42310e7386f6d60b3a9567706a",
     "semantic_hash": ""
   },
   "src/pages/marketing/AboutPage.tsx": {
@@ -1257,6 +1257,41 @@
   "src/infra/recommendationsApi.ts": {
     "mtime": 1788918799.567288,
     "ast_hash": "e7357b3be934fbb4304899a05e44cafa",
+    "semantic_hash": ""
+  },
+  "src/components/domain/DepositIndicators.tsx": {
+    "mtime": 1788920074.3909767,
+    "ast_hash": "5075bd84ffd032f7a40774d73a86a789",
+    "semantic_hash": ""
+  },
+  "src/components/domain/DepositPolicyPanel.tsx": {
+    "mtime": 1788919817.9177256,
+    "ast_hash": "cbbcc65d9522c87980b23100f5768cca",
+    "semantic_hash": ""
+  },
+  "src/components/domain/MembershipsPanel.tsx": {
+    "mtime": 1788920070.3984191,
+    "ast_hash": "65053495ebd2d2a5a884fef61f4361e1",
+    "semantic_hash": ""
+  },
+  "src/components/domain/WaitlistPanel.tsx": {
+    "mtime": 1788919843.6866982,
+    "ast_hash": "5ed7ba15a8837998fe4c50e5c4d29f35",
+    "semantic_hash": ""
+  },
+  "src/infra/depositsApi.ts": {
+    "mtime": 1788919967.8767357,
+    "ast_hash": "be16c6926a8e4c25b6a935e6e6873098",
+    "semantic_hash": ""
+  },
+  "src/infra/membershipsApi.ts": {
+    "mtime": 1788919983.3698034,
+    "ast_hash": "21984782a5663167c0c3300ae2163312",
+    "semantic_hash": ""
+  },
+  "src/infra/waitlistApi.ts": {
+    "mtime": 1788919973.9545264,
+    "ast_hash": "0fa92fbb9ee8786933aecaa5a714ff9a",
     "semantic_hash": ""
   }
 }

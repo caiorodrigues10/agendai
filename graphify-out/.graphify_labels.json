@@ -99,5 +99,11 @@
   "97": "Mapa de domínio — Frontend ↔ API",
   "98": "ApiError",
   "99": "PublicAppointmentManagePage.tsx",
-  "100": "goalsApi.ts"
+  "100": "goalsApi.ts",
+  "101": "OperationMode",
+  "102": "AnalyticsListener.tsx",
+  "103": "commissionsApi.ts",
+  "104": "AboutPage.tsx",
+  "105": "enhancedForecastApi.ts",
+  "106": "README.md"
 }
