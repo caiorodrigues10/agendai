@@ -308,6 +308,310 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
       { to: '/cadastro', label: 'Criar conta grátis' },
     ],
   },
+  {
+    path: '/sistema-para-salao-de-beleza',
+    eyebrow: 'Salão de beleza',
+    h1: 'Sistema para salão de beleza',
+    h1Accent: 'que a cliente acessa pelo celular.',
+    description:
+      'O AgendAI é um sistema completo para salão de beleza: agenda online, fila digital, pacotes, fiado e comissão — tudo num link público que a cliente abre no navegador.',
+    metaTitle: 'Sistema para salão de beleza | AgendAI',
+    metaDescription:
+      'Sistema para salão de beleza com agenda online, fila digital, pacotes, fiado e comissão. 30 dias de Pro grátis, sem cartão.',
+    painTitle: 'Salão de beleza perde o controle no WhatsApp',
+    pains: [
+      'Cliente manda "tem vaga?" e a recepção responde no WhatsApp enquanto atende outra pessoa.',
+      'Dupla marcação acontece quando dois profissionais marcam o mesmo horário no grupo.',
+      'Pacote vendido some do controle — a cliente diz que pagou e ninguém lembra.',
+      'Comissão do mês vira discussão porque ninguém anotou quem atendeu quem.',
+    ],
+    solutionTitle: 'Como o sistema resolve no salão',
+    solutions: [
+      {
+        title: 'Link público sem login',
+        body: 'A cliente abre o link, escolhe o serviço e profissional. Horário só aparece se estiver livre.',
+      },
+      {
+        title: 'Pacotes com controle',
+        body: 'Venda de pacote com validade e consumo automático. A cliente vê as sessões restantes no link.',
+      },
+      {
+        title: 'Comissão automática',
+        body: 'Na finalização do atendimento, o sistema calcula a comissão por profissional. Sem planilha.',
+      },
+    ],
+    featuresTitle: 'Tudo que o salão de beleza precisa',
+    features: [
+      'Agenda por profissional e duração real do serviço',
+      'Pacotes de sessões com validade',
+      'Fiado com cliente identificado',
+      'Comissão na finalização do atendimento',
+      'Estoque e PDV de produtos',
+      'WhatsApp opcional para lembrete',
+    ],
+    proofTitle: 'Feito para salão, não para escritório',
+    proofBody:
+      'O AgendAI já cobre fila, agenda, clientes, financeiro e produtos. 30 dias de Pro completo, sem cartão. Essencial fica R$ 14/mês; Pro, R$ 20/mês.',
+    faqs: [
+      {
+        question: 'Precisa instalar alguma coisa?',
+        answer: 'Não. O salão cadastra no painel web. A cliente agenda pelo link no navegador. A equipe pode instalar o PWA na tela inicial.',
+      },
+      {
+        question: 'Funciona para salão feminino?',
+        answer: 'Sim. Serviços, profissionais, pacotes e fila funcionam para salão feminino, masculino ou unissex.',
+      },
+      {
+        question: 'Tem período de teste?',
+        answer: 'Sim. 30 dias de Pro completo, sem cartão. Depois escolhe Essencial ou Pro.',
+      },
+    ],
+    related: [
+      { to: '/software-para-salao-de-beleza', label: 'Software para salão' },
+      { to: '/app-para-agendamento-de-salao', label: 'Agendamento online' },
+      { to: '/planos', label: 'Ver planos' },
+    ],
+  },
+  {
+    path: '/sistema-para-manicure',
+    eyebrow: 'Manicure',
+    h1: 'Sistema para manicure',
+    h1Accent: 'que agenda sem WhatsApp.',
+    description:
+      'O AgendAI organiza a agenda da manicure com link público, lembrete automático e controle de pacotes. A cliente marca sozinha, sem ligar.',
+    metaTitle: 'Sistema para manicure | AgendAI',
+    metaDescription:
+      'Sistema para manicure com agenda online, lembrete por WhatsApp, pacotes e fiado. 30 dias grátis sem cartão.',
+    painTitle: 'Manicure perde cliente por falta de organização',
+    pains: [
+      'Cliente combina horário no WhatsApp e esquece — cadeira fica vazia.',
+      'Pacote de 10 unhas vende e ninguém anota quantas faltam.',
+      'Manicure atende amiga na frente e a cliente fiel espera mais.',
+      'Fim do mês e não sabe quantas atendeu nem quanto faturou.',
+    ],
+    solutionTitle: 'Agenda que funciona sozinha',
+    solutions: [
+      {
+        title: 'Link público com horário real',
+        body: 'A cliente escolhe o serviço e horário. Só aparece o que está livre, no fuso do salão.',
+      },
+      {
+        title: 'Lembrete automático',
+        body: 'WhatsApp avisa 24h e 1h antes. Menos falta, menos cadeira vazia.',
+      },
+      {
+        title: 'Pacotes digitais',
+        body: 'Venda pacote com validade. Cada sessão é descontada automaticamente no atendimento.',
+      },
+    ],
+    featuresTitle: 'Para manicure e studio de unhas',
+    features: [
+      'Agenda com duração real por serviço',
+      'Lembrete por WhatsApp automático',
+      'Pacotes com validade e controle',
+      'Fiado com cliente identificado',
+      'Perfil público do profissional',
+      'Funciona sem app — só link',
+    ],
+    proofTitle: 'Não é app de vitrine: é operação',
+    proofBody:
+      'O mesmo link que a cliente usa para agendar é o que a equipe usa para atender. Teste 30 dias, sem cartão.',
+    faqs: [
+      {
+        question: 'Precisa de computador?',
+        answer: 'Não. Tudo funciona no celular. A cliente agenda pelo link. A manicure opera no painel mobile.',
+      },
+      {
+        question: 'Dá para vender pacotes?',
+        answer: 'Sim. Crie pacotes com sessões e validade. O consumo é automático no atendimento.',
+      },
+    ],
+    related: [
+      { to: '/software-para-salao-de-beleza', label: 'Software para salão' },
+      { to: '/funcionalidades', label: 'Ver funcionalidades' },
+      { to: '/planos', label: 'Ver planos' },
+    ],
+  },
+  {
+    path: '/sistema-para-lash-designer',
+    eyebrow: 'Lash designer',
+    h1: 'Sistema para lash designer',
+    h1Accent: 'com agenda que respeita o tempo.',
+    description:
+      'O AgendAI agenda extensão de cílios com duração real, lembrete automático e controle de manutenção. A cliente marca sem ligar.',
+    metaTitle: 'Sistema para lash designer | AgendAI',
+    metaDescription:
+      'Sistema para lash designer com agenda online, manutenção programada, lembrete e pacotes. 30 dias grátis.',
+    painTitle: 'Lash designer perde agendamento no WhatsApp',
+    pains: [
+      'Cliente combina manutenção e não aparece — duas horas perdidas.',
+      'Horário de aplicação é longo e o WhatsApp não mostra conflito.',
+      'Manutenção atrasada da cliente e ninguém lembra de chamar.',
+      'Não sabe quantas aplicações fez no mês nem qual serviço rendeu mais.',
+    ],
+    solutionTitle: 'Agenda inteligente para lash',
+    solutions: [
+      {
+        title: 'Duração real do serviço',
+        body: 'Aplicação, manutenção e remoção têm tempos diferentes. A agenda respeita cada um.',
+      },
+      {
+        title: 'Lembrete de manutenção',
+        body: 'O sistema avisa a cliente quando está na hora da manutenção. Menos esquecimento, mais retorno.',
+      },
+      {
+        title: 'Controle de sessões',
+        body: 'Pacotes de manutenção com consumo automático. A cliente vê quantas faltam no link.',
+      },
+    ],
+    featuresTitle: 'Feito para o ritmo da lash',
+    features: [
+      'Agenda com tempos por tipo de serviço',
+      'Lembrete de manutenção automático',
+      'Pacotes de sessões com validade',
+      'Link público sem app',
+      'Financeiro por profissional',
+      'WhatsApp opcional',
+    ],
+    proofTitle: 'Operação simples, resultado completo',
+    proofBody:
+      'Agenda, clientes, financeiro e lembretes no mesmo painel. 30 dias de Pro, sem cartão.',
+    faqs: [
+      {
+        question: 'Funciona para brow designer também?',
+        answer: 'Sim. Qualquer serviço de cílios e sobrancelhas se encaixa na agenda com tempos diferenciados.',
+      },
+      {
+        question: 'Precisa baixar aplicativo?',
+        answer: 'Não. A lash designer opera no celular pelo navegador. A cliente agenda pelo link.',
+      },
+    ],
+    related: [
+      { to: '/sistema-para-manicure', label: 'Sistema para manicure' },
+      { to: '/app-para-agendamento-de-salao', label: 'Agendamento online' },
+      { to: '/planos', label: 'Ver planos' },
+    ],
+  },
+  {
+    path: '/crm-para-salao-de-beleza',
+    eyebrow: 'CRM',
+    h1: 'CRM para salão de beleza',
+    h1Accent: 'que lembra quem está sumindo.',
+    description:
+      'O AgendAI mostra última visita, frequência, valor total e risco de evasão de cada cliente. Você retoma o contato sem exportar planilha.',
+    metaTitle: 'CRM para salão de beleza | AgendAI',
+    metaDescription:
+      'CRM para salão de beleza: histórico do cliente, frequência, pacotes, fiado e retorno automático. 30 dias grátis.',
+    painTitle: 'Salão perde cliente sem perceber',
+    pains: [
+      'Cliente faz 3 meses que não volta e ninguém percebe.',
+      'Não sabe quem são os 20% que geram 80% do faturamento.',
+      'Pacote vendido esgota e a cliente não renova — sem aviso.',
+      'Dados do cliente estão no WhatsApp e no caderno, nunca num painel.',
+    ],
+    solutionTitle: 'Visão completa de cada cliente',
+    solutions: [
+      {
+        title: 'Timeline do cliente',
+        body: 'Última visita, total gasto, serviços preferidos e profissional de estimação — tudo numa tela.',
+      },
+      {
+        title: 'Alerta de evasão',
+        body: 'O sistema marca clientes que estão sem voltar. Você retoma antes de perder de vez.',
+      },
+      {
+        title: 'Integra com agenda e fila',
+        body: 'CRM não é apartado. Cada atendimento alimenta o perfil automaticamente.',
+      },
+    ],
+    featuresTitle: 'CRM que o salão realmente usa',
+    features: [
+      'Perfil do cliente com histórico completo',
+      'Alerta de clientes sumindo',
+      'Frequência e ticket médio por cliente',
+      'Pacotes e fiado vinculados ao perfil',
+      'Busca por nome ou telefone',
+      'Sem exportar planilha',
+    ],
+    proofTitle: 'Dado que estava no WhatsApp vira decisão',
+    proofBody:
+      'O CRM do AgendAI é alimentado automaticamente pela operação. 30 dias de Pro, sem cartão.',
+    faqs: [
+      {
+        question: 'Preciso cadastrar os clientes?',
+        answer: 'Não. Quem entra na fila ou agenda já cria o perfil. O histórico se constrói com o uso.',
+      },
+      {
+        question: 'Funciona para salão pequeno?',
+        answer: 'Sim. Mesmo com 2 profissionais, saber quem está sumindo faz diferença no faturamento.',
+      },
+    ],
+    related: [
+      { to: '/software-para-salao-de-beleza', label: 'Software para salão' },
+      { to: '/funcionalidades', label: 'Ver funcionalidades' },
+      { to: '/planos', label: 'Ver planos' },
+    ],
+  },
+  {
+    path: '/controle-financeiro-para-salao',
+    eyebrow: 'Financeiro',
+    h1: 'Controle financeiro para salão',
+    h1Accent: 'sem planilha e sem surpresa.',
+    description:
+      'O AgendAI mostra entradas, despesas, fiado e lucro líquido em tempo real. Você vê o resultado do dia sem abrir planilha.',
+    metaTitle: 'Controle financeiro para salão | AgendAI',
+    metaDescription:
+      'Controle financeiro para salão: entradas, despesas, fiado e lucro em tempo real. 30 dias de Pro grátis, sem cartão.',
+    painTitle: 'Salão não sabe quanto lucra de verdade',
+    pains: [
+      'Fim do mês e o dono soma Pix, dinheiro e cartão no caderno.',
+      'Despesa pequena some e o lucro parece menor do que deveria.',
+      'Fiado acumula e não tem vencimento nem cobrança organizada.',
+      'Não sabe qual serviço dá mais lucro nem qual profissional fatura mais.',
+    ],
+    solutionTitle: 'Financeiro que o dono enxerga',
+    solutions: [
+      {
+        title: 'Entradas em tempo real',
+        body: 'Cada pagamento registrado alimenta o painel. PIX, cartão, dinheiro e fiado — tudo junto.',
+      },
+      {
+        title: 'Despesas com categoria',
+        body: 'Registre aluguel, produto, equipe e fixos. O sistema subtrai e mostra o líquido.',
+      },
+      {
+        title: 'Fiado com vencimento',
+        body: 'Cliente fiado fica identificado. Vencimento, parcial e status — sem caderno.',
+      },
+    ],
+    featuresTitle: 'O que o financeiro cobre',
+    features: [
+      'Entradas por serviço e profissional',
+      'Despesas com categorias',
+      'Fiado com vencimento e pagamentos parciais',
+      'Lucro líquido do período',
+      'Relatório por dia, semana e mês',
+      'Exportação para contabilidade',
+    ],
+    proofTitle: 'O Pro mostra o que o Essencial não vê',
+    proofBody:
+      'Financeiro, despesas e fiado ficam no plano Pro. 30 dias de teste completo, sem cartão. Depois R$ 20/mês.',
+    faqs: [
+      {
+        question: 'Preciso digitar tudo manualmente?',
+        answer: 'Entradas de atendimento são automáticas. Despesas você registra — mas o painel é simples.',
+      },
+      {
+        question: 'Funciona para quem tem vários salões?',
+        answer: 'Sim. Cada salão é um mundo isolado. O dono pode ver cada um separadamente.',
+      },
+    ],
+    related: [
+      { to: '/dashboard', label: 'Dashboard' },
+      { to: '/software-para-salao-de-beleza', label: 'Software para salão' },
+      { to: '/planos', label: 'Ver planos' },
+    ],
+  },
 ];
 
 export function commercialPageByPath(path: string): CommercialPageContent | undefined {

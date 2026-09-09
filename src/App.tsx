@@ -66,9 +66,14 @@ const App: React.FC = () => {
           <Route path="/bloqueado" element={<AccessBlockedPage />} />
           <Route path="/planos" element={<PlansPage />} />
           <Route path="/software-para-salao-de-beleza" element={<CommercialIntentPage />} />
+          <Route path="/sistema-para-salao-de-beleza" element={<CommercialIntentPage />} />
           <Route path="/sistema-para-barbearia" element={<CommercialIntentPage />} />
           <Route path="/app-para-agendamento-de-salao" element={<CommercialIntentPage />} />
           <Route path="/sistema-para-fila-de-barbearia" element={<CommercialIntentPage />} />
+          <Route path="/sistema-para-manicure" element={<CommercialIntentPage />} />
+          <Route path="/sistema-para-lash-designer" element={<CommercialIntentPage />} />
+          <Route path="/crm-para-salao-de-beleza" element={<CommercialIntentPage />} />
+          <Route path="/controle-financeiro-para-salao" element={<CommercialIntentPage />} />
           <Route
             path="/checkout"
             element={

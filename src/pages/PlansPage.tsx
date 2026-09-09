@@ -7,7 +7,9 @@ import { useSubscription } from '../contexts/SubscriptionContext';
 import { useAuth } from '../contexts/AuthContext';
 import { MarketingNav } from '../components/marketing/MarketingNav';
 import { MarketingFooter } from '../components/marketing/MarketingFooter';
+import { SeoHead } from '../components/marketing/SeoHead';
 import { PricingPersuasionCharts } from '../components/marketing/PricingPersuasionCharts';
+import { softwareApplicationLd } from '../marketing/softwareApplicationLd';
 import { getErrorMessage } from '../utils/errorMessage';
 import { trialCampaign } from '../marketing/trialCampaign';
 import { isPaidSubscription, staffHomePath } from '../utils/subscriptionPaywall';
@@ -135,6 +137,12 @@ export const PlansPage: React.FC = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
+      <SeoHead
+        title="Planos e preços — Essencial e Pro | AgendAI"
+        description="Fila digital, agenda online e equipe ilimitada a partir de R$ 14/mês. 30 dias de Pro grátis, sem cartão. Anual com 2 meses grátis."
+        path="/planos"
+        jsonLd={softwareApplicationLd('/planos')}
+      />
       <div className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute -left-[15%] top-[-12%] h-[55%] w-[55%] rounded-full bg-accent/25 blur-[140px]" />
         <div className="absolute -right-[10%] top-[25%] h-[40%] w-[40%] rounded-full bg-teal-900/15 blur-[120px]" />

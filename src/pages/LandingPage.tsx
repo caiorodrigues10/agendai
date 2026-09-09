@@ -22,8 +22,10 @@ import {
 } from 'lucide-react';
 import { MarketingNav } from '../components/marketing/MarketingNav';
 import { MarketingFooter } from '../components/marketing/MarketingFooter';
+import { SeoHead } from '../components/marketing/SeoHead';
 import { FloatingPathsBackground } from '../components/ui/floating-paths';
 import { trialCampaign } from '../marketing/trialCampaign';
+import { softwareApplicationLd } from '../marketing/softwareApplicationLd';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -653,6 +655,12 @@ export const LandingPage: React.FC = () => {
       ref={pageRef}
       className="min-h-screen overflow-x-hidden bg-[#050706] font-sans text-neutral-100 selection:bg-emerald-400/30"
     >
+      <SeoHead
+        title="AgendAI — Fila, agenda e financeiro para salão e barbearia"
+        description="Fila digital com estimativa de espera, agendamento online 24h e financeiro no mesmo painel. 30 dias de Pro grátis, sem cartão."
+        path="/"
+        jsonLd={softwareApplicationLd('/')}
+      />
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
         <div
           data-ambient="one"

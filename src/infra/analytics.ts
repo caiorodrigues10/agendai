@@ -10,6 +10,7 @@ declare global {
 }
 
 type TrackParams = Record<string, string | number | boolean | undefined>;
+type MetaPixelFunction = NonNullable<Window['fbq']>;
 
 function measurementId() {
   return import.meta.env.VITE_GA_MEASUREMENT_ID?.trim() || '';
@@ -64,13 +65,13 @@ function initMetaPixel() {
   const pixelId = metaPixelId();
   if (!pixelId || window.fbq) return;
 
-  const fbq: Window['fbq'] = function fbq(...args: unknown[]) {
+  const fbq = ((...args: unknown[]) => {
     if (fbq.callMethod) {
       fbq.callMethod(...args);
     } else {
       (fbq.queue = fbq.queue || []).push(args);
     }
-  };
+  }) as MetaPixelFunction;
   fbq.queue = [];
   fbq.loaded = true;
   fbq.version = '2.0';

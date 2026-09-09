@@ -4,7 +4,9 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Calendar, CalendarCheck, CheckCircle2, Repeat, UserCheck } from 'lucide-react';
 import { MarketingNav } from '../../components/marketing/MarketingNav';
 import { MarketingFooter } from '../../components/marketing/MarketingFooter';
+import { SeoHead } from '../../components/marketing/SeoHead';
 import { trialCampaign } from '../../marketing/trialCampaign';
+import { softwareApplicationLd } from '../../marketing/softwareApplicationLd';
 
 const daySlots = [
   { time: '08:00', status: 'free' as const },
@@ -56,6 +58,12 @@ export const SchedulingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
+      <SeoHead
+        title="Agendamento online 24h — Link público sem app | AgendAI"
+        description="Cliente escolhe serviço, profissional e horário pelo link. Sem WhatsApp. Sem ligação. Sem erro. Agendamento que respeita o profissional."
+        path="/agendamento"
+        jsonLd={softwareApplicationLd('/agendamento')}
+      />
       <div className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute -left-[15%] top-[-12%] h-[55%] w-[55%] rounded-full bg-accent/25 blur-[140px]" />
         <div className="absolute -right-[10%] top-[20%] h-[45%] w-[45%] rounded-full bg-teal-900/15 blur-[130px]" />

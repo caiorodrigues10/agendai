@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { MarketingNav } from '../../components/marketing/MarketingNav';
 import { MarketingFooter } from '../../components/marketing/MarketingFooter';
+import { SeoHead } from '../../components/marketing/SeoHead';
 import { contactApi, type ContactTopic } from '../../infra/contactApi';
 import { maskPhone } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
@@ -95,6 +96,11 @@ export const ContactPage: React.FC = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
+      <SeoHead
+        title="Contato — Fale com a equipe AgendAI | AgendAI"
+        description="Planos, suporte ou parceria — envie sua mensagem e receba retorno em 1 dia útil. Sem mailto, sem caixa de spam perdida."
+        path="/contato"
+      />
       <div className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute -left-[15%] top-[-12%] h-[50%] w-[50%] rounded-full bg-accent/25 blur-[140px]" />
         <div className="absolute -right-[10%] bottom-[-10%] h-[45%] w-[45%] rounded-full bg-teal-900/15 blur-[120px]" />

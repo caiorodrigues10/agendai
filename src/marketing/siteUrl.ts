@@ -1,5 +1,5 @@
 /** Domínio canônico usado em sitemap/robots quando o env não está definido. */
-export const DEFAULT_SITE_URL = 'https://agendai.com.br';
+export const DEFAULT_SITE_URL = 'https://agendai-pcts.onrender.com';
 
 export function getPublicSiteUrl(): string {
   const fromEnv = import.meta.env.VITE_PUBLIC_SITE_URL?.replace(/\/$/, '');

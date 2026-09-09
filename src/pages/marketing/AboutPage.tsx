@@ -4,7 +4,9 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { MarketingNav } from '../../components/marketing/MarketingNav';
 import { MarketingFooter } from '../../components/marketing/MarketingFooter';
+import { SeoHead } from '../../components/marketing/SeoHead';
 import { trialCampaign } from '../../marketing/trialCampaign';
+import { softwareApplicationLd } from '../../marketing/softwareApplicationLd';
 
 const friendships = [
   {
@@ -70,6 +72,12 @@ export const AboutPage: React.FC = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
+      <SeoHead
+        title="Sobre o AgendAI — A tecnologia que protege o vínculo do salão | AgendAI"
+        description="O AgendAI nasceu para devolver tempo ao que importa: olhar no olho, fazer o serviço certo e manter a amizade que sustenta o negócio."
+        path="/sobre"
+        jsonLd={softwareApplicationLd('/sobre')}
+      />
       <div className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute -left-[18%] top-[-14%] h-[55%] w-[55%] rounded-full bg-accent/28 blur-[150px]" />
         <div className="absolute -right-[12%] top-[30%] h-[40%] w-[40%] rounded-full bg-teal-900/18 blur-[130px]" />

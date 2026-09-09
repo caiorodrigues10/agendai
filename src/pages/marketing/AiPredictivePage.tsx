@@ -24,6 +24,8 @@ import {
 } from 'lucide-react';
 import { MarketingNav } from '../../components/marketing/MarketingNav';
 import { MarketingFooter } from '../../components/marketing/MarketingFooter';
+import { SeoHead } from '../../components/marketing/SeoHead';
+import { softwareApplicationLd } from '../../marketing/softwareApplicationLd';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -406,6 +408,12 @@ export const AiPredictivePage: React.FC = () => {
       ref={pageRef}
       className="min-h-screen bg-black text-neutral-100 selection:bg-accent/30 font-sans overflow-x-hidden"
     >
+      <SeoHead
+        title="IA Preditiva — Previsão de demanda e risco de cancelamento | AgendAI"
+        description="Inteligência artificial que prevê quedas de demanda, risco de cancelamento e melhores horários para o salão. 30 dias de Pro grátis."
+        path="/ia-preditiva"
+        jsonLd={softwareApplicationLd('/ia-preditiva')}
+      />
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-accent/20 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-teal-900/10 rounded-full blur-[120px]" />

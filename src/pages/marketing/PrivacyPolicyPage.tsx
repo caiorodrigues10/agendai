@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, ShieldCheck } from 'lucide-react';
 import { MarketingNav } from '../../components/marketing/MarketingNav';
 import { MarketingFooter } from '../../components/marketing/MarketingFooter';
+import { SeoHead } from '../../components/marketing/SeoHead';
 
 const CONTACT_EMAIL = 'contato@agendai.com.br';
 
@@ -92,6 +93,11 @@ const sections = [
 export const PrivacyPolicyPage: React.FC = () => {
   return (
     <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
+      <SeoHead
+        title="Política de Privacidade — LGPD | AgendAI"
+        description="Transparência sobre como o AgendAI trata seus dados. Conformidade com a LGPD, dados isolados por salão e senhas criptografadas."
+        path="/privacidade"
+      />
       <div className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute -left-[15%] top-[-12%] h-[50%] w-[50%] rounded-full bg-accent/25 blur-[140px]" />
         <div className="absolute -right-[10%] bottom-[-10%] h-[45%] w-[45%] rounded-full bg-teal-900/15 blur-[120px]" />

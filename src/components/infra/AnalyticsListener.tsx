@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { cookieConsentStorage } from '../../utils/cookieConsentStorage';
-import { initAnalytics, trackPageView } from '../analytics';
+import { initAnalytics, trackPageView } from '../../infra/analytics';
 
 const PRIVATE_PREFIXES = ['/app', '/master', '/checkout', '/bloqueado'];
 
