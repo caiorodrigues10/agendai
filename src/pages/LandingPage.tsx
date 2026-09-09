@@ -1882,68 +1882,68 @@ export const LandingPage: React.FC = () => {
               </div>
 
               <div className="grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-                {weatherTimeline.map((d, i) => {
+                {weatherTimeline.map((d) => {
                   const Icon = d.icon;
+                  const weather = d.icon === Sun ? 'sunny' : d.icon === CloudRain ? 'rainy' : 'cloudy';
+                  const condition = weather === 'sunny' ? 'Céu aberto' : weather === 'rainy' ? 'Chuva intensa' : 'Sol entre nuvens';
                   return (
                     <div
                       key={d.day}
                       data-stagger-item
-                      className={`group relative min-w-0 rounded-2xl border p-3 text-center transition-all duration-300 sm:p-5 ${
-                        d.risk === 'high'
-                          ? 'border-red-400/30 bg-red-400/[0.06] shadow-[0_0_30px_rgba(248,113,113,0.08)]'
-                          : d.risk === 'medium'
-                            ? 'border-yellow-400/20 bg-yellow-400/[0.04]'
-                            : 'border-white/8 bg-white/[0.02]'
-                      } hover:border-white/20 hover:bg-white/[0.04]`}
+                      className={`group relative isolate min-w-0 overflow-hidden rounded-2xl border text-center transition-transform duration-300 motion-safe:hover:-translate-y-1 ${
+                        weather === 'sunny'
+                          ? 'border-amber-200/25 bg-gradient-to-b from-[#725127] via-[#302b23] to-[#141b1b]'
+                          : weather === 'rainy'
+                            ? 'border-sky-200/25 bg-gradient-to-b from-[#334b69] via-[#203449] to-[#131d2a]'
+                            : 'border-slate-200/25 bg-gradient-to-b from-[#536b7b] via-[#303f4b] to-[#182229]'
+                      }`}
                     >
+                      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-56 overflow-hidden">
+                        {weather !== 'rainy' && <div className={`absolute -right-5 top-10 h-28 w-28 rounded-full blur-2xl ${weather === 'sunny' ? 'bg-amber-200/40' : 'bg-amber-100/20'}`} />}
+                        {weather !== 'sunny' && <>
+                          <div className="absolute -left-8 top-16 h-12 w-40 rounded-full bg-white/15 blur-xl" />
+                          <div className="absolute -right-10 top-24 h-14 w-36 rounded-full bg-slate-200/15 blur-lg" />
+                        </>}
+                        {weather === 'rainy' && <div className="absolute inset-x-0 bottom-0 h-28 opacity-30" style={{ backgroundImage: 'repeating-linear-gradient(110deg, transparent 0px, transparent 17px, #bae6fd 18px, transparent 19px)', maskImage: 'linear-gradient(transparent, black, transparent)' }} />}
+                      </div>
                       {d.risk === 'high' && (
-                        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
-                          <span className="rounded-full bg-red-400/90 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-black">
+                        <div className="absolute right-2 top-3">
+                          <span className="rounded-full bg-red-300 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-red-950">
                             Alerta
                           </span>
                         </div>
                       )}
 
-                      <p className="text-xs font-bold text-neutral-500">{d.day}</p>
-                      <p className="text-[10px] text-neutral-600">{d.date}</p>
-
-                      <div className="my-4 flex justify-center">
-                        <div className={`rounded-xl p-3 ${
-                          d.risk === 'high'
-                            ? 'bg-red-400/15'
-                            : d.risk === 'medium'
-                              ? 'bg-yellow-400/10'
-                              : 'bg-emerald-400/10'
-                        }`}>
-                          <Icon className={`h-7 w-7 ${
-                            d.risk === 'high'
-                              ? 'text-red-400'
-                              : d.risk === 'medium'
-                                ? 'text-yellow-400'
-                                : 'text-emerald-400'
-                          }`} />
-                        </div>
+                      <div className="px-4 pt-5 text-left">
+                        <p className="text-sm font-bold text-white">{d.day}</p>
+                        <p className="mt-0.5 text-[11px] text-white/65">{d.date}</p>
                       </div>
 
-                      <p className="text-2xl font-black text-white">{d.temp}</p>
+                      <div className="mb-3 mt-6 flex justify-center">
+                        <Icon aria-hidden="true" strokeWidth={1.3} className={`h-14 w-14 drop-shadow-lg ${weather === 'sunny' ? 'text-amber-200' : weather === 'rainy' ? 'text-sky-200' : 'text-slate-100'}`} />
+                      </div>
 
-                      <div className="mt-3 space-y-2">
+                      <p className="text-4xl font-semibold tracking-tighter text-white">{d.temp}</p>
+                      <p className="mb-5 mt-1 text-[11px] font-medium text-white/80">{condition}</p>
+
+                      <div className="border-t border-white/10 bg-black/20 px-3 pb-4 pt-4 sm:px-4">
+                      <div className="space-y-3">
                         <div>
                           <div className="mb-1 flex justify-between text-[10px]">
-                            <span className="text-neutral-500">Chuva</span>
-                            <span className="text-neutral-400">{d.precip}</span>
+                            <span className="text-slate-300">Chuva</span>
+                            <span className="text-sky-100">{d.precip}</span>
                           </div>
                           <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
                             <div
-                              className={`h-full rounded-full ${d.barColor} transition-all duration-500`}
-                              style={{ width: d.barWidth }}
+                              className="h-full rounded-full bg-sky-300 transition-all duration-500"
+                              style={{ width: d.precip }}
                             />
                           </div>
                         </div>
 
                         <div>
                           <div className="mb-1 flex justify-between text-[10px]">
-                            <span className="text-neutral-500">Demanda</span>
+                            <span className="text-slate-300">Demanda</span>
                             <span className={`font-bold ${d.demandColor}`}>{d.demand}</span>
                           </div>
                           <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
@@ -1955,7 +1955,7 @@ export const LandingPage: React.FC = () => {
                                     ? 'bg-yellow-400'
                                     : 'bg-emerald-400'
                               } transition-all duration-500`}
-                              style={{ width: d.demand }}
+                              style={{ width: `${Math.min(parseInt(d.demand), 100)}%` }}
                             />
                           </div>
                         </div>
@@ -1966,10 +1966,11 @@ export const LandingPage: React.FC = () => {
                           ? 'text-red-400'
                           : d.risk === 'medium'
                             ? 'text-yellow-400'
-                            : 'text-emerald-400/70'
+                            : 'text-emerald-300'
                       }`}>
                         {d.label}
                       </p>
+                      </div>
                     </div>
                   );
                 })}

@@ -72,6 +72,9 @@ export const TAB_GROUPS: TabGroup[] = [
         icon: RiBankCardLine,
         roles: ['OWNER', 'MASTER_ADMIN'],
       },
+      { id: 'profit', label: 'Rentabilidade', icon: RiBarChartBoxLine, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'resources', label: 'Recursos', icon: RiStore2Line, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'gift-cards', label: 'Gift Cards', icon: RiGiftLine, roles: ['OWNER', 'MASTER_ADMIN'] },
     ],
   },
   {
@@ -82,6 +85,7 @@ export const TAB_GROUPS: TabGroup[] = [
       { id: 'showcase', label: 'Showcase', icon: RiImageLine, roles: ['OWNER', 'MASTER_ADMIN'] },
       { id: 'link', label: 'Link Público', icon: RiLinkM, roles: ['OWNER', 'MASTER_ADMIN'] },
       { id: 'referrals', label: 'Indicações', icon: RiGiftLine, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'organizations', label: 'Multiunidades', icon: RiApps2Line, roles: ['OWNER', 'MASTER_ADMIN'] },
     ],
   },
   {

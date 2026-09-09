@@ -74,6 +74,6 @@ describe('StaffNavigation', () => {
       />
     );
     await user.click(screen.getByRole('button', { name: 'Mais' }));
-    expect(screen.getByRole('button', { name: 'Produtos' })).toBeInTheDocument();
+    expect(within(screen.getByRole('dialog', { name: 'Mais opções' })).getByRole('button', { name: 'Produtos' })).toBeInTheDocument();
   });
 });

@@ -52,6 +52,10 @@ import { RecommendationsPanel } from '../components/domain/RecommendationsPanel'
 import { DepositPolicyPanel } from '../components/domain/DepositPolicyPanel';
 import { WaitlistPanel } from '../components/domain/WaitlistPanel';
 import { MembershipsPanel } from '../components/domain/MembershipsPanel';
+import { GiftCardsPanel } from '../components/domain/GiftCardsPanel';
+import { OrganizationsPanel } from '../components/domain/OrganizationsPanel';
+import { ProfitEnginePanel } from '../components/domain/ProfitEnginePanel';
+import { ResourcesPanel } from '../components/domain/ResourcesPanel';
 
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -145,7 +149,7 @@ export const StaffDashboard: React.FC = () => {
   // Re-check access including hasDashboard
   useEffect(() => {
     if (!user) return;
-    if ((activeTab === 'reports' || activeTab === 'finance' || activeTab === 'products') && !hasDashboard) {
+    if ((activeTab === 'reports' || activeTab === 'finance' || activeTab === 'products' || activeTab === 'profit' || activeTab === 'resources' || activeTab === 'gift-cards' || activeTab === 'organizations') && !hasDashboard) {
       navigate(`/app/${getDefaultTab(user.role, operationMode)}`, { replace: true });
     }
   }, [activeTab, user, hasDashboard, operationMode, navigate]);
@@ -515,6 +519,22 @@ export const StaffDashboard: React.FC = () => {
               <LoyaltyPanel />
               <GoalsPanel />
             </div>
+          )}
+
+          {activeTab === 'profit' && barbershopId && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
+            <ProfitEnginePanel barbershopId={barbershopId} />
+          )}
+
+          {activeTab === 'resources' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
+            <ResourcesPanel />
+          )}
+
+          {activeTab === 'gift-cards' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
+            <GiftCardsPanel />
+          )}
+
+          {activeTab === 'organizations' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
+            <OrganizationsPanel />
           )}
 
           {activeTab === 'posts' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
