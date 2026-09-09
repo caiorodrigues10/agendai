@@ -25,8 +25,8 @@
     "semantic_hash": ""
   },
   "src/App.tsx": {
-    "mtime": 1788921878.2969415,
-    "ast_hash": "5d7063949e1821e450534ad58ccd3795",
+    "mtime": 1788915094.9957328,
+    "ast_hash": "bac11cad609dfa0250eadfeb41ca9f82",
     "semantic_hash": ""
   },
   "src/components/domain/AddCustomerForm.tsx": {
@@ -375,8 +375,8 @@
     "semantic_hash": ""
   },
   "src/pages/StaffDashboard.tsx": {
-    "mtime": 1788921946.680072,
-    "ast_hash": "16175dcf16b6635a6cc344b5bc1a1dbe",
+    "mtime": 1788919907.7464488,
+    "ast_hash": "3393dd42310e7386f6d60b3a9567706a",
     "semantic_hash": ""
   },
   "src/pages/marketing/AboutPage.tsx": {
@@ -685,8 +685,8 @@
     "semantic_hash": ""
   },
   "src/config/tabRegistry.ts": {
-    "mtime": 1788921885.124035,
-    "ast_hash": "aa015469f93da83e0f4bd60e41b43c40",
+    "mtime": 1788402874.3813827,
+    "ast_hash": "e074edb456645d074311a807addad7f9",
     "semantic_hash": ""
   },
   "BACKLOG-TECNICO.md": {
@@ -1292,61 +1292,6 @@
   "src/infra/waitlistApi.ts": {
     "mtime": 1788919973.9545264,
     "ast_hash": "0fa92fbb9ee8786933aecaa5a714ff9a",
-    "semantic_hash": ""
-  },
-  "src/components/domain/CatalogManager.tsx": {
-    "mtime": 1788921847.1723006,
-    "ast_hash": "e7e93e5fe605c69e343f0ba801517ef1",
-    "semantic_hash": ""
-  },
-  "src/components/domain/ClientPortalDashboard.tsx": {
-    "mtime": 1788921780.8326037,
-    "ast_hash": "78621e02445aed2d05e05f3bd4d3fa02",
-    "semantic_hash": ""
-  },
-  "src/components/domain/ClientPortalLogin.tsx": {
-    "mtime": 1788921756.556297,
-    "ast_hash": "3f8b9fc0b7aa3799e8322e3ba1681fa7",
-    "semantic_hash": ""
-  },
-  "src/components/domain/ServiceBookingSelector.tsx": {
-    "mtime": 1788921859.6816785,
-    "ast_hash": "f707176b903b116fd55679c93d1984df",
-    "semantic_hash": ""
-  },
-  "src/components/domain/ShowcasePanel.tsx": {
-    "mtime": 1788921800.5454974,
-    "ast_hash": "601755075a2e8600d3811afbec78dfbd",
-    "semantic_hash": ""
-  },
-  "src/components/domain/ShowcasePublicPage.tsx": {
-    "mtime": 1788921814.9631314,
-    "ast_hash": "ff44e4c337c5d87974fc48f9ce5b0979",
-    "semantic_hash": ""
-  },
-  "src/infra/catalogApi.ts": {
-    "mtime": 1788921727.5117757,
-    "ast_hash": "f0a483b499294f15c88c7f4e77125d25",
-    "semantic_hash": ""
-  },
-  "src/infra/clientPortalApi.ts": {
-    "mtime": 1788921715.612928,
-    "ast_hash": "4ed611e8af5038f9d4fe78bfb116df7d",
-    "semantic_hash": ""
-  },
-  "src/infra/showcaseApi.ts": {
-    "mtime": 1788921721.8607426,
-    "ast_hash": "a99d291dbc777cebf291d159e1551694",
-    "semantic_hash": ""
-  },
-  "src/pages/ClientPortalPage.tsx": {
-    "mtime": 1788921864.362439,
-    "ast_hash": "e35d0f306ad460a6fa6ba9f2d2490ee8",
-    "semantic_hash": ""
-  },
-  "src/pages/ShowcasePage.tsx": {
-    "mtime": 1788921865.1321507,
-    "ast_hash": "887253c30a6bb39d581997ea252828b6",
     "semantic_hash": ""
   }
 }

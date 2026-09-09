@@ -16,6 +16,8 @@ import { OwnerFinancialPanel } from '../components/domain/OwnerFinancialPanel';
 import { OwnerSubscriptionPanel } from '../components/domain/OwnerSubscriptionPanel';
 import { OwnerReferralsPanel } from '../components/domain/OwnerReferralsPanel';
 import { PostsManager } from '../components/domain/PostsManager';
+import { ShowcasePanel } from '../components/domain/ShowcasePanel';
+import { CatalogManager } from '../components/domain/CatalogManager';
 import { ShopProfile } from '../components/domain/ShopProfile';
 import { AppointmentCalendar } from '../components/domain/AppointmentCalendar';
 import { Toast } from '../components/ui/Toast';
@@ -465,12 +467,15 @@ export const StaffDashboard: React.FC = () => {
 
           {activeTab === 'services' &&
             (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
-              <ServiceManager
-                services={services}
-                onAdd={addService}
-                onEdit={editService}
-                onDelete={deleteService}
-              />
+              <div className="space-y-6">
+                <ServiceManager
+                  services={services}
+                  onAdd={addService}
+                  onEdit={editService}
+                  onDelete={deleteService}
+                />
+                <CatalogManager />
+              </div>
             )}
 
           {activeTab === 'team' &&
@@ -514,6 +519,10 @@ export const StaffDashboard: React.FC = () => {
 
           {activeTab === 'posts' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
             <PostsManager />
+          )}
+
+          {activeTab === 'showcase' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
+            <ShowcasePanel />
           )}
 
           {activeTab === 'link' &&

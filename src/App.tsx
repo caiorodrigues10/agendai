@@ -30,6 +30,8 @@ const PlansPage = lazy(() => import('./pages/PlansPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const MasterAdminDashboard = lazy(() => import('./pages/MasterAdmin/MasterAdminDashboard'));
 const StaffDashboard = lazy(() => import('./pages/StaffDashboard'));
+const ClientPortalPage = lazy(() => import('./pages/ClientPortalPage'));
+const ShowcasePage = lazy(() => import('./pages/ShowcasePage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const CommercialIntentPage = lazy(() => import('./pages/marketing/CommercialIntentPage'));
 
@@ -107,6 +109,9 @@ const App: React.FC = () => {
             }
           />
           <Route path="/app" element={<Navigate to="/app/overview" replace />} />
+          <Route path="/minha-conta" element={<ClientPortalPage />} />
+          <Route path="/saloes/:salonId/resultados" element={<ShowcasePage />} />
+          <Route path="/saloes/:salonId/resultados/:resultId" element={<ShowcasePage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>

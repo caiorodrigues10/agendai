@@ -16,6 +16,8 @@ import {
   RiStore2Line,
   RiRocketLine,
   RiShoppingBag3Line,
+  RiImageLine,
+  RiApps2Line,
 } from 'react-icons/ri';
 import type { OperationMode } from '../types';
 
@@ -77,6 +79,7 @@ export const TAB_GROUPS: TabGroup[] = [
     label: 'Crescimento',
     tabs: [
       { id: 'posts', label: 'Posts', icon: RiMegaphoneLine, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'showcase', label: 'Showcase', icon: RiImageLine, roles: ['OWNER', 'MASTER_ADMIN'] },
       { id: 'link', label: 'Link Público', icon: RiLinkM, roles: ['OWNER', 'MASTER_ADMIN'] },
       { id: 'referrals', label: 'Indicações', icon: RiGiftLine, roles: ['OWNER', 'MASTER_ADMIN'] },
     ],
