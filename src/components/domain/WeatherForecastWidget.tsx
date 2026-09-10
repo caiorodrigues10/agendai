@@ -207,9 +207,10 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
               key={date}
               className="group relative min-h-52 overflow-hidden rounded-2xl border border-white/10 bg-bg text-left shadow-lg"
             >
-              <img src={visual.image} alt="" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/55 to-black/95" />
-              <div className="relative flex min-h-52 flex-col p-3.5">
+              <img src={visual.image} alt="" className={`weather-image weather-image--${visual.effect} absolute inset-0 h-full w-full object-cover`} />
+              <span aria-hidden="true" className={`weather-effect weather-effect--${visual.effect}`} />
+              <div className="absolute inset-0 z-[2] bg-gradient-to-b from-black/20 via-black/55 to-black/95" />
+              <div className="relative z-10 flex min-h-52 flex-col p-3.5">
               <div className="flex items-center justify-between"><p className="text-[10px] font-bold text-white/75">{formatWeatherDayLabel(date)}</p><span className={`h-2.5 w-2.5 rounded-full ${visual.glow}`} /></div>
               <div className="mt-auto">{getWeatherIcon(weatherCode)}</div>
               <p className="mt-2 min-h-8 text-xs font-bold leading-tight text-white">{condition}</p>

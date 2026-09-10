@@ -81,9 +81,10 @@ export const EnhancedForecastPanel: React.FC = () => {
                 const rainProbability = finiteNumber(day.precipProbability);
                 return (
                   <article key={day.date} className="group relative min-h-56 min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-bg shadow-lg">
-                    <img src={visual.image} alt="" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/55 to-black/95" />
-                    <div className="relative flex min-h-56 flex-col p-3.5">
+                    <img src={visual.image} alt="" className={`weather-image weather-image--${visual.effect} absolute inset-0 h-full w-full object-cover`} />
+                    <span aria-hidden="true" className={`weather-effect weather-effect--${visual.effect}`} />
+                    <div className="absolute inset-0 z-[2] bg-gradient-to-b from-black/20 via-black/55 to-black/95" />
+                    <div className="relative z-10 flex min-h-56 flex-col p-3.5">
                       <div className="flex items-start justify-between gap-2">
                         <div><p className="text-xs font-bold capitalize text-white">{label.weekday}</p><p className="text-[10px] text-white/60">{label.date}</p></div>
                         <span className={`mt-1 h-2.5 w-2.5 rounded-full shadow-[0_0_14px_currentColor] ${visual.glow}`} />
