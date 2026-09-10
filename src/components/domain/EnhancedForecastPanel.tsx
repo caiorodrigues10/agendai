@@ -3,6 +3,7 @@ import {
   AlertCircle,
   BarChart3,
   Calendar,
+  CloudSun,
   Info,
   Loader2,
   TrendingUp,
@@ -83,62 +84,98 @@ export const EnhancedForecastPanel: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-text-primary">Previsão Avançada</h2>
-          <p className="text-sm text-text-muted">Projeção de demanda para os próximos 7 dias</p>
+    <section className="overflow-hidden rounded-3xl border border-border bg-surface shadow-[0_24px_70px_-46px_rgba(0,0,0,0.9)]">
+      <div className="flex flex-col gap-4 border-b border-border bg-gradient-to-r from-accent/10 via-transparent to-transparent p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div className="flex items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-accent/20 bg-accent/10 text-accent">
+            <TrendingUp size={19} />
+          </span>
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-lg font-bold text-text-primary">Previsão de demanda</h2>
+              <span className="rounded-full border border-border bg-bg/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                Próximos 7 dias
+              </span>
+            </div>
+            <p className="mt-1 text-sm text-text-muted">
+              Tendência calculada a partir do histórico, agenda e clima.
+            </p>
+          </div>
         </div>
         <button
           type="button"
           onClick={load}
           disabled={loading}
-          className="flex h-10 items-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm font-medium text-text-secondary transition-colors hover:bg-bg hover:text-text-primary disabled:opacity-50"
+          className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-bg/70 px-4 text-sm font-semibold text-text-secondary transition-all hover:border-accent/30 hover:text-accent disabled:opacity-50"
         >
           <BarChart3 size={15} />
           Atualizar
         </button>
       </div>
 
-      {error && (
+      <div className="space-y-5 p-4 sm:p-6">
+        {error && (
         <div className="flex items-center gap-3 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
           <AlertCircle size={16} />
           <span>{error}</span>
         </div>
-      )}
+        )}
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-border bg-surface p-5 shadow-[0_18px_44px_-32px_rgba(0,0,0,0.65)]">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
-            Previsão total (7 dias)
-          </p>
-          <p className="mt-1 text-xl font-bold text-accent">{formatNumberBR(totalPredicted)}</p>
+      {loading ? (
+        <div className="flex items-center justify-center gap-3 rounded-2xl border border-border bg-bg/40 py-20 text-sm text-text-muted">
+          <Loader2 size={20} className="animate-spin text-accent" />
+          Preparando previsão...
         </div>
-        <div className="rounded-2xl border border-border bg-surface p-5 shadow-[0_18px_44px_-32px_rgba(0,0,0,0.65)]">
+      ) : forecast.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border bg-bg/40 px-6 py-14 text-center">
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/10 text-accent">
+            <CloudSun size={26} />
+          </span>
+          <h3 className="mt-4 text-base font-semibold text-text-primary">Previsão em preparação</h3>
+          <p className="mx-auto mt-1 max-w-lg text-sm leading-relaxed text-text-muted">
+            Continue usando a agenda e concluindo atendimentos. Assim que houver histórico suficiente,
+            as tendências diárias aparecerão aqui.
+          </p>
+        </div>
+      ) : (
+        <>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-bg/50 p-5">
+          <TrendingUp className="absolute -bottom-3 -right-2 text-accent/10" size={72} />
+          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            Demanda estimada
+          </p>
+          <p className="mt-2 text-2xl font-black text-accent">{formatNumberBR(totalPredicted)}</p>
+          <p className="mt-1 text-xs text-text-muted">atendimentos em 7 dias</p>
+        </div>
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-bg/50 p-5">
+          <Calendar className="absolute -bottom-3 -right-2 text-text-primary/5" size={72} />
           <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
             Média diária
           </p>
-          <p className="mt-1 text-xl font-bold text-text-primary">{formatNumberBR(avgPredicted)}</p>
+          <p className="mt-2 text-2xl font-black text-text-primary">{formatNumberBR(avgPredicted)}</p>
+          <p className="mt-1 text-xs text-text-muted">atendimentos por dia</p>
         </div>
-        <div className="col-span-2 rounded-2xl border border-border bg-surface p-5 shadow-[0_18px_44px_-32px_rgba(0,0,0,0.65)] lg:col-span-1">
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-bg/50 p-5">
+          <BarChart3 className="absolute -bottom-3 -right-2 text-text-primary/5" size={72} />
           <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
-            Maturidade do modelo
+            Confiança da análise
           </p>
-          <p className={`mt-1 text-xl font-bold ${maturity.color}`}>{maturity.label}</p>
+          <p className={`mt-2 text-2xl font-black ${maturity.color}`}>{maturity.label}</p>
+          <p className="mt-1 text-xs text-text-muted">qualidade da amostra</p>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface p-5 shadow-[0_18px_44px_-32px_rgba(0,0,0,0.65)]">
-        <h3 className="mb-4 text-sm font-semibold text-text-primary">Previsão diária</h3>
-        {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 size={24} className="animate-spin text-accent" />
+      <div className="rounded-2xl border border-border bg-bg/45 p-5">
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-bold text-text-primary">Movimento por dia</h3>
+            <p className="mt-0.5 text-xs text-text-muted">Comparativo da demanda prevista</p>
           </div>
-        ) : forecast.length === 0 ? (
-          <div className="py-12 text-center text-sm text-text-muted">
-            Sem dados de previsão disponíveis
-          </div>
-        ) : (
+          <span className="rounded-full bg-accent/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-accent">
+            estimativa
+          </span>
+        </div>
           <>
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -181,7 +218,7 @@ export const EnhancedForecastPanel: React.FC = () => {
                 return (
                   <div
                     key={f.date}
-                    className="flex flex-col items-center gap-1 rounded-xl border border-border bg-bg p-2 text-center"
+                    className="flex flex-col items-center gap-1 rounded-xl border border-border bg-surface/60 p-2.5 text-center"
                   >
                     <span className="text-[10px] font-medium text-text-muted">
                       {shortDate(f.date)}
@@ -197,11 +234,10 @@ export const EnhancedForecastPanel: React.FC = () => {
               })}
             </div>
           </>
-        )}
       </div>
 
       {uniqueFactors.length > 0 && (
-        <div className="rounded-2xl border border-border bg-surface p-5 shadow-[0_18px_44px_-32px_rgba(0,0,0,0.65)]">
+        <div className="rounded-2xl border border-border bg-bg/45 p-5">
           <div className="mb-3 flex items-center gap-2">
             <Info size={16} className="text-accent" />
             <h3 className="text-sm font-semibold text-text-primary">Fatores de influência</h3>
@@ -230,6 +266,9 @@ export const EnhancedForecastPanel: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+        </>
+      )}
+      </div>
+    </section>
   );
 };

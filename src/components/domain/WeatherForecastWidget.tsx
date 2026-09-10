@@ -13,6 +13,7 @@ import {
 import { financialApi, WeatherDemandPrediction, WeatherInsights } from '../../infra/financialApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { formatWeatherDayLabel } from '../../utils/weatherUtils';
+import { ApiError } from '../../infra/apiClient';
 
 const RISK_STYLES: Record<string, { bg: string; border: string; text: string; icon: string }> = {
   low: {
@@ -58,24 +59,31 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
   const [insights, setInsights] = useState<WeatherInsights | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [locationMissing, setLocationMissing] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    financialApi
-      .getWeatherInsights(7)
-      .then(data => {
-        if (!cancelled) {
-          setInsights(data);
-          setLoading(false);
-        }
-      })
-      .catch(err => {
+    setError(null);
+    setLocationMissing(false);
+    const load = async () => {
+      try {
+        const data = await financialApi.getWeatherInsights(7);
+        if (!cancelled) setInsights(data);
+      } catch (err) {
         if (!cancelled) {
           setError(getErrorMessage(err));
-          setLoading(false);
+          setLocationMissing(
+            err instanceof ApiError &&
+              err.statusCode === 400 &&
+              /localiza[cç][aã]o/i.test(err.message)
+          );
         }
-      });
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    void load();
     return () => { cancelled = true; };
   }, []);
 
@@ -94,7 +102,9 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
         <Cloud className="mx-auto h-8 w-8 text-text-muted" />
         <p className="mt-3 text-sm text-text-muted">{error}</p>
         <p className="mt-1 text-xs text-text-muted">
-          Configure a localização do salão em Configurações para ativar esta funcionalidade.
+          {locationMissing
+            ? 'Configure a localização do salão em Configurações para ativar esta funcionalidade.'
+            : 'A última previsão disponível será exibida assim que o serviço meteorológico responder.'}
         </p>
       </div>
     );
