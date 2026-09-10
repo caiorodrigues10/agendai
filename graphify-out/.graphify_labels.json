@@ -113,11 +113,12 @@
   "111": "CopilotPanel.tsx",
   "112": "corporateApi.ts",
   "113": "purchasingApi.ts",
-  "114": "organizationsApi.ts",
+  "114": "index.ts",
   "115": "AiPredictivePage.tsx",
   "116": "data",
-  "117": "Field.tsx",
+  "117": "LandingPage.tsx",
   "118": "ServiceBookingSelector.tsx",
-  "119": "AboutPage.tsx",
-  "120": "Mapa de domínio — Frontend ↔ API"
+  "119": "FeaturesPage.tsx",
+  "120": "Mapa de domínio — Frontend ↔ API",
+  "121": "README.md"
 }

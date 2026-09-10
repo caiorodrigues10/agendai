@@ -325,8 +325,8 @@
     "semantic_hash": ""
   },
   "src/pages/LandingPage.tsx": {
-    "mtime": 1788914979.8810709,
-    "ast_hash": "3948e572496900666f05eb654c232f03",
+    "mtime": 1788966925.7596092,
+    "ast_hash": "10a661d8534c62971fb5d456ffd99835",
     "semantic_hash": ""
   },
   "src/pages/LoginPage.test.tsx": {
@@ -375,8 +375,8 @@
     "semantic_hash": ""
   },
   "src/pages/StaffDashboard.tsx": {
-    "mtime": 1788921946.680072,
-    "ast_hash": "16175dcf16b6635a6cc344b5bc1a1dbe",
+    "mtime": 1788968616.180557,
+    "ast_hash": "209aa5c22c8e95415ef2e71e590b4555",
     "semantic_hash": ""
   },
   "src/pages/marketing/AboutPage.tsx": {
@@ -390,8 +390,8 @@
     "semantic_hash": ""
   },
   "src/pages/marketing/ContactPage.tsx": {
-    "mtime": 1788914987.374116,
-    "ast_hash": "47055fa0ba36fbbe1a07f68fc0978774",
+    "mtime": 1789046874.9765449,
+    "ast_hash": "622cedbe7f14b10b299668aede584803",
     "semantic_hash": ""
   },
   "src/pages/marketing/DashboardPage.tsx": {
@@ -685,8 +685,8 @@
     "semantic_hash": ""
   },
   "src/config/tabRegistry.ts": {
-    "mtime": 1788921885.124035,
-    "ast_hash": "aa015469f93da83e0f4bd60e41b43c40",
+    "mtime": 1788968616.1777985,
+    "ast_hash": "1627eee594191ad4ba97e482390882f3",
     "semantic_hash": ""
   },
   "BACKLOG-TECNICO.md": {
@@ -855,8 +855,8 @@
     "semantic_hash": ""
   },
   "src/components/ui/StaffNavigation.test.tsx": {
-    "mtime": 1788406648.867465,
-    "ast_hash": "29bbcede9110166c2205aed154df8b7b",
+    "mtime": 1788968616.1835563,
+    "ast_hash": "542e345a367ff4aa192c787cefc6abee",
     "semantic_hash": ""
   },
   "src/components/ui/StaffNavigation.tsx": {
@@ -1065,8 +1065,8 @@
     "semantic_hash": ""
   },
   "src/marketing/commercialPages.test.ts": {
-    "mtime": 1788898461.2558892,
-    "ast_hash": "46bef4414102816d7bea09952a1a9cf6",
+    "mtime": 1788968616.1825526,
+    "ast_hash": "bc97a0628c4955bee9cc44905e4f883f",
     "semantic_hash": ""
   },
   "src/marketing/commercialPages.ts": {
@@ -1240,8 +1240,8 @@
     "semantic_hash": ""
   },
   "src/infra/enhancedForecastApi.ts": {
-    "mtime": 1788918798.9004033,
-    "ast_hash": "4eb271b8a08e922ee8b1d7bd094604bb",
+    "mtime": 1789047236.4342113,
+    "ast_hash": "efaae5723099aa2c1938db26a0e076a3",
     "semantic_hash": ""
   },
   "src/infra/goalsApi.ts": {
@@ -1347,6 +1347,166 @@
   "src/pages/ShowcasePage.tsx": {
     "mtime": 1788921865.1321507,
     "ast_hash": "887253c30a6bb39d581997ea252828b6",
+    "semantic_hash": ""
+  },
+  "src/components/domain/CopilotPanel.tsx": {
+    "mtime": 1789046648.620109,
+    "ast_hash": "5dd0962ec4de15f78ca1ebc5a552b3eb",
+    "semantic_hash": ""
+  },
+  "src/components/domain/CorporatePanel.tsx": {
+    "mtime": 1789046712.4064927,
+    "ast_hash": "6ba4942802807daf17f3bc2148a3e46c",
+    "semantic_hash": ""
+  },
+  "src/components/domain/FormsPanel.tsx": {
+    "mtime": 1789046564.5651317,
+    "ast_hash": "5893d6c43c7e259388b762b4ed7b72ae",
+    "semantic_hash": ""
+  },
+  "src/components/domain/GiftCardsPanel.tsx": {
+    "mtime": 1788940013.2121172,
+    "ast_hash": "2c7b01dd5cbe488f7ad3f1b9e551bc5f",
+    "semantic_hash": ""
+  },
+  "src/components/domain/OrganizationsPanel.tsx": {
+    "mtime": 1788940827.6642723,
+    "ast_hash": "5dd285dd4272eef0254d60b0ed18665b",
+    "semantic_hash": ""
+  },
+  "src/components/domain/ProfitEnginePanel.tsx": {
+    "mtime": 1788940151.3194532,
+    "ast_hash": "9b277aac11cb2e3b8b30431e2b1f4262",
+    "semantic_hash": ""
+  },
+  "src/components/domain/PurchasingPanel.tsx": {
+    "mtime": 1789046634.2397873,
+    "ast_hash": "c62d5dddcdc640d27fbc1c7114f3434a",
+    "semantic_hash": ""
+  },
+  "src/components/domain/QualityPanel.tsx": {
+    "mtime": 1789046611.393232,
+    "ast_hash": "a6a159870fe08feeb3aa28f77103f5a5",
+    "semantic_hash": ""
+  },
+  "src/components/domain/ReputationPanel.tsx": {
+    "mtime": 1789046584.9686148,
+    "ast_hash": "a55bcdc0bfb258c205ce8d3a31e55395",
+    "semantic_hash": ""
+  },
+  "src/components/domain/ResourcesPanel.tsx": {
+    "mtime": 1788940484.889244,
+    "ast_hash": "1b390b16e3f092fa09ad005faa55f3b5",
+    "semantic_hash": ""
+  },
+  "src/components/domain/SmartPricingPanel.tsx": {
+    "mtime": 1789046700.3988872,
+    "ast_hash": "798bb9e7a69370d9ab843e61e1a8f332",
+    "semantic_hash": ""
+  },
+  "src/components/domain/StaffManagementPanel.tsx": {
+    "mtime": 1789046646.9652784,
+    "ast_hash": "cd8d3c91326955c613b19583f19f1f7a",
+    "semantic_hash": ""
+  },
+  "src/components/domain/VouchersPanel.tsx": {
+    "mtime": 1789046756.8028488,
+    "ast_hash": "31be230aa40a89d1acdff2cf96f16b66",
+    "semantic_hash": ""
+  },
+  "src/components/domain/WalletPanel.tsx": {
+    "mtime": 1789046687.8191948,
+    "ast_hash": "e1544f5d6df777fe921e0c40746c3b46",
+    "semantic_hash": ""
+  },
+  "src/infra/copilotApi.ts": {
+    "mtime": 1789046552.7064118,
+    "ast_hash": "192e83644f02ee0730c8bab6ae1b0f3f",
+    "semantic_hash": ""
+  },
+  "src/infra/corporateApi.ts": {
+    "mtime": 1789046563.3164334,
+    "ast_hash": "8c403b707e112ef3b6267be77a7db276",
+    "semantic_hash": ""
+  },
+  "src/infra/formsApi.ts": {
+    "mtime": 1789046525.8831477,
+    "ast_hash": "7ce7cb7337f75285ce80b358c0f5fe6d",
+    "semantic_hash": ""
+  },
+  "src/infra/giftCardsApi.ts": {
+    "mtime": 1788939687.2022443,
+    "ast_hash": "9139a7ea447fd629cfe686435c54b9a2",
+    "semantic_hash": ""
+  },
+  "src/infra/organizationsApi.ts": {
+    "mtime": 1788968721.862115,
+    "ast_hash": "b649b3b0d865aac6527aef3b35055f00",
+    "semantic_hash": ""
+  },
+  "src/infra/pricingApi.ts": {
+    "mtime": 1789046657.650764,
+    "ast_hash": "ef2a44452d014e6c480f50e3d41e25b1",
+    "semantic_hash": ""
+  },
+  "src/infra/profitApi.ts": {
+    "mtime": 1788940026.408437,
+    "ast_hash": "87581aced36db98541af46660543bd09",
+    "semantic_hash": ""
+  },
+  "src/infra/purchasingApi.ts": {
+    "mtime": 1789046547.5638483,
+    "ast_hash": "8a4d1690e5421400624da0afb33bd87f",
+    "semantic_hash": ""
+  },
+  "src/infra/qualityApi.ts": {
+    "mtime": 1789046539.6690383,
+    "ast_hash": "141b0c0e1e5b26b578b9979231bd9013",
+    "semantic_hash": ""
+  },
+  "src/infra/reputationApi.ts": {
+    "mtime": 1789046532.6387684,
+    "ast_hash": "ad8b9b9b393be2ab74a334543e253d1e",
+    "semantic_hash": ""
+  },
+  "src/infra/resourcesApi.ts": {
+    "mtime": 1788940204.660341,
+    "ast_hash": "3dab9062f24f74431103003bccc4cb53",
+    "semantic_hash": ""
+  },
+  "src/infra/staffApi.ts": {
+    "mtime": 1789046599.4353738,
+    "ast_hash": "85afe11e6e7d4a3cedb8b1e70468ff48",
+    "semantic_hash": ""
+  },
+  "src/infra/vouchersApi.ts": {
+    "mtime": 1789046712.3449018,
+    "ast_hash": "ce5715f479568d17c4cf898601c20286",
+    "semantic_hash": ""
+  },
+  "src/infra/walletApi.ts": {
+    "mtime": 1789046557.6577435,
+    "ast_hash": "37bb8c41d8ae170db418e0a64d30c0a4",
+    "semantic_hash": ""
+  },
+  "src/components/domain/FiscalPanel.tsx": {
+    "mtime": 1789049859.0036469,
+    "ast_hash": "428d7a760926ae55f877123f859a321d",
+    "semantic_hash": ""
+  },
+  "src/components/domain/WhatsAppAIPanel.tsx": {
+    "mtime": 1789050043.7109337,
+    "ast_hash": "410acaeac7bae9be0683d78d5eb258da",
+    "semantic_hash": ""
+  },
+  "src/infra/fiscalApi.ts": {
+    "mtime": 1789049836.628316,
+    "ast_hash": "0d441e14679c3de5a745595721a54c1d",
+    "semantic_hash": ""
+  },
+  "src/infra/whatsappAiApi.ts": {
+    "mtime": 1789050127.3137689,
+    "ast_hash": "d3148368b02916ccc1695f64509d28ec",
     "semantic_hash": ""
   }
 }

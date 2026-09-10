@@ -1240,8 +1240,8 @@
     "semantic_hash": ""
   },
   "src/infra/enhancedForecastApi.ts": {
-    "mtime": 1788918798.9004033,
-    "ast_hash": "4eb271b8a08e922ee8b1d7bd094604bb",
+    "mtime": 1789047236.4342113,
+    "ast_hash": "efaae5723099aa2c1938db26a0e076a3",
     "semantic_hash": ""
   },
   "src/infra/goalsApi.ts": {
@@ -1487,6 +1487,36 @@
   "src/infra/walletApi.ts": {
     "mtime": 1789046557.6577435,
     "ast_hash": "37bb8c41d8ae170db418e0a64d30c0a4",
+    "semantic_hash": ""
+  },
+  "src/components/domain/FiscalPanel.tsx": {
+    "mtime": 1789049859.0036469,
+    "ast_hash": "428d7a760926ae55f877123f859a321d",
+    "semantic_hash": ""
+  },
+  "src/components/domain/WhatsAppAIPanel.tsx": {
+    "mtime": 1789050043.7109337,
+    "ast_hash": "410acaeac7bae9be0683d78d5eb258da",
+    "semantic_hash": ""
+  },
+  "src/infra/fiscalApi.ts": {
+    "mtime": 1789049836.628316,
+    "ast_hash": "0d441e14679c3de5a745595721a54c1d",
+    "semantic_hash": ""
+  },
+  "src/infra/whatsappAiApi.ts": {
+    "mtime": 1789050127.3137689,
+    "ast_hash": "d3148368b02916ccc1695f64509d28ec",
+    "semantic_hash": ""
+  },
+  "src/components/domain/IntegrationsPanel.tsx": {
+    "mtime": 1789050468.7956452,
+    "ast_hash": "e816099e8f7c34288bc19e05a27d81a0",
+    "semantic_hash": ""
+  },
+  "src/infra/integrationsApi.ts": {
+    "mtime": 1789050255.4506168,
+    "ast_hash": "f4591b16f44eba093d77150b74c3ca46",
     "semantic_hash": ""
   }
 }

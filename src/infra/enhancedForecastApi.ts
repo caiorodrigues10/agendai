@@ -26,10 +26,25 @@ export interface EnhancedForecast {
 
 export const enhancedForecastApi = {
   getForecast: (barbershopId: string, days?: number) =>
-    apiClient<{ success: boolean; data: EnhancedForecast[] }>(
+    apiClient<{
+      success: boolean;
+      data: EnhancedForecast[] | { predictions?: EnhancedForecast[] };
+    }>(
       `/api/barbershops/${barbershopId}/analytics/enhanced-forecast${buildQuery({ days })}`,
       'GET',
       undefined,
       token()
-    ).then(res => unwrap<EnhancedForecast[]>(res)),
+    ).then(res => {
+      const data = unwrap<unknown>(res);
+
+      // The analytics endpoint wraps the predictions in `data.predictions`.
+      // Keep this API returning an array so consumers never try to render the
+      // response envelope as forecast items.
+      if (Array.isArray(data)) return data as EnhancedForecast[];
+      if (data && typeof data === 'object' && 'predictions' in data) {
+        const predictions = (data as { predictions?: unknown }).predictions;
+        return Array.isArray(predictions) ? predictions as EnhancedForecast[] : [];
+      }
+      return [];
+    }),
 };
