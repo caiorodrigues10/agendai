@@ -144,7 +144,7 @@ export const RecommendationsPanel: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="grid gap-4 xl:grid-cols-2">
+        <div className="space-y-3">
           {recommendations.map(rec => {
             const priority = PRIORITY_CONFIG[rec.priority] ?? PRIORITY_CONFIG.low;
             const type = TYPE_CONFIG[rec.type] ?? { label: 'Oportunidade do negócio', icon: Lightbulb };
@@ -152,7 +152,7 @@ export const RecommendationsPanel: React.FC = () => {
             return (
               <div
                 key={rec.id}
-                className="group relative overflow-hidden rounded-2xl border border-border bg-bg/45 p-5 transition-all hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[0_22px_50px_-36px_rgba(0,0,0,0.95)]"
+                className="group relative overflow-hidden rounded-2xl border border-border bg-bg/45 p-4 transition-all hover:border-border-strong sm:p-5"
               >
                 <span className={`absolute inset-y-0 left-0 w-1 ${priority.dotClass}`} />
                 <div className="flex items-start justify-between gap-3">
@@ -182,7 +182,7 @@ export const RecommendationsPanel: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_1fr_1.35fr]">
                   <div className="rounded-xl border border-border/70 bg-surface/55 p-3">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
                       Motivo
@@ -195,7 +195,7 @@ export const RecommendationsPanel: React.FC = () => {
                     </p>
                     <p className="mt-0.5 text-sm text-text-secondary">{rec.impact}</p>
                   </div>
-                  <div className="rounded-xl border border-accent/20 bg-accent/8 p-3 sm:col-span-2">
+                  <div className="rounded-xl border border-accent/20 bg-accent/8 p-3">
                     <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-accent">
                       <ArrowUpRight size={12} />
                       Ação sugerida

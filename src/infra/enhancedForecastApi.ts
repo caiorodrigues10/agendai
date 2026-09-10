@@ -1,6 +1,7 @@
 import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
 import { buildQuery } from '../utils/query';
+import type { ShopWeatherDay } from './barbershopApi';
 
 function unwrap<T>(res: unknown): T {
   if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
@@ -24,27 +25,31 @@ export interface EnhancedForecast {
   factors: ForecastFactor[];
 }
 
-export const enhancedForecastApi = {
-  getForecast: (barbershopId: string, days?: number) =>
-    apiClient<{
-      success: boolean;
-      data: EnhancedForecast[] | { predictions?: EnhancedForecast[] };
-    }>(
-      `/api/barbershops/${barbershopId}/analytics/enhanced-forecast${buildQuery({ days })}`,
-      'GET',
-      undefined,
-      token()
-    ).then(res => {
-      const data = unwrap<unknown>(res);
+export interface EnhancedForecastReport {
+  predictions: EnhancedForecast[];
+  forecast: ShopWeatherDay[];
+}
 
-      // The analytics endpoint wraps the predictions in `data.predictions`.
-      // Keep this API returning an array so consumers never try to render the
-      // response envelope as forecast items.
-      if (Array.isArray(data)) return data as EnhancedForecast[];
-      if (data && typeof data === 'object' && 'predictions' in data) {
-        const predictions = (data as { predictions?: unknown }).predictions;
-        return Array.isArray(predictions) ? predictions as EnhancedForecast[] : [];
-      }
-      return [];
-    }),
+const getForecastReport = (barbershopId: string, days?: number) =>
+  apiClient<{
+    success: boolean;
+    data: EnhancedForecast[] | { predictions?: EnhancedForecast[]; forecast?: ShopWeatherDay[] };
+  }>(
+    `/api/barbershops/${barbershopId}/analytics/enhanced-forecast${buildQuery({ days })}`,
+    'GET', undefined, token()
+  ).then((res): EnhancedForecastReport => {
+    const data = unwrap<unknown>(res);
+    if (Array.isArray(data)) return { predictions: data as EnhancedForecast[], forecast: [] };
+    if (!data || typeof data !== 'object') return { predictions: [], forecast: [] };
+    const report = data as { predictions?: unknown; forecast?: unknown };
+    return {
+      predictions: Array.isArray(report.predictions) ? report.predictions as EnhancedForecast[] : [],
+      forecast: Array.isArray(report.forecast) ? report.forecast as ShopWeatherDay[] : [],
+    };
+  });
+
+export const enhancedForecastApi = {
+  getForecastReport,
+  getForecast: (barbershopId: string, days?: number) =>
+    getForecastReport(barbershopId, days).then(report => report.predictions),
 };

@@ -1,52 +1,31 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  AlertCircle,
-  BarChart3,
-  Calendar,
-  CloudSun,
-  Info,
-  Loader2,
-  TrendingUp,
-} from 'lucide-react';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import { AlertCircle, BarChart3, Cloud, CloudLightning, CloudRain, CloudSun, Droplets, Info, Loader2, Sun, TrendingUp } from 'lucide-react';
 import { enhancedForecastApi, EnhancedForecast } from '../../infra/enhancedForecastApi';
+import type { ShopWeatherDay } from '../../infra/barbershopApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';
-import { formatCurrencyBRL, formatNumberBR } from '../../utils/formatters';
+import { formatNumberBR } from '../../utils/formatters';
 
-const shortDate = (value: string) =>
-  new Date(`${value.slice(0, 10)}T12:00:00`).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'short',
-  });
-
-const confidenceBadge: Record<string, { label: string; className: string }> = {
-  insufficient: { label: 'Insuficiente', className: 'bg-gray-500/12 text-gray-400' },
-  preliminary: { label: 'Preliminar', className: 'bg-warning/12 text-warning' },
-  reliable: { label: 'Confiável', className: 'bg-success/12 text-success' },
+const dateLabel = (value: string) => {
+  const date = new Date(`${value.slice(0, 10)}T12:00:00`);
+  return {
+    weekday: date.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', ''),
+    date: date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+  };
 };
 
-const maturityLabel = (items: EnhancedForecast[]) => {
-  if (items.length === 0) return { label: 'Sem dados', color: 'text-text-muted' };
-  const reliable = items.filter(i => i.confidence === 'reliable').length;
-  const pct = Math.round((reliable / items.length) * 100);
-  if (pct >= 70) return { label: `${pct}% confiável`, color: 'text-success' };
-  if (pct >= 40) return { label: `${pct}% preliminar`, color: 'text-warning' };
-  return { label: `${pct}% insuficiente`, color: 'text-text-muted' };
+const weatherTheme = (day: ShopWeatherDay) => {
+  if (day.weatherCode >= 95) return { Icon: CloudLightning, card: 'border-violet-400/25 bg-violet-500/8', icon: 'bg-violet-500/15 text-violet-300' };
+  if (day.precipProbability >= 45 || (day.weatherCode >= 51 && day.weatherCode <= 82)) return { Icon: CloudRain, card: 'border-sky-400/25 bg-sky-500/8', icon: 'bg-sky-500/15 text-sky-300' };
+  if (day.weatherCode <= 1) return { Icon: Sun, card: 'border-amber-400/25 bg-amber-500/8', icon: 'bg-amber-500/15 text-amber-300' };
+  if (day.weatherCode <= 3) return { Icon: CloudSun, card: 'border-cyan-400/20 bg-cyan-500/8', icon: 'bg-cyan-500/15 text-cyan-300' };
+  return { Icon: Cloud, card: 'border-border bg-bg/55', icon: 'bg-surface-2 text-text-secondary' };
 };
 
 export const EnhancedForecastPanel: React.FC = () => {
   const { barbershopId } = useBarbershopFilters();
-
-  const [forecast, setForecast] = useState<EnhancedForecast[]>([]);
+  const [predictions, setPredictions] = useState<EnhancedForecast[]>([]);
+  const [weather, setWeather] = useState<ShopWeatherDay[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,8 +34,9 @@ export const EnhancedForecastPanel: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await enhancedForecastApi.getForecast(barbershopId, 7);
-      setForecast(data);
+      const report = await enhancedForecastApi.getForecastReport(barbershopId, 7);
+      setPredictions(report.predictions);
+      setWeather(report.forecast);
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
@@ -64,210 +44,71 @@ export const EnhancedForecastPanel: React.FC = () => {
     }
   }, [barbershopId]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useEffect(() => { void load(); }, [load]);
 
-  const chartData = forecast.map(f => ({
-    date: shortDate(f.date),
-    predicted: f.predicted,
-    confidence: f.confidence,
-  }));
-
-  const maturity = maturityLabel(forecast);
-  const totalPredicted = forecast.reduce((sum, f) => sum + f.predicted, 0);
-  const avgPredicted = forecast.length > 0 ? totalPredicted / forecast.length : 0;
-
-  const allFactors = forecast.flatMap(f => f.factors);
-  const uniqueFactors = Array.from(
-    new Map(allFactors.map(factor => [factor.label, factor])).values()
-  );
+  const predictionByDate = new Map(predictions.map(item => [item.date.slice(0, 10), item]));
+  const total = predictions.reduce((sum, item) => sum + item.predicted, 0);
+  const rainyDays = weather.filter(day => day.precipProbability >= 45).length;
 
   return (
     <section className="overflow-hidden rounded-3xl border border-border bg-surface shadow-[0_24px_70px_-46px_rgba(0,0,0,0.9)]">
-      <div className="flex flex-col gap-4 border-b border-border bg-gradient-to-r from-accent/10 via-transparent to-transparent p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+      <div className="flex flex-col gap-4 border-b border-border bg-gradient-to-r from-accent/10 via-transparent to-transparent p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-accent/20 bg-accent/10 text-accent">
-            <TrendingUp size={19} />
-          </span>
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-accent/20 bg-accent/10 text-accent"><CloudSun size={20} /></span>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-lg font-bold text-text-primary">Previsão de demanda</h2>
-              <span className="rounded-full border border-border bg-bg/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-text-muted">
-                Próximos 7 dias
-              </span>
+              <h2 className="text-lg font-bold text-text-primary">Clima e demanda da semana</h2>
+              <span className="rounded-full border border-border bg-bg/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-text-muted">Próximos 7 dias</span>
             </div>
-            <p className="mt-1 text-sm text-text-muted">
-              Tendência calculada a partir do histórico, agenda e clima.
-            </p>
+            <p className="mt-1 text-sm text-text-muted">Previsão do tempo cruzada com o movimento esperado do salão.</p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={load}
-          disabled={loading}
-          className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-bg/70 px-4 text-sm font-semibold text-text-secondary transition-all hover:border-accent/30 hover:text-accent disabled:opacity-50"
-        >
-          <BarChart3 size={15} />
-          Atualizar
+        <button type="button" onClick={load} disabled={loading} className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-bg/70 px-4 text-sm font-semibold text-text-secondary transition hover:border-accent/30 hover:text-accent disabled:opacity-50">
+          <BarChart3 size={15} /> Atualizar
         </button>
       </div>
 
-      <div className="space-y-5 p-4 sm:p-6">
-        {error && (
-        <div className="flex items-center gap-3 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-          <AlertCircle size={16} />
-          <span>{error}</span>
-        </div>
-        )}
-
-      {loading ? (
-        <div className="flex items-center justify-center gap-3 rounded-2xl border border-border bg-bg/40 py-20 text-sm text-text-muted">
-          <Loader2 size={20} className="animate-spin text-accent" />
-          Preparando previsão...
-        </div>
-      ) : forecast.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-bg/40 px-6 py-14 text-center">
-          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/10 text-accent">
-            <CloudSun size={26} />
-          </span>
-          <h3 className="mt-4 text-base font-semibold text-text-primary">Previsão em preparação</h3>
-          <p className="mx-auto mt-1 max-w-lg text-sm leading-relaxed text-text-muted">
-            Continue usando a agenda e concluindo atendimentos. Assim que houver histórico suficiente,
-            as tendências diárias aparecerão aqui.
-          </p>
-        </div>
-      ) : (
-        <>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="relative overflow-hidden rounded-2xl border border-border bg-bg/50 p-5">
-          <TrendingUp className="absolute -bottom-3 -right-2 text-accent/10" size={72} />
-          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
-            Demanda estimada
-          </p>
-          <p className="mt-2 text-2xl font-black text-accent">{formatNumberBR(totalPredicted)}</p>
-          <p className="mt-1 text-xs text-text-muted">atendimentos em 7 dias</p>
-        </div>
-        <div className="relative overflow-hidden rounded-2xl border border-border bg-bg/50 p-5">
-          <Calendar className="absolute -bottom-3 -right-2 text-text-primary/5" size={72} />
-          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
-            Média diária
-          </p>
-          <p className="mt-2 text-2xl font-black text-text-primary">{formatNumberBR(avgPredicted)}</p>
-          <p className="mt-1 text-xs text-text-muted">atendimentos por dia</p>
-        </div>
-        <div className="relative overflow-hidden rounded-2xl border border-border bg-bg/50 p-5">
-          <BarChart3 className="absolute -bottom-3 -right-2 text-text-primary/5" size={72} />
-          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
-            Confiança da análise
-          </p>
-          <p className={`mt-2 text-2xl font-black ${maturity.color}`}>{maturity.label}</p>
-          <p className="mt-1 text-xs text-text-muted">qualidade da amostra</p>
-        </div>
-      </div>
-
-      <div className="rounded-2xl border border-border bg-bg/45 p-5">
-        <div className="mb-5 flex items-center justify-between gap-3">
-          <div>
-            <h3 className="text-sm font-bold text-text-primary">Movimento por dia</h3>
-            <p className="mt-0.5 text-xs text-text-muted">Comparativo da demanda prevista</p>
+      <div className="p-4 sm:p-6">
+        {error && <div className="mb-4 flex items-center gap-3 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger"><AlertCircle size={16} />{error}</div>}
+        {loading ? (
+          <div className="flex items-center justify-center gap-3 py-14 text-sm text-text-muted"><Loader2 size={20} className="animate-spin text-accent" />Consultando clima e agenda...</div>
+        ) : weather.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border bg-bg/40 px-6 py-10 text-center">
+            <CloudSun size={28} className="mx-auto text-accent" />
+            <h3 className="mt-3 font-semibold text-text-primary">Previsão indisponível no momento</h3>
+            <p className="mx-auto mt-1 max-w-lg text-sm text-text-muted">A cidade está cadastrada. Não conseguimos consultar o serviço meteorológico agora; tente atualizar em alguns instantes.</p>
           </div>
-          <span className="rounded-full bg-accent/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-accent">
-            estimativa
-          </span>
-        </div>
+        ) : (
           <>
-            <div className="h-64 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }}
-                    axisLine={{ stroke: 'var(--color-border)' }}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'var(--color-surface)',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: 12,
-                      fontSize: 12,
-                    }}
-                    labelStyle={{ color: 'var(--color-text-primary)' }}
-                    formatter={(value: number) => [formatNumberBR(value), 'Previsto']}
-                  />
-                  <Bar
-                    dataKey="predicted"
-                    fill="var(--color-accent)"
-                    radius={[6, 6, 0, 0]}
-                    maxBarSize={48}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-7">
-              {forecast.map(f => {
-                const badge = confidenceBadge[f.confidence] ?? confidenceBadge.insufficient;
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-7">
+              {weather.slice(0, 7).map(day => {
+                const theme = weatherTheme(day);
+                const label = dateLabel(day.date);
+                const demand = predictionByDate.get(day.date.slice(0, 10));
                 return (
-                  <div
-                    key={f.date}
-                    className="flex flex-col items-center gap-1 rounded-xl border border-border bg-surface/60 p-2.5 text-center"
-                  >
-                    <span className="text-[10px] font-medium text-text-muted">
-                      {shortDate(f.date)}
-                    </span>
-                    <span className="text-sm font-semibold text-text-primary">
-                      {formatNumberBR(f.predicted)}
-                    </span>
-                    <span className={`rounded-md px-2 py-0.5 text-[9px] font-bold uppercase ${badge.className}`}>
-                      {badge.label}
-                    </span>
-                  </div>
+                  <article key={day.date} className={`min-w-0 rounded-2xl border p-3.5 ${theme.card}`}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div><p className="text-xs font-bold capitalize text-text-primary">{label.weekday}</p><p className="text-[10px] text-text-muted">{label.date}</p></div>
+                      <span className={`flex h-9 w-9 items-center justify-center rounded-xl ${theme.icon}`}><theme.Icon size={19} /></span>
+                    </div>
+                    <p className="mt-4 text-2xl font-black text-text-primary">{Math.round(day.tempMax)}°</p>
+                    <p className="truncate text-[11px] text-text-muted">{day.condition}</p>
+                    <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-2 text-[10px]">
+                      <span className="flex items-center gap-1 text-sky-300"><Droplets size={11} />{Math.round(day.precipProbability)}%</span>
+                      <span className="text-text-muted">mín. {Math.round(day.tempMin)}°</span>
+                    </div>
+                    {demand && <div className="mt-2 rounded-lg bg-bg/45 px-2 py-1.5 text-center text-[10px] font-semibold text-accent">{formatNumberBR(demand.predicted)} atendimentos</div>}
+                  </article>
                 );
               })}
             </div>
-          </>
-      </div>
 
-      {uniqueFactors.length > 0 && (
-        <div className="rounded-2xl border border-border bg-bg/45 p-5">
-          <div className="mb-3 flex items-center gap-2">
-            <Info size={16} className="text-accent" />
-            <h3 className="text-sm font-semibold text-text-primary">Fatores de influência</h3>
-          </div>
-          <div className="space-y-2">
-            {uniqueFactors.map(factor => (
-              <div
-                key={factor.label}
-                className="flex items-center justify-between rounded-xl border border-border bg-bg px-4 py-2.5"
-              >
-                <span className="text-sm text-text-secondary">{factor.label}</span>
-                <span
-                  className={`text-sm font-semibold ${
-                    factor.signal === 'positive'
-                      ? 'text-success'
-                      : factor.signal === 'negative'
-                      ? 'text-danger'
-                      : 'text-text-muted'
-                  }`}
-                >
-                  {factor.value > 0 ? '+' : ''}
-                  {factor.value}%
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-        </>
-      )}
+            <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-border bg-bg/45 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2 text-text-secondary"><Info size={15} className="text-accent" />{predictions.length ? `${formatNumberBR(total)} atendimentos estimados para a semana.` : 'A estimativa de movimento aparecerá quando houver mais histórico de atendimentos.'}</div>
+              <div className="flex shrink-0 items-center gap-2 text-xs text-text-muted"><TrendingUp size={14} className="text-accent" />{rainyDays ? `${rainyDays} ${rainyDays === 1 ? 'dia com' : 'dias com'} chance de chuva` : 'Semana sem chuva relevante'}</div>
+            </div>
+          </>
+        )}
       </div>
     </section>
   );
