@@ -7,8 +7,12 @@ import { motion } from 'framer-motion';
 import {
   AlertCircle,
   ArrowRight,
+  BadgeDollarSign,
+  HelpCircle,
   CheckCircle2,
   Clock,
+  Headphones,
+  Handshake,
   Loader2,
   Mail,
   MessageSquare,
@@ -24,11 +28,11 @@ import { trialCampaign } from '../../marketing/trialCampaign';
 
 const CONTACT_EMAIL = 'contato@agendai.com.br';
 
-const topics: { value: ContactTopic; label: string; hint: string }[] = [
-  { value: 'planos', label: 'Planos e preços', hint: 'Trial, Essencial, Pro, anual' },
-  { value: 'suporte', label: 'Suporte', hint: 'Conta, fila, pagamentos' },
-  { value: 'parceria', label: 'Parceria', hint: 'Franquia, indicação, imprensa' },
-  { value: 'outro', label: 'Outro', hint: 'Qualquer outra dúvida' },
+const topics: { value: ContactTopic; label: string; hint: string; icon: typeof Headphones }[] = [
+  { value: 'planos', label: 'Planos e preços', hint: 'Trial, Essencial, Pro, anual', icon: BadgeDollarSign },
+  { value: 'suporte', label: 'Suporte', hint: 'Conta, fila, pagamentos', icon: Headphones },
+  { value: 'parceria', label: 'Parceria', hint: 'Franquia, indicação, imprensa', icon: Handshake },
+  { value: 'outro', label: 'Outro', hint: 'Qualquer outra dúvida', icon: HelpCircle },
 ];
 
 const ContactSchema = z.object({
@@ -109,7 +113,7 @@ export const ContactPage: React.FC = () => {
       <MarketingNav />
 
       <section className="relative z-10 px-6 pb-12 pt-36 md:px-10 md:pt-44 xl:px-12">
-        <div className="mx-auto max-w-375">
+        <div className="mx-auto grid max-w-375 gap-10 lg:grid-cols-[1fr_22rem] lg:items-end lg:gap-16">
           <div className="max-w-3xl">
             <motion.p
               initial={{ opacity: 0, y: 10 }}
@@ -138,6 +142,30 @@ export const ContactPage: React.FC = () => {
               sem caixa de spam perdida.
             </motion.p>
           </div>
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.16 }}
+            className="relative overflow-hidden rounded-4xl border border-white/10 bg-white/[0.045] p-5 shadow-[0_24px_80px_-40px_rgba(16,185,129,0.45)] backdrop-blur-sm sm:p-6"
+          >
+            <div className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-accent/20 blur-3xl" />
+            <div className="relative flex items-start justify-between gap-4">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-accent/20 bg-accent/10 text-accent-light">
+                <Headphones className="h-5 w-5" />
+              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-accent-light">
+                <span className="h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_10px_currentColor]" /> Online
+              </span>
+            </div>
+            <p className="relative mt-5 text-lg font-bold text-white">Estamos por aqui.</p>
+            <p className="relative mt-2 text-sm leading-relaxed text-neutral-400">
+              Explique o que aconteceu e a equipe assume a conversa com todo o contexto.
+            </p>
+            <div className="relative mt-5 flex items-center gap-3 border-t border-white/10 pt-4 text-xs font-semibold text-neutral-300">
+              <Clock className="h-4 w-4 text-accent" />
+              Retorno em até 1 dia útil
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -149,8 +177,9 @@ export const ContactPage: React.FC = () => {
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="rounded-4xl border border-white/10 bg-surface p-6"
+              className="group relative overflow-hidden rounded-4xl border border-white/10 bg-surface p-6 transition hover:border-accent/25"
             >
+              <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-accent/10 blur-2xl transition group-hover:bg-accent/20" />
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-500">
                 Canal direto
               </p>
@@ -190,7 +219,7 @@ export const ContactPage: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.08 }}
-              className="rounded-4xl border border-accent/20 bg-accent/8 p-6"
+              className="relative overflow-hidden rounded-4xl border border-accent/25 bg-gradient-to-br from-accent/15 via-accent/5 to-transparent p-6"
             >
               <p className="text-sm font-bold text-accent-light">{trialCampaign.eyebrow}?</p>
               <p className="mt-2 text-sm font-medium leading-relaxed text-neutral-300">
@@ -214,6 +243,16 @@ export const ContactPage: React.FC = () => {
             viewport={{ once: true }}
             className="rounded-4xl border border-white/10 bg-[#0a100c] p-7 md:p-10 lg:col-span-8"
           >
+            <div className="mb-8 flex items-start justify-between gap-5 border-b border-white/10 pb-7">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-accent">Abra uma conversa</p>
+                <h2 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">Como podemos ajudar?</h2>
+                <p className="mt-2 max-w-lg text-sm leading-relaxed text-neutral-500">Escolha um assunto e conte os detalhes. Isso ajuda a gente a responder mais rápido.</p>
+              </div>
+              <div className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-neutral-400 sm:flex">
+                <MessageSquare className="h-5 w-5" />
+              </div>
+            </div>
             {status === 'success' && (
               <div className="mb-8 flex items-start gap-3 rounded-2xl border border-accent/30 bg-accent/10 p-4 text-sm font-medium text-accent-light">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
@@ -241,17 +280,21 @@ export const ContactPage: React.FC = () => {
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {topics.map(item => {
                     const active = topic === item.value;
+                    const TopicIcon = item.icon;
                     return (
                       <button
                         key={item.value}
                         type="button"
                         onClick={() => setValue('topic', item.value, { shouldValidate: true })}
-                        className={`rounded-2xl border px-3 py-3 text-left transition ${
+                        className={`group rounded-2xl border px-3 py-3.5 text-left transition ${
                           active
                             ? 'border-accent/40 bg-accent/12 text-white'
                             : 'border-white/8 bg-black/30 text-neutral-400 hover:border-white/15 hover:text-neutral-200'
                         }`}
                       >
+                        <span className={`mb-2 flex h-8 w-8 items-center justify-center rounded-xl transition ${active ? 'bg-accent/15 text-accent-light' : 'bg-white/[0.05] text-neutral-500 group-hover:text-neutral-300'}`}>
+                          <TopicIcon className="h-4 w-4" />
+                        </span>
                         <span className="block text-sm font-bold">{item.label}</span>
                         <span className="mt-0.5 block text-[10px] font-medium opacity-70">
                           {item.hint}

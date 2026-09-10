@@ -103,21 +103,6 @@
   "101": "OperationMode",
   "102": "AnalyticsListener.tsx",
   "103": "commissionsApi.ts",
-  "104": "GiftCardsPanel.tsx",
   "105": "enhancedForecastApi.ts",
-  "106": "README.md",
-  "107": "ProductsHub.tsx",
-  "108": "reputationApi.ts",
-  "109": "PasswordInput.tsx",
-  "110": "qualityApi.ts",
-  "111": "CopilotPanel.tsx",
-  "112": "corporateApi.ts",
-  "113": "purchasingApi.ts",
-  "114": "organizationsApi.ts",
-  "115": "AiPredictivePage.tsx",
-  "116": "data",
-  "117": "Field.tsx",
-  "118": "ServiceBookingSelector.tsx",
-  "119": "AboutPage.tsx",
-  "120": "Mapa de domínio — Frontend ↔ API"
+  "106": "README.md"
 }
