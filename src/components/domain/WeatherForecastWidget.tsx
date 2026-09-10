@@ -147,12 +147,12 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {highlights?.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {highlights.map((h, i) => (
-            <div key={i} className="flex items-start gap-2 text-sm text-text-secondary">
-              <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+            <div key={i} className="flex items-start gap-2 text-sm text-white/60">
+              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
               {h}
             </div>
           ))}
@@ -160,37 +160,37 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
       )}
 
       {insights.modelTrained && predictions.length > 0 && summary?.bestDay && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="rounded-xl border border-border bg-surface p-3">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Média semana</p>
-          <p className={`mt-1 text-lg font-black ${summary.avgDropPct <= -10 ? 'text-red-400' : 'text-emerald-400'}`}>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Média semana</p>
+          <p className={`mt-1.5 text-lg font-black ${summary.avgDropPct <= -10 ? 'text-red-400' : 'text-emerald-400'}`}>
             {finiteNumber(summary.avgDropPct) > 0 ? '+' : ''}{finiteNumber(summary.avgDropPct)}%
           </p>
         </div>
-        <div className="rounded-xl border border-border bg-surface p-3">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Dias arriscados</p>
-          <p className={`mt-1 text-lg font-black ${summary.highRiskCount > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
+        <div className="rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Dias arriscados</p>
+          <p className={`mt-1.5 text-lg font-black ${summary.highRiskCount > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
             {summary.highRiskCount}
           </p>
         </div>
-        <div className="rounded-xl border border-border bg-surface p-3">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Melhor dia</p>
-          <p className="mt-1 text-sm font-bold text-emerald-400">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Melhor dia</p>
+          <p className="mt-1.5 text-sm font-bold text-emerald-400">
             {formatWeatherDayLabel(summary.bestDay.date)}
           </p>
-          <p className="text-[10px] text-text-muted">{summary.bestDay.condition}</p>
+          <p className="text-[10px] text-white/45">{summary.bestDay.condition}</p>
         </div>
-        <div className="rounded-xl border border-border bg-surface p-3">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Pior dia</p>
-          <p className="mt-1 text-sm font-bold text-red-400">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Pior dia</p>
+          <p className="mt-1.5 text-sm font-bold text-red-400">
             {formatWeatherDayLabel(summary.worstDay.date)}
           </p>
-          <p className="text-[10px] text-text-muted">{summary.worstDay.condition}</p>
+          <p className="text-[10px] text-white/45">{summary.worstDay.condition}</p>
         </div>
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-7">
+      <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 lg:grid-cols-7">
         {(forecast.length > 0 ? forecast : predictions).map((p, index) => {
           const prediction = predictions[index];
           const style = RISK_STYLES[prediction?.riskLevel ?? 'low'];
@@ -202,50 +202,72 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
           const visual = getWeatherVisual(weatherCode, condition);
           const rainProbability = 'precipProbability' in p ? finiteNumber(p.precipProbability) : 0;
           const rainAmount = 'precipMm' in p ? finiteNumber(p.precipMm) : 0;
+          const isToday = index === 0;
           return (
             <div
               key={date}
-              className="group relative min-h-52 overflow-hidden rounded-2xl border border-white/10 bg-bg text-left shadow-lg"
+              className="group relative overflow-hidden rounded-2xl border border-white/10 bg-bg text-left shadow-lg transition-transform duration-200 hover:scale-[1.03]"
             >
               <img src={visual.image} alt="" className={`weather-image weather-image--${visual.effect} absolute inset-0 h-full w-full object-cover`} />
               <span aria-hidden="true" className={`weather-effect weather-effect--${visual.effect}`} />
-              <div className="absolute inset-0 z-[2] bg-gradient-to-b from-black/20 via-black/55 to-black/95" />
-              <div className="relative z-10 flex min-h-52 flex-col p-3.5">
-              <div className="flex items-center justify-between"><p className="text-[10px] font-bold text-white/75">{formatWeatherDayLabel(date)}</p><span className={`h-2.5 w-2.5 rounded-full ${visual.glow}`} /></div>
-              <div className="mt-auto">{getWeatherIcon(weatherCode)}</div>
-              <p className="mt-2 min-h-8 text-xs font-bold leading-tight text-white">{condition}</p>
-              {tempMax != null && (
-                <p className={`mt-1 text-2xl font-black ${visual.accent}`}>
-                  {Math.round(finiteNumber(tempMax))}° <span className="text-xs font-normal text-white/60">{tempMin != null ? `${Math.round(finiteNumber(tempMin))}°` : ''}</span>
-                </p>
-              )}
-              <p className="mt-1 text-[10px] text-white/65">{rainProbability > 0 ? `${Math.round(rainProbability)}% de chuva` : `${rainAmount} mm previstos`}</p>
-              {prediction && (
-                <div className="mt-2">
-                  <div className="h-1 rounded-full bg-white/5">
-                    <div
-                      className={`h-full rounded-full ${
-                        prediction.riskLevel === 'high' || prediction.riskLevel === 'critical'
-                          ? 'bg-red-400'
-                          : prediction.riskLevel === 'medium'
-                            ? 'bg-yellow-400'
-                            : 'bg-emerald-400'
-                      }`}
-                      style={{ width: `${Math.min(100, Math.max(5, 100 + finiteNumber(prediction.dropPct)))}%` }}
-                    />
-                  </div>
-                  <p className={`mt-1 text-[10px] font-bold ${style.text}`}>
-                    {finiteNumber(prediction.dropPct) > 0 ? '+' : ''}{finiteNumber(prediction.dropPct)}%
+              <div className="absolute inset-0 z-[2] bg-gradient-to-b from-black/10 via-black/30 to-black/80" />
+              <div className="relative z-10 flex flex-col p-3">
+                {/* Header: day + glow dot */}
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] font-bold text-white/80">
+                    {isToday ? 'Hoje' : formatWeatherDayLabel(date)}
                   </p>
+                  <span className={`h-2 w-2 rounded-full ${visual.glow}`} />
                 </div>
-              )}
+
+                {/* Weather icon + condition */}
+                <div className="mt-3 flex items-center gap-2">
+                  {getWeatherIcon(weatherCode)}
+                  <p className="text-[11px] font-semibold leading-tight text-white/90 line-clamp-2">{condition}</p>
+                </div>
+
+                {/* Temperature */}
+                {tempMax != null && (
+                  <p className={`mt-2.5 text-xl font-black leading-none ${visual.accent}`}>
+                    {Math.round(finiteNumber(tempMax))}°
+                    {tempMin != null && (
+                      <span className="ml-1 text-[11px] font-medium text-white/50">{Math.round(finiteNumber(tempMin))}°</span>
+                    )}
+                  </p>
+                )}
+
+                {/* Rain info */}
+                <p className="mt-1.5 text-[10px] text-white/55">
+                  {rainProbability > 0 ? `${Math.round(rainProbability)}% chuva` : `${rainAmount} mm`}
+                </p>
+
+                {/* Demand prediction bar */}
+                {prediction && (
+                  <div className="mt-auto pt-2.5">
+                    <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                      <div
+                        className={`h-full rounded-full transition-all ${
+                          prediction.riskLevel === 'high' || prediction.riskLevel === 'critical'
+                            ? 'bg-red-400'
+                            : prediction.riskLevel === 'medium'
+                              ? 'bg-yellow-400'
+                              : 'bg-emerald-400'
+                        }`}
+                        style={{ width: `${Math.min(100, Math.max(8, 100 + finiteNumber(prediction.dropPct)))}%` }}
+                      />
+                    </div>
+                    <p className={`mt-1 text-[10px] font-bold ${style.text}`}>
+                      {finiteNumber(prediction.dropPct) > 0 ? '+' : ''}{finiteNumber(prediction.dropPct)}%
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           );
         })}
       </div>
 
-      <p className="text-[10px] text-text-muted text-right">
+      <p className="text-[10px] text-white/30 text-right">
         Modelo: {insights.modelTrained ? `${insights.historicalDays} dias de treino` : 'Insuficiente'} · Previsão: 7 dias
       </p>
     </div>
