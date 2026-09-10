@@ -14,6 +14,7 @@ import { financialApi, WeatherDemandPrediction, WeatherInsights } from '../../in
 import { getErrorMessage } from '../../utils/errorMessage';
 import { formatWeatherDayLabel } from '../../utils/weatherUtils';
 import { ApiError } from '../../infra/apiClient';
+import { finiteNumber, getWeatherVisual } from '../../utils/weatherVisuals';
 
 const RISK_STYLES: Record<string, { bg: string; border: string; text: string; icon: string }> = {
   low: {
@@ -158,12 +159,12 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
         </div>
       )}
 
-      {predictions.length > 0 && summary?.bestDay && (
+      {insights.modelTrained && predictions.length > 0 && summary?.bestDay && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="rounded-xl border border-border bg-surface p-3">
           <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Média semana</p>
           <p className={`mt-1 text-lg font-black ${summary.avgDropPct <= -10 ? 'text-red-400' : 'text-emerald-400'}`}>
-            {summary.avgDropPct > 0 ? '+' : ''}{summary.avgDropPct}%
+            {finiteNumber(summary.avgDropPct) > 0 ? '+' : ''}{finiteNumber(summary.avgDropPct)}%
           </p>
         </div>
         <div className="rounded-xl border border-border bg-surface p-3">
@@ -189,7 +190,7 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
         </div>
       )}
 
-      <div className="grid gap-2 sm:grid-cols-7">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-7">
         {(forecast.length > 0 ? forecast : predictions).map((p, index) => {
           const prediction = predictions[index];
           const style = RISK_STYLES[prediction?.riskLevel ?? 'low'];
@@ -198,19 +199,26 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
           const tempMin = 'tempMin' in p ? p.tempMin : undefined;
           const condition = p.condition;
           const date = p.date;
+          const visual = getWeatherVisual(weatherCode, condition);
+          const rainProbability = 'precipProbability' in p ? finiteNumber(p.precipProbability) : 0;
+          const rainAmount = 'precipMm' in p ? finiteNumber(p.precipMm) : 0;
           return (
             <div
               key={date}
-              className={`rounded-xl border ${style.border} ${style.bg} p-3 text-center transition-all hover:scale-[1.02]`}
+              className="group relative min-h-52 overflow-hidden rounded-2xl border border-white/10 bg-bg text-left shadow-lg"
             >
-              <p className="text-[10px] font-bold text-text-muted">{formatWeatherDayLabel(date)}</p>
-              <div className="my-2 flex justify-center">{getWeatherIcon(weatherCode)}</div>
-              <p className="text-xs font-bold text-text-secondary">{condition}</p>
+              <img src={visual.image} alt="" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/55 to-black/95" />
+              <div className="relative flex min-h-52 flex-col p-3.5">
+              <div className="flex items-center justify-between"><p className="text-[10px] font-bold text-white/75">{formatWeatherDayLabel(date)}</p><span className={`h-2.5 w-2.5 rounded-full ${visual.glow}`} /></div>
+              <div className="mt-auto">{getWeatherIcon(weatherCode)}</div>
+              <p className="mt-2 min-h-8 text-xs font-bold leading-tight text-white">{condition}</p>
               {tempMax != null && (
-                <p className="mt-1 text-[11px] font-bold text-text-primary">
-                  {Math.round(tempMax)}° <span className="font-normal text-text-muted">{tempMin != null ? `${Math.round(tempMin)}°` : ''}</span>
+                <p className={`mt-1 text-2xl font-black ${visual.accent}`}>
+                  {Math.round(finiteNumber(tempMax))}° <span className="text-xs font-normal text-white/60">{tempMin != null ? `${Math.round(finiteNumber(tempMin))}°` : ''}</span>
                 </p>
               )}
+              <p className="mt-1 text-[10px] text-white/65">{rainProbability > 0 ? `${Math.round(rainProbability)}% de chuva` : `${rainAmount} mm previstos`}</p>
               {prediction && (
                 <div className="mt-2">
                   <div className="h-1 rounded-full bg-white/5">
@@ -222,14 +230,15 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
                             ? 'bg-yellow-400'
                             : 'bg-emerald-400'
                       }`}
-                      style={{ width: `${Math.max(5, 100 + prediction.dropPct)}%` }}
+                      style={{ width: `${Math.min(100, Math.max(5, 100 + finiteNumber(prediction.dropPct)))}%` }}
                     />
                   </div>
                   <p className={`mt-1 text-[10px] font-bold ${style.text}`}>
-                    {prediction.dropPct > 0 ? '+' : ''}{prediction.dropPct}%
+                    {finiteNumber(prediction.dropPct) > 0 ? '+' : ''}{finiteNumber(prediction.dropPct)}%
                   </p>
                 </div>
               )}
+              </div>
             </div>
           );
         })}

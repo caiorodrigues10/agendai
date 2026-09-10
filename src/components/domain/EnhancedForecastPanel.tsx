@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { AlertCircle, BarChart3, Cloud, CloudLightning, CloudRain, CloudSun, Droplets, Info, Loader2, Sun, TrendingUp } from 'lucide-react';
+import { AlertCircle, BarChart3, CloudSun, Droplets, Info, Loader2, TrendingUp } from 'lucide-react';
 import { enhancedForecastApi, EnhancedForecast } from '../../infra/enhancedForecastApi';
 import type { ShopWeatherDay } from '../../infra/barbershopApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { formatNumberBR } from '../../utils/formatters';
+import { finiteNumber, getWeatherVisual } from '../../utils/weatherVisuals';
 
 const dateLabel = (value: string) => {
   const date = new Date(`${value.slice(0, 10)}T12:00:00`);
@@ -12,14 +13,6 @@ const dateLabel = (value: string) => {
     weekday: date.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', ''),
     date: date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
   };
-};
-
-const weatherTheme = (day: ShopWeatherDay) => {
-  if (day.weatherCode >= 95) return { Icon: CloudLightning, card: 'border-violet-400/25 bg-violet-500/8', icon: 'bg-violet-500/15 text-violet-300' };
-  if (day.precipProbability >= 45 || (day.weatherCode >= 51 && day.weatherCode <= 82)) return { Icon: CloudRain, card: 'border-sky-400/25 bg-sky-500/8', icon: 'bg-sky-500/15 text-sky-300' };
-  if (day.weatherCode <= 1) return { Icon: Sun, card: 'border-amber-400/25 bg-amber-500/8', icon: 'bg-amber-500/15 text-amber-300' };
-  if (day.weatherCode <= 3) return { Icon: CloudSun, card: 'border-cyan-400/20 bg-cyan-500/8', icon: 'bg-cyan-500/15 text-cyan-300' };
-  return { Icon: Cloud, card: 'border-border bg-bg/55', icon: 'bg-surface-2 text-text-secondary' };
 };
 
 export const EnhancedForecastPanel: React.FC = () => {
@@ -47,8 +40,8 @@ export const EnhancedForecastPanel: React.FC = () => {
   useEffect(() => { void load(); }, [load]);
 
   const predictionByDate = new Map(predictions.map(item => [item.date.slice(0, 10), item]));
-  const total = predictions.reduce((sum, item) => sum + item.predicted, 0);
-  const rainyDays = weather.filter(day => day.precipProbability >= 45).length;
+  const total = predictions.reduce((sum, item) => sum + finiteNumber(item.predicted), 0);
+  const rainyDays = weather.filter(day => finiteNumber(day.precipProbability) >= 45 || finiteNumber(day.precipMm) > 0).length;
 
   return (
     <section className="overflow-hidden rounded-3xl border border-border bg-surface shadow-[0_24px_70px_-46px_rgba(0,0,0,0.9)]">
@@ -82,30 +75,36 @@ export const EnhancedForecastPanel: React.FC = () => {
           <>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-7">
               {weather.slice(0, 7).map(day => {
-                const theme = weatherTheme(day);
+                const visual = getWeatherVisual(day.weatherCode, day.condition);
                 const label = dateLabel(day.date);
                 const demand = predictionByDate.get(day.date.slice(0, 10));
+                const rainProbability = finiteNumber(day.precipProbability);
                 return (
-                  <article key={day.date} className={`min-w-0 rounded-2xl border p-3.5 ${theme.card}`}>
-                    <div className="flex items-start justify-between gap-2">
-                      <div><p className="text-xs font-bold capitalize text-text-primary">{label.weekday}</p><p className="text-[10px] text-text-muted">{label.date}</p></div>
-                      <span className={`flex h-9 w-9 items-center justify-center rounded-xl ${theme.icon}`}><theme.Icon size={19} /></span>
+                  <article key={day.date} className="group relative min-h-56 min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-bg shadow-lg">
+                    <img src={visual.image} alt="" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/55 to-black/95" />
+                    <div className="relative flex min-h-56 flex-col p-3.5">
+                      <div className="flex items-start justify-between gap-2">
+                        <div><p className="text-xs font-bold capitalize text-white">{label.weekday}</p><p className="text-[10px] text-white/60">{label.date}</p></div>
+                        <span className={`mt-1 h-2.5 w-2.5 rounded-full shadow-[0_0_14px_currentColor] ${visual.glow}`} />
+                      </div>
+                      <div className="mt-auto">
+                        <p className={`text-3xl font-black ${visual.accent}`}>{Math.round(finiteNumber(day.tempMax))}°</p>
+                        <p className="mt-0.5 min-h-8 text-xs font-semibold leading-tight text-white/90">{day.condition}</p>
+                        <div className="mt-3 flex items-center justify-between border-t border-white/15 pt-2 text-[10px] text-white/70">
+                          <span className="flex items-center gap-1"><Droplets size={11} />{rainProbability > 0 ? `${Math.round(rainProbability)}%` : `${finiteNumber(day.precipMm)} mm`}</span>
+                          <span>mín. {Math.round(finiteNumber(day.tempMin))}°</span>
+                        </div>
+                        {demand && <div className="mt-2 rounded-lg border border-white/10 bg-black/35 px-2 py-1.5 text-center text-[10px] font-semibold text-white">{formatNumberBR(finiteNumber(demand.predicted))} atendimentos</div>}
+                      </div>
                     </div>
-                    <p className="mt-4 text-2xl font-black text-text-primary">{Math.round(day.tempMax)}°</p>
-                    <p className="truncate text-[11px] text-text-muted">{day.condition}</p>
-                    <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-2 text-[10px]">
-                      <span className="flex items-center gap-1 text-sky-300"><Droplets size={11} />{Math.round(day.precipProbability)}%</span>
-                      <span className="text-text-muted">mín. {Math.round(day.tempMin)}°</span>
-                    </div>
-                    {demand && <div className="mt-2 rounded-lg bg-bg/45 px-2 py-1.5 text-center text-[10px] font-semibold text-accent">{formatNumberBR(demand.predicted)} atendimentos</div>}
                   </article>
                 );
               })}
             </div>
-
             <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-border bg-bg/45 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2 text-text-secondary"><Info size={15} className="text-accent" />{predictions.length ? `${formatNumberBR(total)} atendimentos estimados para a semana.` : 'A estimativa de movimento aparecerá quando houver mais histórico de atendimentos.'}</div>
-              <div className="flex shrink-0 items-center gap-2 text-xs text-text-muted"><TrendingUp size={14} className="text-accent" />{rainyDays ? `${rainyDays} ${rainyDays === 1 ? 'dia com' : 'dias com'} chance de chuva` : 'Semana sem chuva relevante'}</div>
+              <div className="flex shrink-0 items-center gap-2 text-xs text-text-muted"><TrendingUp size={14} className="text-accent" />{rainyDays ? `${rainyDays} ${rainyDays === 1 ? 'dia com' : 'dias com'} chuva prevista` : 'Semana sem chuva relevante'}</div>
             </div>
           </>
         )}
