@@ -18,7 +18,23 @@ export interface Recommendation {
 
 export const recommendationsApi = {
   getRecommendations: (barbershopId: string) =>
-    apiClient(`/api/barbershops/${barbershopId}/analytics/recommendations`, 'GET', undefined, token()),
+    apiClient<{
+      success: boolean;
+      data: Recommendation[] | { recommendations?: Recommendation[] };
+    }>(
+      `/api/barbershops/${barbershopId}/analytics/recommendations`,
+      'GET',
+      undefined,
+      token()
+    ).then(res => {
+      const data = res?.data;
+      if (Array.isArray(data)) return data;
+      if (data && typeof data === 'object' && 'recommendations' in data) {
+        const recommendations = data.recommendations;
+        return Array.isArray(recommendations) ? recommendations : [];
+      }
+      return [];
+    }),
 
   dismiss: (barbershopId: string, recommendationId: string) =>
     apiClient(`/api/barbershops/${barbershopId}/analytics/recommendations/${recommendationId}/dismiss`, 'POST', undefined, token()),

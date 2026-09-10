@@ -42,13 +42,12 @@ export const RecommendationsPanel: React.FC = () => {
 
   const load = useCallback(async () => {
     if (!barbershopId) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await recommendationsApi.getRecommendations(barbershopId);
-      const data = Array.isArray(res) ? res : (res as any)?.data ?? [];
-      setRecommendations(data);
-    } catch (err) {
+      setLoading(true);
+      setError(null);
+      try {
+      const data = await recommendationsApi.getRecommendations(barbershopId);
+      setRecommendations(Array.isArray(data) ? data : []);
+      } catch (err) {
       setError(getErrorMessage(err));
     } finally {
       setLoading(false);
