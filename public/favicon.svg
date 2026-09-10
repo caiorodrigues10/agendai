@@ -1,4 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#00c2b3"/>
-  <text x="256" y="310" font-family="system-ui, -apple-system, sans-serif" font-size="260" font-weight="900" fill="#0a0f18" text-anchor="middle" letter-spacing="-8">AI</text>
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00c2b3"/>
+      <stop offset="100%" stop-color="#00a896"/>
+    </linearGradient>
+  </defs>
+  <!-- Calendar body -->
+  <rect x="60" y="120" width="392" height="340" rx="48" fill="url(#g)"/>
+  <!-- Calendar top tabs -->
+  <rect x="120" y="70" width="40" height="80" rx="12" fill="url(#g)"/>
+  <rect x="352" y="70" width="40" height="80" rx="12" fill="url(#g)"/>
+  <!-- Inner white area -->
+  <rect x="100" y="180" width="312" height="240" rx="24" fill="#ffffff" opacity="0.95"/>
+  <!-- Mountain/chart shape -->
+  <path d="M140 380 L220 260 L280 320 L340 220 L390 380 Z" fill="#00c2b3" opacity="0.85"/>
+  <!-- Checkmark -->
+  <path d="M200 320 L250 370 L370 240" stroke="#ffffff" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
 </svg>
