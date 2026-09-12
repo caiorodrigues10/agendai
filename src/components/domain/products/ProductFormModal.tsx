@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { productsApi, type Product, type ProductCategory, type ProductType } from '../../../infra/productsApi';
 import { SmartSelect } from '../../ui/SmartSelect';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_FOOTER, FORM_GRID, FORM_SECTION_TITLE } from '../../ui/Field';
 import { getErrorMessage } from '../../../utils/errorMessage';
 import { ProductSchema, ProductFormData } from '../../../schemas';
+import { PRODUCT_PURPOSE_LABEL } from './productMoney';
 
 interface Props {
   open: boolean;
   product: Product | null;
+  defaultType?: ProductType;
   readOnly?: boolean;
   categories: ProductCategory[];
   onClose: () => void;
@@ -21,6 +23,7 @@ interface Props {
 export const ProductFormModal: React.FC<Props> = ({
   open,
   product,
+  defaultType = 'RETAIL',
   readOnly,
   categories,
   onClose,
@@ -36,6 +39,7 @@ export const ProductFormModal: React.FC<Props> = ({
     handleSubmit,
     reset,
     control,
+    setValue,
     formState: { errors },
   } = useForm<ProductFormData>({
     resolver: zodResolver(ProductSchema),
@@ -46,12 +50,15 @@ export const ProductFormModal: React.FC<Props> = ({
       sku: '',
       barcode: '',
       categoryId: '',
-      type: 'RETAIL',
+      type: defaultType,
       unitLabel: 'unidade',
       minStock: 0,
       trackStock: true,
     },
   });
+
+  const productType = useWatch({ control, name: 'type' });
+  const stockOnly = productType === 'CONSUMABLE';
 
   useEffect(() => {
     if (!open) return;
@@ -76,13 +83,18 @@ export const ProductFormModal: React.FC<Props> = ({
         sku: '',
         barcode: '',
         categoryId: '',
-        type: 'RETAIL',
+        type: defaultType,
         unitLabel: 'unidade',
         minStock: 0,
         trackStock: true,
       });
     }
-  }, [open, product, reset]);
+  }, [open, product, defaultType, reset]);
+
+  useEffect(() => {
+    if (!open || product || !stockOnly) return;
+    setValue('salePrice', 0);
+  }, [open, product, stockOnly, setValue]);
 
   if (!open) return null;
 
@@ -93,7 +105,7 @@ export const ProductFormModal: React.FC<Props> = ({
       const payload = {
         name: data.name.trim(),
         description: data.description?.trim() || null,
-        salePrice: data.salePrice,
+        salePrice: data.type === 'CONSUMABLE' ? 0 : data.salePrice,
         sku: data.sku?.trim() || null,
         barcode: data.barcode?.trim() || null,
         categoryId: data.categoryId || null,
@@ -160,11 +172,36 @@ export const ProductFormModal: React.FC<Props> = ({
                 {...register('description')}
               />
             </Field>
+            <Controller
+              control={control}
+              name="type"
+              render={({ field }) => (
+                <SmartSelect
+                  label="Finalidade"
+                  disabled={readOnly}
+                  value={field.value}
+                  onChange={value => field.onChange(value ?? 'RETAIL')}
+                  options={[
+                    { value: 'RETAIL', label: PRODUCT_PURPOSE_LABEL.RETAIL },
+                    { value: 'CONSUMABLE', label: PRODUCT_PURPOSE_LABEL.CONSUMABLE },
+                    { value: 'BOTH', label: PRODUCT_PURPOSE_LABEL.BOTH },
+                  ]}
+                  searchable={false}
+                />
+              )}
+            />
+            <p className="text-xs text-text-muted">
+              {stockOnly
+                ? 'Só estoque do salão — não entra no PDV.'
+                : productType === 'BOTH'
+                  ? 'Aparece na venda e no estoque de uso interno.'
+                  : 'Entra no PDV e na aba Vendas.'}
+            </p>
           </div>
 
           <div className="space-y-4">
-            <p className={FORM_SECTION_TITLE}>Venda</p>
-            <div className={FORM_GRID}>
+            <p className={FORM_SECTION_TITLE}>{stockOnly ? 'Cadastro' : 'Venda'}</p>
+            {!stockOnly && (
               <Field label="Preço de venda (R$)" error={errors.salePrice?.message}>
                 <input
                   disabled={readOnly}
@@ -176,25 +213,7 @@ export const ProductFormModal: React.FC<Props> = ({
                   {...register('salePrice')}
                 />
               </Field>
-              <Controller
-                control={control}
-                name="type"
-                render={({ field }) => (
-                  <SmartSelect
-                    label="Tipo"
-                    disabled={readOnly}
-                    value={field.value}
-                    onChange={value => field.onChange(value ?? 'RETAIL')}
-                    options={[
-                      { value: 'RETAIL', label: 'Revenda' },
-                      { value: 'CONSUMABLE', label: 'Consumo interno' },
-                      { value: 'BOTH', label: 'Ambos' },
-                    ]}
-                    searchable={false}
-                  />
-                )}
-              />
-            </div>
+            )}
             <div className={FORM_GRID}>
               <Field label="Unidade" error={errors.unitLabel?.message}>
                 <input

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { productsApi, type Product, type ProductCategory } from '../../../infra/productsApi';
+import { productsApi, type Product, type ProductCategory, type ProductListPurpose, type ProductType } from '../../../infra/productsApi';
 import { useBarbershop } from '../../../contexts/BarbershopContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import type { BusinessSegment } from '../../../types';
@@ -7,7 +7,7 @@ import { getErrorMessage } from '../../../utils/errorMessage';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { ProductFormModal } from './ProductFormModal';
 import { CatalogTemplateModal } from './CatalogTemplateModal';
-import { productMoney } from './productMoney';
+import { PRODUCT_PURPOSE_SHORT, productMoney } from './productMoney';
 
 const SEGMENTS: Record<BusinessSegment, string> = {
   BARBERSHOP: 'Barbearia',
@@ -18,6 +18,21 @@ const SEGMENTS: Record<BusinessSegment, string> = {
   AESTHETICS: 'Estética',
   SPA: 'Spa',
   OTHER: 'Outro',
+};
+
+type CatalogPurpose = ProductListPurpose;
+
+const PURPOSE_META: Record<CatalogPurpose, { title: string; hint: string; defaultType: ProductType }> = {
+  sale: {
+    title: 'Para vender',
+    hint: 'Entra no PDV e na aba Vendas.',
+    defaultType: 'RETAIL',
+  },
+  own: {
+    title: 'Estoque do salão',
+    hint: 'Uso interno — entrada, ajuste e consumo. Não aparece no carrinho.',
+    defaultType: 'CONSUMABLE',
+  },
 };
 
 interface Props {
@@ -33,6 +48,7 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
   const { user } = useAuth();
   const { settings } = useBarbershop();
   const barbershopId = user?.barbershopId;
+  const [catalogPurpose, setCatalogPurpose] = useState<CatalogPurpose>('sale');
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [search, setSearch] = useState('');
@@ -41,10 +57,12 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [modalProduct, setModalProduct] = useState<Product | null | 'new'>(null);
+  const [defaultType, setDefaultType] = useState<ProductType>('RETAIL');
   const [readOnly, setReadOnly] = useState(false);
   const [templateOpen, setTemplateOpen] = useState(false);
   const [confirmToggle, setConfirmToggle] = useState<Product | null>(null);
   const limit = 30;
+  const purposeMeta = PURPOSE_META[catalogPurpose];
 
   useEffect(() => {
     const t = setTimeout(() => setSearchDebounced(search), 300);
@@ -56,10 +74,15 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
     setLoading(true);
     try {
       const [list, cats] = await Promise.all([
-        productsApi.listProducts({ search: searchDebounced || undefined, page, limit }),
+        productsApi.listProducts({
+          search: searchDebounced || undefined,
+          purpose: catalogPurpose,
+          page,
+          limit,
+        }),
         productsApi.listCategories(),
       ]);
-      setProducts(list.data);
+      setProducts(prev => (page === 1 ? list.data : [...prev, ...list.data]));
       setTotal(list.meta.total);
       setCategories(cats);
     } catch (err) {
@@ -67,10 +90,10 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
     } finally {
       setLoading(false);
     }
-  }, [canView, canManage, searchDebounced, page, onNotify]);
+  }, [canView, canManage, searchDebounced, page, catalogPurpose, onNotify]);
 
   useEffect(() => { void load(); }, [load]);
-  useEffect(() => { setPage(1); }, [searchDebounced]);
+  useEffect(() => { setPage(1); }, [searchDebounced, catalogPurpose]);
 
   if (!canView && !canManage) {
     return <p className="text-sm text-text-muted">Você não tem permissão para ver o catálogo.</p>;
@@ -83,6 +106,12 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
   const openProduct = (product: Product, viewOnly = false) => {
     setModalProduct(product);
     setReadOnly(viewOnly || !canManage);
+  };
+
+  const openNew = () => {
+    setDefaultType(purposeMeta.defaultType);
+    setModalProduct('new');
+    setReadOnly(false);
   };
 
   const toggleActive = async () => {
@@ -98,6 +127,16 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
     }
   };
 
+  const purposeBtn = (id: CatalogPurpose) => (
+    <button
+      type="button"
+      onClick={() => setCatalogPurpose(id)}
+      className={`rounded-xl px-3 py-2 text-sm font-bold ${catalogPurpose === id ? 'bg-accent text-accent-fg' : 'bg-surface border border-border text-text-secondary'}`}
+    >
+      {PURPOSE_META[id].title}
+    </button>
+  );
+
   return (
     <div className="space-y-4">
       {canManage && barbershopId && (
@@ -112,9 +151,15 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
         </div>
       )}
 
+      <div className="flex flex-wrap gap-2">
+        {purposeBtn('sale')}
+        {purposeBtn('own')}
+      </div>
+      <p className="text-xs text-text-secondary">{purposeMeta.hint}</p>
+
       {canManage && (
-        <button type="button" onClick={() => { setModalProduct('new'); setReadOnly(false); }} className="w-full rounded-xl border border-dashed border-border bg-bg px-4 py-3 text-sm font-bold text-text-primary">
-          + Novo produto
+        <button type="button" onClick={openNew} className="w-full rounded-xl border border-dashed border-border bg-bg px-4 py-3 text-sm font-bold text-text-primary">
+          + Novo produto · {purposeMeta.title}
         </button>
       )}
 
@@ -127,9 +172,17 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
           {products.map(product => (
             <div key={product.id} className="rounded-xl border border-border bg-surface px-3 py-3">
               <button type="button" onClick={() => openProduct(product, !canManage)} className="w-full text-left">
-                <p className="font-semibold text-text-primary">{product.name}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="font-semibold text-text-primary">{product.name}</p>
+                  {product.type === 'BOTH' && (
+                    <span className="inline-flex rounded-lg border border-border bg-bg px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-text-secondary">
+                      {PRODUCT_PURPOSE_SHORT.BOTH}
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-text-muted">
-                  {productMoney.format(product.salePrice)} · estoque {product.stockQty} {product.unitLabel}
+                  {product.type !== 'CONSUMABLE' ? `${productMoney.format(product.salePrice)} · ` : ''}
+                  estoque {product.stockQty} {product.unitLabel}
                   {product.minStock > 0 ? ` · mín ${product.minStock}` : ''}
                   {product.sku ? ` · SKU ${product.sku}` : ''}
                   {canSeeCost && product.averageCost != null ? ` · custo ${productMoney.format(product.averageCost)}` : ''}
@@ -143,7 +196,7 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
               )}
             </div>
           ))}
-          {!products.length && <p className="text-sm text-text-muted">Nenhum produto encontrado.</p>}
+          {!products.length && <p className="text-sm text-text-muted">Nenhum produto neste cadastro.</p>}
         </div>
       )}
 
@@ -156,6 +209,7 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
       <ProductFormModal
         open={modalProduct !== null}
         product={modalProduct === 'new' || modalProduct === null ? null : modalProduct}
+        defaultType={defaultType}
         readOnly={readOnly}
         categories={categories}
         onClose={() => setModalProduct(null)}
@@ -176,7 +230,7 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
       <ConfirmDialog
         open={Boolean(confirmToggle)}
         title={confirmToggle?.active ? 'Inativar produto?' : 'Reativar produto?'}
-        message={confirmToggle ? `"${confirmToggle.name}" deixará de aparecer nas vendas.` : ''}
+        message={confirmToggle ? `"${confirmToggle.name}" deixará de aparecer nas listas ativas.` : ''}
         confirmLabel={confirmToggle?.active ? 'Inativar' : 'Ativar'}
         variant={confirmToggle?.active ? 'danger' : 'default'}
         onConfirm={() => void toggleActive()}

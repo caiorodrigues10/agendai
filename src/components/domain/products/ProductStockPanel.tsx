@@ -6,7 +6,7 @@ import { SmartSelect } from '../../ui/SmartSelect';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_GRID } from '../../ui/Field';
 import { getErrorMessage } from '../../../utils/errorMessage';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
-import { MOVEMENT_LABEL, productMoney } from './productMoney';
+import { MOVEMENT_LABEL, PRODUCT_PURPOSE_SHORT, productMoney } from './productMoney';
 import { StockReceiptSchema, StockReceiptFormData, StockAdjustmentSchema, StockAdjustmentFormData } from '../../../schemas';
 
 interface Props {
@@ -72,7 +72,10 @@ export const ProductStockPanel: React.FC<Props> = ({ loadError, onNotify, onRelo
 
   if (loadError) return <p className="text-sm text-danger">{loadError}</p>;
 
-  const productOptions = products.map(p => ({ value: p.id, label: p.name }));
+  const productOptions = products.map(p => ({
+    value: p.id,
+    label: `${p.name} · ${PRODUCT_PURPOSE_SHORT[p.type]}`,
+  }));
 
   const addSupplier = async () => {
     if (!newSupplier.trim()) return;
@@ -117,6 +120,29 @@ export const ProductStockPanel: React.FC<Props> = ({ loadError, onNotify, onRelo
 
   return (
     <div className="space-y-4">
+      <div className="rounded-xl border border-border bg-surface p-4">
+        <p className="mb-2 font-bold text-text-primary">Produtos em estoque</p>
+        <div className="space-y-2 text-sm">
+          {products.map(p => (
+            <div key={p.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-2 last:border-0 last:pb-0">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-semibold text-text-primary">{p.name}</span>
+                  <span className="inline-flex rounded-lg border border-border bg-bg px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-text-secondary">
+                    {PRODUCT_PURPOSE_SHORT[p.type]}
+                  </span>
+                </div>
+                <p className="text-xs text-text-muted">
+                  {p.stockQty} {p.unitLabel}
+                  {p.minStock > 0 ? ` · mín ${p.minStock}` : ''}
+                </p>
+              </div>
+            </div>
+          ))}
+          {!products.length && <p className="text-text-muted">Nenhum produto cadastrado.</p>}
+        </div>
+      </div>
+
       <form
         onSubmit={handleReceiptSubmit(onReceiptSubmit)}
         className="space-y-4 rounded-xl border border-border bg-surface p-4"

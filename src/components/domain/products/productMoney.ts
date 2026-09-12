@@ -22,3 +22,16 @@ export const MOVEMENT_LABEL: Record<string, string> = {
   MANUAL_ADJUSTMENT: 'Ajuste manual',
   PURCHASE_REVERSAL: 'Estorno de compra',
 };
+
+/** Finalidade do cadastro (Product.type) — labels para o salão */
+export const PRODUCT_PURPOSE_LABEL: Record<'RETAIL' | 'CONSUMABLE' | 'BOTH', string> = {
+  RETAIL: 'Para vender',
+  CONSUMABLE: 'Só estoque do salão',
+  BOTH: 'Venda e uso interno',
+};
+
+export const PRODUCT_PURPOSE_SHORT: Record<'RETAIL' | 'CONSUMABLE' | 'BOTH', string> = {
+  RETAIL: 'Venda',
+  CONSUMABLE: 'Estoque',
+  BOTH: 'Venda e uso interno',
+};

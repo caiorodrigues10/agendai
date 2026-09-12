@@ -24,6 +24,7 @@ export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'succes
   const [tab, setTab] = useState<HubTab>(defaultTab);
   const [error, setError] = useState<string | null>(null);
   const [lowStockCount, setLowStockCount] = useState(0);
+  const [needsReorderCount, setNeedsReorderCount] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const probe = useCallback(async () => {
@@ -31,11 +32,23 @@ export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'succes
       setError(null);
       const result = await productsApi.listProducts({ lowStock: 'true', limit: 1, page: 1 });
       setLowStockCount(result.meta.total);
+      if (canReports) {
+        const from = new Date(Date.now() - 29 * 86_400_000).toISOString().slice(0, 10);
+        const to = new Date().toISOString().slice(0, 10);
+        const reports = await productsApi.reports(from, to);
+        setNeedsReorderCount(reports.attention?.needsReorder.length ?? 0);
+        if (reports.attention?.missing.length != null) {
+          setLowStockCount(reports.attention.missing.length);
+        }
+      } else {
+        setNeedsReorderCount(0);
+      }
     } catch (err) {
       setError(getErrorMessage(err, 'Não foi possível carregar produtos.'));
       setLowStockCount(0);
+      setNeedsReorderCount(0);
     }
-  }, []);
+  }, [canReports]);
 
   useEffect(() => { void probe(); }, [probe, refreshKey]);
 
@@ -44,6 +57,10 @@ export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'succes
   const tabBtn = (id: HubTab, label: string, visible: boolean) => visible ? (
     <button type="button" onClick={() => setTab(id)} className={`rounded-xl px-3 py-2 text-sm font-bold ${tab === id ? 'bg-accent text-accent-fg' : 'bg-surface border border-border text-text-secondary'}`}>{label}</button>
   ) : null;
+
+  const bannerParts: string[] = [];
+  if (lowStockCount > 0) bannerParts.push(`${lowStockCount} abaixo do mínimo`);
+  if (needsReorderCount > 0) bannerParts.push(`${needsReorderCount} vendendo bem e precisando repor`);
 
   return (
     <div className="space-y-4">
@@ -54,10 +71,15 @@ export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'succes
         {tabBtn('reports', 'Relatórios', canReports)}
       </div>
 
-      {lowStockCount > 0 && (
-        <div className="rounded-xl border border-warning/40 bg-warning/10 p-3 text-sm text-text-primary">
-          {lowStockCount} produto(s) abaixo do estoque mínimo. A operação continua liberada.
-        </div>
+      {bannerParts.length > 0 && (
+        <button
+          type="button"
+          onClick={() => canReports ? setTab('reports') : canInventory ? setTab('stock') : undefined}
+          className="w-full rounded-xl border border-warning/40 bg-warning/10 p-3 text-left text-sm text-text-primary"
+        >
+          {bannerParts.join(' · ')}. A operação continua liberada.
+          {canReports ? ' Ver atenção nos relatórios.' : ''}
+        </button>
       )}
 
       {tab === 'catalog' && (canView || canManage) && (
@@ -70,7 +92,11 @@ export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'succes
         <ProductSalesPanel canManage={canManage} canRefund={canRefund} loadError={error} onNotify={onNotify} onReload={reload} />
       )}
       {tab === 'reports' && canReports && (
-        <ProductReportsPanel loadError={error} onNotify={onNotify} />
+        <ProductReportsPanel
+          loadError={error}
+          onNotify={onNotify}
+          onGoStock={canInventory ? () => setTab('stock') : undefined}
+        />
       )}
     </div>
   );

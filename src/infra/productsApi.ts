@@ -18,6 +18,7 @@ function token() {
 }
 
 export type ProductType = 'RETAIL' | 'CONSUMABLE' | 'BOTH';
+export type ProductListPurpose = 'sale' | 'own';
 export type RetailPaymentMethod = 'cash' | 'pix' | 'credit_card' | 'debit_card' | 'fiado';
 export type StockMovementType =
   | 'PURCHASE_RECEIPT'
@@ -171,12 +172,40 @@ export interface ProductReports {
   }[];
   lowStock: Product[];
   idleProducts: { id: string; name: string; stockQty: number }[];
+  attention?: {
+    missing: ProductAttentionItem[];
+    hot: ProductAttentionItem[];
+    needsReorder: ProductAttentionItem[];
+    idle: ProductAttentionItem[];
+  };
   inventoryValue: number;
   byStaff: { soldById: string; soldByName: string; total: number; count: number }[];
 }
 
+export interface ProductAttentionItem {
+  productId: string;
+  name: string;
+  stockQty: number;
+  minStock?: number;
+  quantity?: number;
+  revenue?: number;
+  margin?: number;
+  daysOfCover?: number | null;
+  purpose: 'sale' | 'own' | 'both';
+}
+
 export const productsApi = {
-  listProducts: async (params: Record<string, string | number | undefined> = {}) => {
+  listProducts: async (params: {
+    search?: string;
+    categoryId?: string;
+    active?: string;
+    type?: ProductType;
+    purpose?: ProductListPurpose;
+    forSale?: string;
+    lowStock?: string;
+    page?: number;
+    limit?: number;
+  } = {}) => {
     const res = await apiClient<{ success: boolean; data: Product[]; meta?: ListMeta }>(
       `/api/products${buildQuery(params)}`,
       'GET',

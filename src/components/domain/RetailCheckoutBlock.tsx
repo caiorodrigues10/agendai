@@ -55,7 +55,7 @@ export const RetailCheckoutBlock: React.FC<Props> = ({
   useEffect(() => {
     if (!open) return;
     const t = setTimeout(() => {
-      productsApi.listProducts({ search, forSale: 'true', active: 'true', limit: 30 })
+      productsApi.listProducts({ search, purpose: 'sale', active: 'true', limit: 30 })
         .then(res => setProducts(res.data))
         .catch(err => setError(getErrorMessage(err, 'Não foi possível buscar produtos.')));
     }, 200);
