@@ -28,8 +28,7 @@ export default defineConfig(({ mode }) => {
 				registerType: 'prompt',
 				injectRegister: null,
 				includeAssets: [
-					'favicon.svg',
-					'brand/*.svg',
+					'favicon.png',
 					'brand/*.png',
 					'icons/*.png',
 					'screenshots/*.png',

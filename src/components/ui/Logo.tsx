@@ -47,7 +47,7 @@ export const Logo: React.FC<LogoProps> = ({
   if (!showText) {
     return (
       <img
-        src="/favicon.svg"
+        src="/favicon.png"
         alt="AGENDAI"
         className={`${s.iconOnly} select-none object-contain`}
       />
@@ -55,14 +55,9 @@ export const Logo: React.FC<LogoProps> = ({
   }
 
   return (
-    <img
-      src="/brand/agendai-logo.png"
-      alt="AGENDAI"
-      className={`${s.img} select-none object-contain ${className ?? ''}`}
-      onError={(e) => {
-        // Fallback para SVG se PNG não carregar
-        (e.target as HTMLImageElement).src = '/brand/agendai-logo.svg';
-      }}
-    />
+    <span className={`inline-flex select-none ${className ?? ''}`}>
+      <img src="/brand/agendai-logo.png" alt="AgendAI" className={`${s.img} object-contain dark:hidden`} />
+      <img src="/brand/agendai-logo-dark.png" alt="AgendAI" className={`${s.img} hidden object-contain dark:block`} />
+    </span>
   );
 };
