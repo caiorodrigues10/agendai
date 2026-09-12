@@ -268,3 +268,14 @@ export const FiadoSchema = z.object({
 });
 
 export type FiadoFormData = z.infer<typeof FiadoSchema>;
+
+// --- Procedure Record Schema ---
+export const ProcedureRecordSchema = z.object({
+  title: z.string().min(1, 'Título é obrigatório').max(200),
+  professionalName: z.string().min(1, 'Profissional é obrigatório').max(200),
+  formula: z.string().optional().default(''),
+  details: z.string().optional().default(''),
+  serviceName: z.string().optional().default(''),
+});
+
+export type ProcedureRecordFormData = z.infer<typeof ProcedureRecordSchema>;

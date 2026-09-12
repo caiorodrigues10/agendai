@@ -10,8 +10,9 @@ import {
   RiFileTextLine,
   RiHistoryLine,
   RiLoader4Line,
+  RiAddLine,
 } from 'react-icons/ri';
-import { MessageCircle, X } from 'lucide-react';
+import { MessageCircle, X, Scissors, FlaskConical, Clock } from 'lucide-react';
 import {
   ClientPackage,
   PackagePaymentMethod,
@@ -20,7 +21,7 @@ import {
   ShopSettings,
   StaffMember,
 } from '../../types';
-import { clientsApi } from '../../infra/clientsApi';
+import { clientsApi, ProcedureRecord } from '../../infra/clientsApi';
 import { crmApi, CrmClientProfile } from '../../infra/crmApi';
 import { packagesApi } from '../../infra/packagesApi';
 import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
@@ -38,7 +39,7 @@ import { METRIC_LABEL } from '../../utils/metricLabels';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { BookPackageSessionsModal } from './BookPackageSessionsModal';
 import { AppointmentBookingModal } from './AppointmentBookingModal';
-import { AppointmentFormData, ClientEditSchema, ClientEditFormData } from '../../schemas';
+import { AppointmentFormData, ClientEditSchema, ClientEditFormData, ProcedureRecordSchema, ProcedureRecordFormData } from '../../schemas';
 import { AvailabilitySlot } from '../../utils/schedulingUtils';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -113,9 +114,26 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
     | { type: 'delete' }
     | { type: 'consume'; packageId: string }
     | { type: 'cancelSale'; packageId: string }
+    | { type: 'deleteProcedure'; recordId: string }
     | null
   >(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
+
+  const [procedures, setProcedures] = useState<ProcedureRecord[]>([]);
+  const [proceduresLoading, setProceduresLoading] = useState(false);
+  const [showProcedureForm, setShowProcedureForm] = useState(false);
+  const [editingProcedure, setEditingProcedure] = useState<ProcedureRecord | null>(null);
+  const [procedureSaving, setProcedureSaving] = useState(false);
+
+  const {
+    register: registerProcedure,
+    handleSubmit: handleSubmitProcedure,
+    reset: resetProcedure,
+    formState: { errors: procedureErrors },
+  } = useForm<ProcedureRecordFormData>({
+    resolver: zodResolver(ProcedureRecordSchema),
+    defaultValues: { title: '', professionalName: '', formula: '', details: '', serviceName: '' },
+  });
 
   const {
     register,
@@ -192,6 +210,88 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
   const refresh = async () => {
     await loadDetail();
     onUpdated();
+  };
+
+  const loadProcedures = useCallback(async () => {
+    if (!clientId) return;
+    setProceduresLoading(true);
+    try {
+      const data = await clientsApi.listProcedures(clientId);
+      setProcedures(data);
+    } catch {
+      // silent
+    } finally {
+      setProceduresLoading(false);
+    }
+  }, [clientId]);
+
+  useEffect(() => {
+    if (tab === 'historico' && clientId) {
+      void loadProcedures();
+    }
+  }, [tab, clientId, loadProcedures]);
+
+  const startProcedureForm = (proc?: ProcedureRecord) => {
+    if (proc) {
+      setEditingProcedure(proc);
+      resetProcedure({
+        title: proc.title,
+        professionalName: proc.professionalName,
+        formula: proc.formula ?? '',
+        details: proc.details ?? '',
+        serviceName: proc.serviceName ?? '',
+      });
+    } else {
+      setEditingProcedure(null);
+      resetProcedure({ title: '', professionalName: '', formula: '', details: '', serviceName: '' });
+    }
+    setShowProcedureForm(true);
+  };
+
+  const handleProcedureSubmit = async (data: ProcedureRecordFormData) => {
+    if (!clientId) return;
+    setProcedureSaving(true);
+    setError(null);
+    try {
+      if (editingProcedure) {
+        await clientsApi.updateProcedure(clientId, editingProcedure.id, {
+          title: data.title.trim(),
+          professionalName: data.professionalName.trim(),
+          formula: data.formula?.trim() || null,
+          details: data.details?.trim() || null,
+          serviceName: data.serviceName?.trim() || null,
+        });
+      } else {
+        await clientsApi.createProcedure(clientId, {
+          title: data.title.trim(),
+          professionalName: data.professionalName.trim(),
+          formula: data.formula?.trim() || undefined,
+          details: data.details?.trim() || undefined,
+          serviceName: data.serviceName?.trim() || undefined,
+        });
+      }
+      setShowProcedureForm(false);
+      setEditingProcedure(null);
+      await loadProcedures();
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setProcedureSaving(false);
+    }
+  };
+
+  const handleDeleteProcedure = async (recordId: string) => {
+    if (!clientId) return;
+    setConfirmLoading(true);
+    try {
+      await clientsApi.deleteProcedure(clientId, recordId);
+      setConfirm(null);
+      await loadProcedures();
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setConfirmLoading(false);
+    }
   };
 
   const startEdit = () => {
@@ -615,39 +715,182 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
             )}
 
             {tab === 'historico' && detail && (
-              <div>
-                <p className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">
-                  <RiHistoryLine size={12} /> Agendamentos
-                </p>
-                {sortedAppointments.length === 0 ? (
-                  <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-text-muted">
-                    Nenhum agendamento registrado.
-                  </p>
-                ) : (
-                  <ul className="space-y-1.5 text-xs">
-                    {sortedAppointments.map(a => (
-                      <li
-                        key={a.id}
-                        className="flex items-center justify-between rounded-lg border border-border bg-bg px-3 py-2"
-                      >
-                        <div>
-                          <p className="font-medium text-text-primary">{a.serviceName}</p>
-                          <p className="text-text-muted">
-                            {new Date(a.date).toLocaleDateString('pt-BR')} {a.time}
-                          </p>
-                        </div>
-                        <span
-                          className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${
-                            APPOINTMENT_STATUS_STYLE[a.status] ??
-                            'border border-gray-500/30 bg-gray-500/15 text-gray-400'
-                          }`}
+              <div className="space-y-5">
+                {/* Procedure Records */}
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">
+                      <Scissors size={12} /> Procedimentos
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => startProcedureForm()}
+                      className="flex items-center gap-1 rounded-lg bg-accent/15 px-2 py-1 text-[11px] font-bold text-accent hover:bg-accent/25"
+                    >
+                      <RiAddLine size={12} /> Novo
+                    </button>
+                  </div>
+
+                  {showProcedureForm && (
+                    <form onSubmit={handleSubmitProcedure(handleProcedureSubmit)} className="mb-3 space-y-2 rounded-xl border border-accent/30 bg-accent/5 p-3">
+                      <p className="text-xs font-bold text-text-primary">
+                        {editingProcedure ? 'Editar procedimento' : 'Novo procedimento'}
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Field label="Título" error={procedureErrors.title?.message}>
+                          <input
+                            className={procedureErrors.title ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                            placeholder="Ex: Coloração"
+                            {...registerProcedure('title')}
+                          />
+                        </Field>
+                        <Field label="Profissional" error={procedureErrors.professionalName?.message}>
+                          <input
+                            className={procedureErrors.professionalName ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                            placeholder="Nome do profissional"
+                            {...registerProcedure('professionalName')}
+                          />
+                        </Field>
+                      </div>
+                      <Field label="Fórmula / Produto" error={procedureErrors.formula?.message}>
+                        <input
+                          className={FIELD_CONTROL}
+                          placeholder="Ex: Wella 7.1 + 20 vol"
+                          {...registerProcedure('formula')}
+                        />
+                      </Field>
+                      <Field label="Serviço" error={procedureErrors.serviceName?.message}>
+                        <input
+                          className={FIELD_CONTROL}
+                          placeholder="Ex: Coloração"
+                          {...registerProcedure('serviceName')}
+                        />
+                      </Field>
+                      <Field label="Detalhes" error={procedureErrors.details?.message}>
+                        <textarea
+                          className={`${FIELD_CONTROL} resize-none`}
+                          placeholder="Tempo, técnica, observações..."
+                          rows={2}
+                          {...registerProcedure('details')}
+                        />
+                      </Field>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => { setShowProcedureForm(false); setEditingProcedure(null); }}
+                          className="flex-1 rounded-lg bg-surface-2 py-2 text-xs font-bold text-text-secondary"
                         >
-                          {APPOINTMENT_STATUS_LABEL[a.status] ?? a.status}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                          Cancelar
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={procedureSaving}
+                          className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-accent py-2 text-xs font-bold text-accent-fg disabled:opacity-50"
+                        >
+                          {procedureSaving ? 'Salvando…' : editingProcedure ? 'Salvar' : 'Registrar'}
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
+                  {proceduresLoading ? (
+                    <div className="flex items-center justify-center py-4 text-text-muted">
+                      <RiLoader4Line className="animate-spin" size={16} />
+                    </div>
+                  ) : procedures.length === 0 ? (
+                    <p className="rounded-xl border border-dashed border-border p-4 text-center text-sm text-text-muted">
+                      Nenhum procedimento registrado.
+                    </p>
+                  ) : (
+                    <div className="relative space-y-0">
+                      <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-border" />
+                      {procedures.map(proc => (
+                        <div key={proc.id} className="relative flex gap-3 py-2">
+                          <div className="relative z-10 mt-1 h-5 w-5 shrink-0 rounded-full border-2 border-border bg-surface flex items-center justify-center">
+                            <Scissors size={10} className="text-accent" />
+                          </div>
+                          <div className="min-w-0 flex-1 rounded-lg border border-border bg-bg p-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0">
+                                <p className="text-sm font-bold text-text-primary">{proc.title}</p>
+                                <p className="text-xs text-text-muted">{proc.professionalName}</p>
+                              </div>
+                              <div className="flex shrink-0 gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => startProcedureForm(proc)}
+                                  className="rounded p-1 text-text-muted hover:text-accent"
+                                  aria-label="Editar"
+                                >
+                                  <RiEditLine size={12} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setConfirm({ type: 'deleteProcedure', recordId: proc.id })}
+                                  className="rounded p-1 text-text-muted hover:text-danger"
+                                  aria-label="Excluir"
+                                >
+                                  <RiDeleteBin6Line size={12} />
+                                </button>
+                              </div>
+                            </div>
+                            {proc.formula && (
+                              <p className="mt-1 flex items-center gap-1 text-xs text-text-secondary">
+                                <FlaskConical size={10} /> {proc.formula}
+                              </p>
+                            )}
+                            {proc.details && (
+                              <p className="mt-1 text-xs text-text-muted">{proc.details}</p>
+                            )}
+                            {proc.serviceName && (
+                              <p className="mt-1 text-[10px] text-text-muted">Serviço: {proc.serviceName}</p>
+                            )}
+                            <p className="mt-1 flex items-center gap-1 text-[10px] text-text-muted">
+                              <Clock size={9} />
+                              {new Date(proc.occurredAt).toLocaleDateString('pt-BR')} {new Date(proc.occurredAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Appointments */}
+                <div>
+                  <p className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">
+                    <RiHistoryLine size={12} /> Agendamentos
+                  </p>
+                  {sortedAppointments.length === 0 ? (
+                    <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-text-muted">
+                      Nenhum agendamento registrado.
+                    </p>
+                  ) : (
+                    <ul className="space-y-1.5 text-xs">
+                      {sortedAppointments.map(a => (
+                        <li
+                          key={a.id}
+                          className="flex items-center justify-between rounded-lg border border-border bg-bg px-3 py-2"
+                        >
+                          <div>
+                            <p className="font-medium text-text-primary">{a.serviceName}</p>
+                            <p className="text-text-muted">
+                              {new Date(a.date).toLocaleDateString('pt-BR')} {a.time}
+                            </p>
+                          </div>
+                          <span
+                            className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${
+                              APPOINTMENT_STATUS_STYLE[a.status] ??
+                              'border border-gray-500/30 bg-gray-500/15 text-gray-400'
+                            }`}
+                          >
+                            {APPOINTMENT_STATUS_LABEL[a.status] ?? a.status}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </div>
             )}
 
@@ -763,6 +1006,16 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
         variant="danger"
         loading={confirmLoading}
         onConfirm={() => confirm?.type === 'cancelSale' && void handleCancelSale(confirm.packageId)}
+        onCancel={() => setConfirm(null)}
+      />
+      <ConfirmDialog
+        open={confirm?.type === 'deleteProcedure'}
+        title="Excluir procedimento"
+        message="Tem certeza que deseja excluir este registro de procedimento?"
+        confirmLabel="Excluir"
+        variant="danger"
+        loading={confirmLoading}
+        onConfirm={() => confirm?.type === 'deleteProcedure' && void handleDeleteProcedure(confirm.recordId)}
         onCancel={() => setConfirm(null)}
       />
 

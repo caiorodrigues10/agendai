@@ -19,6 +19,22 @@ export interface ListMeta {
   totalPages: number;
 }
 
+export interface ProcedureRecord {
+  id: string;
+  barbershopId: string;
+  clientId: string;
+  professionalName: string;
+  title: string;
+  formula: string | null;
+  details: string | null;
+  serviceName: string | null;
+  queueItemId: string | null;
+  appointmentId: string | null;
+  occurredAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const clientsApi = {
   list: async (params?: { search?: string; page?: number; limit?: number }) => {
     const res = await apiClient<{ success: boolean; data: SalonClient[]; meta: ListMeta }>(
@@ -70,5 +86,71 @@ export const clientsApi = {
 
   delete: async (id: string) => {
     await apiClient<void>(`/api/clients/${id}`, 'DELETE', undefined, token());
+  },
+
+  // Procedure records
+  listProcedures: async (clientId: string, limit?: number) => {
+    const query = limit ? `?limit=${limit}` : '';
+    const res = await apiClient<{ success: boolean; data: ProcedureRecord[] }>(
+      `/api/clients/${clientId}/procedures${query}`,
+      'GET',
+      undefined,
+      token()
+    );
+    return unwrap<ProcedureRecord[]>(res);
+  },
+
+  getLatestProcedure: async (clientId: string) => {
+    const res = await apiClient<{ success: boolean; data: ProcedureRecord | null }>(
+      `/api/clients/${clientId}/procedures/latest`,
+      'GET',
+      undefined,
+      token()
+    );
+    return unwrap<ProcedureRecord | null>(res);
+  },
+
+  createProcedure: async (clientId: string, body: {
+    professionalName: string;
+    title: string;
+    formula?: string;
+    details?: string;
+    serviceName?: string;
+    queueItemId?: string;
+    appointmentId?: string;
+    occurredAt?: string;
+  }) => {
+    const res = await apiClient<{ success: boolean; data: ProcedureRecord }>(
+      `/api/clients/${clientId}/procedures`,
+      'POST',
+      body,
+      token()
+    );
+    return unwrap<ProcedureRecord>(res);
+  },
+
+  updateProcedure: async (clientId: string, recordId: string, body: {
+    professionalName?: string;
+    title?: string;
+    formula?: string | null;
+    details?: string | null;
+    serviceName?: string | null;
+  }) => {
+    const res = await apiClient<{ success: boolean; data: ProcedureRecord }>(
+      `/api/clients/${clientId}/procedures/${recordId}`,
+      'PATCH',
+      body,
+      token()
+    );
+    return unwrap<ProcedureRecord>(res);
+  },
+
+  deleteProcedure: async (clientId: string, recordId: string) => {
+    await apiClient<void>(
+      `/api/clients/${clientId}/procedures/${recordId}`,
+      'DELETE',
+      undefined,
+      token()
+    );
   },
 };

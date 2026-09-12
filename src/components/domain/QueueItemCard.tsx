@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { QueueItem, Service, StaffMember } from '../../types';
 import { DynamicIcon } from '../ui/DynamicIcon';
 import {
@@ -14,8 +14,11 @@ import {
   Banknote,
   Smartphone,
   UserPlus,
+  Scissors,
+  FlaskConical,
 } from 'lucide-react';
 import { notificationsApi } from '../../infra/notificationsApi';
+import { clientsApi, ProcedureRecord } from '../../infra/clientsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { RetailCheckoutBlock } from './RetailCheckoutBlock';
 import type { RetailSalePayload } from '../../infra/productsApi';
@@ -36,7 +39,7 @@ interface QueueItemCardProps {
   onStatusChange: (
     id: string,
     status: QueueItem['status'],
-    extras?: { paymentMethod?: QueueItem['paymentMethod']; commissionSplits?: { professionalId: string; percentage: number }[]; retailSale?: import('../../infra/productsApi').RetailSalePayload }
+    extras?: { paymentMethod?: QueueItem['paymentMethod']; commissionSplits?: { professionalId: string; percentage: number }[]; retailSale?: import('../../infra/productsApi').RetailSalePayload; procedure?: { title: string; professionalName?: string; formula?: string; details?: string; serviceName?: string } }
   ) => void;
   onLeaveQueue: (id: string) => void;
   onReturnToQueue?: (item: QueueItem) => void;
@@ -64,6 +67,12 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
 }) => {
   const canSellProducts = Boolean(enableProductSales);
   const canOverridePrice = Boolean(canOverrideProductPrice);
+
+  useEffect(() => {
+    if (item.clientId && item.status === 'in_chair') {
+      clientsApi.getLatestProcedure(item.clientId).then(setLastProcedure).catch(() => {});
+    }
+  }, [item.clientId, item.status]);
   const [retailSale, setRetailSale] = useState<(RetailSalePayload & { total: number }) | null>(null);
   const [sending, setSending] = useState<'reminder' | 'next' | null>(null);
   const [showPaymentPicker, setShowPaymentPicker] = useState(false);
@@ -73,6 +82,10 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
     const professionalId = currentUserId || staff[0]?.id;
     return percent > 0 && professionalId ? [{ professionalId, percentage: percent }] : [];
   });
+  const [lastProcedure, setLastProcedure] = useState<ProcedureRecord | null>(null);
+  const [procedureTitle, setProcedureTitle] = useState('');
+  const [procedureFormula, setProcedureFormula] = useState('');
+  const [procedureDetails, setProcedureDetails] = useState('');
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'in_chair':
@@ -143,10 +156,18 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
   const handleFinalize = async (paymentMethod: QueueItem['paymentMethod']) => {
     setSubmittingFinalization(true);
     try {
+      const procedure = procedureTitle.trim() ? {
+        title: procedureTitle.trim(),
+        professionalName: staff.find(s => s.id === currentUserId)?.name || 'Profissional',
+        formula: procedureFormula.trim() || undefined,
+        details: procedureDetails.trim() || undefined,
+        serviceName: service?.name,
+      } : undefined;
       await onStatusChange(item.id, 'completed', {
         paymentMethod,
         commissionSplits: commissionSplits.length ? commissionSplits : undefined,
         retailSale: retailSale ? { paymentMethod: retailSale.paymentMethod, items: retailSale.items, discount: retailSale.discount, clientId: retailSale.clientId } : undefined,
+        procedure,
       });
       setShowPaymentPicker(false);
     } finally {
@@ -200,6 +221,24 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
                 })}
               </span>
             </div>
+            {lastProcedure && item.status === 'in_chair' && (
+              <div className="mt-2 rounded-lg border border-accent/20 bg-accent/5 px-2 py-1.5 text-xs">
+                <p className="flex items-center gap-1 font-medium text-accent">
+                  <Scissors size={10} /> Último procedimento
+                </p>
+                <p className="text-text-secondary">
+                  {lastProcedure.title} — {lastProcedure.professionalName}
+                </p>
+                {lastProcedure.formula && (
+                  <p className="flex items-center gap-1 text-text-muted">
+                    <FlaskConical size={9} /> {lastProcedure.formula}
+                  </p>
+                )}
+                <p className="text-[10px] text-text-muted">
+                  {new Date(lastProcedure.occurredAt).toLocaleDateString('pt-BR')}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -313,6 +352,34 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
             </p>
 
             <div className="mt-4 grid grid-cols-1 gap-2">
+              {/* Procedure record fields */}
+              <div className="rounded-xl border border-accent/20 bg-accent/5 p-3">
+                <p className="flex items-center gap-1 text-xs font-bold text-accent">
+                  <Scissors size={12} /> Registrar procedimento (opcional)
+                </p>
+                <input
+                  type="text"
+                  placeholder="Título (ex: Coloração, Luzes, Degradê)"
+                  value={procedureTitle}
+                  onChange={e => setProcedureTitle(e.target.value)}
+                  className="mt-2 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted"
+                />
+                <input
+                  type="text"
+                  placeholder="Fórmula / Produto (ex: Wella 7.1 + 20 vol)"
+                  value={procedureFormula}
+                  onChange={e => setProcedureFormula(e.target.value)}
+                  className="mt-2 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted"
+                />
+                <input
+                  type="text"
+                  placeholder="Detalhes (tempo, técnica, observações)"
+                  value={procedureDetails}
+                  onChange={e => setProcedureDetails(e.target.value)}
+                  className="mt-2 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted"
+                />
+              </div>
+
               {(service?.commissionPercent ?? 0) > 0 && (
                 <div className="rounded-xl border border-border bg-bg p-3 text-sm">
                   <p className="font-semibold text-text-primary">Divisão da comissão ({service?.commissionPercent}%)</p>
