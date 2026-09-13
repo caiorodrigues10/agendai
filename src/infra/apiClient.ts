@@ -281,18 +281,31 @@ export const apiClient = async <T>(
 export const apiFetch = async (
   url: string,
   init: RequestInit = {},
-  token?: string
+  token?: string,
+  retried = false
 ): Promise<Response> => {
   checkRateLimit();
   const headers = new Headers(init.headers);
   if (token && !headers.has('Authorization')) headers.set('Authorization', `Bearer ${token}`);
 
   try {
-    return await fetch(`${API_BASE}${url}`, {
+    const response = await fetch(`${API_BASE}${url}`, {
       ...init,
       headers,
       credentials: init.credentials ?? 'include',
     });
+    const corrId = response.headers.get('x-correlation-id');
+    if (corrId) setLastCorrelationId(corrId);
+    if (
+      response.status === 401 &&
+      token &&
+      !retried &&
+      !NO_REFRESH_PATHS.some(p => url.startsWith(p))
+    ) {
+      const nextToken = await refreshAccessToken();
+      if (nextToken) return apiFetch(url, init, nextToken, true);
+    }
+    return response;
   } catch (err) {
     throw new ApiError(
       'Não foi possível conectar ao servidor. Verifique se a API está no ar e tente de novo.',
