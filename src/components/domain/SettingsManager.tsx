@@ -451,18 +451,20 @@ const SalonWhatsAppConnection: React.FC<{
       {showDisconnectModal &&
         createPortal(
           <div
-            className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 p-4"
-            role="presentation"
-            onClick={() => {
-              if (!busy) setShowDisconnectModal(false);
-            }}
+            className="fixed inset-0 z-[110] flex items-center justify-center p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="disconnect-whatsapp-title"
           >
+            <button
+              type="button"
+              aria-label="Fechar modal"
+              disabled={busy}
+              onClick={() => setShowDisconnectModal(false)}
+              className="absolute inset-0 bg-black/60 disabled:cursor-default"
+            />
             <div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="disconnect-whatsapp-title"
-              className="w-full max-w-md rounded-2xl bg-surface border border-border p-5 shadow-2xl"
-              onClick={e => e.stopPropagation()}
+              className="relative w-full max-w-md rounded-2xl bg-surface border border-border p-5 shadow-2xl"
             >
               <h4 id="disconnect-whatsapp-title" className="text-lg font-bold text-text-primary">
                 Desconectar WhatsApp?

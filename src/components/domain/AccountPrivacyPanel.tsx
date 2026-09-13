@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { authStorage } from '../../infra/authStorage';
+import { apiFetch } from '../../infra/apiClient';
 import { usersApi } from '../../infra/usersApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import {
@@ -35,10 +36,9 @@ export const AccountPrivacyPanel: React.FC<AccountPrivacyPanelProps> = ({ onNoti
   const handleExport = async (format: 'json' | 'csv') => {
     setExporting(format);
     try {
-      const response = await fetch(`/api/users/me/export?format=${format}`, {
+      const response = await apiFetch(`/api/users/me/export?format=${format}`, {
         method: 'GET',
-        headers: { Authorization: `Bearer ${token()}` },
-      });
+      }, token());
       if (!response.ok) throw new Error('Não foi possível exportar os dados.');
 
       const blob = new Blob([await response.blob()], {

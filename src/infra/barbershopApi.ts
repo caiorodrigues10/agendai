@@ -1,4 +1,4 @@
-import { API_BASE, apiClient } from './apiClient';
+import { API_BASE, apiClient, apiFetch } from './apiClient';
 import { authStorage } from './authStorage';
 import { DaySchedule, Service, StaffMember, FeedPost, PostMode, PostConfig, OperationMode, OpeningMode, ManualShopStatus, ShopOpenState, ScheduleException, BusinessSegment } from '../types';
 import { mapScheduleToApi } from '../utils/schedulingUtils';
@@ -606,13 +606,10 @@ export const barbershopApi = {
     const formData = new FormData();
     formData.append('video', file);
 
-    const response = await fetch(`/api/feed/${encodeURIComponent(barbershopId)}/video`, {
+    const response = await apiFetch(`/api/feed/${encodeURIComponent(barbershopId)}/video`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
       body: formData,
-    });
+    }, token);
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'Erro ao enviar vídeo' }));

@@ -30,16 +30,13 @@ export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'succes
   const probe = useCallback(async () => {
     try {
       setError(null);
-      const result = await productsApi.listProducts({ lowStock: 'true', limit: 1, page: 1 });
+      const result = await productsApi.listProducts({ active: 'true', lowStock: 'true', limit: 1, page: 1 });
       setLowStockCount(result.meta.total);
       if (canReports) {
         const from = new Date(Date.now() - 29 * 86_400_000).toISOString().slice(0, 10);
         const to = new Date().toISOString().slice(0, 10);
         const reports = await productsApi.reports(from, to);
         setNeedsReorderCount(reports.attention?.needsReorder.length ?? 0);
-        if (reports.attention?.missing.length != null) {
-          setLowStockCount(reports.attention.missing.length);
-        }
       } else {
         setNeedsReorderCount(0);
       }

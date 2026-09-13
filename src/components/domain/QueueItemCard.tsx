@@ -67,6 +67,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
 }) => {
   const canSellProducts = Boolean(enableProductSales);
   const canOverridePrice = Boolean(canOverrideProductPrice);
+  const [lastProcedure, setLastProcedure] = useState<ProcedureRecord | null>(null);
 
   useEffect(() => {
     if (item.clientId && item.status === 'in_chair') {
@@ -82,7 +83,6 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
     const professionalId = currentUserId || staff[0]?.id;
     return percent > 0 && professionalId ? [{ professionalId, percentage: percent }] : [];
   });
-  const [lastProcedure, setLastProcedure] = useState<ProcedureRecord | null>(null);
   const [procedureTitle, setProcedureTitle] = useState('');
   const [procedureFormula, setProcedureFormula] = useState('');
   const [procedureDetails, setProcedureDetails] = useState('');

@@ -71,7 +71,9 @@ export const ShowcasePublicPage: React.FC = () => {
               controls
               className="w-full aspect-video object-cover"
               poster={selectedEntry.mediaUrl}
-            />
+            >
+              <track kind="captions" label="Português" srcLang="pt-BR" />
+            </video>
           ) : (
             <img
               src={selectedEntry.mediaUrl}

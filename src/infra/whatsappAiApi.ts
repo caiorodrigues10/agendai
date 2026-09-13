@@ -54,10 +54,31 @@ export interface IntentStats {
   avgConfidence: number;
 }
 
-type ProcessResult = { conversationId: string; message: AiMessage; intent: string; confidence: number; transferredToHuman: boolean };
-type ListResult = { conversations: AiConversation[]; total: number; page: number; limit: number };
-type DetailResult = AiConversation & { messages: AiMessage[] };
-type LogsResult = { logs: AiIntentLog[]; total: number; page: number; limit: number };
+interface ProcessResult {
+  conversationId: string;
+  message: AiMessage;
+  intent: string;
+  confidence: number;
+  transferredToHuman: boolean;
+}
+
+interface ListResult {
+  conversations: AiConversation[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+interface DetailResult extends AiConversation {
+  messages: AiMessage[];
+}
+
+interface LogsResult {
+  logs: AiIntentLog[];
+  total: number;
+  page: number;
+  limit: number;
+}
 
 export const whatsappAiApi = {
   processIncoming: (barbershopId: string, phone: string, content: string) =>

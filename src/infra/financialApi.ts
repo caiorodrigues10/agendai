@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient';
+import { apiClient, apiFetch } from './apiClient';
 import { authStorage } from './authStorage';
 import type { ShopWeatherDay } from './barbershopApi';
 import { buildQuery } from '../utils/query';
@@ -297,9 +297,7 @@ export const financialApi = {
 
   exportExpensesCsv: async (params?: Record<string, string | undefined>) => {
     const query = buildQuery(params);
-    const response = await fetch(`/api/expenses${query}`, {
-      headers: { Authorization: `Bearer ${token()}` },
-    });
+    const response = await apiFetch(`/api/expenses${query}`, {}, token());
     const data = await response.json();
     const items: ExpenseItem[] = data.data ?? data;
     const header =

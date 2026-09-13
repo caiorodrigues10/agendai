@@ -1,5 +1,10 @@
 export type WeatherEffect = 'sun' | 'clouds' | 'rain' | 'storm' | 'fog';
-export type WeatherVisual = { image: string; accent: string; glow: string; effect: WeatherEffect };
+export interface WeatherVisual {
+  image: string;
+  accent: string;
+  glow: string;
+  effect: WeatherEffect;
+}
 
 export function getWeatherVisual(code: number, condition = ''): WeatherVisual {
   const name = condition.toLowerCase();

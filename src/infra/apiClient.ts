@@ -277,3 +277,28 @@ export const apiClient = async <T>(
   }
   return parsed as T;
 };
+
+export const apiFetch = async (
+  url: string,
+  init: RequestInit = {},
+  token?: string
+): Promise<Response> => {
+  checkRateLimit();
+  const headers = new Headers(init.headers);
+  if (token && !headers.has('Authorization')) headers.set('Authorization', `Bearer ${token}`);
+
+  try {
+    return await fetch(`${API_BASE}${url}`, {
+      ...init,
+      headers,
+      credentials: init.credentials ?? 'include',
+    });
+  } catch (err) {
+    throw new ApiError(
+      'Não foi possível conectar ao servidor. Verifique se a API está no ar e tente de novo.',
+      0,
+      'NETWORK_ERROR',
+      { cause: err instanceof Error ? err.message : String(err) }
+    );
+  }
+};

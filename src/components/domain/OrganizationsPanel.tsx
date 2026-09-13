@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { organizationsApi, Organization } from "@/infra/organizationsApi";
 
 export function OrganizationsPanel() {
@@ -8,18 +8,18 @@ export function OrganizationsPanel() {
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ name: "", slug: "", logoUrl: "" });
 
-  useEffect(() => {
-    loadOrgs();
-  }, []);
-
-  async function loadOrgs() {
+  const loadOrgs = useCallback(async () => {
     try {
       const data = await organizationsApi.listMy();
       setOrgs(data);
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    void loadOrgs();
+  }, [loadOrgs]);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
