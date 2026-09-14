@@ -55,6 +55,23 @@ describe('StaffNavigation', () => {
     expect(screen.queryByRole('dialog', { name: 'Mais opções' })).not.toBeInTheDocument();
   });
 
+  it('aplica font-display (Syne) nos títulos, rótulos e itens de navegação', async () => {
+    const user = userEvent.setup();
+
+    render(<StaffNavigation activeTab="overview" userRole="OWNER" onNavigate={vi.fn()} />);
+
+    const desktopNav = screen.getByRole('navigation', { name: 'Navegação do painel' });
+    expect(within(desktopNav).getByText('Áreas do salão')).toHaveClass('font-display');
+    expect(within(desktopNav).getByText('Visão Geral')).toHaveClass('font-display');
+
+    const compactNav = screen.getByRole('navigation', { name: 'Navegação compacta do painel' });
+    expect(within(compactNav).getByText('Mais')).toHaveClass('font-display');
+
+    await user.click(within(compactNav).getByText('Mais'));
+    const dialog = screen.getByRole('dialog', { name: 'Mais opções' });
+    expect(within(dialog).getByText('Mais opções')).toHaveClass('font-display');
+  });
+
   it('mostra Produtos na folha Mais só com dashboard Pro', async () => {
     const user = userEvent.setup();
 

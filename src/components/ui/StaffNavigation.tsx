@@ -86,7 +86,7 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
             <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-text-muted">
               Navegação
             </p>
-            <p className="mt-1 text-sm font-semibold text-text-primary">Áreas do salão</p>
+            <p className="mt-1 font-display text-sm font-bold tracking-wide text-text-primary">Áreas do salão</p>
           </div>
 
           <div className="space-y-4">
@@ -94,7 +94,7 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
               <section key={group.id} aria-labelledby={`desktop-nav-${group.id}`}>
                 <p
                   id={`desktop-nav-${group.id}`}
-                  className="mb-1.5 px-2 text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted"
+                  className="mb-1.5 px-2 font-display text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted"
                 >
                   {group.label}
                 </p>
@@ -140,7 +140,7 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
             }`}
           >
             <RiMore2Line size={20} />
-            <span>Mais</span>
+            <span className="font-display font-semibold">Mais</span>
           </button>
         </div>
       </nav>
@@ -164,12 +164,12 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
               <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-border-strong" />
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-text-muted">
+                  <p className="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
                     Navegação
                   </p>
                   <h2
                     id="staff-navigation-more-title"
-                    className="mt-1 text-lg font-semibold text-text-primary"
+                    className="mt-1 font-display text-lg font-bold tracking-wide text-text-primary"
                   >
                     Mais opções
                   </h2>
@@ -189,7 +189,7 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
                   <section key={group.id} aria-labelledby={`mobile-nav-${group.id}`}>
                     <p
                       id={`mobile-nav-${group.id}`}
-                      className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-text-muted"
+                      className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted"
                     >
                       {group.label}
                     </p>
@@ -241,7 +241,7 @@ function DesktopNavigationItem({
       >
         <tab.icon size={17} />
       </span>
-      <span className="truncate">{tab.label}</span>
+      <span className="font-display truncate text-[13px] font-semibold">{tab.label}</span>
     </button>
   );
 }
@@ -307,7 +307,7 @@ function MoreNavigationItem({
       >
         <tab.icon size={18} />
       </span>
-      <span className="min-w-0 truncate text-sm font-semibold">{tab.label}</span>
+      <span className="min-w-0 truncate font-display text-sm font-bold">{tab.label}</span>
     </button>
   );
 }
