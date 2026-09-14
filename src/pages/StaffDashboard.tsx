@@ -47,7 +47,6 @@ import { productsApi } from '../infra/productsApi';
 import { CashPanel } from '../components/domain/CashPanel';
 import { LoyaltyPanel } from '../components/domain/LoyaltyPanel';
 import { GoalsPanel } from '../components/domain/GoalsPanel';
-import { EnhancedForecastPanel } from '../components/domain/EnhancedForecastPanel';
 import { RecommendationsPanel } from '../components/domain/RecommendationsPanel';
 import { DepositPolicyPanel } from '../components/domain/DepositPolicyPanel';
 import { WaitlistPanel } from '../components/domain/WaitlistPanel';
@@ -504,7 +503,6 @@ export const StaffDashboard: React.FC = () => {
                 allStaff={staff}
                 onDeleteHistoryItem={deleteHistoryItem}
               />
-              <EnhancedForecastPanel />
               <RecommendationsPanel />
             </div>
           )}
