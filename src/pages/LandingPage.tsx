@@ -9,13 +9,9 @@ import {
   Calendar,
   CheckCircle2,
   ChevronRight,
-  Cloud,
   CloudRain,
-  CloudSun,
   Scissors,
   Smartphone,
-  Sun,
-  Thermometer,
   TrendingUp,
   Users,
   Zap,
@@ -26,6 +22,7 @@ import { SeoHead } from '../components/marketing/SeoHead';
 import { FloatingPathsBackground } from '../components/ui/floating-paths';
 import { trialCampaign } from '../marketing/trialCampaign';
 import { softwareApplicationLd } from '../marketing/softwareApplicationLd';
+import { getWeatherVisual } from '../utils/weatherVisuals';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -121,12 +118,12 @@ const planFeatures = {
 };
 
 const weatherTimeline = [
-  { day: 'Seg', date: '01/09', icon: Sun, temp: '28°', precip: '5%', barWidth: '5%', barColor: 'bg-emerald-400', risk: 'low', label: 'Normal', demand: '100%', demandColor: 'text-emerald-400' },
-  { day: 'Ter', date: '02/09', icon: CloudSun, temp: '24°', precip: '30%', barWidth: '30%', barColor: 'bg-yellow-400', risk: 'medium', label: 'Leve queda', demand: '85%', demandColor: 'text-yellow-400' },
-  { day: 'Qua', date: '03/09', icon: CloudRain, temp: '19°', precip: '85%', barWidth: '85%', barColor: 'bg-red-400', risk: 'high', label: '-35%', demand: '65%', demandColor: 'text-red-400' },
-  { day: 'Qui', date: '04/09', icon: CloudSun, temp: '22°', precip: '40%', barWidth: '40%', barColor: 'bg-yellow-400', risk: 'medium', label: 'Leve queda', demand: '88%', demandColor: 'text-yellow-400' },
-  { day: 'Sex', date: '05/09', icon: Sun, temp: '27°', precip: '10%', barWidth: '10%', barColor: 'bg-emerald-400', risk: 'low', label: 'Normal', demand: '105%', demandColor: 'text-emerald-400' },
-  { day: 'Sáb', date: '06/09', icon: Sun, temp: '30°', precip: '0%', barWidth: '3%', barColor: 'bg-emerald-400', risk: 'low', label: 'Movimento alto', demand: '120%', demandColor: 'text-emerald-300' },
+  { day: 'Seg', date: '01/09', weatherCode: 0, condition: 'Ensolarado', tempMax: 28, tempMin: 20, precip: 5, risk: 'low', label: 'Normal', demand: 100 },
+  { day: 'Ter', date: '02/09', weatherCode: 2, condition: 'Parcialmente nublado', tempMax: 24, tempMin: 18, precip: 30, risk: 'medium', label: 'Leve queda', demand: 85 },
+  { day: 'Qua', date: '03/09', weatherCode: 61, condition: 'Chuva intensa', tempMax: 19, tempMin: 16, precip: 85, risk: 'high', label: '-35%', demand: 65 },
+  { day: 'Qui', date: '04/09', weatherCode: 3, condition: 'Nublado', tempMax: 22, tempMin: 17, precip: 40, risk: 'medium', label: 'Leve queda', demand: 88 },
+  { day: 'Sex', date: '05/09', weatherCode: 1, condition: 'Céu limpo', tempMax: 27, tempMin: 19, precip: 10, risk: 'low', label: 'Normal', demand: 105 },
+  { day: 'Sáb', date: '06/09', weatherCode: 0, condition: 'Ensolarado', tempMax: 30, tempMin: 21, precip: 0, risk: 'low', label: 'Movimento alto', demand: 120 },
 ] as const;
 
 export const LandingPage: React.FC = () => {
@@ -1883,93 +1880,98 @@ export const LandingPage: React.FC = () => {
 
               <div className="grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
                 {weatherTimeline.map((d) => {
-                  const Icon = d.icon;
-                  const weather = d.icon === Sun ? 'sunny' : d.icon === CloudRain ? 'rainy' : 'cloudy';
-                  const condition = weather === 'sunny' ? 'Céu aberto' : weather === 'rainy' ? 'Chuva intensa' : 'Sol entre nuvens';
+                  const visual = getWeatherVisual(d.weatherCode, d.condition);
                   return (
                     <div
                       key={d.day}
                       data-stagger-item
-                      className={`group relative isolate min-w-0 overflow-hidden rounded-2xl border text-center transition-transform duration-300 motion-safe:hover:-translate-y-1 ${
-                        weather === 'sunny'
-                          ? 'border-amber-200/25 bg-gradient-to-b from-[#725127] via-[#302b23] to-[#141b1b]'
-                          : weather === 'rainy'
-                            ? 'border-sky-200/25 bg-gradient-to-b from-[#334b69] via-[#203449] to-[#131d2a]'
-                            : 'border-slate-200/25 bg-gradient-to-b from-[#536b7b] via-[#303f4b] to-[#182229]'
-                      }`}
+                      className="group relative isolate min-h-[280px] min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#101312] text-left shadow-2xl shadow-black/25 transition-transform duration-300 motion-safe:hover:-translate-y-1"
                     >
-                      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-56 overflow-hidden">
-                        {weather !== 'rainy' && <div className={`absolute -right-5 top-10 h-28 w-28 rounded-full blur-2xl ${weather === 'sunny' ? 'bg-amber-200/40' : 'bg-amber-100/20'}`} />}
-                        {weather !== 'sunny' && <>
-                          <div className="absolute -left-8 top-16 h-12 w-40 rounded-full bg-white/15 blur-xl" />
-                          <div className="absolute -right-10 top-24 h-14 w-36 rounded-full bg-slate-200/15 blur-lg" />
-                        </>}
-                        {weather === 'rainy' && <div className="absolute inset-x-0 bottom-0 h-28 opacity-30" style={{ backgroundImage: 'repeating-linear-gradient(110deg, transparent 0px, transparent 17px, #bae6fd 18px, transparent 19px)', maskImage: 'linear-gradient(transparent, black, transparent)' }} />}
-                      </div>
+                      <img
+                        src={visual.image}
+                        alt=""
+                        className={`weather-image weather-image--${visual.effect} absolute inset-0 h-full w-full object-cover`}
+                      />
+                      <span aria-hidden="true" className={`weather-effect weather-effect--${visual.effect}`} />
+                      <div className="absolute inset-0 z-[2] bg-gradient-to-b from-black/15 via-black/35 to-black/85" />
+                      <div className="absolute inset-x-0 bottom-0 z-[3] h-28 bg-gradient-to-t from-black/60 to-transparent" />
+
                       {d.risk === 'high' && (
-                        <div className="absolute right-2 top-3">
-                          <span className="rounded-full bg-red-300 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-red-950">
+                        <div className="absolute right-3 top-3 z-10">
+                          <span className="rounded-full bg-red-400 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-red-950 shadow-lg shadow-red-950/20">
                             Alerta
                           </span>
                         </div>
                       )}
 
-                      <div className="px-4 pt-5 text-left">
-                        <p className="text-sm font-bold text-white">{d.day}</p>
-                        <p className="mt-0.5 text-[11px] text-white/65">{d.date}</p>
-                      </div>
-
-                      <div className="mb-3 mt-6 flex justify-center">
-                        <Icon aria-hidden="true" strokeWidth={1.3} className={`h-14 w-14 drop-shadow-lg ${weather === 'sunny' ? 'text-amber-200' : weather === 'rainy' ? 'text-sky-200' : 'text-slate-100'}`} />
-                      </div>
-
-                      <p className="text-4xl font-semibold tracking-tighter text-white">{d.temp}</p>
-                      <p className="mb-5 mt-1 text-[11px] font-medium text-white/80">{condition}</p>
-
-                      <div className="border-t border-white/10 bg-black/20 px-3 pb-4 pt-4 sm:px-4">
-                      <div className="space-y-3">
-                        <div>
-                          <div className="mb-1 flex justify-between text-[10px]">
-                            <span className="text-slate-300">Chuva</span>
-                            <span className="text-sky-100">{d.precip}</span>
+                      <div className="relative z-10 flex h-full min-h-[280px] flex-col p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-black text-white">{d.day}</p>
+                            <p className="mt-0.5 text-[11px] font-semibold text-white/60">{d.date}</p>
                           </div>
-                          <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
-                            <div
-                              className="h-full rounded-full bg-sky-300 transition-all duration-500"
-                              style={{ width: d.precip }}
-                            />
-                          </div>
+                          <span className={`h-2.5 w-2.5 rounded-full ${visual.glow} shadow-lg`} />
                         </div>
 
-                        <div>
-                          <div className="mb-1 flex justify-between text-[10px]">
-                            <span className="text-slate-300">Demanda</span>
-                            <span className={`font-bold ${d.demandColor}`}>{d.demand}</span>
-                          </div>
-                          <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
-                            <div
-                              className={`h-full rounded-full ${
-                                d.risk === 'high'
-                                  ? 'bg-red-400'
-                                  : d.risk === 'medium'
-                                    ? 'bg-yellow-400'
-                                    : 'bg-emerald-400'
-                              } transition-all duration-500`}
-                              style={{ width: `${Math.min(parseInt(d.demand), 100)}%` }}
-                            />
-                          </div>
-                        </div>
-                      </div>
+                        <div className="mt-auto">
+                          <p className={`text-4xl font-black leading-none tracking-tight ${visual.accent}`}>
+                            {d.tempMax}°
+                            <span className="ml-1 text-sm font-semibold text-white/50">{d.tempMin}°</span>
+                          </p>
+                          <p className="mt-1 text-xs font-bold leading-tight text-white/90">{d.condition}</p>
 
-                      <p className={`mt-3 text-[10px] font-bold uppercase tracking-wider ${
-                        d.risk === 'high'
-                          ? 'text-red-400'
-                          : d.risk === 'medium'
-                            ? 'text-yellow-400'
-                            : 'text-emerald-300'
-                      }`}>
-                        {d.label}
-                      </p>
+                          <div className="mt-4 space-y-3 rounded-xl border border-white/10 bg-black/28 p-3 backdrop-blur-sm">
+                            <div>
+                              <div className="mb-1 flex justify-between text-[10px]">
+                                <span className="font-semibold text-white/55">Chuva</span>
+                                <span className="font-bold text-sky-100">{d.precip}%</span>
+                              </div>
+                              <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                                <div
+                                  className="h-full rounded-full bg-sky-300 transition-all duration-500"
+                                  style={{ width: `${d.precip}%` }}
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <div className="mb-1 flex justify-between text-[10px]">
+                                <span className="font-semibold text-white/55">Demanda</span>
+                                <span className={`font-black ${
+                                  d.risk === 'high'
+                                    ? 'text-red-300'
+                                    : d.risk === 'medium'
+                                      ? 'text-yellow-300'
+                                      : 'text-emerald-300'
+                                }`}>
+                                  {d.demand}%
+                                </span>
+                              </div>
+                              <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                                <div
+                                  className={`h-full rounded-full ${
+                                    d.risk === 'high'
+                                      ? 'bg-red-400'
+                                      : d.risk === 'medium'
+                                        ? 'bg-yellow-400'
+                                        : 'bg-emerald-400'
+                                  } transition-all duration-500`}
+                                  style={{ width: `${Math.min(d.demand, 100)}%` }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          <p className={`mt-3 text-[10px] font-black uppercase tracking-wider ${
+                            d.risk === 'high'
+                              ? 'text-red-300'
+                              : d.risk === 'medium'
+                                ? 'text-yellow-300'
+                                : 'text-emerald-300'
+                          }`}>
+                            {d.label}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   );
