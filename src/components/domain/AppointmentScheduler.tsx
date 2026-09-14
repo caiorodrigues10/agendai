@@ -140,9 +140,9 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(evt.title)}&dates=${fmt(evt.start)}/${fmt(evt.end)}&details=${encodeURIComponent(evt.details)}&location=${encodeURIComponent(evt.location)}`;
   };
 
-  const generateIcsLink = () => {
+  const openNativeCalendar = () => {
     const evt = getEventDetails();
-    if (!evt) return '#';
+    if (!evt) return;
     const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
     const ics = [
       'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//AgendAI//Appointment//PT-BR',
@@ -150,7 +150,10 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
       `SUMMARY:${evt.title}`, `DESCRIPTION:${evt.details}`, `LOCATION:${evt.location}`,
       'END:VEVENT', 'END:VCALENDAR',
     ].join('\r\n');
-    return `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    setTimeout(() => URL.revokeObjectURL(url), 10_000);
   };
 
   if (bookingComplete) {
@@ -176,13 +179,13 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
           >
             <Calendar size={16} className="text-blue-400" /> Adicionar ao Google Agenda
           </a>
-          <a
-            href={generateIcsLink()}
-            download="agendamento.ics"
+          <button
+            type="button"
+            onClick={openNativeCalendar}
             className="w-full py-3 bg-surface-2 hover:bg-border-strong text-text-primary text-xs font-bold rounded-xl flex items-center justify-center gap-2 border border-border-strong"
           >
-            <Calendar size={16} className="text-accent" /> Baixar arquivo para Apple/Outlook
-          </a>
+            <Calendar size={16} className="text-accent" /> Adicionar ao calendário
+          </button>
           {manageToken && (
             <a
               href={`/agendamento/gerenciar#token=${encodeURIComponent(manageToken)}`}
