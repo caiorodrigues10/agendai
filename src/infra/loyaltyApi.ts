@@ -1,6 +1,5 @@
 import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
-import { buildQuery } from '../utils/query';
 
 function unwrap<T>(res: unknown): T {
   if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
@@ -12,7 +11,7 @@ function token() {
 }
 
 export interface LoyaltyProgram {
-  id: string;
+  id: string | null;
   barbershopId: string;
   type: string;
   isActive: boolean;
@@ -48,38 +47,38 @@ export const loyaltyApi = {
   updateProgram: (barbershopId: string, data: { isActive: boolean; config: any }) =>
     apiClient<{ success: boolean; data: LoyaltyProgram }>(
       `/api/barbershops/${barbershopId}/loyalty/program`,
-      'PUT',
-      data,
+      'POST',
+      { type: 'VISITS', ...data },
       token()
     ).then(res => unwrap<LoyaltyProgram>(res)),
 
   getAccount: (barbershopId: string, clientId: string) =>
-    apiClient<{ success: boolean; data: LoyaltyAccount }>(
-      `/api/clients/${clientId}/loyalty${buildQuery({ barbershopId })}`,
+    apiClient<{ success: boolean; data: { account: LoyaltyAccount; entries: LoyaltyLedgerEntry[] } }>(
+      `/api/barbershops/${barbershopId}/loyalty/accounts/${clientId}`,
       'GET',
       undefined,
       token()
-    ).then(res => unwrap<LoyaltyAccount>(res)),
+    ).then(res => unwrap<{ account: LoyaltyAccount }>(res).account),
 
   getLedger: (barbershopId: string, clientId: string) =>
     apiClient<{ success: boolean; data: LoyaltyLedgerEntry[] }>(
-      `/api/clients/${clientId}/loyalty/ledger${buildQuery({ barbershopId })}`,
+      `/api/barbershops/${barbershopId}/loyalty/accounts/${clientId}`,
       'GET',
       undefined,
       token()
-    ).then(res => unwrap<LoyaltyLedgerEntry[]>(res)),
+    ).then(res => unwrap<{ entries?: LoyaltyLedgerEntry[] }>(res).entries ?? []),
 
   redeemReward: (barbershopId: string, clientId: string) =>
     apiClient<{ success: boolean; data: LoyaltyLedgerEntry }>(
-      '/api/loyalty/redemptions',
+      `/api/barbershops/${barbershopId}/loyalty/redeem`,
       'POST',
-      { barbershopId, clientId },
+      { clientId },
       token()
     ).then(res => unwrap<LoyaltyLedgerEntry>(res)),
 
   getBalance: (barbershopId: string, clientId: string) =>
     apiClient<{ success: boolean; data: { balance: number } }>(
-      `/api/loyalty/accounts/${clientId}/balance${buildQuery({ barbershopId })}`,
+      `/api/barbershops/${barbershopId}/loyalty/accounts/${clientId}/balance`,
       'GET',
       undefined,
       token()
