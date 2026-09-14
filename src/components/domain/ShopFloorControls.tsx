@@ -3,6 +3,7 @@ import { DoorClosed, DoorOpen, RotateCcw, Ban, ListChecks, Clock } from 'lucide-
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import type { ManualShopStatus, OpeningMode } from '../../types';
 
 function statusCopy(open: boolean, reason?: string, queueClosed?: boolean) {
@@ -56,19 +57,6 @@ export const ShopFloorControls: React.FC<ShopFloorControlsProps> = ({
     }
   };
 
-  const confirmLabel =
-    confirm === 'open'
-      ? 'Abrir o salão agora? Clientes poderão entrar na fila.'
-      : confirm === 'close'
-        ? 'Fechar o salão agora? A fila pública e o status de hoje ficam bloqueados.'
-        : confirm === 'auto'
-          ? 'Voltar ao automático? O horário da agenda volta a valer.'
-          : confirm === 'queue'
-            ? queueClosed
-              ? 'Reabrir a fila para novos clientes?'
-              : 'Encerrar a fila por hoje? Quem já está continua; agendamentos seguem valendo.'
-            : null;
-
   return (
     <div className="bg-surface border border-border rounded-xl p-5">
       <div className="flex items-start justify-between gap-3 mb-4">
@@ -86,39 +74,44 @@ export const ShopFloorControls: React.FC<ShopFloorControlsProps> = ({
         </span>
       </div>
 
-      {confirm && (
-        <div className="mb-3 rounded-lg border border-warning/40 bg-warning/10 px-3 py-2.5 text-sm text-text-primary">
-          <p>{confirmLabel}</p>
-          <div className="mt-2 flex gap-2">
-            <button
-              type="button"
-              disabled={Boolean(busy)}
-              onClick={() => {
-                if (confirm === 'open') void run('open', () => setManualStatus('OPEN'), 'Salão aberto.');
-                if (confirm === 'close') void run('close', () => setManualStatus('CLOSED'), 'Salão fechado.');
-                if (confirm === 'auto') void run('auto', () => setManualStatus('AUTO'), 'Voltando ao horário automático.');
-                if (confirm === 'queue') {
-                  void run(
-                    'queue',
-                    () => setQueueClosed(!queueClosed),
-                    queueClosed ? 'Fila reaberta.' : 'Fila encerrada por hoje.'
-                  );
-                }
-              }}
-              className="px-3 py-1.5 rounded-lg bg-accent text-accent-fg text-xs font-bold"
-            >
-              Confirmar
-            </button>
-            <button
-              type="button"
-              onClick={() => setConfirm(null)}
-              className="px-3 py-1.5 rounded-lg border border-border text-xs font-bold text-text-secondary"
-            >
-              Cancelar
-            </button>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={confirm !== null}
+        title={
+          confirm === 'open' ? 'Abrir salão?'
+            : confirm === 'close' ? 'Fechar salão?'
+              : confirm === 'auto' ? 'Voltar ao automático?'
+                : queueClosed ? 'Reabrir fila?' : 'Encerrar fila?'
+        }
+        message={
+          confirm === 'open' ? 'Clientes poderão entrar na fila.'
+            : confirm === 'close' ? 'A fila pública e o status de hoje ficam bloqueados.'
+              : confirm === 'auto' ? 'O horário da agenda volta a valer.'
+                : queueClosed
+                  ? 'Novos clientes poderão entrar na fila.'
+                  : 'Quem já está continua; agendamentos seguem valendo.'
+        }
+        variant={confirm === 'close' ? 'danger' : 'default'}
+        confirmLabel={
+          confirm === 'open' ? 'Abrir'
+            : confirm === 'close' ? 'Fechar'
+              : confirm === 'auto' ? 'Voltar'
+                : queueClosed ? 'Reabrir' : 'Encerrar'
+        }
+        loading={Boolean(busy)}
+        onConfirm={() => {
+          if (confirm === 'open') void run('open', () => setManualStatus('OPEN'), 'Salão aberto.');
+          if (confirm === 'close') void run('close', () => setManualStatus('CLOSED'), 'Salão fechado.');
+          if (confirm === 'auto') void run('auto', () => setManualStatus('AUTO'), 'Voltando ao horário automático.');
+          if (confirm === 'queue') {
+            void run(
+              'queue',
+              () => setQueueClosed(!queueClosed),
+              queueClosed ? 'Fila reaberta.' : 'Fila encerrada por hoje.'
+            );
+          }
+        }}
+        onCancel={() => setConfirm(null)}
+      />
 
       <div className="flex flex-wrap gap-2">
         {open ? (
