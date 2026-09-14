@@ -270,9 +270,7 @@ body.recaptcha-visible .grecaptcha-badge {
 }
 .weather-effect--rain,
 .weather-effect--storm {
-  background-image: repeating-linear-gradient(105deg, transparent 0 16px, rgb(186 230 253 / 0.22) 17px 18px, transparent 19px 33px);
-  background-size: 170% 170%;
-  animation: weather-rain 0.75s linear infinite;
+  display: none;
 }
 .weather-effect--storm::after {
   content: '';
