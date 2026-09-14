@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { CloudRain, Loader2, Sun, Cloud, CloudSun, AlertTriangle } from 'lucide-react';
 import { financialApi, WeatherDemandPrediction } from '../../infra/financialApi';
 import { formatWeatherDayLabel } from '../../utils/weatherUtils';
+import { finiteNumber } from '../../utils/weatherVisuals';
 
 interface DemandAlertBannerProps {
   compact?: boolean;
@@ -30,7 +31,7 @@ export const DemandAlertBanner: React.FC<DemandAlertBannerProps> = ({ compact = 
     financialApi
       .getWeatherInsights(2)
       .then(data => {
-        if (!cancelled && data.predictions.length > 0) {
+        if (!cancelled && data.modelTrained && data.predictions.length > 0) {
           setTomorrow(data.predictions[0]);
         }
       })
@@ -49,7 +50,8 @@ export const DemandAlertBanner: React.FC<DemandAlertBannerProps> = ({ compact = 
     return null;
   }
 
-  const style = RISK_STYLES[tomorrow.riskLevel];
+  const style = RISK_STYLES[tomorrow.riskLevel] ?? RISK_STYLES.low;
+  const dropPct = Math.abs(finiteNumber(tomorrow.dropPct));
 
   return (
     <div className={`rounded-xl border ${style.border} ${style.bg} p-3`}>
@@ -57,7 +59,7 @@ export const DemandAlertBanner: React.FC<DemandAlertBannerProps> = ({ compact = 
         <AlertTriangle className={`h-4 w-4 shrink-0 ${style.icon}`} />
         <div className="min-w-0">
           <p className={`text-xs font-bold ${style.text}`}>
-            {formatWeatherDayLabel(tomorrow.date)}: {tomorrow.condition} — {Math.abs(tomorrow.dropPct)}% menos clientes
+            {formatWeatherDayLabel(tomorrow.date)}: {tomorrow.condition} — {dropPct}% menos clientes
           </p>
           {!compact && (
             <p className="mt-0.5 text-[11px] text-text-muted truncate">{tomorrow.recommendation}</p>

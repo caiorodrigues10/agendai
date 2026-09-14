@@ -38,6 +38,11 @@ export interface CrmClientProfile extends CrmClientMetric {
 }
 
 export const crmApi = {
+  mergeClients: async (body: { targetId: string; sourceIds: string[]; barbershopId?: string }) => {
+    await apiClient<{ success: boolean; message: string }>('/api/crm/clients/merge', 'POST', body, token());
+  },
+  backfillRuns: async (barbershopId?: string) => data(await apiClient<{ data: CrmBackfillRun[] }>(`/api/crm/backfill/runs${query({ barbershopId })}`, 'GET', undefined, token())),
+  backfillAll: async () => data(await apiClient<{ data: CrmBackfillResult[] }>('/api/crm/backfill/all', 'POST', {}, token())),
   overview: async (params: { from?: string; to?: string; compare?: boolean } = {}) => data(await apiClient<{ data: CrmOverview }>(`/api/crm/overview${query(params)}`, 'GET', undefined, token())),
   clients: async (params: { page?: number; limit?: number; search?: string; segment?: CrmSegment; sort?: 'ltv' | 'lastVisit' | 'outstanding'; from?: string; to?: string } = {}) => {
     const result = await apiClient<{ data: CrmClientMetric[]; meta: { total: number; page: number; limit: number; totalPages: number } }>(`/api/crm/clients${query(params)}`, 'GET', undefined, token());
@@ -50,5 +55,18 @@ export const crmApi = {
   createCampaign: async (body: { name: string; segment: CrmSegment; message: string; clientIds?: string[] }) => data(await apiClient<{ data: unknown }>('/api/crm/campaigns', 'POST', body, token())),
   campaigns: async (params: { page?: number; limit?: number; status?: CrmCampaign['status']; from?: string; to?: string } = {}) => apiClient<{ data: CrmCampaign[]; meta: { total: number; page: number; limit: number; totalPages: number } }>(`/api/crm/campaigns${query(params)}`, 'GET', undefined, token()),
   campaign: async (id: string) => data(await apiClient<{ data: CrmCampaign }>(`/api/crm/campaigns/${id}`, 'GET', undefined, token())),
-  backfill: async () => data(await apiClient<{ data: { linked: number; events: number } }>('/api/crm/backfill', 'POST', {}, token())),
+  backfill: async (barbershopId?: string) => data(await apiClient<{ data: CrmBackfillRun }>('/api/crm/backfill', 'POST', barbershopId ? { barbershopId } : {}, token())),
 };
+
+export interface CrmBackfillRun {
+  id: string;
+  barbershopId: string;
+  status: string;
+  linkedRecords: number;
+  createdEvents: number;
+  totalEvents: number;
+  startedAt: string;
+  completedAt: string | null;
+  error: string | null;
+}
+export type CrmBackfillResult = { barbershopId: string; run: CrmBackfillRun; error?: never } | { barbershopId: string; error: string; run?: never };

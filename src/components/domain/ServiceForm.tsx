@@ -1,5 +1,7 @@
+import { Category } from '../../infra/categoriesApi';
+import { SmartSelect } from '../ui/SmartSelect';
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Service } from '../../types';
 import { DynamicIcon, ICON_OPTIONS } from '../ui/DynamicIcon';
@@ -9,20 +11,25 @@ import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_FOOTER, FORM_GRID } fro
 
 interface ServiceFormProps {
   initialService?: Service;
+  categories?: Category[];
+  categoriesLoading?: boolean;
+  categoriesError?: string | null;
   onSave: (service: Omit<Service, 'id'>) => void;
   onCancel: () => void;
 }
 
-export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave, onCancel }) => {
+export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave, onCancel, categories = [], categoriesLoading = false, categoriesError }) => {
   const [selectedIcon, setSelectedIcon] = useState(initialService?.icon || 'Scissors');
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<ServiceFormData>({
     resolver: zodResolver(ServiceSchema),
     defaultValues: {
+      categoryId: initialService?.categoryId ?? null,
       name: initialService?.name || '',
       price: initialService?.price || 0,
       avgTimeMinutes: initialService?.avgTimeMinutes || 30,
@@ -55,6 +62,9 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
             />
           </Field>
 
+          <Field label="Categoria" error={categoriesError || errors.categoryId?.message}>
+            <Controller name="categoryId" control={control} render={({ field }) => <SmartSelect aria-label="Categoria" value={field.value ?? null} onChange={field.onChange} loading={categoriesLoading} disabled={categoriesLoading || !!categoriesError} placeholder="Sem categoria" options={categories.map(c => ({ value: c.id, label: c.name }))} />} />
+          </Field>
           <div className={FORM_GRID}>
             <Field label="Preço (R$)" error={errors.price?.message}>
               <input

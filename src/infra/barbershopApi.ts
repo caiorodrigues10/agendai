@@ -1,3 +1,4 @@
+import { serviceCategoriesApi } from './categoriesApi';
 import { API_BASE, apiClient, apiFetch } from './apiClient';
 import { authStorage } from './authStorage';
 import { DaySchedule, Service, StaffMember, FeedPost, PostMode, PostConfig, OperationMode, OpeningMode, ManualShopStatus, ShopOpenState, ScheduleException, BusinessSegment } from '../types';
@@ -197,6 +198,10 @@ export const barbershopApi = {
       token
     );
   },
+  listServiceCategories: serviceCategoriesApi.list,
+  createServiceCategory: serviceCategoriesApi.create,
+  updateServiceCategory: serviceCategoriesApi.update,
+  deleteServiceCategory: serviceCategoriesApi.delete,
   listServices: (barbershopId?: string) => {
     const qs = barbershopId ? `?barbershopId=${barbershopId}` : '';
     return apiClient<{ success: boolean; data: Service[] }>(`/api/services${qs}`).then(res =>

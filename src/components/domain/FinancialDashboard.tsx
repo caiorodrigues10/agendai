@@ -30,6 +30,7 @@ import { WeatherForecastWidget } from './WeatherForecastWidget';
 import { SmartSelect } from '../ui/SmartSelect';
 import { Avatar } from '../ui/Avatar';
 import { commissionsApi, type CommissionSummary } from '../../infra/commissionsApi';
+import { finiteNumber } from '../../utils/weatherVisuals';
 
 interface FinancialDashboardProps {
   queueHistory: QueueItem[];
@@ -40,7 +41,8 @@ interface FinancialDashboardProps {
 }
 
 const brl = (n: number) =>
-  n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+  Number.isFinite(Number(n)) && n != null ? Number(n).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }) : '—';
+const metric = (n: unknown) => n != null && Number.isFinite(Number(n)) ? String(Number(n)) : '—';
 
 const isOwnerLike = (role: StaffMember['role']) =>
   role === 'OWNER' ||
@@ -76,7 +78,13 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
     financialApi
       .getInsights(period)
       .then(data => {
-        if (!cancelled) setInsights(data);
+        if (cancelled) return;
+        if (!data?.kpis) throw new Error('Relatório incompleto');
+        setInsights({ ...data,
+          byWeekday: data.byWeekday ?? [], byHour: data.byHour ?? [],
+          highlights: data.highlights ?? [], topServices: data.topServices ?? [],
+          byStaff: data.byStaff ?? [], inactiveCustomers: data.inactiveCustomers ?? [],
+        });
       })
       .catch(err => {
         if (cancelled) return;
@@ -84,7 +92,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
           setInsightsError('Insights disponíveis no plano Pro.');
         } else {
           setInsightsError(
-            err instanceof Error ? err.message : 'Não foi possível carregar insights.'
+            'Não foi possível atualizar o relatório. Tente novamente em instantes.'
           );
         }
       })
@@ -120,12 +128,12 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
         professionalId: commissionProfessionalId || undefined,
       })
       .then(data => {
-        if (!cancelled) setCommissionSummary(data);
+        if (!cancelled) setCommissionSummary(data ? { ...data, byProfessional: data.byProfessional ?? [] } : null);
       })
       .catch(error => {
         if (cancelled) return;
         setCommissionSummary(null);
-        setCommissionError(error instanceof Error ? error.message : 'Não foi possível carregar comissões.');
+        setCommissionError('Não foi possível atualizar as comissões. Tente novamente em instantes.');
       })
       .finally(() => {
         if (!cancelled) setCommissionLoading(false);
@@ -159,7 +167,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
   }, [queueHistory, viewMode, timeFilter, currentUser.id]);
 
   const localStats = useMemo(() => {
-    const totalRevenue = filteredData.reduce((acc, curr) => acc + (curr.finalPrice || 0), 0);
+    const totalRevenue = filteredData.reduce((acc, curr) => acc + finiteNumber(curr.finalPrice), 0);
     const totalClients = filteredData.length;
     const avgTicket = totalClients > 0 ? totalRevenue / totalClients : 0;
     const daysCount = [0, 0, 0, 0, 0, 0, 0];
@@ -389,7 +397,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                   },
                   {
                     label: 'Atendimentos',
-                    value: String(kpis!.completedServices),
+                    value: metric(kpis!.completedServices),
                     icon: Users,
                     tone: 'text-text-primary',
                   },
@@ -397,26 +405,26 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                     label: 'Espera média',
                     value:
                       kpis!.avgWaitMinutes != null
-                        ? `${Math.round(kpis!.avgWaitMinutes)} min`
+                        ? `${metric(Math.round(kpis!.avgWaitMinutes))} min`
                         : '—',
                     icon: Clock,
                     tone: 'text-text-primary',
                   },
                   {
                     label: 'Clientes únicos',
-                    value: String(kpis!.uniqueCustomers),
+                    value: metric(kpis!.uniqueCustomers),
                     icon: Users,
                     tone: 'text-text-primary',
                   },
                   {
                     label: 'Retorno',
-                    value: `${kpis!.returningCustomerRate}%`,
+                    value: `${metric(kpis!.returningCustomerRate)}%`,
                     icon: TrendingUp,
                     tone: 'text-accent',
                   },
                   {
                     label: 'Cancel. agenda',
-                    value: `${kpis!.appointmentCancelRate}%`,
+                    value: `${metric(kpis!.appointmentCancelRate)}%`,
                     icon: AlertCircle,
                     tone: kpis!.appointmentCancelRate >= 15 ? 'text-warning' : 'text-text-primary',
                   },
@@ -715,7 +723,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                       <td className="p-3 text-right">{getStaffName(item.completedBy)}</td>
                     )}
                     <td className="p-3 text-right text-success">
-                      R$ {(item.finalPrice || 0).toFixed(2)}
+                      {brl(item.finalPrice)}
                     </td>
                     {owner && (
                       <td className="p-3 text-center">

@@ -77,7 +77,7 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
           setLocationMissing(
             err instanceof ApiError &&
               err.statusCode === 400 &&
-              /localiza[cç][aã]o/i.test(err.message)
+              (err.code === 'WEATHER_LOCATION_MISSING' || /localiza[cç][aã]o/i.test(err.message))
           );
         }
       } finally {
@@ -92,7 +92,7 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
     return (
       <div className="flex items-center justify-center py-12 text-text-muted gap-2">
         <Loader2 size={18} className="animate-spin text-accent" />
-        <span className="text-sm">Carregando previsão climática...</span>
+        <span className="text-sm">Consultando previsão do tempo...</span>
       </div>
     );
   }
@@ -101,11 +101,11 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
     return (
       <div className="rounded-xl border border-border bg-surface p-6 text-center">
         <Cloud className="mx-auto h-8 w-8 text-text-muted" />
-        <p className="mt-3 text-sm text-text-muted">{error}</p>
+        <p className="mt-3 text-sm font-semibold text-text-primary">Não foi possível carregar o clima</p>
         <p className="mt-1 text-xs text-text-muted">
           {locationMissing
-            ? 'Configure a localização do salão em Configurações para ativar esta funcionalidade.'
-            : 'A última previsão disponível será exibida assim que o serviço meteorológico responder.'}
+            ? 'Cadastre a cidade do salão em Configurações para ativar a previsão climática.'
+            : 'Verifique sua conexão e tente novamente. Enquanto isso, o restante do painel continua funcionando normalmente.'}
         </p>
       </div>
     );
@@ -115,9 +115,11 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
     return (
       <div className="rounded-xl border border-border bg-surface p-6 text-center">
         <Calendar className="mx-auto h-8 w-8 text-text-muted" />
-        <p className="mt-3 text-sm text-text-muted">Sem dados suficientes para previsão.</p>
+        <p className="mt-3 text-sm font-semibold text-text-primary">Aguardando dados do clima</p>
         <p className="mt-1 text-xs text-text-muted">
-          Informe a cidade do salão em Configurações para ver o clima.
+          {locationMissing
+            ? 'Configure a cidade do salão em Configurações para ver a previsão do tempo e a demanda estimada.'
+            : 'A previsão climática ficará disponível assim que o serviço meteorológico responder. Enquanto isso, as outras funcionalidades estão operacionais.'}
         </p>
       </div>
     );
@@ -130,14 +132,14 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
     const tomorrow = predictions[0];
     if (!tomorrow || tomorrow.riskLevel === 'low') return null;
 
-    const style = RISK_STYLES[tomorrow.riskLevel];
+    const style = RISK_STYLES[tomorrow.riskLevel] ?? RISK_STYLES.low;
     return (
       <div className={`rounded-xl border ${style.border} ${style.bg} p-4`}>
         <div className="flex items-center gap-3">
           <AlertTriangle className={`h-5 w-5 ${style.icon}`} />
           <div>
             <p className={`text-sm font-bold ${style.text}`}>
-              Amanhã: {tomorrow.condition} — {Math.abs(tomorrow.dropPct)}% menos clientes
+              Amanhã: {tomorrow.condition} — {Math.abs(finiteNumber(tomorrow.dropPct))}% menos clientes
             </p>
             <p className="mt-0.5 text-xs text-text-muted">{tomorrow.recommendation}</p>
           </div>
@@ -159,7 +161,7 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
         </div>
       )}
 
-      {insights.modelTrained && predictions.length > 0 && summary?.bestDay && (
+      {insights.modelTrained && predictions.length > 0 && summary?.bestDay && summary?.worstDay && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <div className="rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
           <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Média semana</p>
@@ -193,7 +195,7 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
       <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 lg:grid-cols-7">
         {(forecast.length > 0 ? forecast : predictions).map((p, index) => {
           const prediction = predictions[index];
-          const style = RISK_STYLES[prediction?.riskLevel ?? 'low'];
+          const style = RISK_STYLES[prediction?.riskLevel ?? 'low'] ?? RISK_STYLES.low;
           const weatherCode = 'weatherCode' in p ? p.weatherCode : 0;
           const tempMax = 'tempMax' in p ? p.tempMax : undefined;
           const tempMin = 'tempMin' in p ? p.tempMin : undefined;
@@ -238,11 +240,11 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
 
                 {/* Rain info */}
                 <p className="mt-1.5 text-[10px] text-white/55">
-                  {rainProbability > 0 ? `${Math.round(rainProbability)}% chuva` : `${rainAmount} mm`}
+                  {rainProbability > 0 ? `${Math.round(rainProbability)}% chuva` : rainAmount > 0 ? `${rainAmount} mm` : 'Sem chuva'}
                 </p>
 
                 {/* Demand prediction bar */}
-                {prediction && (
+                {insights.modelTrained && prediction && (
                   <div className="mt-auto pt-2.5">
                     <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
                       <div
@@ -268,7 +270,9 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
       </div>
 
       <p className="text-[10px] text-white/30 text-right">
-        Modelo: {insights.modelTrained ? `${insights.historicalDays} dias de treino` : 'Insuficiente'} · Previsão: 7 dias
+        {insights.modelTrained
+          ? `Previsão baseada em ${insights.historicalDays} dias de dados`
+          : 'Previsão com dados limitados'} · Próximos 7 dias
       </p>
     </div>
   );

@@ -21,6 +21,11 @@
 
 ## Observações
 
+- `contract:check` — `node scripts/check-api-contract.mjs`: compara método/caminho dos wrappers com as rotas registradas no backend irmão; sem servidor, banco ou segredos. Bloqueia novas divergências e exceções obsoletas.
+- `contract:check:strict` — mesma checagem com `--strict`: reprova também as 77 divergências legadas inventariadas inicialmente. Não está verde enquanto essa dívida existir.
+- `test:contract` — `node --test scripts/check-api-contract.test.mjs`: testa extração, mudanças de rota/método e sintaxe não suportada com fixtures temporárias.
+- Procedimento de contrato, limites e smoke de deploy: [DELIVERY_CHECKS.md](DELIVERY_CHECKS.md).
+
 - Há testes frontend (Vitest + Testing Library + Playwright). Não afirmar “sem testes”.
 - Cobertura: `@vitest/coverage-v8` está declarado; os scripts acima **não** habilitam `--coverage` por padrão.
 - CSS do projeto: **Tailwind v4 + tokens semânticos** em `src/index.css`. Não usar BEM/CSS Modules como padrão obrigatório.

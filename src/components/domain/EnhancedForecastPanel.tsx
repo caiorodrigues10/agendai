@@ -23,7 +23,7 @@ export const EnhancedForecastPanel: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!barbershopId) return;
+    if (!barbershopId) { setLoading(false); setPredictions([]); setWeather([]); return; }
     setLoading(true);
     setError(null);
     try {
@@ -31,7 +31,7 @@ export const EnhancedForecastPanel: React.FC = () => {
       setPredictions(report.predictions);
       setWeather(report.forecast);
     } catch (err) {
-      setError(getErrorMessage(err));
+      setError('Não foi possível atualizar clima e demanda agora. Tente novamente em alguns instantes.');
     } finally {
       setLoading(false);
     }
@@ -42,6 +42,9 @@ export const EnhancedForecastPanel: React.FC = () => {
   const predictionByDate = new Map(predictions.map(item => [item.date.slice(0, 10), item]));
   const total = predictions.reduce((sum, item) => sum + finiteNumber(item.predicted), 0);
   const rainyDays = weather.filter(day => finiteNumber(day.precipProbability) >= 45 || finiteNumber(day.precipMm) > 0).length;
+
+  const safeTotal = Number.isFinite(total) ? total : 0;
+  const hasDemand = predictions.some(item => item.confidence !== 'insufficient');
 
   return (
     <section className="overflow-hidden rounded-3xl border border-border bg-surface shadow-[0_24px_70px_-46px_rgba(0,0,0,0.9)]">
@@ -68,8 +71,10 @@ export const EnhancedForecastPanel: React.FC = () => {
         ) : weather.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-bg/40 px-6 py-10 text-center">
             <CloudSun size={28} className="mx-auto text-accent" />
-            <h3 className="mt-3 font-semibold text-text-primary">Previsão indisponível no momento</h3>
-            <p className="mx-auto mt-1 max-w-lg text-sm text-text-muted">A cidade está cadastrada. Não conseguimos consultar o serviço meteorológico agora; tente atualizar em alguns instantes.</p>
+            <h3 className="mt-3 font-semibold text-text-primary">Clima indisponível no momento</h3>
+            <p className="mx-auto mt-1 max-w-lg text-sm text-text-muted">
+              Confira a cidade do salão em Configurações e tente atualizar em alguns instantes.
+            </p>
           </div>
         ) : (
           <>
@@ -96,7 +101,7 @@ export const EnhancedForecastPanel: React.FC = () => {
                           <span className="flex items-center gap-1"><Droplets size={11} />{rainProbability > 0 ? `${Math.round(rainProbability)}%` : `${finiteNumber(day.precipMm)} mm`}</span>
                           <span>mín. {Math.round(finiteNumber(day.tempMin))}°</span>
                         </div>
-                        {demand && <div className="mt-2 rounded-lg border border-white/10 bg-black/35 px-2 py-1.5 text-center text-[10px] font-semibold text-white">{formatNumberBR(finiteNumber(demand.predicted))} atendimentos</div>}
+                        {demand && demand.confidence !== 'insufficient' && <div className="mt-2 rounded-lg border border-white/10 bg-black/35 px-2 py-1.5 text-center text-[10px] font-semibold text-white">{formatNumberBR(finiteNumber(demand.predicted))} atendimentos</div>}
                       </div>
                     </div>
                   </article>
@@ -104,7 +109,7 @@ export const EnhancedForecastPanel: React.FC = () => {
               })}
             </div>
             <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-border bg-bg/45 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-2 text-text-secondary"><Info size={15} className="text-accent" />{predictions.length ? `${formatNumberBR(total)} atendimentos estimados para a semana.` : 'A estimativa de movimento aparecerá quando houver mais histórico de atendimentos.'}</div>
+              <div className="flex items-center gap-2 text-text-secondary"><Info size={15} className="text-accent" />{hasDemand ? `${formatNumberBR(safeTotal)} atendimentos estimados para a semana.` : 'A estimativa de movimento aparecerá quando houver mais histórico de atendimentos.'}</div>
               <div className="flex shrink-0 items-center gap-2 text-xs text-text-muted"><TrendingUp size={14} className="text-accent" />{rainyDays ? `${rainyDays} ${rainyDays === 1 ? 'dia com' : 'dias com'} chuva prevista` : 'Semana sem chuva relevante'}</div>
             </div>
           </>

@@ -1,3 +1,6 @@
+import { useCategories } from '../../hooks/useCategories';
+import { useBarbershop } from '../../contexts/BarbershopContext';
+import { CategoryManager } from './CategoryManager';
 import React, { useState } from 'react';
 import { Service } from '../../types';
 import { ServiceForm } from './ServiceForm';
@@ -21,6 +24,8 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   onDelete,
   canManagePackages = true,
 }) => {
+  const categoryState = useCategories('service');
+  const { updateServiceCategory } = useBarbershop();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
@@ -37,6 +42,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
         </button>
       </div>
 
+      <CategoryManager key={categoryState.barbershopId || 'global'} title="Categorias de serviços" linkedLabel="Os serviços vinculados" state={categoryState} onChanged={(id, category) => updateServiceCategory(id, category?.name ?? null)} />
       <div className="space-y-3">
         {services.map(service => (
           <div
@@ -52,6 +58,10 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 <p className="break-words text-xs text-text-secondary">
                   {service.avgTimeMinutes} min • R$ {service.price.toFixed(2)}
                 </p>
+                <span className="flex items-center gap-1 text-xs text-text-muted">
+                  {categoryState.categories.find(c => c.id === service.categoryId)?.color && <span aria-hidden="true" className="h-2 w-2 rounded-full" style={{ backgroundColor: categoryState.categories.find(c => c.id === service.categoryId)?.color || undefined }} />}
+                  {categoryState.categories.find(c => c.id === service.categoryId)?.name || service.categoryName || 'Sem categoria'}
+                </span>
               </div>
             </div>
 
@@ -77,6 +87,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
       {isAdding && (
         <ServiceForm
+          categories={categoryState.categories}
+          categoriesLoading={categoryState.loading}
+          categoriesError={categoryState.error}
           onSave={data => {
             onAdd(data);
             setIsAdding(false);
@@ -87,6 +100,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
       {editingId && (
         <ServiceForm
+          categories={categoryState.categories}
+          categoriesLoading={categoryState.loading}
+          categoriesError={categoryState.error}
           initialService={services.find(s => s.id === editingId)}
           onSave={data => {
             onEdit(editingId, data);

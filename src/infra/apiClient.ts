@@ -52,10 +52,11 @@ let refreshInFlight: Promise<string | null> | null = null;
  * Renova o access token via fetch direto (não usa apiClient → sem recursão).
  * Retorna o novo access token ou null se a sessão morreu.
  */
-async function refreshAccessToken(): Promise<string | null> {
+export async function refreshAccessToken(): Promise<string | null> {
   if (refreshInFlight) return refreshInFlight;
 
   refreshInFlight = (async () => {
+    const revision = authStorage.getRevision();
     try {
       // O refresh token atual fica em cookie HTTP-only. Versões antigas também
       // podem tê-lo no storage, então mantemos esse valor apenas como compatibilidade.
@@ -67,6 +68,10 @@ async function refreshAccessToken(): Promise<string | null> {
         credentials: 'include',
       });
       if (!res.ok) {
+        if (res.status !== 401 && res.status !== 403) {
+          throw new ApiError('Não foi possível renovar a sessão agora. Tente novamente.', res.status);
+        }
+        if (revision !== authStorage.getRevision()) return null;
         authStorage.clearTokens();
         authStorage.clearUser();
         window.dispatchEvent(new Event('agendai:session-expired'));
@@ -74,36 +79,26 @@ async function refreshAccessToken(): Promise<string | null> {
       }
       const bodyText = await res.text();
       if (!bodyText) {
-        authStorage.clearTokens();
-        authStorage.clearUser();
-        window.dispatchEvent(new Event('agendai:session-expired'));
-        return null;
+        throw new ApiError('Resposta de sessão indisponível.', 502);
       }
       const json = tryParseJson(bodyText);
       if (!json || typeof json !== 'object') {
-        authStorage.clearTokens();
-        authStorage.clearUser();
-        window.dispatchEvent(new Event('agendai:session-expired'));
-        return null;
+        throw new ApiError('Resposta de sessão inválida.', 502);
       }
       const obj = json as Record<string, unknown>;
       const data = (obj.data && typeof obj.data === 'object' ? obj.data as Record<string, unknown> : obj);
       const accessToken = typeof data.accessToken === 'string' ? data.accessToken : undefined;
       if (!accessToken) {
-        authStorage.clearTokens();
-        authStorage.clearUser();
-        window.dispatchEvent(new Event('agendai:session-expired'));
-        return null;
+        throw new ApiError('Resposta de sessão incompleta.', 502);
       }
+      if (revision !== authStorage.getRevision()) return null;
       const rememberMe = authStorage.isPersistent();
       authStorage.setTokens(accessToken, typeof data.refreshToken === 'string' ? data.refreshToken : undefined, rememberMe);
       if (data.user && typeof data.user === 'object') authStorage.setUser(data.user as Record<string, unknown>, rememberMe);
       return accessToken;
-    } catch {
-      authStorage.clearTokens();
-      authStorage.clearUser();
-      window.dispatchEvent(new Event('agendai:session-expired'));
-      return null;
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError('Não foi possível renovar a sessão agora.', 0, 'NETWORK_ERROR');
     } finally {
       refreshInFlight = null;
     }

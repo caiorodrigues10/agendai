@@ -22,7 +22,20 @@ export interface EnhancedForecast {
   date: string;
   predicted: number;
   confidence: 'insufficient' | 'preliminary' | 'reliable';
-  factors: ForecastFactor[];
+  factors: (ForecastFactor | string)[];
+}
+
+function normalizePredictions(value: unknown): EnhancedForecast[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(item => item && typeof item.date === 'string').map(item => {
+    const predicted = Number(item.predicted ?? item.predictedQueue);
+    return {
+      date: item.date,
+      predicted: Number.isFinite(predicted) ? Math.max(0, predicted) : 0,
+      confidence: ['preliminary', 'reliable'].includes(item.confidence) ? item.confidence : 'insufficient',
+      factors: Array.isArray(item.factors) ? item.factors : [],
+    };
+  });
 }
 
 export interface EnhancedForecastReport {
@@ -39,11 +52,11 @@ const getForecastReport = (barbershopId: string, days?: number) =>
     'GET', undefined, token()
   ).then((res): EnhancedForecastReport => {
     const data = unwrap<unknown>(res);
-    if (Array.isArray(data)) return { predictions: data as EnhancedForecast[], forecast: [] };
+    if (Array.isArray(data)) return { predictions: normalizePredictions(data), forecast: [] };
     if (!data || typeof data !== 'object') return { predictions: [], forecast: [] };
     const report = data as { predictions?: unknown; forecast?: unknown };
     return {
-      predictions: Array.isArray(report.predictions) ? report.predictions as EnhancedForecast[] : [],
+      predictions: normalizePredictions(report.predictions),
       forecast: Array.isArray(report.forecast) ? report.forecast as ShopWeatherDay[] : [],
     };
   });

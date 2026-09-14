@@ -6,6 +6,7 @@ import { barbershopApi, ShopWhatsAppStatus, ShopWeatherDay } from '../../infra/b
 import { ApiError } from '../../infra/apiClient';
 import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { finiteNumber } from '../../utils/weatherVisuals';
 import { AccountPrivacyPanel } from './AccountPrivacyPanel';
 import { OwnerNotificationsPanel } from './OwnerNotificationsPanel';
 import { QueueAlertSettings } from './QueueAlertSettings';
@@ -140,11 +141,11 @@ const ShopCityField: React.FC<{
             <div key={day.date} className="rounded-lg border border-border bg-bg p-2 text-center">
               <p className="text-[10px] font-bold text-text-muted">{weatherDayLabel(day.date)}</p>
               <div className="my-1 flex justify-center">{weatherIcon(day.weatherCode)}</div>
-              <p className="text-[11px] font-bold text-text-primary">{Math.round(day.tempMax)}°</p>
-              <p className="text-[10px] text-text-muted">{Math.round(day.tempMin)}°</p>
+              <p className="text-[11px] font-bold text-text-primary">{Math.round(finiteNumber(day.tempMax))}°</p>
+              <p className="text-[10px] text-text-muted">{Math.round(finiteNumber(day.tempMin))}°</p>
               <p className="mt-1 text-[10px] text-text-secondary leading-tight line-clamp-2">{day.condition}</p>
-              {day.precipProbability > 0 && (
-                <p className="mt-0.5 text-[10px] text-blue-400">{Math.round(day.precipProbability)}%</p>
+              {finiteNumber(day.precipProbability) > 0 && (
+                <p className="mt-0.5 text-[10px] text-blue-400">{Math.round(finiteNumber(day.precipProbability))}%</p>
               )}
             </div>
           ))}

@@ -44,8 +44,12 @@ interface Props {
 
 type Tab = 'overview' | 'clients' | 'intelligence' | 'campaigns';
 
-const money = (value: unknown) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(value ?? 0));
+const money = (value: unknown) => {
+  const n = Number(value);
+  return Number.isFinite(n)
+    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n)
+    : '—';
+};
 
 const shortDate = (value: string) =>
   new Date(`${value.slice(0, 10)}T12:00:00`).toLocaleDateString('pt-BR', {
@@ -74,7 +78,25 @@ const statusLabel: Record<CrmCampaign['status'], string> = {
   CANCELED: 'Cancelada',
 };
 
-function Kpi({
+const FACTOR_LABELS: Record<string, string> = {
+  weekday: 'Dia da semana',
+  month: 'Mês',
+  weather: 'Clima',
+  holiday: 'Feriado',
+  season: 'Estação',
+  rain: 'Chuva',
+  temperature: 'Temperatura',
+  trend: 'Tendência',
+  historical: 'Histórico',
+  day_of_week: 'Dia da semana',
+  is_weekend: 'Fim de semana',
+  precipitation: 'Precipitação',
+};
+
+const formatFactor = (factor: string) =>
+  FACTOR_LABELS[factor] ?? (/[_]|^[A-Z\d-]+$/.test(factor) ? 'Histórico do salão' : factor);
+
+const Kpi = ({
   label,
   value,
   moneyValue = true,
@@ -82,16 +104,16 @@ function Kpi({
   label: string;
   value: unknown;
   moneyValue?: boolean;
-}) {
+}) => {
   return (
     <div className="rounded-xl border border-border bg-bg p-3">
       <p className="text-xs text-text-muted">{label}</p>
       <strong className="mt-1 block text-base text-text-primary">
-        {moneyValue ? money(value) : String(value ?? 0)}
+        {moneyValue ? money(value) : String(Number(value ?? 0) || 0)}
       </strong>
     </div>
   );
-}
+};
 
 function Empty({ children }: React.PropsWithChildren) {
   return (
@@ -680,12 +702,12 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
                           : 'com dados insuficientes'}
                       .
                     </strong>{' '}
-                    {forecast.historicalDays} dias analisados. {METRIC_LABEL.MAE}:{' '}
-                    {forecast.backtest.mae == null ? 'indisponível' : money(forecast.backtest.mae)}{' '}
+                    {forecast.historicalDays || 0} dias analisados. {METRIC_LABEL.MAE}:{' '}
+                    {Number(forecast.backtest.mae) > 0 ? money(forecast.backtest.mae) : 'indisponível'}{' '}
                     · {METRIC_LABEL.MAPE}:{' '}
-                    {forecast.backtest.mape == null
-                      ? 'indisponível'
-                      : `${forecast.backtest.mape}%`}
+                    {Number(forecast.backtest.mape) > 0
+                      ? `${Number(forecast.backtest.mape).toFixed(1)}%`
+                      : 'indisponível'}
                     .
                   </div>
                   <div className="h-64 rounded-xl border border-border p-3">
@@ -732,7 +754,7 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
                           <strong>{money(item.predictedRevenue)}</strong>
                         </div>
                         <p className="mt-1 text-xs text-text-muted">
-                          {item.predictedVisits} atendimentos · {item.factors.join(' · ')}
+                          {Number(item.predictedVisits) || 0} atendimentos · {item.factors.map(formatFactor).join(' · ')}
                         </p>
                       </div>
                     ))}

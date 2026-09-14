@@ -43,7 +43,7 @@ export const authApi = {
     apiClient<AuthResponse>('/api/auth/register', 'POST', payload),
   refresh: (refreshToken?: string) =>
     apiClient<AuthResponse>('/api/auth/refresh', 'POST', { refreshToken }),
-  me: (token: string) => apiClient<{ user: AuthUser }>('/api/auth/me', 'GET', undefined, token),
+  me: (token: string) => apiClient<{ user: AuthUser }>('/api/auth/me', 'GET', undefined, token, { retried: true }),
   logout: (token: string) =>
     apiClient<{ message: string }>('/api/auth/logout', 'POST', undefined, token),
   googleLogin: (idToken: string) =>

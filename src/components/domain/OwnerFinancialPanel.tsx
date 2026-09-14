@@ -1,3 +1,5 @@
+import { useCategories } from '../../hooks/useCategories';
+import { CategoryManager } from './CategoryManager';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -76,7 +78,8 @@ export const OwnerFinancialPanel: React.FC = () => {
   const [expenseSubmitting, setExpenseSubmitting] = useState(false);
   const [deleteExpenseId, setDeleteExpenseId] = useState<string | null>(null);
 
-  const [categories, setCategories] = useState<ExpenseCategory[]>([]);
+  const categoryState = useCategories('expense');
+  const { categories } = categoryState;
   const [expenseFilters, setExpenseFilters] = useState({
     categoryId: '',
     type: '',
@@ -104,6 +107,8 @@ export const OwnerFinancialPanel: React.FC = () => {
     register: registerExpense,
     handleSubmit: handleExpenseSubmit,
     reset: resetExpense,
+    getValues: getExpenseValues,
+    setValue: setExpenseValue,
     formState: { errors: expenseErrors },
   } = useForm<ExpenseFormData>({
     resolver: zodResolver(ExpenseSchema),
@@ -137,15 +142,6 @@ export const OwnerFinancialPanel: React.FC = () => {
       dueDate: '',
     },
   });
-
-  useEffect(() => {
-    if (tab === 'despesas') {
-      financialApi
-        .listExpenseCategories()
-        .then(setCategories)
-        .catch(() => setCategories([]));
-    }
-  }, [tab]);
 
   useEffect(() => {
     if (tab === 'despesas') {
@@ -606,6 +602,15 @@ export const OwnerFinancialPanel: React.FC = () => {
 
         {tab === 'despesas' && (
           <div className="space-y-4">
+            <CategoryManager key={categoryState.barbershopId || 'global'} title="Categorias de despesas" linkedLabel="Os lançamentos vinculados" state={categoryState} onChanged={(id, category) => {
+              if (!category) {
+                if (getExpenseValues('categoryId') === id) setExpenseValue('categoryId', '');
+                setExpenseFilters(filters => filters.categoryId === id ? { ...filters, categoryId: '' } : filters);
+              }
+              setEditingExpense(item => item?.categoryId === id ? { ...item, categoryId: category ? id : null, categoryName: category?.name ?? null } : item);
+              setExpenses(items => items.map(item => item.categoryId === id ? { ...item, categoryId: category ? id : null, categoryName: category?.name ?? null } : item));
+              handleRefresh();
+            }} />
             <form
               onSubmit={handleExpenseSubmit(onCreateExpense)}
               className="bg-surface p-4 rounded-xl border border-border space-y-3"
@@ -904,7 +909,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                                 )}
                               </td>
                               <td className="p-3 hidden sm:table-cell">
-                                {item.categoryName || <span className="text-text-muted">—</span>}
+                                {item.categoryName || <span className="text-text-muted">Sem categoria</span>}
                               </td>
                               <td className="p-3">{EXPENSE_TYPE_LABELS[item.type] ?? item.type}</td>
                               <td className="p-3 text-right text-danger font-medium">

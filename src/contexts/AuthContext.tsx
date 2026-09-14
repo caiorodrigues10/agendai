@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
 import { authApi, RegisterPayload } from '../infra/authApi';
 import { authStorage } from '../infra/authStorage';
-import { ApiError } from '../infra/apiClient';
+import { ApiError, refreshAccessToken } from '../infra/apiClient';
 import { getErrorMessage } from '../utils/errorMessage';
 import { StaffMember } from '../types';
 import { usersApi } from '../infra/usersApi';
@@ -36,6 +36,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+    const revision = authStorage.getRevision();
+    const isCurrent = () => !cancelled && revision === authStorage.getRevision();
     const init = async () => {
       const token = authStorage.getAccessToken();
       const cachedUser = authStorage.getUser();
@@ -44,11 +47,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (token) {
         try {
           const me = await authApi.me(token);
+          if (!isCurrent()) return;
           setUser(normalizeUser(me.user));
           authStorage.setUser(me.user, authStorage.isPersistent());
           success = true;
         } catch (err) {
-          // Rate limit / rede: mantém sessão local em vez de forçar logout
+          if (!isCurrent()) return;
+          // Erros de rede / rate limit / backend indisponível: mantém sessão
+          // local em vez de forçar logout — evita expulsar o usuário por
+          // instabilidade temporária.
           if (
             err instanceof ApiError &&
             (err.statusCode === 0 ||
@@ -61,22 +68,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               success = true;
             }
           }
-          // Token inválido ou expirado → tentar refresh abaixo
+          // 401 / token expirado → fluxo de refresh abaixo
         }
       }
 
       if (!success) {
         const refreshToken = authStorage.getRefreshToken();
-        // A sessão persistente usa cookie HTTP-only; ele não é legível pelo
-        // JavaScript, mas o navegador o envia automaticamente neste request.
         if (refreshToken || cachedUser) {
           try {
-            const resp = await authApi.refresh(refreshToken ?? undefined);
-            const rememberMe = authStorage.isPersistent();
-            authStorage.setTokens(resp.accessToken, resp.refreshToken, rememberMe);
-            authStorage.setUser(resp.user, rememberMe);
-            setUser(normalizeUser(resp.user));
+            const refreshed = await refreshAccessToken();
+            if (!isCurrent()) return;
+            const refreshedUser = authStorage.getUser();
+            setUser(refreshed && refreshedUser ? normalizeUser(refreshedUser) : null);
           } catch (err) {
+            if (!isCurrent()) return;
             if (
               err instanceof ApiError &&
               (err.statusCode === 0 ||
@@ -85,6 +90,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 err.statusCode >= 500) &&
               cachedUser
             ) {
+              // Rede indisponível: mantém sessão local; o próximo request
+              // tentará refresh novamente.
               setUser(normalizeUser(cachedUser));
             } else {
               authStorage.clearTokens();
@@ -100,7 +107,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       setLoading(false);
     };
-    init();
+    void init().finally(() => { if (!cancelled) setLoading(false); });
+
+    // Refresh periódico: renova o access token a cada 14 minutos para
+    // evitar que a sessão expire durante uso ativo do painel.
+    const REFRESH_INTERVAL_MS = 14 * 60 * 1000;
+    const periodicRefresh = setInterval(() => {
+      const refreshToken = authStorage.getRefreshToken();
+      if (!refreshToken && !authStorage.hasStoredSession()) return;
+      void refreshAccessToken().catch(() => {
+        // Falha silenciosa: o próximo 401 acionará refresh via apiClient
+      });
+    }, REFRESH_INTERVAL_MS);
 
     // Escuta evento disparado pelo apiClient quando refresh falha
     const onSessionExpired = () => {
@@ -109,12 +127,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(null);
     };
     window.addEventListener('agendai:session-expired', onSessionExpired);
-    return () => window.removeEventListener('agendai:session-expired', onSessionExpired);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('agendai:session-expired', onSessionExpired);
+      clearInterval(periodicRefresh);
+    };
   }, []);
 
-  const persistSession = (resp: { user: any; accessToken: string; refreshToken?: string }, rememberMe = true) => {
-    authStorage.setTokens(resp.accessToken, resp.refreshToken, rememberMe);
-    authStorage.setUser(resp.user, rememberMe);
+  const persistSession = (resp: { user: any; accessToken: string; refreshToken?: string }, rememberMe?: boolean) => {
+    const effectiveRememberMe = rememberMe ?? authStorage.getRememberMe();
+    authStorage.setTokens(resp.accessToken, resp.refreshToken, effectiveRememberMe);
+    authStorage.setUser(resp.user, effectiveRememberMe);
+    authStorage.setRememberMe(effectiveRememberMe);
     setUser(normalizeUser(resp.user));
     sessionStorage.removeItem('agendai:access-block-info');
   };
@@ -135,7 +159,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const loginWithGoogle = async (idToken: string): Promise<AuthResult> => {
     try {
       const resp = await authApi.googleLogin(idToken);
-      persistSession(resp);
+      persistSession(resp, true);
       return { ok: true };
     } catch (err) {
       if (
@@ -155,7 +179,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const register = async (data: RegisterPayload & { recaptchaToken?: string }): Promise<AuthResult> => {
     try {
       const resp = await authApi.register(data);
-      persistSession(resp);
+      persistSession(resp, true);
       return { ok: true };
     } catch (err) {
       return {

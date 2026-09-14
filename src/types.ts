@@ -1,4 +1,6 @@
 export interface Service {
+  categoryId?: string | null;
+  categoryName?: string | null;
   id: string;
   name: string;
   price: number;

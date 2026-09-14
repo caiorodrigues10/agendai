@@ -1,3 +1,4 @@
+import { expenseCategoriesApi } from './categoriesApi';
 import { apiClient, apiFetch } from './apiClient';
 import { authStorage } from './authStorage';
 import type { ShopWeatherDay } from './barbershopApi';
@@ -236,8 +237,8 @@ export interface WeatherInsights {
   summary: {
     avgDropPct: number;
     highRiskCount: number;
-    bestDay: WeatherDemandPrediction;
-    worstDay: WeatherDemandPrediction;
+    bestDay: WeatherDemandPrediction | null;
+    worstDay: WeatherDemandPrediction | null;
   };
   highlights: string[];
 }
@@ -368,13 +369,10 @@ export const financialApi = {
 
   deleteFiado: (id: string) => apiClient<void>(`/api/fiado/${id}`, 'DELETE', undefined, token()),
 
-  listExpenseCategories: () =>
-    apiClient<{ success: boolean; data: ExpenseCategory[] }>(
-      '/api/expense-categories',
-      'GET',
-      undefined,
-      token()
-    ).then(res => unwrap<ExpenseCategory[]>(res)),
+  listExpenseCategories: expenseCategoriesApi.list,
+  createExpenseCategory: expenseCategoriesApi.create,
+  updateExpenseCategory: expenseCategoriesApi.update,
+  deleteExpenseCategory: expenseCategoriesApi.delete,
 
   getWeatherInsights: (days = 7) =>
     apiClient<{ success: boolean; data: WeatherInsights }>(

@@ -58,11 +58,12 @@ import { getErrorMessage } from '../../utils/errorMessage';
 import { maskPhone } from '../../utils/documentUtils';
 import { BillingTab } from './BillingTab';
 import { ReferralsTab } from './ReferralsTab';
+import { CrmBackfillPanel } from '../../components/domain/CrmBackfillPanel';
 
 // ─────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────
-type Tab = 'overview' | 'barbershops' | 'users' | 'billing' | 'referrals';
+type Tab = 'overview' | 'barbershops' | 'users' | 'billing' | 'referrals' | 'crm';
 
 const PERIOD_OPTIONS: { value: DashboardPeriod; label: string }[] = [
   { value: 'day', label: '1D' },
@@ -1620,6 +1621,7 @@ export const MasterAdminDashboard: React.FC = () => {
     { tab: 'users', icon: <Users size={17} />, label: 'Usuários' },
     { tab: 'billing', icon: <CreditCard size={17} />, label: 'Faturamento' },
     { tab: 'referrals', icon: <Gift size={17} />, label: 'Indicações' },
+    ...(user?.role === 'MASTER_ADMIN' ? [{ tab: 'crm' as const, icon: <RefreshCcw size={17} />, label: 'CRM' }] : []),
   ];
 
   return (
@@ -1770,6 +1772,7 @@ export const MasterAdminDashboard: React.FC = () => {
                 <BillingTab />
               </motion.div>
             )}
+            {activeTab === 'crm' && user?.role === 'MASTER_ADMIN' && <CrmBackfillPanel key="crm" global />}
             {activeTab === 'referrals' && (
               <motion.div
                 key="referrals"

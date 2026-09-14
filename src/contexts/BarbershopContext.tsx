@@ -10,6 +10,7 @@ import type { ShopStatusPayload } from '../infra/barbershopApi';
 interface BarbershopContextValue {
   loading: boolean;
   services: Service[];
+  updateServiceCategory: (id: string, name: string | null) => void;
   staff: StaffMember[];
   settings: ShopSettings | null;
   feed: FeedPost[];
@@ -404,6 +405,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
       setQueueClosed,
       addScheduleExceptions,
       removeScheduleException,
+      updateServiceCategory: (id: string, name: string | null) => setServices(items => items.map(service => service.categoryId === id ? { ...service, categoryId: name === null ? null : id, categoryName: name } : service)),
       addService,
       editService,
       deleteService,

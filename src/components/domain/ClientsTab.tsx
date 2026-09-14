@@ -8,6 +8,9 @@ import { METRIC_LABEL } from '../../utils/metricLabels';
 import { ClientsManager } from './ClientsManager';
 import { CrmIntelligencePanel } from './CrmIntelligencePanel';
 import { ClientProfileSheet } from './ClientProfileSheet';
+import { CrmMergePanel } from './CrmMergePanel';
+import { CrmBackfillPanel } from './CrmBackfillPanel';
+import { useAuth } from '../../contexts/AuthContext';
 
 type ClientsSection = 'operacao' | 'inteligencia';
 
@@ -42,6 +45,9 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
   onNotify,
 }) => {
   const [section, setSection] = useState<ClientsSection>('operacao');
+  const { user } = useAuth();
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const [operationMessage, setOperationMessage] = useState('');
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [period, setPeriod] = useState(initialPeriod);
   const [listRefreshSignal, setListRefreshSignal] = useState(0);
@@ -105,6 +111,7 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
         />
       ) : (
         <CrmIntelligencePanel
+          key={listRefreshSignal}
           canAnalytics={canAnalytics}
           canCampaigns={canCampaigns}
           period={period}
@@ -114,7 +121,21 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
         />
       )}
 
+      {canAnalytics && (canCampaigns || user?.role === 'OWNER') && <div className="space-y-3">
+        <button type="button" aria-expanded={toolsOpen} onClick={() => setToolsOpen(value => !value)} className="min-h-11 rounded-lg border border-border px-4 text-sm font-bold text-text-primary">Ferramentas do CRM</button>
+        {operationMessage && <p role="status" className="text-sm text-text-primary">{operationMessage}</p>}
+        {toolsOpen && <>
+          {canCampaigns && <CrmMergePanel onMerged={id => {
+            setSelectedClientId(id);
+            setListRefreshSignal(value => value + 1);
+            setOperationMessage('Clientes mesclados. Lista e perfil atualizados.');
+          }} />}
+          <CrmBackfillPanel onUpdated={() => setListRefreshSignal(value => value + 1)} />
+        </>}
+      </div>}
+
       <ClientProfileSheet
+        key={listRefreshSignal}
         clientId={selectedClientId}
         onClose={() => setSelectedClientId(null)}
         services={services}

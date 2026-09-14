@@ -1,4 +1,14 @@
 import { z } from 'zod';
+
+export const CrmMergeSchema = z.object({
+  targetId: z.string().uuid('Selecione o cadastro principal'),
+  sourceIds: z.array(z.string().uuid()).min(1, 'Selecione ao menos um duplicado'),
+  confirmation: z.literal('MESCLAR', { errorMap: () => ({ message: 'Digite MESCLAR para confirmar' }) }),
+}).refine(value => !value.sourceIds.includes(value.targetId) && new Set(value.sourceIds).size === value.sourceIds.length, {
+  path: ['sourceIds'], message: 'Os duplicados devem ser distintos do cadastro principal',
+});
+
+export const CrmBackfillSchema = z.object({ confirmation: z.literal('REPROCESSAR', { errorMap: () => ({ message: 'Digite REPROCESSAR para confirmar' }) }) });
 import {
   isValidCpf,
   normalizeDocument,
@@ -96,6 +106,7 @@ export type CustomerQueueStaffFormData = z.infer<typeof CustomerQueueStaffSchema
 
 // --- Service Schema ---
 export const ServiceSchema = z.object({
+  categoryId: z.string().nullable().optional(),
   name: z.string().min(3, 'Nome do serviço é obrigatório'),
   price: z.number({ invalid_type_error: 'Preço inválido' }).min(0, 'O preço não pode ser negativo'),
   avgTimeMinutes: z.number({ invalid_type_error: 'Tempo inválido' }).min(5, 'Mínimo 5 minutos'),
@@ -279,3 +290,9 @@ export const ProcedureRecordSchema = z.object({
 });
 
 export type ProcedureRecordFormData = z.infer<typeof ProcedureRecordSchema>;
+
+export const CategorySchema = z.object({
+  name: z.string().trim().min(2, 'Informe pelo menos 2 caracteres').max(100, 'Use até 100 caracteres'),
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Escolha uma cor').or(z.literal('')),
+});
+export type CategoryFormData = z.infer<typeof CategorySchema>;
