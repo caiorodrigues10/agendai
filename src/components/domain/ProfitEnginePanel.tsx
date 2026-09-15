@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   DollarSign,
   TrendingUp,
-  TrendingDown,
   BarChart3,
   Users,
   Scissors,
@@ -11,7 +10,7 @@ import {
   Settings,
   RefreshCw,
 } from 'lucide-react';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Line, LineChart } from 'recharts';
+import { CartesianGrid, XAxis, YAxis, Line, LineChart } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '../ui/chart';
 import {
   profitApi,
@@ -41,6 +40,18 @@ const chartConfig = {
   netProfit: { label: 'Lucro Líquido', color: 'var(--chart-2)' },
   margin: { label: 'Margem %', color: 'var(--chart-3)' },
 } satisfies ChartConfig;
+
+const cardClass =
+  'rounded-2xl border border-border bg-surface p-4 shadow-[0_18px_44px_-32px_rgba(0,0,0,0.7)]';
+
+const compactCardClass =
+  'rounded-2xl border border-border bg-bg p-4 transition-colors hover:border-accent/35 hover:bg-surface-2/60';
+
+const EmptyProfitState: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="rounded-2xl border border-dashed border-border bg-bg px-6 py-10 text-center text-sm text-text-secondary">
+    {children}
+  </div>
+);
 
 export const ProfitEnginePanel: React.FC<ProfitEnginePanelProps> = ({ barbershopId }) => {
   const [period, setPeriod] = useState(getCurrentPeriod());
@@ -117,124 +128,133 @@ export const ProfitEnginePanel: React.FC<ProfitEnginePanelProps> = ({ barbershop
 
   if (loading && !periodData) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="flex items-center justify-center rounded-2xl border border-border bg-surface p-12">
+        <Loader2 className="h-6 w-6 animate-spin text-accent" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <DollarSign className="h-5 w-5" />
-          <h2 className="text-lg font-semibold">Motor de Lucro</h2>
+    <div className="space-y-5">
+      <div className="rounded-3xl border border-border bg-surface shadow-[0_22px_60px_-40px_rgba(0,0,0,0.9)]">
+        <div className="flex flex-col gap-4 border-b border-border bg-gradient-to-r from-accent/10 via-transparent to-transparent p-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-accent/25 bg-accent/12 text-accent">
+              <DollarSign className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="text-xl font-extrabold text-text-primary">Motor de Lucro</h2>
+              <p className="mt-1 text-sm text-text-secondary">
+                Receita, custos, impostos e margem calculados para o período.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <input
+              type="month"
+              value={period}
+              onChange={(e) => setPeriod(e.target.value)}
+              className="min-h-11 rounded-xl border border-border bg-bg px-3 text-sm font-semibold text-text-primary outline-none focus:border-accent"
+            />
+            <button
+              type="button"
+              onClick={() => setShowSettings(!showSettings)}
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-bg px-3 text-text-secondary transition hover:bg-surface-2 hover:text-text-primary"
+              aria-label="Configurações do motor de lucro"
+            >
+              <Settings className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={handleCompute}
+              disabled={computing}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-accent-fg shadow-lg shadow-accent/15 transition hover:bg-accent-hover disabled:opacity-50"
+            >
+              {computing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              Computar
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <input
-            type="month"
-            value={period}
-            onChange={(e) => setPeriod(e.target.value)}
-            className="border rounded px-2 py-1 text-sm"
-          />
-          <button
-            onClick={() => setShowSettings(!showSettings)}
-            className="p-2 border rounded hover:bg-muted"
-          >
-            <Settings className="h-4 w-4" />
-          </button>
-          <button
-            onClick={handleCompute}
-            disabled={computing}
-            className="flex items-center gap-1 px-3 py-1 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 disabled:opacity-50"
-          >
-            {computing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-            Computar
-          </button>
-        </div>
-      </div>
 
       {showSettings && (
-        <div className="border rounded p-4 space-y-3 bg-muted/50">
-          <h3 className="font-medium">Configurações de Lucro</h3>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="m-5 rounded-2xl border border-border bg-bg p-4">
+          <h3 className="font-bold text-text-primary">Configurações de Lucro</h3>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="text-sm text-muted-foreground">Taxa de Imposto (%)</label>
+                <label className="text-xs font-bold uppercase tracking-wide text-text-secondary">Taxa de Imposto (%)</label>
               <input
                 type="number"
                 value={taxRate}
                 onChange={(e) => setTaxRate(e.target.value)}
-                className="w-full border rounded px-2 py-1 text-sm mt-1"
+                  className="mt-1 min-h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm text-text-primary outline-none focus:border-accent"
                 min="0"
                 max="100"
                 step="0.1"
               />
             </div>
             <div>
-              <label className="text-sm text-muted-foreground">Comissão Padrão (%)</label>
+                <label className="text-xs font-bold uppercase tracking-wide text-text-secondary">Comissão Padrão (%)</label>
               <input
                 type="number"
                 value={commission}
                 onChange={(e) => setCommission(e.target.value)}
-                className="w-full border rounded px-2 py-1 text-sm mt-1"
+                  className="mt-1 min-h-11 w-full rounded-xl border border-border bg-surface px-3 text-sm text-text-primary outline-none focus:border-accent"
                 min="0"
                 max="100"
                 step="0.1"
               />
             </div>
           </div>
-          <div className="flex gap-2">
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
             <button
+                type="button"
+                onClick={() => setShowSettings(false)}
+                className="min-h-11 rounded-xl border border-border px-4 text-sm font-bold text-text-secondary transition hover:bg-surface-2 hover:text-text-primary"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
               onClick={handleSaveSettings}
-              className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm"
+                className="min-h-11 rounded-xl bg-accent px-4 text-sm font-bold text-accent-fg transition hover:bg-accent-hover"
             >
               Salvar
-            </button>
-            <button
-              onClick={() => setShowSettings(false)}
-              className="px-3 py-1 border rounded text-sm"
-            >
-              Cancelar
             </button>
           </div>
         </div>
       )}
 
       {error && (
-        <div className="flex items-center gap-2 p-3 bg-destructive/10 text-destructive rounded text-sm">
+          <div className="mx-5 flex items-start gap-2 rounded-xl border border-danger/30 bg-danger/10 p-3 text-sm text-danger">
           <AlertCircle className="h-4 w-4" />
           {error}
         </div>
       )}
 
-      <div className="grid grid-cols-4 gap-3">
-        <div className="border rounded p-3">
-          <div className="text-sm text-muted-foreground">Receita Total</div>
-          <div className="text-xl font-bold">{brl(periodData?.totals.revenue ?? 0)}</div>
-        </div>
-        <div className="border rounded p-3">
-          <div className="text-sm text-muted-foreground">Lucro Líquido</div>
-          <div className="text-xl font-bold text-green-600">{brl(periodData?.totals.netProfit ?? 0)}</div>
-        </div>
-        <div className="border rounded p-3">
-          <div className="text-sm text-muted-foreground">Margem</div>
-          <div className="text-xl font-bold">{pct(periodData?.totals.marginPercent ?? 0)}</div>
-        </div>
-        <div className="border rounded p-3">
-          <div className="text-sm text-muted-foreground">Impostos</div>
-          <div className="text-xl font-bold text-orange-600">{brl(periodData?.totals.taxAmount ?? 0)}</div>
+        <div className="grid gap-3 p-5 sm:grid-cols-2 xl:grid-cols-4">
+          {[
+            { label: 'Receita Total', value: brl(periodData?.totals.revenue ?? 0), tone: 'text-text-primary' },
+            { label: 'Lucro Líquido', value: brl(periodData?.totals.netProfit ?? 0), tone: 'text-success' },
+            { label: 'Margem', value: pct(periodData?.totals.marginPercent ?? 0), tone: 'text-text-primary' },
+            { label: 'Impostos', value: brl(periodData?.totals.taxAmount ?? 0), tone: 'text-warning' },
+          ].map(item => (
+            <div key={item.label} className="rounded-2xl border border-border bg-bg p-4">
+              <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-secondary">{item.label}</div>
+              <div className={`mt-2 text-2xl font-extrabold ${item.tone}`}>{item.value}</div>
+            </div>
+          ))}
         </div>
       </div>
 
-      <div className="flex gap-1 border-b">
+      <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border bg-surface p-2 lg:grid-cols-4">
         {(['overview', 'service', 'staff', 'trend'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-3 py-2 text-sm border-b-2 transition-colors ${
+            className={`inline-flex min-h-11 items-center justify-center rounded-xl px-3 text-sm font-bold transition-colors ${
               activeTab === tab
-                ? 'border-primary text-primary font-medium'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
+                ? 'bg-accent text-accent-fg shadow-md shadow-accent/15'
+                : 'text-text-secondary hover:bg-surface-2 hover:text-text-primary'
             }`}
           >
             {tab === 'overview' && 'Resumo'}
@@ -246,52 +266,54 @@ export const ProfitEnginePanel: React.FC<ProfitEnginePanelProps> = ({ barbershop
       </div>
 
       {activeTab === 'overview' && periodData && (
-        <div className="grid grid-cols-2 gap-4">
-          <div className="border rounded p-4">
-            <h3 className="font-medium mb-3">Composição do Lucro</h3>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className={cardClass}>
+            <h3 className="mb-3 font-bold text-text-primary">Composição do Lucro</h3>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span>Receita</span><span>{brl(periodData.totals.revenue)}</span></div>
-              <div className="flex justify-between"><span>Custos Indiretos</span><span className="text-red-600">-{brl(periodData.totals.overheadCosts)}</span></div>
-              <div className="flex justify-between"><span>Impostos</span><span className="text-red-600">-{brl(periodData.totals.taxAmount)}</span></div>
-              <div className="flex justify-between"><span>Comissões</span><span className="text-red-600">-{brl(periodData.totals.commissionAmt)}</span></div>
-              <div className="border-t pt-2 flex justify-between font-medium">
+              <div className="flex justify-between text-text-secondary"><span>Receita</span><span className="font-bold text-text-primary">{brl(periodData.totals.revenue)}</span></div>
+              <div className="flex justify-between text-text-secondary"><span>Custos Indiretos</span><span className="font-bold text-danger">-{brl(periodData.totals.overheadCosts)}</span></div>
+              <div className="flex justify-between text-text-secondary"><span>Impostos</span><span className="font-bold text-danger">-{brl(periodData.totals.taxAmount)}</span></div>
+              <div className="flex justify-between text-text-secondary"><span>Comissões</span><span className="font-bold text-danger">-{brl(periodData.totals.commissionAmt)}</span></div>
+              <div className="flex justify-between border-t border-border pt-3 font-bold text-text-primary">
                 <span>Lucro Líquido</span>
-                <span className={periodData.totals.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}>
+                <span className={periodData.totals.netProfit >= 0 ? 'text-success' : 'text-danger'}>
                   {brl(periodData.totals.netProfit)}
                 </span>
               </div>
             </div>
           </div>
-          <div className="border rounded p-4">
-            <h3 className="font-medium mb-3">Indicadores</h3>
+          <div className={cardClass}>
+            <h3 className="mb-3 font-bold text-text-primary">Indicadores</h3>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span>Margem Bruta</span><span>{pct(periodData.totals.marginPercent)}</span></div>
-              <div className="flex justify-between"><span>Taxa de Imposto</span><span>{settings ? `${settings.defaultTaxRate}%` : '-'}</span></div>
-              <div className="flex justify-between"><span>Comissão Padrão</span><span>{settings ? `${settings.defaultCommission}%` : '-'}</span></div>
+              <div className="flex justify-between text-text-secondary"><span>Margem Bruta</span><span className="font-bold text-text-primary">{pct(periodData.totals.marginPercent)}</span></div>
+              <div className="flex justify-between text-text-secondary"><span>Taxa de Imposto</span><span className="font-bold text-text-primary">{settings ? `${settings.defaultTaxRate}%` : '-'}</span></div>
+              <div className="flex justify-between text-text-secondary"><span>Comissão Padrão</span><span className="font-bold text-text-primary">{settings ? `${settings.defaultCommission}%` : '-'}</span></div>
             </div>
           </div>
         </div>
       )}
 
       {activeTab === 'service' && (
-        <div className="border rounded p-4">
-          <h3 className="font-medium mb-3">Rentabilidade por Serviço</h3>
+        <div className={cardClass}>
+          <h3 className="mb-3 font-bold text-text-primary">Rentabilidade por Serviço</h3>
           {byService.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhum dado disponível. Clique em "Computar" para gerar.</p>
+            <EmptyProfitState>Nenhum dado disponível. Clique em “Computar” para gerar.</EmptyProfitState>
           ) : (
             <div className="space-y-2">
               {byService.map((entry) => (
-                <div key={entry.id} className="flex items-center justify-between p-2 border rounded">
+                <div key={entry.id} className={compactCardClass}>
+                  <div className="flex items-center justify-between gap-3">
                   <div>
-                    <div className="font-medium">{entry.service?.name ?? 'Serviço'}</div>
-                    <div className="text-sm text-muted-foreground">Margem: {pct(entry.marginPercent)}</div>
+                      <div className="font-bold text-text-primary">{entry.service?.name ?? 'Serviço'}</div>
+                      <div className="text-sm text-text-secondary">Margem: {pct(entry.marginPercent)}</div>
                   </div>
                   <div className="text-right">
-                    <div className="font-medium">{brl(Number(entry.revenue))}</div>
-                    <div className={`text-sm ${Number(entry.netProfit) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <div className="font-bold text-text-primary">{brl(Number(entry.revenue))}</div>
+                      <div className={`text-sm font-semibold ${Number(entry.netProfit) >= 0 ? 'text-success' : 'text-danger'}`}>
                       Lucro: {brl(Number(entry.netProfit))}
                     </div>
                   </div>
+                </div>
                 </div>
               ))}
             </div>
@@ -300,24 +322,26 @@ export const ProfitEnginePanel: React.FC<ProfitEnginePanelProps> = ({ barbershop
       )}
 
       {activeTab === 'staff' && (
-        <div className="border rounded p-4">
-          <h3 className="font-medium mb-3">Rentabilidade por Profissional</h3>
+        <div className={cardClass}>
+          <h3 className="mb-3 font-bold text-text-primary">Rentabilidade por Profissional</h3>
           {byStaff.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhum dado disponível. Clique em "Computar" para gerar.</p>
+            <EmptyProfitState>Nenhum dado disponível. Clique em “Computar” para gerar.</EmptyProfitState>
           ) : (
             <div className="space-y-2">
               {byStaff.map((entry) => (
-                <div key={entry.id} className="flex items-center justify-between p-2 border rounded">
+                <div key={entry.id} className={compactCardClass}>
+                  <div className="flex items-center justify-between gap-3">
                   <div>
-                    <div className="font-medium">{entry.staff?.name ?? 'Profissional'}</div>
-                    <div className="text-sm text-muted-foreground">Margem: {pct(entry.marginPercent)} | Comissão: {brl(Number(entry.commissionAmt))}</div>
+                      <div className="font-bold text-text-primary">{entry.staff?.name ?? 'Profissional'}</div>
+                      <div className="text-sm text-text-secondary">Margem: {pct(entry.marginPercent)} · Comissão: {brl(Number(entry.commissionAmt))}</div>
                   </div>
                   <div className="text-right">
-                    <div className="font-medium">{brl(Number(entry.revenue))}</div>
-                    <div className={`text-sm ${Number(entry.netProfit) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <div className="font-bold text-text-primary">{brl(Number(entry.revenue))}</div>
+                      <div className={`text-sm font-semibold ${Number(entry.netProfit) >= 0 ? 'text-success' : 'text-danger'}`}>
                       Lucro: {brl(Number(entry.netProfit))}
                     </div>
                   </div>
+                </div>
                 </div>
               ))}
             </div>
@@ -326,10 +350,10 @@ export const ProfitEnginePanel: React.FC<ProfitEnginePanelProps> = ({ barbershop
       )}
 
       {activeTab === 'trend' && (
-        <div className="border rounded p-4">
-          <h3 className="font-medium mb-3">Tendência de Lucro (6 meses)</h3>
+        <div className={cardClass}>
+          <h3 className="mb-3 font-bold text-text-primary">Tendência de Lucro (6 meses)</h3>
           {trend.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhum dado de tendência disponível.</p>
+            <EmptyProfitState>Nenhum dado de tendência disponível.</EmptyProfitState>
           ) : (
             <ChartContainer config={chartConfig} className="h-[300px]">
               <LineChart data={trend}>

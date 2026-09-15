@@ -7,6 +7,7 @@ import { formatDateBR } from '../../utils/formatters';
 import { Field, FIELD_CONTROL, FORM_FOOTER, FORM_GRID } from '../ui/Field';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { EmptyState } from '../ui/EmptyState';
+import { SmartSelect } from '../ui/SmartSelect';
 
 const TYPE_LABELS: Record<string, string> = {
   ROOM: 'Sala',
@@ -78,6 +79,14 @@ export const ResourcesPanel: React.FC = () => {
 
   const [dateRange, setDateRange] = useState({ from: '', to: '' });
   const [activeTab, setActiveTab] = useState<'resources' | 'bookings'>('resources');
+  const resourceTypeOptions = Object.entries(TYPE_LABELS).map(([value, label]) => ({ value, label }));
+  const activeResourceOptions = resources
+    .filter((resource) => resource.isActive)
+    .map((resource) => ({
+      value: resource.id,
+      label: resource.name,
+      description: TYPE_LABELS[resource.type] ?? resource.type,
+    }));
 
   const loadResources = useCallback(async () => {
     if (!barbershopId) return;
@@ -410,17 +419,14 @@ export const ResourcesPanel: React.FC = () => {
                 />
               </Field>
               <Field label="Tipo">
-                <select
+                <SmartSelect
                   value={form.type}
-                  onChange={(e) => setForm((p) => ({ ...p, type: e.target.value }))}
-                  className={FIELD_CONTROL}
-                >
-                  {Object.entries(TYPE_LABELS).map(([key, label]) => (
-                    <option key={key} value={key}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(value) => setForm((p) => ({ ...p, type: value ?? 'OTHER' }))}
+                  options={resourceTypeOptions}
+                  placeholder="Buscar tipo"
+                  searchable
+                  clearable={false}
+                />
               </Field>
               <Field label="Descrição">
                 <textarea
@@ -477,19 +483,14 @@ export const ResourcesPanel: React.FC = () => {
                 </div>
               )}
               <Field label="Recurso">
-                <select
+                <SmartSelect
                   value={bookingForm.resourceId}
-                  onChange={(e) => setBookingForm((p) => ({ ...p, resourceId: e.target.value }))}
-                  className={FIELD_CONTROL}
+                  onChange={(value) => setBookingForm((p) => ({ ...p, resourceId: value ?? '' }))}
+                  options={activeResourceOptions}
+                  placeholder="Buscar recurso"
+                  searchable
                   required
-                >
-                  <option value="">Selecione...</option>
-                  {resources.filter((r) => r.isActive).map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.name} ({TYPE_LABELS[r.type] ?? r.type})
-                    </option>
-                  ))}
-                </select>
+                />
               </Field>
               <Field label="Início">
                 <input

@@ -15,6 +15,7 @@ import { getErrorMessage } from '../../utils/errorMessage';
 import { formatCurrencyBRL, formatDateBR } from '../../utils/formatters';
 import { Field, FIELD_CONTROL, FORM_FOOTER } from '../ui/Field';
 import { formatPercentBR } from '../../utils/formatters';
+import { SmartSelect } from '../ui/SmartSelect';
 
 type GoalMetric = 'REVENUE' | 'APPOINTMENTS' | 'PRODUCTS_SOLD';
 
@@ -64,6 +65,10 @@ export const GoalsPanel: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [form, setForm] = useState<GoalFormData>(INITIAL_FORM);
+  const metricOptions = (Object.keys(METRIC_LABELS) as GoalMetric[]).map(metric => ({
+    value: metric,
+    label: METRIC_LABELS[metric],
+  }));
 
   const load = useCallback(async () => {
     if (!barbershopId) return;
@@ -242,17 +247,13 @@ export const GoalsPanel: React.FC = () => {
 
             <div className="space-y-4">
               <Field label="Métrica">
-                <select
+                <SmartSelect
                   value={form.metric}
-                  onChange={e => setForm(f => ({ ...f, metric: e.target.value as GoalMetric }))}
-                  className={FIELD_CONTROL}
-                >
-                  {(Object.keys(METRIC_LABELS) as GoalMetric[]).map(m => (
-                    <option key={m} value={m}>
-                      {METRIC_LABELS[m]}
-                    </option>
-                  ))}
-                </select>
+                  onChange={value => setForm(f => ({ ...f, metric: value ?? 'REVENUE' }))}
+                  options={metricOptions}
+                  searchable
+                  clearable={false}
+                />
               </Field>
 
               <Field label="Meta (valor)">

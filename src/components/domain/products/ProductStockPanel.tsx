@@ -227,10 +227,16 @@ export const ProductStockPanel: React.FC<Props> = ({ loadError, onNotify, onRelo
             name="type"
             render={({ field }) => (
               <Field label="Tipo" error={adjErrors.type?.message}>
-                <select className={FIELD_CONTROL} value={field.value} onChange={e => field.onChange(e.target.value as 'MANUAL_ADJUSTMENT' | 'INTERNAL_CONSUMPTION')}>
-                  <option value="MANUAL_ADJUSTMENT">Ajuste manual</option>
-                  <option value="INTERNAL_CONSUMPTION">Consumo interno</option>
-                </select>
+                <SmartSelect
+                  value={field.value}
+                  onChange={value => field.onChange(value ?? 'MANUAL_ADJUSTMENT')}
+                  options={[
+                    { value: 'MANUAL_ADJUSTMENT', label: 'Ajuste manual' },
+                    { value: 'INTERNAL_CONSUMPTION', label: 'Consumo interno' },
+                  ]}
+                  searchable
+                  clearable={false}
+                />
               </Field>
             )}
           />
