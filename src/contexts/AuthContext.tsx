@@ -6,13 +6,15 @@ import { getErrorMessage } from '../utils/errorMessage';
 import { StaffMember } from '../types';
 import { usersApi } from '../infra/usersApi';
 
-export type AuthResult = { ok: true } | { ok: false; message: string };
+export type AuthResult = { ok: true; message?: string } | { ok: false; message: string };
 
 interface AuthContextValue {
   user: StaffMember | null;
   loading: boolean;
   login: (email: string, password: string, recaptchaToken?: string, rememberMe?: boolean) => Promise<AuthResult>;
   loginWithGoogle: (idToken: string) => Promise<AuthResult>;
+  loginWithSavedAccount: (userId: string) => Promise<AuthResult>;
+  forgetSavedAccount: (userId: string) => Promise<void>;
   register: (data: RegisterPayload & { recaptchaToken?: string }) => Promise<AuthResult>;
   logout: () => void;
   hasRole: (roles: StaffMember['role'][]) => boolean;
@@ -140,6 +142,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     authStorage.setUser(resp.user, effectiveRememberMe);
     authStorage.setRememberMe(effectiveRememberMe);
     setUser(normalizeUser(resp.user));
+    authStorage.upsertSavedAccount({
+      id: resp.user.id,
+      name: resp.user.name,
+      email: resp.user.email,
+      avatarUrl: resp.user.avatarUrl,
+    });
     sessionStorage.removeItem('agendai:access-block-info');
   };
 
@@ -154,6 +162,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       return { ok: false, message: getErrorMessage(err, 'E-mail ou senha inválidos') };
     }
+  };
+
+  const loginWithSavedAccount = async (userId: string): Promise<AuthResult> => {
+    try {
+      const resp = await authApi.switchAccount(userId);
+      persistSession(resp, true);
+      return { ok: true };
+    } catch (err) {
+      authStorage.removeSavedAccount(userId);
+      return { ok: false, message: getErrorMessage(err, 'Sessão expirada. Faça login novamente.') };
+    }
+  };
+
+  const forgetSavedAccount = async (userId: string): Promise<void> => {
+    authStorage.removeSavedAccount(userId);
+    await authApi.forgetAccount(userId).catch(() => undefined);
   };
 
   const loginWithGoogle = async (idToken: string): Promise<AuthResult> => {
@@ -229,7 +253,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const value = useMemo(
-    () => ({ user, loading, login, loginWithGoogle, register, logout, hasRole, updateUserAvatar, updateUserProfile }),
+    () => ({ user, loading, login, loginWithGoogle, loginWithSavedAccount, forgetSavedAccount, register, logout, hasRole, updateUserAvatar, updateUserProfile }),
     [user, loading, updateUserAvatar, updateUserProfile]
   );
 

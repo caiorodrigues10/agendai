@@ -62,7 +62,10 @@ export const RegisterSchema = z.object({
     })
     .transform(v => (v ? normalizeDocument(v) : v)),
   address: z.string().max(500).optional(),
+  addressNumber: z.string().max(20).optional(),
+  addressComplement: z.string().max(100).optional(),
   city: z.string().min(2, 'Informe a cidade').max(120),
+  cep: z.string().max(9).optional(),
   termsVersion: z.string().min(1),
   termsAccepted: z.boolean().refine(v => v === true, 'É necessário aceitar os Termos de Uso'),
   marketingOptIn: z.boolean().optional().default(false),

@@ -52,4 +52,8 @@ export const authApi = {
     apiClient<{ message: string }>('/api/auth/forgot-password', 'POST', { email, recaptchaToken }),
   resetPassword: (token: string, newPassword: string) =>
     apiClient<{ message: string }>('/api/auth/reset-password', 'POST', { token, newPassword }),
+  switchAccount: (userId: string) =>
+    apiClient<AuthResponse>('/api/auth/switch-account', 'POST', { userId }),
+  forgetAccount: (userId: string) =>
+    apiClient<{ message: string }>('/api/auth/forget-account', 'POST', { userId }),
 };

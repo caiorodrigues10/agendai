@@ -28,13 +28,17 @@ import {
   ShieldCheck,
   Sparkles,
   Check,
+  X,
+  Hash,
   LucideIcon,
 } from 'lucide-react';
+import { Avatar } from '../components/ui/Avatar';
 import {
   normalizeDocument,
   maskCpf,
   maskCnpj,
   maskPhone,
+  maskCep,
   normalizePhoneBR,
   isValidDocument,
 } from '../utils/documentUtils';
@@ -236,7 +240,7 @@ const BrandPanel: React.FC = () => (
 export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, login, loginWithGoogle, register: registerUser } = useAuth();
+  const { user, login, loginWithGoogle, loginWithSavedAccount, forgetSavedAccount, register: registerUser } = useAuth();
   const [tab, setTab] = useState<Tab>(mode);
   const [registerStep, setRegisterStep] = useState<RegisterStep>(1);
   const [showPassword, setShowPassword] = useState(false);
@@ -260,6 +264,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   });
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [paywallPlans, setPaywallPlans] = useState<Plan[]>([]);
+  const [cepStatus, setCepStatus] = useState<'idle' | 'loading' | 'found' | 'not_found'>('idle');
+  const [savedAccounts, setSavedAccounts] = useState(authStorage.getSavedAccounts);
+  const [showManualLoginForm, setShowManualLoginForm] = useState(false);
+  const [switchingAccountId, setSwitchingAccountId] = useState<string | null>(null);
   const hadSessionOnMount = useRef(Boolean(authStorage.getUser()));
   useRecaptchaBadge();
 
@@ -363,6 +371,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       whatsapp: '',
       address: '',
       city: '',
+      cep: '',
       cnpj: '',
       termsVersion: '1.0',
       termsAccepted: false,
@@ -373,6 +382,45 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     reValidateMode: 'onChange',
   });
   const [registerFieldsUnlocked, setRegisterFieldsUnlocked] = useState(false);
+
+  const cepValue = registerForm.watch('cep') ?? '';
+  const cepDigits = normalizeDocument(cepValue);
+
+  useEffect(() => {
+    if (cepDigits.length !== 8) {
+      setCepStatus('idle');
+      return;
+    }
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    setCepStatus('loading');
+    fetch(`https://viacep.com.br/ws/${cepDigits}/json/`, { signal: controller.signal })
+      .then(r => r.json())
+      .then(data => {
+        clearTimeout(timeout);
+        if (data.erro) {
+          setCepStatus('not_found');
+          return;
+        }
+        registerForm.setValue('city', data.localidade ?? '', { shouldValidate: true });
+        if (data.logradouro) {
+          registerForm.setValue(
+            'address',
+            data.bairro ? `${data.logradouro}, ${data.bairro}` : data.logradouro,
+            { shouldValidate: true },
+          );
+        }
+        setCepStatus('found');
+      })
+      .catch(() => {
+        clearTimeout(timeout);
+        setCepStatus('not_found');
+      });
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [cepDigits]);
 
   const handleLogoClick = () => {
     if (!user) {
@@ -509,7 +557,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       cpf,
       barbershopName: data.barbershopName.trim(),
       whatsapp: normalizePhoneBR(data.whatsapp),
-      address: data.address?.trim() || undefined,
+      address: [
+        data.address?.trim(),
+        data.addressNumber?.trim() ? `nº ${data.addressNumber.trim()}` : null,
+        data.addressComplement?.trim(),
+      ].filter(Boolean).join(', ') || undefined,
       city: data.city.trim(),
       cnpj: data.cnpj ? normalizeDocument(data.cnpj) : undefined,
       referralCode,
@@ -680,7 +732,75 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
             )}
 
             <AnimatePresence mode="wait" initial={false}>
-              {tab === 'login' ? (
+              {tab === 'login' && !showManualLoginForm && savedAccounts.length > 0 && !authStorage.hasStoredSession() ? (
+                <motion.div
+                  key="account-switcher"
+                  initial={{ opacity: 0, x: -16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 16 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-full space-y-3"
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                    Contas salvas
+                  </p>
+                  <AnimatePresence>
+                    {savedAccounts.map(account => (
+                      <motion.div
+                        key={account.id}
+                        layout
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, x: -16 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <button
+                          type="button"
+                          disabled={switchingAccountId !== null}
+                          onClick={async () => {
+                            setSwitchingAccountId(account.id);
+                            const result = await loginWithSavedAccount(account.id);
+                            setSwitchingAccountId(null);
+                            if (result.ok) {
+                              await navigateAfterAuth();
+                            } else {
+                              showErrorToast(result.message);
+                              setSavedAccounts(authStorage.getSavedAccounts());
+                            }
+                          }}
+                          className="w-full flex items-center gap-3 p-3 rounded-xl border border-border bg-bg hover:border-accent/40 transition-all group"
+                        >
+                          <Avatar name={account.name} src={account.avatarUrl} size="sm" />
+                          <div className="flex-1 text-left min-w-0">
+                            <p className="text-[12px] font-semibold text-text-primary truncate">{account.name}</p>
+                            <p className="text-[10px] text-text-muted truncate">{account.email}</p>
+                          </div>
+                          {switchingAccountId === account.id ? (
+                            <Loader2 size={14} className="animate-spin text-text-muted shrink-0" />
+                          ) : (
+                            <X
+                              size={14}
+                              className="opacity-0 group-hover:opacity-100 text-text-muted hover:text-danger shrink-0 transition-opacity"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                await forgetSavedAccount(account.id);
+                                setSavedAccounts(authStorage.getSavedAccounts());
+                              }}
+                            />
+                          )}
+                        </button>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  <button
+                    type="button"
+                    onClick={() => setShowManualLoginForm(true)}
+                    className="w-full text-[11px] text-text-muted hover:text-accent transition-colors py-2"
+                  >
+                    + Usar outra conta
+                  </button>
+                </motion.div>
+              ) : tab === 'login' ? (
                 <motion.form
                   key="login"
                   initial={{ opacity: 0, x: -16 }}
@@ -894,14 +1014,50 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                         />
                       </Field>
 
+                      <Field
+                        label="CEP"
+                        icon={MapPin}
+                        optional
+                        error={cepStatus === 'not_found' ? 'CEP não encontrado — preencha manualmente' : undefined}
+                      >
+                        <div className="relative">
+                          <input
+                            className={inputClass(false)}
+                            placeholder="00000-000"
+                            value={registerForm.watch('cep') ?? ''}
+                            onChange={e =>
+                              registerForm.setValue('cep', maskCep(e.target.value), {
+                                shouldValidate: true,
+                              })
+                            }
+                          />
+                          {cepStatus === 'loading' && (
+                            <Loader2
+                              size={14}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-text-muted"
+                            />
+                          )}
+                        </div>
+                      </Field>
+
                       <div className="grid gap-3 sm:grid-cols-2">
                         <Field label="Cidade" icon={MapPin} error={registerForm.formState.errors.city?.message}>
                           <input className={inputClass(!!registerForm.formState.errors.city)} placeholder="São Paulo" {...registerForm.register('city')} />
                         </Field>
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-[2fr_1fr]">
                         <Field label="Endereço" icon={MapPin} optional>
-                          <input className={inputClass(false)} placeholder="Rua, número e bairro" {...registerForm.register('address')} />
+                          <input className={inputClass(false)} placeholder="Rua, bairro" {...registerForm.register('address')} />
+                        </Field>
+                        <Field label="Número" icon={Hash} optional>
+                          <input className={inputClass(false)} placeholder="123" inputMode="numeric" {...registerForm.register('addressNumber')} />
                         </Field>
                       </div>
+
+                      <Field label="Complemento" icon={MapPin} optional>
+                        <input className={inputClass(false)} placeholder="Sala 2, próximo ao mercado, etc. (opcional)" {...registerForm.register('addressComplement')} />
+                      </Field>
 
                       <Field label="CNPJ" icon={Building2} optional>
                         <input
@@ -917,9 +1073,50 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                       </Field>
 
                       <div className="space-y-2 pt-2 border-t border-border">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
-                          Horário de funcionamento
-                        </p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                            Horário de funcionamento
+                          </p>
+                          <span className="text-[10px] text-text-muted">
+                            Aberto {Object.values(scheduleDays).filter(d => d.isOpen).length} dias por semana
+                          </span>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const std = { openTime: '09:00', closeTime: '19:00' };
+                              setScheduleDays(prev => {
+                                const next = { ...prev };
+                                for (let d = 0; d <= 6; d++) {
+                                  next[d] = { ...std, isOpen: d >= 1 && d <= 5 };
+                                }
+                                return next;
+                              });
+                            }}
+                            className="text-[10px] px-2 py-1 rounded-md border border-border bg-bg text-text-secondary hover:border-accent/40 transition-colors cursor-pointer"
+                          >
+                            Seg a Sex
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const std = { openTime: '09:00', closeTime: '19:00', isOpen: true };
+                              setScheduleDays(prev => {
+                                const next = { ...prev };
+                                for (let d = 0; d <= 6; d++) {
+                                  next[d] = { ...std };
+                                }
+                                return next;
+                              });
+                            }}
+                            className="text-[10px] px-2 py-1 rounded-md border border-border bg-bg text-text-secondary hover:border-accent/40 transition-colors cursor-pointer"
+                          >
+                            Todos os dias
+                          </button>
+                        </div>
+
                         <div className="space-y-1.5">
                           {(['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] as const).map(
                             (label, i) => {
@@ -930,60 +1127,83 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                                   className={`flex items-center gap-2 p-2 rounded-lg border transition-all ${
                                     day.isOpen
                                       ? 'border-accent/30 bg-accent/5'
-                                      : 'border-border bg-bg'
+                                      : 'border-border bg-bg opacity-50'
                                   }`}
                                 >
                                   <button
                                     type="button"
-                                    aria-pressed={day.isOpen}
+                                    role="switch"
+                                    aria-checked={day.isOpen}
                                     aria-label={`${day.isOpen ? 'Desmarcar' : 'Selecionar'} ${label}`}
-                                    title={`${day.isOpen ? 'Clique para fechar' : 'Clique para abrir'} neste dia`}
                                     onClick={() =>
                                       setScheduleDays(prev => ({
                                         ...prev,
                                         [i]: { ...prev[i], isOpen: !prev[i].isOpen },
                                       }))
                                     }
-                                    className={`flex min-h-8 w-14 shrink-0 cursor-pointer items-center justify-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${
-                                      day.isOpen
-                                        ? 'bg-accent border-accent text-accent-fg shadow-sm shadow-accent/20'
-                                        : 'bg-bg border-border text-text-muted hover:border-accent/40 hover:text-text-secondary'
+                                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${
+                                      day.isOpen ? 'bg-accent' : 'bg-border'
                                     }`}
                                   >
-                                    <Check size={12} className={`shrink-0 transition-opacity ${day.isOpen ? 'opacity-100' : 'opacity-35'}`} />
-                                    {label}
+                                    <motion.span
+                                      layout
+                                      className="inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm"
+                                      animate={{ x: day.isOpen ? 18 : 3 }}
+                                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                                    />
                                   </button>
-                                  {day.isOpen ? (
-                                    <div className="flex items-center gap-1.5 flex-1">
-                                      <input
-                                        type="time"
-                                        value={day.openTime}
-                                        onChange={e =>
-                                          setScheduleDays(prev => ({
-                                            ...prev,
-                                            [i]: { ...prev[i], openTime: e.target.value },
-                                          }))
-                                        }
-                                        className="flex-1 min-w-0 bg-bg border border-border rounded-md px-2 py-1 text-text-primary text-[11px] outline-none focus:ring-1 focus:ring-accent"
-                                      />
-                                      <span className="text-[10px] text-text-muted">até</span>
-                                      <input
-                                        type="time"
-                                        value={day.closeTime}
-                                        onChange={e =>
-                                          setScheduleDays(prev => ({
-                                            ...prev,
-                                            [i]: { ...prev[i], closeTime: e.target.value },
-                                          }))
-                                        }
-                                        className="flex-1 min-w-0 bg-bg border border-border rounded-md px-2 py-1 text-text-primary text-[11px] outline-none focus:ring-1 focus:ring-accent"
-                                      />
-                                    </div>
-                                  ) : (
-                                    <span className="flex-1 text-[11px] text-text-muted italic">
-                                      Fechado
-                                    </span>
-                                  )}
+                                  <span
+                                    className={`text-[11px] font-bold w-8 shrink-0 ${
+                                      day.isOpen ? 'text-text-primary' : 'text-text-muted'
+                                    }`}
+                                  >
+                                    {label}
+                                  </span>
+
+                                  <AnimatePresence mode="wait">
+                                    {day.isOpen ? (
+                                      <motion.div
+                                        key="times"
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="flex items-center gap-1.5 flex-1 overflow-hidden"
+                                      >
+                                        <input
+                                          type="time"
+                                          value={day.openTime}
+                                          onChange={e =>
+                                            setScheduleDays(prev => ({
+                                              ...prev,
+                                              [i]: { ...prev[i], openTime: e.target.value },
+                                            }))
+                                          }
+                                          className="flex-1 min-w-0 bg-bg border border-border rounded-md px-2 py-1 text-text-primary text-[11px] outline-none focus:ring-1 focus:ring-accent"
+                                        />
+                                        <span className="text-[10px] text-text-muted">até</span>
+                                        <input
+                                          type="time"
+                                          value={day.closeTime}
+                                          onChange={e =>
+                                            setScheduleDays(prev => ({
+                                              ...prev,
+                                              [i]: { ...prev[i], closeTime: e.target.value },
+                                            }))
+                                          }
+                                          className="flex-1 min-w-0 bg-bg border border-border rounded-md px-2 py-1 text-text-primary text-[11px] outline-none focus:ring-1 focus:ring-accent"
+                                        />
+                                      </motion.div>
+                                    ) : (
+                                      <motion.span
+                                        key="closed"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="flex-1 text-[11px] text-text-muted italic"
+                                      >
+                                        Fechado
+                                      </motion.span>
+                                    )}
+                                  </AnimatePresence>
                                 </div>
                               );
                             }

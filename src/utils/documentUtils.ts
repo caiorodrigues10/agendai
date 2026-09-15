@@ -59,6 +59,11 @@ export const maskPhone = (value: string): string => {
   return `(${ddd}) ${rest.slice(0, 4)}-${rest.slice(4, 8)}`;
 };
 
+export const maskCep = (value: string): string => {
+  const d = normalizeDocument(value).slice(0, 8);
+  return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d;
+};
+
 // --- Validações ---
 
 export const isValidCpf = (raw: string): boolean => {

@@ -5,7 +5,15 @@ const REFRESH_TOKEN_SESSION_KEY = 'barber_refresh_token_session';
 const USER_KEY = 'barber_user';
 const USER_SESSION_KEY = 'barber_user_session';
 const REMEMBER_ME_KEY = 'barber_remember_me';
+const SAVED_ACCOUNTS_KEY = 'barber_saved_accounts';
 let revision = 0;
+
+export interface SavedAccount {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl?: string;
+}
 
 function getRememberMe(): boolean {
   const preference = localStorage.getItem(REMEMBER_ME_KEY);
@@ -95,5 +103,21 @@ export const authStorage = {
   clearUser: () => {
     localStorage.removeItem(USER_KEY);
     sessionStorage.removeItem(USER_SESSION_KEY);
+  },
+  getSavedAccounts: (): SavedAccount[] => {
+    try {
+      const raw = localStorage.getItem(SAVED_ACCOUNTS_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+  },
+  upsertSavedAccount: (user: SavedAccount) => {
+    const accounts = authStorage.getSavedAccounts();
+    const filtered = accounts.filter(a => a.id !== user.id);
+    filtered.unshift({ id: user.id, name: user.name, email: user.email, avatarUrl: user.avatarUrl });
+    localStorage.setItem(SAVED_ACCOUNTS_KEY, JSON.stringify(filtered.slice(0, 5)));
+  },
+  removeSavedAccount: (id: string) => {
+    const accounts = authStorage.getSavedAccounts();
+    localStorage.setItem(SAVED_ACCOUNTS_KEY, JSON.stringify(accounts.filter(a => a.id !== id)));
   },
 };
