@@ -51,7 +51,7 @@ export const ProductStockPanel: React.FC<Props> = ({ loadError, onNotify, onRelo
   const load = useCallback(async () => {
     try {
       const [list, sups, mov, rec] = await Promise.all([
-        productsApi.listProducts({ limit: 200 }),
+        productsApi.listProducts({ limit: 100 }),
         productsApi.listSuppliers(),
         productsApi.listMovements({ page: 1, limit: 20 }),
         productsApi.listReceipts({ page: 1, limit: 20 }),

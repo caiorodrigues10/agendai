@@ -548,7 +548,7 @@ export const StaffDashboard: React.FC = () => {
             barbershopId && <PublicLinkPanel barbershopId={barbershopId} operationMode={settings?.operationMode} />}
 
           {activeTab === 'referrals' &&
-            (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && <OwnerReferralsPanel />}
+            (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && <OwnerReferralsPanel onNotify={showToast} />}
 
           {activeTab === 'subscription' &&
             (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && <OwnerSubscriptionPanel />}

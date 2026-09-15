@@ -14,6 +14,7 @@ import { catalogApi, ServiceVariation, ServiceAddon, ServiceCombo } from '../../
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { SmartSelect } from '../ui/SmartSelect';
 
 type CatalogTab = 'variations' | 'addons' | 'combos';
 
@@ -52,6 +53,10 @@ export const CatalogManager: React.FC = () => {
   const [creatingCombo, setCreatingCombo] = useState(false);
 
   const [error, setError] = useState('');
+  const serviceOptions = services.map(service => ({
+    value: service.id,
+    label: service.name,
+  }));
 
   // Load data when service changes
   useEffect(() => {
@@ -165,15 +170,14 @@ export const CatalogManager: React.FC = () => {
       {error && <p className="text-xs text-error">{error}</p>}
 
       {/* Service selector */}
-      <select
+      <SmartSelect
+        label="Serviço"
         value={selectedServiceId}
-        onChange={e => setSelectedServiceId(e.target.value)}
-        className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-text-primary"
-      >
-        {services.map(s => (
-          <option key={s.id} value={s.id}>{s.name}</option>
-        ))}
-      </select>
+        onChange={setSelectedServiceId}
+        options={serviceOptions}
+        placeholder="Buscar serviço"
+        searchable
+      />
 
       {/* Tabs */}
       <div className="flex gap-1 rounded-xl border border-border bg-surface p-1">
@@ -380,22 +384,21 @@ export const CatalogManager: React.FC = () => {
                 <p className="text-xs font-bold text-text-secondary">Serviços no combo</p>
                 {comboItems.map((item, i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <select
+                    <SmartSelect
                       value={item.serviceId}
-                      onChange={e => {
-                        const svc = services.find(s => s.id === e.target.value);
+                      onChange={value => {
+                        const svc = services.find(s => s.id === value);
                         setComboItems(prev => prev.map((it, j) => j === i ? {
                           ...it,
-                          serviceId: e.target.value,
+                          serviceId: value,
                           originalPrice: svc?.price || 0,
                         } : it));
                       }}
-                      className="flex-1 rounded-lg border border-border bg-surface px-2 py-1.5 text-xs text-text-primary"
-                    >
-                      {services.map(s => (
-                        <option key={s.id} value={s.id}>{s.name}</option>
-                      ))}
-                    </select>
+                      options={serviceOptions}
+                      placeholder="Buscar serviço"
+                      searchable
+                      className="flex-1"
+                    />
                     <input
                       type="number"
                       placeholder="Preço com desconto"

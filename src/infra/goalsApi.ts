@@ -16,7 +16,7 @@ export interface ProfessionalGoal {
   professionalId: string;
   professionalName?: string;
   barbershopId: string;
-  metric: string;
+  metric: 'REVENUE' | 'APPOINTMENTS' | 'PRODUCTS_SOLD';
   target: number;
   current: number;
   percentage: number;
@@ -36,7 +36,7 @@ export const goalsApi = {
 
   create: (barbershopId: string, data: {
     professionalId: string;
-    metric: string;
+    metric: 'REVENUE' | 'APPOINTMENTS' | 'PRODUCTS_SOLD';
     target: number;
     startDate: string;
     endDate: string;
@@ -64,7 +64,13 @@ export const goalsApi = {
       token()
     ).then(res => unwrap<ProfessionalGoal[]>(res)),
 
-  getRanking: (barbershopId: string, params?: { from?: string; to?: string }) =>
+  getRanking: (barbershopId: string, params?: {
+    metric?: 'REVENUE' | 'APPOINTMENTS' | 'PRODUCTS_SOLD';
+    startDate?: string;
+    endDate?: string;
+    from?: string;
+    to?: string;
+  }) =>
     apiClient<{ success: boolean; data: ProfessionalGoal[] }>(
       `/api/barbershops/${barbershopId}/goals/ranking${buildQuery(params)}`,
       'GET',

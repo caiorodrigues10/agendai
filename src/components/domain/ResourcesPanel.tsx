@@ -195,42 +195,49 @@ export const ResourcesPanel: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Recursos</h2>
+    <div className="space-y-5">
+      <div className="rounded-2xl border border-border bg-surface p-5 shadow-[0_18px_44px_-32px_rgba(0,0,0,0.7)]">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-text-primary">Recursos</h2>
+            <p className="mt-1 text-sm text-text-secondary">
+              Controle salas, cadeiras, equipamentos e reservas do salão.
+            </p>
+          </div>
         <button
           onClick={openCreate}
-          className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-accent-fg shadow-lg shadow-accent/15 transition hover:bg-accent-hover"
         >
           <Plus className="h-4 w-4" />
           Novo Recurso
         </button>
+        </div>
       </div>
 
       {error && (
-        <div className="rounded-md border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
+        <div className="rounded-xl border border-danger/30 bg-danger/10 p-3 text-sm text-danger">
           {error}
         </div>
       )}
 
       {/* Tab selector */}
-      <div className="flex gap-1 rounded-lg bg-muted p-1">
+      <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border bg-surface p-2">
         <button
           onClick={() => setActiveTab('resources')}
-          className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+          className={`rounded-xl px-4 py-3 text-sm font-bold transition-colors ${
             activeTab === 'resources'
-              ? 'bg-background text-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
+              ? 'bg-accent text-accent-fg shadow-md shadow-accent/15'
+              : 'text-text-secondary hover:bg-surface-2 hover:text-text-primary'
           }`}
         >
           Recursos
         </button>
         <button
           onClick={() => setActiveTab('bookings')}
-          className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+          className={`rounded-xl px-4 py-3 text-sm font-bold transition-colors ${
             activeTab === 'bookings'
-              ? 'bg-background text-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
+              ? 'bg-accent text-accent-fg shadow-md shadow-accent/15'
+              : 'text-text-secondary hover:bg-surface-2 hover:text-text-primary'
           }`}
         >
           Reservas
@@ -295,19 +302,20 @@ export const ResourcesPanel: React.FC = () => {
 
       {activeTab === 'bookings' && (
         <div className="space-y-3">
-          <div className="flex items-center gap-2">
+          <div className="rounded-2xl border border-border bg-surface p-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
             <input
               type="date"
               value={dateRange.from}
               onChange={(e) => setDateRange((p) => ({ ...p, from: e.target.value }))}
-              className="rounded-md border border-border bg-background px-3 py-1.5 text-sm"
+                className="min-h-11 rounded-xl border border-border bg-bg px-3 text-sm text-text-primary"
             />
-            <span className="text-muted-foreground">até</span>
+              <span className="text-sm font-bold text-text-secondary">até</span>
             <input
               type="date"
               value={dateRange.to}
               onChange={(e) => setDateRange((p) => ({ ...p, to: e.target.value }))}
-              className="rounded-md border border-border bg-background px-3 py-1.5 text-sm"
+                className="min-h-11 rounded-xl border border-border bg-bg px-3 text-sm text-text-primary"
             />
             <button
               onClick={() => {
@@ -315,11 +323,12 @@ export const ResourcesPanel: React.FC = () => {
                 setBookingSubmitError(null);
                 setBookingModalOpen(true);
               }}
-              className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-bg px-4 text-sm font-bold text-text-primary transition hover:bg-surface-2 lg:ml-auto"
             >
               <Plus className="h-4 w-4" />
               Nova Reserva
             </button>
+            </div>
           </div>
 
           {bookings.length === 0 ? (

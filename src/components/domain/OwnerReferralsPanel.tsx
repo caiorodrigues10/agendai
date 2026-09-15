@@ -28,7 +28,11 @@ const STATUS_STYLES: Record<string, string> = {
   QUALIFIED: 'bg-accent/15 text-accent',
 };
 
-export const OwnerReferralsPanel: React.FC = () => {
+interface OwnerReferralsPanelProps {
+  onNotify?: (message: string, type: 'success' | 'error' | 'bot') => void;
+}
+
+export const OwnerReferralsPanel: React.FC<OwnerReferralsPanelProps> = ({ onNotify }) => {
   const [data, setData] = useState<ReferralDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -100,9 +104,15 @@ export const OwnerReferralsPanel: React.FC = () => {
     try {
       await referralsApi.applyCode(code);
       setReferralCode('');
+      onNotify?.('Código de indicação aplicado.', 'success');
       await load();
     } catch (err) {
-      setError(getErrorMessage(err, 'Não foi possível aplicar este código.'));
+      const message = getErrorMessage(err, 'Não foi possível aplicar este código.');
+      if (onNotify) {
+        onNotify(message, 'error');
+      } else {
+        setError(message);
+      }
     } finally {
       setApplyingCode(false);
     }
@@ -238,7 +248,7 @@ export const OwnerReferralsPanel: React.FC = () => {
         )}
       </div>
 
-      {error && (
+      {error && !onNotify && (
         <p className="text-xs text-danger flex items-center gap-1">
           <AlertCircle size={12} /> {error}
         </p>

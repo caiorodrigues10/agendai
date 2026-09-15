@@ -16,12 +16,12 @@ import { formatCurrencyBRL, formatDateBR } from '../../utils/formatters';
 import { Field, FIELD_CONTROL, FORM_FOOTER } from '../ui/Field';
 import { formatPercentBR } from '../../utils/formatters';
 
-type GoalMetric = 'Faturamento' | 'Atendimentos' | 'Ticket medio';
+type GoalMetric = 'REVENUE' | 'APPOINTMENTS' | 'PRODUCTS_SOLD';
 
 const METRIC_LABELS: Record<GoalMetric, string> = {
-  Faturamento: 'Faturamento',
-  Atendimentos: 'Atendimentos',
-  'Ticket medio': 'Ticket médio',
+  REVENUE: 'Faturamento',
+  APPOINTMENTS: 'Atendimentos',
+  PRODUCTS_SOLD: 'Produtos vendidos',
 };
 
 interface GoalFormData {
@@ -34,7 +34,7 @@ interface GoalFormData {
 
 const INITIAL_FORM: GoalFormData = {
   professionalId: '',
-  metric: 'Faturamento',
+  metric: 'REVENUE',
   target: '',
   startDate: '',
   endDate: '',
@@ -49,7 +49,7 @@ const progressColor = (pct: number) => {
 const progressWidth = (pct: number) => `${Math.min(pct, 100)}%`;
 
 const formatMetricValue = (value: number, metric: string) => {
-  if (metric === 'Faturamento') return formatCurrencyBRL(value);
+  if (metric === 'REVENUE' || metric === 'PRODUCTS_SOLD') return formatCurrencyBRL(value);
   return String(value);
 };
 
@@ -186,7 +186,9 @@ export const GoalsPanel: React.FC = () => {
                     <p className="text-sm font-semibold text-text-primary">
                       {goal.professionalName ?? 'Profissional'}
                     </p>
-                    <p className="text-xs text-text-muted">{goal.metric}</p>
+                    <p className="text-xs text-text-muted">
+                      {METRIC_LABELS[goal.metric as GoalMetric] ?? goal.metric}
+                    </p>
                   </div>
                 </div>
                 <div className="text-right">

@@ -200,34 +200,36 @@ export const GiftCardsPanel: React.FC = () => {
     d ? new Date(d).toLocaleDateString('pt-BR') : '-';
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Tabs */}
-      <div className="flex gap-2 border-b pb-2">
+      <div className="rounded-2xl border border-border bg-surface p-2 shadow-[0_18px_44px_-32px_rgba(0,0,0,0.7)]">
+        <div className="grid gap-2 sm:grid-cols-3">
         <button
           onClick={() => setTab('list')}
-          className={`px-3 py-1.5 rounded text-sm font-medium transition ${tab === 'list' ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+            className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-sm font-bold transition ${tab === 'list' ? 'bg-accent text-accent-fg shadow-md shadow-accent/15' : 'text-text-secondary hover:bg-surface-2 hover:text-text-primary'}`}
         >
-          <Tag className="inline w-4 h-4 mr-1" />
+          <Tag className="h-4 w-4" />
           Lista
         </button>
         <button
           onClick={() => setTab('purchase')}
-          className={`px-3 py-1.5 rounded text-sm font-medium transition ${tab === 'purchase' ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+            className={`inline-flex min-h-11 items-center justify-center rounded-xl px-3 text-sm font-bold transition ${tab === 'purchase' ? 'bg-accent text-accent-fg shadow-md shadow-accent/15' : 'text-text-secondary hover:bg-surface-2 hover:text-text-primary'}`}
         >
           Criar Gift Card
         </button>
         <button
           onClick={() => setTab('lookup')}
-          className={`px-3 py-1.5 rounded text-sm font-medium transition ${tab === 'lookup' ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+            className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-sm font-bold transition ${tab === 'lookup' ? 'bg-accent text-accent-fg shadow-md shadow-accent/15' : 'text-text-secondary hover:bg-surface-2 hover:text-text-primary'}`}
         >
-          <Search className="inline w-4 h-4 mr-1" />
+          <Search className="h-4 w-4" />
           Consultar
         </button>
+        </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm flex items-center gap-2">
+        <div className="flex items-center gap-2 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
           <AlertCircle className="w-4 h-4 shrink-0" />
           {error}
           <button onClick={() => setError(null)} className="ml-auto"><X className="w-4 h-4" /></button>
@@ -238,9 +240,15 @@ export const GiftCardsPanel: React.FC = () => {
       {tab === 'list' && (
         <div>
           {loading ? (
-            <div className="flex items-center justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-indigo-500" /></div>
+            <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-accent" /></div>
           ) : cards.length === 0 ? (
-            <p className="text-gray-500 text-sm py-4 text-center">Nenhum gift card encontrado.</p>
+            <div className="rounded-2xl border border-dashed border-border bg-surface px-6 py-12 text-center">
+              <Tag className="mx-auto mb-3 h-8 w-8 text-accent" />
+              <p className="text-sm font-bold text-text-primary">Nenhum gift card encontrado</p>
+              <p className="mt-1 text-sm text-text-secondary">
+                Crie um gift card ou consulte um código existente para acompanhar o saldo.
+              </p>
+            </div>
           ) : (
             <div className="space-y-2">
               {cards.map(card => (
