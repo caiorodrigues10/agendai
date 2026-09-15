@@ -1,10 +1,11 @@
 import React from 'react';
 import { Logo } from './Logo';
 import { Avatar } from './Avatar';
-import { Lock, LogOut, Wallet } from 'lucide-react';
+import { Clock3, Lock, LogOut, Wallet } from 'lucide-react';
 import { StaffMember } from '../../types';
 import { ThemeToggle } from './ThemeToggle';
 import { Link } from 'react-router-dom';
+import { useSubscription } from '../../contexts/SubscriptionContext';
 
 interface HeaderProps {
   currentUser: StaffMember | null;
@@ -14,12 +15,33 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogout, logoUrl }) => {
+  const { data: subscriptionData } = useSubscription();
+  const trial = subscriptionData?.trial;
+  const trialDays = trial?.daysRemainingInTrial;
+  const isTrialActive = Boolean(trial?.isInTrial && !trial.isExpired && typeof trialDays === 'number');
+  const trialLabel = trialDays === 0 ? 'Trial termina hoje' : `${trialDays} ${trialDays === 1 ? 'dia' : 'dias'} de trial`;
+  const trialTone = trialDays != null && trialDays <= 3
+    ? 'border-danger/30 bg-danger/10 text-danger'
+    : trialDays != null && trialDays <= 7
+      ? 'border-warning/30 bg-warning/10 text-warning'
+      : 'border-accent/30 bg-accent/10 text-accent';
+
   return (
     <header className="sticky top-0 z-50 bg-bg/95 backdrop-blur-sm border-b border-accent/20 shadow-lg shadow-accent/5">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 lg:px-6">
         <Logo size="sm" customImageUrl={logoUrl} />
         <div className="flex items-center gap-2">
           <ThemeToggle />
+          {currentUser && isTrialActive && (
+            <span
+              aria-label={`Seu acesso de teste termina em ${trialDays} ${trialDays === 1 ? 'dia' : 'dias'}.`}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[11px] font-bold sm:px-2.5 ${trialTone}`}
+            >
+              <Clock3 size={13} aria-hidden="true" />
+              <span className="sm:hidden">{trialDays}d</span>
+              <span className="hidden sm:inline">{trialLabel}</span>
+            </span>
+          )}
           {currentUser ? (
             <div className="flex items-center gap-2 bg-surface rounded-lg p-1 pr-3 border border-border">
               {currentUser.role === 'OWNER' && (

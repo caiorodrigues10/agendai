@@ -65,17 +65,17 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               </div>
             </div>
 
-            <div className="flex self-end gap-2 sm:self-auto">
+            <div className="flex shrink-0 items-center self-end gap-2 sm:self-auto">
               <button
                 onClick={() => setEditingId(service.id)}
-                className="min-h-10 min-w-10 rounded-xl border border-border bg-bg p-2 text-text-secondary transition-all hover:border-accent/30 hover:bg-accent/10 hover:text-accent"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-bg p-2 text-text-secondary transition-all hover:border-accent/30 hover:bg-accent/10 hover:text-accent"
                 title="Editar"
               >
                 <RiPencilLine size={18} />
               </button>
               <button
                 onClick={() => setServiceToDelete(service)}
-                className="min-h-10 min-w-10 rounded-xl border border-border bg-bg p-2 text-text-secondary transition-all hover:border-danger/30 hover:bg-danger/10 hover:text-danger"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-bg p-2 text-text-secondary transition-all hover:border-danger/30 hover:bg-danger/10 hover:text-danger"
                 title="Excluir"
               >
                 <RiDeleteBin6Line size={18} />

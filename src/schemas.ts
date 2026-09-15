@@ -296,3 +296,10 @@ export const CategorySchema = z.object({
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Escolha uma cor').or(z.literal('')),
 });
 export type CategoryFormData = z.infer<typeof CategorySchema>;
+
+export const OrganizationSchema = z.object({
+  name: z.string().trim().min(1, 'Informe o nome da organização'),
+  slug: z.string().trim().min(1, 'Informe o identificador'),
+  logoUrl: z.string().trim().url('Informe uma URL válida').or(z.literal('')),
+});
+export type OrganizationFormData = z.infer<typeof OrganizationSchema>;
