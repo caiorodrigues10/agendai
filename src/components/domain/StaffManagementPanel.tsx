@@ -15,6 +15,7 @@ import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { Field, FIELD_CONTROL, FORM_FOOTER } from '../ui/Field';
+import { SmartSelect } from '../ui/SmartSelect';
 
 const DAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const DAY_LABELS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -238,6 +239,8 @@ export const StaffManagementPanel: React.FC = () => {
   const availableServices = services.filter(
     s => !assignedServices.some(as => as.serviceId === s.id)
   );
+  const dayOptions = DAY_LABELS.map((label, idx) => ({ value: String(idx), label }));
+  const serviceOptions = availableServices.map(service => ({ value: service.id, label: service.name }));
 
   return (
     <div className="space-y-4">
@@ -340,15 +343,13 @@ export const StaffManagementPanel: React.FC = () => {
                   <h4 className="text-xs font-bold text-text-secondary">Adicionar horário</h4>
                   <div className="grid grid-cols-3 gap-3">
                     <Field label="Dia da semana">
-                      <select
-                        value={newDayOfWeek}
-                        onChange={e => setNewDayOfWeek(parseInt(e.target.value))}
-                        className={FIELD_CONTROL}
-                      >
-                        {DAY_LABELS.map((label, idx) => (
-                          <option key={idx} value={idx}>{label}</option>
-                        ))}
-                      </select>
+                      <SmartSelect
+                        value={String(newDayOfWeek)}
+                        onChange={value => setNewDayOfWeek(Number(value ?? 1))}
+                        options={dayOptions}
+                        clearable={false}
+                        searchable
+                      />
                     </Field>
                     <Field label="Início">
                       <input
@@ -454,16 +455,14 @@ export const StaffManagementPanel: React.FC = () => {
                 <div className="rounded-2xl border border-border bg-surface p-4 space-y-3">
                   <h4 className="text-xs font-bold text-text-secondary">Atribuir serviço</h4>
                   <Field label="Serviço *">
-                    <select
+                    <SmartSelect
                       value={assignServiceId}
-                      onChange={e => setAssignServiceId(e.target.value)}
-                      className={FIELD_CONTROL}
-                    >
-                      <option value="">Selecione...</option>
-                      {availableServices.map(s => (
-                        <option key={s.id} value={s.id}>{s.name}</option>
-                      ))}
-                    </select>
+                      onChange={value => setAssignServiceId(value ?? '')}
+                      options={serviceOptions}
+                      placeholder="Buscar serviço"
+                      emptyMessage="Nenhum serviço disponível"
+                      searchable
+                    />
                   </Field>
                   <div className="grid grid-cols-2 gap-3">
                     <Field label="Preço personalizado (opcional)">

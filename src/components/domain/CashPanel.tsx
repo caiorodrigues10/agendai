@@ -17,6 +17,7 @@ import { getErrorMessage } from '../../utils/errorMessage';
 import { formatCurrencyBRL, formatDateTimeBR } from '../../utils/formatters';
 import { Field, FIELD_CONTROL, FORM_FOOTER } from '../ui/Field';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { SmartSelect } from '../ui/SmartSelect';
 
 type MovementType = 'SERVICE_SALE' | 'PRODUCT_SALE' | 'TIP' | 'EXPENSE' | 'OTHER';
 type PaymentMethod = 'CASH' | 'PIX' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'FIADO';
@@ -59,6 +60,23 @@ const INITIAL_FORM: MovementFormData = {
   description: '',
 };
 
+const todayIso = () => new Date().toISOString().slice(0, 10);
+
+const movementTypeOptions = (Object.keys(MOVEMENT_TYPE_LABELS) as MovementType[]).map(value => ({
+  value,
+  label: MOVEMENT_TYPE_LABELS[value],
+}));
+
+const paymentMethodOptions = (Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map(value => ({
+  value,
+  label: PAYMENT_METHOD_LABELS[value],
+}));
+
+const paymentMethodFilterOptions = [
+  { value: 'ALL', label: 'Todos' },
+  ...paymentMethodOptions,
+];
+
 export const CashPanel: React.FC = () => {
   const { barbershopId } = useBarbershopFilters();
   const { user } = useAuth();
@@ -79,8 +97,11 @@ export const CashPanel: React.FC = () => {
     setError(null);
     try {
       const [s, m] = await Promise.all([
-        cashApi.getSummary(barbershopId),
-        cashApi.getMovements(barbershopId, filterMethod ? { paymentMethod: filterMethod } : undefined),
+        cashApi.getSummary(barbershopId, todayIso()),
+        cashApi.getMovements(barbershopId, {
+          date: todayIso(),
+          paymentMethod: filterMethod || undefined,
+        }),
       ]);
       setSummary(s);
       setMovements(m);
@@ -202,18 +223,16 @@ export const CashPanel: React.FC = () => {
           <h3 className="text-sm font-semibold text-text-primary">Movimentações</h3>
           <div className="flex items-center gap-2">
             <Filter size={14} className="text-text-muted" />
-            <select
-              value={filterMethod}
-              onChange={e => setFilterMethod(e.target.value as PaymentMethod | '')}
-              className="h-8 rounded-lg border border-border bg-bg px-2 text-xs text-text-primary outline-none focus:ring-2 focus:ring-accent"
-            >
-              <option value="">Todos</option>
-              {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map(method => (
-                <option key={method} value={method}>
-                  {PAYMENT_METHOD_LABELS[method]}
-                </option>
-              ))}
-            </select>
+            <SmartSelect
+              value={(filterMethod || 'ALL') as PaymentMethod | 'ALL'}
+              onChange={value => setFilterMethod(value === 'ALL' || !value ? '' : value)}
+              options={paymentMethodFilterOptions}
+              clearable={false}
+              size="sm"
+              searchable
+              aria-label="Filtrar forma de pagamento"
+              placeholder="Todos"
+            />
           </div>
         </div>
 
@@ -277,17 +296,13 @@ export const CashPanel: React.FC = () => {
 
             <div className="space-y-4">
               <Field label="Tipo">
-                <select
+                <SmartSelect
                   value={form.type}
-                  onChange={e => setForm(f => ({ ...f, type: e.target.value as MovementType }))}
-                  className={FIELD_CONTROL}
-                >
-                  {(Object.keys(MOVEMENT_TYPE_LABELS) as MovementType[]).map(t => (
-                    <option key={t} value={t}>
-                      {MOVEMENT_TYPE_LABELS[t]}
-                    </option>
-                  ))}
-                </select>
+                  onChange={value => setForm(f => ({ ...f, type: value ?? 'OTHER' }))}
+                  options={movementTypeOptions}
+                  clearable={false}
+                  searchable
+                />
               </Field>
 
               <Field label="Valor (R$)">
@@ -303,19 +318,15 @@ export const CashPanel: React.FC = () => {
               </Field>
 
               <Field label="Forma de pagamento">
-                <select
+                <SmartSelect
                   value={form.paymentMethod}
-                  onChange={e =>
-                    setForm(f => ({ ...f, paymentMethod: e.target.value as PaymentMethod }))
+                  onChange={value =>
+                    setForm(f => ({ ...f, paymentMethod: value ?? 'PIX' }))
                   }
-                  className={FIELD_CONTROL}
-                >
-                  {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map(m => (
-                    <option key={m} value={m}>
-                      {PAYMENT_METHOD_LABELS[m]}
-                    </option>
-                  ))}
-                </select>
+                  options={paymentMethodOptions}
+                  clearable={false}
+                  searchable
+                />
               </Field>
 
               <Field label="Descrição (opcional)">

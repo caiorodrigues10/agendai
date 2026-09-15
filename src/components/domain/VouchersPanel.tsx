@@ -14,6 +14,7 @@ import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { Field, FIELD_CONTROL, FORM_FOOTER } from '../ui/Field';
+import { SmartSelect } from '../ui/SmartSelect';
 
 const VOUCHER_TYPES = ['PERCENTAGE', 'FIXED', 'FREE_SERVICE'];
 
@@ -22,6 +23,8 @@ const TYPE_LABELS: Record<string, string> = {
   FIXED: 'Valor fixo',
   FREE_SERVICE: 'Serviço grátis',
 };
+
+const voucherTypeOptions = VOUCHER_TYPES.map(value => ({ value, label: TYPE_LABELS[value] }));
 
 const STATUS_COLORS: Record<string, string> = {
   ACTIVE: 'bg-success/15 text-success',
@@ -206,6 +209,11 @@ export const VouchersPanel: React.FC = () => {
   const formatDate = (d?: string) =>
     d ? new Date(d).toLocaleDateString('pt-BR') : '-';
 
+  const serviceOptions = [
+    { value: 'ANY', label: 'Qualquer' },
+    ...services.map(service => ({ value: service.id, label: service.name })),
+  ];
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
@@ -245,16 +253,14 @@ export const VouchersPanel: React.FC = () => {
               />
             </Field>
             <Field label="Serviço">
-              <select
-                value={validateServiceId}
-                onChange={e => setValidateServiceId(e.target.value)}
-                className={FIELD_CONTROL}
-              >
-                <option value="">Qualquer</option>
-                {services.map(s => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
+              <SmartSelect
+                value={validateServiceId || 'ANY'}
+                onChange={value => setValidateServiceId(value === 'ANY' || !value ? '' : value)}
+                options={serviceOptions}
+                clearable={false}
+                searchable
+                placeholder="Buscar serviço"
+              />
             </Field>
           </div>
           <Field label="Valor da compra (R$)">
@@ -347,15 +353,13 @@ export const VouchersPanel: React.FC = () => {
           </Field>
           <div className="grid grid-cols-3 gap-3">
             <Field label="Tipo *">
-              <select
+              <SmartSelect
                 value={form.type}
-                onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
-                className={FIELD_CONTROL}
-              >
-                {VOUCHER_TYPES.map(t => (
-                  <option key={t} value={t}>{TYPE_LABELS[t]}</option>
-                ))}
-              </select>
+                onChange={value => setForm(f => ({ ...f, type: value ?? 'PERCENTAGE' }))}
+                options={voucherTypeOptions}
+                clearable={false}
+                searchable
+              />
             </Field>
             <Field label={form.type === 'PERCENTAGE' ? 'Valor (%) *' : 'Valor (R$) *'}>
               <input

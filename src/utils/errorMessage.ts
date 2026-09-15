@@ -8,6 +8,12 @@ const TECHNICAL_PATTERN = /^HTTP\s*\d+$/i;
 const SDK_PATTERN =
   /credentials|google-auth|cloud\.google\.com\/docs|could not load|default credentials|permission denied|unauthorized|invalid_grant/i;
 
+const RAW_VALIDATION_PATTERN =
+  /"\s*code\s*"|invalid_date|too_big|too_small|invalid_type|invalid enum|expected .*received|\[\s*\{\s*"code"/i;
+
+const RAW_DATABASE_PATTERN =
+  /prisma\.|findmany|findunique|findfirst|update\(\)|create\(\)|unknown field|provided date object is invalid|cannot read properties of undefined/i;
+
 function isNetworkError(err: unknown): boolean {
   if (err instanceof ApiError) {
     return err.code === 'NETWORK_ERROR' || err.statusCode === 0;
@@ -25,7 +31,10 @@ function formatApiFieldErrors(errors: unknown): string | null {
         if (typeof item === 'string') return item;
         if (item && typeof item === 'object' && 'message' in item) {
           const msg = (item as { message?: unknown }).message;
-          return typeof msg === 'string' ? msg : null;
+          const path = Array.isArray((item as { path?: unknown }).path)
+            ? (item as { path?: unknown[] }).path?.join('.')
+            : null;
+          return typeof msg === 'string' ? (path ? `${path}: ${msg}` : msg) : null;
         }
         return null;
       })
@@ -38,6 +47,22 @@ function formatApiFieldErrors(errors: unknown): string | null {
       .map(v => (typeof v === 'string' ? v : null))
       .filter((v): v is string => Boolean(v));
     return parts.length ? parts.join(' · ') : null;
+  }
+  return null;
+}
+
+function friendlyTechnicalMessage(raw: string): string | null {
+  if (RAW_VALIDATION_PATTERN.test(raw)) {
+    if (/limit|too_big|less than or equal to 100/i.test(raw)) {
+      return 'O limite máximo permitido é 100 registros por vez.';
+    }
+    if (/date|invalid_date|provided date object is invalid/i.test(raw)) {
+      return 'Data inválida. Ajuste o período e tente novamente.';
+    }
+    return 'Dados inválidos. Confira as informações e tente novamente.';
+  }
+  if (RAW_DATABASE_PATTERN.test(raw)) {
+    return 'Não foi possível carregar estes dados agora. Tente novamente em instantes.';
   }
   return null;
 }
@@ -114,6 +139,8 @@ export function getErrorMessage(
     }
 
     const raw = err.message?.trim() ?? '';
+    const friendly = friendlyTechnicalMessage(raw);
+    if (friendly) return friendly;
     if (
       err.statusCode === 401 &&
       /token\s*(inválido|ausente|mal\s*formatado)|refresh\s*token|sess[aã]o/i.test(raw)
@@ -128,6 +155,8 @@ export function getErrorMessage(
 
   if (err instanceof Error) {
     const raw = err.message?.trim() ?? '';
+    const friendly = friendlyTechnicalMessage(raw);
+    if (friendly) return friendly;
     if (!raw || NETWORK_PATTERN.test(raw) || TECHNICAL_PATTERN.test(raw) || SDK_PATTERN.test(raw)) {
       return fallback;
     }

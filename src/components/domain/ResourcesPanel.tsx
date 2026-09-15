@@ -57,6 +57,10 @@ const INITIAL_BOOKING_FORM: BookingFormData = {
   notes: '',
 };
 
+const startOfDayIso = (date: string) => new Date(`${date}T00:00:00`).toISOString();
+const endOfDayIso = (date: string) => new Date(`${date}T23:59:59.999`).toISOString();
+const dateTimeLocalToIso = (value: string) => new Date(value).toISOString();
+
 export const ResourcesPanel: React.FC = () => {
   const { barbershopId } = useBarbershopFilters();
   const [resources, setResources] = useState<Resource[]>([]);
@@ -106,8 +110,8 @@ export const ResourcesPanel: React.FC = () => {
     if (!barbershopId || !dateRange.from || !dateRange.to) return;
     try {
       const data = await resourcesApi.listBookings(barbershopId, {
-        dateFrom: dateRange.from,
-        dateTo: dateRange.to,
+        dateFrom: startOfDayIso(dateRange.from),
+        dateTo: endOfDayIso(dateRange.to),
       });
       setBookings(data);
     } catch (err) {
@@ -176,7 +180,11 @@ export const ResourcesPanel: React.FC = () => {
     if (!barbershopId) return;
     setBookingSubmitError(null);
     try {
-      await resourcesApi.createBooking(barbershopId, bookingForm);
+      await resourcesApi.createBooking(barbershopId, {
+        ...bookingForm,
+        startAt: dateTimeLocalToIso(bookingForm.startAt),
+        endTime: dateTimeLocalToIso(bookingForm.endTime),
+      });
       setBookingModalOpen(false);
       await loadBookings();
     } catch (err) {
@@ -213,13 +221,13 @@ export const ResourcesPanel: React.FC = () => {
               Controle salas, cadeiras, equipamentos e reservas do salão.
             </p>
           </div>
-        <button
-          onClick={openCreate}
+          <button
+            onClick={openCreate}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-accent-fg shadow-lg shadow-accent/15 transition hover:bg-accent-hover"
-        >
-          <Plus className="h-4 w-4" />
-          Novo Recurso
-        </button>
+          >
+            <Plus className="h-4 w-4" />
+            Novo recurso
+          </button>
         </div>
       </div>
 
@@ -265,19 +273,19 @@ export const ResourcesPanel: React.FC = () => {
               {resources.map((resource) => (
                 <div
                   key={resource.id}
-                  className="rounded-lg border border-border bg-card p-4 space-y-2"
+                  className="rounded-xl border border-border bg-surface p-4 shadow-[0_16px_36px_-30px_rgba(0,0,0,0.75)] transition-colors hover:border-accent/40"
                 >
                   <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-medium">{resource.name}</h3>
-                      <span className="inline-block rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                    <div className="min-w-0">
+                      <h3 className="truncate text-sm font-bold text-text-primary">{resource.name}</h3>
+                      <span className="mt-2 inline-flex rounded-full border border-border bg-bg px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-text-secondary">
                         {TYPE_LABELS[resource.type] ?? resource.type}
                       </span>
                     </div>
                     <div className="flex gap-1">
                       <button
                         onClick={() => openEdit(resource)}
-                        className="rounded p-1 hover:bg-muted"
+                        className="rounded-lg p-2 text-text-muted hover:bg-surface-2 hover:text-text-primary"
                         title="Editar"
                       >
                         <Edit3 className="h-4 w-4" />
@@ -291,13 +299,15 @@ export const ResourcesPanel: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  {resource.description && (
-                    <p className="text-sm text-muted-foreground line-clamp-2">{resource.description}</p>
+                  {resource.description ? (
+                    <p className="line-clamp-2 text-sm text-text-secondary">{resource.description}</p>
+                  ) : (
+                    <p className="text-sm text-text-muted">Sem descrição.</p>
                   )}
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span>Capacidade: {resource.maxConcurrent}</span>
+                  <div className="flex items-center gap-3 text-xs text-text-muted">
+                    <span>Capacidade {resource.maxConcurrent}</span>
                     <span
-                      className={resource.isActive ? 'text-green-400' : 'text-red-400'}
+                      className={resource.isActive ? 'font-semibold text-success' : 'font-semibold text-danger'}
                     >
                       {resource.isActive ? 'Ativo' : 'Inativo'}
                     </span>
@@ -350,7 +360,7 @@ export const ResourcesPanel: React.FC = () => {
               {bookings.map((booking) => (
                 <div
                   key={booking.id}
-                  className="flex items-center justify-between rounded-lg border border-border bg-card p-3"
+                  className="flex items-center justify-between rounded-xl border border-border bg-surface p-3"
                 >
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
@@ -363,7 +373,7 @@ export const ResourcesPanel: React.FC = () => {
                         {STATUS_LABELS[booking.status] ?? booking.status}
                       </span>
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-text-secondary">
                       {new Date(booking.startAt).toLocaleDateString('pt-BR')}{' '}
                       {new Date(booking.startAt).toLocaleTimeString('pt-BR', {
                         hour: '2-digit',
@@ -376,7 +386,7 @@ export const ResourcesPanel: React.FC = () => {
                       })}
                     </div>
                     {booking.notes && (
-                      <p className="text-xs text-muted-foreground">{booking.notes}</p>
+                      <p className="text-xs text-text-muted">{booking.notes}</p>
                     )}
                   </div>
                   {booking.status === 'CONFIRMED' && (
@@ -398,12 +408,12 @@ export const ResourcesPanel: React.FC = () => {
       {/* Resource create/edit modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-lg">
-            <h3 className="mb-4 text-lg font-semibold">
-              {editingResource ? 'Editar Recurso' : 'Novo Recurso'}
+          <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+            <h3 className="mb-4 text-lg font-semibold text-text-primary">
+              {editingResource ? 'Editar recurso' : 'Novo recurso'}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-3">
-              {bookingSubmitError && (
+              {submitError && (
                 <div className="rounded-md bg-red-500/10 p-2 text-sm text-red-400">
                   {submitError}
                 </div>
@@ -474,8 +484,8 @@ export const ResourcesPanel: React.FC = () => {
       {/* Booking create modal */}
       {bookingModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-lg">
-            <h3 className="mb-4 text-lg font-semibold">Nova Reserva</h3>
+          <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+            <h3 className="mb-4 text-lg font-semibold text-text-primary">Nova reserva</h3>
             <form onSubmit={handleCreateBooking} className="space-y-3">
               {bookingSubmitError && (
                 <div className="rounded-md bg-red-500/10 p-2 text-sm text-red-400">
