@@ -225,6 +225,22 @@ export const productsApi = {
       payload,
       token()
     ).then(res => unwrap<Product>(res)),
+  uploadProductImage: async (productId: string, file: File): Promise<{ imageUrl: string }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch(`/api/products/${productId}/image/upload`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token()}` },
+      body: formData,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      const msg = body?.message ?? `Erro no upload (${res.status})`;
+      throw new Error(msg);
+    }
+    const body = await res.json();
+    return { imageUrl: body.data.imageUrl };
+  },
   listCategories: () =>
     apiClient<{ success: boolean; data: ProductCategory[] }>(
       '/api/product-categories',
@@ -246,6 +262,13 @@ export const productsApi = {
       payload,
       token()
     ).then(res => unwrap<ProductCategory>(res)),
+  deleteCategory: (id: string) =>
+    apiClient<{ success: boolean; data: { deleted: boolean; movedProducts: number } }>(
+      `/api/product-categories/${id}`,
+      'DELETE',
+      undefined,
+      token()
+    ).then(res => unwrap<{ deleted: boolean; movedProducts: number }>(res)),
   listSuppliers: () =>
     apiClient<{ success: boolean; data: Supplier[] }>(
       '/api/suppliers',

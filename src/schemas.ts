@@ -159,11 +159,10 @@ export const ProductSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   description: z.string().optional().default(''),
   salePrice: z.coerce.number({ invalid_type_error: 'Preço inválido' }).min(0, 'Preço não pode ser negativo'),
-  sku: z.string().optional().default(''),
-  barcode: z.string().optional().default(''),
   categoryId: z.string().optional().default(''),
+  imageUrl: z.string().optional().default(''),
   type: z.enum(['RETAIL', 'CONSUMABLE', 'BOTH']),
-  unitLabel: z.string().min(1, 'Unidade é obrigatória').default('unidade'),
+  unitLabel: z.string().min(1, 'Unidade é obrigatória').default(''),
   minStock: z.coerce.number({ invalid_type_error: 'Estoque inválido' }).min(0).default(0),
   trackStock: z.boolean().default(true),
 });
