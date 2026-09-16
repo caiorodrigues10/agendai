@@ -5,6 +5,7 @@ import { membershipsApi, MembershipPlan, ClientMembership } from '../../infra/me
 import { getErrorMessage } from '../../utils/errorMessage';
 import { formatCurrencyBRL, formatDateBR } from '../../utils/formatters';
 import { Field, FIELD_CONTROL, FORM_FOOTER, FORM_GRID } from '../ui/Field';
+import { SmartSelect } from '../ui/SmartSelect';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { EmptyState } from '../ui/EmptyState';
 
@@ -385,9 +386,12 @@ export const MembershipsPanel: React.FC = () => {
                 <input type="number" min={0} step={0.01} className={FIELD_CONTROL} value={planForm.price} onChange={e => setPlanForm(f => ({ ...f, price: e.target.value }))} />
               </Field>
               <Field label="Ciclo">
-                <select className={FIELD_CONTROL} value={planForm.billingCycle} onChange={e => setPlanForm(f => ({ ...f, billingCycle: e.target.value }))}>
-                  {Object.entries(CYCLE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                </select>
+                <SmartSelect
+                  value={planForm.billingCycle}
+                  onChange={val => setPlanForm(f => ({ ...f, billingCycle: val ?? 'MONTHLY' }))}
+                  options={Object.entries(CYCLE_LABELS).map(([value, label]) => ({ value, label }))}
+                  clearable={false}
+                />
               </Field>
             </div>
 
@@ -407,10 +411,12 @@ export const MembershipsPanel: React.FC = () => {
           <div className="bg-surface rounded-xl border border-border w-full max-w-sm p-5 space-y-4">
             <h4 className="text-base font-bold">Nova adesão</h4>
             <Field label="Plano">
-              <select className={FIELD_CONTROL} value={selectedPlanId} onChange={e => setSelectedPlanId(e.target.value)}>
-                <option value="">Selecione...</option>
-                {plans.filter(p => p.isActive).map(p => <option key={p.id} value={p.id}>{p.name} — {formatCurrencyBRL(p.price)}</option>)}
-              </select>
+              <SmartSelect
+                value={selectedPlanId || null}
+                onChange={val => setSelectedPlanId(val ?? '')}
+                options={plans.filter(p => p.isActive).map(p => ({ value: p.id, label: `${p.name} — ${formatCurrencyBRL(p.price)}` }))}
+                placeholder="Selecione..."
+              />
             </Field>
             <Field label="ID do cliente">
               <input className={FIELD_CONTROL} value={selectedClientId} onChange={e => setSelectedClientId(e.target.value)} placeholder="UUID do cliente" />
@@ -444,12 +450,17 @@ export const MembershipsPanel: React.FC = () => {
           <div className="bg-surface rounded-xl border border-border w-full max-w-sm p-5 space-y-4">
             <h4 className="text-base font-bold">Registrar pagamento</h4>
             <Field label="Método de pagamento">
-              <select className={FIELD_CONTROL} value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}>
-                <option value="PIX">PIX</option>
-                <option value="CASH">Dinheiro</option>
-                <option value="CREDIT_CARD">Cartão de Crédito</option>
-                <option value="DEBIT_CARD">Cartão de Débito</option>
-              </select>
+              <SmartSelect
+                value={paymentMethod}
+                onChange={val => setPaymentMethod(val ?? 'PIX')}
+                options={[
+                  { value: 'PIX', label: 'PIX' },
+                  { value: 'CASH', label: 'Dinheiro' },
+                  { value: 'CREDIT_CARD', label: 'Cartão de Crédito' },
+                  { value: 'DEBIT_CARD', label: 'Cartão de Débito' },
+                ]}
+                clearable={false}
+              />
             </Field>
             <div className={FORM_FOOTER}>
               <button onClick={handlePayment} disabled={paymentLoading} className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-bold text-accent-fg disabled:opacity-60">

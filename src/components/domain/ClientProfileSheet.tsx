@@ -27,6 +27,7 @@ import { packagesApi } from '../../infra/packagesApi';
 import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_FOOTER, FORM_GRID } from '../ui/Field';
+import { SmartSelect } from '../ui/SmartSelect';
 import { buildWhatsAppUrl } from '../../utils/whatsappUtils';
 import {
   APPOINTMENT_STATUS_LABEL,
@@ -622,18 +623,15 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                   <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted">
                     Vender pacote
                   </p>
-                  <select
-                    className="w-full rounded-xl border border-border bg-bg px-3 py-3 text-sm text-text-primary"
-                    value={sellPackageId}
-                    onChange={e => setSellPackageId(e.target.value)}
-                  >
-                    <option value="">Escolher pacote</option>
-                    {catalog.map(p => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} · {p.sessionCount}x {p.serviceName} · {brl.format(p.price)}
-                      </option>
-                    ))}
-                  </select>
+                  <SmartSelect
+                    value={sellPackageId || null}
+                    onChange={val => setSellPackageId(val ?? '')}
+                    options={catalog.map(p => ({
+                      value: p.id,
+                      label: `${p.name} · ${p.sessionCount}x ${p.serviceName} · ${brl.format(p.price)}`,
+                    }))}
+                    placeholder="Escolher pacote"
+                  />
                   <div className="grid grid-cols-4 gap-2">
                     {(Object.keys(PAYMENT_LABEL) as PackagePaymentMethod[]).map(method => (
                       <button

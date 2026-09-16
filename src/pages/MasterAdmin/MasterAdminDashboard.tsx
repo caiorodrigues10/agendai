@@ -59,6 +59,7 @@ import { maskPhone } from '../../utils/documentUtils';
 import { BillingTab } from './BillingTab';
 import { ReferralsTab } from './ReferralsTab';
 import { CrmBackfillPanel } from '../../components/domain/CrmBackfillPanel';
+import { SmartSelect } from '../../components/ui/SmartSelect';
 
 // ─────────────────────────────────────────────
 // Types
@@ -1105,15 +1106,19 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
               <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
                 Cargo / Role
               </label>
-              <select
+              <SmartSelect
                 value={formData.role}
-                onChange={e => setFormData({ ...formData, role: e.target.value as any })}
-                className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-all appearance-none cursor-pointer"
-              >
-                <option value="MASTER_ADMIN">Master Admin</option>
-                <option value="OWNER">Proprietário</option>
-                <option value="EMPLOYEE">Funcionário</option>
-              </select>
+                onChange={val => setFormData({ ...formData, role: val as any })}
+                options={[
+                  { value: 'MASTER_ADMIN', label: 'Master Admin' },
+                  { value: 'OWNER', label: 'Proprietário' },
+                  { value: 'EMPLOYEE', label: 'Funcionário' },
+                ]}
+                placeholder="Cargo / Role"
+                clearable={false}
+                size="sm"
+                aria-label="Cargo / Role"
+              />
             </div>
             <div>
               <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
@@ -1138,25 +1143,20 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
             <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
               Vincular Salão
             </label>
-            <select
-              required={formData.role !== 'MASTER_ADMIN'}
-              value={formData.barbershopId || ''}
-              onChange={e => setFormData({ ...formData, barbershopId: e.target.value })}
-              className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-all appearance-none cursor-pointer"
-            >
-              <option value="">Selecione um salão...</option>
-              <option
-                value="NULL"
-                className={formData.role === 'MASTER_ADMIN' ? 'block' : 'hidden'}
-              >
-                Sem Salão (Apenas Master)
-              </option>
-              {barbershops.map(shop => (
-                <option key={shop.id} value={shop.id}>
-                  {shop.name}
-                </option>
-              ))}
-            </select>
+            <SmartSelect
+              value={formData.barbershopId || null}
+              onChange={val => setFormData({ ...formData, barbershopId: val ?? '' })}
+              options={[
+                ...(formData.role === 'MASTER_ADMIN'
+                  ? [{ value: 'NULL', label: 'Sem Salão (Apenas Master)' }]
+                  : []),
+                ...barbershops.map(shop => ({ value: shop.id, label: shop.name })),
+              ]}
+              placeholder="Selecione um salão..."
+              clearable={false}
+              size="sm"
+              aria-label="Vincular Salão"
+            />
             <p className="text-[10px] text-text-muted mt-1 ml-1">
               * Obrigatório para proprietários e funcionários
             </p>

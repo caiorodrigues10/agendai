@@ -46,7 +46,7 @@ export const TAB_GROUPS: TabGroup[] = [
     id: 'operacao',
     label: 'Operação',
     tabs: [
-      { id: 'overview', label: 'Visão Geral', icon: RiDashboardLine },
+      { id: 'overview', label: 'Hoje', icon: RiDashboardLine },
       { id: 'onboarding', label: 'Configuração inicial', icon: RiRocketLine, roles: ['OWNER', 'MASTER_ADMIN'] },
       { id: 'queue', label: 'Fila', icon: RiListCheck2, modes: ['HYBRID', 'QUEUE_ONLY'] },
       { id: 'appointments', label: 'Agenda', icon: RiCalendarScheduleLine, modes: ['HYBRID', 'APPOINTMENTS_ONLY'] },
@@ -79,7 +79,7 @@ export const TAB_GROUPS: TabGroup[] = [
   },
   {
     id: 'crescimento',
-    label: 'Crescimento',
+    label: 'Divulgação',
     tabs: [
       { id: 'posts', label: 'Posts', icon: RiMegaphoneLine, roles: ['OWNER', 'MASTER_ADMIN'] },
       { id: 'showcase', label: 'Showcase', icon: RiImageLine, roles: ['OWNER', 'MASTER_ADMIN'] },

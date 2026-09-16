@@ -1111,14 +1111,18 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
               <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
                 Tier
               </label>
-              <select
+              <SmartSelect
                 value={form.tierKey}
-                onChange={e => setForm({ ...form, tierKey: e.target.value })}
-                className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-all"
-              >
-                <option value="essential">essential</option>
-                <option value="pro">pro</option>
-              </select>
+                onChange={val => setForm({ ...form, tierKey: val ?? 'pro' })}
+                options={[
+                  { value: 'essential', label: 'essential' },
+                  { value: 'pro', label: 'pro' },
+                ]}
+                placeholder="Tier"
+                clearable={false}
+                size="sm"
+                aria-label="Tier do plano"
+              />
             </div>
             <div className="flex items-end pb-1">
               <button

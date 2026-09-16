@@ -25,6 +25,7 @@ import {
 import { getErrorMessage } from '../../utils/errorMessage';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_GRID } from '../ui/Field';
+import { SmartSelect } from '../ui/SmartSelect';
 import {
   ExpenseCategory,
   ExpenseItem,
@@ -109,6 +110,7 @@ export const OwnerFinancialPanel: React.FC = () => {
     reset: resetExpense,
     getValues: getExpenseValues,
     setValue: setExpenseValue,
+    watch: watchExpense,
     formState: { errors: expenseErrors },
   } = useForm<ExpenseFormData>({
     resolver: zodResolver(ExpenseSchema),
@@ -639,23 +641,30 @@ export const OwnerFinancialPanel: React.FC = () => {
                 </Field>
               </div>
               <div className={FORM_GRID}>
-                <Field label="Tipo" error={expenseErrors.type?.message}>
-                  <select className={FIELD_CONTROL} {...registerExpense('type')}>
-                    <option value="VARIABLE">Variável</option>
-                    <option value="FIXED">Fixa</option>
-                    <option value="INVESTMENT">Investimento</option>
-                  </select>
-                </Field>
-                <Field label="Categoria" error={expenseErrors.categoryId?.message}>
-                  <select className={FIELD_CONTROL} {...registerExpense('categoryId')}>
-                    <option value="">Sem categoria</option>
-                    {categories.map(c => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
+                <SmartSelect
+                  label="Tipo"
+                  value={watchExpense('type')}
+                  onChange={val => setExpenseValue('type', val as any)}
+                  options={[
+                    { value: 'VARIABLE', label: 'Variável' },
+                    { value: 'FIXED', label: 'Fixa' },
+                    { value: 'INVESTMENT', label: 'Investimento' },
+                  ]}
+                  clearable={false}
+                  size="sm"
+                  error={expenseErrors.type?.message}
+                />
+                <SmartSelect
+                  label="Categoria"
+                  value={watchExpense('categoryId') || null}
+                  onChange={val => setExpenseValue('categoryId', val ?? '')}
+                  options={[
+                    { value: '', label: 'Sem categoria' },
+                    ...categories.map(c => ({ value: c.id, label: c.name })),
+                  ]}
+                  size="sm"
+                  error={expenseErrors.categoryId?.message}
+                />
               </div>
               <div className={FORM_GRID}>
                 <Field label="Data de referência" error={expenseErrors.referenceDate?.message}>
@@ -670,25 +679,32 @@ export const OwnerFinancialPanel: React.FC = () => {
                 </Field>
               </div>
               <div className={FORM_GRID}>
-                <Field label="Recorrência" error={expenseErrors.recurrence?.message}>
-                  <select className={FIELD_CONTROL} {...registerExpense('recurrence')}>
-                    <option value="ONCE">Única</option>
-                    <option value="DAILY">Diária</option>
-                    <option value="WEEKLY">Semanal</option>
-                    <option value="MONTHLY">Mensal</option>
-                    <option value="YEARLY">Anual</option>
-                  </select>
-                </Field>
-                <Field label="Forma de pagamento" error={expenseErrors.paymentMethod?.message}>
-                  <select className={FIELD_CONTROL} {...registerExpense('paymentMethod')}>
-                    <option value="">Selecione</option>
-                    {FINANCE_PAYMENT_METHODS.map(m => (
-                      <option key={m} value={m}>
-                        {m}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
+                <SmartSelect
+                  label="Recorrência"
+                  value={watchExpense('recurrence')}
+                  onChange={val => setExpenseValue('recurrence', val as any)}
+                  options={[
+                    { value: 'ONCE', label: 'Única' },
+                    { value: 'DAILY', label: 'Diária' },
+                    { value: 'WEEKLY', label: 'Semanal' },
+                    { value: 'MONTHLY', label: 'Mensal' },
+                    { value: 'YEARLY', label: 'Anual' },
+                  ]}
+                  clearable={false}
+                  size="sm"
+                  error={expenseErrors.recurrence?.message}
+                />
+                <SmartSelect
+                  label="Forma de pagamento"
+                  value={watchExpense('paymentMethod') || null}
+                  onChange={val => setExpenseValue('paymentMethod', val ?? '')}
+                  options={[
+                    { value: '', label: 'Selecione' },
+                    ...FINANCE_PAYMENT_METHODS.map(m => ({ value: m, label: m })),
+                  ]}
+                  size="sm"
+                  error={expenseErrors.paymentMethod?.message}
+                />
               </div>
               <div className={FORM_GRID}>
                 <Field label="Fornecedor" error={expenseErrors.supplierName?.message}>
@@ -748,37 +764,39 @@ export const OwnerFinancialPanel: React.FC = () => {
                     onChange={e => setExpenseFilters(f => ({ ...f, search: e.target.value }))}
                     className="bg-bg border border-border rounded-lg px-3 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent w-40"
                   />
-                  <select
-                    value={expenseFilters.categoryId}
-                    onChange={e => setExpenseFilters(f => ({ ...f, categoryId: e.target.value }))}
-                    className="bg-bg border border-border rounded-lg px-3 py-1.5 text-xs text-text-primary focus:outline-none focus:border-accent"
-                  >
-                    <option value="">Todas categorias</option>
-                    {categories.map(c => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={expenseFilters.type}
-                    onChange={e => setExpenseFilters(f => ({ ...f, type: e.target.value }))}
-                    className="bg-bg border border-border rounded-lg px-3 py-1.5 text-xs text-text-primary focus:outline-none focus:border-accent"
-                  >
-                    <option value="">Todos tipos</option>
-                    <option value="FIXED">Fixa</option>
-                    <option value="VARIABLE">Variável</option>
-                    <option value="INVESTMENT">Investimento</option>
-                  </select>
-                  <select
-                    value={expenseFilters.paid}
-                    onChange={e => setExpenseFilters(f => ({ ...f, paid: e.target.value }))}
-                    className="bg-bg border border-border rounded-lg px-3 py-1.5 text-xs text-text-primary focus:outline-none focus:border-accent"
-                  >
-                    <option value="">Todos status</option>
-                    <option value="true">Pagas</option>
-                    <option value="false">Pendentes</option>
-                  </select>
+                  <SmartSelect
+                    value={expenseFilters.categoryId || null}
+                    onChange={val => setExpenseFilters(f => ({ ...f, categoryId: val ?? '' }))}
+                    options={[
+                      { value: '', label: 'Todas categorias' },
+                      ...categories.map(c => ({ value: c.id, label: c.name })),
+                    ]}
+                    size="sm"
+                    aria-label="Filtrar por categoria"
+                  />
+                  <SmartSelect
+                    value={expenseFilters.type || null}
+                    onChange={val => setExpenseFilters(f => ({ ...f, type: val ?? '' }))}
+                    options={[
+                      { value: '', label: 'Todos tipos' },
+                      { value: 'FIXED', label: 'Fixa' },
+                      { value: 'VARIABLE', label: 'Variável' },
+                      { value: 'INVESTMENT', label: 'Investimento' },
+                    ]}
+                    size="sm"
+                    aria-label="Filtrar por tipo"
+                  />
+                  <SmartSelect
+                    value={expenseFilters.paid || null}
+                    onChange={val => setExpenseFilters(f => ({ ...f, paid: val ?? '' }))}
+                    options={[
+                      { value: '', label: 'Todos status' },
+                      { value: 'true', label: 'Pagas' },
+                      { value: 'false', label: 'Pendentes' },
+                    ]}
+                    size="sm"
+                    aria-label="Filtrar por status"
+                  />
                   <input
                     type="date"
                     aria-label="Data inicial"
@@ -1014,43 +1032,28 @@ export const OwnerFinancialPanel: React.FC = () => {
                                       </Field>
                                     </div>
                                     <div className={FORM_GRID}>
-                                      <Field label="Tipo">
-                                        <select
-                                          value={editingExpense.type}
-                                          onChange={e =>
-                                            setEditingExpense(ex =>
-                                              ex
-                                                ? { ...ex, type: e.target.value as ExpenseType }
-                                                : null
-                                            )
-                                          }
-                                          className={FIELD_CONTROL}
-                                        >
-                                          <option value="VARIABLE">Variável</option>
-                                          <option value="FIXED">Fixa</option>
-                                          <option value="INVESTMENT">Investimento</option>
-                                        </select>
-                                      </Field>
-                                      <Field label="Categoria">
-                                        <select
-                                          value={editingExpense.categoryId ?? ''}
-                                          onChange={e =>
-                                            setEditingExpense(ex =>
-                                              ex
-                                                ? { ...ex, categoryId: e.target.value || null }
-                                                : null
-                                            )
-                                          }
-                                          className={FIELD_CONTROL}
-                                        >
-                                          <option value="">Sem categoria</option>
-                                          {categories.map(c => (
-                                            <option key={c.id} value={c.id}>
-                                              {c.name}
-                                            </option>
-                                          ))}
-                                        </select>
-                                      </Field>
+                                      <SmartSelect
+                                        label="Tipo"
+                                        value={editingExpense.type}
+                                        onChange={val => setEditingExpense(ex => ex ? { ...ex, type: val as ExpenseType } : null)}
+                                        options={[
+                                          { value: 'VARIABLE', label: 'Variável' },
+                                          { value: 'FIXED', label: 'Fixa' },
+                                          { value: 'INVESTMENT', label: 'Investimento' },
+                                        ]}
+                                        clearable={false}
+                                        size="sm"
+                                      />
+                                      <SmartSelect
+                                        label="Categoria"
+                                        value={editingExpense.categoryId || null}
+                                        onChange={val => setEditingExpense(ex => ex ? { ...ex, categoryId: val || null } : null)}
+                                        options={[
+                                          { value: '', label: 'Sem categoria' },
+                                          ...categories.map(c => ({ value: c.id, label: c.name })),
+                                        ]}
+                                        size="sm"
+                                      />
                                     </div>
                                     <div className={FORM_GRID}>
                                       <Field label="Data de referência">
@@ -1079,26 +1082,16 @@ export const OwnerFinancialPanel: React.FC = () => {
                                       </Field>
                                     </div>
                                     <div className={FORM_GRID}>
-                                      <Field label="Forma de pagamento">
-                                        <select
-                                          value={editingExpense.paymentMethod ?? ''}
-                                          onChange={e =>
-                                            setEditingExpense(ex =>
-                                              ex
-                                                ? { ...ex, paymentMethod: e.target.value || null }
-                                                : null
-                                            )
-                                          }
-                                          className={FIELD_CONTROL}
-                                        >
-                                          <option value="">Selecione</option>
-                                          {FINANCE_PAYMENT_METHODS.map(m => (
-                                            <option key={m} value={m}>
-                                              {m}
-                                            </option>
-                                          ))}
-                                        </select>
-                                      </Field>
+                                      <SmartSelect
+                                        label="Forma de pagamento"
+                                        value={editingExpense.paymentMethod || null}
+                                        onChange={val => setEditingExpense(ex => ex ? { ...ex, paymentMethod: val || null } : null)}
+                                        options={[
+                                          { value: '', label: 'Selecione' },
+                                          ...FINANCE_PAYMENT_METHODS.map(m => ({ value: m, label: m })),
+                                        ]}
+                                        size="sm"
+                                      />
                                       <Field label="Fornecedor">
                                         <input
                                           type="text"

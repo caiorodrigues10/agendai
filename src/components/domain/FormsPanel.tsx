@@ -16,6 +16,7 @@ import { formsApi, Form, FormField, FormResponse } from '../../infra/formsApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { Field, FIELD_CONTROL, FORM_FOOTER } from '../ui/Field';
+import { SmartSelect } from '../ui/SmartSelect';
 
 const FIELD_TYPES = ['TEXT', 'TEXTAREA', 'EMAIL', 'PHONE', 'NUMBER', 'SELECT', 'CHECKBOX', 'RADIO'];
 
@@ -375,15 +376,12 @@ export const FormsPanel: React.FC = () => {
                           onChange={e => setFieldLabel(e.target.value)}
                           className="rounded-lg border border-border bg-bg px-3 py-2 text-xs text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none"
                         />
-                        <select
+                        <SmartSelect
                           value={fieldType}
-                          onChange={e => setFieldType(e.target.value)}
-                          className="rounded-lg border border-border bg-bg px-3 py-2 text-xs text-text-primary"
-                        >
-                          {FIELD_TYPES.map(t => (
-                            <option key={t} value={t}>{FIELD_TYPE_LABELS[t]}</option>
-                          ))}
-                        </select>
+                          onChange={val => val && setFieldType(val)}
+                          options={FIELD_TYPES.map(t => ({ value: t, label: FIELD_TYPE_LABELS[t] }))}
+                          clearable={false}
+                        />
                       </div>
                       {(fieldType === 'SELECT' || fieldType === 'RADIO') && (
                         <textarea

@@ -12,6 +12,7 @@ import {
 import { qualityApi, QualityProtocol, QualityAudit, QualityOverview } from '../../infra/qualityApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { SmartSelect } from '../ui/SmartSelect';
 
 export const QualityPanel: React.FC = () => {
   const { barbershopId } = useBarbershopFilters();
@@ -199,16 +200,12 @@ export const QualityPanel: React.FC = () => {
 
       {tab === 'audits' && showAudit && (
         <div className="rounded-2xl border border-border bg-surface p-4 space-y-3">
-          <select
-            value={auditProtocolId}
-            onChange={e => setAuditProtocolId(e.target.value)}
-            className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm text-text-primary"
-          >
-            <option value="">Selecionar protocolo</option>
-            {protocols.map(p => (
-              <option key={p.id} value={p.id}>{p.title}</option>
-            ))}
-          </select>
+          <SmartSelect
+            value={auditProtocolId || null}
+            onChange={val => setAuditProtocolId(val ?? '')}
+            options={protocols.map(p => ({ value: p.id, label: p.title }))}
+            placeholder="Selecionar protocolo"
+          />
           <div>
             <label className="text-xs text-text-muted">Pontuação: {auditScore}</label>
             <input

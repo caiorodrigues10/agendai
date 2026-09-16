@@ -13,6 +13,7 @@ import {
   Smartphone,
 } from 'lucide-react';
 import { clientPortalApi, ClientIdentity, ClientSalonLink, ClientAppointment, ClientBenefit } from '../../infra/clientPortalApi';
+import { SmartSelect } from '../ui/SmartSelect';
 import { getErrorMessage } from '../../utils/errorMessage';
 
 type PortalTab = 'home' | 'salons' | 'appointments' | 'benefits' | 'account';
@@ -187,15 +188,12 @@ export const ClientPortalDashboard: React.FC = () => {
       {activeTab === 'appointments' && (
         <div className="space-y-3">
           {selectedSalonId && salons.length > 1 && (
-            <select
+            <SmartSelect
               value={selectedSalonId}
-              onChange={e => setSelectedSalonId(e.target.value)}
-              className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-text-primary"
-            >
-              {salons.map(s => (
-                <option key={s.barbershopId} value={s.barbershopId}>{s.barbershopName || s.barbershopId}</option>
-              ))}
-            </select>
+              onChange={val => setSelectedSalonId(val)}
+              options={salons.map(s => ({ value: s.barbershopId, label: s.barbershopName || s.barbershopId }))}
+              clearable={false}
+            />
           )}
           {appointments.length === 0 && (
             <div className="rounded-2xl border border-dashed border-border bg-surface p-6 text-center">
@@ -234,15 +232,12 @@ export const ClientPortalDashboard: React.FC = () => {
       {activeTab === 'benefits' && (
         <div className="space-y-3">
           {selectedSalonId && salons.length > 1 && (
-            <select
+            <SmartSelect
               value={selectedSalonId}
-              onChange={e => setSelectedSalonId(e.target.value)}
-              className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-text-primary"
-            >
-              {salons.map(s => (
-                <option key={s.barbershopId} value={s.barbershopId}>{s.barbershopName || s.barbershopId}</option>
-              ))}
-            </select>
+              onChange={val => setSelectedSalonId(val)}
+              options={salons.map(s => ({ value: s.barbershopId, label: s.barbershopName || s.barbershopId }))}
+              clearable={false}
+            />
           )}
           {benefits.length === 0 && (
             <div className="rounded-2xl border border-dashed border-border bg-surface p-6 text-center">

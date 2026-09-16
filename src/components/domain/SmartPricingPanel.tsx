@@ -16,6 +16,7 @@ import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { Field, FIELD_CONTROL, FORM_FOOTER } from '../ui/Field';
+import { SmartSelect } from '../ui/SmartSelect';
 
 const RULE_TYPES = ['TIME_BASED', 'VOLUME', 'LOYALTY', 'PROMOTIONAL', 'HAPPY_HOUR'];
 const DISCOUNT_TYPES = ['PERCENTAGE', 'FIXED'];
@@ -262,28 +263,24 @@ export const SmartPricingPanel: React.FC = () => {
           <h4 className="text-xs font-bold text-text-secondary">Simular precificação</h4>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Serviço *">
-              <select
-                value={evalServiceId}
-                onChange={e => setEvalServiceId(e.target.value)}
-                className={FIELD_CONTROL}
-              >
-                <option value="">Selecione...</option>
-                {services.map(s => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
+              <SmartSelect
+                value={evalServiceId || null}
+                onChange={val => setEvalServiceId(val ?? '')}
+                options={services.map(s => ({ value: s.id, label: s.name }))}
+                placeholder="Selecione..."
+                size="sm"
+                aria-label="Serviço"
+              />
             </Field>
             <Field label="Profissional">
-              <select
-                value={evalStaffId}
-                onChange={e => setEvalStaffId(e.target.value)}
-                className={FIELD_CONTROL}
-              >
-                <option value="">Qualquer</option>
-                {staff.map(s => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
+              <SmartSelect
+                value={evalStaffId || null}
+                onChange={val => setEvalStaffId(val ?? '')}
+                options={staff.map(s => ({ value: s.id, label: s.name }))}
+                placeholder="Qualquer"
+                size="sm"
+                aria-label="Profissional"
+              />
             </Field>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -353,15 +350,15 @@ export const SmartPricingPanel: React.FC = () => {
               />
             </Field>
             <Field label="Tipo">
-              <select
+              <SmartSelect
                 value={form.type}
-                onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
-                className={FIELD_CONTROL}
-              >
-                {RULE_TYPES.map(t => (
-                  <option key={t} value={t}>{RULE_TYPE_LABELS[t]}</option>
-                ))}
-              </select>
+                onChange={val => setForm(f => ({ ...f, type: val ?? 'PROMOTIONAL' }))}
+                options={RULE_TYPES.map(t => ({ value: t, label: RULE_TYPE_LABELS[t] }))}
+                placeholder="Tipo da regra"
+                clearable={false}
+                size="sm"
+                aria-label="Tipo da regra"
+              />
             </Field>
           </div>
           <div className="grid grid-cols-3 gap-3">
@@ -374,15 +371,15 @@ export const SmartPricingPanel: React.FC = () => {
               />
             </Field>
             <Field label="Tipo de desconto">
-              <select
+              <SmartSelect
                 value={form.discountType}
-                onChange={e => setForm(f => ({ ...f, discountType: e.target.value }))}
-                className={FIELD_CONTROL}
-              >
-                {DISCOUNT_TYPES.map(t => (
-                  <option key={t} value={t}>{t === 'PERCENTAGE' ? 'Percentual' : 'Fixo'}</option>
-                ))}
-              </select>
+                onChange={val => setForm(f => ({ ...f, discountType: val ?? 'PERCENTAGE' }))}
+                options={DISCOUNT_TYPES.map(t => ({ value: t, label: t === 'PERCENTAGE' ? 'Percentual' : 'Fixo' }))}
+                placeholder="Tipo de desconto"
+                clearable={false}
+                size="sm"
+                aria-label="Tipo de desconto"
+              />
             </Field>
             <Field label={form.discountType === 'PERCENTAGE' ? 'Desconto (%) *' : 'Desconto (R$) *'}>
               <input
@@ -443,26 +440,28 @@ export const SmartPricingPanel: React.FC = () => {
             <div className="space-y-2">
               {form.conditions.map((cond, idx) => (
                 <div key={idx} className="flex items-center gap-2">
-                  <select
+                  <SmartSelect
                     value={cond.field}
-                    onChange={e => handleUpdateCondition(idx, { field: e.target.value })}
-                    className="rounded-lg border border-border bg-bg px-2 py-1.5 text-xs text-text-primary"
-                  >
-                    {CONDITIONS.map(c => (
-                      <option key={c.field} value={c.field}>{c.label}</option>
-                    ))}
-                  </select>
-                  <select
+                    onChange={val => handleUpdateCondition(idx, { field: val ?? 'dayOfWeek' })}
+                    options={CONDITIONS.map(c => ({ value: c.field, label: c.label }))}
+                    clearable={false}
+                    size="sm"
+                    aria-label="Campo da condição"
+                  />
+                  <SmartSelect
                     value={cond.operator}
-                    onChange={e => handleUpdateCondition(idx, { operator: e.target.value })}
-                    className="rounded-lg border border-border bg-bg px-2 py-1.5 text-xs text-text-primary"
-                  >
-                    <option value="eq">igual</option>
-                    <option value="neq">diferente</option>
-                    <option value="gte">maior ou igual</option>
-                    <option value="lte">menor ou igual</option>
-                    <option value="contains">contém</option>
-                  </select>
+                    onChange={val => handleUpdateCondition(idx, { operator: val ?? 'eq' })}
+                    options={[
+                      { value: 'eq', label: 'igual' },
+                      { value: 'neq', label: 'diferente' },
+                      { value: 'gte', label: 'maior ou igual' },
+                      { value: 'lte', label: 'menor ou igual' },
+                      { value: 'contains', label: 'contém' },
+                    ]}
+                    clearable={false}
+                    size="sm"
+                    aria-label="Operador da condição"
+                  />
                   <input
                     type="text"
                     placeholder="Valor"

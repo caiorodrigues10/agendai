@@ -23,6 +23,7 @@ import {
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { FIELD_CONTROL, FORM_FOOTER } from '../ui/Field';
+import { SmartSelect } from '../ui/SmartSelect';
 
 const TYPE_META: Record<string, { icon: React.ReactNode; label: string; description: string }> = {
   GOOGLE_CALENDAR: {
@@ -446,16 +447,13 @@ export const IntegrationsPanel: React.FC = () => {
 
             <div>
               <label className="mb-1.5 block text-sm font-medium text-text-secondary">Tipo</label>
-              <select
+              <SmartSelect
                 value={form.type}
-                onChange={e => setForm(prev => ({ ...prev, type: e.target.value }))}
+                onChange={val => setForm(prev => ({ ...prev, type: val ?? 'GOOGLE_CALENDAR' }))}
+                options={Object.entries(TYPE_META).map(([key, meta]) => ({ value: key, label: meta.label }))}
                 disabled={!!editingId}
-                className={FIELD_CONTROL}
-              >
-                {Object.entries(TYPE_META).map(([key, meta]) => (
-                  <option key={key} value={key}>{meta.label}</option>
-                ))}
-              </select>
+                clearable={false}
+              />
             </div>
 
             <div>
@@ -583,14 +581,15 @@ export const IntegrationsPanel: React.FC = () => {
                   </div>
                   <div>
                     <label className="mb-1 block text-xs text-text-secondary">Ambiente</label>
-                    <select
+                    <SmartSelect
                       value={(form.config.environment as string) ?? 'sandbox'}
-                      onChange={e => updateConfigField('environment', e.target.value)}
-                      className={FIELD_CONTROL}
-                    >
-                      <option value="sandbox">Sandbox</option>
-                      <option value="production">Produção</option>
-                    </select>
+                      onChange={val => updateConfigField('environment', val ?? 'sandbox')}
+                      options={[
+                        { value: 'sandbox', label: 'Sandbox' },
+                        { value: 'production', label: 'Produção' },
+                      ]}
+                      clearable={false}
+                    />
                   </div>
                 </>
               )}

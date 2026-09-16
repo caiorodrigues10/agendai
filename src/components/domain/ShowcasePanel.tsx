@@ -16,6 +16,7 @@ import { showcaseApi, ShowcaseEntry } from '../../infra/showcaseApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { SmartSelect } from '../ui/SmartSelect';
 
 export const ShowcasePanel: React.FC = () => {
   const { barbershopId } = useBarbershopFilters();
@@ -156,26 +157,22 @@ export const ShowcasePanel: React.FC = () => {
             className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none resize-none"
           />
           <div className="grid grid-cols-2 gap-3">
-            <select
-              value={newServiceId}
-              onChange={e => setNewServiceId(e.target.value)}
-              className="rounded-xl border border-border bg-bg px-3 py-2.5 text-sm text-text-primary"
-            >
-              <option value="">Serviço (opcional)</option>
-              {services.map(s => (
-                <option key={s.id} value={s.id}>{s.name}</option>
-              ))}
-            </select>
-            <select
-              value={newStaffId}
-              onChange={e => setNewStaffId(e.target.value)}
-              className="rounded-xl border border-border bg-bg px-3 py-2.5 text-sm text-text-primary"
-            >
-              <option value="">Profissional (opcional)</option>
-              {staff.map(s => (
-                <option key={s.id} value={s.id}>{s.name}</option>
-              ))}
-            </select>
+            <SmartSelect
+              value={newServiceId || null}
+              onChange={val => setNewServiceId(val ?? '')}
+              options={services.map(s => ({ value: s.id, label: s.name }))}
+              placeholder="Serviço (opcional)"
+              size="sm"
+              aria-label="Serviço"
+            />
+            <SmartSelect
+              value={newStaffId || null}
+              onChange={val => setNewStaffId(val ?? '')}
+              options={staff.map(s => ({ value: s.id, label: s.name }))}
+              placeholder="Profissional (opcional)"
+              size="sm"
+              aria-label="Profissional"
+            />
           </div>
           <div className="flex gap-2">
             <button

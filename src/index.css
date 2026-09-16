@@ -25,6 +25,16 @@
   --ag-accent: #047857;
   --ag-accent-hover: #065f46;
   --ag-accent-fg: #ffffff;
+  /* Cor terciária: detalhes e seleção, sem competir com a marca. */
+  --ag-tertiary: #79613f;
+  /* Suporte/emphasis: cor de destaque secundária (utilizada em badges, links). */
+  --ag-support: #3b82f6;
+  /* Botões secundários (outlined): cor da borda/texto. */
+  --ag-action-secondary: #d4d4d4;
+  /* Seleção: fundo de item selecionado (baixa opacidade). */
+  --ag-selection: rgba(4, 120, 87, 0.12);
+  /* Fanelo de foco: anel de acessibilidade. */
+  --ag-focus: #047857;
   --ag-danger: #dc2626;
   --ag-success: #16a34a;
   --ag-warning: #b45309;
@@ -53,6 +63,11 @@
   --ag-accent-hover: #34d399;
   /* texto escuro sobre accent claro garante contraste AA nos botões */
   --ag-accent-fg: #052e1f;
+  --ag-tertiary: #c6ad87;
+  --ag-support: #60a5fa;
+  --ag-action-secondary: #3f3f3f;
+  --ag-selection: rgba(16, 185, 129, 0.15);
+  --ag-focus: #10b981;
   --ag-danger: #ef4444;
   --ag-success: #22c55e;
   --ag-warning: #f59e0b;
@@ -80,6 +95,11 @@
   --color-accent: var(--ag-accent);
   --color-accent-hover: var(--ag-accent-hover);
   --color-accent-fg: var(--ag-accent-fg);
+  --color-tertiary: var(--ag-tertiary);
+  --color-support: var(--ag-support);
+  --color-action-secondary: var(--ag-action-secondary);
+  --color-selection: var(--ag-selection);
+  --color-focus: var(--ag-focus);
   --color-danger: var(--ag-danger);
   --color-success: var(--ag-success);
   --color-warning: var(--ag-warning);

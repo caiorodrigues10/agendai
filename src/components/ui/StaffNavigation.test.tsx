@@ -11,7 +11,7 @@ describe('StaffNavigation', () => {
       name: 'Navegação compacta do painel',
     });
 
-    expect(within(compactNavigation).getByRole('button', { name: 'Visão Geral' })).toHaveAttribute(
+    expect(within(compactNavigation).getByRole('button', { name: 'Hoje' })).toHaveAttribute(
       'aria-current',
       'page'
     );
@@ -62,7 +62,7 @@ describe('StaffNavigation', () => {
 
     const desktopNav = screen.getByRole('navigation', { name: 'Navegação do painel' });
     expect(within(desktopNav).getByText('Áreas do salão')).toHaveClass('font-display');
-    expect(within(desktopNav).getByText('Visão Geral')).toHaveClass('font-display');
+    expect(within(desktopNav).getByText('Hoje')).toHaveClass('font-display');
 
     const compactNav = screen.getByRole('navigation', { name: 'Navegação compacta do painel' });
     expect(within(compactNav).getByText('Mais')).toHaveClass('font-display');
@@ -92,5 +92,20 @@ describe('StaffNavigation', () => {
     );
     await user.click(screen.getByRole('button', { name: 'Mais' }));
     expect(within(screen.getByRole('dialog', { name: 'Mais opções' })).getByRole('button', { name: 'Produtos' })).toBeInTheDocument();
+  });
+
+  it('oculta Agenda no modo exclusivo de fila e Fila no modo exclusivo de agenda', () => {
+    const { rerender } = render(
+      <StaffNavigation activeTab="overview" userRole="OWNER" operationMode="QUEUE_ONLY" onNavigate={vi.fn()} />
+    );
+    const compactNavigation = screen.getByRole('navigation', { name: 'Navegação compacta do painel' });
+    expect(within(compactNavigation).queryByRole('button', { name: 'Agenda' })).not.toBeInTheDocument();
+    expect(within(compactNavigation).getByRole('button', { name: 'Fila' })).toBeInTheDocument();
+
+    rerender(
+      <StaffNavigation activeTab="overview" userRole="OWNER" operationMode="APPOINTMENTS_ONLY" onNavigate={vi.fn()} />
+    );
+    expect(within(compactNavigation).queryByRole('button', { name: 'Fila' })).not.toBeInTheDocument();
+    expect(within(compactNavigation).getByRole('button', { name: 'Agenda' })).toBeInTheDocument();
   });
 });

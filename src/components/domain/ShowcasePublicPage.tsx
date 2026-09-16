@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Loader2, Filter, CalendarDays, MessageCircle } from 'lucide-react';
 import { showcaseApi, ShowcaseEntry } from '../../infra/showcaseApi';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { SmartSelect } from '../ui/SmartSelect';
 
 export const ShowcasePublicPage: React.FC = () => {
   const { salonId } = useParams<{ salonId: string }>();
@@ -139,28 +140,24 @@ export const ShowcasePublicPage: React.FC = () => {
         <div className="flex flex-wrap gap-2">
           <Filter size={16} className="text-text-muted" />
           {services.length > 0 && (
-            <select
-              value={serviceFilter}
-              onChange={e => setServiceFilter(e.target.value)}
-              className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs text-text-primary"
-            >
-              <option value="">Todos os serviços</option>
-              {services.map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+            <SmartSelect
+              value={serviceFilter || null}
+              onChange={val => setServiceFilter(val ?? '')}
+              options={services.map(s => ({ value: s, label: s }))}
+              placeholder="Todos os serviços"
+              size="sm"
+              aria-label="Filtrar por serviço"
+            />
           )}
           {staffMembers.length > 0 && (
-            <select
-              value={staffFilter}
-              onChange={e => setStaffFilter(e.target.value)}
-              className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs text-text-primary"
-            >
-              <option value="">Todos os profissionais</option>
-              {staffMembers.map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+            <SmartSelect
+              value={staffFilter || null}
+              onChange={val => setStaffFilter(val ?? '')}
+              options={staffMembers.map(s => ({ value: s, label: s }))}
+              placeholder="Todos os profissionais"
+              size="sm"
+              aria-label="Filtrar por profissional"
+            />
           )}
         </div>
       )}

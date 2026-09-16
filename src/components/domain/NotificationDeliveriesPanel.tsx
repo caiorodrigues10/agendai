@@ -9,6 +9,7 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { SmartSelect } from '../ui/SmartSelect';
 import {
   ListNotificationDeliveriesParams,
   NotificationChannel,
@@ -245,78 +246,68 @@ export const NotificationDeliveriesPanel: React.FC<NotificationDeliveriesPanelPr
       >
         <label className="text-xs font-semibold text-text-secondary">
           Canal
-          <select
-            value={draftFilters.channel}
-            onChange={event =>
+          <SmartSelect
+            value={draftFilters.channel || null}
+            onChange={val =>
               setDraftFilters(current => ({
                 ...current,
-                channel: event.target.value as Filters['channel'],
+                channel: (val ?? '') as Filters['channel'],
               }))
             }
-            className="mt-1 min-h-11 w-full rounded-lg border border-border bg-bg px-3 text-sm text-text-primary"
-          >
-            <option value="">Todos</option>
-            <option value="WHATSAPP">WhatsApp</option>
-            <option value="EMAIL">E-mail</option>
-          </select>
+            options={[
+              { value: 'WHATSAPP', label: 'WhatsApp' },
+              { value: 'EMAIL', label: 'E-mail' },
+            ]}
+            placeholder="Todos"
+            size="sm"
+            className="mt-1"
+          />
         </label>
 
         <label className="text-xs font-semibold text-text-secondary">
           Status
-          <select
-            value={draftFilters.status}
-            onChange={event =>
+          <SmartSelect
+            value={draftFilters.status || null}
+            onChange={val =>
               setDraftFilters(current => ({
                 ...current,
-                status: event.target.value as Filters['status'],
+                status: (val ?? '') as Filters['status'],
               }))
             }
-            className="mt-1 min-h-11 w-full rounded-lg border border-border bg-bg px-3 text-sm text-text-primary"
-          >
-            <option value="">Todos</option>
-            {Object.entries(STATUS_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+            options={Object.entries(STATUS_LABELS).map(([value, label]) => ({ value, label }))}
+            placeholder="Todos"
+            size="sm"
+            className="mt-1"
+          />
         </label>
 
         <label className="text-xs font-semibold text-text-secondary">
           Tipo
-          <select
-            value={draftFilters.type}
-            onChange={event =>
-              setDraftFilters(current => ({ ...current, type: event.target.value }))
+          <SmartSelect
+            value={draftFilters.type || null}
+            onChange={val =>
+              setDraftFilters(current => ({ ...current, type: val ?? '' }))
             }
-            className="mt-1 min-h-11 w-full rounded-lg border border-border bg-bg px-3 text-sm text-text-primary"
-          >
-            <option value="">Todos</option>
-            {availableTypes.map(value => (
-              <option key={value} value={value}>
-                {typeLabel(value)}
-              </option>
-            ))}
-          </select>
+            options={availableTypes.map(value => ({ value, label: typeLabel(value) }))}
+            placeholder="Todos"
+            size="sm"
+            className="mt-1"
+          />
         </label>
 
         {masterAdmin && (
           <label className="text-xs font-semibold text-text-secondary">
             Salão
-            <select
-              value={draftFilters.barbershopId}
-              onChange={event =>
-                setDraftFilters(current => ({ ...current, barbershopId: event.target.value }))
+            <SmartSelect
+              value={draftFilters.barbershopId || null}
+              onChange={val =>
+                setDraftFilters(current => ({ ...current, barbershopId: val ?? '' }))
               }
-              className="mt-1 min-h-11 w-full rounded-lg border border-border bg-bg px-3 text-sm text-text-primary"
-            >
-              <option value="">Todos os salões</option>
-              {barbershops.map(shop => (
-                <option key={shop.id} value={shop.id}>
-                  {shop.name}
-                </option>
-              ))}
-            </select>
+              options={barbershops.map(shop => ({ value: shop.id, label: shop.name }))}
+              placeholder="Todos os salões"
+              size="sm"
+              className="mt-1"
+            />
           </label>
         )}
 

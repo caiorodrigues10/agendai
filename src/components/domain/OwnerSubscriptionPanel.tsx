@@ -37,6 +37,7 @@ import {
 import { plansApi, Plan } from '../../infra/plansApi';
 import { referralsApi, ReferralDashboard } from '../../infra/referralsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { SmartSelect } from '../ui/SmartSelect';
 import { trialCampaign } from '../../marketing/trialCampaign';
 import { ShareReferralButton } from './ShareReferralButton';
 import { SubscriptionCheckout } from '../../pages/CheckoutPage';
@@ -861,17 +862,18 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                           placeholder="Chave PIX (ex.: email, CPF, celular)"
                           className="flex-1 px-3 py-2.5 rounded-xl bg-bg border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
                         />
-                        <select
+                        <SmartSelect
                           value={pixKeyType}
-                          onChange={e => setPixKeyType(e.target.value as any)}
-                          className="px-3 py-2.5 rounded-xl bg-bg border border-border text-sm text-text-primary focus:outline-none focus:border-accent"
-                        >
-                          <option value="EMAIL">E-mail</option>
-                          <option value="CPF">CPF</option>
-                          <option value="CNPJ">CNPJ</option>
-                          <option value="PHONE">Celular</option>
-                          <option value="RANDOM">Aleatória</option>
-                        </select>
+                          onChange={val => setPixKeyType((val ?? 'EMAIL') as any)}
+                          options={[
+                            { value: 'EMAIL', label: 'E-mail' },
+                            { value: 'CPF', label: 'CPF' },
+                            { value: 'CNPJ', label: 'CNPJ' },
+                            { value: 'PHONE', label: 'Celular' },
+                            { value: 'RANDOM', label: 'Aleatória' },
+                          ]}
+                          clearable={false}
+                        />
                       </div>
                     </div>
                   )}

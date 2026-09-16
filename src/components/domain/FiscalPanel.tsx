@@ -3,6 +3,7 @@ import { FileText, Loader2, Settings, XCircle } from 'lucide-react';
 import { fiscalApi, FiscalConfig, NfeRecord, FiscalStats } from '../../infra/fiscalApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { SmartSelect } from '../ui/SmartSelect';
 
 export const FiscalPanel: React.FC = () => {
   const { barbershopId } = useBarbershopFilters();
@@ -205,14 +206,15 @@ export const FiscalPanel: React.FC = () => {
               />
               NFS-e Habilitada
             </label>
-            <select
+            <SmartSelect
               value={nfeEnv}
-              onChange={e => setNfeEnv(e.target.value)}
-              className="rounded-xl border border-border bg-bg px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none"
-            >
-              <option value="HOMOLOGATION">Homologação</option>
-              <option value="PRODUCTION">Produção</option>
-            </select>
+              onChange={val => val && setNfeEnv(val)}
+              options={[
+                { value: 'HOMOLOGATION', label: 'Homologação' },
+                { value: 'PRODUCTION', label: 'Produção' },
+              ]}
+              clearable={false}
+            />
           </div>
           <button
             onClick={() => void handleSaveConfig()}

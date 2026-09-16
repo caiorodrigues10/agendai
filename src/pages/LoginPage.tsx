@@ -112,14 +112,14 @@ const BrandPanel: React.FC = () => (
     <motion.div
       aria-hidden
       className="absolute -top-32 -left-32 w-[560px] h-[560px] rounded-full blur-[140px] pointer-events-none"
-      style={{ background: 'rgba(16,185,129,0.28)' }}
+      style={{ background: 'rgba(16,185,129,0.10)' }}
       animate={{ x: [0, 70, -30, 0], y: [0, -40, 50, 0] }}
       transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
     />
     <motion.div
       aria-hidden
       className="absolute -bottom-45 -right-30 w-[520px] h-[520px] rounded-full blur-[140px] pointer-events-none"
-      style={{ background: 'rgba(0,194,179,0.22)' }}
+      style={{ background: 'color-mix(in srgb, var(--ag-tertiary) 10%, transparent)' }}
       animate={{ x: [0, -60, 40, 0], y: [0, 50, -30, 0] }}
       transition={{ duration: 26, repeat: Infinity, ease: 'easeInOut' }}
     />
@@ -179,7 +179,7 @@ const BrandPanel: React.FC = () => (
             <div className="space-y-3">
               {QUEUE_MOCK.map((item, i) => (
                 <div key={item.name} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-linear-to-br from-accent/30 to-accent/20 border border-accent/20 flex items-center justify-center text-[11px] font-bold text-accent">
+                  <div className="w-8 h-8 rounded-full bg-tertiary/10 border border-tertiary/20 flex items-center justify-center text-[11px] font-bold text-tertiary">
                     {item.name.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -220,15 +220,15 @@ const BrandPanel: React.FC = () => (
       <div className="space-y-5">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-text-muted text-[11px] font-medium">
           <span className="flex items-center gap-1.5">
-            <CalendarCheck size={13} className="text-accent/70" />
+            <CalendarCheck size={13} className="text-tertiary" />
             Agenda inteligente
           </span>
           <span className="flex items-center gap-1.5">
-            <Users size={13} className="text-accent/70" />
+            <Users size={13} className="text-tertiary" />
             Fila em tempo real
           </span>
           <span className="flex items-center gap-1.5">
-            <ShieldCheck size={13} className="text-accent/70" />
+            <ShieldCheck size={13} className="text-tertiary" />
             Dados protegidos
           </span>
         </div>
@@ -626,7 +626,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   };
 
   const primaryBtn =
-    'relative w-full min-h-12 px-5 bg-accent text-accent-fg hover:bg-accent-hover shadow-[0_12px_30px_color-mix(in_srgb,var(--ag-accent)_25%,transparent)] rounded-xl font-black text-xs uppercase tracking-[0.16em] flex items-center justify-center gap-3 transition-all duration-300 disabled:opacity-60 overflow-hidden group/btn active:scale-[0.98] cursor-pointer';
+    'relative w-full min-h-12 px-5 bg-accent text-accent-fg hover:bg-accent-hover shadow-[0_8px_24px_color-mix(in_srgb,var(--ag-accent)_12%,transparent)] rounded-xl font-black text-xs uppercase tracking-[0.16em] flex items-center justify-center gap-3 transition-all duration-300 disabled:opacity-60 overflow-hidden group/btn active:scale-[0.98] cursor-pointer';
 
   return (
     <div className="min-h-screen bg-bg grid lg:grid-cols-2">
@@ -692,7 +692,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
               <button
                 type="button"
                 onClick={() => goToAuthMode(tab === 'login' ? 'register' : 'login')}
-                className="inline-flex min-h-11 items-center font-bold text-accent underline decoration-accent/30 underline-offset-4 transition hover:decoration-accent"
+                className="inline-flex min-h-11 items-center font-bold text-tertiary underline decoration-tertiary/30 underline-offset-4 transition hover:decoration-tertiary"
               >
                 {tab === 'login' ? 'Criar conta grátis' : 'Entrar agora'}
               </button>

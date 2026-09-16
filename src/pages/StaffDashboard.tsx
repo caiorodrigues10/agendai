@@ -290,18 +290,12 @@ export const StaffDashboard: React.FC = () => {
               )}
               <DemandAlertBanner />
               {hasDashboard && isOwnerOrAdmin && <LowStockBanner />}
-              <div className="bg-surface rounded-xl border border-border p-4">
-                <h2 className="text-lg font-bold mb-3">Visão Geral</h2>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  {supportsQueue(operationMode) && (
-                    <div className="bg-surface-2 rounded-lg p-3">
-                      <p className="text-text-muted text-xs">Na fila</p>
-                      <p className="text-xl font-bold">{peopleWaiting}</p>
-                    </div>
-                  )}
-                  {supportsAppointments(operationMode) && (
-                    <div className="bg-surface-2 rounded-lg p-3">
-                      <p className="text-text-muted text-xs">Agendamentos hoje</p>
+              {supportsAppointments(operationMode) && (
+                <div className="rounded-xl border border-border bg-surface p-4">
+                  <h2 className="mb-3 text-lg font-bold">Agenda de hoje</h2>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="rounded-lg bg-surface-2 p-3">
+                      <p className="text-xs text-text-muted">Agendamentos</p>
                       <p className="text-xl font-bold">
                         {appointments.filter(a => {
                           const today = new Date().toISOString().slice(0, 10);
@@ -309,29 +303,15 @@ export const StaffDashboard: React.FC = () => {
                         }).length}
                       </p>
                     </div>
-                  )}
-                  <div className="bg-surface-2 rounded-lg p-3">
-                    <p className="text-text-muted text-xs">Status</p>
-                    <p
-                      className={`text-sm font-bold ${isOpen ? 'text-green-400' : 'text-red-400'}`}
-                    >
-                      {isOpen ? 'Aberto' : 'Fechado'}
-                    </p>
+                    <div className="rounded-lg bg-surface-2 p-3">
+                      <p className="text-xs text-text-muted">Status do salão</p>
+                      <p className={`text-sm font-bold ${isOpen ? 'text-success' : 'text-danger'}`}>
+                        {isOpen ? 'Aberto' : 'Fechado'}
+                      </p>
+                    </div>
                   </div>
-                  {supportsQueue(operationMode) && (
-                    <div className="bg-surface-2 rounded-lg p-3">
-                      <p className="text-text-muted text-xs">Em atendimento</p>
-                      <p className="text-sm font-bold">{currentInChair?.customerName || '—'}</p>
-                    </div>
-                  )}
-                  {supportsAppointments(operationMode) && (
-                    <div className="bg-surface-2 rounded-lg p-3">
-                      <p className="text-text-muted text-xs">Atendidos hoje</p>
-                      <p className="text-xl font-bold">{completedCount}</p>
-                    </div>
-                  )}
                 </div>
-              </div>
+              )}
               {supportsQueue(operationMode) && (
                 <QueueStatusCard
                   shopName={settings?.shopName}
@@ -344,14 +324,7 @@ export const StaffDashboard: React.FC = () => {
                   showStaffStats
                 />
               )}
-              <div className="grid gap-4 lg:grid-cols-[1fr_0.95fr]">
-                <PwaInstallCard variant="panel" videoUrl={installVideoUrl} />
-                <div className="rounded-xl border border-border bg-surface p-4 sm:p-5">
-                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-accent">Ajuda rápida</p>
-                  <h3 className="mt-2 text-lg font-bold text-text-primary">Instale o AgendAI no celular da equipe</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-text-secondary">Use o cartão ao lado para instalar o PWA. A fila e a agenda continuam disponíveis mesmo sem WhatsApp configurado.</p>
-                </div>
-              </div>
+              <PwaInstallCard variant="panel" videoUrl={installVideoUrl} />
             </div>
           )}
 

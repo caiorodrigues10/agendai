@@ -4,6 +4,7 @@ import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { depositsApi, DepositPolicy } from '../../infra/depositsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { Field, FIELD_CONTROL, FORM_FOOTER, FORM_GRID } from '../ui/Field';
+import { SmartSelect } from '../ui/SmartSelect';
 
 const DEPOSIT_REQUIRED_OPTIONS = [
   { value: 'OFF', label: 'Desativado' },
@@ -102,15 +103,12 @@ export const DepositPolicyPanel: React.FC = () => {
       <div className="space-y-4">
         <div className={FORM_GRID}>
           <Field label="Modo do sinal">
-            <select
-              className={FIELD_CONTROL}
+            <SmartSelect
               value={policy.depositRequired}
-              onChange={e => update({ depositRequired: e.target.value })}
-            >
-              {DEPOSIT_REQUIRED_OPTIONS.map(o => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+              onChange={val => val && update({ depositRequired: val })}
+              options={DEPOSIT_REQUIRED_OPTIONS}
+              clearable={false}
+            />
           </Field>
 
           <Field label="Percentual padrão (%)" hint="0–100">
@@ -165,27 +163,21 @@ export const DepositPolicyPanel: React.FC = () => {
 
         <div className={FORM_GRID}>
           <Field label="Regra de reembolso">
-            <select
-              className={FIELD_CONTROL}
+            <SmartSelect
               value={policy.depositRefundRule}
-              onChange={e => update({ depositRefundRule: e.target.value })}
-            >
-              {REFUND_RULE_OPTIONS.map(o => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+              onChange={val => val && update({ depositRefundRule: val })}
+              options={REFUND_RULE_OPTIONS}
+              clearable={false}
+            />
           </Field>
 
           <Field label="Regra de sinal no no-show">
-            <select
-              className={FIELD_CONTROL}
+            <SmartSelect
               value={policy.noShowDepositRule}
-              onChange={e => update({ noShowDepositRule: e.target.value })}
-            >
-              {NO_SHOW_RULE_OPTIONS.map(o => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+              onChange={val => val && update({ noShowDepositRule: val })}
+              options={NO_SHOW_RULE_OPTIONS}
+              clearable={false}
+            />
           </Field>
 
           <Field label="Máx. remarcações">

@@ -11,6 +11,7 @@ import {
 import { corporateApi, CorporatePlan, CorporateSubscription } from '../../infra/corporateApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { SmartSelect } from '../ui/SmartSelect';
 
 export const CorporatePanel: React.FC = () => {
   const { barbershopId } = useBarbershopFilters();
@@ -219,16 +220,15 @@ export const CorporatePanel: React.FC = () => {
 
       {tab === 'subscriptions' && showSubscribe && (
         <div className="rounded-2xl border border-border bg-surface p-4 space-y-3">
-          <select
-            value={subPlanId}
-            onChange={e => setSubPlanId(e.target.value)}
-            className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm text-text-primary"
-          >
-            <option value="">Selecionar plano</option>
-            {plans.filter(p => p.active).map(p => (
-              <option key={p.id} value={p.id}>{p.name} - R$ {p.price.toFixed(2)}</option>
-            ))}
-          </select>
+          <SmartSelect
+            value={subPlanId || null}
+            onChange={val => setSubPlanId(val ?? '')}
+            options={plans.filter(p => p.active).map(p => ({
+              value: p.id,
+              label: `${p.name} - R$ ${p.price.toFixed(2)}`,
+            }))}
+            placeholder="Selecionar plano"
+          />
           <div className="flex gap-2">
             <button
               onClick={() => void handleSubscribe()}
