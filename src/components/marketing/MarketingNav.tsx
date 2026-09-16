@@ -94,20 +94,32 @@ export const MarketingNav: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3 sm:gap-4">
-          <button
-            type="button"
-            onClick={goPanel}
-            className="hidden text-xs font-bold uppercase tracking-tighter text-white/90 transition-colors hover:text-white md:block"
-          >
-            {user ? 'Ir para o painel' : 'Entrar'}
-          </button>
-          <button
-            type="button"
-            onClick={goStart}
-            className="hidden rounded-full bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-tighter text-black shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] sm:block"
-          >
-            {user ? 'Ir para o painel' : 'Criar conta'}
-          </button>
+          {user ? (
+            <button
+              type="button"
+              onClick={goPanel}
+              className="hidden rounded-full bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-tighter text-black shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] sm:block"
+            >
+              Ir para o painel
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={goPanel}
+                className="hidden text-xs font-bold uppercase tracking-tighter text-white/90 transition-colors hover:text-white md:block"
+              >
+                Entrar
+              </button>
+              <button
+                type="button"
+                onClick={goStart}
+                className="hidden rounded-full bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-tighter text-black shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] sm:block"
+              >
+                Criar conta
+              </button>
+            </>
+          )}
           <button
             type="button"
             onClick={() => setMobileOpen(v => !v)}
@@ -143,20 +155,32 @@ export const MarketingNav: React.FC = () => {
               {link.label}
             </Link>
           ))}
-          <button
-            type="button"
-            onClick={goPanel}
-            className="mt-2 rounded-full border border-white/30 bg-white/5 py-3 text-center text-xs font-bold uppercase tracking-tighter text-white transition-colors hover:border-white/50 hover:bg-white/10"
-          >
-            {user ? 'Ir para o painel' : 'Entrar'}
-          </button>
-          <button
-            type="button"
-            onClick={goStart}
-            className="mt-2 rounded-full bg-white px-5 py-3 text-xs font-bold uppercase tracking-tighter text-black"
-          >
-            {user ? 'Ir para o painel' : 'Criar conta grátis'}
-          </button>
+          {user ? (
+            <button
+              type="button"
+              onClick={goPanel}
+              className="mt-2 rounded-full bg-white px-5 py-3 text-xs font-bold uppercase tracking-tighter text-black"
+            >
+              Ir para o painel
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={goPanel}
+                className="mt-2 rounded-full border border-white/30 bg-white/5 py-3 text-center text-xs font-bold uppercase tracking-tighter text-white transition-colors hover:border-white/50 hover:bg-white/10"
+              >
+                Entrar
+              </button>
+              <button
+                type="button"
+                onClick={goStart}
+                className="mt-2 rounded-full bg-white px-5 py-3 text-xs font-bold uppercase tracking-tighter text-black"
+              >
+                Criar conta grátis
+              </button>
+            </>
+          )}
         </div>
       )}
     </nav>
