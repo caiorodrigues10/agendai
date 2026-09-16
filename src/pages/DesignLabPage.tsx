@@ -111,6 +111,28 @@ const PANELS: PanelDef[] = [
       '--dl-selection': 'rgba(134,182,194,0.15)',
     },
   },
+  {
+    id: 'verde-equilibrado',
+    label: 'E Verde Equilibrado',
+    hex: '#5B8F72',
+    usage: 'Verde de marca mais sereno, com presença sem dominar a interface.',
+    tokens: {
+      '--dl-accent': '#5B8F72',
+      '--dl-accent-hover': '#47755C',
+      '--dl-accent-fg': '#ffffff',
+      '--dl-surface': '#f6f8f5',
+      '--dl-surface-2': '#e9eee9',
+      '--dl-bg': '#fbfcfa',
+      '--dl-border': '#d9e2d9',
+      '--dl-border-strong': '#b9c9bc',
+      '--dl-text-primary': '#18251c',
+      '--dl-text-secondary': '#4f6154',
+      '--dl-text-muted': '#77857a',
+      '--dl-support': '#88A996',
+      '--dl-danger': '#c0392b',
+      '--dl-selection': 'rgba(91,143,114,0.15)',
+    },
+  },
 ];
 
 /* ------------------------------------------------------------------ */
