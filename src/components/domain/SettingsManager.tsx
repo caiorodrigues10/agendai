@@ -12,6 +12,7 @@ import { OwnerNotificationsPanel } from './OwnerNotificationsPanel';
 import { QueueAlertSettings } from './QueueAlertSettings';
 import { ShopFloorControls } from './ShopFloorControls';
 import { ThemedCalendar, toLocalISO } from '../ui/ThemedCalendar';
+import { SmartSelect } from '../ui/SmartSelect';
 import { addDays } from '../../utils/schedulingUtils';
 import {
   Save,
@@ -75,18 +76,50 @@ function weatherDayLabel(dateStr: string) {
 }
 
 const ShopCityField: React.FC<{
-  barbershopId?: string;
   city: string;
   onCityChange: (value: string) => void;
   settings: ShopSettings;
-}> = ({ barbershopId, city, onCityChange, settings }) => {
-  const [forecast, setForecast] = useState<ShopWeatherDay[] | null>(null);
-  const [weatherFailed, setWeatherFailed] = useState(false);
+}> = ({ city, onCityChange, settings }) => {
   const cityTrim = city.trim();
   const locationReady =
     cityTrim.toLowerCase() === (settings.city || '').trim().toLowerCase() &&
     settings.latitude != null &&
     settings.longitude != null;
+
+  return (
+    <div>
+      <label className="block text-sm text-text-secondary mb-1.5" htmlFor="shop-city">Cidade</label>
+      <input
+        id="shop-city"
+        value={city}
+        onChange={e => onCityChange(e.target.value)}
+        className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
+        placeholder="São Paulo"
+      />
+      <p className={`mt-1.5 text-[11px] flex items-start gap-1.5 ${locationReady ? 'text-success' : 'text-text-muted'}`}>
+        <MapPin size={12} className="mt-0.5 shrink-0" />
+        <span>
+          {locationReady
+            ? `Previsão do tempo ativa para ${settings.city || cityTrim}.`
+            : cityTrim
+              ? 'Clique em Salvar Configurações para localizar a cidade e carregar o clima.'
+              : 'Necessária para a previsão de demanda baseada no clima.'}
+        </span>
+      </p>
+    </div>
+  );
+};
+
+const WeatherForecastCard: React.FC<{
+  barbershopId?: string;
+  settings: ShopSettings;
+}> = ({ barbershopId, settings }) => {
+  const [forecast, setForecast] = useState<ShopWeatherDay[] | null>(null);
+  const [weatherFailed, setWeatherFailed] = useState(false);
+  const locationReady =
+    settings.latitude != null &&
+    settings.longitude != null &&
+    (settings.city || '').trim().length > 0;
 
   useEffect(() => {
     if (!barbershopId || settings.latitude == null || settings.longitude == null) return;
@@ -110,33 +143,27 @@ const ShopCityField: React.FC<{
     };
   }, [barbershopId, settings.latitude, settings.longitude]);
 
+  if (!locationReady) return null;
+
   return (
-    <div>
-      <label className="block text-sm text-text-secondary mb-1.5" htmlFor="shop-city">Cidade</label>
-      <input
-        id="shop-city"
-        value={city}
-        onChange={e => onCityChange(e.target.value)}
-        className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
-        placeholder="São Paulo"
-      />
-      <p className={`mt-1.5 text-[11px] flex items-start gap-1.5 ${locationReady ? 'text-success' : 'text-text-muted'}`}>
-        <MapPin size={12} className="mt-0.5 shrink-0" />
-        <span>
-          {locationReady
-            ? `Previsão do tempo ativa para ${settings.city || cityTrim}.`
-            : cityTrim
-              ? 'Clique em Salvar Configurações para localizar a cidade e carregar o clima.'
-              : 'Necessária para a previsão de demanda baseada no clima.'}
-        </span>
+    <div className="bg-surface border border-border rounded-xl p-5">
+      <div className="flex items-center gap-2 mb-1">
+        <Cloud size={16} className="text-accent" />
+        <h3 className="text-lg font-bold text-text-primary">Previsão do tempo</h3>
+      </div>
+      <p className="text-xs text-text-muted mb-4">
+        Clima previsto para os próximos 7 dias — usado para prever demanda.
       </p>
-      {locationReady && !forecast && !weatherFailed && (
-        <p className="mt-2 text-[11px] text-text-muted flex items-center gap-1.5">
+      {!forecast && !weatherFailed && (
+        <p className="text-[11px] text-text-muted flex items-center gap-1.5">
           <Loader2 size={12} className="animate-spin" /> Carregando clima...
         </p>
       )}
-      {locationReady && forecast && forecast.length > 0 && (
-        <div className="mt-3 grid grid-cols-4 sm:grid-cols-7 gap-2">
+      {weatherFailed && (
+        <p className="text-[11px] text-text-muted">Não foi possível carregar a previsão do tempo.</p>
+      )}
+      {forecast && forecast.length > 0 && (
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
           {forecast.slice(0, 7).map(day => (
             <div key={day.date} className="rounded-lg border border-border bg-bg p-2 text-center">
               <p className="text-[10px] font-bold text-text-muted">{weatherDayLabel(day.date)}</p>
@@ -530,11 +557,16 @@ const BusinessSegmentSection: React.FC<{
       <p className="text-xs text-text-muted mb-4">
         Só orienta sugestões de catálogo. Não altera plano, URL pública, fila ou agenda.
       </p>
-      <select
-        disabled={saving}
+      <SmartSelect
+        options={SEGMENT_OPTIONS}
         value={current}
-        onChange={async event => {
-          const businessSegment = event.target.value as BusinessSegment;
+        disabled={saving}
+        clearable={false}
+        searchable={false}
+        placeholder="Selecione o tipo…"
+        onChange={async (value) => {
+          if (!value) return;
+          const businessSegment = value as BusinessSegment;
           setSaving(true);
           try {
             await onSave({ ...settings, businessSegment });
@@ -545,12 +577,7 @@ const BusinessSegmentSection: React.FC<{
             setSaving(false);
           }
         }}
-        className="w-full rounded-lg border border-border bg-bg px-3 py-2 text-sm text-text-primary"
-      >
-        {SEGMENT_OPTIONS.map(option => (
-          <option key={option.value} value={option.value}>{option.label}</option>
-        ))}
-      </select>
+      />
     </div>
   );
 };
@@ -898,14 +925,47 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
             </p>
 
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm text-text-secondary mb-1.5">Nome do Salão</label>
-                <input
-                  type="text"
-                  value={shopName}
-                  onChange={e => setShopName(e.target.value)}
-                  className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
-                />
+              <div className="flex flex-col sm:flex-row items-start gap-4">
+                <div className="shrink-0">
+                  <label className="block text-sm text-text-secondary mb-1.5">Logo do Salão</label>
+                  <div className="flex items-center gap-3">
+                    <div className="w-16 h-16 rounded-lg bg-bg border border-border flex items-center justify-center overflow-hidden">
+                      {logoUploading ? (
+                        <Loader2 className="text-accent animate-spin" size={20} />
+                      ) : logoUrl ? (
+                        <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                      ) : (
+                        <Upload className="text-text-muted" size={20} />
+                      )}
+                    </div>
+                    <label
+                      className={`px-3 py-2 text-xs bg-surface-2 text-text-secondary rounded-lg border border-border-strong cursor-pointer hover:bg-border-strong ${logoUploading ? 'opacity-50 pointer-events-none' : ''}`}
+                    >
+                      {logoUploading ? 'Enviando...' : 'Escolher arquivo'}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        disabled={logoUploading}
+                      />
+                    </label>
+                  </div>
+                  {logoError && (
+                    <p className="mt-2 text-xs text-danger" role="alert">
+                      {logoError}
+                    </p>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0 w-full">
+                  <label className="block text-sm text-text-secondary mb-1.5">Nome do Salão</label>
+                  <input
+                    type="text"
+                    value={shopName}
+                    onChange={e => setShopName(e.target.value)}
+                    className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary outline-none focus:ring-2 focus:ring-accent"
+                  />
+                </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
@@ -919,47 +979,16 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                 </div>
                 <div>
                   <ShopCityField
-                    barbershopId={barbershopId}
                     city={city}
                     onCityChange={setCity}
                     settings={settings}
                   />
                 </div>
               </div>
-
-              <div>
-                <label className="block text-sm text-text-secondary mb-2">Logo do Salão</label>
-                <div className="flex items-center gap-3">
-                  <div className="w-16 h-16 rounded-lg bg-bg border border-border flex items-center justify-center overflow-hidden">
-                    {logoUploading ? (
-                      <Loader2 className="text-accent animate-spin" size={20} />
-                    ) : logoUrl ? (
-                      <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
-                    ) : (
-                      <Upload className="text-text-muted" size={20} />
-                    )}
-                  </div>
-                  <label
-                    className={`px-3 py-2 text-xs bg-surface-2 text-text-secondary rounded-lg border border-border-strong cursor-pointer hover:bg-border-strong ${logoUploading ? 'opacity-50 pointer-events-none' : ''}`}
-                  >
-                    {logoUploading ? 'Enviando...' : 'Escolher arquivo'}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      disabled={logoUploading}
-                    />
-                  </label>
-                </div>
-                {logoError && (
-                  <p className="mt-2 text-xs text-danger" role="alert">
-                    {logoError}
-                  </p>
-                )}
-              </div>
             </div>
           </div>
+
+          <WeatherForecastCard barbershopId={barbershopId} settings={settings} />
 
           <BusinessSegmentSection settings={settings} onNotify={onNotify} onSave={onSave} />
           {saveButton}
