@@ -39,7 +39,7 @@ import { ClosedSalonJoinModal } from '../components/domain/ClosedSalonJoinModal'
 import { ShopFloorControls } from '../components/domain/ShopFloorControls';
 import { usePermissions } from '../hooks/usePermissions';
 import { ActivationChecklist } from '../components/domain/ActivationChecklist';
-import { OnboardingMissions } from '../components/domain/OnboardingMissions';
+import { OnboardingChecklist } from '../components/domain/OnboardingChecklist';
 import { QueueCapacityBanner } from '../components/domain/QueueCapacityBanner';
 import { barbershopApi } from '../infra/barbershopApi';
 import { ProductsHub } from '../components/domain/ProductsHub';
@@ -329,7 +329,7 @@ export const StaffDashboard: React.FC = () => {
           )}
 
           {activeTab === 'onboarding' && user && barbershopId && (
-            <OnboardingMissions
+            <OnboardingChecklist
               barbershopId={barbershopId}
               shopName={settings?.shopName || ''}
               onNavigate={tab => navigate(`/app/${tab}`)}
