@@ -110,7 +110,7 @@ export const PublicHome: React.FC = () => {
 
   if (stillLoading) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center text-accent">
+      <div className="min-h-screen bg-bg flex items-center justify-center text-text-muted">
         <Loader2 className="animate-spin" size={40} />
       </div>
     );
@@ -167,7 +167,7 @@ export const PublicHome: React.FC = () => {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 z-10 relative
-                        ${activeTab === tab ? 'text-text-primary' : 'text-text-muted'}
+                        ${activeTab === tab ? 'text-accent' : 'text-text-muted'}
                     `}
             >
               {tab === 'queue' && (
@@ -189,7 +189,7 @@ export const PublicHome: React.FC = () => {
           ))}
 
           <div
-            className={`absolute top-1 bottom-1 bg-surface-2 rounded-lg transition-all duration-300
+            className={`absolute top-1 bottom-1 bg-selection rounded-lg transition-all duration-300
                 ${tabs.length === 3
                   ? `w-[calc(33.3%-2px)] ${activeTab === 'queue' ? 'left-1' : activeTab === 'appointments' ? 'left-[calc(33.3%+2px)]' : 'left-[calc(66.6%+2px)]'}`
                   : tabs.length === 2
@@ -263,16 +263,16 @@ export const PublicHome: React.FC = () => {
 
             {/* STATS GRID */}
             <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="bg-surface p-4 rounded-xl border border-border text-center shadow-lg group hover:border-accent/30 transition-colors">
-                <span className="block text-3xl font-bold text-text-primary mb-1 group-hover:text-accent transition-colors">
+              <div className="bg-surface p-4 rounded-xl border border-border text-center shadow-lg group">
+                <span className="block text-3xl font-bold text-text-primary mb-1">
                   {peopleWaiting}
                 </span>
                 <span className="text-[10px] text-text-muted uppercase tracking-widest font-bold">
                   Na Fila
                 </span>
               </div>
-              <div className="bg-surface p-4 rounded-xl border border-border text-center shadow-lg group hover:border-success/30 transition-colors">
-                <span className="block text-3xl font-bold text-success mb-1">
+              <div className="bg-surface p-4 rounded-xl border border-border text-center shadow-lg group">
+                <span className="block text-3xl font-bold text-tertiary mb-1">
                   {currentInChair ? '1' : '0'}
                 </span>
                 <span className="text-[10px] text-text-muted uppercase tracking-widest font-bold">
@@ -293,7 +293,7 @@ export const PublicHome: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => openJoinForm('self')}
-                    className="w-full bg-accent hover:bg-accent-hover text-accent-fg font-bold text-lg py-4 rounded-xl shadow-lg shadow-accent/30 hover:shadow-accent/50 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 border border-accent/20 relative overflow-hidden group cursor-pointer"
+                    className="w-full bg-accent hover:bg-accent-hover text-accent-fg font-bold text-lg py-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 border border-accent/20 relative overflow-hidden group cursor-pointer"
                   >
                     <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 group-hover:translate-x-full"></div>
                     <span className="relative flex items-center gap-3">
@@ -304,8 +304,8 @@ export const PublicHome: React.FC = () => {
                 ))}
 
               {isUserInQueue && (
-                <div className="w-full bg-accent/10 border border-accent/30 text-accent text-center py-3 rounded-xl flex items-center justify-center gap-2">
-                  <DynamicIcon name="CheckCircle" size={20} className="text-accent" />
+                <div className="w-full bg-selection border border-accent/30 text-accent text-center py-3 rounded-xl flex items-center justify-center gap-2">
+                  <DynamicIcon name="CheckCircle" size={20} className="text-success" />
                   <span className="font-bold">Você já está na fila!</span>
                 </div>
               )}
@@ -317,7 +317,7 @@ export const PublicHome: React.FC = () => {
                   className="w-full bg-surface border border-border hover:border-accent/50 hover:bg-surface-2 text-text-primary text-sm font-bold py-3.5 rounded-xl transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
-                    <DynamicIcon name="UserPlus" size={16} className="text-accent" />
+                    <DynamicIcon name="UserPlus" size={16} className="text-tertiary" />
                     Adicionar dependente
                   </span>
                   <span className="text-[11px] font-medium text-text-muted">

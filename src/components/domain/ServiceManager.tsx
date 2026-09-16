@@ -8,6 +8,7 @@ import { DynamicIcon } from '../ui/DynamicIcon';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { RiAddLine, RiPencilLine, RiDeleteBin6Line } from 'react-icons/ri';
 import { PackageCatalog } from './PackageCatalog';
+import { Button } from '../ui/Button';
 
 interface ServiceManagerProps {
   services: Service[];
@@ -34,12 +35,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
     <div className="mt-6">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h3 className="text-lg font-bold text-text-primary">Gerenciar Serviços</h3>
-        <button
+        <Button
           onClick={() => setIsAdding(true)}
-          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-accent/40 bg-gradient-to-r from-accent/15 to-accent/10 px-4 py-2.5 text-xs font-bold text-accent transition-all hover:border-accent/60 hover:from-accent/20 hover:to-accent/15 hover:shadow-lg hover:shadow-accent/10"
         >
           <RiAddLine size={16} /> Novo Serviço
-        </button>
+        </Button>
       </div>
 
       <CategoryManager key={categoryState.barbershopId || 'global'} title="Categorias de serviços" linkedLabel="Os serviços vinculados" state={categoryState} onChanged={(id, category) => updateServiceCategory(id, category?.name ?? null)} />
@@ -68,7 +68,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             <div className="flex shrink-0 items-center self-end gap-2 sm:self-auto">
               <button
                 onClick={() => setEditingId(service.id)}
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-bg p-2 text-text-secondary transition-all hover:border-accent/30 hover:bg-accent/10 hover:text-accent"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-bg p-2 text-text-secondary transition-all hover:border-accent/30 hover:bg-selection hover:text-accent"
                 title="Editar"
               >
                 <RiPencilLine size={18} />

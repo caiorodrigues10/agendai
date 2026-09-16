@@ -136,9 +136,9 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
             aria-controls="staff-navigation-more"
             aria-current={moreIsActive ? 'page' : undefined}
             onClick={() => setMoreOpen(open => !open)}
-            className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-semibold transition-colors ${
+            className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-[10px] font-semibold transition-colors ${
               moreIsActive || moreOpen
-                ? 'bg-accent text-accent-fg shadow-lg shadow-accent/20'
+                ? 'border-accent/30 bg-selection text-accent'
                 : 'text-text-muted hover:bg-bg hover:text-text-primary'
             }`}
           >
@@ -231,15 +231,15 @@ function DesktopNavigationItem({
       type="button"
       onClick={() => onNavigate(tab.id)}
       aria-current={active ? 'page' : undefined}
-      className={`group flex min-h-11 w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left text-sm font-medium transition-colors ${
+      className={`group flex min-h-11 w-full items-center gap-3 rounded-xl border border-transparent px-2.5 py-2 text-left text-sm font-medium transition-colors ${
         active
-          ? 'bg-accent text-accent-fg shadow-md shadow-accent/15'
+          ? 'border-accent/30 bg-selection text-accent'
           : 'text-text-secondary hover:bg-bg hover:text-text-primary'
       }`}
     >
       <span
         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-          active ? 'bg-white/15' : 'bg-surface-2 text-text-muted group-hover:text-accent'
+          active ? 'bg-accent/15 text-accent' : 'bg-surface-2 text-text-muted group-hover:text-accent'
         }`}
       >
         <tab.icon size={17} />
@@ -263,16 +263,16 @@ function MobileNavigationItem({
       type="button"
       onClick={() => onNavigate(tab.id)}
       aria-current={active ? 'page' : undefined}
-      className={`group flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-semibold transition-colors ${
+      className={`group flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-[10px] font-semibold transition-colors ${
         active
-          ? 'bg-accent text-accent-fg shadow-lg shadow-accent/20'
+          ? 'border-accent/30 bg-selection text-accent'
           : 'text-text-muted hover:bg-bg hover:text-text-primary'
       }`}
     >
       <span
         className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
           active
-            ? 'bg-black/15 text-accent-fg shadow-inner shadow-black/10'
+            ? 'bg-accent/15 text-accent'
             : 'bg-surface-2 text-text-muted group-hover:text-accent'
         }`}
       >
@@ -305,7 +305,7 @@ function MoreNavigationItem({
     >
       <span
         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
-          active ? 'bg-accent text-accent-fg' : 'bg-surface-2 text-text-muted'
+          active ? 'bg-accent/15 text-accent' : 'bg-surface-2 text-text-muted'
         }`}
       >
         <tab.icon size={18} />

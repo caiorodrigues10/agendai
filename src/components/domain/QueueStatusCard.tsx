@@ -82,7 +82,7 @@ export const QueueStatusCard: React.FC<QueueStatusCardProps> = ({
               {shopName || 'Salão'}
             </h2>
             <p className="mt-1 flex items-center gap-1.5 text-xs text-text-secondary">
-              <Store size={13} className="text-accent shrink-0" />
+              <Store size={13} className="text-text-secondary shrink-0" />
               {queueClosed && isOpen ? 'Fila encerrada por hoje' : isOpen ? 'Aberto agora' : 'Fechado agora'}
             </p>
           </div>
@@ -120,7 +120,7 @@ export const QueueStatusCard: React.FC<QueueStatusCardProps> = ({
         ) : (
           <div className="mb-4">
             <div className="flex items-end gap-2">
-              <Clock size={28} className="text-accent mb-1" />
+              <Clock size={28} className="text-support mb-1" />
               <span className="text-4xl font-bold text-text-primary tracking-tight leading-none">
                 {wait}
               </span>
@@ -132,7 +132,7 @@ export const QueueStatusCard: React.FC<QueueStatusCardProps> = ({
         )}
 
         <div className="rounded-xl bg-bg/80 border border-border px-3.5 py-3 flex gap-2.5">
-          <Sparkles size={16} className="text-accent shrink-0 mt-0.5" />
+          <Sparkles size={16} className="text-tertiary shrink-0 mt-0.5" />
           <p className="text-sm text-text-secondary leading-relaxed">
             {insight?.message ||
               (queueClosed && isOpen

@@ -27,7 +27,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
       : 'border-accent/30 bg-accent/10 text-accent';
 
   return (
-    <header className="sticky top-0 z-50 bg-bg/95 backdrop-blur-sm border-b border-accent/20 shadow-lg shadow-accent/5">
+    <header className="sticky top-0 z-50 bg-bg/95 backdrop-blur-sm border-b border-border shadow-lg shadow-black/5">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 lg:px-6">
         <Logo size="sm" customImageUrl={logoUrl} />
         <div className="flex items-center gap-2">

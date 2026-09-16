@@ -41,7 +41,7 @@ export const ShowcasePublicPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <Loader2 className="animate-spin text-accent" size={32} />
+        <Loader2 className="animate-spin text-text-muted" size={32} />
       </div>
     );
   }
@@ -60,7 +60,7 @@ export const ShowcasePublicPage: React.FC = () => {
       <div className="mx-auto max-w-2xl space-y-4 py-4">
         <button
           onClick={() => setSelectedEntry(null)}
-          className="text-xs font-bold text-accent hover:underline"
+          className="text-xs font-bold text-support hover:underline"
         >
           ← Voltar ao showcase
         </button>
@@ -94,7 +94,7 @@ export const ShowcasePublicPage: React.FC = () => {
                 <CalendarDays size={14} />
                 {selectedEntry.serviceName}
                 {selectedEntry.servicePrice != null && (
-                  <span className="font-bold text-accent">R$ {(selectedEntry.servicePrice / 100).toFixed(2)}</span>
+                  <span className="font-bold text-text-primary">R$ {(selectedEntry.servicePrice / 100).toFixed(2)}</span>
                 )}
                 {selectedEntry.serviceDuration != null && (
                   <span className="text-text-muted">· {selectedEntry.serviceDuration}min</span>
@@ -172,7 +172,7 @@ export const ShowcasePublicPage: React.FC = () => {
             <button
               key={entry.id}
               onClick={() => void handleTrackClick(entry)}
-              className="group overflow-hidden rounded-2xl border border-border bg-surface text-left transition-all hover:border-accent/40 hover:shadow-lg hover:shadow-accent/5"
+                className="group overflow-hidden rounded-2xl border border-border bg-surface text-left transition-all hover:border-border-strong hover:shadow-lg hover:shadow-black/5"
             >
               <div className="aspect-square overflow-hidden bg-surface-2">
                 {entry.mediaType?.startsWith('video') ? (
@@ -193,7 +193,7 @@ export const ShowcasePublicPage: React.FC = () => {
                   <p className="mt-0.5 truncate text-xs text-text-muted">{entry.serviceName}</p>
                 )}
                 {entry.servicePrice != null && (
-                  <p className="mt-1 text-xs font-bold text-accent">R$ {(entry.servicePrice / 100).toFixed(2)}</p>
+                  <p className="mt-1 text-xs font-bold text-text-primary">R$ {(entry.servicePrice / 100).toFixed(2)}</p>
                 )}
               </div>
             </button>

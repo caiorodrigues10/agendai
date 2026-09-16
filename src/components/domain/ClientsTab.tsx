@@ -55,9 +55,9 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
   return (
     <div className="space-y-4">
       {showUpgradeHint && (
-        <div className="flex flex-col gap-3 rounded-xl border border-accent/25 bg-accent/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
-            <div className="rounded-lg bg-accent/15 p-2 text-accent">
+            <div className="rounded-lg bg-surface-2 p-2 text-text-secondary">
               <Sparkles size={18} />
             </div>
             <div>

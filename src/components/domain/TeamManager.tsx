@@ -21,6 +21,7 @@ import { usersApi } from '../../infra/usersApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { ALL_PERMISSIONS, PERMISSION_LABELS } from '../../hooks/usePermissions';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_FOOTER, FORM_GRID } from '../ui/Field';
+import { Button } from '../ui/Button';
 
 interface TeamManagerProps {
   staff: StaffMember[];
@@ -147,15 +148,14 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-lg font-bold text-text-primary">Equipe & Acessos</h3>
-        <button
+        <Button
           onClick={() => {
             setIsAdding(!isAdding);
             setFormError(null);
           }}
-          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-accent/40 bg-gradient-to-r from-accent/15 to-accent/10 px-4 py-2.5 text-xs font-bold text-accent transition-all hover:border-accent/60 hover:from-accent/20 hover:to-accent/15 hover:shadow-lg hover:shadow-accent/10"
         >
           <RiAddLine size={16} /> Adicionar
-        </button>
+        </Button>
       </div>
 
       {formError && !isAdding && (
@@ -215,20 +215,21 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
             </Field>
 
             <div className={FORM_FOOTER}>
-              <button
+              <Button
+                variant="secondary"
                 type="button"
                 onClick={() => setIsAdding(false)}
-                className="min-h-11 flex-1 rounded-xl bg-surface-2 py-3 text-sm font-bold text-text-secondary"
+                className="flex-1"
               >
                 Cancelar
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
-                disabled={saving}
-                className="min-h-11 flex-1 rounded-xl bg-accent py-3 text-sm font-bold text-accent-fg disabled:opacity-60"
+                loading={saving}
+                className="flex-1"
               >
-                {saving ? 'Salvando…' : 'Cadastrar'}
-              </button>
+                Cadastrar
+              </Button>
             </div>
           </div>
         </form>

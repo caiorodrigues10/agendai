@@ -222,8 +222,8 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
               </span>
             </div>
             {lastProcedure && item.status === 'in_chair' && (
-              <div className="mt-2 rounded-lg border border-accent/20 bg-accent/5 px-2 py-1.5 text-xs">
-                <p className="flex items-center gap-1 font-medium text-accent">
+              <div className="mt-2 rounded-lg border border-border bg-surface px-2 py-1.5 text-xs">
+                <p className="flex items-center gap-1 font-medium text-text-secondary">
                   <Scissors size={10} /> Último procedimento
                 </p>
                 <p className="text-text-secondary">
@@ -275,7 +275,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
                     type="button"
                     disabled={sending !== null}
                     onClick={() => void sendWhatsApp('reminder')}
-                    className="px-3 py-1.5 text-xs text-success bg-success/10 border border-success/30 hover:bg-success/20 rounded flex items-center gap-1 transition-colors disabled:opacity-50 cursor-pointer"
+                    className="px-3 py-1.5 text-xs text-accent bg-accent/10 border border-accent/30 hover:bg-accent/20 rounded flex items-center gap-1 transition-colors disabled:opacity-50 cursor-pointer"
                   >
                     {sending === 'reminder' ? (
                       <Loader2 size={14} className="animate-spin" />

@@ -208,7 +208,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
-          <CalendarDays className="text-accent" size={20} />
+          <CalendarDays className="text-text-secondary" size={20} />
           Agenda
         </h3>
         <button
@@ -335,7 +335,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
               }}
               className="text-sm font-bold text-text-primary capitalize flex items-center gap-1 mx-auto hover:text-accent transition-colors"
             >
-              <CalendarDays size={14} className="text-accent" />
+              <CalendarDays size={14} className="text-text-secondary" />
               {dateLabel}
             </button>
           </div>
@@ -449,13 +449,13 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                           <button
                             key={appt.id}
                             onClick={() => setSelectedAppt(appt)}
-                            className="absolute inset-x-0.5 top-0.5 bg-accent/20 border border-accent/40 rounded-lg p-1.5 text-left hover:bg-accent/30 transition-colors z-10 overflow-hidden"
+                            className="absolute inset-x-0.5 top-0.5 bg-selection border border-accent/30 rounded-lg p-1.5 text-left hover:bg-accent/10 transition-colors z-10 overflow-hidden"
                             style={{ minHeight: `${rows * 2.5}rem` }}
                           >
                             <p className="text-[10px] font-bold text-text-primary truncate">
                               {appt.customerName}
                             </p>
-                            <p className="text-[9px] text-accent truncate">
+                            <p className="text-[9px] text-text-secondary truncate">
                               {appt.serviceName ?? getServiceName(appt.serviceId, services)}
                             </p>
                           </button>

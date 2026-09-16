@@ -18,7 +18,7 @@ const CYCLE_LABELS: Record<string, string> = {
 };
 
 const MEMBERSHIP_STATUS_STYLES: Record<string, string> = {
-  ACTIVE: 'bg-green-500/10 text-green-400 border-green-500/30',
+  ACTIVE: 'bg-success/10 text-success border-success/30',
   PAUSED: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
   CANCELLED: 'bg-red-500/10 text-red-400 border-red-500/30',
   PENDING: 'bg-blue-500/10 text-blue-400 border-blue-500/30',

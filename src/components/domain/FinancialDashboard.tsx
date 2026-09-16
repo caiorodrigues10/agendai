@@ -210,7 +210,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
       <div className="flex flex-col gap-4 bg-surface p-4 rounded-xl border border-border">
         <div className="flex justify-between items-center flex-wrap gap-3">
           <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
-            <TrendingUp className="text-accent" /> Relatórios
+            <TrendingUp className="text-support" /> Relatórios
           </h2>
 
           {owner && (
@@ -226,7 +226,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
               <button
                 onClick={() => setViewMode('personal')}
                 className={`px-3 py-1.5 text-xs font-bold rounded transition-all ${
-                  viewMode === 'personal' ? 'bg-accent/15 text-accent shadow' : 'text-text-muted'
+                  viewMode === 'personal' ? 'bg-selection text-accent shadow-sm' : 'text-text-muted'
                 }`}
               >
                 Meus Resultados
@@ -249,7 +249,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                 onClick={() => setPeriod(t.id)}
                 className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider border transition-all whitespace-nowrap ${
                   period === t.id
-                    ? 'bg-accent border-accent text-accent-fg'
+                    ? 'bg-selection border-accent/30 text-accent'
                     : 'bg-bg border-border text-text-muted hover:border-border-strong'
                 }`}
               >
@@ -265,7 +265,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                 onClick={() => setTimeFilter(t)}
                 className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider border transition-all whitespace-nowrap ${
                   timeFilter === t
-                    ? 'bg-accent border-accent text-accent-fg'
+                    ? 'bg-selection border-accent/30 text-accent'
                     : 'bg-bg border-border text-text-muted hover:border-border-strong'
                 }`}
               >
@@ -282,7 +282,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-                  <DollarSign size={16} className="text-accent" /> Comissões
+                  <DollarSign size={16} className="text-tertiary" /> Comissões
                 </h3>
                 <p className="mt-1 text-xs text-text-muted">Calculadas sobre o valor final recebido.</p>
               </div>
@@ -316,7 +316,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                   </div>
                   <div className="rounded-lg bg-bg p-3">
                     <p className="text-[10px] font-bold uppercase text-text-muted">Comissões</p>
-                    <p className="mt-1 text-lg font-bold text-accent">{brl(commissionSummary.commissionTotal)}</p>
+                    <p className="mt-1 text-lg font-bold text-text-primary">{brl(commissionSummary.commissionTotal)}</p>
                   </div>
                   <div className="col-span-2 rounded-lg bg-bg p-3 sm:col-span-1">
                     <p className="text-[10px] font-bold uppercase text-text-muted">Profissionais</p>
@@ -356,12 +356,12 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
             <>
               <div className="bg-surface p-5 rounded-xl border border-border">
                 <h3 className="text-sm font-bold text-text-primary mb-3 flex items-center gap-2">
-                  <Sparkles size={16} className="text-accent" /> Insights do período
+                  <Sparkles size={16} className="text-tertiary" /> Insights do período
                 </h3>
                 <ul className="space-y-2">
                   {insights.highlights.map((h, i) => (
                     <li key={i} className="text-sm text-text-secondary leading-relaxed flex gap-2">
-                      <span className="text-accent font-bold shrink-0">·</span>
+                      <span className="text-support font-bold shrink-0">·</span>
                       {h}
                     </li>
                   ))}
@@ -370,7 +370,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
 
               <div className="bg-surface p-5 rounded-xl border border-border">
                 <h3 className="text-sm font-bold text-text-primary mb-4 flex items-center gap-2">
-                  <Cloud size={16} className="text-accent" /> Previsão Climática (7 dias)
+                  <Cloud size={16} className="text-support" /> Previsão Climática (7 dias)
                 </h3>
                 <WeatherForecastWidget />
               </div>
@@ -393,7 +393,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                     label: 'Ticket médio',
                     value: brl(kpis!.avgTicket),
                     icon: Filter,
-                    tone: 'text-accent',
+                    tone: 'text-text-primary',
                   },
                   {
                     label: 'Atendimentos',
@@ -420,7 +420,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                     label: 'Retorno',
                     value: `${metric(kpis!.returningCustomerRate)}%`,
                     icon: TrendingUp,
-                    tone: 'text-accent',
+                    tone: 'text-text-primary',
                   },
                   {
                     label: 'Cancel. agenda',
@@ -649,7 +649,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                 <Filter size={64} />
               </div>
               <p className="text-xs text-text-muted uppercase font-bold mb-1">Ticket Médio</p>
-              <h3 className="text-lg sm:text-xl font-bold text-accent">
+              <h3 className="text-lg sm:text-xl font-bold text-text-primary">
                 R$ {localStats.avgTicket.toFixed(0)}
               </h3>
             </div>

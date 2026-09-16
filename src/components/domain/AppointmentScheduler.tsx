@@ -225,7 +225,7 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
                   className={`cursor-pointer p-4 rounded-xl border transition-all relative overflow-hidden group flex items-center gap-4
                                 ${
                                   selectedServiceId === service.id
-                                    ? 'bg-surface-2 border-accent/50 shadow-[0_0_15px_rgba(16,185,129,0.1)]'
+                                    ? 'bg-selection border-accent/50 shadow-sm shadow-black/5'
                                     : 'bg-bg border-border hover:border-border-strong hover:bg-surface'
                                 }
                             `}

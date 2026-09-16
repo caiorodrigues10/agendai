@@ -88,7 +88,7 @@ export const ClientPortalDashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
-        <Loader2 className="animate-spin text-accent" size={32} />
+        <Loader2 className="animate-spin text-text-muted" size={32} />
       </div>
     );
   }
@@ -109,7 +109,7 @@ export const ClientPortalDashboard: React.FC = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-bold whitespace-nowrap transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-accent text-accent-fg'
+                  ? 'border border-accent/30 bg-selection text-accent'
                   : 'text-text-secondary hover:bg-surface-2'
               }`}
             >
@@ -124,14 +124,14 @@ export const ClientPortalDashboard: React.FC = () => {
       {activeTab === 'home' && (
         <div className="space-y-4">
           <div className="rounded-2xl border border-border bg-surface p-5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent">Bem-vindo</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-text-muted">Bem-vindo</p>
             <h3 className="mt-1 text-lg font-bold text-text-primary">{identity?.name || 'Cliente'}</h3>
             <p className="mt-1 text-sm text-text-secondary">{identity?.phone}</p>
           </div>
 
           {nextAppointment && (
-            <div className="rounded-2xl border border-accent/30 bg-accent/5 p-4">
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent">Próximo agendamento</p>
+            <div className="rounded-2xl border border-accent/30 bg-selection p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-tertiary">Próximo agendamento</p>
               <h4 className="mt-1 font-bold text-text-primary">{nextAppointment.serviceName}</h4>
               <p className="mt-1 text-sm text-text-secondary">
                 {nextAppointment.barbershopName} · {nextAppointment.date} às {nextAppointment.time}
@@ -262,7 +262,7 @@ export const ClientPortalDashboard: React.FC = () => {
       {activeTab === 'account' && (
         <div className="space-y-4">
           <div className="rounded-2xl border border-border bg-surface p-5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-accent">Dados da conta</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-text-muted">Dados da conta</p>
             <div className="mt-3 space-y-2">
               <div className="flex items-center gap-2 text-sm text-text-primary">
                 <User size={14} className="text-text-muted" />

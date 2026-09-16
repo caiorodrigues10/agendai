@@ -18,7 +18,7 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  CONFIRMED: 'bg-green-500/10 text-green-400 border-green-500/30',
+  CONFIRMED: 'bg-success/10 text-success border-success/30',
   CANCELED: 'bg-red-500/10 text-red-400 border-red-500/30',
   COMPLETED: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
 };

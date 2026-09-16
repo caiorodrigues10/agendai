@@ -52,7 +52,7 @@ export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'succes
   const reload = () => setRefreshKey(k => k + 1);
 
   const tabBtn = (id: HubTab, label: string, visible: boolean) => visible ? (
-    <button type="button" onClick={() => setTab(id)} className={`rounded-xl px-3 py-2 text-sm font-bold ${tab === id ? 'bg-accent text-accent-fg' : 'bg-surface border border-border text-text-secondary'}`}>{label}</button>
+    <button type="button" onClick={() => setTab(id)} className={`rounded-xl border px-3 py-2 text-sm font-bold transition-colors ${tab === id ? 'border-accent/30 bg-selection text-accent' : 'border-border bg-surface text-text-secondary hover:bg-surface-2'}`}>{label}</button>
   ) : null;
 
   const bannerParts: string[] = [];

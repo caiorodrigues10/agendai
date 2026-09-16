@@ -1,10 +1,10 @@
 import React from 'react';
 
 export const FIELD_CONTROL =
-  'w-full rounded-lg border border-border bg-bg px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-accent disabled:opacity-70';
+  'w-full rounded-lg border border-border bg-bg px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-focus disabled:opacity-70';
 
 export const FIELD_CONTROL_ERROR =
-  'w-full rounded-lg border border-danger bg-bg px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-accent disabled:opacity-70';
+  'w-full rounded-lg border border-danger bg-bg px-4 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-focus disabled:opacity-70';
 
 export const FORM_SECTION_TITLE =
   'text-xs font-bold uppercase tracking-wider text-text-muted';

@@ -263,7 +263,7 @@ export function SmartSelect<T extends string = string>(props: SmartSelectProps<T
         {showSearch && (
           <div className="relative mb-2">
             <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-            <input ref={searchRef} value={query} onChange={event => setSearch(event.target.value)} onKeyDown={handleSearchKeyDown} placeholder={searchPlaceholder} className="min-h-11 w-full rounded-lg border border-border bg-bg pl-9 pr-3 text-sm text-text-primary outline-none focus:border-accent" aria-label="Buscar opções" />
+            <input ref={searchRef} value={query} onChange={event => setSearch(event.target.value)} onKeyDown={handleSearchKeyDown} placeholder={searchPlaceholder} className="min-h-11 w-full rounded-lg border border-border bg-bg pl-9 pr-3 text-sm text-text-primary outline-none focus:border-focus" aria-label="Buscar opções" />
           </div>
         )}
         <div ref={listRef} id={listId} role="listbox" aria-multiselectable={mode === 'multiple' || undefined} className="overscroll-contain">
@@ -296,9 +296,9 @@ export function SmartSelect<T extends string = string>(props: SmartSelectProps<T
       disabled={disabled}
       onKeyDown={handleTriggerKeyDown}
       {...(!mobile ? getReferenceProps() : {})}
-      className={`flex w-full items-center gap-2 rounded-xl border border-border bg-surface text-left text-text-primary outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-50 ${triggerSize}`}
+      className={`flex w-full items-center gap-2 rounded-xl border border-border bg-surface text-left text-text-primary outline-none transition-colors focus:border-focus focus:ring-2 focus:ring-focus/20 disabled:cursor-not-allowed disabled:opacity-50 ${triggerSize}`}
     >
-      {multipleProps ? <span className="flex min-w-0 flex-1 flex-wrap gap-1">{selectedOptions.length ? selectedOptions.slice(0, 3).map(option => <span key={option.value} className="inline-flex items-center gap-1 rounded-md bg-accent/15 px-2 py-1 text-xs text-accent">{option.label}<button type="button" aria-label={`Remover ${option.label}`} onClick={event => { event.stopPropagation(); multipleProps.onChange(multipleProps.value.filter(value => value !== option.value)); }}><X size={12} /></button></span>) : <span className="text-text-muted">{placeholder}</span>}{selectedOptions.length > 3 && <span className="rounded-md bg-surface-2 px-2 py-1 text-xs text-text-secondary">{selectedOptions.length} selecionados</span>}</span> : <span className={`min-w-0 flex-1 truncate ${selectedLabel ? '' : 'text-text-muted'}`}>{selectedLabel ?? placeholder}</span>}
+      {multipleProps ? <span className="flex min-w-0 flex-1 flex-wrap gap-1">{selectedOptions.length ? selectedOptions.slice(0, 3).map(option => <span key={option.value} className="inline-flex items-center gap-1 rounded-md bg-selection px-2 py-1 text-xs text-accent">{option.label}<button type="button" aria-label={`Remover ${option.label}`} onClick={event => { event.stopPropagation(); multipleProps.onChange(multipleProps.value.filter(value => value !== option.value)); }}><X size={12} /></button></span>) : <span className="text-text-muted">{placeholder}</span>}{selectedOptions.length > 3 && <span className="rounded-md bg-surface-2 px-2 py-1 text-xs text-text-secondary">{selectedOptions.length} selecionados</span>}</span> : <span className={`min-w-0 flex-1 truncate ${selectedLabel ? '' : 'text-text-muted'}`}>{selectedLabel ?? placeholder}</span>}
       {clearable && selectedValues.length > 0 && !required && <span role="button" tabIndex={0} aria-label="Limpar seleção" onClick={clear} className="rounded p-1 text-text-muted hover:bg-surface-2"><X size={15} /></span>}
       <ChevronDown size={17} className={`shrink-0 text-text-muted transition-transform ${open ? 'rotate-180' : ''}`} />
     </button>

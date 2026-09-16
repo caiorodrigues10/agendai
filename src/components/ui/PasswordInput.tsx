@@ -50,7 +50,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
         <div
           className={`
             rounded-xl border overflow-hidden transition-colors
-            focus-within:shadow-[0_0_15px_rgba(16,185,129,0.15)]
+            focus-within:shadow-[0_0_15px_color-mix(in_srgb,var(--ag-focus)_16%,transparent)]
             ${
               hasError
                 ? 'border-danger/40 focus-within:border-danger'

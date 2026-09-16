@@ -18,6 +18,7 @@ import { formatCurrencyBRL, formatDateTimeBR } from '../../utils/formatters';
 import { Field, FIELD_CONTROL, FORM_FOOTER } from '../ui/Field';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { SmartSelect } from '../ui/SmartSelect';
+import { Button } from '../ui/Button';
 
 type MovementType = 'SERVICE_SALE' | 'PRODUCT_SALE' | 'TIP' | 'EXPENSE' | 'OTHER';
 type PaymentMethod = 'CASH' | 'PIX' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'FIADO';
@@ -157,22 +158,22 @@ export const CashPanel: React.FC = () => {
           <p className="text-sm text-text-muted">Movimentações do dia</p>
         </div>
         <div className="flex gap-2">
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={load}
             disabled={loading}
-            className="flex h-10 items-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm font-medium text-text-secondary transition-colors hover:bg-bg hover:text-text-primary disabled:opacity-50"
+            className="h-10"
           >
             <RefreshCcw size={15} className={loading ? 'animate-spin' : ''} />
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
             onClick={() => setModalOpen(true)}
-            className="flex h-10 items-center gap-2 rounded-xl bg-accent px-4 text-sm font-semibold text-accent-fg shadow-md shadow-accent/15 transition-colors hover:opacity-90"
+            className="h-10"
           >
             <Plus size={16} />
             Registrar movimentação
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -185,11 +186,11 @@ export const CashPanel: React.FC = () => {
 
       <div className="rounded-2xl border border-border bg-surface p-5 shadow-[0_18px_44px_-32px_rgba(0,0,0,0.65)]">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          <div className="rounded-xl border border-accent/20 bg-accent/8 p-4">
+          <div className="rounded-xl border border-accent/30 bg-selection p-4">
             <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
               Total recebido
             </p>
-            <p className="mt-1 text-xl font-bold text-accent">{formatCurrencyBRL(todayTotal)}</p>
+            <p className="mt-1 text-xl font-bold text-text-primary">{formatCurrencyBRL(todayTotal)}</p>
           </div>
           {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map(method => {
             const entry = byMethod[method];
@@ -348,22 +349,21 @@ export const CashPanel: React.FC = () => {
             </div>
 
             <div className={FORM_FOOTER}>
-              <button
-                type="button"
+              <Button
+                variant="secondary"
                 onClick={() => setModalOpen(false)}
-                className="flex-1 rounded-xl border border-border bg-bg px-4 py-3 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
+                className="flex-1"
               >
                 Cancelar
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
                 onClick={handleSubmit}
-                disabled={submitting || !form.amount}
-                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-accent-fg shadow-md shadow-accent/15 transition-colors hover:opacity-90 disabled:opacity-50"
+                loading={submitting}
+                disabled={!form.amount}
+                className="flex-1"
               >
-                {submitting && <Loader2 size={15} className="animate-spin" />}
                 Registrar
-              </button>
+              </Button>
             </div>
           </div>
         </div>

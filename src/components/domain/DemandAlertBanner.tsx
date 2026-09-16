@@ -16,7 +16,7 @@ function getWeatherIcon(code: number): React.ReactNode {
 }
 
 const RISK_STYLES: Record<string, { bg: string; border: string; text: string; icon: string }> = {
-  low: { bg: 'bg-emerald-400/5', border: 'border-emerald-400/20', text: 'text-emerald-400', icon: 'text-emerald-400' },
+  low: { bg: 'bg-success/5', border: 'border-success/20', text: 'text-success', icon: 'text-success' },
   medium: { bg: 'bg-yellow-400/5', border: 'border-yellow-400/20', text: 'text-yellow-400', icon: 'text-yellow-400' },
   high: { bg: 'bg-red-400/5', border: 'border-red-400/20', text: 'text-red-400', icon: 'text-red-400' },
   critical: { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-400', icon: 'text-red-400' },

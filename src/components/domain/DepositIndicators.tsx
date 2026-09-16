@@ -5,7 +5,7 @@ import { formatCurrencyBRL, formatDateBR } from '../../utils/formatters';
 
 const STATUS_STYLES: Record<string, string> = {
   PENDING: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
-  CONFIRMED: 'bg-green-500/10 text-green-400 border-green-500/30',
+  CONFIRMED: 'bg-success/10 text-success border-success/30',
   EXPIRED: 'bg-red-500/10 text-red-400 border-red-500/30',
   WAIVED: 'bg-gray-500/10 text-gray-400 border-gray-500/30',
   REJECTED: 'bg-red-500/10 text-red-400 border-red-500/30',

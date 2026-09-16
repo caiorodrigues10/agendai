@@ -21,6 +21,7 @@ import { CatalogManager } from '../components/domain/CatalogManager';
 import { ShopProfile } from '../components/domain/ShopProfile';
 import { AppointmentCalendar } from '../components/domain/AppointmentCalendar';
 import { Toast } from '../components/ui/Toast';
+import { Button } from '../components/ui/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { useBarbershop } from '../contexts/BarbershopContext';
 import { useScheduling } from '../contexts/SchedulingContext';
@@ -361,12 +362,9 @@ export const StaffDashboard: React.FC = () => {
               )}
 
               <div className="flex items-center justify-end mb-4">
-                <button
-                  onClick={() => setShowJoinForm(true)}
-                  className="w-full sm:w-auto px-4 py-3 rounded-xl bg-accent text-accent-fg text-sm font-bold shadow-lg shadow-accent/20"
-                >
+                <Button onClick={() => setShowJoinForm(true)} className="w-full sm:w-auto">
                   Adicionar cliente
-                </button>
+                </Button>
               </div>
 
               <div className="space-y-4">
