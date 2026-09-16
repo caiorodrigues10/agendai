@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
 import { barbershopApi } from '../infra/barbershopApi';
-import { StaffMember, Service, ShopSettings, FeedPost, OperationMode, OpeningMode, ManualShopStatus, ShopOpenState, ScheduleException } from '../types';
+import { StaffMember, Service, ShopSettings, FeedPost, OperationMode, OpeningMode, ManualShopStatus, ShopOpenState } from '../types';
 import { mapScheduleFromApi, mapStaffFromApi } from '../utils/schedulingUtils';
 import { useBarbershopFilters } from './BarbershopFiltersContext';
 import { useAuth } from './AuthContext';
@@ -19,8 +19,6 @@ interface BarbershopContextValue {
   setOpeningMode: (mode: OpeningMode) => Promise<void>;
   setManualStatus: (status: ManualShopStatus) => Promise<void>;
   setQueueClosed: (closed: boolean) => Promise<void>;
-  addScheduleExceptions: (from: string, to?: string, reason?: string) => Promise<void>;
-  removeScheduleException: (exceptionId: string) => Promise<void>;
   addService: (data: Omit<Service, 'id'>) => Promise<void>;
   editService: (id: string, data: Omit<Service, 'id'>) => Promise<void>;
   deleteService: (id: string) => Promise<void>;
@@ -131,7 +129,6 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
           businessSegment?: import('../types').BusinessSegment;
           manualStatus?: ManualShopStatus;
           openState?: ShopOpenState;
-          scheduleExceptions?: ScheduleException[];
         } | null;
         let schedule = mapScheduleFromApi(null);
         try {
@@ -166,7 +163,6 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
             businessSegment: shopData.businessSegment ?? 'OTHER',
             manualStatus: shopData.manualStatus ?? 'AUTO',
             openState: shopData.openState,
-            scheduleExceptions: shopData.scheduleExceptions ?? [],
             schedule,
             logoUrl: shopData.logoUrl ?? undefined,
           });
@@ -232,7 +228,6 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
             openingMode: payload.openingMode,
             manualStatus: payload.manualStatus,
             openState: payload.openState,
-            scheduleExceptions: payload.scheduleExceptions ?? prev.scheduleExceptions,
           }
         : prev
     );
@@ -252,7 +247,6 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
               openingMode: shop.openingMode ?? mode,
               manualStatus: shop.manualStatus ?? current.manualStatus,
               openState: shop.openState ?? current.openState,
-              scheduleExceptions: shop.scheduleExceptions ?? current.scheduleExceptions,
             }
           : current
       );
@@ -272,30 +266,6 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
     if (!barbershopId) return;
     const payload = await barbershopApi.setQueueStatus(barbershopId, closed);
     applyShopStatus(payload);
-  };
-
-  const addScheduleExceptions = async (from: string, to?: string, reason?: string) => {
-    if (!barbershopId) return;
-    await barbershopApi.createScheduleExceptions(barbershopId, { from, to, reason, isOpen: false });
-    const shop = await barbershopApi.getBarbershop(barbershopId);
-    setSettingsState(current =>
-      current
-        ? { ...current, scheduleExceptions: shop.scheduleExceptions ?? [], openState: shop.openState ?? current.openState }
-        : current
-    );
-  };
-
-  const removeScheduleException = async (exceptionId: string) => {
-    if (!barbershopId) return;
-    await barbershopApi.deleteScheduleException(barbershopId, exceptionId);
-    setSettingsState(current =>
-      current
-        ? {
-            ...current,
-            scheduleExceptions: (current.scheduleExceptions ?? []).filter(item => item.id !== exceptionId),
-          }
-        : current
-    );
   };
 
   const addService = async (data: Omit<Service, 'id'>) => {
@@ -403,8 +373,6 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
       setOpeningMode,
       setManualStatus,
       setQueueClosed,
-      addScheduleExceptions,
-      removeScheduleException,
       updateServiceCategory: (id: string, name: string | null) => setServices(items => items.map(service => service.categoryId === id ? { ...service, categoryId: name === null ? null : id, categoryName: name } : service)),
       addService,
       editService,

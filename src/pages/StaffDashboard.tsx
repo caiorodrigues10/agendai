@@ -26,7 +26,7 @@ import { useBarbershop } from '../contexts/BarbershopContext';
 import { useScheduling } from '../contexts/SchedulingContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
-import { ALL_TAB_IDS, getDefaultTab, canAccessTab, canAccessTabByMode } from '../config/tabRegistry';
+import { ALL_TAB_IDS, getDefaultTab, canAccessTab, canAccessTabByMode, getPrimaryTabForMode } from '../config/tabRegistry';
 import { ClientsTab } from '../components/domain/ClientsTab';
 import { PublicLinkPanel } from '../components/domain/PublicLinkPanel';
 import { PwaInstallCard } from '../components/pwa/PwaInstallCard';
@@ -35,6 +35,7 @@ import { QueueItem } from '../types';
 import { Loader2 } from 'lucide-react';
 import { DemandAlertBanner } from '../components/domain/DemandAlertBanner';
 import { StaffNavigation } from '../components/ui/StaffNavigation';
+import { supportsQueue, supportsAppointments } from '../utils/operationMode';
 import { ClosedSalonJoinModal } from '../components/domain/ClosedSalonJoinModal';
 import { ShopFloorControls } from '../components/domain/ShopFloorControls';
 import { usePermissions } from '../hooks/usePermissions';
@@ -141,9 +142,13 @@ export const StaffDashboard: React.FC = () => {
   // Redirect if tab not accessible by operation mode
   useEffect(() => {
     if (!canAccessTabByMode(activeTab, operationMode)) {
-      navigate(`/app/${getDefaultTab(user?.role, operationMode)}`, { replace: true });
+      const preferred = getPrimaryTabForMode(operationMode);
+      const target = canAccessTab(preferred, user?.role, { hasDashboard, permissions: user?.permissions })
+        ? preferred
+        : getDefaultTab(user?.role, operationMode);
+      navigate(`/app/${target}`, { replace: true });
     }
-  }, [activeTab, operationMode, user?.role, navigate]);
+  }, [activeTab, operationMode, user?.role, hasDashboard, navigate]);
 
   // Re-check access including hasDashboard
   useEffect(() => {
@@ -267,13 +272,16 @@ export const StaffDashboard: React.FC = () => {
           userRole={user?.role}
           hasDashboard={hasDashboard}
           permissions={user?.permissions}
+          operationMode={operationMode}
           onNavigate={tabId => navigate(`/app/${tabId}`)}
         />
         <main id="main-content" className="min-w-0 flex-1">
           {/* Tab Content */}
           {activeTab === 'overview' && (
             <div className="space-y-4">
-              <QueueCapacityBanner barbershopId={barbershopId} waiting={peopleWaiting} onNavigate={tab => navigate(`/app/${tab}`)} canConfigure={user?.role === 'OWNER' || user?.role === 'MASTER_ADMIN'} />
+              {supportsQueue(operationMode) && (
+                <QueueCapacityBanner barbershopId={barbershopId} waiting={peopleWaiting} onNavigate={tab => navigate(`/app/${tab}`)} canConfigure={user?.role === 'OWNER' || user?.role === 'MASTER_ADMIN'} />
+              )}
               {(user?.role === 'OWNER' || user?.role === 'MASTER_ADMIN') && settings && barbershopId && (
                 <ActivationChecklist
                   barbershopId={barbershopId}
@@ -285,14 +293,23 @@ export const StaffDashboard: React.FC = () => {
               <div className="bg-surface rounded-xl border border-border p-4">
                 <h2 className="text-lg font-bold mb-3">Visão Geral</h2>
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="bg-surface-2 rounded-lg p-3">
-                    <p className="text-text-muted text-xs">Na fila</p>
-                    <p className="text-xl font-bold">{peopleWaiting}</p>
-                  </div>
-                  <div className="bg-surface-2 rounded-lg p-3">
-                    <p className="text-text-muted text-xs">Atendidos hoje</p>
-                    <p className="text-xl font-bold">{completedCount}</p>
-                  </div>
+                  {supportsQueue(operationMode) && (
+                    <div className="bg-surface-2 rounded-lg p-3">
+                      <p className="text-text-muted text-xs">Na fila</p>
+                      <p className="text-xl font-bold">{peopleWaiting}</p>
+                    </div>
+                  )}
+                  {supportsAppointments(operationMode) && (
+                    <div className="bg-surface-2 rounded-lg p-3">
+                      <p className="text-text-muted text-xs">Agendamentos hoje</p>
+                      <p className="text-xl font-bold">
+                        {appointments.filter(a => {
+                          const today = new Date().toISOString().slice(0, 10);
+                          return a.date === today && (a.status === 'confirmed' || a.status === 'checked_in');
+                        }).length}
+                      </p>
+                    </div>
+                  )}
                   <div className="bg-surface-2 rounded-lg p-3">
                     <p className="text-text-muted text-xs">Status</p>
                     <p
@@ -301,22 +318,32 @@ export const StaffDashboard: React.FC = () => {
                       {isOpen ? 'Aberto' : 'Fechado'}
                     </p>
                   </div>
-                  <div className="bg-surface-2 rounded-lg p-3">
-                    <p className="text-text-muted text-xs">Em atendimento</p>
-                    <p className="text-sm font-bold">{currentInChair?.customerName || '—'}</p>
-                  </div>
+                  {supportsQueue(operationMode) && (
+                    <div className="bg-surface-2 rounded-lg p-3">
+                      <p className="text-text-muted text-xs">Em atendimento</p>
+                      <p className="text-sm font-bold">{currentInChair?.customerName || '—'}</p>
+                    </div>
+                  )}
+                  {supportsAppointments(operationMode) && (
+                    <div className="bg-surface-2 rounded-lg p-3">
+                      <p className="text-text-muted text-xs">Atendidos hoje</p>
+                      <p className="text-xl font-bold">{completedCount}</p>
+                    </div>
+                  )}
                 </div>
               </div>
-              <QueueStatusCard
-                shopName={settings?.shopName}
-                isOpen={isOpen}
-                queueClosed={queueClosed}
-                insight={aiInsight}
-                peopleWaiting={peopleWaiting}
-                completedCount={completedCount}
-                inChairName={currentInChair?.customerName ?? null}
-                showStaffStats
-              />
+              {supportsQueue(operationMode) && (
+                <QueueStatusCard
+                  shopName={settings?.shopName}
+                  isOpen={isOpen}
+                  queueClosed={queueClosed}
+                  insight={aiInsight}
+                  peopleWaiting={peopleWaiting}
+                  completedCount={completedCount}
+                  inChairName={currentInChair?.customerName ?? null}
+                  showStaffStats
+                />
+              )}
               <div className="grid gap-4 lg:grid-cols-[1fr_0.95fr]">
                 <PwaInstallCard variant="panel" videoUrl={installVideoUrl} />
                 <div className="rounded-xl border border-border bg-surface p-4 sm:p-5">

@@ -1,7 +1,7 @@
 import { serviceCategoriesApi } from './categoriesApi';
 import { API_BASE, apiClient, apiFetch } from './apiClient';
 import { authStorage } from './authStorage';
-import { DaySchedule, Service, StaffMember, FeedPost, PostMode, PostConfig, OperationMode, OpeningMode, ManualShopStatus, ShopOpenState, ScheduleException, BusinessSegment } from '../types';
+import { DaySchedule, Service, StaffMember, FeedPost, PostMode, PostConfig, OperationMode, OpeningMode, ManualShopStatus, ShopOpenState, BusinessSegment } from '../types';
 import { mapScheduleToApi } from '../utils/schedulingUtils';
 
 function unwrap<T>(res: unknown): T {
@@ -22,7 +22,6 @@ interface BarbershopData {
   businessSegment?: BusinessSegment;
   manualStatus?: ManualShopStatus;
   openState?: ShopOpenState;
-  scheduleExceptions?: ScheduleException[];
 }
 
 export interface ShopWeatherDay {
@@ -48,7 +47,6 @@ export interface ShopStatusPayload {
   openingMode: OpeningMode;
   manualStatus: ManualShopStatus;
   openState: ShopOpenState;
-  scheduleExceptions: ScheduleException[];
 }
 
 type UpdateBarbershopPayload = Partial<BarbershopData>;
@@ -571,39 +569,6 @@ export const barbershopApi = {
       { closed },
       token
     ).then(res => unwrap<ShopStatusPayload>(res));
-  },
-
-  listScheduleExceptions: (id: string) => {
-    const token = authStorage.getAccessToken() || '';
-    return apiClient<{ success: boolean; data: ScheduleException[] }>(
-      `/api/barbershops/${id}/schedule-exceptions`,
-      'GET',
-      undefined,
-      token
-    ).then(res => unwrap<ScheduleException[]>(res));
-  },
-
-  createScheduleExceptions: (
-    id: string,
-    payload: { from: string; to?: string; reason?: string; isOpen?: boolean }
-  ) => {
-    const token = authStorage.getAccessToken() || '';
-    return apiClient<{ success: boolean; data: ScheduleException[] }>(
-      `/api/barbershops/${id}/schedule-exceptions`,
-      'POST',
-      payload,
-      token
-    ).then(res => unwrap<ScheduleException[]>(res));
-  },
-
-  deleteScheduleException: (id: string, exceptionId: string) => {
-    const token = authStorage.getAccessToken() || '';
-    return apiClient<{ success: boolean }>(
-      `/api/barbershops/${id}/schedule-exceptions/${exceptionId}`,
-      'DELETE',
-      undefined,
-      token
-    );
   },
 
   uploadPostVideo: async (barbershopId: string, file: File): Promise<{ videoUrl: string }> => {

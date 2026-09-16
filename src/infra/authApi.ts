@@ -6,6 +6,7 @@ export interface AuthUser {
   email: string;
   role: string;
   barbershopId?: string;
+  emailVerified?: boolean;
   active?: boolean;
   createdAt?: string;
 }
@@ -56,4 +57,6 @@ export const authApi = {
     apiClient<AuthResponse>('/api/auth/switch-account', 'POST', { userId }),
   forgetAccount: (userId: string) =>
     apiClient<{ message: string }>('/api/auth/forget-account', 'POST', { userId }),
+  resendVerification: (token: string) =>
+    apiClient<{ success: boolean; message: string }>('/api/auth/resend-verification', 'POST', {}, token),
 };

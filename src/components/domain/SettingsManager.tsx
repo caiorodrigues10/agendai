@@ -13,7 +13,6 @@ import { QueueAlertSettings } from './QueueAlertSettings';
 import { ShopFloorControls } from './ShopFloorControls';
 import { ThemedCalendar, toLocalISO } from '../ui/ThemedCalendar';
 import { SmartSelect } from '../ui/SmartSelect';
-import { addDays } from '../../utils/schedulingUtils';
 import {
   Save,
   Clock,
@@ -29,7 +28,6 @@ import {
   Users,
   CalendarCheck,
   LayoutGrid,
-  Trash2,
   MapPin,
   UserRound,
   Store,
@@ -669,110 +667,6 @@ const OperationModeSection: React.FC<OperationModeSectionProps> = ({
   );
 };
 
-const ScheduleExceptionsSection: React.FC<{
-  onNotify: (message: string, type: 'success' | 'error') => void;
-}> = ({ onNotify }) => {
-  const { settings, addScheduleExceptions, removeScheduleException } = useBarbershop();
-  const [from, setFrom] = useState(toLocalISO(new Date()));
-  const [to, setTo] = useState('');
-  const [reason, setReason] = useState('');
-  const [saving, setSaving] = useState(false);
-  const exceptions = (settings?.scheduleExceptions ?? []).filter(item => !item.isOpen);
-  const today = toLocalISO(new Date());
-  const maxDate = toLocalISO(addDays(new Date(), 90));
-
-  const add = async () => {
-    setSaving(true);
-    try {
-      await addScheduleExceptions(from, to || undefined, reason.trim() || undefined);
-      setReason('');
-      setTo('');
-      onNotify('Data de fechamento adicionada.', 'success');
-    } catch (err) {
-      onNotify(getErrorMessage(err, 'Não foi possível salvar a data de fechamento.'), 'error');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div className="bg-surface border border-border rounded-xl p-5">
-      <h3 className="text-lg font-bold text-text-primary mb-1">Datas de fechamento</h3>
-      <p className="text-xs text-text-muted mb-4">
-        Feriados, férias ou folgas planejadas. Bloqueia fila pública e agendamento nesses dias.
-      </p>
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-2">De</p>
-          <div className="rounded-xl border border-border bg-bg px-2 py-2">
-            <ThemedCalendar value={from} min={today} max={maxDate} onChange={setFrom} />
-          </div>
-        </div>
-        <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-2">Até (opcional)</p>
-          <div className="rounded-xl border border-border bg-bg px-2 py-2">
-            <ThemedCalendar value={to || from} min={from} max={maxDate} onChange={setTo} />
-          </div>
-          {to && (
-            <button type="button" onClick={() => setTo('')} className="mt-2 text-xs text-text-muted hover:underline">
-              Usar só um dia
-            </button>
-          )}
-        </div>
-      </div>
-      <label className="block text-xs text-text-secondary mt-4">
-        Motivo (opcional)
-        <input
-          value={reason}
-          onChange={e => setReason(e.target.value)}
-          maxLength={200}
-          placeholder="Feriado, férias..."
-          className="mt-1 w-full rounded-lg bg-bg border border-border p-2 text-text-primary"
-        />
-      </label>
-      <button
-        type="button"
-        disabled={saving}
-        onClick={() => void add()}
-        className="mt-3 rounded-lg bg-accent px-4 py-2 text-sm font-bold text-accent-fg disabled:opacity-50"
-      >
-        {saving ? 'Salvando...' : 'Adicionar fechamento'}
-      </button>
-      <ul className="mt-4 space-y-2">
-        {exceptions.length === 0 && (
-          <li className="text-xs text-text-muted">Nenhuma data de fechamento cadastrada.</li>
-        )}
-        {exceptions.map(item => (
-          <li
-            key={item.id}
-            className="flex items-center justify-between gap-3 rounded-lg border border-border bg-bg px-3 py-2"
-          >
-            <div>
-              <p className="text-sm font-bold text-text-primary">
-                {new Date(`${item.date.slice(0, 10)}T12:00:00`).toLocaleDateString('pt-BR')}
-              </p>
-              {item.reason && <p className="text-xs text-text-muted">{item.reason}</p>}
-            </div>
-            <button
-              type="button"
-              onClick={() =>
-                void removeScheduleException(item.id).then(
-                  () => onNotify('Data removida.', 'success'),
-                  err => onNotify(getErrorMessage(err, 'Não foi possível remover.'), 'error')
-                )
-              }
-              className="p-2 rounded-lg text-danger hover:bg-danger/10"
-              aria-label="Remover data"
-            >
-              <Trash2 size={16} />
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
 type SettingsSection = 'account' | 'shop' | 'whatsapp' | 'operation' | 'privacy';
 
 const SETTINGS_SECTIONS: { id: SettingsSection; label: string; icon: React.ElementType }[] = [
@@ -1023,7 +917,6 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
         <div className="space-y-6">
           <OperationModeSection settings={settings} barbershopId={barbershopId} onNotify={onNotify} />
           {barbershopId && <ShopFloorControls variant="full" onNotify={onNotify} />}
-          {barbershopId && <ScheduleExceptionsSection onNotify={onNotify} />}
 
           <div className="bg-surface border border-border rounded-xl p-5">
             <h3 className="text-lg font-bold text-text-primary mb-4">Horários de Funcionamento</h3>

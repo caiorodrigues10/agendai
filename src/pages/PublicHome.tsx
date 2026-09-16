@@ -14,7 +14,6 @@ import { schedulingApi } from '../infra/schedulingApi';
 import { DynamicIcon } from '../components/ui/DynamicIcon';
 import { List, CalendarDays, Store, Coffee, Loader2 } from 'lucide-react';
 import type { OperationMode } from '../types';
-import { toLocalISO } from '../components/ui/ThemedCalendar';
 
 type PublicTab = 'queue' | 'appointments' | 'profile';
 
@@ -149,16 +148,10 @@ export const PublicHome: React.FC = () => {
   const isOpen = isShopOpen();
   const queueClosed = isQueueClosed();
   const canJoinQueue = isOpen && !queueClosed;
-  const todayIso = toLocalISO(new Date());
-  const todayException = settings.scheduleExceptions?.find(
-    item => !item.isOpen && item.date.slice(0, 10) === todayIso
-  );
   const closedBanner = !isOpen
     ? settings.openState?.reason === 'MANUAL_MODE_NOT_OPENED'
       ? 'O salão ainda não abriu hoje.'
-      : settings.openState?.reason === 'EXCEPTION'
-        ? `Fechado em ${new Date(`${todayIso}T12:00:00`).toLocaleDateString('pt-BR')}${todayException?.reason ? ` (${todayException.reason})` : ''}`
-        : 'Fechado no momento'
+      : 'Fechado no momento'
     : queueClosed
       ? 'Fila encerrada por hoje'
       : null;

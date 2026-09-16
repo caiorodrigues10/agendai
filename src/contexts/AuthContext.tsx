@@ -20,6 +20,7 @@ interface AuthContextValue {
   hasRole: (roles: StaffMember['role'][]) => boolean;
   updateUserAvatar: (avatarUrl: string | null) => void;
   updateUserProfile: (payload: { name?: string; email?: string; currentPassword?: string; newPassword?: string }) => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -252,9 +253,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    const currentToken = authStorage.getAccessToken();
+    if (!currentToken) return;
+    const me = await authApi.me(currentToken);
+    setUser(normalizeUser(me.user));
+    authStorage.setUser(me.user, authStorage.isPersistent());
+  }, []);
+
   const value = useMemo(
-    () => ({ user, loading, login, loginWithGoogle, loginWithSavedAccount, forgetSavedAccount, register, logout, hasRole, updateUserAvatar, updateUserProfile }),
-    [user, loading, updateUserAvatar, updateUserProfile]
+    () => ({ user, loading, login, loginWithGoogle, loginWithSavedAccount, forgetSavedAccount, register, logout, hasRole, updateUserAvatar, updateUserProfile, refreshUser }),
+    [user, loading, updateUserAvatar, updateUserProfile, refreshUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

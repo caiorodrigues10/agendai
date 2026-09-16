@@ -149,3 +149,10 @@ export function getDefaultTab(userRole?: string, mode?: OperationMode): string {
   }
   return 'overview';
 }
+
+/** Returns the primary tab for the given operation mode */
+export function getPrimaryTabForMode(mode?: OperationMode): string {
+  if (mode === 'QUEUE_ONLY') return 'queue';
+  if (mode === 'APPOINTMENTS_ONLY') return 'appointments';
+  return 'overview';
+}

@@ -3,33 +3,36 @@ import FocusLock from 'react-focus-lock';
 import { RiCloseLine, RiMore2Line } from 'react-icons/ri';
 import {
   canAccessTab,
+  canAccessTabByMode,
   MOBILE_PRIMARY_TAB_IDS,
   TAB_GROUPS,
   type TabDef,
   type TabGroup,
 } from '../../config/tabRegistry';
+import type { OperationMode } from '../../types';
 
 interface StaffNavigationProps {
   activeTab: string;
   userRole?: string;
   hasDashboard?: boolean;
   permissions?: string[];
+  operationMode?: OperationMode;
   onNavigate: (tabId: string) => void;
 }
 
-const visibleTabs = (group: TabGroup, userRole?: string, extras?: { hasDashboard?: boolean; permissions?: string[] }) =>
-  group.tabs.filter(tab => canAccessTab(tab.id, userRole, extras));
+const visibleTabs = (group: TabGroup, userRole?: string, operationMode?: OperationMode, extras?: { hasDashboard?: boolean; permissions?: string[] }) =>
+  group.tabs.filter(tab => canAccessTab(tab.id, userRole, extras) && canAccessTabByMode(tab.id, operationMode));
 
-export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions, onNavigate }: StaffNavigationProps) {
+export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions, operationMode, onNavigate }: StaffNavigationProps) {
   const [moreOpen, setMoreOpen] = useState(false);
   const extras = { hasDashboard, permissions };
 
   const groups = useMemo(
     () =>
-      TAB_GROUPS.map(group => ({ ...group, tabs: visibleTabs(group, userRole, extras) })).filter(
+      TAB_GROUPS.map(group => ({ ...group, tabs: visibleTabs(group, userRole, operationMode, extras) })).filter(
         group => group.tabs.length > 0
       ),
-    [userRole, hasDashboard, permissions]
+    [userRole, hasDashboard, permissions, operationMode]
   );
 
   const primaryTabs = useMemo(() => {

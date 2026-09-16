@@ -3,6 +3,7 @@ import { DoorClosed, DoorOpen, RotateCcw, Ban, ListChecks, Clock } from 'lucide-
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { supportsQueue } from '../../utils/operationMode';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import type { ManualShopStatus, OpeningMode } from '../../types';
 
@@ -143,15 +144,17 @@ export const ShopFloorControls: React.FC<ShopFloorControlsProps> = ({
             <RotateCcw size={16} /> Voltar ao automático
           </button>
         )}
-        <button
-          type="button"
-          disabled={Boolean(busy) || !open}
-          onClick={() => setConfirm('queue')}
-          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-border text-text-secondary text-sm font-bold hover:bg-surface-2 disabled:opacity-50"
-        >
-          {queueClosed ? <ListChecks size={16} /> : <Ban size={16} />}
-          {queueClosed ? 'Reabrir fila' : 'Fechar fila'}
-        </button>
+        {supportsQueue(settings.operationMode) && (
+          <button
+            type="button"
+            disabled={Boolean(busy) || !open}
+            onClick={() => setConfirm('queue')}
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-border text-text-secondary text-sm font-bold hover:bg-surface-2 disabled:opacity-50"
+          >
+            {queueClosed ? <ListChecks size={16} /> : <Ban size={16} />}
+            {queueClosed ? 'Reabrir fila' : 'Fechar fila'}
+          </button>
+        )}
       </div>
 
       {variant === 'full' && (

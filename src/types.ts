@@ -74,13 +74,6 @@ export interface ShopOpenState {
   queueClosed: boolean;
 }
 
-export interface ScheduleException {
-  id: string;
-  date: string;
-  isOpen: boolean;
-  reason: string | null;
-}
-
 export interface ShopSettings {
   shopName: string;
   whatsapp: string;
@@ -95,7 +88,6 @@ export interface ShopSettings {
   businessSegment?: BusinessSegment;
   manualStatus?: ManualShopStatus;
   openState?: ShopOpenState;
-  scheduleExceptions?: ScheduleException[];
 }
 
 export interface AIInsight {

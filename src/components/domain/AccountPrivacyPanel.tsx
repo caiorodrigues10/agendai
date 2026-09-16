@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { authStorage } from '../../infra/authStorage';
 import { apiFetch } from '../../infra/apiClient';
+import { authApi } from '../../infra/authApi';
 import { usersApi } from '../../infra/usersApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import {
@@ -12,6 +13,8 @@ import {
   FileJson,
   FileText,
   ShieldCheck,
+  Mail,
+  RefreshCw,
 } from 'lucide-react';
 
 const token = () => authStorage.getAccessToken() || '';
@@ -28,10 +31,57 @@ interface AccountPrivacyPanelProps {
 }
 
 export const AccountPrivacyPanel: React.FC<AccountPrivacyPanelProps> = ({ onNotify }) => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [exporting, setExporting] = useState<'json' | 'csv' | null>(null);
   const [requestingDeletion, setRequestingDeletion] = useState(false);
   const [deletionRequested, setDeletionRequested] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [cooldownUntil, setCooldownUntil] = useState(0);
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (cooldownUntil <= 0) {
+      if (cooldownRef.current) {
+        clearInterval(cooldownRef.current);
+        cooldownRef.current = null;
+      }
+      return;
+    }
+    cooldownRef.current = setInterval(() => {
+      if (Date.now() >= cooldownUntil) {
+        setCooldownUntil(0);
+      }
+    }, 1000);
+    return () => {
+      if (cooldownRef.current) clearInterval(cooldownRef.current);
+    };
+  }, [cooldownUntil]);
+
+  const handleResendVerification = async () => {
+    setResending(true);
+    try {
+      await authApi.resendVerification(token());
+      setCooldownUntil(Date.now() + 60_000);
+      onNotify('E-mail de verificação reenviado. Verifique sua caixa de entrada.', 'success');
+    } catch (err) {
+      onNotify(getErrorMessage(err, 'Não foi possível reenviar o e-mail de verificação.'), 'error');
+    } finally {
+      setResending(false);
+    }
+  };
+
+  const handleRefreshStatus = async () => {
+    setRefreshing(true);
+    try {
+      await refreshUser();
+      onNotify('Status atualizado.', 'success');
+    } catch (err) {
+      onNotify(getErrorMessage(err, 'Não foi possível atualizar o status.'), 'error');
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const handleExport = async (format: 'json' | 'csv') => {
     setExporting(format);
@@ -73,6 +123,8 @@ export const AccountPrivacyPanel: React.FC<AccountPrivacyPanelProps> = ({ onNoti
     }
   };
 
+  const cooldownSeconds = Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000));
+
   return (
     <div className="space-y-6">
       <div className="bg-surface border border-border rounded-xl p-5">
@@ -108,7 +160,41 @@ export const AccountPrivacyPanel: React.FC<AccountPrivacyPanelProps> = ({ onNoti
             <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-0.5">
               E-mail verificado
             </p>
-            <p className="text-sm text-text-primary">{user?.emailVerified ? 'Sim' : 'Não'}</p>
+            <p className="text-sm text-text-primary">
+              {user?.emailVerified ? 'Sim' : 'Não'}
+            </p>
+            {!user?.emailVerified && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => void handleResendVerification()}
+                  disabled={resending || cooldownSeconds > 0}
+                  className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-accent/10 border border-accent/30 text-accent hover:bg-accent/20 disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {resending ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : (
+                    <Mail size={12} />
+                  )}
+                  {cooldownSeconds > 0
+                    ? `Reenviar em ${cooldownSeconds}s`
+                    : 'Reenviar e-mail de verificação'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleRefreshStatus()}
+                  disabled={refreshing}
+                  className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-surface-2 border border-border text-text-secondary hover:bg-border-strong disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {refreshing ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : (
+                    <RefreshCw size={12} />
+                  )}
+                  Já verifiquei / Atualizar status
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
