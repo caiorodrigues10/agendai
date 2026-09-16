@@ -32,7 +32,7 @@ const MasterAdminDashboard = lazy(() => import('./pages/MasterAdmin/MasterAdminD
 const StaffDashboard = lazy(() => import('./pages/StaffDashboard'));
 const ClientPortalPage = lazy(() => import('./pages/ClientPortalPage'));
 const ShowcasePage = lazy(() => import('./pages/ShowcasePage'));
-const DesignLabPage = import.meta.env.DEV ? lazy(() => import('./pages/DesignLabPage')) : null;
+const DesignLabPage = lazy(() => import('./pages/DesignLabPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const CommercialIntentPage = lazy(() => import('./pages/marketing/CommercialIntentPage'));
 
@@ -113,7 +113,7 @@ const App: React.FC = () => {
           <Route path="/minha-conta" element={<ClientPortalPage />} />
           <Route path="/saloes/:salonId/resultados" element={<ShowcasePage />} />
           <Route path="/saloes/:salonId/resultados/:resultId" element={<ShowcasePage />} />
-          {DesignLabPage && <Route path="/design-lab" element={<DesignLabPage />} />}
+          <Route path="/design-lab" element={<DesignLabPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
