@@ -1,0 +1,24 @@
+/* ── Skeleton loading base ────────────────────────────────────── */
+
+.skeleton {
+  background-color: var(--ag-surface-2);
+  display: block;
+  min-height: 1rem;
+  /* Pulse suave — sem faixa brilhante percorrendo. */
+}
+
+.skeleton--animate {
+  animation: skeleton-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+/* Respeita preferências de movimento reduzido. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton--animate {
+    animation: none;
+  }
+}

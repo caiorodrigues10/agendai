@@ -1,6 +1,7 @@
 import { Loader2 } from 'lucide-react';
 import { EmptyState } from './EmptyState';
 import { SectionError } from './SectionError';
+import { TableSkeleton, TableSkeletonProps } from './TableSkeleton';
 
 interface DataTableStateProps {
   loading?: boolean;
@@ -9,6 +10,10 @@ interface DataTableStateProps {
   emptyTitle?: string;
   emptyDescription?: string;
   onRetry?: () => void;
+  /** Quando fornecido, exibe este skeleton em vez do spinner genérico. */
+  skeleton?: React.ReactNode;
+  /** Alternativa: gera TableSkeleton automaticamente com estas props. */
+  skeletonProps?: TableSkeletonProps;
 }
 
 export function DataTableState({
@@ -18,11 +23,22 @@ export function DataTableState({
   emptyTitle = 'Nenhum item encontrado',
   emptyDescription,
   onRetry,
+  skeleton,
+  skeletonProps,
 }: DataTableStateProps) {
   if (loading)
     return (
-      <div className="flex justify-center py-8">
-        <Loader2 className="animate-spin text-accent" aria-label="Carregando" />
+      <div className="py-4" aria-busy aria-live="polite">
+        <span className="sr-only">Carregando</span>
+        {skeleton ?? (
+          skeletonProps ? (
+            <TableSkeleton {...skeletonProps} />
+          ) : (
+            <div className="flex justify-center py-8">
+              <Loader2 className="animate-spin text-accent" aria-label="Carregando" />
+            </div>
+          )
+        )}
       </div>
     );
   if (error) return <SectionError message={error} onRetry={onRetry} />;
