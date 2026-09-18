@@ -6,6 +6,7 @@ import { getLastCorrelationId } from '../../utils/correlationIdStore';
 
 interface Props {
   children: ReactNode;
+  variant?: 'page' | 'section';
 }
 
 interface State {
@@ -43,6 +44,25 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       const { correlationId, copied } = this.state;
+      const isSection = this.props.variant === 'section';
+
+      if (isSection) {
+        return (
+          <div className="rounded-2xl border border-danger/30 bg-danger/10 p-5 text-sm text-danger">
+            <p className="font-semibold text-text-primary">Não foi possível carregar esta seção</p>
+            <p className="mt-1 text-text-secondary">
+              O restante da tela continua disponível. Tente de novo ou recarregue a página.
+            </p>
+            <button
+              type="button"
+              onClick={() => this.setState({ hasError: false, correlationId: null, copied: false })}
+              className="mt-3 rounded-xl border border-border bg-surface px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:bg-bg"
+            >
+              Tentar novamente
+            </button>
+          </div>
+        );
+      }
 
       return (
         <SystemStatePage

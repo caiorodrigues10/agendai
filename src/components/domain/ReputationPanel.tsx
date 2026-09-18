@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
   Star,
   MessageSquare,
-  TrendingUp,
-  TrendingDown,
   Minus,
   Loader2,
   ThumbsUp,
@@ -14,11 +12,17 @@ import { reputationApi, ReputationStats, Review } from '../../infra/reputationAp
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';
 
-const sentimentIcon = (s: string) => {
-  if (s === 'positive') return <ThumbsUp size={12} className="text-success" />;
-  if (s === 'negative') return <ThumbsDown size={12} className="text-error" />;
+const sentimentIcon = (rating: number) => {
+  if (rating >= 4) return <ThumbsUp size={12} className="text-success" />;
+  if (rating <= 2) return <ThumbsDown size={12} className="text-error" />;
   return <Minus size={12} className="text-text-muted" />;
 };
+
+function responseTextOf(response: Review['response']) {
+  if (!response) return '';
+  if (typeof response === 'string') return response;
+  return response.content || response.message || '';
+}
 
 export const ReputationPanel: React.FC = () => {
   const { barbershopId } = useBarbershopFilters();
@@ -36,19 +40,29 @@ export const ReputationPanel: React.FC = () => {
     setLoading(true);
     Promise.all([
       reputationApi.getStats(barbershopId),
-      reputationApi.listReviews(barbershopId, sentimentFilter ? { sentiment: sentimentFilter } : undefined),
+      reputationApi.listReviews(barbershopId),
     ])
-      .then(([s, r]) => { setStats(s); setReviews(r); })
+      .then(([s, r]) => {
+        setStats(s);
+        const filtered = sentimentFilter
+          ? r.filter(review => {
+              if (review.rating >= 4) return sentimentFilter === 'positive';
+              if (review.rating <= 2) return sentimentFilter === 'negative';
+              return sentimentFilter === 'neutral';
+            })
+          : r;
+        setReviews(filtered);
+      })
       .catch(err => setError(getErrorMessage(err, 'Erro ao carregar reputação.')))
       .finally(() => setLoading(false));
   }, [barbershopId, sentimentFilter]);
 
   const handleRespond = async (reviewId: string) => {
-    if (!responseText.trim()) return;
+    if (!barbershopId || !responseText.trim()) return;
     setSubmitting(true);
     setError('');
     try {
-      const resp = await reputationApi.respondToReview(reviewId, responseText.trim());
+      const resp = await reputationApi.respondToReview(barbershopId, reviewId, responseText.trim());
       setReviews(prev => prev.map(r => r.id === reviewId ? { ...r, response: resp } : r));
       setRespondingTo(null);
       setResponseText('');
@@ -78,7 +92,7 @@ export const ReputationPanel: React.FC = () => {
       {stats && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div className="rounded-2xl border border-border bg-surface p-4 text-center">
-            <p className="text-2xl font-bold text-accent">{stats.averageRating.toFixed(1)}</p>
+            <p className="text-2xl font-bold text-accent">{stats.avgRating.toFixed(1)}</p>
             <p className="text-xs text-text-muted">Média</p>
           </div>
           <div className="rounded-2xl border border-border bg-surface p-4 text-center">
@@ -86,33 +100,13 @@ export const ReputationPanel: React.FC = () => {
             <p className="text-xs text-text-muted">Avaliações</p>
           </div>
           <div className="rounded-2xl border border-border bg-surface p-4 text-center">
-            <p className="text-2xl font-bold text-success">{stats.sentimentBreakdown.positive}</p>
+            <p className="text-2xl font-bold text-success">{stats.sentimentPositive}</p>
             <p className="text-xs text-text-muted">Positivas</p>
           </div>
           <div className="rounded-2xl border border-border bg-surface p-4 text-center">
-            <p className="text-2xl font-bold text-error">{stats.sentimentBreakdown.negative}</p>
+            <p className="text-2xl font-bold text-error">{stats.sentimentNegative}</p>
             <p className="text-xs text-text-muted">Negativas</p>
           </div>
-        </div>
-      )}
-
-      {stats && stats.ratingDistribution && (
-        <div className="rounded-2xl border border-border bg-surface p-4 space-y-2">
-          <p className="text-xs font-bold text-text-secondary">Distribuição</p>
-          {[5, 4, 3, 2, 1].map(n => {
-            const count = stats.ratingDistribution[n] || 0;
-            const pct = stats.totalReviews > 0 ? (count / stats.totalReviews) * 100 : 0;
-            return (
-              <div key={n} className="flex items-center gap-2">
-                <span className="w-3 text-xs text-text-muted">{n}</span>
-                <Star size={12} className="text-warning" />
-                <div className="flex-1 h-2 rounded-full bg-surface-2 overflow-hidden">
-                  <div className="h-full rounded-full bg-warning" style={{ width: `${pct}%` }} />
-                </div>
-                <span className="w-8 text-right text-xs text-text-muted">{count}</span>
-              </div>
-            );
-          })}
         </div>
       )}
 
@@ -137,11 +131,14 @@ export const ReputationPanel: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-2">
-          {reviews.map(review => (
-            <div key={review.id} className="rounded-2xl border border-border bg-surface p-4 space-y-2">
+          {reviews.map((review, idx) => {
+            const reviewKey = review.id ?? `${review.createdAt}-${review.rating}-${idx}`;
+            const existingResponse = responseTextOf(review.response);
+            return (
+            <div key={reviewKey} className="rounded-2xl border border-border bg-surface p-4 space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-text-primary">{review.clientName}</span>
+                  <span className="text-sm font-bold text-text-primary">{review.clientName || review.staff?.name || 'Cliente'}</span>
                   <div className="flex">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
@@ -153,18 +150,18 @@ export const ReputationPanel: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
-                  {sentimentIcon(review.sentiment || '')}
+                  {sentimentIcon(review.rating)}
                   <span className="text-[10px] text-text-muted">{new Date(review.createdAt).toLocaleDateString('pt-BR')}</span>
                 </div>
               </div>
               {review.comment && <p className="text-xs text-text-secondary">{review.comment}</p>}
 
-              {review.response ? (
+              {existingResponse ? (
                 <div className="ml-4 rounded-xl bg-surface-2 p-3">
                   <p className="text-[10px] font-bold text-text-muted">Resposta</p>
-                  <p className="text-xs text-text-secondary">{review.response.message}</p>
+                  <p className="text-xs text-text-secondary">{existingResponse}</p>
                 </div>
-              ) : respondingTo === review.id ? (
+              ) : review.id && respondingTo === review.id ? (
                 <div className="ml-4 space-y-2">
                   <textarea
                     value={responseText}
@@ -175,7 +172,7 @@ export const ReputationPanel: React.FC = () => {
                   />
                   <div className="flex gap-2">
                     <button
-                      onClick={() => void handleRespond(review.id)}
+                      onClick={() => void handleRespond(review.id!)}
                       disabled={submitting || !responseText.trim()}
                       className="flex items-center gap-1 rounded-xl bg-accent px-3 py-1.5 text-xs font-bold text-accent-fg disabled:opacity-50"
                     >
@@ -190,16 +187,17 @@ export const ReputationPanel: React.FC = () => {
                     </button>
                   </div>
                 </div>
-              ) : (
+              ) : review.id ? (
                 <button
-                  onClick={() => { setRespondingTo(review.id); setResponseText(''); }}
+                  onClick={() => { setRespondingTo(review.id!); setResponseText(''); }}
                   className="ml-4 text-xs font-bold text-accent hover:underline"
                 >
                   Responder
                 </button>
-              )}
+              ) : null}
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

@@ -1,10 +1,6 @@
 import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
-
-function unwrap<T>(res: unknown): T {
-  if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
-  return res as T;
-}
+import { unwrapData, unwrapList } from '../utils/apiData';
 
 function token() {
   return authStorage.getAccessToken() || '';
@@ -46,51 +42,59 @@ export interface ServiceCombo {
 }
 
 export const catalogApi = {
-  listVariations: (barbershopId: string, serviceId: string) =>
-    apiClient<{ data: ServiceVariation[] }>(
-      `/api/barbershops/${barbershopId}/services/${serviceId}/variations`,
+  listVariations: (barbershopId: string, params?: { serviceId?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.serviceId) qs.set('serviceId', params.serviceId);
+    const query = qs.toString();
+    return apiClient<{ data: ServiceVariation[] }>(
+      `/api/barbershops/${barbershopId}/variations${query ? '?' + query : ''}`,
       'GET', undefined, token()
-    ).then(r => unwrap<ServiceVariation[]>(r)),
+    ).then(r => unwrapList<ServiceVariation>(r));
+  },
 
-  createVariation: (barbershopId: string, serviceId: string, data: { name: string; price: number; avgTimeMinutes: number }) =>
+  createVariation: (barbershopId: string, data: { serviceId: string; name: string; price: number; avgTimeMinutes: number }) =>
     apiClient<{ data: ServiceVariation }>(
-      `/api/barbershops/${barbershopId}/services/${serviceId}/variations`,
+      `/api/barbershops/${barbershopId}/variations`,
       'POST', data, token()
-    ).then(r => unwrap<ServiceVariation>(r)),
+    ).then(r => unwrapData<ServiceVariation>(r)),
 
-  updateVariation: (barbershopId: string, serviceId: string, variationId: string, data: Partial<ServiceVariation>) =>
+  updateVariation: (barbershopId: string, variationId: string, data: Partial<ServiceVariation>) =>
     apiClient<{ data: ServiceVariation }>(
-      `/api/barbershops/${barbershopId}/services/${serviceId}/variations/${variationId}`,
+      `/api/barbershops/${barbershopId}/variations/${variationId}`,
       'PATCH', data, token()
-    ).then(r => unwrap<ServiceVariation>(r)),
+    ).then(r => unwrapData<ServiceVariation>(r)),
 
-  listAddons: (barbershopId: string, serviceId: string) =>
-    apiClient<{ data: ServiceAddon[] }>(
-      `/api/barbershops/${barbershopId}/services/${serviceId}/addons`,
+  listAddons: (barbershopId: string, params?: { serviceId?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.serviceId) qs.set('serviceId', params.serviceId);
+    const query = qs.toString();
+    return apiClient<{ data: ServiceAddon[] }>(
+      `/api/barbershops/${barbershopId}/addons${query ? '?' + query : ''}`,
       'GET', undefined, token()
-    ).then(r => unwrap<ServiceAddon[]>(r)),
+    ).then(r => unwrapList<ServiceAddon>(r));
+  },
 
-  createAddon: (barbershopId: string, serviceId: string, data: { name: string; price: number; avgTimeMinutes: number }) =>
+  createAddon: (barbershopId: string, data: { serviceId: string; name: string; price: number; avgTimeMinutes: number }) =>
     apiClient<{ data: ServiceAddon }>(
-      `/api/barbershops/${barbershopId}/services/${serviceId}/addons`,
+      `/api/barbershops/${barbershopId}/addons`,
       'POST', data, token()
-    ).then(r => unwrap<ServiceAddon>(r)),
+    ).then(r => unwrapData<ServiceAddon>(r)),
 
   listCombos: (barbershopId: string) =>
     apiClient<{ data: ServiceCombo[] }>(
       `/api/barbershops/${barbershopId}/combos`,
       'GET', undefined, token()
-    ).then(r => unwrap<ServiceCombo[]>(r)),
+    ).then(r => unwrapList<ServiceCombo>(r)),
 
   createCombo: (barbershopId: string, data: { name: string; description?: string; comboPrice: number; items: any[] }) =>
     apiClient<{ data: ServiceCombo }>(
       `/api/barbershops/${barbershopId}/combos`,
-      'POST', data, token()
-    ).then(r => unwrap<ServiceCombo>(r)),
+      'POST', { barbershopId, ...data }, token()
+    ).then(r => unwrapData<ServiceCombo>(r)),
 
   updateCombo: (barbershopId: string, comboId: string, data: Partial<ServiceCombo>) =>
     apiClient<{ data: ServiceCombo }>(
       `/api/barbershops/${barbershopId}/combos/${comboId}`,
       'PATCH', data, token()
-    ).then(r => unwrap<ServiceCombo>(r)),
+    ).then(r => unwrapData<ServiceCombo>(r)),
 };

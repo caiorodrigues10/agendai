@@ -1,5 +1,5 @@
+/// <reference types="vitest/globals" />
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, expect, it, vi } from 'vitest';
 import { OrganizationsPanel } from './OrganizationsPanel';
 import { organizationsApi } from '@/infra/organizationsApi';
 vi.mock('@/infra/organizationsApi', () => ({

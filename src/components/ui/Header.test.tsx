@@ -1,6 +1,6 @@
+/// <reference types="vitest/globals" />
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
 import { Header } from './Header';
 
 const subscription = vi.fn();

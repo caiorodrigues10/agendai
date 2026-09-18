@@ -22,7 +22,8 @@
     "docs:check": "node scripts/check-docs.mjs",
     "contract:check": "node scripts/check-api-contract.mjs",
     "contract:check:strict": "node scripts/check-api-contract.mjs --strict",
-    "test:contract": "node --test scripts/check-api-contract.test.mjs"
+    "test:contract": "node --test scripts/check-api-contract.test.mjs",
+    "verify:delivery": "node scripts/verify-delivery.mjs"
   },
   "dependencies": {
     "@floating-ui/react": "^0.27.20",

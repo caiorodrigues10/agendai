@@ -82,8 +82,8 @@ export const MembershipsPanel: React.FC = () => {
         membershipsApi.listPlans(barbershopId),
         membershipsApi.listMemberships(barbershopId),
       ]);
-      setPlans(p);
-      setMemberships(m);
+      setPlans(Array.isArray(p) ? p : []);
+      setMemberships(Array.isArray(m) ? m : []);
     } catch (err) {
       setError(getErrorMessage(err, 'Erro ao carregar assinaturas'));
     } finally {
@@ -107,7 +107,7 @@ export const MembershipsPanel: React.FC = () => {
       description: plan.description ?? '',
       price: String(plan.price),
       billingCycle: plan.billingCycle,
-      benefits: plan.benefits.map(b => ({
+      benefits: (plan.benefits ?? []).map(b => ({
         serviceId: b.serviceId ?? '',
         type: b.type,
         quantity: String(b.quantity),
@@ -267,7 +267,7 @@ export const MembershipsPanel: React.FC = () => {
                       </span>
                     </div>
                   </div>
-                  {plan.benefits.length > 0 && (
+                  {Array.isArray(plan.benefits) && plan.benefits.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {plan.benefits.map(b => (
                         <span key={b.id} className="inline-flex rounded bg-surface px-2 py-0.5 text-[10px] text-text-muted">
@@ -316,7 +316,7 @@ export const MembershipsPanel: React.FC = () => {
                   <div className="text-xs text-text-muted">
                     <span>Próximo término: {formatDateBR(m.currentPeriodEnd)}</span>
                   </div>
-                  {m.usageSummary.length > 0 && (
+                  {Array.isArray(m.usageSummary) && m.usageSummary.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {m.usageSummary.map(u => (
                         <span key={u.benefitId} className="inline-flex rounded bg-surface px-2 py-0.5 text-[10px] text-text-muted">
@@ -346,7 +346,7 @@ export const MembershipsPanel: React.FC = () => {
                         <XCircle size={12} /> Cancelar
                       </button>
                     )}
-                    {m.cycles.filter(c => c.status !== 'PAID').map(c => (
+                    {(m.cycles ?? []).filter(c => c.status !== 'PAID').map(c => (
                       <button
                         key={c.id}
                         onClick={() => setPaymentTarget({ membership: m, cycleId: c.id })}

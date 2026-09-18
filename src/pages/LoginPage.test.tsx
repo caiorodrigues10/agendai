@@ -1,6 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+/// <reference types="vitest/globals" />
+import { fireEvent, screen } from '@testing-library/react';
 import { LoginPage } from './LoginPage';
 import { renderWithProviders } from '../tests/testUtils';
 
@@ -39,11 +38,10 @@ describe('LoginPage (usabilidade)', () => {
     expect(screen.getAllByRole('button', { name: /entrar/i }).length).toBeGreaterThan(0);
   });
 
-  it('mostra validação ao submeter login vazio', async () => {
-    const user = userEvent.setup();
+  it('mostra validação ao submeter login vazio', () => {
     renderWithProviders(<LoginPage />, { route: '/login' });
     const submit = screen.getAllByRole('button', { name: /entrar/i })[0];
-    await user.click(submit);
+    fireEvent.click(submit);
     expect(loginMock).not.toHaveBeenCalled();
   });
 });

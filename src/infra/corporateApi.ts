@@ -13,38 +13,57 @@ function token() {
 export interface CorporatePlan {
   id: string;
   name: string;
-  description: string;
-  price: number;
+  companyName: string;
+  cnpj?: string | null;
+  contactEmail: string;
+  contactPhone?: string | null;
   maxUnits: number;
-  features: string[];
-  active: boolean;
+  pricePerUnit: number;
+  billingCycle: string;
+  status: string;
+  startedAt?: string | null;
+  expiresAt?: string | null;
   createdAt: string;
 }
 
 export interface CorporateSubscription {
   id: string;
   planId: string;
-  planName: string;
   barbershopId: string;
-  barbershopName: string;
   status: string;
-  startsAt: string;
-  expiresAt: string;
+  startedAt?: string | null;
+  expiresAt?: string | null;
   createdAt: string;
+  plan?: { id: string; name: string; companyName?: string };
+  barbershop?: { id: string; name: string };
+}
+
+export interface CorporateValidation {
+  active: boolean;
+  subscription: CorporateSubscription | null;
 }
 
 export const corporateApi = {
   listPlans: () =>
     apiClient<{ success: boolean; data: CorporatePlan[] }>(
-      '/api/corporate/plans',
+      '/api/admin/corporate-plans',
       'GET',
       undefined,
       token()
     ).then(r => unwrap<CorporatePlan[]>(r)),
 
-  createPlan: (data: { name: string; description: string; price: number; maxUnits: number; features: string[] }) =>
+  createPlan: (data: {
+    name: string;
+    companyName: string;
+    contactEmail: string;
+    contactPhone?: string;
+    cnpj?: string;
+    maxUnits: number;
+    pricePerUnit: number;
+    billingCycle?: 'monthly' | 'quarterly' | 'yearly';
+  }) =>
     apiClient<{ success: boolean; data: CorporatePlan }>(
-      '/api/corporate/plans',
+      '/api/admin/corporate-plans',
       'POST',
       data,
       token()
@@ -52,7 +71,7 @@ export const corporateApi = {
 
   updatePlan: (planId: string, data: Partial<CorporatePlan>) =>
     apiClient<{ success: boolean; data: CorporatePlan }>(
-      `/api/corporate/plans/${planId}`,
+      `/api/admin/corporate-plans/${planId}`,
       'PATCH',
       data,
       token()
@@ -60,38 +79,33 @@ export const corporateApi = {
 
   deletePlan: (planId: string) =>
     apiClient<{ success: boolean }>(
-      `/api/corporate/plans/${planId}`,
+      `/api/admin/corporate-plans/${planId}`,
       'DELETE',
       undefined,
       token()
     ),
 
-  subscribe: (data: { planId: string; barbershopId: string }) =>
+  subscribe: (planId: string, barbershopId: string) =>
     apiClient<{ success: boolean; data: CorporateSubscription }>(
-      '/api/corporate/subscriptions',
+      `/api/admin/corporate-plans/${planId}/subscribe`,
       'POST',
-      data,
+      { barbershopId },
       token()
     ).then(r => unwrap<CorporateSubscription>(r)),
 
-  validate: (subscriptionId: string) =>
-    apiClient<{ success: boolean; data: CorporateSubscription }>(
-      `/api/corporate/subscriptions/${subscriptionId}/validate`,
-      'POST',
-      undefined,
-      token()
-    ).then(r => unwrap<CorporateSubscription>(r)),
-
-  listSubscriptions: (params?: { barbershopId?: string; status?: string }) => {
-    const qs = new URLSearchParams();
-    if (params?.barbershopId) qs.set('barbershopId', params.barbershopId);
-    if (params?.status) qs.set('status', params.status);
-    const query = qs.toString();
-    return apiClient<{ success: boolean; data: CorporateSubscription[] }>(
-      `/api/corporate/subscriptions${query ? '?' + query : ''}`,
+  listSubscriptions: (planId: string) =>
+    apiClient<{ success: boolean; data: CorporateSubscription[] }>(
+      `/api/admin/corporate-plans/${planId}/subscriptions`,
       'GET',
       undefined,
       token()
-    ).then(r => unwrap<CorporateSubscription[]>(r));
-  },
+    ).then(r => unwrap<CorporateSubscription[]>(r)),
+
+  validate: (barbershopId: string) =>
+    apiClient<{ success: boolean; data: CorporateValidation }>(
+      `/api/barbershops/${barbershopId}/corporate/validate`,
+      'GET',
+      undefined,
+      token()
+    ).then(r => unwrap<CorporateValidation>(r)),
 };

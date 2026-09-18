@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   AlertCircle,
-  Calendar,
   Loader2,
   Plus,
   Target,
@@ -10,7 +9,7 @@ import {
 } from 'lucide-react';
 import { goalsApi, ProfessionalGoal } from '../../infra/goalsApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
-import { useAuth } from '../../contexts/AuthContext';
+import { useBarbershop } from '../../contexts/BarbershopContext';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { formatCurrencyBRL, formatDateBR } from '../../utils/formatters';
 import { Field, FIELD_CONTROL, FORM_FOOTER } from '../ui/Field';
@@ -56,7 +55,7 @@ const formatMetricValue = (value: number, metric: string) => {
 
 export const GoalsPanel: React.FC = () => {
   const { barbershopId } = useBarbershopFilters();
-  const { user } = useAuth();
+  const { staff } = useBarbershop();
 
   const [goals, setGoals] = useState<ProfessionalGoal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,13 +75,19 @@ export const GoalsPanel: React.FC = () => {
     setError(null);
     try {
       const data = await goalsApi.getRanking(barbershopId);
-      setGoals(data);
+      const staffNames = new Map((staff ?? []).map(member => [member.id, member.name]));
+      setGoals(
+        (Array.isArray(data) ? data : []).map(goal => ({
+          ...goal,
+          professionalName: goal.professionalName ?? staffNames.get(goal.professionalId),
+        }))
+      );
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
-  }, [barbershopId]);
+  }, [barbershopId, staff]);
 
   useEffect(() => {
     load();
@@ -246,6 +251,16 @@ export const GoalsPanel: React.FC = () => {
             </div>
 
             <div className="space-y-4">
+              <Field label="Profissional">
+                <SmartSelect
+                  value={form.professionalId || null}
+                  onChange={value => setForm(f => ({ ...f, professionalId: value ?? '' }))}
+                  options={staff.map(member => ({ value: member.id, label: member.name }))}
+                  placeholder="Selecione o profissional"
+                  searchable
+                />
+              </Field>
+
               <Field label="Métrica">
                 <SmartSelect
                   value={form.metric}
@@ -306,7 +321,7 @@ export const GoalsPanel: React.FC = () => {
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={submitting || !form.target || !form.startDate || !form.endDate}
+                disabled={submitting || !form.professionalId || !form.target || !form.startDate || !form.endDate}
                 className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-accent-fg shadow-md shadow-accent/15 transition-colors hover:opacity-90 disabled:opacity-50"
               >
                 {submitting && <Loader2 size={15} className="animate-spin" />}

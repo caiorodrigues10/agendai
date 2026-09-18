@@ -40,12 +40,14 @@ export const QualityPanel: React.FC = () => {
   useEffect(() => {
     if (!barbershopId) return;
     setLoading(true);
-    Promise.all([
-      qualityApi.listProtocols(barbershopId),
-      qualityApi.listAudits(barbershopId),
-      qualityApi.getOverview(barbershopId),
-    ])
-      .then(([p, a, o]) => { setProtocols(p); setAudits(a); setOverview(o); })
+    qualityApi.listProtocols(barbershopId)
+      .then(async p => {
+        setProtocols(p);
+        const lists = await Promise.all(p.map(protocol => qualityApi.listAudits(barbershopId, protocol.id).catch(() => [] as QualityAudit[])));
+        setAudits(lists.flat());
+        const o = await qualityApi.getOverview(barbershopId);
+        setOverview(o);
+      })
       .catch(err => setError(getErrorMessage(err, 'Erro ao carregar qualidade.')))
       .finally(() => setLoading(false));
   }, [barbershopId]);
@@ -56,7 +58,7 @@ export const QualityPanel: React.FC = () => {
     setError('');
     try {
       const p = await qualityApi.createProtocol(barbershopId, {
-        title: newTitle.trim(),
+        name: newTitle.trim(),
         description: newDescription.trim(),
         category: newCategory.trim(),
       });
@@ -87,9 +89,14 @@ export const QualityPanel: React.FC = () => {
     setAuditing(true);
     setError('');
     try {
-      const a = await qualityApi.runAudit(barbershopId, {
-        protocolId: auditProtocolId,
-        score: auditScore,
+      const protocol = protocols.find(pr => pr.id === auditProtocolId);
+      const checklist = protocol?.checklistItems ?? [];
+      const passed = auditScore >= 70;
+      const results = checklist.length
+        ? checklist.map((_, i) => ({ checklistIndex: i, passed }))
+        : [{ checklistIndex: 0, passed }];
+      const a = await qualityApi.runAudit(barbershopId, auditProtocolId, {
+        results,
         notes: auditNotes.trim() || undefined,
       });
       setAudits(prev => [a, ...prev]);
@@ -203,7 +210,7 @@ export const QualityPanel: React.FC = () => {
           <SmartSelect
             value={auditProtocolId || null}
             onChange={val => setAuditProtocolId(val ?? '')}
-            options={protocols.map(p => ({ value: p.id, label: p.title }))}
+            options={protocols.map(p => ({ value: p.id, label: p.name }))}
             placeholder="Selecionar protocolo"
           />
           <div>
@@ -247,7 +254,7 @@ export const QualityPanel: React.FC = () => {
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="rounded-2xl border border-border bg-surface p-4 text-center">
-              <p className="text-2xl font-bold text-accent">{overview.averageScore.toFixed(1)}</p>
+              <p className="text-2xl font-bold text-accent">{overview.averageScore != null ? overview.averageScore.toFixed(1) : '—'}</p>
               <p className="text-xs text-text-muted">Média</p>
             </div>
             <div className="rounded-2xl border border-border bg-surface p-4 text-center">
@@ -255,25 +262,14 @@ export const QualityPanel: React.FC = () => {
               <p className="text-xs text-text-muted">Auditorias</p>
             </div>
             <div className="rounded-2xl border border-border bg-surface p-4 text-center">
-              <p className="text-2xl font-bold text-text-primary">{overview.protocolsActive}</p>
+              <p className="text-2xl font-bold text-text-primary">{overview.activeProtocols}</p>
               <p className="text-xs text-text-muted">Protocolos</p>
             </div>
             <div className="rounded-2xl border border-border bg-surface p-4 text-center flex flex-col items-center">
-              {trendIcon(overview.recentTrend)}
+              {trendIcon('STABLE')}
               <p className="text-xs text-text-muted mt-1">Tendência</p>
             </div>
           </div>
-          {overview.breakdownByCategory.length > 0 && (
-            <div className="rounded-2xl border border-border bg-surface p-4 space-y-2">
-              <p className="text-xs font-bold text-text-secondary">Por Categoria</p>
-              {overview.breakdownByCategory.map(c => (
-                <div key={c.category} className="flex items-center justify-between">
-                  <span className="text-sm text-text-primary">{c.category}</span>
-                  <span className="text-sm font-bold text-accent">{c.avgScore.toFixed(1)}</span>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       )}
 
@@ -288,7 +284,7 @@ export const QualityPanel: React.FC = () => {
             {protocols.map(p => (
               <div key={p.id} className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-text-primary">{p.title}</p>
+                  <p className="text-sm font-bold text-text-primary">{p.name}</p>
                   <p className="text-xs text-text-muted">{p.category} · {p.description}</p>
                 </div>
                 <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${p.isActive ? 'bg-success/15 text-success' : 'bg-surface-2 text-text-muted'}`}>
@@ -318,12 +314,12 @@ export const QualityPanel: React.FC = () => {
             {audits.map(a => (
               <div key={a.id} className="rounded-2xl border border-border bg-surface p-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-text-primary">{a.protocolTitle}</span>
-                  <span className={`text-sm font-bold ${a.score >= 70 ? 'text-success' : a.score >= 40 ? 'text-warning' : 'text-error'}`}>
-                    {a.score}
+                  <span className="text-sm font-bold text-text-primary">{a.protocol?.name ?? a.protocolId}</span>
+                  <span className={`text-sm font-bold ${(a.score ?? 0) >= 70 ? 'text-success' : (a.score ?? 0) >= 40 ? 'text-warning' : 'text-error'}`}>
+                    {a.score ?? '—'}
                   </span>
                 </div>
-                <p className="text-xs text-text-muted">{a.auditorName} · {new Date(a.createdAt).toLocaleDateString('pt-BR')}</p>
+                <p className="text-xs text-text-muted">{a.auditedBy?.name ?? '—'} · {a.auditedAt ? new Date(a.auditedAt).toLocaleDateString('pt-BR') : ''}</p>
                 {a.notes && <p className="mt-1 text-xs text-text-secondary">{a.notes}</p>}
               </div>
             ))}

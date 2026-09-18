@@ -6,13 +6,15 @@ import {
   EyeOff,
   Trash2,
   Loader2,
-  BarChart3,
   Image as ImageIcon,
   Film,
-  ChevronDown,
-  ChevronUp,
 } from 'lucide-react';
-import { showcaseApi, ShowcaseEntry } from '../../infra/showcaseApi';
+import {
+  showcaseApi,
+  ShowcaseEntry,
+  ShowcaseImageAuthorization,
+  ShowcaseMode,
+} from '../../infra/showcaseApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { getErrorMessage } from '../../utils/errorMessage';
@@ -20,7 +22,7 @@ import { SmartSelect } from '../ui/SmartSelect';
 
 export const ShowcasePanel: React.FC = () => {
   const { barbershopId } = useBarbershopFilters();
-  const { services, staff } = useBarbershop();
+  const { services, staff, feed } = useBarbershop();
   const [entries, setEntries] = useState<ShowcaseEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'ALL' | 'DRAFT' | 'PUBLISHED' | 'HIDDEN'>('ALL');
@@ -32,7 +34,9 @@ export const ShowcasePanel: React.FC = () => {
   // Create form
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
-  const [newMode, setNewMode] = useState('standard');
+  const [newPostId, setNewPostId] = useState('');
+  const [newMode, setNewMode] = useState<ShowcaseMode>('direct_service');
+  const [newAuthorization, setNewAuthorization] = useState<ShowcaseImageAuthorization>('team_confirmed');
   const [newServiceId, setNewServiceId] = useState('');
   const [newStaffId, setNewStaffId] = useState('');
 
@@ -47,15 +51,16 @@ export const ShowcasePanel: React.FC = () => {
   }, [barbershopId, filter]);
 
   const handleCreate = async () => {
-    if (!barbershopId || !newTitle.trim()) return;
+    if (!barbershopId || !newTitle.trim() || !newPostId) return;
     setCreating(true);
     setError('');
     try {
       const entry = await showcaseApi.createEntry(barbershopId, {
-        postId: '',
+        postId: newPostId,
         title: newTitle.trim(),
         description: newDescription.trim() || undefined,
         mode: newMode,
+        imageAuthorization: newAuthorization,
         serviceId: newServiceId || undefined,
         staffId: newStaffId || undefined,
       });
@@ -63,6 +68,9 @@ export const ShowcasePanel: React.FC = () => {
       setShowCreate(false);
       setNewTitle('');
       setNewDescription('');
+      setNewPostId('');
+      setNewMode('direct_service');
+      setNewAuthorization('team_confirmed');
       setNewServiceId('');
       setNewStaffId('');
     } catch (err) {
@@ -74,9 +82,11 @@ export const ShowcasePanel: React.FC = () => {
 
   const handleToggleStatus = async (entry: ShowcaseEntry) => {
     if (!barbershopId) return;
-    const newStatus = entry.status === 'PUBLISHED' ? 'HIDDEN' : 'PUBLISHED';
     try {
-      const updated = await showcaseApi.updateEntry(barbershopId, entry.id, { status: newStatus });
+      const updated =
+        entry.status === 'PUBLISHED'
+          ? await showcaseApi.hideEntry(barbershopId, entry.id)
+          : await showcaseApi.publishEntry(barbershopId, entry.id);
       setEntries(prev => prev.map(e => (e.id === entry.id ? updated : e)));
     } catch (err) {
       setError(getErrorMessage(err, 'Erro ao alterar status.'));
@@ -86,7 +96,7 @@ export const ShowcasePanel: React.FC = () => {
   const handleDelete = async (entryId: string) => {
     if (!barbershopId) return;
     try {
-      await showcaseApi.updateEntry(barbershopId, entryId, { status: 'DELETED' } as any);
+      await showcaseApi.deleteEntry(barbershopId, entryId);
       setEntries(prev => prev.filter(e => e.id !== entryId));
     } catch (err) {
       setError(getErrorMessage(err, 'Erro ao remover.'));
@@ -142,6 +152,16 @@ export const ShowcasePanel: React.FC = () => {
       {/* Create form */}
       {showCreate && (
         <div className="rounded-2xl border border-border bg-surface p-4 space-y-3">
+          <SmartSelect
+            value={newPostId || null}
+            onChange={val => setNewPostId(val ?? '')}
+            options={feed
+              .filter(post => !entries.some(entry => entry.postId === post.id))
+              .map(post => ({ value: post.id, label: post.title || post.content || post.id }))}
+            placeholder="Post do feed *"
+            size="sm"
+            aria-label="Post do feed"
+          />
           <input
             type="text"
             placeholder="Título do resultado"
@@ -156,6 +176,33 @@ export const ShowcasePanel: React.FC = () => {
             rows={2}
             className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none resize-none"
           />
+          <div className="grid grid-cols-2 gap-3">
+            <SmartSelect
+              value={newMode}
+              onChange={val => setNewMode((val as ShowcaseMode) ?? 'direct_service')}
+              options={[
+                { value: 'direct_service', label: 'Agendar serviço' },
+                { value: 'whatsapp_evaluation', label: 'Avaliação no WhatsApp' },
+              ]}
+              placeholder="Modo"
+              size="sm"
+              aria-label="Modo"
+              clearable={false}
+            />
+            <SmartSelect
+              value={newAuthorization}
+              onChange={val => setNewAuthorization((val as ShowcaseImageAuthorization) ?? 'team_confirmed')}
+              options={[
+                { value: 'team_confirmed', label: 'Autorizada pela equipe' },
+                { value: 'no_identifiable_client', label: 'Sem cliente identificável' },
+                { value: 'pending_review', label: 'Pendente de revisão' },
+              ]}
+              placeholder="Autorização da imagem"
+              size="sm"
+              aria-label="Autorização da imagem"
+              clearable={false}
+            />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <SmartSelect
               value={newServiceId || null}
@@ -177,7 +224,7 @@ export const ShowcasePanel: React.FC = () => {
           <div className="flex gap-2">
             <button
               onClick={() => void handleCreate()}
-              disabled={creating || !newTitle.trim()}
+              disabled={creating || !newTitle.trim() || !newPostId}
               className="flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-xs font-bold text-accent-fg disabled:opacity-50"
             >
               {creating ? <Loader2 className="animate-spin" size={14} /> : <Plus size={14} />}

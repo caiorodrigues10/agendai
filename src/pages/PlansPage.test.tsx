@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+/// <reference types="vitest/globals" />
 import { screen, waitFor } from '@testing-library/react';
 import { PlansPage } from './PlansPage';
 import { renderWithProviders } from '../tests/testUtils';

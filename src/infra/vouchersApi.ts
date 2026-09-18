@@ -52,12 +52,6 @@ export const vouchersApi = {
     ).then(r => unwrap<Voucher[]>(r));
   },
 
-  getById: (barbershopId: string, voucherId: string) =>
-    apiClient<{ data: Voucher }>(
-      `/api/barbershops/${barbershopId}/vouchers/${voucherId}`,
-      'GET', undefined, token()
-    ).then(r => unwrap<Voucher>(r)),
-
   create: (barbershopId: string, data: {
     name: string;
     description?: string;

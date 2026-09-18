@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Loader2, Filter, CalendarDays, MessageCircle } from 'lucide-react';
 import { showcaseApi, ShowcaseEntry } from '../../infra/showcaseApi';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { formatCurrencyBRL } from '../../utils/formatters';
 import { SmartSelect } from '../ui/SmartSelect';
 
 export const ShowcasePublicPage: React.FC = () => {
@@ -33,9 +34,26 @@ export const ShowcasePublicPage: React.FC = () => {
     return true;
   });
 
-  const handleTrackClick = (entry: ShowcaseEntry) => {
+  const handleSelect = async (entry: ShowcaseEntry) => {
+    if (!salonId) return;
     setSelectedEntry(entry);
-    void showcaseApi.trackEvent(entry.id, 'VIEW');
+    try {
+      const detailed = await showcaseApi.getPublicEntry(salonId, entry.id);
+      setSelectedEntry(detailed);
+    } catch {
+      // Keep the list snapshot if detail fails.
+    }
+    void showcaseApi.trackEvent(salonId, entry.id, 'VIEW');
+  };
+
+  const handleBookClick = () => {
+    if (!salonId || !selectedEntry) return;
+    void showcaseApi.trackEvent(salonId, selectedEntry.id, 'CLICK_BOOK');
+  };
+
+  const handleWhatsAppClick = () => {
+    if (!salonId || !selectedEntry) return;
+    void showcaseApi.trackEvent(salonId, selectedEntry.id, 'CLICK_WHATSAPP');
   };
 
   if (loading) {
@@ -94,7 +112,7 @@ export const ShowcasePublicPage: React.FC = () => {
                 <CalendarDays size={14} />
                 {selectedEntry.serviceName}
                 {selectedEntry.servicePrice != null && (
-                  <span className="font-bold text-text-primary">R$ {(selectedEntry.servicePrice / 100).toFixed(2)}</span>
+                  <span className="font-bold text-text-primary">{formatCurrencyBRL(selectedEntry.servicePrice)}</span>
                 )}
                 {selectedEntry.serviceDuration != null && (
                   <span className="text-text-muted">· {selectedEntry.serviceDuration}min</span>
@@ -109,6 +127,7 @@ export const ShowcasePublicPage: React.FC = () => {
             <div className="flex gap-3 pt-2">
               <a
                 href={`/queue/${salonId}?tab=appointments`}
+                onClick={handleBookClick}
                 className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-accent py-3 text-sm font-bold text-accent-fg"
               >
                 <CalendarDays size={16} />
@@ -118,6 +137,7 @@ export const ShowcasePublicPage: React.FC = () => {
                 href={`https://wa.me/?text=${encodeURIComponent(`Olá! Vi seu resultado no AgendAI e queria agendar.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={handleWhatsAppClick}
                 className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-success/40 bg-success/10 py-3 text-sm font-bold text-success"
               >
                 <MessageCircle size={16} />
@@ -171,7 +191,7 @@ export const ShowcasePublicPage: React.FC = () => {
           {filtered.map(entry => (
             <button
               key={entry.id}
-              onClick={() => void handleTrackClick(entry)}
+              onClick={() => void handleSelect(entry)}
                 className="group overflow-hidden rounded-2xl border border-border bg-surface text-left transition-all hover:border-border-strong hover:shadow-lg hover:shadow-black/5"
             >
               <div className="aspect-square overflow-hidden bg-surface-2">
@@ -193,7 +213,7 @@ export const ShowcasePublicPage: React.FC = () => {
                   <p className="mt-0.5 truncate text-xs text-text-muted">{entry.serviceName}</p>
                 )}
                 {entry.servicePrice != null && (
-                  <p className="mt-1 text-xs font-bold text-text-primary">R$ {(entry.servicePrice / 100).toFixed(2)}</p>
+                  <p className="mt-1 text-xs font-bold text-text-primary">{formatCurrencyBRL(entry.servicePrice)}</p>
                 )}
               </div>
             </button>

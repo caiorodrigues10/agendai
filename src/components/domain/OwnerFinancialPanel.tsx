@@ -579,7 +579,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                   </>
                 )}
 
-                {summary.expenses.byType.length > 0 && (
+                {Array.isArray(summary.expenses?.byType) && summary.expenses.byType.length > 0 && (
                   <div className="bg-surface p-5 rounded-xl border border-border">
                     <h3 className="text-sm font-bold text-text-primary mb-4">Despesas por tipo</h3>
                     <div className="space-y-2">

@@ -7,8 +7,6 @@ import {
   Clock,
   Check,
   X,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react';
 import { staffApi, StaffScheduleEntry, StaffService, TimeOffRequest } from '../../infra/staffApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
@@ -46,8 +44,6 @@ export const StaffManagementPanel: React.FC = () => {
   const [newDayOfWeek, setNewDayOfWeek] = useState(1);
   const [newStartTime, setNewStartTime] = useState('09:00');
   const [newEndTime, setNewEndTime] = useState('18:00');
-  const [newBreakStart, setNewBreakStart] = useState('');
-  const [newBreakEnd, setNewBreakEnd] = useState('');
   const [addingSchedule, setAddingSchedule] = useState(false);
 
   // Services
@@ -132,16 +128,12 @@ export const StaffManagementPanel: React.FC = () => {
         dayOfWeek: newDayOfWeek,
         startTime: newStartTime,
         endTime: newEndTime,
-        breakStart: newBreakStart || undefined,
-        breakEnd: newBreakEnd || undefined,
       });
       setSchedules(prev => {
         const filtered = prev.filter(s => s.dayOfWeek !== entry.dayOfWeek);
         return [...filtered, entry].sort((a, b) => a.dayOfWeek - b.dayOfWeek);
       });
       setShowAddSchedule(false);
-      setNewBreakStart('');
-      setNewBreakEnd('');
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
@@ -167,7 +159,7 @@ export const StaffManagementPanel: React.FC = () => {
       const svc = await staffApi.assignService(barbershopId, selectedStaffId, {
         serviceId: assignServiceId,
         customPrice: assignCustomPrice ? parseFloat(assignCustomPrice) : undefined,
-        customDuration: assignCustomDuration ? parseInt(assignCustomDuration, 10) : undefined,
+        customTime: assignCustomDuration ? parseInt(assignCustomDuration, 10) : undefined,
       });
       setAssignedServices(prev => [...prev, svc]);
       setShowAssignService(false);
@@ -319,9 +311,6 @@ export const StaffManagementPanel: React.FC = () => {
                         {entry ? (
                           <div className="space-y-0.5">
                             <p className="text-text-primary font-medium">{entry.startTime}-{entry.endTime}</p>
-                            {entry.breakStart && entry.breakEnd && (
-                              <p className="text-text-muted text-[10px]">Almoço {entry.breakStart}-{entry.breakEnd}</p>
-                            )}
                             <button
                               onClick={() => void handleRemoveSchedule(entry.id)}
                               className="text-error hover:underline text-[10px]"
@@ -364,24 +353,6 @@ export const StaffManagementPanel: React.FC = () => {
                         type="time"
                         value={newEndTime}
                         onChange={e => setNewEndTime(e.target.value)}
-                        className={FIELD_CONTROL}
-                      />
-                    </Field>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Field label="Início almoço (opcional)">
-                      <input
-                        type="time"
-                        value={newBreakStart}
-                        onChange={e => setNewBreakStart(e.target.value)}
-                        className={FIELD_CONTROL}
-                      />
-                    </Field>
-                    <Field label="Fim almoço (opcional)">
-                      <input
-                        type="time"
-                        value={newBreakEnd}
-                        onChange={e => setNewBreakEnd(e.target.value)}
                         className={FIELD_CONTROL}
                       />
                     </Field>
@@ -436,8 +407,8 @@ export const StaffManagementPanel: React.FC = () => {
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-bold text-text-primary">{svc.serviceName || svc.serviceId}</p>
                         <p className="text-xs text-text-muted">
-                          {svc.customPrice ? `R$ ${svc.customPrice.toFixed(2)}` : 'Preço padrão'}
-                          {svc.customDuration ? ` · ${svc.customDuration} min` : ''}
+                          {svc.customPrice ? `R$ ${Number(svc.customPrice).toFixed(2)}` : 'Preço padrão'}
+                          {svc.customTime ? ` · ${svc.customTime} min` : ''}
                         </p>
                       </div>
                       <button

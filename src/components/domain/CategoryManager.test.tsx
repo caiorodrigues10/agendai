@@ -1,6 +1,6 @@
+/// <reference types="vitest/globals" />
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CategoryManager } from './CategoryManager';
 import { useCategories } from '../../hooks/useCategories';
 import { Category } from '../../infra/categoriesApi';

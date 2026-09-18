@@ -104,17 +104,6 @@ export interface SubscribePayload {
   asaasBillingType?: 'PIX' | 'CREDIT_CARD';
   cardToken?: string;
   cardPaymentMethodId?: string;
-  /** Cartão Asaas processado no backend (createPayment). */
-  asaasCreditCard?: {
-    holderName: string;
-    number: string;
-    expiryMonth: string;
-    expiryYear: string;
-    ccv: string;
-    postalCode: string;
-    addressNumber: string;
-    phone: string;
-  };
   payerEmail: string;
   payerFirstName?: string;
   payerLastName?: string;
@@ -127,7 +116,6 @@ export interface SetupTrialCardPayload {
   payerFirstName?: string;
   payerLastName?: string;
   payerIdentification: PayerIdentification;
-  asaasCreditCard: NonNullable<SubscribePayload['asaasCreditCard']>;
 }
 
 function unwrap<T>(res: unknown): T {

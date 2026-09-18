@@ -9,6 +9,7 @@
 
 | Pacote | Versão | Categoria | Finalidade | Evidência de uso |
 |---|---|---|---|---|
+| `@floating-ui/react` | `^0.27.20` | UI | Posicionamento de dropdowns/popovers (useFloating, FloatingPortal) | src/components/ui/SmartSelect.tsx |
 | `@google/genai` | `^1.34.0` | IA | SDK Gemini (uso limitado; há heurística local em geminiService) | src/services/geminiService.ts — confirmar consumo de API antes de ampliar |
 | `@hookform/resolvers` | `^3.3.4` | Formulários | Bridge Zod ↔ react-hook-form | zodResolver nos formulários do painel |
 | `class-variance-authority` | `^0.7.1` | UI | Variantes de classe CSS | componentes UI / utilitários |

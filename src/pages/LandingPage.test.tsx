@@ -1,6 +1,7 @@
-import { describe, it, expect, vi } from 'vitest';
+/// <reference types="vitest/globals" />
 import { screen } from '@testing-library/react';
 import { renderWithProviders } from '../tests/testUtils';
+import { LandingPage } from './LandingPage';
 
 vi.mock('../contexts/AuthContext', () => ({
   useAuth: () => ({
@@ -45,8 +46,7 @@ vi.mock('gsap/ScrollTrigger', () => ({
 }));
 
 describe('LandingPage smoke', () => {
-  it('monta a landing sem crash', async () => {
-    const { LandingPage } = await import('./LandingPage');
+  it('monta a landing sem crash', () => {
     renderWithProviders(<LandingPage />, { route: '/' });
     expect(screen.getByTestId('marketing-nav')).toBeInTheDocument();
     expect(document.body.textContent?.length ?? 0).toBeGreaterThan(20);

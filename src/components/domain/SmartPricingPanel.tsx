@@ -210,9 +210,10 @@ export const SmartPricingPanel: React.FC = () => {
     try {
       const result = await pricingApi.evaluate(barbershopId, {
         serviceId: evalServiceId,
-        staffId: evalStaffId || undefined,
-        appointmentDate: evalDate || undefined,
-        appointmentTime: evalTime || undefined,
+        basePrice: services.find(s => s.id === evalServiceId)?.price ?? 0,
+        scheduledAt: evalDate
+          ? new Date(`${evalDate}T${evalTime || '12:00'}:00`).toISOString()
+          : undefined,
       });
       setEvalResult(result);
     } catch (err) {

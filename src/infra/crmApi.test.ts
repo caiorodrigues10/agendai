@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+/// <reference types="vitest/globals" />
 import { apiClient } from './apiClient';
 import { crmApi } from './crmApi';
 vi.mock('./apiClient', () => ({ apiClient: vi.fn() }));

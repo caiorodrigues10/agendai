@@ -18,11 +18,14 @@
 | `format` | `prettier --write …` | geração | `npm install` | Formata fontes |
 | `format:check` | `prettier --check …` | leitura | `npm install` | Verifica formatação |
 | `docs:check` | `node scripts/check-docs.mjs` | leitura | Node | Valida inventários documentais |
+| `contract:check` | `node scripts/check-api-contract.mjs` | leitura | backend irmão | Compara wrappers HTTP com rotas |
+| `test:contract` | `node --test scripts/check-api-contract.test.mjs` | testes | Node | Testa o parser de contrato |
+| `verify:delivery` | `node scripts/verify-delivery.mjs` | leitura | `npm install` | Encadeia docs, typecheck, contrato e Vitest (sem produção) |
 
 ## Observações
 
 - `contract:check` — `node scripts/check-api-contract.mjs`: compara método/caminho dos wrappers com as rotas registradas no backend irmão; sem servidor, banco ou segredos. Bloqueia novas divergências e exceções obsoletas.
-- `contract:check:strict` — mesma checagem com `--strict`: reprova também as 77 divergências legadas inventariadas inicialmente. Não está verde enquanto essa dívida existir.
+- `contract:check:strict` — mesma checagem com `--strict`. Com `entries: []` em `api-contract-debt.json`, equivale ao check normal.
 - `test:contract` — `node --test scripts/check-api-contract.test.mjs`: testa extração, mudanças de rota/método e sintaxe não suportada com fixtures temporárias.
 - Procedimento de contrato, limites e smoke de deploy: [DELIVERY_CHECKS.md](DELIVERY_CHECKS.md).
 

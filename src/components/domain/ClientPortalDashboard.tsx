@@ -58,7 +58,7 @@ export const ClientPortalDashboard: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!selectedSalonId || activeTab !== 'appointments') return;
+    if (!selectedSalonId || (activeTab !== 'appointments' && activeTab !== 'home')) return;
     void clientPortalApi.getAppointments(selectedSalonId).then(setAppointments).catch(() => setAppointments([]));
   }, [selectedSalonId, activeTab]);
 
@@ -168,7 +168,7 @@ export const ClientPortalDashboard: React.FC = () => {
               <div>
                 <p className="text-sm font-bold text-text-primary">{salon.barbershopName || salon.barbershopId}</p>
                 <p className="mt-0.5 text-xs text-text-muted">
-                  Status: <span className={salon.status === 'ACTIVE' ? 'text-success' : 'text-warning'}>{salon.status}</span>
+                  Status: <span className={salon.status === 'CONFIRMED' ? 'text-success' : 'text-warning'}>{salon.status}</span>
                 </p>
                 {salon.salonClientName && <p className="text-xs text-text-muted">Nome no salão: {salon.salonClientName}</p>}
               </div>
@@ -221,7 +221,7 @@ export const ClientPortalDashboard: React.FC = () => {
                 {appt.staffName && <span>com {appt.staffName}</span>}
               </div>
               {appt.price > 0 && (
-                <p className="mt-1 text-sm font-bold text-accent">R$ {(appt.price / 100).toFixed(2)}</p>
+                <p className="mt-1 text-sm font-bold text-accent">R$ {appt.price.toFixed(2)}</p>
               )}
             </div>
           ))}
@@ -242,7 +242,7 @@ export const ClientPortalDashboard: React.FC = () => {
           {benefits.length === 0 && (
             <div className="rounded-2xl border border-dashed border-border bg-surface p-6 text-center">
               <Gift size={32} className="mx-auto text-text-muted" />
-              <p className="mt-2 text-sm text-text-secondary">Nenhum benefício disponível.</p>
+              <p className="mt-2 text-sm text-text-secondary">Nenhum benefício disponível neste portal.</p>
             </div>
           )}
           {benefits.map((b, i) => (

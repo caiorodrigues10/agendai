@@ -10,6 +10,7 @@ interface ClientPortalLoginProps {
 export const ClientPortalLogin: React.FC<ClientPortalLoginProps> = ({ onAuthenticated }) => {
   const [step, setStep] = useState<'phone' | 'code'>('phone');
   const [phone, setPhone] = useState('');
+  const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -30,7 +31,7 @@ export const ClientPortalLogin: React.FC<ClientPortalLoginProps> = ({ onAuthenti
     }
     setLoading(true);
     try {
-      await clientPortalApi.requestCode(digits);
+      await clientPortalApi.requestCode(digits, name.trim() || undefined);
       setStep('code');
     } catch (err) {
       setError(getErrorMessage(err, 'Não foi possível enviar o código.'));
@@ -70,6 +71,17 @@ export const ClientPortalLogin: React.FC<ClientPortalLoginProps> = ({ onAuthenti
 
       {step === 'phone' && (
         <div className="space-y-4 rounded-2xl border border-border bg-surface p-5">
+          <div>
+            <label className="mb-1 block text-xs font-bold text-text-secondary">Nome</label>
+            <input
+              type="text"
+              value={name}
+              onChange={e => { setName(e.target.value); setError(''); }}
+              placeholder="Como o salão deve te chamar"
+              className="w-full rounded-xl border border-border bg-bg py-3 px-4 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+            />
+          </div>
+
           <div>
             <label className="mb-1 block text-xs font-bold text-text-secondary">Telefone (WhatsApp)</label>
             <div className="relative">

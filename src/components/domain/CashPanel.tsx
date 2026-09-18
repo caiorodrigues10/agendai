@@ -105,7 +105,7 @@ export const CashPanel: React.FC = () => {
         }),
       ]);
       setSummary(s);
-      setMovements(m);
+      setMovements(Array.isArray(m) ? m : []);
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {

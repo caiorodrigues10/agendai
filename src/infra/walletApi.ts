@@ -1,74 +1,68 @@
 import { apiClient } from './apiClient';
-import { authStorage } from './authStorage';
+
+const CLIENT_ACCESS_KEY = 'agendai_client_portal_access';
 
 function unwrap<T>(res: unknown): T {
   if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
   return res as T;
 }
 
-function token() {
-  return authStorage.getAccessToken() || '';
+function clientToken() {
+  return localStorage.getItem(CLIENT_ACCESS_KEY) || sessionStorage.getItem(CLIENT_ACCESS_KEY) || '';
 }
 
+/** Client-portal wallet (authenticateClient). There is no barbershop shop-wallet API. */
 export interface WalletBalance {
-  barbershopId: string;
+  id?: string;
+  identityId?: string;
   balance: number;
-  currency: string;
+  currency?: string;
 }
 
 export interface WalletEntry {
   id: string;
-  barbershopId: string;
   type: string;
   amount: number;
-  description: string;
+  description?: string;
   referenceId?: string;
   createdAt: string;
 }
 
 export const walletApi = {
-  getBalance: (barbershopId: string) =>
+  getBalance: () =>
     apiClient<{ success: boolean; data: WalletBalance }>(
-      `/api/barbershops/${barbershopId}/wallet/balance`,
+      '/api/client/portal/wallet',
       'GET',
       undefined,
-      token()
+      clientToken()
     ).then(r => unwrap<WalletBalance>(r)),
 
-  credit: (barbershopId: string, data: { amount: number; description: string; referenceId?: string }) =>
+  debit: (data: { amount: number; description?: string; referenceId?: string }) =>
     apiClient<{ success: boolean; data: WalletEntry }>(
-      `/api/barbershops/${barbershopId}/wallet/credit`,
+      '/api/client/portal/wallet/debit',
       'POST',
       data,
-      token()
+      clientToken()
     ).then(r => unwrap<WalletEntry>(r)),
 
-  debit: (barbershopId: string, data: { amount: number; description: string; referenceId?: string }) =>
-    apiClient<{ success: boolean; data: WalletEntry }>(
-      `/api/barbershops/${barbershopId}/wallet/debit`,
-      'POST',
-      data,
-      token()
-    ).then(r => unwrap<WalletEntry>(r)),
-
-  listEntries: (barbershopId: string, params?: { type?: string; page?: number }) => {
+  listEntries: (params?: { page?: number; limit?: number }) => {
     const qs = new URLSearchParams();
-    if (params?.type) qs.set('type', params.type);
     if (params?.page) qs.set('page', String(params.page));
+    if (params?.limit) qs.set('limit', String(params.limit));
     const query = qs.toString();
     return apiClient<{ success: boolean; data: WalletEntry[] }>(
-      `/api/barbershops/${barbershopId}/wallet/entries${query ? '?' + query : ''}`,
+      `/api/client/portal/wallet/entries${query ? '?' + query : ''}`,
       'GET',
       undefined,
-      token()
+      clientToken()
     ).then(r => unwrap<WalletEntry[]>(r));
   },
 
-  transfer: (barbershopId: string, data: { toBarbershopId: string; amount: number; description: string }) =>
+  transfer: (data: { targetWalletId: string; amount: number; description?: string }) =>
     apiClient<{ success: boolean; data: WalletEntry }>(
-      `/api/barbershops/${barbershopId}/wallet/transfer`,
+      '/api/client/portal/wallet/transfer',
       'POST',
       data,
-      token()
+      clientToken()
     ).then(r => unwrap<WalletEntry>(r)),
 };

@@ -1,10 +1,11 @@
+/// <reference types="vitest/globals" />
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { render, fireEvent } from '@testing-library/react';
+import { PublicHome } from './PublicHome';
 
-const mockJoinQueue = vi.fn();
+const { mockJoinQueue } = vi.hoisted(() => ({ mockJoinQueue: vi.fn() }));
 
 vi.mock('../contexts/AuthContext', () => ({
   useAuth: () => ({
@@ -35,6 +36,7 @@ vi.mock('../contexts/BarbershopContext', () => ({
       whatsapp: '11999999999',
       schedule: [],
       logoUrl: undefined,
+      operationMode: 'HYBRID',
     },
     services: [{ id: 's1', name: 'Corte', price: 40, avgTimeMinutes: 30, icon: 'scissors' }],
     staff: [],
@@ -77,37 +79,42 @@ vi.mock('../contexts/SchedulingContext', () => ({
   }),
 }));
 
-describe('PublicHome smoke', () => {
-  it('renderiza perfil público da barbearia', async () => {
-    const { PublicHome } = await import('./PublicHome');
-    render(
-      <MemoryRouter initialEntries={['/queue/shop-1']}>
-        <Routes>
-          <Route path="/queue/:id" element={<PublicHome />} />
-        </Routes>
-      </MemoryRouter>
-    );
+vi.mock('../infra/schedulingApi', () => ({
+  schedulingApi: {
+    getAppointmentSlots: vi.fn(async () => []),
+  },
+}));
 
-    await waitFor(() => {
-      expect(screen.getByText(/salão teste/i)).toBeInTheDocument();
-    });
+vi.mock('../components/domain/AppointmentScheduler', () => ({
+  AppointmentScheduler: () => null,
+}));
+
+vi.mock('../components/domain/ShopProfile', () => ({
+  ShopProfile: () => null,
+}));
+
+function renderPublicHome() {
+  return render(
+    <MemoryRouter initialEntries={['/queue/shop-1']}>
+      <Routes>
+        <Route path="/queue/:id" element={<PublicHome />} />
+      </Routes>
+    </MemoryRouter>
+  );
+}
+
+describe('PublicHome smoke', () => {
+  it('renderiza perfil público da barbearia', () => {
+    renderPublicHome();
+    expect(screen.getByText(/salão teste/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /adicionar dependente/i })).toBeInTheDocument();
   });
 
   it('envia dependente como pessoa adicional na fila', async () => {
     mockJoinQueue.mockClear();
-    const { PublicHome } = await import('./PublicHome');
-    render(
-      <MemoryRouter initialEntries={['/queue/shop-1']}>
-        <Routes>
-          <Route path="/queue/:id" element={<PublicHome />} />
-        </Routes>
-      </MemoryRouter>
-    );
+    renderPublicHome();
 
-    await waitFor(() => {
-      expect(screen.getByText(/salão teste/i)).toBeInTheDocument();
-    });
+    expect(screen.getByText(/salão teste/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /adicionar dependente/i }));
     fireEvent.change(screen.getByPlaceholderText(/ex: joão silva/i), {
@@ -116,12 +123,7 @@ describe('PublicHome smoke', () => {
     fireEvent.click(screen.getByRole('button', { name: /adicionar à fila/i }));
 
     await waitFor(() => {
-      expect(mockJoinQueue).toHaveBeenCalledWith(
-        'Maria Silva',
-        '',
-        's1',
-        { additionalPerson: true }
-      );
+      expect(mockJoinQueue).toHaveBeenCalledWith('Maria Silva', '', 's1', { additionalPerson: true });
     });
   });
 });

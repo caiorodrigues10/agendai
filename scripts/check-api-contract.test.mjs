@@ -41,6 +41,18 @@ test('expands factories, query suffixes, multipart and default GET', t => {
     ['PATCH /api/a/{}', 'PATCH /api/b/{}', 'POST /api/upload', 'GET /api/items']);
 });
 
+test('skips fetch(url) when url is the enclosing transport parameter', t => {
+  const root = fixture(t, { 'wrapper.ts': `
+    async function clientFetch(url: string, init?: RequestInit) {
+      return fetch(url, init);
+    }
+    clientFetch('/api/client/portal/me');
+    fetch('/api/client/portal/refresh', { method: 'POST' });
+  ` });
+  assert.deepEqual(frontendRequests(path.join(root, 'wrapper.ts')).map(r => r.key),
+    ['GET /api/client/portal/me', 'POST /api/client/portal/refresh']);
+});
+
 test('fails closed on unknown URL expressions and dynamic methods', t => {
   for (const [index, source] of ['apiClient(dynamicUrl)', 'apiClient("/api/a", method)', 'apiClient(`/api/items${suffix}`)'].entries()) {
     const root = fixture(t, { [`${index}.ts`]: source });

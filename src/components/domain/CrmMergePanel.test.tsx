@@ -1,5 +1,5 @@
+/// <reference types="vitest/globals" />
 import React from 'react';
-import { beforeEach, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { CrmMergePanel } from './CrmMergePanel';
 import { CrmMergeSchema } from '../../schemas';

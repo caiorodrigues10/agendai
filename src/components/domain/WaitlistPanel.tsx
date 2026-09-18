@@ -67,7 +67,7 @@ export const WaitlistPanel: React.FC = () => {
     setError(null);
     try {
       const data = await waitlistApi.list(barbershopId);
-      setEntries(data);
+      setEntries(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(getErrorMessage(err, 'Erro ao carregar lista de espera'));
     } finally {

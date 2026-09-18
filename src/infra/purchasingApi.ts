@@ -13,11 +13,12 @@ function token() {
 export interface PurchaseOrder {
   id: string;
   barbershopId: string;
-  supplier: string;
+  supplierId?: string | null;
+  supplier?: { id: string; name: string } | null;
   status: string;
   totalAmount: number;
-  expectedDate?: string;
-  notes?: string;
+  expectedAt?: string | null;
+  notes?: string | null;
   items: PurchaseOrderItem[];
   createdAt: string;
   updatedAt: string;
@@ -25,11 +26,11 @@ export interface PurchaseOrder {
 
 export interface PurchaseOrderItem {
   id: string;
-  name: string;
+  description: string;
   quantity: number;
   unitPrice: number;
   total: number;
-  received: number;
+  productId?: string | null;
 }
 
 export const purchasingApi = {
@@ -38,7 +39,7 @@ export const purchasingApi = {
     if (params?.status) qs.set('status', params.status);
     const query = qs.toString();
     return apiClient<{ success: boolean; data: PurchaseOrder[] }>(
-      `/api/barbershops/${barbershopId}/purchasing/orders${query ? '?' + query : ''}`,
+      `/api/barbershops/${barbershopId}/purchase-orders${query ? '?' + query : ''}`,
       'GET',
       undefined,
       token()
@@ -47,57 +48,52 @@ export const purchasingApi = {
 
   getOrder: (barbershopId: string, orderId: string) =>
     apiClient<{ success: boolean; data: PurchaseOrder }>(
-      `/api/barbershops/${barbershopId}/purchasing/orders/${orderId}`,
+      `/api/barbershops/${barbershopId}/purchase-orders/${orderId}`,
       'GET',
       undefined,
       token()
     ).then(r => unwrap<PurchaseOrder>(r)),
 
-  createOrder: (barbershopId: string, data: { supplier: string; expectedDate?: string; notes?: string; items: { name: string; quantity: number; unitPrice: number }[] }) =>
+  createOrder: (barbershopId: string, data: {
+    supplierId?: string;
+    notes?: string;
+    expectedAt?: string;
+  }) =>
     apiClient<{ success: boolean; data: PurchaseOrder }>(
-      `/api/barbershops/${barbershopId}/purchasing/orders`,
+      `/api/barbershops/${barbershopId}/purchase-orders`,
       'POST',
-      data,
+      { barbershopId, ...data },
       token()
     ).then(r => unwrap<PurchaseOrder>(r)),
 
   updateOrder: (barbershopId: string, orderId: string, data: Partial<PurchaseOrder>) =>
     apiClient<{ success: boolean; data: PurchaseOrder }>(
-      `/api/barbershops/${barbershopId}/purchasing/orders/${orderId}`,
+      `/api/barbershops/${barbershopId}/purchase-orders/${orderId}`,
       'PATCH',
       data,
       token()
     ).then(r => unwrap<PurchaseOrder>(r)),
 
-  addItem: (barbershopId: string, orderId: string, data: { name: string; quantity: number; unitPrice: number }) =>
+  addItem: (barbershopId: string, orderId: string, data: {
+    description: string;
+    quantity: number;
+    unitPrice: number;
+    productId?: string;
+  }) =>
     apiClient<{ success: boolean; data: PurchaseOrderItem }>(
-      `/api/barbershops/${barbershopId}/purchasing/orders/${orderId}/items`,
+      `/api/barbershops/${barbershopId}/purchase-orders/${orderId}/items`,
       'POST',
       data,
       token()
     ).then(r => unwrap<PurchaseOrderItem>(r)),
 
-  removeItem: (barbershopId: string, orderId: string, itemId: string) =>
-    apiClient<{ success: boolean }>(
-      `/api/barbershops/${barbershopId}/purchasing/orders/${orderId}/items/${itemId}`,
-      'DELETE',
-      undefined,
-      token()
-    ),
-
-  receiveItem: (barbershopId: string, orderId: string, itemId: string, data: { quantity: number }) =>
-    apiClient<{ success: boolean; data: PurchaseOrderItem }>(
-      `/api/barbershops/${barbershopId}/purchasing/orders/${orderId}/items/${itemId}/receive`,
-      'POST',
-      data,
-      token()
-    ).then(r => unwrap<PurchaseOrderItem>(r)),
-
-  receiveOrder: (barbershopId: string, orderId: string) =>
+  receiveOrder: (barbershopId: string, orderId: string, data?: {
+    items?: { itemId: string; receivedQuantity: number }[];
+  }) =>
     apiClient<{ success: boolean; data: PurchaseOrder }>(
-      `/api/barbershops/${barbershopId}/purchasing/orders/${orderId}/receive`,
+      `/api/barbershops/${barbershopId}/purchase-orders/${orderId}/receive`,
       'POST',
-      undefined,
+      data ?? {},
       token()
     ).then(r => unwrap<PurchaseOrder>(r)),
 };

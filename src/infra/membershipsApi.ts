@@ -1,10 +1,10 @@
 import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
 import { buildQuery } from '../utils/query';
+import { unwrapData, unwrapList } from '../utils/apiData';
 
 function unwrap<T>(res: unknown): T {
-  if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
-  return res as T;
+  return unwrapData<T>(res);
 }
 
 function token() {
@@ -64,7 +64,7 @@ export const membershipsApi = {
       'GET',
       undefined,
       token()
-    ).then(res => unwrap<MembershipPlan[]>(res)),
+    ).then(res => unwrapList<MembershipPlan>(res)),
 
   createPlan: (barbershopId: string, data: { name: string; description?: string; price: number; billingCycle: string; benefits: any[] }) =>
     apiClient<{ success: boolean; data: MembershipPlan }>(
@@ -88,7 +88,7 @@ export const membershipsApi = {
       'GET',
       undefined,
       token()
-    ).then(res => unwrap<ClientMembership[]>(res)),
+    ).then(res => unwrapList<ClientMembership>(res)),
 
   createMembership: (barbershopId: string, data: { planId: string; clientId: string }) =>
     apiClient<{ success: boolean; data: ClientMembership }>(

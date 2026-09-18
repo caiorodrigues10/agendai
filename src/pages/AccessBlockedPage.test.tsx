@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+/// <reference types="vitest/globals" />
 import { screen } from '@testing-library/react';
 import { AccessBlockedPage } from './AccessBlockedPage';
 import { renderWithProviders } from '../tests/testUtils';

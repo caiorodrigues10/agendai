@@ -4,10 +4,9 @@ import {
   Plus,
   Trash2,
   Loader2,
-  PackageCheck,
   CheckCircle2,
 } from 'lucide-react';
-import { purchasingApi, PurchaseOrder, PurchaseOrderItem } from '../../infra/purchasingApi';
+import { purchasingApi, PurchaseOrder } from '../../infra/purchasingApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';
 
@@ -45,12 +44,21 @@ export const PurchasingPanel: React.FC = () => {
     setCreating(true);
     setError('');
     try {
-      const order = await purchasingApi.createOrder(barbershopId, {
-        supplier: newSupplier.trim(),
-        expectedDate: newExpectedDate || undefined,
-        notes: newNotes.trim() || undefined,
-        items: newItems,
-      });
+      const expectedAt = newExpectedDate
+        ? new Date(`${newExpectedDate}T12:00:00.000Z`).toISOString()
+        : undefined;
+      const notes = [newSupplier.trim(), newNotes.trim()].filter(Boolean).join(' — ') || undefined;
+      let order = await purchasingApi.createOrder(barbershopId, { notes, expectedAt });
+      for (const item of newItems) {
+        await purchasingApi.addItem(barbershopId, order.id, {
+          description: item.name,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+        });
+      }
+      if (newItems.length) {
+        order = await purchasingApi.getOrder(barbershopId, order.id);
+      }
       setOrders(prev => [order, ...prev]);
       setShowCreate(false);
       setNewSupplier('');
@@ -79,31 +87,14 @@ export const PurchasingPanel: React.FC = () => {
   const handleReceiveOrder = async (orderId: string) => {
     if (!barbershopId) return;
     try {
-      const updated = await purchasingApi.receiveOrder(barbershopId, orderId);
+      const order = orders.find(o => o.id === orderId) ?? selectedOrder;
+      const updated = await purchasingApi.receiveOrder(barbershopId, orderId, {
+        items: order?.items.map(item => ({ itemId: item.id, receivedQuantity: item.quantity })),
+      });
       setOrders(prev => prev.map(o => o.id === orderId ? updated : o));
       if (selectedOrder?.id === orderId) setSelectedOrder(updated);
     } catch (err) {
       setError(getErrorMessage(err, 'Erro ao receber pedido.'));
-    }
-  };
-
-  const handleReceiveItem = async (orderId: string, itemId: string) => {
-    if (!barbershopId) return;
-    try {
-      const item = selectedOrder?.items.find(i => i.id === itemId);
-      if (!item) return;
-      const remaining = item.quantity - item.received;
-      const updated = await purchasingApi.receiveItem(barbershopId, orderId, itemId, { quantity: remaining });
-      setOrders(prev => prev.map(o => {
-        if (o.id !== orderId) return o;
-        return { ...o, items: o.items.map(i => i.id === itemId ? updated : i) };
-      }));
-      setSelectedOrder(prev => {
-        if (!prev || prev.id !== orderId) return prev;
-        return { ...prev, items: prev.items.map(i => i.id === itemId ? updated : i) };
-      });
-    } catch (err) {
-      setError(getErrorMessage(err, 'Erro ao receber item.'));
     }
   };
 
@@ -220,7 +211,7 @@ export const PurchasingPanel: React.FC = () => {
       )}
 
       <div className="flex gap-2 overflow-x-auto">
-        {['', 'PENDING', 'PARTIAL', 'RECEIVED'].map(s => (
+        {['', 'DRAFT', 'SENT', 'RECEIVED', 'CANCELED'].map(s => (
           <button
             key={s}
             onClick={() => setStatusFilter(s)}
@@ -250,9 +241,9 @@ export const PurchasingPanel: React.FC = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-bold text-text-primary">{order.supplier}</p>
+                  <p className="text-sm font-bold text-text-primary">{order.supplier?.name || order.notes || 'Pedido'}</p>
                   <p className="text-xs text-text-muted">
-                    {order.items.length} itens · {new Date(order.createdAt).toLocaleDateString('pt-BR')}
+                    {(order.items?.length ?? 0)} itens · {new Date(order.createdAt).toLocaleDateString('pt-BR')}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -268,19 +259,11 @@ export const PurchasingPanel: React.FC = () => {
                   {order.items.map(item => (
                     <div key={item.id} className="flex items-center justify-between rounded-xl bg-surface-2 p-2">
                       <div>
-                        <p className="text-xs font-bold text-text-primary">{item.name}</p>
+                        <p className="text-xs font-bold text-text-primary">{item.description}</p>
                         <p className="text-[10px] text-text-muted">
-                          {item.quantity} x R$ {item.unitPrice.toFixed(2)} · Recebido: {item.received}
+                          {item.quantity} x R$ {item.unitPrice.toFixed(2)}
                         </p>
                       </div>
-                      {item.received < item.quantity && order.status !== 'RECEIVED' && (
-                        <button
-                          onClick={e => { e.stopPropagation(); void handleReceiveItem(order.id, item.id); }}
-                          className="flex items-center gap-1 rounded-lg bg-success/10 px-2 py-1 text-[10px] font-bold text-success hover:bg-success/20"
-                        >
-                          <PackageCheck size={10} /> Receber
-                        </button>
-                      )}
                     </div>
                   ))}
                   {order.status !== 'RECEIVED' && (

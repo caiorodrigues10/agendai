@@ -1,14 +1,14 @@
 import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
 import { buildQuery } from '../utils/query';
-
-function unwrap<T>(res: unknown): T {
-  if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
-  return res as T;
-}
+import { unwrapData, unwrapList } from '../utils/apiData';
 
 function token() {
   return authStorage.getAccessToken() || '';
+}
+
+function todayIso() {
+  return new Date().toISOString().slice(0, 10);
 }
 
 export interface CashMovement {
@@ -46,7 +46,7 @@ export const cashApi = {
       'POST',
       data,
       token()
-    ).then(res => unwrap<CashMovement>(res)),
+    ).then(res => unwrapData<CashMovement>(res)),
 
   getMovements: (barbershopId: string, params?: { date?: string; paymentMethod?: string }) =>
     apiClient<{ success: boolean; data: CashMovement[] }>(
@@ -54,7 +54,7 @@ export const cashApi = {
       'GET',
       undefined,
       token()
-    ).then(res => unwrap<CashMovement[]>(res)),
+    ).then(res => unwrapList<CashMovement>(res)),
 
   getSummary: (barbershopId: string, date?: string) =>
     apiClient<{ success: boolean; data: CashSummary }>(
@@ -62,5 +62,21 @@ export const cashApi = {
       'GET',
       undefined,
       token()
-    ).then(res => unwrap<CashSummary>(res)),
+    ).then(res => {
+      const data = unwrapData<CashSummary | { summary?: CashSummary['byMethod']; totalMovements?: number }>(res);
+      if (data && typeof data === 'object' && 'byMethod' in data && data.byMethod) {
+        return data as CashSummary;
+      }
+      const byMethod =
+        data && typeof data === 'object' && 'summary' in data && data.summary && typeof data.summary === 'object'
+          ? data.summary
+          : {};
+      const total = Object.values(byMethod).reduce((sum, entry) => sum + (entry?.total ?? 0), 0);
+      return {
+        date: todayIso(),
+        movements: [],
+        byMethod,
+        total,
+      };
+    }),
 };

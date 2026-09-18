@@ -36,26 +36,26 @@ export const copilotApi = {
     ).then(r => unwrap<CopilotSuggestion[]>(r));
   },
 
-  markRead: (suggestionId: string) =>
+  markRead: (barbershopId: string, suggestionId: string) =>
     apiClient<{ success: boolean; data: CopilotSuggestion }>(
-      `/api/copilot/suggestions/${suggestionId}/read`,
+      `/api/barbershops/${barbershopId}/copilot/suggestions/${suggestionId}/read`,
       'PATCH',
       undefined,
       token()
     ).then(r => unwrap<CopilotSuggestion>(r)),
 
-  dismiss: (suggestionId: string) =>
+  dismiss: (barbershopId: string, suggestionId: string) =>
     apiClient<{ success: boolean; data: CopilotSuggestion }>(
-      `/api/copilot/suggestions/${suggestionId}/dismiss`,
+      `/api/barbershops/${barbershopId}/copilot/suggestions/${suggestionId}/dismiss`,
       'PATCH',
       undefined,
       token()
     ).then(r => unwrap<CopilotSuggestion>(r)),
 
-  accept: (suggestionId: string) =>
+  accept: (barbershopId: string, suggestionId: string) =>
     apiClient<{ success: boolean; data: CopilotSuggestion }>(
-      `/api/copilot/suggestions/${suggestionId}/accept`,
-      'POST',
+      `/api/barbershops/${barbershopId}/copilot/suggestions/${suggestionId}/accept`,
+      'PATCH',
       undefined,
       token()
     ).then(r => unwrap<CopilotSuggestion>(r)),

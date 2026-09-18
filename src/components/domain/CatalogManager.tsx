@@ -63,14 +63,14 @@ export const CatalogManager: React.FC = () => {
     if (!barbershopId || !selectedServiceId) return;
     if (activeTab === 'variations') {
       setLoadingVars(true);
-      catalogApi.listVariations(barbershopId, selectedServiceId)
-        .then(setVariations)
+      catalogApi.listVariations(barbershopId, { serviceId: selectedServiceId })
+        .then(rows => setVariations(Array.isArray(rows) ? rows : []))
         .catch(() => setVariations([]))
         .finally(() => setLoadingVars(false));
     } else if (activeTab === 'addons') {
       setLoadingAddons(true);
-      catalogApi.listAddons(barbershopId, selectedServiceId)
-        .then(setAddons)
+      catalogApi.listAddons(barbershopId, { serviceId: selectedServiceId })
+        .then(rows => setAddons(Array.isArray(rows) ? rows : []))
         .catch(() => setAddons([]))
         .finally(() => setLoadingAddons(false));
     }
@@ -80,7 +80,7 @@ export const CatalogManager: React.FC = () => {
     if (!barbershopId || activeTab !== 'combos') return;
     setLoadingCombos(true);
     catalogApi.listCombos(barbershopId)
-      .then(setCombos)
+      .then(rows => setCombos(Array.isArray(rows) ? rows : []))
       .catch(() => setCombos([]))
       .finally(() => setLoadingCombos(false));
   }, [barbershopId, activeTab]);
@@ -90,7 +90,8 @@ export const CatalogManager: React.FC = () => {
     setCreatingVar(true);
     setError('');
     try {
-      const v = await catalogApi.createVariation(barbershopId, selectedServiceId, {
+      const v = await catalogApi.createVariation(barbershopId, {
+        serviceId: selectedServiceId,
         name: varName.trim(),
         price: Number(varPrice) || 0,
         avgTimeMinutes: Number(varTime) || 0,
@@ -112,7 +113,8 @@ export const CatalogManager: React.FC = () => {
     setCreatingAddon(true);
     setError('');
     try {
-      const a = await catalogApi.createAddon(barbershopId, selectedServiceId, {
+      const a = await catalogApi.createAddon(barbershopId, {
+        serviceId: selectedServiceId,
         name: addonName.trim(),
         price: Number(addonPrice) || 0,
         avgTimeMinutes: Number(addonTime) || 0,

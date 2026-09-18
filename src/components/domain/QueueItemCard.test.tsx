@@ -1,5 +1,5 @@
+/// <reference types="vitest/globals" />
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
 import { QueueItemCard } from './QueueItemCard';
 import type { QueueItem, Service } from '../../types';
 

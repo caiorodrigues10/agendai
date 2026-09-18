@@ -22,13 +22,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { Logo } from '../components/ui/Logo';
-import { CreditCardForm } from '../components/ui/credit-card-form';
 import {
   normalizeDocument,
   maskCpf,
   maskCnpj,
-  maskPhone,
-  normalizePhoneBR,
   isValidDocument,
 } from '../utils/documentUtils';
 
@@ -100,15 +97,6 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
   const [lastName, setLastName] = useState('');
   const [docType, setDocType] = useState<'CPF' | 'CNPJ'>('CPF');
   const [docNumber, setDocNumber] = useState('');
-
-  // Cartão Asaas: o fluxo atual envia os dados ao backend sem persistência/log.
-  const [asaasCardName, setAsaasCardName] = useState('');
-  const [asaasCardNumber, setAsaasCardNumber] = useState('');
-  const [asaasCardExpiry, setAsaasCardExpiry] = useState('');
-  const [asaasCardCvv, setAsaasCardCvv] = useState('');
-  const [asaasPostalCode, setAsaasPostalCode] = useState('');
-  const [asaasAddressNumber, setAsaasAddressNumber] = useState('');
-  const [asaasPhone, setAsaasPhone] = useState('');
 
   // PIX
   const [pixPayment, setPixPayment] = useState<Payment | null>(null);
@@ -230,33 +218,11 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
     return null;
   };
 
-  const validateAsaasCard = (): string | null => {
-    if (!asaasCardName.trim()) return 'Informe o nome impresso no cartão.';
-    const digits = asaasCardNumber.replace(/\D/g, '');
-    if (digits.length < 13 || digits.length > 19)
-      return 'Número do cartão inválido. Confira os dados.';
-    const m = /^(\d{2})\s*\/\s*(\d{2})$/.exec(asaasCardExpiry.trim());
-    if (!m) return 'Validade inválida. Use o formato MM/AA.';
-    const month = Number(m[1]);
-    const year = 2000 + Number(m[2]);
-    const now = new Date();
-    if (
-      month < 1 ||
-      month > 12 ||
-      year < now.getFullYear() ||
-      (year === now.getFullYear() && month < now.getMonth() + 1)
-    ) {
-      return 'Validade do cartão vencida. Confira os dados.';
+  const redirectToHostedCheckout = (url: string | null | undefined) => {
+    if (!url) {
+      throw new Error('O checkout hospedado Asaas não retornou uma URL. Tente novamente.');
     }
-    if (!/^\d{3,4}$/.test(asaasCardCvv.trim())) return 'Código de segurança (CVV) inválido.';
-    if (normalizeDocument(asaasPostalCode).length !== 8)
-      return 'Informe um CEP válido (8 dígitos).';
-    if (!asaasAddressNumber.trim()) return 'Informe o número do endereço do titular.';
-    const phoneDigits = normalizePhoneBR(asaasPhone);
-    if (phoneDigits.length < 10 || phoneDigits.length > 11) {
-      return 'Informe um telefone válido com DDD.';
-    }
-    return null;
+    window.location.assign(url);
   };
 
   const buildBasePayload = (): SubscribePayload => {
@@ -301,61 +267,48 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
   };
 
   const submitAsaasCard = async () => {
-    const validationError = validatePayerForm() || validateAsaasCard();
+    const validationError = validatePayerForm();
     if (validationError) {
       setError(validationError);
+      return;
+    }
+    const doc = normalizeDocument(docNumber);
+    if (!doc || !isValidDocument(docType, doc)) {
+      setError(`${docType} inválido. Confira o número.`);
       return;
     }
     setError(null);
     setSubmitting(true);
     try {
-      const [mm, yy] = asaasCardExpiry.split('/');
-      const card = {
-        holderName: asaasCardName.trim(),
-        number: asaasCardNumber.replace(/\D/g, ''),
-        expiryMonth: mm.trim(),
-        expiryYear: `20${yy.trim()}`,
-        ccv: asaasCardCvv.trim(),
-        postalCode: normalizeDocument(asaasPostalCode),
-        addressNumber: asaasAddressNumber.trim(),
-        phone: normalizePhoneBR(asaasPhone),
-      };
-      const doc = normalizeDocument(docNumber);
-
       if (isTrialSetup) {
-        if (!doc || !isValidDocument(docType, doc)) {
-          setError(`${docType} inválido. Confira o número.`);
-          setSubmitting(false);
-          return;
-        }
         const sub = await subscriptionsApi.setupTrialCard({
           planId: plan!.id,
           payerEmail: payerEmail.trim(),
           payerFirstName: firstName.trim() || undefined,
           payerLastName: lastName.trim() || undefined,
           payerIdentification: { type: docType, number: doc },
-          asaasCreditCard: card,
         }, idempotencyKeys.current.TRIAL);
+        if (sub.payment?.checkoutUrl) {
+          redirectToHostedCheckout(sub.payment.checkoutUrl);
+          return;
+        }
         await refreshSubscription();
         if (sub.hasPaymentMethod || sub.status === 'TRIALING') {
           setSuccess(true);
           sessionStorage.removeItem('agendai:access-block-info');
         } else {
-          setError('Cartão não foi salvo. Tente novamente.');
+          setError('Não foi possível iniciar o checkout do cartão. Tente novamente.');
         }
         return;
       }
 
-      await subscriptionsApi.subscribe({
+      const subscription = await subscriptionsApi.subscribe({
         ...buildBasePayload(),
         asaasBillingType: 'CREDIT_CARD',
-        asaasCreditCard: card,
       }, idempotencyKeys.current.CREDIT_CARD);
-      setError(
-        'Pagamento processado. Assim que for confirmado, seu acesso será liberado automaticamente.'
-      );
+      redirectToHostedCheckout(subscription.payment?.checkoutUrl);
     } catch (err: any) {
-      setError(getErrorMessage(err, 'Erro ao processar o cartão.'));
+      setError(getErrorMessage(err, 'Erro ao abrir o checkout do cartão.'));
     } finally {
       setSubmitting(false);
     }
@@ -661,87 +614,15 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
                       Pagamento processado pelo Asaas{' '}
                       {asaasBillingType === 'PIX'
                         ? 'via PIX — o QR Code é gerado aqui mesmo.'
-                        : 'via cartão — o pagamento é aprovado em instantes.'}
+                        : 'via cartão — você informa os dados no checkout seguro da Asaas.'}
                     </p>
                   </>
                 )}
 
                 {isTrialSetup && (
                   <p className="text-xs text-text-muted">
-                    Cartão tokenizado pelo Asaas — sem cobrança até o fim dos 30 dias.
+                    Sem cobrança até o fim dos 30 dias. O cartão é informado no checkout hospedado da Asaas — o número não passa pelo AgendAI.
                   </p>
-                )}
-
-                {asaasBillingType === 'CREDIT_CARD' && (
-                  <>
-                    <div className="pt-2">
-                      <CreditCardForm
-                        maskMiddle
-                        showSubmit={false}
-                        ring1="#10b981"
-                        ring2="#06b6d4"
-                        submitLabel={
-                          isTrialSetup ? 'Cadastrar cartão' : `Pagar ${formatPrice(plan.price)}`
-                        }
-                        onChange={state => {
-                          setAsaasCardNumber(state.number);
-                          setAsaasCardName(state.holder);
-                          setAsaasCardExpiry(`${state.month}/${state.year.slice(-2)}`);
-                          setAsaasCardCvv(state.cvv);
-                        }}
-                        onSubmit={() => {
-                          if (asaasBillingType === 'CREDIT_CARD') {
-                            submitAsaasCard();
-                          }
-                        }}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label htmlFor="billing-postal-code" className="text-xs font-bold text-text-secondary block mb-1">
-                          CEP *
-                        </label>
-                        <input
-                          id="billing-postal-code"
-                          className={inputClass}
-                          placeholder="00000-000"
-                          inputMode="numeric"
-                          value={asaasPostalCode}
-                          onChange={e => {
-                            const d = normalizeDocument(e.target.value).slice(0, 8);
-                            setAsaasPostalCode(d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d);
-                          }}
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="billing-address-number" className="text-xs font-bold text-text-secondary block mb-1">
-                          Nº endereço *
-                        </label>
-                        <input
-                          id="billing-address-number"
-                          className={inputClass}
-                          placeholder="123"
-                          value={asaasAddressNumber}
-                          onChange={e => setAsaasAddressNumber(e.target.value.slice(0, 20))}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label htmlFor="billing-phone" className="text-xs font-bold text-text-secondary block mb-1">
-                        Telefone do titular *
-                      </label>
-                      <input
-                        id="billing-phone"
-                        className={inputClass}
-                        placeholder="(00) 00000-0000"
-                        inputMode="numeric"
-                        value={asaasPhone}
-                        onChange={e => setAsaasPhone(maskPhone(e.target.value))}
-                      />
-                    </div>
-                  </>
                 )}
 
                 <button
@@ -756,7 +637,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
                     </>
                   ) : isTrialSetup ? (
                     <>
-                      <Landmark size={16} /> Cadastrar cartão e começar trial
+                      <Landmark size={16} /> Continuar no checkout Asaas
                     </>
                   ) : asaasBillingType === 'PIX' ? (
                     <>
@@ -764,7 +645,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
                     </>
                   ) : (
                     <>
-                      <CreditCard size={16} /> Pagar {formatPrice(plan.price)}
+                      <CreditCard size={16} /> Pagar {formatPrice(plan.price)} no Asaas
                     </>
                   )}
                 </button>

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+/// <reference types="vitest/globals" />
 import { COMMERCIAL_PAGES } from './commercialPages';
 import { canonicalUrl } from './siteUrl';
 

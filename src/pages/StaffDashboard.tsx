@@ -57,6 +57,7 @@ import { GiftCardsPanel } from '../components/domain/GiftCardsPanel';
 import { OrganizationsPanel } from '../components/domain/OrganizationsPanel';
 import { ProfitEnginePanel } from '../components/domain/ProfitEnginePanel';
 import { ResourcesPanel } from '../components/domain/ResourcesPanel';
+import { ErrorBoundary } from '../components/infra/ErrorBoundary';
 
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -507,13 +508,27 @@ export const StaffDashboard: React.FC = () => {
 
           {activeTab === 'finance' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
             <div className="space-y-6">
-              <OwnerFinancialPanel />
-              <CashPanel />
-              <DepositPolicyPanel />
-              <WaitlistPanel />
-              <MembershipsPanel />
-              <LoyaltyPanel />
-              <GoalsPanel />
+              <ErrorBoundary variant="section">
+                <OwnerFinancialPanel />
+              </ErrorBoundary>
+              <ErrorBoundary variant="section">
+                <CashPanel />
+              </ErrorBoundary>
+              <ErrorBoundary variant="section">
+                <DepositPolicyPanel />
+              </ErrorBoundary>
+              <ErrorBoundary variant="section">
+                <WaitlistPanel />
+              </ErrorBoundary>
+              <ErrorBoundary variant="section">
+                <MembershipsPanel />
+              </ErrorBoundary>
+              <ErrorBoundary variant="section">
+                <LoyaltyPanel />
+              </ErrorBoundary>
+              <ErrorBoundary variant="section">
+                <GoalsPanel />
+              </ErrorBoundary>
             </div>
           )}
 

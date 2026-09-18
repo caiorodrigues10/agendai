@@ -11,36 +11,41 @@ function token() {
 }
 
 export interface Review {
-  id: string;
-  barbershopId: string;
-  clientId: string;
-  clientName: string;
+  id?: string;
+  barbershopId?: string;
+  clientId?: string;
+  clientName?: string;
   rating: number;
-  comment?: string;
+  comment?: string | null;
   sentiment?: string;
   createdAt: string;
-  response?: ReviewResponse;
+  response?: ReviewResponse | string | null;
+  staff?: { name: string } | null;
 }
 
 export interface ReviewResponse {
   id: string;
   reviewId: string;
-  message: string;
+  content?: string;
+  message?: string;
   createdAt: string;
 }
 
 export interface ReputationStats {
   barbershopId: string;
-  averageRating: number;
+  avgRating: number;
   totalReviews: number;
-  sentimentBreakdown: { positive: number; neutral: number; negative: number };
-  ratingDistribution: Record<number, number>;
+  npsScore: number | null;
+  sentimentPositive: number;
+  sentimentNeutral: number;
+  sentimentNegative: number;
+  computedAt?: string | null;
 }
 
 export const reputationApi = {
   getStats: (barbershopId: string) =>
     apiClient<{ success: boolean; data: ReputationStats }>(
-      `/api/barbershops/${barbershopId}/reputation/stats`,
+      `/api/barbershops/${barbershopId}/reputation`,
       'GET',
       undefined,
       token()
@@ -54,30 +59,32 @@ export const reputationApi = {
       token()
     ).then(r => unwrap<ReputationStats>(r)),
 
-  listReviews: (barbershopId: string, params?: { sentiment?: string; page?: number }) => {
+  listReviews: (barbershopId: string, params?: { staffId?: string }) => {
     const qs = new URLSearchParams();
-    if (params?.sentiment) qs.set('sentiment', params.sentiment);
-    if (params?.page) qs.set('page', String(params.page));
+    if (params?.staffId) qs.set('staffId', params.staffId);
     const query = qs.toString();
-    return apiClient<{ success: boolean; data: Review[] }>(
-      `/api/barbershops/${barbershopId}/reputation/reviews${query ? '?' + query : ''}`,
+    return apiClient<{ success: boolean; data: { reviews?: Review[] } | Review[] }>(
+      `/api/barbershops/${barbershopId}/reviews${query ? '?' + query : ''}`,
       'GET',
       undefined,
       token()
-    ).then(r => unwrap<Review[]>(r));
+    ).then(r => {
+      const data = unwrap<{ reviews?: Review[] } | Review[]>(r);
+      return Array.isArray(data) ? data : (data.reviews ?? []);
+    });
   },
 
-  respondToReview: (reviewId: string, message: string) =>
+  respondToReview: (barbershopId: string, reviewId: string, content: string) =>
     apiClient<{ success: boolean; data: ReviewResponse }>(
-      `/api/reputation/reviews/${reviewId}/respond`,
+      `/api/barbershops/${barbershopId}/reviews/${reviewId}/respond`,
       'POST',
-      { message },
+      { content },
       token()
     ).then(r => unwrap<ReviewResponse>(r)),
 
-  getResponse: (reviewId: string) =>
+  getResponse: (barbershopId: string, reviewId: string) =>
     apiClient<{ success: boolean; data: ReviewResponse | null }>(
-      `/api/reputation/reviews/${reviewId}/response`,
+      `/api/barbershops/${barbershopId}/reviews/${reviewId}/response`,
       'GET',
       undefined,
       token()

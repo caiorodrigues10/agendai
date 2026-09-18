@@ -13,57 +13,54 @@ function token() {
 export interface QualityProtocol {
   id: string;
   barbershopId: string;
-  title: string;
-  description: string;
-  category: string;
+  name: string;
+  description?: string | null;
+  category?: string | null;
+  checklistItems?: { title: string; description?: string | null; required?: boolean }[];
   isActive: boolean;
-  createdBy: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface QualityAudit {
   id: string;
-  barbershopId: string;
   protocolId: string;
-  protocolTitle: string;
-  auditorId: string;
-  auditorName: string;
-  score: number;
-  notes?: string;
-  status: string;
-  createdAt: string;
+  barbershopId: string;
+  score: number | null;
+  notes?: string | null;
+  auditedAt?: string;
+  protocol?: { id: string; name: string; category?: string | null };
+  auditedBy?: { id: string; name: string } | null;
 }
 
 export interface QualityOverview {
-  barbershopId: string;
-  averageScore: number;
+  totalProtocols: number;
+  activeProtocols: number;
   totalAudits: number;
-  protocolsActive: number;
-  recentTrend: 'UP' | 'DOWN' | 'STABLE';
-  breakdownByCategory: { category: string; avgScore: number }[];
+  averageScore: number | null;
+  recentAudits: { score: number | null; auditedAt: string; protocolId: string }[];
 }
 
 export const qualityApi = {
   listProtocols: (barbershopId: string) =>
     apiClient<{ success: boolean; data: QualityProtocol[] }>(
-      `/api/barbershops/${barbershopId}/quality/protocols`,
+      `/api/barbershops/${barbershopId}/protocols`,
       'GET',
       undefined,
       token()
     ).then(r => unwrap<QualityProtocol[]>(r)),
 
-  createProtocol: (barbershopId: string, data: { title: string; description: string; category: string }) =>
+  createProtocol: (barbershopId: string, data: { name: string; description?: string; category?: string }) =>
     apiClient<{ success: boolean; data: QualityProtocol }>(
-      `/api/barbershops/${barbershopId}/quality/protocols`,
+      `/api/barbershops/${barbershopId}/protocols`,
       'POST',
-      data,
+      { barbershopId, ...data },
       token()
     ).then(r => unwrap<QualityProtocol>(r)),
 
   updateProtocol: (barbershopId: string, protocolId: string, data: Partial<QualityProtocol>) =>
     apiClient<{ success: boolean; data: QualityProtocol }>(
-      `/api/barbershops/${barbershopId}/quality/protocols/${protocolId}`,
+      `/api/barbershops/${barbershopId}/protocols/${protocolId}`,
       'PATCH',
       data,
       token()
@@ -71,32 +68,30 @@ export const qualityApi = {
 
   deleteProtocol: (barbershopId: string, protocolId: string) =>
     apiClient<{ success: boolean }>(
-      `/api/barbershops/${barbershopId}/quality/protocols/${protocolId}`,
+      `/api/barbershops/${barbershopId}/protocols/${protocolId}`,
       'DELETE',
       undefined,
       token()
     ),
 
-  runAudit: (barbershopId: string, data: { protocolId: string; score: number; notes?: string }) =>
+  runAudit: (barbershopId: string, protocolId: string, data: {
+    results: { checklistIndex: number; passed: boolean; note?: string }[];
+    notes?: string;
+  }) =>
     apiClient<{ success: boolean; data: QualityAudit }>(
-      `/api/barbershops/${barbershopId}/quality/audits`,
+      `/api/barbershops/${barbershopId}/protocols/${protocolId}/audits`,
       'POST',
-      data,
+      { protocolId, barbershopId, ...data },
       token()
     ).then(r => unwrap<QualityAudit>(r)),
 
-  listAudits: (barbershopId: string, params?: { protocolId?: string; page?: number }) => {
-    const qs = new URLSearchParams();
-    if (params?.protocolId) qs.set('protocolId', params.protocolId);
-    if (params?.page) qs.set('page', String(params.page));
-    const query = qs.toString();
-    return apiClient<{ success: boolean; data: QualityAudit[] }>(
-      `/api/barbershops/${barbershopId}/quality/audits${query ? '?' + query : ''}`,
+  listAudits: (barbershopId: string, protocolId: string) =>
+    apiClient<{ success: boolean; data: QualityAudit[] }>(
+      `/api/barbershops/${barbershopId}/protocols/${protocolId}/audits`,
       'GET',
       undefined,
       token()
-    ).then(r => unwrap<QualityAudit[]>(r));
-  },
+    ).then(r => unwrap<QualityAudit[]>(r)),
 
   getOverview: (barbershopId: string) =>
     apiClient<{ success: boolean; data: QualityOverview }>(

@@ -1,5 +1,5 @@
+/// <reference types="vitest/globals" />
 import React from 'react';
-import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ErrorBoundary } from './ErrorBoundary';
 import { logger } from '../../utils/logger';

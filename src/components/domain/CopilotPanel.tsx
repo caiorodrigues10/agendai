@@ -50,8 +50,9 @@ export const CopilotPanel: React.FC = () => {
   };
 
   const handleAccept = async (id: string) => {
+    if (!barbershopId) return;
     try {
-      const updated = await copilotApi.accept(id);
+      const updated = await copilotApi.accept(barbershopId, id);
       setSuggestions(prev => prev.map(s => s.id === id ? updated : s));
     } catch (err) {
       setError(getErrorMessage(err, 'Erro ao aceitar.'));
@@ -59,8 +60,9 @@ export const CopilotPanel: React.FC = () => {
   };
 
   const handleDismiss = async (id: string) => {
+    if (!barbershopId) return;
     try {
-      const updated = await copilotApi.dismiss(id);
+      const updated = await copilotApi.dismiss(barbershopId, id);
       setSuggestions(prev => prev.map(s => s.id === id ? updated : s));
     } catch (err) {
       setError(getErrorMessage(err, 'Erro ao dispensar.'));
@@ -68,8 +70,9 @@ export const CopilotPanel: React.FC = () => {
   };
 
   const handleMarkRead = async (id: string) => {
+    if (!barbershopId) return;
     try {
-      const updated = await copilotApi.markRead(id);
+      const updated = await copilotApi.markRead(barbershopId, id);
       setSuggestions(prev => prev.map(s => s.id === id ? updated : s));
     } catch (err) {
       setError(getErrorMessage(err, 'Erro ao marcar lida.'));

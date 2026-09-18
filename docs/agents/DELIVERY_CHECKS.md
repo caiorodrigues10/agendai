@@ -5,6 +5,12 @@
 Na raiz do frontend, com dependências instaladas e o backend irmão disponível:
 
 ```powershell
+npm run verify:delivery
+```
+
+O harness acima encadeia `docs:check`, `typecheck`, `test:contract`, `contract:check` e Vitest (sem produção). Equivalente passo a passo:
+
+```powershell
 npm run contract:check
 npm run test:contract
 npm run typecheck
@@ -13,13 +19,13 @@ npm run docs:check
 npm run build
 ```
 
-Se o checkout backend estiver em outro local, definir `API_CONTRACT_BACKEND` com seu caminho absoluto. Ausência do backend é erro, não skip. Na raiz do backend: `npm run typecheck`, `npm run test:unit` e `npm run docs:check`. Esses checks de contrato não carregam `.env`, não inicializam a API e não acessam banco/provedores. Fixtures do parser são sintéticas.
+`scripts/api-contract-debt.json` deve permanecer com `entries: []`. O parser ignora `fetch(url)` / `clientFetch(url)` quando `url` é parâmetro de transporte (portal do cliente). O check normal e o `--strict` reprovam qualquer divergência de método/caminho. Não adicionar exceções para fazer a checagem passar. A aprovação do check não certifica payloads, permissões nem o comportamento em produção.
+
+Se o checkout backend estiver em outro local, definir `API_CONTRACT_BACKEND` com seu caminho absoluto. Ausência do backend é erro, não skip. Na raiz do backend: `npm run verify:delivery` (docs, typecheck, test:security, unitários). Esses checks de contrato não carregam `.env`, não inicializam a API e não acessam banco/provedores. Fixtures do parser são sintéticas.
 
 O backend já registra `@fastify/swagger` e Swagger UI em `/docs` (`src/config/swagger.ts`); não havia exportação OpenAPI nem geração de cliente frontend. Os wrappers têm tipos manuais e várias rotas validam com Zod em preHandlers/controllers, sem schema equivalente no Swagger. Gerar um SDK desses schemas hoje não garantiria os payloads. A integração mínima mantém o transporte atual e compara a AST TypeScript dos wrappers com as rotas efetivamente chamadas por `apiRoutes`, usando o prefixo registrado em `app.ts`.
 
 Cobertura: chamadas `apiClient`, `apiFetch` e upload HTTP nos arquivos `src/infra/*Api.ts`; método, caminho e quantidade de segmentos, ignorando nomes de parâmetros e queries. Expande a factory de categorias. Não cobre corpos, respostas, parâmetros de query, permissões, chamadas fora desses wrappers nem o transporte interno de refresh. Não é um cliente gerado nem uma validação completa OpenAPI. Sintaxe dinâmica não suportada falha e exige extensão do parser com teste. Se mudar a arquitetura de registro das rotas, atualizar o extrator; ele foi feito para as funções atuais que recebem `app` diretamente.
-
-`scripts/api-contract-debt.json` registra 77 divergências preexistentes, por wrapper + método + caminho. O check normal mostra essa quantidade e bloqueia novas divergências; exige remover entradas quando corrigidas ou removidas. `npm run contract:check:strict` reprova qualquer divergência, inclusive a dívida. Não regenerar a lista para aprovar mudanças. Catálogo, portal do cliente, carteira e outros módulos dessa lista precisam de revisão de payload/autorização antes de corrigir endpoints; trocar apenas a URL não basta. A aprovação do check normal não certifica esses módulos para deploy.
 
 ## Smoke manual mínimo após deploy
 

@@ -84,9 +84,18 @@ export function frontendRequests(file) {
   walk(ast, node => {
     if (!ts.isCallExpression(node)) return;
     const name = node.expression.getText();
-    if (!['apiClient', 'apiFetch', 'fetch'].includes(name)) return;
+    if (!['apiClient', 'apiFetch', 'fetch', 'clientFetch'].includes(name)) return;
     // Transport implementation and signed storage PUT are not API wrappers.
     if (name === 'fetch' && node.arguments[0]?.getText() === 'uploadUrl') return;
+    if ((name === 'fetch' || name === 'clientFetch') && node.arguments[0] && ts.isIdentifier(node.arguments[0])) {
+      const argName = node.arguments[0].text;
+      let owner = node.parent;
+      while (owner && !ts.isFunctionDeclaration(owner) && !ts.isFunctionExpression(owner) && !ts.isArrowFunction(owner)) {
+        owner = owner.parent;
+      }
+      const paramNames = owner?.parameters?.map(p => p.name.getText()) ?? [];
+      if (paramNames.includes(argName)) return;
+    }
     let owner = node.parent;
     while (owner && !ts.isFunctionDeclaration(owner)) owner = owner.parent;
     const variants = [];
