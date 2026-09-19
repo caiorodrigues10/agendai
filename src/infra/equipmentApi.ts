@@ -37,15 +37,15 @@ export interface Equipment {
 
 export interface EquipmentMovement {
   id: string;
-  equipmentId: string;
+  equipmentId: string | null;
   barbershopId: string;
   type: string;
   quantity: number;
   reason: string | null;
   staffId: string | null;
   createdAt: string;
-  equipment?: { id: string; name: string; category: string };
-  staff?: { id: string; name: string };
+  equipment: { id: string; name: string; category: string } | null;
+  staff: { id: string; name: string } | null;
 }
 
 export interface EquipmentNeed {

@@ -835,7 +835,7 @@ export const EquipmentPanel: React.FC = () => {
         open={!!deleteTarget}
         onCancel={() => setDeleteTarget(null)}
         title="Remover equipamento"
-        message={`Tem certeza que deseja remover "${deleteTarget?.name}"? Todas as movimentacoes associadas serao mantidas no historico.`}
+        message={`Tem certeza que deseja remover "${deleteTarget?.name}"? O histórico de movimentações associadas será mantido, mas ficará sem vínculo com este equipamento.`}
         onConfirm={handleDelete}
         loading={deleting}
         confirmLabel="Remover"

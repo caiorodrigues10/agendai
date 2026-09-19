@@ -90,7 +90,17 @@ Env (nomes): ver [DOMAIN_MAP.md](docs/agents/DOMAIN_MAP.md) e `.env.example`.
 
 ---
 
-## 6. Checklist rápido
+## 6. Risco conhecido: Vitest `pool: 'threads'` trava após testes completarem
+
+O `vitest.config.ts` usa `pool: 'threads'` com `fileParallelism: false`. Em combinação com o `jsdom` environment, o processo do vitest **não encerra sozinho** após todos os testes passarem — trava indefinidamente com handles abertos. Isso parece um hang, mas todos os testes já passaram.
+
+**Workaround:** rodar com `--pool=forks` contorna o problema (todos os arquivos completam e o processo encerra normalmente). Trocar o pool default no config é uma decisão de projeto; por enquanto, documentar aqui basta.
+
+Custo real: já causou ~15 min de debug desnecessário em 2026-09-19.
+
+---
+
+## 7. Checklist rápido
 
 - [ ] Endpoint já existe no wrapper certo?
 - [ ] Tokens de tema / `Field` reutilizados?
