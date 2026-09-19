@@ -56,7 +56,7 @@ import { MembershipsPanel } from '../components/domain/MembershipsPanel';
 import { GiftCardsPanel } from '../components/domain/GiftCardsPanel';
 import { OrganizationsPanel } from '../components/domain/OrganizationsPanel';
 import { ProfitEnginePanel } from '../components/domain/ProfitEnginePanel';
-import { ResourcesPanel } from '../components/domain/ResourcesPanel';
+import { EquipmentPanel } from '../components/domain/EquipmentPanel';
 
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -154,7 +154,7 @@ export const StaffDashboard: React.FC = () => {
   // Re-check access including hasDashboard
   useEffect(() => {
     if (!user) return;
-    if ((activeTab === 'reports' || activeTab === 'finance' || activeTab === 'products' || activeTab === 'profit' || activeTab === 'resources' || activeTab === 'gift-cards' || activeTab === 'organizations') && !hasDashboard) {
+    if ((activeTab === 'reports' || activeTab === 'finance' || activeTab === 'products' || activeTab === 'profit' || activeTab === 'equipment' || activeTab === 'gift-cards' || activeTab === 'organizations') && !hasDashboard) {
       navigate(`/app/${getDefaultTab(user.role, operationMode)}`, { replace: true });
     }
   }, [activeTab, user, hasDashboard, operationMode, navigate]);
@@ -521,8 +521,8 @@ export const StaffDashboard: React.FC = () => {
             <ProfitEnginePanel barbershopId={barbershopId} />
           )}
 
-          {activeTab === 'resources' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
-            <ResourcesPanel />
+          {activeTab === 'equipment' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
+            <EquipmentPanel />
           )}
 
           {activeTab === 'gift-cards' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
