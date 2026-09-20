@@ -56,7 +56,6 @@ import { MembershipsPanel } from '../components/domain/MembershipsPanel';
 import { GiftCardsPanel } from '../components/domain/GiftCardsPanel';
 import { OrganizationsPanel } from '../components/domain/OrganizationsPanel';
 import { ProfitEnginePanel } from '../components/domain/ProfitEnginePanel';
-import { ResourcesPanel } from '../components/domain/ResourcesPanel';
 import { ErrorBoundary } from '../components/infra/ErrorBoundary';
 import { EquipmentPanel } from '../components/domain/EquipmentPanel';
 
