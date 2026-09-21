@@ -36,9 +36,12 @@ import {
   CloudRain,
   CloudSun,
   Sun,
+  Mail,
 } from 'lucide-react';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import type { AppointmentPolicy } from '../../infra/barbershopApi';
+import { EmailPreferencesPanel } from './EmailPreferencesPanel';
+import { EmailHistoryPanel } from './EmailHistoryPanel';
 
 const WA_POLL_MS = 2000;
 const WA_POLL_TIMEOUT_MS = 90_000;
@@ -667,13 +670,14 @@ const OperationModeSection: React.FC<OperationModeSectionProps> = ({
   );
 };
 
-type SettingsSection = 'account' | 'shop' | 'whatsapp' | 'operation' | 'privacy';
+type SettingsSection = 'account' | 'shop' | 'whatsapp' | 'operation' | 'email' | 'privacy';
 
 const SETTINGS_SECTIONS: { id: SettingsSection; label: string; icon: React.ElementType }[] = [
   { id: 'account', label: 'Conta', icon: UserRound },
   { id: 'shop', label: 'Estabelecimento', icon: Store },
   { id: 'whatsapp', label: 'WhatsApp', icon: Smartphone },
   { id: 'operation', label: 'Funcionamento', icon: Clock },
+  { id: 'email', label: 'E-mail e notificações', icon: Mail },
   { id: 'privacy', label: 'Privacidade', icon: ShieldCheck },
 ];
 
@@ -979,6 +983,13 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
       )}
 
       {activeSection === 'privacy' && <AccountPrivacyPanel onNotify={onNotify} />}
+
+      {activeSection === 'email' && barbershopId && (
+        <div className="space-y-4">
+          <EmailPreferencesPanel barbershopId={barbershopId} onNotify={onNotify} />
+          <EmailHistoryPanel barbershopId={barbershopId} />
+        </div>
+      )}
     </div>
   );
 };
