@@ -7,6 +7,7 @@ import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_GRID } from '../../ui/F
 import { getErrorMessage } from '../../../utils/errorMessage';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { MOVEMENT_LABEL, PRODUCT_PURPOSE_SHORT, productMoney } from './productMoney';
+import { formatStockQty } from './productStock';
 import { StockReceiptSchema, StockReceiptFormData, StockAdjustmentSchema, StockAdjustmentFormData } from '../../../schemas';
 
 interface Props {
@@ -133,7 +134,7 @@ export const ProductStockPanel: React.FC<Props> = ({ loadError, onNotify, onRelo
                   </span>
                 </div>
                 <p className="text-xs text-text-muted">
-                  {p.stockQty} {p.unitLabel}
+                  {formatStockQty(p.stockQty, p.unit)}
                   {p.minStock > 0 ? ` · mín ${p.minStock}` : ''}
                 </p>
               </div>

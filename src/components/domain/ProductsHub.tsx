@@ -25,6 +25,8 @@ export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'succes
   const [error, setError] = useState<string | null>(null);
   const [lowStockCount, setLowStockCount] = useState(0);
   const [needsReorderCount, setNeedsReorderCount] = useState(0);
+  const [expiredCount, setExpiredCount] = useState(0);
+  const [expiringCount, setExpiringCount] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const probe = useCallback(async () => {
@@ -40,10 +42,15 @@ export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'succes
       } else {
         setNeedsReorderCount(0);
       }
+      const alerts = await productsApi.stockAlerts();
+      setExpiredCount(alerts.expired.count);
+      setExpiringCount(alerts.expiringSoon.count);
     } catch (err) {
       setError(getErrorMessage(err, 'Não foi possível carregar produtos.'));
       setLowStockCount(0);
       setNeedsReorderCount(0);
+      setExpiredCount(0);
+      setExpiringCount(0);
     }
   }, [canReports]);
 
@@ -57,6 +64,8 @@ export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'succes
 
   const bannerParts: string[] = [];
   if (lowStockCount > 0) bannerParts.push(`${lowStockCount} abaixo do mínimo`);
+  if (expiredCount > 0) bannerParts.push(`${expiredCount} vencido(s)`);
+  if (expiringCount > 0) bannerParts.push(`${expiringCount} vencendo em breve`);
   if (needsReorderCount > 0) bannerParts.push(`${needsReorderCount} vendendo bem e precisando repor`);
 
   return (

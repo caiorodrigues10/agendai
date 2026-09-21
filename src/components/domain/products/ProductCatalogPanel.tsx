@@ -8,7 +8,8 @@ import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { ProductFormModal } from './ProductFormModal';
 import { CatalogTemplateModal } from './CatalogTemplateModal';
 import { PRODUCT_PURPOSE_SHORT, productMoney } from './productMoney';
-import { Package } from 'lucide-react';
+import { formatStockQty, isLowStock, formatDateOnlyBR } from './productStock';
+import { Package, Clock, AlertTriangle } from 'lucide-react';
 
 const SEGMENTS: Record<BusinessSegment, string> = {
   BARBERSHOP: 'Barbearia',
@@ -191,10 +192,25 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
                           {PRODUCT_PURPOSE_SHORT.BOTH}
                         </span>
                       )}
+                      {isLowStock(product) && (
+                        <span className="inline-flex items-center gap-0.5 rounded-lg border border-warning/30 bg-warning/10 px-2 py-0.5 text-[10px] font-bold text-warning">
+                          <AlertTriangle size={10} /> estoque baixo
+                        </span>
+                      )}
+                      {product.expirationStatus === 'expired' && (
+                        <span className="inline-flex items-center gap-0.5 rounded-lg border border-danger/30 bg-danger/10 px-2 py-0.5 text-[10px] font-bold text-danger">
+                          vencido
+                        </span>
+                      )}
+                      {product.expirationStatus === 'expiring' && (
+                        <span className="inline-flex items-center gap-0.5 rounded-lg border border-warning/30 bg-warning/10 px-2 py-0.5 text-[10px] font-bold text-warning">
+                          <Clock size={10} /> vence em {product.daysToExpire}d
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-text-muted">
                       {product.type !== 'CONSUMABLE' ? `${productMoney.format(product.salePrice)} · ` : ''}
-                      estoque {product.stockQty} {product.unitLabel}
+                      {formatStockQty(product.stockQty, product.unit)}
                       {product.minStock > 0 ? ` · mín ${product.minStock}` : ''}
                       {canSeeCost && product.averageCost != null ? ` · custo ${productMoney.format(product.averageCost)}` : ''}
                     </p>

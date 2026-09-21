@@ -19,6 +19,7 @@ function token() {
 
 export type ProductType = 'RETAIL' | 'CONSUMABLE' | 'BOTH';
 export type ProductListPurpose = 'sale' | 'own';
+export type StockUnit = 'UNIT' | 'ML' | 'L' | 'G' | 'KG' | 'BOX' | 'PACK' | 'OTHER';
 export type RetailPaymentMethod = 'cash' | 'pix' | 'credit_card' | 'debit_card' | 'fiado';
 export type StockMovementType =
   | 'PURCHASE_RECEIPT'
@@ -43,6 +44,7 @@ export interface Product {
   sku: string | null;
   barcode: string | null;
   imageUrl: string | null;
+  unit: StockUnit;
   unitLabel: string;
   salePrice: number;
   averageCost?: number;
@@ -51,6 +53,10 @@ export interface Product {
   active: boolean;
   type: ProductType;
   trackStock: boolean;
+  expirationDate?: string | null;
+  lotNumber?: string | null;
+  expirationStatus?: 'expired' | 'expiring' | null;
+  daysToExpire?: number | null;
   category?: { id: string; name: string } | null;
 }
 
@@ -203,6 +209,8 @@ export const productsApi = {
     purpose?: ProductListPurpose;
     forSale?: string;
     lowStock?: string;
+    expiry?: 'expired' | 'expiring';
+    days?: number;
     page?: number;
     limit?: number;
   } = {}) => {
@@ -406,4 +414,26 @@ export const productsApi = {
     }>(`/api/barbershops/${barbershopId}/catalog-template/install`, 'POST', payload, token()).then(
       res => unwrap<{ alreadyInstalled: boolean; created: Record<string, number> }>(res)
     ),
+  stockAlerts: (days?: number) =>
+    apiClient<{
+      success: boolean;
+      data: {
+        days: number;
+        expired: { count: number; items: StockAlertItem[] };
+        expiringSoon: { count: number; items: StockAlertItem[] };
+      };
+    }>(`/api/products/alerts${buildQuery({ days })}`, 'GET', undefined, token()).then(
+      res => unwrap<{ days: number; expired: { count: number; items: StockAlertItem[] }; expiringSoon: { count: number; items: StockAlertItem[] } }>(res)
+    ),
 };
+
+export interface StockAlertItem {
+  id: string;
+  name: string;
+  stockQty: number;
+  unit: StockUnit;
+  unitLabel: string;
+  expirationDate: string;
+  lotNumber: string | null;
+  daysToExpire: number;
+}

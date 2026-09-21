@@ -1,13 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { productsApi, type Product, type ProductCategory, type ProductType } from '../../../infra/productsApi';
+import { productsApi, type Product, type ProductCategory, type ProductType, type StockUnit } from '../../../infra/productsApi';
 import { SmartSelect } from '../../ui/SmartSelect';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_FOOTER, FORM_GRID, FORM_SECTION_TITLE } from '../../ui/Field';
 import { CurrencyInput } from '../../ui/CurrencyInput';
 import { getErrorMessage } from '../../../utils/errorMessage';
 import { ProductSchema, ProductFormData } from '../../../schemas';
 import { PRODUCT_PURPOSE_LABEL } from './productMoney';
+import { STOCK_UNIT_OPTIONS } from './productStock';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { Trash2, Upload, X } from 'lucide-react';
 
@@ -73,14 +74,19 @@ export const ProductFormModal: React.FC<Props> = ({
       categoryId: '',
       imageUrl: '',
       type: defaultType,
+      unit: 'UNIT',
       unitLabel: '',
       minStock: 0,
       trackStock: true,
+      expirationDate: '',
+      lotNumber: '',
     },
   });
 
   const productType = useWatch({ control, name: 'type' });
+  const unitValue = useWatch({ control, name: 'unit' });
   const stockOnly = productType === 'CONSUMABLE';
+  const showExpiration = productType === 'CONSUMABLE' || productType === 'BOTH';
 
   useEffect(() => {
     if (!open) return;
@@ -94,9 +100,12 @@ export const ProductFormModal: React.FC<Props> = ({
         categoryId: product.categoryId ?? '',
         imageUrl: product.imageUrl ?? '',
         type: product.type,
+        unit: product.unit ?? 'UNIT',
         unitLabel: product.unitLabel,
         minStock: product.minStock,
         trackStock: product.trackStock,
+        expirationDate: product.expirationDate ?? '',
+        lotNumber: product.lotNumber ?? '',
       });
       if (product.imageUrl) setImagePreview(product.imageUrl);
     } else {
@@ -107,9 +116,12 @@ export const ProductFormModal: React.FC<Props> = ({
         categoryId: '',
         imageUrl: '',
         type: defaultType,
+        unit: 'UNIT',
         unitLabel: '',
         minStock: 0,
         trackStock: true,
+        expirationDate: '',
+        lotNumber: '',
       });
     }
   }, [open, product, defaultType, reset]);
@@ -125,16 +137,20 @@ export const ProductFormModal: React.FC<Props> = ({
     if (readOnly) return;
     setSaving(true);
     try {
-      const payload = {
+      const isRetail = data.type === 'RETAIL';
+      const payload: Record<string, unknown> = {
         name: data.name.trim(),
         description: data.description?.trim() || null,
         salePrice: data.type === 'CONSUMABLE' ? 0 : data.salePrice,
         categoryId: data.categoryId || null,
         imageUrl: data.imageUrl || null,
         type: data.type,
-        unitLabel: data.unitLabel?.trim() || 'un',
+        unit: data.unit,
+        unitLabel: data.unit === 'OTHER' ? (data.unitLabel?.trim() || null) : undefined,
         minStock: data.minStock,
         trackStock: data.trackStock,
+        expirationDate: isRetail ? null : (data.expirationDate || null),
+        lotNumber: isRetail ? null : (data.lotNumber?.trim() || null),
       };
       let savedId: string;
       if (product) {
@@ -329,14 +345,30 @@ export const ProductFormModal: React.FC<Props> = ({
               />
             )}
             <div className={FORM_GRID}>
-              <Field label="Unidade" error={errors.unitLabel?.message}>
-                <input
-                  disabled={readOnly}
-                  placeholder="Ex: 1"
-                  className={errors.unitLabel ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                  {...register('unitLabel')}
-                />
-              </Field>
+              <Controller
+                control={control}
+                name="unit"
+                render={({ field }) => (
+                  <SmartSelect
+                    label="Unidade"
+                    disabled={readOnly}
+                    value={field.value}
+                    onChange={value => field.onChange(value ?? 'UNIT')}
+                    options={[...STOCK_UNIT_OPTIONS]}
+                    searchable={false}
+                  />
+                )}
+              />
+              {unitValue === 'OTHER' && (
+                <Field label="Nome da unidade" error={errors.unitLabel?.message}>
+                  <input
+                    disabled={readOnly}
+                    placeholder="Ex: frasco"
+                    className={errors.unitLabel ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                    {...register('unitLabel')}
+                  />
+                </Field>
+              )}
               <Controller
                 control={control}
                 name="categoryId"
@@ -429,6 +461,28 @@ export const ProductFormModal: React.FC<Props> = ({
                 ) : null
               }
             />
+            {showExpiration && (
+              <>
+                <div className={FORM_GRID}>
+                  <Field label="Data de validade" error={errors.expirationDate?.message}>
+                    <input
+                      disabled={readOnly}
+                      type="date"
+                      className={errors.expirationDate ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                      {...register('expirationDate')}
+                    />
+                  </Field>
+                  <Field label="Lote" error={errors.lotNumber?.message}>
+                    <input
+                      disabled={readOnly}
+                      placeholder="Opcional"
+                      className={errors.lotNumber ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                      {...register('lotNumber')}
+                    />
+                  </Field>
+                </div>
+              </>
+            )}
           </div>
 
           {!readOnly && (
