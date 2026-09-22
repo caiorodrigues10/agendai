@@ -50,7 +50,7 @@ describe('Gestão de categorias', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Salvar categoria' }));
     await screen.findByRole('option', { name: 'Cortes' });
     expect(mocks.changed).toHaveBeenCalledWith('cat-1', updated);
-    expect(screen.getByText('Cortes', { selector: 'span' }).querySelector('span')).toHaveStyle({ backgroundColor: '#abcdef' });
+    await waitFor(() => expect(screen.getByText('Cortes', { selector: 'span' }).querySelector('[style]')).toHaveStyle({ backgroundColor: '#abcdef' }));
   });
   it('confirma exclusão e informa desvinculação ao consumidor', async () => {
     mocks.api.delete.mockResolvedValue(undefined);
