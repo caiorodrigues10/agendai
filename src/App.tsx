@@ -29,6 +29,16 @@ const AccessBlockedPage = lazy(() => import('./pages/AccessBlockedPage'));
 const PlansPage = lazy(() => import('./pages/PlansPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const MasterAdminDashboard = lazy(() => import('./pages/MasterAdmin/MasterAdminDashboard'));
+const AdminLayout = lazy(() => import('./components/domain/admin/AdminLayout'));
+const WorkSummaryPage = lazy(() => import('./pages/MasterAdmin/WorkSummaryPage'));
+const TicketsPage = lazy(() => import('./pages/MasterAdmin/TicketsPage'));
+const TicketDetailPage = lazy(() => import('./pages/MasterAdmin/TicketDetailPage'));
+const TasksPage = lazy(() => import('./pages/MasterAdmin/TasksPage'));
+const TaskDetailPage = lazy(() => import('./pages/MasterAdmin/TaskDetailPage'));
+const TeamPage = lazy(() => import('./pages/MasterAdmin/TeamPage'));
+const AccountsPage = lazy(() => import('./pages/MasterAdmin/AccountsPage'));
+const OperationsPage = lazy(() => import('./pages/MasterAdmin/OperationsPage'));
+const AuditPage = lazy(() => import('./pages/MasterAdmin/AuditPage'));
 const StaffDashboard = lazy(() => import('./pages/StaffDashboard'));
 const ClientPortalPage = lazy(() => import('./pages/ClientPortalPage'));
 const ShowcasePage = lazy(() => import('./pages/ShowcasePage'));
@@ -88,14 +98,29 @@ const App: React.FC = () => {
             }
           />
           <Route
-            path="/master/*"
+            path="/master"
             element={
               <PrivateRoute roles={['MASTER_ADMIN']} fallback={<Navigate to="/login" replace />}>
-                {' '}
-                <MasterAdminDashboard />{' '}
+                <AdminLayout />
               </PrivateRoute>
             }
-          />
+          >
+            <Route index element={<Navigate to="/master/work" replace />} />
+            <Route path="work" element={<WorkSummaryPage />} />
+            <Route path="tickets" element={<TicketsPage />} />
+            <Route path="tickets/new" element={<TicketsPage />} />
+            <Route path="tickets/:id" element={<TicketDetailPage />} />
+            <Route path="tasks" element={<TasksPage />} />
+            <Route path="tasks/new" element={<TasksPage />} />
+            <Route path="tasks/:id" element={<TaskDetailPage />} />
+            <Route path="team" element={<TeamPage />} />
+            <Route path="accounts" element={<AccountsPage />} />
+            <Route path="operations" element={<OperationsPage />} />
+            <Route path="audit" element={<AuditPage />} />
+            <Route path="billing" element={<MasterAdminDashboard />} />
+            <Route path="referrals" element={<MasterAdminDashboard />} />
+            <Route path="crm" element={<MasterAdminDashboard />} />
+          </Route>
           <Route path="/app/account" element={<Navigate to="/app/settings" replace />} />
           <Route
             path="/app/:tab"
