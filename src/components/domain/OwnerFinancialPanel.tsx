@@ -286,7 +286,10 @@ export const OwnerFinancialPanel: React.FC = () => {
     if (expenseFilters.paid) params.paid = expenseFilters.paid;
     if (expenseFilters.from) params.from = expenseFilters.from;
     if (expenseFilters.to) params.to = expenseFilters.to;
-    financialApi.exportExpensesCsv(Object.keys(params).length ? params : undefined);
+    setError(null);
+    financialApi
+      .exportExpensesCsv(Object.keys(params).length ? params : undefined)
+      .catch(err => setError(errorMessage(err)));
   };
 
   const onCreateFiado = async (data: FiadoFormData) => {

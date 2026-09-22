@@ -74,7 +74,6 @@ export const TAB_GROUPS: TabGroup[] = [
       },
       { id: 'profit', label: 'Rentabilidade', icon: RiBarChartBoxLine, roles: ['OWNER', 'MASTER_ADMIN'] },
       { id: 'equipment', label: 'Estoque', icon: RiStore2Line, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'gift-cards', label: 'Gift Cards', icon: RiGiftLine, roles: ['OWNER', 'MASTER_ADMIN'] },
     ],
   },
   {

@@ -53,7 +53,6 @@ import { RecommendationsPanel } from '../components/domain/RecommendationsPanel'
 import { DepositPolicyPanel } from '../components/domain/DepositPolicyPanel';
 import { WaitlistPanel } from '../components/domain/WaitlistPanel';
 import { MembershipsPanel } from '../components/domain/MembershipsPanel';
-import { GiftCardsPanel } from '../components/domain/GiftCardsPanel';
 import { OrganizationsPanel } from '../components/domain/OrganizationsPanel';
 import { ProfitEnginePanel } from '../components/domain/ProfitEnginePanel';
 import { ErrorBoundary } from '../components/infra/ErrorBoundary';
@@ -155,7 +154,7 @@ export const StaffDashboard: React.FC = () => {
   // Re-check access including hasDashboard
   useEffect(() => {
     if (!user) return;
-    if ((activeTab === 'reports' || activeTab === 'finance' || activeTab === 'products' || activeTab === 'profit' || activeTab === 'equipment' || activeTab === 'gift-cards' || activeTab === 'organizations') && !hasDashboard) {
+    if ((activeTab === 'reports' || activeTab === 'finance' || activeTab === 'products' || activeTab === 'profit' || activeTab === 'equipment' || activeTab === 'organizations') && !hasDashboard) {
       navigate(`/app/${getDefaultTab(user.role, operationMode)}`, { replace: true });
     }
   }, [activeTab, user, hasDashboard, operationMode, navigate]);
@@ -538,10 +537,6 @@ export const StaffDashboard: React.FC = () => {
 
           {activeTab === 'equipment' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
             <EquipmentPanel />
-          )}
-
-          {activeTab === 'gift-cards' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
-            <GiftCardsPanel />
           )}
 
           {activeTab === 'organizations' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (

@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useMemo, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
+import { setSelectedBarbershopId } from '../infra/selectedShopStore';
 
 interface DateRange {
   start: string;
@@ -20,6 +21,10 @@ export const BarbershopFiltersProvider: React.FC<{ children: ReactNode }> = ({ c
   const [barbershopId, setBarbershopId] = useState<string | null>(null);
   const [staffId, setStaffId] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange | null>(null);
+
+  useEffect(() => {
+    setSelectedBarbershopId(barbershopId);
+  }, [barbershopId]);
 
   const value = useMemo(
     () => ({
