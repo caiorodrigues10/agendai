@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
-import { authApi, RegisterPayload } from '../infra/authApi';
+import { authApi, RegisterPayload, RegisterWithGooglePayload } from '../infra/authApi';
 import { authStorage } from '../infra/authStorage';
 import { ApiError, refreshAccessToken } from '../infra/apiClient';
 import { getErrorMessage } from '../utils/errorMessage';
@@ -16,6 +16,7 @@ interface AuthContextValue {
   loginWithSavedAccount: (userId: string) => Promise<AuthResult>;
   forgetSavedAccount: (userId: string) => Promise<void>;
   register: (data: RegisterPayload & { recaptchaToken?: string }) => Promise<AuthResult>;
+  registerWithGoogle: (data: RegisterWithGooglePayload & { recaptchaToken?: string }) => Promise<AuthResult>;
   logout: () => void;
   hasRole: (roles: StaffMember['role'][]) => boolean;
   updateUserAvatar: (avatarUrl: string | null) => void;
@@ -214,6 +215,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const registerWithGoogle = async (
+    data: RegisterWithGooglePayload & { recaptchaToken?: string }
+  ): Promise<AuthResult> => {
+    try {
+      const resp = await authApi.registerWithGoogle(data);
+      persistSession(resp, true);
+      return { ok: true };
+    } catch (err) {
+      return {
+        ok: false,
+        message: getErrorMessage(err, 'Não foi possível criar sua conta com Google. Tente novamente.'),
+      };
+    }
+  };
+
   const logout = () => {
     const token = authStorage.getAccessToken();
     if (token) {
@@ -262,7 +278,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const value = useMemo(
-    () => ({ user, loading, login, loginWithGoogle, loginWithSavedAccount, forgetSavedAccount, register, logout, hasRole, updateUserAvatar, updateUserProfile, refreshUser }),
+    () => ({ user, loading, login, loginWithGoogle, loginWithSavedAccount, forgetSavedAccount, register, registerWithGoogle, logout, hasRole, updateUserAvatar, updateUserProfile, refreshUser }),
     [user, loading, updateUserAvatar, updateUserProfile, refreshUser]
   );
 

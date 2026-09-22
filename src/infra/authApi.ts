@@ -37,11 +37,17 @@ export interface RegisterPayload {
   schedule?: { dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }[];
 }
 
+export type RegisterWithGooglePayload = Omit<RegisterPayload, 'email' | 'password'> & {
+  idToken: string;
+};
+
 export const authApi = {
   login: (email: string, password: string, recaptchaToken?: string, rememberMe = true) =>
     apiClient<AuthResponse>('/api/auth/login', 'POST', { email, password, recaptchaToken, rememberMe }),
   register: (payload: RegisterPayload & { recaptchaToken?: string }) =>
     apiClient<AuthResponse>('/api/auth/register', 'POST', payload),
+  registerWithGoogle: (payload: RegisterWithGooglePayload & { recaptchaToken?: string }) =>
+    apiClient<AuthResponse>('/api/auth/register-google', 'POST', payload),
   refresh: (refreshToken?: string) =>
     apiClient<AuthResponse>('/api/auth/refresh', 'POST', { refreshToken }),
   me: (token: string) => apiClient<{ user: AuthUser }>('/api/auth/me', 'GET', undefined, token, { retried: true }),

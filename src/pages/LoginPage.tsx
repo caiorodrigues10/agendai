@@ -43,6 +43,7 @@ import {
   isValidDocument,
 } from '../utils/documentUtils';
 import { referralStorage } from '../utils/referralStorage';
+import { decodeGoogleCredential } from '../utils/googleCredential';
 import { getRecaptchaToken, useRecaptchaBadge } from '../utils/recaptcha';
 import { plansApi, Plan } from '../infra/plansApi';
 import { subscriptionsApi } from '../infra/subscriptionsApi';
@@ -240,7 +241,7 @@ const BrandPanel: React.FC = () => (
 export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, login, loginWithGoogle, loginWithSavedAccount, forgetSavedAccount, register: registerUser } = useAuth();
+  const { user, login, loginWithGoogle, loginWithSavedAccount, forgetSavedAccount, register: registerUser, registerWithGoogle } = useAuth();
   const [tab, setTab] = useState<Tab>(mode);
   const [registerStep, setRegisterStep] = useState<RegisterStep>(1);
   const [showPassword, setShowPassword] = useState(false);
@@ -279,6 +280,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   const [googleError, setGoogleError] = useState<string | null>(null);
   const googleRenderedRef = useRef(false);
   const [googleLoaded, setGoogleLoaded] = useState(false);
+  const [googleRegisterError, setGoogleRegisterError] = useState<string | null>(null);
+  const [googleEmailLocked, setGoogleEmailLocked] = useState(false);
+  const googleAuthModeRef = useRef<Tab>(mode);
+  const handleGoogleRegisterCredentialRef = useRef<(idToken: string) => void>(() => undefined);
 
   const handleGoogleCredential = async (idToken: string) => {
     setGoogleError(null);
@@ -313,13 +318,18 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   }, [googleClientId]);
 
   useEffect(() => {
-    if (!googleClientId || !googleLoaded || tab !== 'login' || googleRenderedRef.current) return;
+    if (!googleClientId || !googleLoaded || googleRenderedRef.current) return;
     try {
       const google = (window as unknown as { google: { accounts: { id: { initialize: (opts: Record<string, unknown>) => void } } } }).google;
       google.accounts.id.initialize({
         client_id: googleClientId,
         callback: ({ credential }: { credential?: string }) => {
-          if (credential) handleGoogleCredential(credential);
+          if (!credential) return;
+          if (googleAuthModeRef.current === 'register') {
+            handleGoogleRegisterCredentialRef.current(credential);
+          } else {
+            handleGoogleCredential(credential);
+          }
         },
         auto_select: false,
         cancel_on_tap_outside: true,
@@ -328,14 +338,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     } catch {
       setGoogleError('Erro ao inicializar botão Google.');
     }
-  }, [googleClientId, googleLoaded, tab]);
+  }, [googleClientId, googleLoaded]);
 
   const handleGoogleClick = () => {
     const w = window as unknown as { google: { accounts: { id: { prompt: (cb: (notification: { isNotDisplayed: () => boolean; isSkippedMoment: () => boolean }) => void) => void } } } };
     if (!w.google?.accounts?.id) return;
     w.google.accounts.id.prompt(notification => {
       if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-        setGoogleError('Não foi possível abrir o login com Google. Tente novamente.');
+        const message = 'Não foi possível continuar com o Google. Tente novamente.';
+        if (googleAuthModeRef.current === 'register') {
+          setGoogleRegisterError(message);
+        } else {
+          setGoogleError(message);
+        }
       }
     });
   };
@@ -366,6 +381,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       ownerName: '',
       email: '',
       password: '',
+      authMethod: 'password',
+      googleIdToken: undefined,
       cpf: '',
       barbershopName: '',
       whatsapp: '',
@@ -421,6 +438,45 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       controller.abort();
     };
   }, [cepDigits]);
+
+  const googleRegisterMode = registerForm.watch('authMethod') === 'google';
+
+  const resetGoogleRegisterMode = () => {
+    registerForm.setValue('authMethod', 'password');
+    registerForm.setValue('googleIdToken', undefined);
+    setGoogleRegisterError(null);
+    setGoogleEmailLocked(false);
+  };
+
+  const handleGoogleRegisterCredential = (idToken: string) => {
+    setGoogleRegisterError(null);
+    const claims = decodeGoogleCredential(idToken);
+    registerForm.setValue('authMethod', 'google');
+    registerForm.setValue('googleIdToken', idToken);
+    const email = claims.email;
+    if (email) {
+      registerForm.setValue('email', email, { shouldValidate: true });
+      setRegisterFieldsUnlocked(true);
+      setGoogleEmailLocked(true);
+    } else {
+      setRegisterFieldsUnlocked(true);
+      setGoogleEmailLocked(false);
+    }
+    const ownerName =
+      claims.name ??
+      [claims.given_name, claims.family_name].filter(Boolean).join(' ');
+    if (ownerName) {
+      registerForm.setValue('ownerName', ownerName, { shouldValidate: true });
+    }
+  };
+
+  useEffect(() => {
+    handleGoogleRegisterCredentialRef.current = handleGoogleRegisterCredential;
+  });
+
+  useEffect(() => {
+    googleAuthModeRef.current = tab;
+  }, [tab]);
 
   const handleLogoClick = () => {
     if (!user) {
@@ -498,6 +554,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       errors.email,
       errors.cpf,
       errors.password,
+      errors.googleIdToken,
       errors.barbershopName,
       errors.whatsapp,
       errors.city,
@@ -509,7 +566,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   };
 
   const goToRegisterStep2 = async () => {
-    const ok = await registerForm.trigger(['ownerName', 'email', 'cpf', 'password']);
+    const isGoogle = registerForm.getValues('authMethod') === 'google';
+    const ok = await registerForm.trigger(
+      isGoogle ? ['ownerName', 'email', 'cpf'] : ['ownerName', 'email', 'cpf', 'password'],
+    );
     if (!ok) {
       showRegisterValidationError();
       return;
@@ -550,28 +610,54 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       openTime: scheduleDays[dayOfWeek].openTime,
       closeTime: scheduleDays[dayOfWeek].closeTime,
     }));
-    const result = await registerUser({
-      ownerName: data.ownerName.trim(),
-      email: data.email.trim(),
-      password: data.password,
-      cpf,
-      barbershopName: data.barbershopName.trim(),
-      whatsapp: normalizePhoneBR(data.whatsapp),
-      address: [
-        data.address?.trim(),
-        data.addressNumber?.trim() ? `nº ${data.addressNumber.trim()}` : null,
-        data.addressComplement?.trim(),
-      ].filter(Boolean).join(', ') || undefined,
-      city: data.city.trim(),
-      cnpj: data.cnpj ? normalizeDocument(data.cnpj) : undefined,
-      referralCode,
-      termsVersion: data.termsVersion,
-      termsAccepted: data.termsAccepted,
-      marketingOptIn: data.marketingOptIn,
-      lgpdConsent: data.lgpdConsent,
-      schedule,
-      recaptchaToken: token,
-    });
+    const result =
+      data.authMethod === 'google'
+        ? await registerWithGoogle({
+            ownerName: data.ownerName.trim(),
+            idToken: data.googleIdToken ?? '',
+            cpf,
+            barbershopName: data.barbershopName.trim(),
+            whatsapp: normalizePhoneBR(data.whatsapp),
+            address:
+              [
+                data.address?.trim(),
+                data.addressNumber?.trim() ? `nº ${data.addressNumber.trim()}` : null,
+                data.addressComplement?.trim(),
+              ]
+                .filter(Boolean)
+                .join(', ') || undefined,
+            city: data.city.trim(),
+            cnpj: data.cnpj ? normalizeDocument(data.cnpj) : undefined,
+            referralCode,
+            termsVersion: data.termsVersion,
+            termsAccepted: data.termsAccepted,
+            marketingOptIn: data.marketingOptIn,
+            lgpdConsent: data.lgpdConsent,
+            schedule,
+            recaptchaToken: token,
+          })
+        : await registerUser({
+            ownerName: data.ownerName.trim(),
+            email: data.email.trim(),
+            password: data.password ?? '',
+            cpf,
+            barbershopName: data.barbershopName.trim(),
+            whatsapp: normalizePhoneBR(data.whatsapp),
+            address: [
+              data.address?.trim(),
+              data.addressNumber?.trim() ? `nº ${data.addressNumber.trim()}` : null,
+              data.addressComplement?.trim(),
+            ].filter(Boolean).join(', ') || undefined,
+            city: data.city.trim(),
+            cnpj: data.cnpj ? normalizeDocument(data.cnpj) : undefined,
+            referralCode,
+            termsVersion: data.termsVersion,
+            termsAccepted: data.termsAccepted,
+            marketingOptIn: data.marketingOptIn,
+            lgpdConsent: data.lgpdConsent,
+            schedule,
+            recaptchaToken: token,
+          });
     setSubmitting(false);
     if (result.ok === false) {
       showErrorToast(result.message);
@@ -589,6 +675,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     setTab(next);
     setRegisterStep(1);
     setRegisterFieldsUnlocked(false);
+    resetGoogleRegisterMode();
     setScheduleDays({
       0: { isOpen: false, openTime: '09:00', closeTime: '19:00' },
       1: { isOpen: true, openTime: '09:00', closeTime: '19:00' },
@@ -603,6 +690,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
         ownerName: '',
         email: '',
         password: '',
+        authMethod: 'password',
+        googleIdToken: undefined,
         cpf: '',
         barbershopName: '',
         whatsapp: '',
@@ -924,8 +1013,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                           autoComplete="email"
                           autoCorrect="off"
                           spellCheck={false}
-                          readOnly={!registerFieldsUnlocked}
+                          readOnly={googleEmailLocked || !registerFieldsUnlocked}
                           onFocus={e => {
+                            if (googleRegisterMode) return;
                             setRegisterFieldsUnlocked(true);
                           }}
                           className={inputClass(!!registerForm.formState.errors.email)}
@@ -950,26 +1040,32 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                         />
                       </Field>
 
-                      <div className="space-y-1">
-                        <label htmlFor="register-password" className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
-                          Senha
-                        </label>
-                        <PasswordInput
-                          id="register-password"
-                          showStrength
-                          showPassword={showPassword}
-                          onToggleShow={() => setShowPassword(v => !v)}
-                          error={registerForm.formState.errors.password?.message}
-                          placeholder="Crie uma senha segura"
-                          autoComplete="new-password"
-                          readOnly={!registerFieldsUnlocked}
-                          value={registerPassword}
-                          {...passwordField}
-                          onFocus={() => {
-                            setRegisterFieldsUnlocked(true);
-                          }}
-                        />
-                      </div>
+                      {!googleRegisterMode ? (
+                        <div className="space-y-1">
+                          <label htmlFor="register-password" className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                            Senha
+                          </label>
+                          <PasswordInput
+                            id="register-password"
+                            showStrength
+                            showPassword={showPassword}
+                            onToggleShow={() => setShowPassword(v => !v)}
+                            error={registerForm.formState.errors.password?.message}
+                            placeholder="Crie uma senha segura"
+                            autoComplete="new-password"
+                            readOnly={!registerFieldsUnlocked}
+                            value={registerPassword}
+                            {...passwordField}
+                            onFocus={() => {
+                              setRegisterFieldsUnlocked(true);
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <p className="text-[11px] text-text-muted bg-bg/60 border border-border rounded-lg px-3 py-2">
+                          Continuando com Google — a senha será gerada automaticamente.
+                        </p>
+                      )}
 
                       <button type="submit" className={primaryBtn}>
                         Continuar
@@ -1280,6 +1376,62 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                 </motion.form>
               )}
             </AnimatePresence>
+
+            {tab === 'register' && registerStep === 1 && googleClientId && (
+              <div className="w-full mt-4">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-[10px] text-text-muted uppercase">ou</span>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleGoogleClick}
+                  disabled={submitting}
+                  className="w-full py-3 rounded-xl border border-border bg-bg hover:bg-surface hover:border-border-strong text-text-primary text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-200 disabled:opacity-60 cursor-pointer"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                      fill="#4285F4"
+                    />
+                    <path
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                      fill="#34A853"
+                    />
+                    <path
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                      fill="#FBBC05"
+                    />
+                    <path
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                      fill="#EA4335"
+                    />
+                  </svg>
+                  Cadastrar com Google
+                </button>
+                {googleRegisterError && (
+                  <p className="text-[11px] text-center text-danger mt-2">{googleRegisterError}</p>
+                )}
+                {googleRegisterMode && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      resetGoogleRegisterMode();
+                      setRegisterFieldsUnlocked(false);
+                    }}
+                    className="w-full mt-2 text-[11px] text-text-muted hover:text-accent transition-colors py-1"
+                  >
+                    Usar e-mail e senha
+                  </button>
+                )}
+              </div>
+            )}
 
             {tab === 'login' && googleClientId && (
               <div className="w-full mt-4">

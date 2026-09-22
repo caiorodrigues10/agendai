@@ -46,7 +46,9 @@ export type LoginFormData = z.infer<typeof LoginSchema>;
 export const RegisterSchema = z.object({
   ownerName: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
   email: z.string().email('E-mail inválido'),
-  password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
+  authMethod: z.enum(['password', 'google']).default('password'),
+  googleIdToken: z.string().optional(),
+  password: z.string().optional(),
   cpf: z
     .string()
     .min(11, 'CPF inválido')
@@ -84,6 +86,23 @@ export const RegisterSchema = z.object({
     .min(7)
     .max(7)
     .optional(),
+}).superRefine((data, ctx) => {
+  if (data.authMethod === 'password') {
+    if (!data.password || data.password.length < 6) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['password'],
+        message: 'Senha deve ter no mínimo 6 caracteres',
+      });
+    }
+  }
+  if (data.authMethod === 'google' && !data.googleIdToken) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['googleIdToken'],
+      message: 'Continue com o Google para concluir o cadastro',
+    });
+  }
 });
 
 export type RegisterFormData = z.infer<typeof RegisterSchema>;
