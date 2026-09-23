@@ -33,6 +33,7 @@ interface OnboardingChecklistProps {
   shopName: string;
   onNavigate: (tab: string) => void;
   onDone?: () => void;
+  onCompleted?: () => void;
 }
 
 const DESTINATIONS: Record<string, string> = {
@@ -67,6 +68,7 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
   shopName,
   onNavigate,
   onDone,
+  onCompleted,
 }) => {
   const [steps, setSteps] = useState<Step[]>([]);
   const [loading, setLoading] = useState(true);
@@ -100,6 +102,10 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
     void barbershopApi.markOnboardingWelcomeSeen(barbershopId).catch(() => undefined);
     void load();
   }, [barbershopId]);
+
+  useEffect(() => {
+    if (allDone) onCompleted?.();
+  }, [allDone, onCompleted]);
 
   const confirmStep = async (step: Step) => {
     setBusy(true);

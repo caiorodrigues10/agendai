@@ -17,22 +17,33 @@ interface StaffNavigationProps {
   hasDashboard?: boolean;
   permissions?: string[];
   operationMode?: OperationMode;
+  onboardingCompleted?: boolean;
   onNavigate: (tabId: string) => void;
 }
 
-const visibleTabs = (group: TabGroup, userRole?: string, operationMode?: OperationMode, extras?: { hasDashboard?: boolean; permissions?: string[] }) =>
-  group.tabs.filter(tab => canAccessTab(tab.id, userRole, extras) && canAccessTabByMode(tab.id, operationMode));
+const visibleTabs = (
+  group: TabGroup,
+  userRole?: string,
+  operationMode?: OperationMode,
+  extras?: { hasDashboard?: boolean; permissions?: string[] },
+  onboardingCompleted?: boolean
+) =>
+  group.tabs.filter(tab => {
+    if (tab.id === 'onboarding' && onboardingCompleted) return false;
+    return canAccessTab(tab.id, userRole, extras) && canAccessTabByMode(tab.id, operationMode);
+  });
 
-export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions, operationMode, onNavigate }: StaffNavigationProps) {
+export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions, operationMode, onboardingCompleted, onNavigate }: StaffNavigationProps) {
   const [moreOpen, setMoreOpen] = useState(false);
   const extras = { hasDashboard, permissions };
 
   const groups = useMemo(
     () =>
-      TAB_GROUPS.map(group => ({ ...group, tabs: visibleTabs(group, userRole, operationMode, extras) })).filter(
-        group => group.tabs.length > 0
-      ),
-    [userRole, hasDashboard, permissions, operationMode]
+      TAB_GROUPS.map(group => ({
+        ...group,
+        tabs: visibleTabs(group, userRole, operationMode, extras, onboardingCompleted),
+      })).filter(group => group.tabs.length > 0),
+    [userRole, hasDashboard, permissions, operationMode, onboardingCompleted]
   );
 
   const primaryTabs = useMemo(() => {

@@ -100,4 +100,32 @@ describe('StaffNavigation', () => {
     expect(within(compactNavigation).queryByRole('button', { name: 'Fila' })).not.toBeInTheDocument();
     expect(within(compactNavigation).getByRole('button', { name: 'Agenda' })).toBeInTheDocument();
   });
+
+  it('oculta Configuração inicial quando o onboarding está concluído', () => {
+    const { rerender } = render(
+      <StaffNavigation activeTab="overview" userRole="OWNER" onNavigate={vi.fn()} />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Mais' }));
+    expect(
+      within(screen.getByRole('dialog', { name: 'Mais opções' })).getByRole('button', {
+        name: 'Configuração inicial',
+      })
+    ).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: 'Escape' });
+
+    rerender(
+      <StaffNavigation
+        activeTab="overview"
+        userRole="OWNER"
+        onboardingCompleted
+        onNavigate={vi.fn()}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Mais' }));
+    expect(
+      within(screen.getByRole('dialog', { name: 'Mais opções' })).queryByRole('button', {
+        name: 'Configuração inicial',
+      })
+    ).not.toBeInTheDocument();
+  });
 });

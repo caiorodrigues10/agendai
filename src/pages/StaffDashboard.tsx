@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '../components/ui/Header';
 import { QueueItemCard } from '../components/domain/QueueItemCard';
@@ -43,7 +43,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { ActivationChecklist } from '../components/domain/ActivationChecklist';
 import { OnboardingChecklist } from '../components/domain/OnboardingChecklist';
 import { QueueCapacityBanner } from '../components/domain/QueueCapacityBanner';
-import { barbershopApi } from '../infra/barbershopApi';
+import { useOnboardingStatus } from '../hooks/useOnboardingStatus';
 import { ProductsHub } from '../components/domain/ProductsHub';
 import { productsApi } from '../infra/productsApi';
 import { CashPanel } from '../components/domain/CashPanel';
@@ -106,6 +106,13 @@ export const StaffDashboard: React.FC = () => {
   const [pendingJoin, setPendingJoin] = useState<{ name: string; whatsapp: string; serviceId: string } | null>(null);
   const [joiningClosedSalon, setJoiningClosedSalon] = useState(false);
   const [onboardingChecked, setOnboardingChecked] = useState(false);
+  const isOnboardingRole = user?.role === 'OWNER' || user?.role === 'MASTER_ADMIN';
+  const {
+    status: onboardingStatus,
+    loaded: onboardingLoaded,
+    completed: onboardingCompleted,
+    refresh: refreshOnboarding,
+  } = useOnboardingStatus(isOnboardingRole ? barbershopId : null);
   const [dependentResponsible, setDependentResponsible] = useState<QueueItem | null>(null);
   const [returnToQueueItem, setReturnToQueueItem] = useState<QueueItem | null>(null);
   const [returningToQueue, setReturningToQueue] = useState(false);
@@ -117,13 +124,29 @@ export const StaffDashboard: React.FC = () => {
   const operationMode = settings?.operationMode ?? 'HYBRID';
   const activeTab = ALL_TAB_IDS.includes(rawTab) ? rawTab : getDefaultTab(user?.role, operationMode);
 
+  const prevRawTab = useRef(rawTab);
   useEffect(() => {
-    if (!user || !barbershopId || (user.role !== 'OWNER' && user.role !== 'MASTER_ADMIN') || onboardingChecked) return;
+    if (prevRawTab.current === 'onboarding' && rawTab !== 'onboarding') {
+      void refreshOnboarding();
+    }
+    prevRawTab.current = rawTab;
+  }, [rawTab, refreshOnboarding]);
+
+  const handleOnboardingCompleted = useCallback(() => {
+    void refreshOnboarding();
+  }, [refreshOnboarding]);
+
+  useEffect(() => {
+    if (!user || !barbershopId || !isOnboardingRole || onboardingChecked || !onboardingLoaded || !onboardingStatus) return;
     setOnboardingChecked(true);
-    void barbershopApi.getOnboarding(barbershopId).then(data => {
-      if (!data.welcomeSeen && !data.dismissed && !data.completed && rawTab !== 'onboarding') navigate('/app/onboarding', { replace: true });
-    }).catch(() => undefined);
-  }, [user, barbershopId, onboardingChecked, rawTab, navigate]);
+    if (onboardingStatus.completed && rawTab === 'onboarding') {
+      navigate('/app/overview', { replace: true });
+      return;
+    }
+    if (!onboardingStatus.welcomeSeen && !onboardingStatus.dismissed && !onboardingStatus.completed && rawTab !== 'onboarding') {
+      navigate('/app/onboarding', { replace: true });
+    }
+  }, [user, barbershopId, isOnboardingRole, onboardingChecked, onboardingLoaded, onboardingStatus, rawTab, navigate]);
 
   // Redirect invalid tabs
   useEffect(() => {
@@ -274,6 +297,7 @@ export const StaffDashboard: React.FC = () => {
           hasDashboard={hasDashboard}
           permissions={user?.permissions}
           operationMode={operationMode}
+          onboardingCompleted={onboardingCompleted}
           onNavigate={tabId => navigate(`/app/${tabId}`)}
         />
         <main id="main-content" className="min-w-0 flex-1">
@@ -334,6 +358,7 @@ export const StaffDashboard: React.FC = () => {
               barbershopId={barbershopId}
               shopName={settings?.shopName || ''}
               onNavigate={tab => navigate(`/app/${tab}`)}
+              onCompleted={handleOnboardingCompleted}
               onDone={() => navigate('/app/overview')}
             />
           )}
