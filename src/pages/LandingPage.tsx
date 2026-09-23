@@ -3,19 +3,19 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
-  ArrowRight,
-  BarChart3,
-  Bell,
-  Calendar,
-  CheckCircle2,
-  ChevronRight,
-  CloudRain,
-  Scissors,
-  Smartphone,
-  TrendingUp,
-  Users,
-  Zap,
-} from 'lucide-react';
+  LuArrowRight as ArrowRight,
+  LuChartColumn as BarChart3,
+  LuBell as Bell,
+  LuCalendar as Calendar,
+  LuCircleCheck as CheckCircle2,
+  LuChevronRight as ChevronRight,
+  LuCloudRain as CloudRain,
+  LuScissors as Scissors,
+  LuSmartphone as Smartphone,
+  LuTrendingUp as TrendingUp,
+  LuUsers as Users,
+  LuZap as Zap,
+} from 'react-icons/lu';
 import { MarketingNav } from '../components/marketing/MarketingNav';
 import { MarketingFooter } from '../components/marketing/MarketingFooter';
 import { SeoHead } from '../components/marketing/SeoHead';
@@ -741,7 +741,7 @@ export const LandingPage: React.FC = () => {
                         className="absolute inset-x-0 -bottom-1 h-[2px] origin-left scale-x-100 bg-emerald-400 transition duration-300 group-hover:bg-emerald-300"
                       />
                     </span>
-                    <ArrowRight className="h-5 w-5 shrink-0 text-emerald-400 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-emerald-300" />
+                    <ArrowRight size={24} className="h-5 w-5 shrink-0 text-emerald-400 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-emerald-300" />
                   </span>
                   <span className="mt-3 block text-[11px] font-medium tracking-[0.04em] text-neutral-500">
                     {trialCampaign.heroSubline}
@@ -753,7 +753,7 @@ export const LandingPage: React.FC = () => {
                   className="group inline-flex items-center gap-1.5 pb-1 text-sm font-medium text-neutral-500 transition hover:text-neutral-200"
                 >
                   Ver o produto
-                  <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  <ChevronRight size={24} className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                 </button>
               </div>
 
@@ -813,7 +813,7 @@ export const LandingPage: React.FC = () => {
                   <div className="flex items-center justify-between border-b border-white/[0.07] px-5 py-4">
                     <div className="flex items-center gap-3">
                       <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-400 text-black">
-                        <Scissors className="h-4 w-4" />
+                        <Scissors size={24} className="h-4 w-4" />
                       </div>
                       <div>
                         <p className="text-sm font-bold text-white">Visão de hoje</p>
@@ -857,7 +857,7 @@ export const LandingPage: React.FC = () => {
                           <p className="text-xs font-bold text-white">Fila em tempo real</p>
                           <p className="mt-1 text-[9px] text-neutral-500">Atualizada agora</p>
                         </div>
-                        <ChevronRight className="h-4 w-4 text-neutral-600" />
+                        <ChevronRight size={24} className="h-4 w-4 text-neutral-600" />
                       </div>
                       <div className="space-y-2">
                         {queueCustomers.map((customer, index) => (
@@ -896,7 +896,7 @@ export const LandingPage: React.FC = () => {
                           <p className="text-xs font-bold text-white">Movimento</p>
                           <p className="mt-1 text-[9px] text-neutral-500">Atendimentos por hora</p>
                         </div>
-                        <BarChart3 className="h-4 w-4 text-emerald-400" />
+                        <BarChart3 size={24} className="h-4 w-4 text-emerald-400" />
                       </div>
                       <div className="mt-6 flex min-h-32 flex-1 items-end gap-2">
                         {[36, 55, 43, 72, 62, 88, 68, 96, 78].map((height, index) => (
@@ -931,7 +931,7 @@ export const LandingPage: React.FC = () => {
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300">
-                    <Bell className="h-4 w-4" />
+                    <Bell size={24} className="h-4 w-4" />
                   </div>
                   <div>
                     <p className="text-[10px] font-bold text-white">Nova entrada</p>
@@ -951,7 +951,7 @@ export const LandingPage: React.FC = () => {
                   <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400">
                     Próximo horário
                   </span>
-                  <Calendar className="h-4 w-4 text-emerald-400" />
+                  <Calendar size={24} className="h-4 w-4 text-emerald-400" />
                 </div>
                 <p className="text-sm font-bold text-white">14:30 · Corte + escova</p>
                 <p className="mt-1 text-[9px] text-neutral-500">com Marina Oliveira</p>
@@ -1036,7 +1036,7 @@ export const LandingPage: React.FC = () => {
                         key={item}
                         className="flex items-start gap-3 text-sm font-semibold text-neutral-300"
                       >
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                        <CheckCircle2 size={24} className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
                         {item}
                       </li>
                     ))}
@@ -1181,7 +1181,7 @@ export const LandingPage: React.FC = () => {
                       className="mt-5 flex items-center gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/8 p-3.5"
                     >
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-400/15 text-emerald-300">
-                        <Calendar className="h-4 w-4" />
+                        <Calendar size={24} className="h-4 w-4" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-bold text-white">Qui 15 · 15:30</p>
@@ -1217,7 +1217,7 @@ export const LandingPage: React.FC = () => {
                         key={item}
                         className="flex items-start gap-3 text-sm font-semibold text-neutral-300"
                       >
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-cyan-300" />
+                        <CheckCircle2 size={24} className="mt-0.5 h-4 w-4 shrink-0 text-cyan-300" />
                         {item}
                       </li>
                     ))}
@@ -1251,7 +1251,7 @@ export const LandingPage: React.FC = () => {
                         key={item}
                         className="flex items-start gap-3 text-sm font-semibold text-neutral-300"
                       >
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-amber-200" />
+                        <CheckCircle2 size={24} className="mt-0.5 h-4 w-4 shrink-0 text-amber-200" />
                         {item}
                       </li>
                     ))}
@@ -1420,7 +1420,7 @@ export const LandingPage: React.FC = () => {
                             key={item}
                             className="flex items-center gap-2.5 text-sm font-semibold text-neutral-200"
                           >
-                            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                            <CheckCircle2 size={24} className="h-4 w-4 shrink-0 text-emerald-400" />
                             {item}
                           </li>
                         ))}
@@ -1458,7 +1458,7 @@ export const LandingPage: React.FC = () => {
                               item.ok ? 'text-neutral-200' : 'text-neutral-600'
                             }`}
                           >
-                            <CheckCircle2
+                            <CheckCircle2 size={24}
                               className={`h-4 w-4 shrink-0 ${
                                 item.ok ? 'text-emerald-400' : 'text-neutral-700'
                               }`}
@@ -1540,7 +1540,7 @@ export const LandingPage: React.FC = () => {
                 className="group mt-8 inline-flex items-center gap-3 text-sm font-bold text-white"
               >
                 Explorar funcionalidades
-                <ArrowRight className="h-4 w-4 text-emerald-400 transition-transform group-hover:translate-x-1" />
+                <ArrowRight size={24} className="h-4 w-4 text-emerald-400 transition-transform group-hover:translate-x-1" />
               </button>
             </div>
 
@@ -1983,7 +1983,7 @@ export const LandingPage: React.FC = () => {
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div className="flex min-w-0 items-start gap-3">
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-400/15">
-                      <CloudRain className="h-5 w-5 text-red-400" />
+                      <CloudRain size={24} className="h-5 w-5 text-red-400" />
                     </span>
                     <div>
                       <p className="text-sm font-bold leading-snug text-red-300">
@@ -2108,7 +2108,7 @@ export const LandingPage: React.FC = () => {
                       key={feature}
                       className="flex items-center gap-3 text-sm font-medium text-neutral-300"
                     >
-                      <CheckCircle2 className="h-4 w-4 shrink-0 text-neutral-500" />
+                      <CheckCircle2 size={24} className="h-4 w-4 shrink-0 text-neutral-500" />
                       {feature}
                     </li>
                   ))}
@@ -2120,7 +2120,7 @@ export const LandingPage: React.FC = () => {
                   className="group/btn relative z-10 mt-9 inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/12 bg-white/5 px-6 py-4 text-sm font-black text-white transition hover:border-white/25 hover:bg-white/10"
                 >
                   {trialCampaign.cta}
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+                  <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
                 </button>
               </article>
 
@@ -2143,7 +2143,7 @@ export const LandingPage: React.FC = () => {
                     <h3 className="mt-2 text-3xl font-black tracking-tight text-white">Pro</h3>
                   </div>
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-black">
-                    <Zap className="h-3 w-3" />
+                    <Zap size={24} className="h-3 w-3" />
                     Recomendado
                   </span>
                 </div>
@@ -2178,7 +2178,7 @@ export const LandingPage: React.FC = () => {
                       key={feature}
                       className="flex items-center gap-3 text-sm font-medium text-neutral-100"
                     >
-                      <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                      <CheckCircle2 size={24} className="h-4 w-4 shrink-0 text-emerald-400" />
                       {feature}
                     </li>
                   ))}
@@ -2190,7 +2190,7 @@ export const LandingPage: React.FC = () => {
                   className="group/btn relative z-10 mt-9 inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-400 px-6 py-4 text-sm font-black text-black shadow-[0_16px_50px_rgba(52,211,153,0.28)] transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-300"
                 >
                   {trialCampaign.cta}
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+                  <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
                 </button>
               </article>
             </div>

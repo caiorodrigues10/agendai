@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Plus,
-  GripVertical,
-  Eye,
-  EyeOff,
-  Trash2,
-  Loader2,
-  Image as ImageIcon,
-  Film,
-} from 'lucide-react';
+  LuPlus as Plus,
+  LuGripVertical as GripVertical,
+  LuEye as Eye,
+  LuEyeOff as EyeOff,
+  LuTrash2 as Trash2,
+  LuLoaderCircle as Loader2,
+  LuImage as ImageIcon,
+  LuFilm as Film,
+} from 'react-icons/lu';
 import {
   showcaseApi,
   ShowcaseEntry,

@@ -1,5 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Loader2, Plus, Trash2, Edit3, Package, ArrowDownCircle, ArrowUpCircle, AlertTriangle, Wrench, Search as SearchIcon } from 'lucide-react';
+import {
+  LuLoaderCircle as Loader2,
+  LuPlus as Plus,
+  LuTrash2 as Trash2,
+  LuPencilLine as Edit3,
+  LuPackage as Package,
+  LuCircleArrowDown as ArrowDownCircle,
+  LuCircleArrowUp as ArrowUpCircle,
+  LuTriangleAlert as AlertTriangle,
+  LuWrench as Wrench,
+  LuSearch as SearchIcon,
+} from 'react-icons/lu';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { equipmentApi, Equipment, EquipmentMovement, EquipmentNeed } from '../../infra/equipmentApi';
 import { getErrorMessage } from '../../utils/errorMessage';
@@ -44,11 +55,11 @@ const MOVEMENT_TYPE_LABELS: Record<string, string> = {
 };
 
 const MOVEMENT_TYPE_ICONS: Record<string, React.ReactNode> = {
-  IN: <ArrowDownCircle className="h-4 w-4 text-success" />,
-  OUT: <ArrowUpCircle className="h-4 w-4 text-danger" />,
-  MAINTENANCE: <Wrench className="h-4 w-4 text-blue-400" />,
-  LOSS: <Trash2 className="h-4 w-4 text-red-400" />,
-  ADJUSTMENT: <Edit3 className="h-4 w-4 text-text-muted" />,
+  IN: <ArrowDownCircle size={24} className="h-4 w-4 text-success" />,
+  OUT: <ArrowUpCircle size={24} className="h-4 w-4 text-danger" />,
+  MAINTENANCE: <Wrench size={24} className="h-4 w-4 text-blue-400" />,
+  LOSS: <Trash2 size={24} className="h-4 w-4 text-red-400" />,
+  ADJUSTMENT: <Edit3 size={24} className="h-4 w-4 text-text-muted" />,
 };
 
 const PRIORITY_LABELS: Record<string, string> = {
@@ -386,7 +397,7 @@ export const EquipmentPanel: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 size={24} className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -410,7 +421,7 @@ export const EquipmentPanel: React.FC = () => {
             onClick={openCreateEquip}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-accent-fg shadow-lg shadow-accent/15 transition hover:bg-accent-hover"
           >
-            <Plus className="h-4 w-4" />
+            <Plus size={24} className="h-4 w-4" />
             Novo equipamento
           </button>
         </div>
@@ -452,9 +463,9 @@ export const EquipmentPanel: React.FC = () => {
       <div className="rounded-2xl border border-border bg-surface p-2 shadow-[0_18px_44px_-32px_rgba(0,0,0,0.7)]">
         <div className="grid grid-cols-3 gap-2">
           {([
-            ['estoque', 'Estoque', <Package className="h-4 w-4" />],
-            ['movimentacoes', 'Movimentacoes', <ArrowUpCircle className="h-4 w-4" />],
-            ['necessidades', 'Necessidades', <AlertTriangle className="h-4 w-4" />],
+            ['estoque', 'Estoque', <Package size={24} className="h-4 w-4" />],
+            ['movimentacoes', 'Movimentacoes', <ArrowUpCircle size={24} className="h-4 w-4" />],
+            ['necessidades', 'Necessidades', <AlertTriangle size={24} className="h-4 w-4" />],
           ] as const).map(([id, label, icon]) => (
             <button
               key={id}
@@ -477,7 +488,7 @@ export const EquipmentPanel: React.FC = () => {
         <div className="space-y-3">
           {/* Search bar */}
           <div className="relative">
-            <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+            <SearchIcon size={24} className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
             <input
               type="text"
               value={search}
@@ -517,14 +528,14 @@ export const EquipmentPanel: React.FC = () => {
                         className="rounded-lg p-2 text-text-muted hover:bg-surface-2 hover:text-text-primary"
                         title="Editar"
                       >
-                        <Edit3 className="h-4 w-4" />
+                        <Edit3 size={24} className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => setDeleteTarget(equip)}
                         className="rounded p-1 text-red-400 hover:bg-red-500/10"
                         title="Remover"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 size={24} className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
@@ -561,7 +572,7 @@ export const EquipmentPanel: React.FC = () => {
               onClick={() => { setMovForm(INITIAL_MOVEMENT_FORM); setMovSubmitError(null); setMovModalOpen(true); }}
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-accent-fg shadow-lg shadow-accent/15 transition hover:bg-accent-hover"
             >
-              <Plus className="h-4 w-4" />
+              <Plus size={24} className="h-4 w-4" />
               Nova movimentacao
             </button>
           </div>
@@ -579,7 +590,7 @@ export const EquipmentPanel: React.FC = () => {
                   className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3"
                 >
                   <div className="shrink-0">
-                    {MOVEMENT_TYPE_ICONS[mov.type] ?? <Package className="h-4 w-4 text-text-muted" />}
+                    {MOVEMENT_TYPE_ICONS[mov.type] ?? <Package size={24} className="h-4 w-4 text-text-muted" />}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
@@ -612,7 +623,7 @@ export const EquipmentPanel: React.FC = () => {
               onClick={() => { setNeedForm(INITIAL_NEED_FORM); setNeedSubmitError(null); setNeedModalOpen(true); }}
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-accent-fg shadow-lg shadow-accent/15 transition hover:bg-accent-hover"
             >
-              <Plus className="h-4 w-4" />
+              <Plus size={24} className="h-4 w-4" />
               Nova necessidade
             </button>
           </div>
@@ -745,7 +756,7 @@ export const EquipmentPanel: React.FC = () => {
               <div className={FORM_FOOTER}>
                 <button type="button" onClick={() => setEquipModalOpen(false)} className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted">Cancelar</button>
                 <button type="submit" disabled={equipSubmitting} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
-                  {equipSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {equipSubmitting && <Loader2 size={24} className="h-4 w-4 animate-spin" />}
                   {editingEquip ? 'Salvar' : 'Criar'}
                 </button>
               </div>
@@ -780,7 +791,7 @@ export const EquipmentPanel: React.FC = () => {
               <div className={FORM_FOOTER}>
                 <button type="button" onClick={() => setMovModalOpen(false)} className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted">Cancelar</button>
                 <button type="submit" disabled={movSubmitting} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
-                  {movSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {movSubmitting && <Loader2 size={24} className="h-4 w-4 animate-spin" />}
                   Registrar
                 </button>
               </div>
@@ -821,7 +832,7 @@ export const EquipmentPanel: React.FC = () => {
               <div className={FORM_FOOTER}>
                 <button type="button" onClick={() => setNeedModalOpen(false)} className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted">Cancelar</button>
                 <button type="submit" disabled={needSubmitting} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
-                  {needSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {needSubmitting && <Loader2 size={24} className="h-4 w-4 animate-spin" />}
                   Criar
                 </button>
               </div>

@@ -1,14 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
-  BarChart3,
-  BrainCircuit,
-  ChevronLeft,
-  ChevronRight,
-  Megaphone,
-  RefreshCw,
-  Search,
-  Users,
-} from 'lucide-react';
+  LuChartColumn as BarChart3,
+  LuBrainCircuit as BrainCircuit,
+  LuChevronLeft as ChevronLeft,
+  LuChevronRight as ChevronRight,
+  LuMegaphone as Megaphone,
+  LuRefreshCw as RefreshCw,
+  LuSearch as Search,
+  LuUsers as Users,
+} from 'react-icons/lu';
 import {
   Bar,
   BarChart,
@@ -42,7 +43,7 @@ interface Props {
   onNotify?: (message: string, type?: 'success' | 'error' | 'bot') => void;
 }
 
-type Tab = 'overview' | 'clients' | 'intelligence' | 'campaigns';
+type IntelTab = 'resumo' | 'segmentos' | 'previsoes' | 'campanhas';
 
 const money = (value: unknown) => {
   const n = Number(value);
@@ -214,7 +215,15 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
     confidenceHigh: { label: 'Máximo', color: 'var(--chart-5)' },
   };
 
-  const [tab, setTab] = useState<Tab>('overview');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rawTab = searchParams.get('tab');
+  const validTabs: IntelTab[] = ['resumo', 'segmentos', 'previsoes', 'campanhas'];
+  const tab: IntelTab = validTabs.includes(rawTab as IntelTab) && (rawTab !== 'campanhas' || canCampaigns)
+    ? (rawTab as IntelTab)
+    : 'resumo';
+  const setTab = useCallback((t: IntelTab) => {
+    setSearchParams(prev => { prev.set('tab', t); return prev; }, { replace: true });
+  }, [setSearchParams]);
   const [overview, setOverview] = useState<CrmOverview | null>(null);
   const [overviewState, setOverviewState] = useState<'idle' | 'loading' | 'error'>('idle');
   const [overviewError, setOverviewError] = useState('');
@@ -321,13 +330,13 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
     void loadOverview();
   }, [loadOverview]);
   useEffect(() => {
-    if (tab === 'clients') void loadClients(1);
+    if (tab === 'segmentos') void loadClients(1);
   }, [loadClients, tab]);
   useEffect(() => {
-    if (tab === 'intelligence') void loadForecast();
+    if (tab === 'previsoes') void loadForecast();
   }, [loadForecast, tab]);
   useEffect(() => {
-    if (tab === 'campaigns') void loadCampaigns();
+    if (tab === 'campanhas') void loadCampaigns();
   }, [loadCampaigns, tab]);
 
   const calculateAudience = async () => {
@@ -422,11 +431,11 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
         <nav aria-label="Áreas do CRM" className="flex overflow-x-auto border-b border-border px-2">
           {(
             [
-              ['overview', 'Visão geral', BarChart3],
-              ['clients', 'Clientes', Users],
-              ['intelligence', 'Inteligência', BrainCircuit],
-              ...(canCampaigns ? [['campaigns', 'Campanhas', Megaphone] as const] : []),
-            ] as [Tab, string, React.ComponentType<{ size?: number; className?: string }>][]
+              ['resumo', 'Resumo', BarChart3],
+              ['segmentos', 'Segmentos', Users],
+              ['previsoes', 'Previsões', BrainCircuit],
+              ...(canCampaigns ? [['campanhas', 'Campanhas', Megaphone] as const] : []),
+            ] as [IntelTab, string, React.ComponentType<{ size?: number; className?: string }>][]
           ).map(([id, label, Icon]) => (
             <button
               type="button"
@@ -442,7 +451,7 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
           ))}
         </nav>
 
-        {tab === 'overview' && (
+        {tab === 'resumo' && (
           <div className="space-y-4 p-4">
             {overviewError && (
               <p className="rounded-lg bg-danger/10 p-3 text-sm text-danger">{overviewError}</p>
@@ -564,7 +573,7 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
           </div>
         )}
 
-        {tab === 'clients' && (
+        {tab === 'segmentos' && (
           <div className="space-y-4 p-4">
             <div className="grid gap-2 md:grid-cols-[1fr_auto_auto]">
               <label className="relative">
@@ -666,7 +675,7 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
           </div>
         )}
 
-        {tab === 'intelligence' && (
+        {tab === 'previsoes' && (
           <div className="space-y-4 p-4">
             <div className="flex flex-wrap gap-2">
               {([7, 30, 90] as const).map(horizon => (
@@ -765,7 +774,7 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
           </div>
         )}
 
-        {tab === 'campaigns' && canCampaigns && (
+        {tab === 'campanhas' && canCampaigns && (
           <div className="grid gap-4 p-4 xl:grid-cols-2">
             <div className="space-y-3 rounded-xl border border-border p-4">
               <h3 className="font-bold text-text-primary">Preparar campanha</h3>

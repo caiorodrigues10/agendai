@@ -1,5 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Loader2, Plus, Trash2, Edit3, Send, Calendar, AlertTriangle } from 'lucide-react';
+import {
+  LuLoaderCircle as Loader2,
+  LuPlus as Plus,
+  LuTrash2 as Trash2,
+  LuPencilLine as Edit3,
+  LuSend as Send,
+  LuCalendar as Calendar,
+  LuTriangleAlert as AlertTriangle,
+} from 'react-icons/lu';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { waitlistApi, WaitlistEntry } from '../../infra/waitlistApi';
 import { getErrorMessage } from '../../utils/errorMessage';

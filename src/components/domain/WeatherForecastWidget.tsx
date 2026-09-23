@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Cloud,
-  CloudRain,
-  CloudSun,
-  Loader2,
-  Sun,
-  AlertTriangle,
-  TrendingDown,
-  TrendingUp,
-  Calendar,
-} from 'lucide-react';
+  LuCloud as Cloud,
+  LuCloudRain as CloudRain,
+  LuCloudSun as CloudSun,
+  LuLoaderCircle as Loader2,
+  LuSun as Sun,
+  LuTriangleAlert as AlertTriangle,
+  LuTrendingDown as TrendingDown,
+  LuTrendingUp as TrendingUp,
+  LuCalendar as Calendar,
+} from 'react-icons/lu';
 import { financialApi, WeatherDemandPrediction, WeatherInsights } from '../../infra/financialApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { formatWeatherDayLabel } from '../../utils/weatherUtils';
@@ -44,12 +44,12 @@ const RISK_STYLES: Record<string, { bg: string; border: string; text: string; ic
 };
 
 function getWeatherIcon(code: number): React.ReactNode {
-  if (code <= 1) return <Sun className="h-6 w-6 text-yellow-400" />;
-  if (code <= 3) return <CloudSun className="h-6 w-6 text-neutral-400" />;
-  if (code >= 51 && code <= 67) return <CloudRain className="h-6 w-6 text-blue-400" />;
-  if (code >= 80 && code <= 82) return <CloudRain className="h-6 w-6 text-blue-400" />;
-  if (code >= 95) return <CloudRain className="h-6 w-6 text-purple-400" />;
-  return <Cloud className="h-6 w-6 text-neutral-400" />;
+  if (code <= 1) return <Sun size={24} className="h-6 w-6 text-yellow-400" />;
+  if (code <= 3) return <CloudSun size={24} className="h-6 w-6 text-neutral-400" />;
+  if (code >= 51 && code <= 67) return <CloudRain size={24} className="h-6 w-6 text-blue-400" />;
+  if (code >= 80 && code <= 82) return <CloudRain size={24} className="h-6 w-6 text-blue-400" />;
+  if (code >= 95) return <CloudRain size={24} className="h-6 w-6 text-purple-400" />;
+  return <Cloud size={24} className="h-6 w-6 text-neutral-400" />;
 }
 
 interface WeatherForecastWidgetProps {
@@ -100,7 +100,7 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
   if (error) {
     return (
       <div className="rounded-xl border border-border bg-surface p-6 text-center">
-        <Cloud className="mx-auto h-8 w-8 text-text-muted" />
+        <Cloud size={24} className="mx-auto h-8 w-8 text-text-muted" />
         <p className="mt-3 text-sm font-semibold text-text-primary">Não foi possível carregar o clima</p>
         <p className="mt-1 text-xs text-text-muted">
           {locationMissing
@@ -114,7 +114,7 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
   if (!insights || (insights.predictions.length === 0 && (!insights.forecast || insights.forecast.length === 0))) {
     return (
       <div className="rounded-xl border border-border bg-surface p-6 text-center">
-        <Calendar className="mx-auto h-8 w-8 text-text-muted" />
+        <Calendar size={24} className="mx-auto h-8 w-8 text-text-muted" />
         <p className="mt-3 text-sm font-semibold text-text-primary">Aguardando dados do clima</p>
         <p className="mt-1 text-xs text-text-muted">
           {locationMissing
@@ -136,7 +136,7 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
     return (
       <div className={`rounded-xl border ${style.border} ${style.bg} p-4`}>
         <div className="flex items-center gap-3">
-          <AlertTriangle className={`h-5 w-5 ${style.icon}`} />
+          <AlertTriangle size={24} className={`h-5 w-5 ${style.icon}`} />
           <div>
             <p className={`text-sm font-bold ${style.text}`}>
               Amanhã: {tomorrow.condition} — {Math.abs(finiteNumber(tomorrow.dropPct))}% menos clientes

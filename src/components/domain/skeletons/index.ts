@@ -6,3 +6,4 @@ export { ClientsSkeleton, TeamSkeleton } from './ClientsSkeleton';
 export { FinancialSkeleton, ReportsSkeleton } from './FinancialSkeleton';
 export { WeatherSkeleton } from './WeatherSkeleton';
 export { PublicPageSkeleton } from './PublicPageSkeleton';
+export { FinanceResumoSkeleton } from './FinanceResumoSkeleton';

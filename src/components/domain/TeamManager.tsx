@@ -1,11 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChevronDown } from 'lucide-react';
+import { LuChevronDown as ChevronDown } from 'react-icons/lu';
 import { Link } from 'react-router-dom';
 import { StaffMember, EmployeePermission } from '../../types';
 import { TeamMemberSchema, TeamMemberFormData } from '../../schemas';
-import { v4 as uuidv4 } from 'uuid';
 import {
   RiAddLine,
   RiDeleteBin6Line,
@@ -58,7 +57,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
     setSaving(true);
     setFormError(null);
     const newMember: StaffMember & { cpf: string; password: string } = {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       name: data.name,
       email: data.email,
       password: data.password,

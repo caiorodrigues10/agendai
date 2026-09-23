@@ -28,7 +28,6 @@ const EmailVerifiedPage = lazy(() => import('./pages/EmailVerifiedPage'));
 const AccessBlockedPage = lazy(() => import('./pages/AccessBlockedPage'));
 const PlansPage = lazy(() => import('./pages/PlansPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
-const MasterAdminDashboard = lazy(() => import('./pages/MasterAdmin/MasterAdminDashboard'));
 const AdminLayout = lazy(() => import('./components/domain/admin/AdminLayout'));
 const WorkSummaryPage = lazy(() => import('./pages/MasterAdmin/WorkSummaryPage'));
 const TicketsPage = lazy(() => import('./pages/MasterAdmin/TicketsPage'));
@@ -39,6 +38,9 @@ const TeamPage = lazy(() => import('./pages/MasterAdmin/TeamPage'));
 const AccountsPage = lazy(() => import('./pages/MasterAdmin/AccountsPage'));
 const OperationsPage = lazy(() => import('./pages/MasterAdmin/OperationsPage'));
 const AuditPage = lazy(() => import('./pages/MasterAdmin/AuditPage'));
+const BillingPage = lazy(() => import('./pages/MasterAdmin/BillingPage'));
+const ReferralsPage = lazy(() => import('./pages/MasterAdmin/ReferralsPage'));
+const CrmMaintenancePage = lazy(() => import('./pages/MasterAdmin/CrmMaintenancePage'));
 const StaffDashboard = lazy(() => import('./pages/StaffDashboard'));
 const ClientPortalPage = lazy(() => import('./pages/ClientPortalPage'));
 const ShowcasePage = lazy(() => import('./pages/ShowcasePage'));
@@ -106,6 +108,7 @@ const App: React.FC = () => {
             }
           >
             <Route index element={<Navigate to="/master/work" replace />} />
+            <Route path="dashboard" element={<Navigate to="/master/work" replace />} />
             <Route path="work" element={<WorkSummaryPage />} />
             <Route path="tickets" element={<TicketsPage />} />
             <Route path="tickets/new" element={<TicketsPage />} />
@@ -117,9 +120,9 @@ const App: React.FC = () => {
             <Route path="accounts" element={<AccountsPage />} />
             <Route path="operations" element={<OperationsPage />} />
             <Route path="audit" element={<AuditPage />} />
-            <Route path="billing" element={<MasterAdminDashboard />} />
-            <Route path="referrals" element={<MasterAdminDashboard />} />
-            <Route path="crm" element={<MasterAdminDashboard />} />
+            <Route path="billing" element={<BillingPage />} />
+            <Route path="referrals" element={<ReferralsPage />} />
+            <Route path="crm" element={<CrmMaintenancePage />} />
           </Route>
           <Route path="/app/account" element={<Navigate to="/app/settings" replace />} />
           <Route

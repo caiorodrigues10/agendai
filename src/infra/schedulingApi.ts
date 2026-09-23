@@ -15,6 +15,8 @@ export interface ListAppointmentsParams {
   staffId?: string;
   from?: string;
   to?: string;
+  page?: number;
+  limit?: number;
 }
 
 interface JoinQueuePayload {

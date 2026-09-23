@@ -9,7 +9,7 @@ import { ProductFormModal } from './ProductFormModal';
 import { CatalogTemplateModal } from './CatalogTemplateModal';
 import { PRODUCT_PURPOSE_SHORT, productMoney } from './productMoney';
 import { formatStockQty, isLowStock, formatDateOnlyBR } from './productStock';
-import { Package, Clock, AlertTriangle } from 'lucide-react';
+import { LuPackage as Package, LuClock as Clock, LuTriangleAlert as AlertTriangle } from 'react-icons/lu';
 
 const SEGMENTS: Record<BusinessSegment, string> = {
   BARBERSHOP: 'Barbearia',

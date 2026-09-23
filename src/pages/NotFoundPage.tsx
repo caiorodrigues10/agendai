@@ -1,5 +1,10 @@
 import React, { useEffect } from 'react';
-import { Home, LayoutDashboard, LogIn, SearchX } from 'lucide-react';
+import {
+  LuHouse as Home,
+  LuLayoutDashboard as LayoutDashboard,
+  LuLogIn as LogIn,
+  LuSearchX as SearchX,
+} from 'react-icons/lu';
 import { SystemStatePage } from '../components/infra/SystemStatePage';
 import { useAuth } from '../contexts/AuthContext';
 import { staffHomePath } from '../utils/subscriptionPaywall';

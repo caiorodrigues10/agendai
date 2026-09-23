@@ -1,5 +1,11 @@
 import React, { forwardRef } from 'react';
-import { Key, Eye, EyeOff, AlertCircle, Check } from 'lucide-react';
+import {
+  LuKey as Key,
+  LuEye as Eye,
+  LuEyeOff as EyeOff,
+  LuCircleAlert as AlertCircle,
+  LuCheck as Check,
+} from 'react-icons/lu';
 import { getPasswordStrength, PasswordStrengthLevel } from '../../utils/passwordStrength';
 
 const STRENGTH_BAR: Record<PasswordStrengthLevel, string> = {

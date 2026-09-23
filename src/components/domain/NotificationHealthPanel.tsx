@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Activity, AlertCircle, Clock3, RefreshCcw, Server, TimerReset } from 'lucide-react';
+import {
+  LuActivity as Activity,
+  LuCircleAlert as AlertCircle,
+  LuClock3 as Clock3,
+  LuRefreshCcw as RefreshCcw,
+  LuServer as Server,
+  LuTimerReset as TimerReset,
+} from 'react-icons/lu';
 import { NotificationOperationsHealth, notificationsApi } from '../../infra/notificationsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 

@@ -3,25 +3,25 @@ import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
-  Sparkles,
-  ArrowRight,
-  Gauge,
-  AlertTriangle,
-  Bot,
-  LineChart,
-  Clock,
-  Users,
-  TrendingUp,
-  MessageCircleWarning,
-  CalendarCheck,
-  BarChart3,
-  Zap,
-  Target,
-  Repeat,
-  TrendingDown,
-  Lightbulb,
-  Activity,
-} from 'lucide-react';
+  LuSparkles as Sparkles,
+  LuArrowRight as ArrowRight,
+  LuGauge as Gauge,
+  LuTriangleAlert as AlertTriangle,
+  LuBot as Bot,
+  LuChartLine as LineChart,
+  LuClock as Clock,
+  LuUsers as Users,
+  LuTrendingUp as TrendingUp,
+  LuMessageCircleWarning as MessageCircleWarning,
+  LuCalendarCheck as CalendarCheck,
+  LuChartColumn as BarChart3,
+  LuZap as Zap,
+  LuTarget as Target,
+  LuRepeat as Repeat,
+  LuTrendingDown as TrendingDown,
+  LuLightbulb as Lightbulb,
+  LuActivity as Activity,
+} from 'react-icons/lu';
 import { MarketingNav } from '../../components/marketing/MarketingNav';
 import { MarketingFooter } from '../../components/marketing/MarketingFooter';
 import { SeoHead } from '../../components/marketing/SeoHead';
@@ -57,7 +57,7 @@ const PredictionPhone = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="text-xs font-bold text-white tracking-wide">IA PREDITIVA</div>
           <div className="flex items-center gap-1.5">
-            <Activity className="w-3 h-3 text-accent" />
+            <Activity size={24} className="w-3 h-3 text-accent" />
             <span className="text-[10px] text-accent font-bold">Ativo</span>
           </div>
         </div>
@@ -87,7 +87,7 @@ const PredictionPhone = () => {
             {active === i && (
               <div className="mt-2 pt-2 border-t border-white/5">
                 <div className="flex items-center gap-1.5">
-                  <Lightbulb className="w-3 h-3 text-amber-400" />
+                  <Lightbulb size={24} className="w-3 h-3 text-amber-400" />
                   <span className="text-[10px] text-neutral-300">
                     {p.color === 'red'
                       ? 'Enviar WhatsApp reengajamento'
@@ -102,7 +102,7 @@ const PredictionPhone = () => {
         ))}
         <div className="mt-2 p-3 rounded-xl bg-accent/5 border border-accent/20">
           <div className="flex items-center gap-2 mb-1">
-            <TrendingDown className="w-3 h-3 text-accent" />
+            <TrendingDown size={24} className="w-3 h-3 text-accent" />
             <span className="text-[10px] font-bold text-accent uppercase tracking-wider">
               Previsão da semana
             </span>
@@ -128,7 +128,7 @@ const WaitTimePhone = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between mb-2">
           <div className="text-xs font-bold text-white tracking-wide">TEMPO ESTIMADO</div>
-          <Gauge className="w-4 h-4 text-accent" />
+          <Gauge size={24} className="w-4 h-4 text-accent" />
         </div>
         {bars.map(bar => (
           <div key={bar.client} className="space-y-1.5">
@@ -168,7 +168,7 @@ const RevenuePhone = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between mb-2">
           <div className="text-xs font-bold text-white tracking-wide">INSIGHTS DE IA</div>
-          <Sparkles className="w-4 h-4 text-violet-400" />
+          <Sparkles size={24} className="w-4 h-4 text-violet-400" />
         </div>
         {insights.map((insight, i) => (
           <div key={i} className="p-3 rounded-xl bg-white/5 border border-white/5">
@@ -210,7 +210,7 @@ const EngagementPhone = () => {
       <div className="space-y-3">
         <div className="flex items-center justify-between mb-2">
           <div className="text-xs font-bold text-white tracking-wide">REENGAJAMENTO</div>
-          <Bot className="w-4 h-4 text-violet-400" />
+          <Bot size={24} className="w-4 h-4 text-violet-400" />
         </div>
         {messages.map((msg, i) => (
           <div
@@ -426,7 +426,7 @@ export const AiPredictivePage: React.FC = () => {
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 relative z-10">
           <div className="flex-1 text-center lg:text-left">
             <div className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-accent/20 bg-accent/5 text-accent text-[10px] font-black uppercase tracking-[0.3em] mb-8 opacity-0">
-              <Sparkles className="w-3.5 h-3.5" />
+              <Sparkles size={24} className="w-3.5 h-3.5" />
               IA Preditiva
               <span className="px-1.5 py-0.5 rounded bg-accent/20 text-accent-light text-[8px] font-bold uppercase tracking-wider">
                 Novo
@@ -451,7 +451,7 @@ export const AiPredictivePage: React.FC = () => {
                 className="bg-accent text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-accent transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
               >
                 Ver planos
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight size={24} className="w-4 h-4" />
               </button>
               <button
                 onClick={() => navigate('/queue')}
@@ -472,7 +472,7 @@ export const AiPredictivePage: React.FC = () => {
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
           <div className="feature-text flex-1">
             <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/20 bg-accent/5 text-accent text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
-              <Gauge className="w-3.5 h-3.5" />
+              <Gauge size={24} className="w-3.5 h-3.5" />
               Previsão de Espera
             </div>
             <h2 className="feature-title text-4xl md:text-6xl font-black tracking-tight mb-6 leading-[1.05] opacity-0">
@@ -515,7 +515,7 @@ export const AiPredictivePage: React.FC = () => {
           </div>
           <div className="feature-text flex-1">
             <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
-              <AlertTriangle className="w-3.5 h-3.5" />
+              <AlertTriangle size={24} className="w-3.5 h-3.5" />
               Alerta de Cancelamento
             </div>
             <h2 className="feature-title text-4xl md:text-6xl font-black tracking-tight mb-6 leading-[1.05] opacity-0">
@@ -552,7 +552,7 @@ export const AiPredictivePage: React.FC = () => {
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
           <div className="feature-text flex-1">
             <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-violet-500/20 bg-violet-500/5 text-violet-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
-              <Bot className="w-3.5 h-3.5" />
+              <Bot size={24} className="w-3.5 h-3.5" />
               Reengajamento Automático
             </div>
             <h2 className="feature-title text-4xl md:text-6xl font-black tracking-tight mb-6 leading-[1.05] opacity-0">
@@ -597,7 +597,7 @@ export const AiPredictivePage: React.FC = () => {
           </div>
           <div className="feature-text flex-1">
             <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/20 bg-cyan-500/5 text-cyan-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
-              <LineChart className="w-3.5 h-3.5" />
+              <LineChart size={24} className="w-3.5 h-3.5" />
               Insights de Faturamento
             </div>
             <h2 className="feature-title text-4xl md:text-6xl font-black tracking-tight mb-6 leading-[1.05] opacity-0">
@@ -874,7 +874,7 @@ export const AiPredictivePage: React.FC = () => {
               className="bg-accent text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-accent transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
             >
               Ver planos
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight size={24} className="w-4 h-4" />
             </button>
             <button
               onClick={() => navigate('/queue')}

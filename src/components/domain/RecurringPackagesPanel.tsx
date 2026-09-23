@@ -1,7 +1,17 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Loader2, Plus, Edit3, Pause, Play, XCircle, CreditCard, AlertTriangle, RefreshCcw } from 'lucide-react';
+import {
+  LuLoaderCircle as Loader2,
+  LuPlus as Plus,
+  LuPencilLine as Edit3,
+  LuPause as Pause,
+  LuPlay as Play,
+  LuCircleX as XCircle,
+  LuCreditCard as CreditCard,
+  LuTriangleAlert as AlertTriangle,
+  LuRefreshCcw as RefreshCcw,
+} from 'react-icons/lu';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
-import { membershipsApi, MembershipPlan, ClientMembership } from '../../infra/membershipsApi';
+import { recurringPackagesApi, RecurringPackagePlan, ClientRecurringPackage } from '../../infra/recurringPackagesApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { formatCurrencyBRL, formatDateBR } from '../../utils/formatters';
 import { Field, FIELD_CONTROL, FORM_FOOTER, FORM_GRID } from '../ui/Field';
@@ -47,16 +57,16 @@ const INITIAL_PLAN_FORM: PlanFormData = {
   benefits: [],
 };
 
-export const MembershipsPanel: React.FC = () => {
+export const RecurringPackagesPanel: React.FC = () => {
   const { barbershopId } = useBarbershopFilters();
   const [tab, setTab] = useState<Tab>('plans');
-  const [plans, setPlans] = useState<MembershipPlan[]>([]);
-  const [memberships, setMemberships] = useState<ClientMembership[]>([]);
+  const [plans, setPlans] = useState<RecurringPackagePlan[]>([]);
+  const [memberships, setMemberships] = useState<ClientRecurringPackage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [planModalOpen, setPlanModalOpen] = useState(false);
-  const [editingPlan, setEditingPlan] = useState<MembershipPlan | null>(null);
+  const [editingPlan, setEditingPlan] = useState<RecurringPackagePlan | null>(null);
   const [planForm, setPlanForm] = useState<PlanFormData>(INITIAL_PLAN_FORM);
   const [planSubmitting, setPlanSubmitting] = useState(false);
   const [planSubmitError, setPlanSubmitError] = useState<string | null>(null);
@@ -66,10 +76,10 @@ export const MembershipsPanel: React.FC = () => {
   const [selectedClientId, setSelectedClientId] = useState('');
   const [newMembershipSubmitting, setNewMembershipSubmitting] = useState(false);
 
-  const [actionTarget, setActionTarget] = useState<{ membership: ClientMembership; action: 'activate' | 'pause' | 'resume' | 'cancel' } | null>(null);
+  const [actionTarget, setActionTarget] = useState<{ membership: ClientRecurringPackage; action: 'activate' | 'pause' | 'resume' | 'cancel' } | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const [paymentTarget, setPaymentTarget] = useState<{ membership: ClientMembership; cycleId: string } | null>(null);
+  const [paymentTarget, setPaymentTarget] = useState<{ membership: ClientRecurringPackage; cycleId: string } | null>(null);
   const [paymentMethod, setPaymentMethod] = useState('PIX');
   const [paymentLoading, setPaymentLoading] = useState(false);
 
@@ -79,13 +89,13 @@ export const MembershipsPanel: React.FC = () => {
     setError(null);
     try {
       const [p, m] = await Promise.all([
-        membershipsApi.listPlans(barbershopId),
-        membershipsApi.listMemberships(barbershopId),
+        recurringPackagesApi.listPlans(barbershopId),
+        recurringPackagesApi.listMemberships(barbershopId),
       ]);
       setPlans(Array.isArray(p) ? p : []);
       setMemberships(Array.isArray(m) ? m : []);
     } catch (err) {
-      setError(getErrorMessage(err, 'Erro ao carregar assinaturas'));
+      setError(getErrorMessage(err, 'Erro ao carregar pacotes recorrentes'));
     } finally {
       setLoading(false);
     }
@@ -100,7 +110,7 @@ export const MembershipsPanel: React.FC = () => {
     setPlanModalOpen(true);
   };
 
-  const openPlanEdit = (plan: MembershipPlan) => {
+  const openPlanEdit = (plan: RecurringPackagePlan) => {
     setEditingPlan(plan);
     setPlanForm({
       name: plan.name,
@@ -138,14 +148,14 @@ export const MembershipsPanel: React.FC = () => {
         })),
       };
       if (editingPlan) {
-        await membershipsApi.updatePlan(barbershopId, editingPlan.id, payload as any);
+        await recurringPackagesApi.updatePlan(barbershopId, editingPlan.id, payload as any);
       } else {
-        await membershipsApi.createPlan(barbershopId, payload);
+        await recurringPackagesApi.createPlan(barbershopId, payload);
       }
       setPlanModalOpen(false);
       await load();
     } catch (err) {
-      setPlanSubmitError(getErrorMessage(err, 'Erro ao salvar plano'));
+      setPlanSubmitError(getErrorMessage(err, 'Erro ao salvar modelo'));
     } finally {
       setPlanSubmitting(false);
     }
@@ -155,7 +165,7 @@ export const MembershipsPanel: React.FC = () => {
     if (!barbershopId || !selectedPlanId || !selectedClientId) return;
     setNewMembershipSubmitting(true);
     try {
-      await membershipsApi.createMembership(barbershopId, { planId: selectedPlanId, clientId: selectedClientId });
+      await recurringPackagesApi.createMembership(barbershopId, { planId: selectedPlanId, clientId: selectedClientId });
       setNewMembershipOpen(false);
       setSelectedPlanId('');
       setSelectedClientId('');
@@ -173,10 +183,10 @@ export const MembershipsPanel: React.FC = () => {
     try {
       const { membership, action } = actionTarget;
       const apiFn = {
-        activate: membershipsApi.activate,
-        pause: membershipsApi.pause,
-        resume: membershipsApi.resume,
-        cancel: membershipsApi.cancel,
+        activate: recurringPackagesApi.activate,
+        pause: recurringPackagesApi.pause,
+        resume: recurringPackagesApi.resume,
+        cancel: recurringPackagesApi.cancel,
       }[action];
       await apiFn(barbershopId, membership.id);
       setActionTarget(null);
@@ -192,7 +202,7 @@ export const MembershipsPanel: React.FC = () => {
     if (!barbershopId || !paymentTarget) return;
     setPaymentLoading(true);
     try {
-      await membershipsApi.recordPayment(barbershopId, paymentTarget.membership.id, paymentTarget.cycleId, { paymentMethod });
+      await recurringPackagesApi.recordPayment(barbershopId, paymentTarget.membership.id, paymentTarget.cycleId, { paymentMethod });
       setPaymentTarget(null);
       await load();
     } catch (err) {
@@ -225,19 +235,19 @@ export const MembershipsPanel: React.FC = () => {
   return (
     <div className="bg-surface rounded-xl border border-border p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold">Assinaturas</h3>
+        <h3 className="text-lg font-bold">Pacotes recorrentes</h3>
         <div className="flex gap-2">
           <button
             onClick={() => setTab('plans')}
             className={`rounded-lg px-3 py-1.5 text-xs font-bold ${tab === 'plans' ? 'bg-accent text-accent-fg' : 'bg-surface-2 text-text-secondary hover:bg-surface'}`}
           >
-            Planos ({plans.length})
+            Modelos de pacote ({plans.length})
           </button>
           <button
             onClick={() => setTab('memberships')}
             className={`rounded-lg px-3 py-1.5 text-xs font-bold ${tab === 'memberships' ? 'bg-accent text-accent-fg' : 'bg-surface-2 text-text-secondary hover:bg-surface'}`}
           >
-            Adesões ({memberships.length})
+            Pacotes dos clientes ({memberships.length})
           </button>
         </div>
       </div>
@@ -246,11 +256,11 @@ export const MembershipsPanel: React.FC = () => {
         <>
           <div className="flex justify-end">
             <button onClick={openPlanCreate} className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-xs font-bold text-accent-fg">
-              <Plus size={14} /> Criar plano
+              <Plus size={14} /> Criar modelo
             </button>
           </div>
           {plans.length === 0 ? (
-            <EmptyState title="Nenhum plano criado" description="Crie planos de assinatura para oferecer benefícios recorrentes." />
+            <EmptyState title="Nenhum modelo criado" description="Crie modelos de pacote para oferecer benefícios recorrentes." />
           ) : (
             <div className="space-y-2">
               {plans.map(plan => (
@@ -295,11 +305,11 @@ export const MembershipsPanel: React.FC = () => {
         <>
           <div className="flex justify-end">
             <button onClick={() => setNewMembershipOpen(true)} className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-xs font-bold text-accent-fg">
-              <Plus size={14} /> Nova adesão
+              <Plus size={14} /> Novo pacote
             </button>
           </div>
           {memberships.length === 0 ? (
-            <EmptyState title="Nenhuma adesão" description="Associe clientes a planos para gerenciar assinaturas." />
+            <EmptyState title="Nenhum pacote de cliente" description="Associe clientes a modelos para gerenciar pacotes recorrentes." />
           ) : (
             <div className="space-y-2">
               {memberships.map(m => (
@@ -367,13 +377,13 @@ export const MembershipsPanel: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-surface rounded-xl border border-border w-full max-w-lg max-h-[90vh] overflow-y-auto p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="text-base font-bold">{editingPlan ? 'Editar plano' : 'Criar plano'}</h4>
+              <h4 className="text-base font-bold">{editingPlan ? 'Editar modelo' : 'Criar modelo'}</h4>
               <button onClick={() => setPlanModalOpen(false)} className="text-text-muted hover:text-text-primary">✕</button>
             </div>
 
             {planSubmitError && <div className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">{planSubmitError}</div>}
 
-            <Field label="Nome do plano">
+            <Field label="Nome do modelo">
               <input className={FIELD_CONTROL} value={planForm.name} onChange={e => setPlanForm(f => ({ ...f, name: e.target.value }))} />
             </Field>
 
@@ -409,8 +419,8 @@ export const MembershipsPanel: React.FC = () => {
       {newMembershipOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-surface rounded-xl border border-border w-full max-w-sm p-5 space-y-4">
-            <h4 className="text-base font-bold">Nova adesão</h4>
-            <Field label="Plano">
+            <h4 className="text-base font-bold">Novo pacote</h4>
+            <Field label="Modelo">
               <SmartSelect
                 value={selectedPlanId || null}
                 onChange={val => setSelectedPlanId(val ?? '')}
@@ -424,7 +434,7 @@ export const MembershipsPanel: React.FC = () => {
             <div className={FORM_FOOTER}>
               <button onClick={handleNewMembership} disabled={newMembershipSubmitting || !selectedPlanId || !selectedClientId} className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-bold text-accent-fg disabled:opacity-60">
                 {newMembershipSubmitting ? <Loader2 className="animate-spin" size={16} /> : null}
-                Criar adesão
+                Criar pacote
               </button>
               <button onClick={() => setNewMembershipOpen(false)} className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-secondary hover:bg-surface-2">Cancelar</button>
             </div>
@@ -435,8 +445,8 @@ export const MembershipsPanel: React.FC = () => {
       {actionTarget && (
         <ConfirmDialog
           open
-          title={`${actionTarget.action === 'activate' ? 'Ativar' : actionTarget.action === 'pause' ? 'Pausar' : actionTarget.action === 'resume' ? 'Retomar' : 'Cancelar'} assinatura`}
-          message={`Deseja ${actionTarget.action === 'activate' ? 'ativar' : actionTarget.action === 'pause' ? 'pausar' : actionTarget.action === 'resume' ? 'retomar' : 'cancelar'} a assinatura de ${actionTarget.membership.clientName ?? actionTarget.membership.clientId}?`}
+          title={`${actionTarget.action === 'activate' ? 'Ativar' : actionTarget.action === 'pause' ? 'Pausar' : actionTarget.action === 'resume' ? 'Retomar' : 'Cancelar'} pacote recorrente`}
+          message={`Deseja ${actionTarget.action === 'activate' ? 'ativar' : actionTarget.action === 'pause' ? 'pausar' : actionTarget.action === 'resume' ? 'retomar' : 'cancelar'} o pacote recorrente de ${actionTarget.membership.clientName ?? actionTarget.membership.clientId}?`}
           confirmLabel="Confirmar"
           variant={actionTarget.action === 'cancel' ? 'danger' : 'default'}
           loading={actionLoading}

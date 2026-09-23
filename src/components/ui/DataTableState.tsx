@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react';
+import { LuLoaderCircle as Loader2 } from 'react-icons/lu';
 import { EmptyState } from './EmptyState';
 import { SectionError } from './SectionError';
 import { TableSkeleton, TableSkeletonProps } from './TableSkeleton';
@@ -35,7 +35,7 @@ export function DataTableState({
             <TableSkeleton {...skeletonProps} />
           ) : (
             <div className="flex justify-center py-8">
-              <Loader2 className="animate-spin text-accent" aria-label="Carregando" />
+              <Loader2 size={24} className="animate-spin text-accent" aria-label="Carregando" />
             </div>
           )
         )}

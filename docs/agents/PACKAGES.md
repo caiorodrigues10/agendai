@@ -10,23 +10,20 @@
 | Pacote | Versão | Categoria | Finalidade | Evidência de uso |
 |---|---|---|---|---|
 | `@floating-ui/react` | `^0.27.20` | UI | Posicionamento de dropdowns/popovers (useFloating, FloatingPortal) | src/components/ui/SmartSelect.tsx |
-| `@google/genai` | `^1.34.0` | IA | SDK Gemini (uso limitado; há heurística local em geminiService) | src/services/geminiService.ts — confirmar consumo de API antes de ampliar |
 | `@hookform/resolvers` | `^3.3.4` | Formulários | Bridge Zod ↔ react-hook-form | zodResolver nos formulários do painel |
 | `class-variance-authority` | `^0.7.1` | UI | Variantes de classe CSS | componentes UI / utilitários |
 | `clsx` | `^2.1.1` | UI | Concatenação condicional de classes | com tailwind-merge |
 | `framer-motion` | `^12.38.0` | UI | Animações React | landing e painel |
 | `gsap` | `^3.15.0` | UI | Animações avançadas marketing | páginas marketing |
-| `lucide-react` | `0.344.0` | UI | Ícones | componentes domain/ui |
 | `react` | `18.3.1` | Core | Biblioteca UI | toda a aplicação |
 | `react-day-picker` | `^10.0.1` | UI | Seletor de datas | ThemedCalendar / agenda |
 | `react-dom` | `18.3.1` | Core | Renderização DOM | index.tsx |
 | `react-focus-lock` | `^2.13.7` | A11y | Foco em modais | diálogos/modais |
 | `react-hook-form` | `^7.55.0` | Formulários | Estado e validação de formulários | ServiceForm, TeamManager, produtos, financeiro, etc. |
-| `react-icons` | `^5.7.0` | UI | Pacote adicional de ícones | ClientsManager, TeamManager |
+| `react-icons` | `^5.7.0` | UI | Biblioteca de ícones | componentes domain/ui e páginas (react-icons/lu e demais conjuntos) |
 | `react-router-dom` | `^6.28.0` | Roteamento | Rotas SPA | App.tsx |
 | `recharts` | `^3.10.0` | UI | Gráficos | dashboard financeiro / master admin |
 | `tailwind-merge` | `^3.6.0` | UI | Merge de classes Tailwind | utilitário cn / UI |
-| `uuid` | `^13.0.0` | Utilitário | IDs no cliente | TeamManager e fluxos locais |
 | `zod` | `3.22.4` | Validação | Schemas de formulário | src/schemas.ts |
 
 ## devDependencies

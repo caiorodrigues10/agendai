@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { LuArrowRight as ArrowRight } from 'react-icons/lu';
 import { MarketingNav } from '../../components/marketing/MarketingNav';
 import { MarketingFooter } from '../../components/marketing/MarketingFooter';
 import { SeoHead } from '../../components/marketing/SeoHead';
@@ -485,7 +485,7 @@ export const AboutPage: React.FC = () => {
                 className="group inline-flex items-center justify-center gap-3 rounded-full bg-accent px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-accent-light"
               >
                 {trialCampaign.cta}
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </button>
               <button
                 type="button"

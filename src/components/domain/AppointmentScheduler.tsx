@@ -13,13 +13,13 @@ import {
 } from '../../utils/schedulingUtils';
 import { maskPhone } from '../../utils/documentUtils';
 import {
-  Calendar,
-  User,
-  CheckCircle,
-  Smartphone,
-  AlertCircle,
-  Clock,
-} from 'lucide-react';
+  LuCalendar as Calendar,
+  LuUser as User,
+  LuCircleCheck as CheckCircle,
+  LuSmartphone as Smartphone,
+  LuCircleAlert as AlertCircle,
+  LuClock as Clock,
+} from 'react-icons/lu';
 import { DynamicIcon } from '../ui/DynamicIcon';
 import { ThemedCalendar, toLocalISO } from '../ui/ThemedCalendar';
 import { Avatar } from '../ui/Avatar';

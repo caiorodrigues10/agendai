@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { DoorClosed, DoorOpen, RotateCcw, Ban, ListChecks, Clock } from 'lucide-react';
+import {
+  LuDoorClosed as DoorClosed,
+  LuDoorOpen as DoorOpen,
+  LuRotateCcw as RotateCcw,
+  LuBan as Ban,
+  LuListChecks as ListChecks,
+  LuClock as Clock,
+} from 'react-icons/lu';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';

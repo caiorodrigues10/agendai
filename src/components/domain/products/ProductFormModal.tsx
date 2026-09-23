@@ -10,7 +10,7 @@ import { ProductSchema, ProductFormData } from '../../../schemas';
 import { PRODUCT_PURPOSE_LABEL } from './productMoney';
 import { STOCK_UNIT_OPTIONS } from './productStock';
 import { ConfirmDialog } from '../../ui/ConfirmDialog';
-import { Trash2, Upload, X } from 'lucide-react';
+import { LuTrash2 as Trash2, LuUpload as Upload, LuX as X } from 'react-icons/lu';
 
 const TITLE_CASE_EXCEPTIONS = new Set(['de', 'do', 'da', 'dos', 'das', 'e', 'para', 'com', 'sem', 'ou']);
 

@@ -1,17 +1,17 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  Plus,
-  Loader2,
-  Trash2,
-  GripVertical,
-  FileText,
-  ChevronDown,
-  ChevronUp,
-  Check,
-  X,
-  List,
-  Eye,
-} from 'lucide-react';
+  LuPlus as Plus,
+  LuLoaderCircle as Loader2,
+  LuTrash2 as Trash2,
+  LuGripVertical as GripVertical,
+  LuFileText as FileText,
+  LuChevronDown as ChevronDown,
+  LuChevronUp as ChevronUp,
+  LuCheck as Check,
+  LuX as X,
+  LuList as List,
+  LuEye as Eye,
+} from 'react-icons/lu';
 import { formsApi, Form, FormField, FormResponse } from '../../infra/formsApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';

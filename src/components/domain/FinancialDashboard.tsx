@@ -1,23 +1,23 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { QueueItem, Service, StaffMember } from '../../types';
 import {
-  DollarSign,
-  Users,
-  Calendar,
-  TrendingUp,
-  Filter,
-  History,
-  Trash2,
-  Check,
-  X,
-  Clock,
-  Sparkles,
-  Loader2,
-  AlertCircle,
-  UserMinus,
-  Scissors,
-  Cloud,
-} from 'lucide-react';
+  LuDollarSign as DollarSign,
+  LuUsers as Users,
+  LuCalendar as Calendar,
+  LuTrendingUp as TrendingUp,
+  LuFilter as Filter,
+  LuHistory as History,
+  LuTrash2 as Trash2,
+  LuCheck as Check,
+  LuX as X,
+  LuClock as Clock,
+  LuSparkles as Sparkles,
+  LuLoaderCircle as Loader2,
+  LuCircleAlert as AlertCircle,
+  LuUserMinus as UserMinus,
+  LuScissors as Scissors,
+  LuCloud as Cloud,
+} from 'react-icons/lu';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '../ui/chart';
 import {
@@ -210,7 +210,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
       <div className="flex flex-col gap-4 bg-surface p-4 rounded-xl border border-border">
         <div className="flex justify-between items-center flex-wrap gap-3">
           <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
-            <TrendingUp className="text-support" /> Relatórios
+            <TrendingUp size={24} className="text-support" /> Relatórios
           </h2>
 
           {owner && (

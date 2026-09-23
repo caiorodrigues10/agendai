@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  AlertCircle,
-  Loader2,
-  Plus,
-  Target,
-  Trophy,
-  X,
-} from 'lucide-react';
+  LuCircleAlert as AlertCircle,
+  LuLoaderCircle as Loader2,
+  LuPlus as Plus,
+  LuTarget as Target,
+  LuTrophy as Trophy,
+  LuX as X,
+} from 'react-icons/lu';
 import { goalsApi, ProfessionalGoal } from '../../infra/goalsApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { useBarbershop } from '../../contexts/BarbershopContext';

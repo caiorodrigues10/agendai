@@ -2,17 +2,17 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 // MercadoPago SDK removido — pagamento exclusivo via Asaas
 import {
-  ArrowLeft,
-  Loader2,
-  AlertCircle,
-  QrCode,
-  CreditCard,
-  Copy,
-  CheckCircle2,
-  Clock,
-  PartyPopper,
-  Landmark,
-} from 'lucide-react';
+  LuArrowLeft as ArrowLeft,
+  LuLoaderCircle as Loader2,
+  LuCircleAlert as AlertCircle,
+  LuQrCode as QrCode,
+  LuCreditCard as CreditCard,
+  LuCopy as Copy,
+  LuCircleCheck as CheckCircle2,
+  LuClock as Clock,
+  LuPartyPopper as PartyPopper,
+  LuLandmark as Landmark,
+} from 'react-icons/lu';
 import { plansApi, Plan, pickPlanForCheckout } from '../infra/plansApi';
 import { subscriptionsApi, SubscribePayload } from '../infra/subscriptionsApi';
 import { paymentsApi, Payment } from '../infra/paymentsApi';

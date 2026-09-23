@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Bell, Check, Loader2, Mail, MessageCircle, RefreshCcw } from 'lucide-react';
+import {
+  LuBell as Bell,
+  LuCheck as Check,
+  LuLoaderCircle as Loader2,
+  LuMail as Mail,
+  LuMessageCircle as MessageCircle,
+  LuRefreshCcw as RefreshCcw,
+} from 'react-icons/lu';
 import {
   NotificationChannel,
   NotificationPreference,

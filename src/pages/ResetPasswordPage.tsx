@@ -4,7 +4,13 @@ import { authApi } from '../infra/authApi';
 import { Logo } from '../components/ui/Logo';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { PasswordInput } from '../components/ui/PasswordInput';
-import { ArrowRight, LockKeyhole, AlertCircle, Loader2, CheckCircle } from 'lucide-react';
+import {
+  LuArrowRight as ArrowRight,
+  LuLockKeyhole as LockKeyhole,
+  LuCircleAlert as AlertCircle,
+  LuLoaderCircle as Loader2,
+  LuCircleCheck as CheckCircle,
+} from 'react-icons/lu';
 
 const inputClass = (hasError: boolean) =>
   `w-full bg-bg border rounded-xl py-3 pl-4 pr-4 text-text-primary text-sm

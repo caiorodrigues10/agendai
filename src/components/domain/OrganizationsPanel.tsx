@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Building2, ChevronDown, Plus, Trash2 } from 'lucide-react';
+import {
+  LuBuilding2 as Building2,
+  LuChevronDown as ChevronDown,
+  LuPlus as Plus,
+  LuTrash2 as Trash2,
+} from 'react-icons/lu';
 import { organizationsApi, Organization } from '@/infra/organizationsApi';
 import { OrganizationSchema, OrganizationFormData } from '@/schemas';
 import { getErrorMessage } from '@/utils/errorMessage';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import { LuArrowRight as ArrowRight, LuCircleCheck as CheckCircle2 } from 'react-icons/lu';
 import { MarketingNav } from '../../components/marketing/MarketingNav';
 import { MarketingFooter } from '../../components/marketing/MarketingFooter';
 import { SeoHead } from '../../components/marketing/SeoHead';
@@ -73,7 +73,7 @@ export const CommercialIntentPage: React.FC = () => {
               className="group inline-flex items-center justify-center gap-3 rounded-full bg-white px-8 py-4 text-base font-black text-black transition hover:-translate-y-0.5 hover:bg-accent-light"
             >
               {trialCampaign.cta}
-              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+              <ArrowRight size={24} className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </button>
             <button
               type="button"
@@ -117,7 +117,7 @@ export const CommercialIntentPage: React.FC = () => {
           <ul className="mt-8 grid gap-4 sm:grid-cols-2">
             {page.features.map(feature => (
               <li key={feature} className="flex items-start gap-3 text-sm font-medium text-neutral-300">
-                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+                <CheckCircle2 size={24} className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
                 {feature}
               </li>
             ))}
@@ -169,7 +169,7 @@ export const CommercialIntentPage: React.FC = () => {
             className="inline-flex items-center gap-2 rounded-full bg-black px-7 py-3.5 text-sm font-black text-white"
           >
             {trialCampaign.cta}
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight size={24} className="h-4 w-4" />
           </button>
         </div>
       </section>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { LuMenu as Menu, LuX as X } from 'react-icons/lu';
 import { Logo } from '../ui/Logo';
 import { useAuth } from '../../contexts/AuthContext';
 import { staffHomePath } from '../../utils/subscriptionPaywall';
@@ -127,7 +127,7 @@ export const MarketingNav: React.FC = () => {
             aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
             aria-expanded={mobileOpen}
           >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileOpen ? <X size={24} className="w-5 h-5" /> : <Menu size={24} className="w-5 h-5" />}
           </button>
         </div>
       </div>

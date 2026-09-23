@@ -1,7 +1,7 @@
 import React from 'react';
 import { Service } from '../../types';
 import { DynamicIcon } from '../ui/DynamicIcon';
-import { Check } from 'lucide-react';
+import { LuCheck as Check } from 'react-icons/lu';
 
 interface ServiceCardProps {
   service: Service;

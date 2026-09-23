@@ -4,7 +4,14 @@ import { authApi } from '../infra/authApi';
 import { getRecaptchaToken } from '../utils/recaptcha';
 import { Logo } from '../components/ui/Logo';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
-import { ArrowRight, LockKeyhole, AlertCircle, Mail, Loader2, CheckCircle } from 'lucide-react';
+import {
+  LuArrowRight as ArrowRight,
+  LuLockKeyhole as LockKeyhole,
+  LuCircleAlert as AlertCircle,
+  LuMail as Mail,
+  LuLoaderCircle as Loader2,
+  LuCircleCheck as CheckCircle,
+} from 'react-icons/lu';
 
 const inputClass = (hasError: boolean) =>
   `w-full bg-bg border rounded-xl py-3 pl-10 pr-4 text-text-primary text-sm

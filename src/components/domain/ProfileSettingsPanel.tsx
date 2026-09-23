@@ -1,7 +1,12 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { KeyRound, Loader2, Save, UserRound } from 'lucide-react';
+import {
+  LuKeyRound as KeyRound,
+  LuLoaderCircle as Loader2,
+  LuSave as Save,
+  LuUserRound as UserRound,
+} from 'react-icons/lu';
 import { useAuth } from '../../contexts/AuthContext';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_GRID } from '../ui/Field';

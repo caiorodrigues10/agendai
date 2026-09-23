@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Mail, Clock3, CheckCircle, AlertTriangle, Loader2, RefreshCw } from 'lucide-react';
+import {
+  LuMail as Mail,
+  LuClock3 as Clock3,
+  LuCircleCheck as CheckCircle,
+  LuTriangleAlert as AlertTriangle,
+  LuLoaderCircle as Loader2,
+  LuRefreshCw as RefreshCw,
+} from 'react-icons/lu';
 import { emailApi } from '../../infra/emailApi';
 
 interface EmailHistoryPanelProps {

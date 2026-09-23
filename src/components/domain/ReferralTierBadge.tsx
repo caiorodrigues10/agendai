@@ -1,5 +1,5 @@
 import React from 'react';
-import { Medal, Award, Crown } from 'lucide-react';
+import { LuMedal as Medal, LuAward as Award, LuCrown as Crown } from 'react-icons/lu';
 import type { ReferralTierName } from '../../infra/referralsApi';
 
 interface ReferralTierBadgeProps {

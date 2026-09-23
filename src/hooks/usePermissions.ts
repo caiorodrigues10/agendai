@@ -8,6 +8,8 @@ export type EmployeePermission =
   | 'CLIENTS_MANAGE'
   | 'PACKAGES_SELL'
   | 'FINANCE_VIEW'
+  | 'FINANCE_CREATE'
+  | 'FINANCE_EDIT'
   | 'FINANCE_MANAGE'
   | 'REPORTS_VIEW'
   | 'MARKETING_MANAGE'
@@ -28,6 +30,8 @@ export const ALL_PERMISSIONS: EmployeePermission[] = [
   'CLIENTS_MANAGE',
   'PACKAGES_SELL',
   'FINANCE_VIEW',
+  'FINANCE_CREATE',
+  'FINANCE_EDIT',
   'FINANCE_MANAGE',
   'REPORTS_VIEW',
   'MARKETING_MANAGE',
@@ -49,6 +53,8 @@ export const PERMISSION_LABELS: Record<EmployeePermission, string> = {
   CLIENTS_MANAGE: 'Gerenciar clientes',
   PACKAGES_SELL: 'Vender pacotes',
   FINANCE_VIEW: 'Ver financeiro',
+  FINANCE_CREATE: 'Lançar no financeiro',
+  FINANCE_EDIT: 'Editar valores financeiros',
   FINANCE_MANAGE: 'Gerenciar financeiro',
   REPORTS_VIEW: 'Ver relatórios',
   MARKETING_MANAGE: 'Gerenciar marketing',

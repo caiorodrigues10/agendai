@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Service } from '../../types';
 import { DynamicIcon, ICON_OPTIONS } from '../ui/DynamicIcon';
 import { ServiceSchema, ServiceFormData } from '../../schemas';
-import { AlertCircle } from 'lucide-react';
+import { LuCircleAlert as AlertCircle } from 'react-icons/lu';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_FOOTER, FORM_GRID } from '../ui/Field';
 
 interface ServiceFormProps {

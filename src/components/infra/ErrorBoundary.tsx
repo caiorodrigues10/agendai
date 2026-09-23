@@ -1,5 +1,11 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, Home, RefreshCw, Copy, Check } from 'lucide-react';
+import {
+  LuTriangleAlert as AlertTriangle,
+  LuHouse as Home,
+  LuRefreshCw as RefreshCw,
+  LuCopy as Copy,
+  LuCheck as Check,
+} from 'react-icons/lu';
 import { logger } from '../../utils/logger';
 import { SystemStatePage } from './SystemStatePage';
 import { getLastCorrelationId } from '../../utils/correlationIdStore';

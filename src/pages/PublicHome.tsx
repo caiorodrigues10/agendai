@@ -12,7 +12,13 @@ import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
 import { useScheduling } from '../contexts/SchedulingContext';
 import { schedulingApi } from '../infra/schedulingApi';
 import { DynamicIcon } from '../components/ui/DynamicIcon';
-import { List, CalendarDays, Store, Coffee, Loader2 } from 'lucide-react';
+import {
+  LuList as List,
+  LuCalendarDays as CalendarDays,
+  LuStore as Store,
+  LuCoffee as Coffee,
+  LuLoaderCircle as Loader2,
+} from 'react-icons/lu';
 import type { OperationMode } from '../types';
 
 type PublicTab = 'queue' | 'appointments' | 'profile';

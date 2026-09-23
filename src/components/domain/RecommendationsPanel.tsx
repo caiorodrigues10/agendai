@@ -1,16 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  AlertCircle,
-  ArrowUpRight,
-  CalendarClock,
-  PackageSearch,
-  Lightbulb,
-  Loader2,
-  Sparkles,
-  Target,
-  UserRoundX,
-  X,
-} from 'lucide-react';
+  LuCircleAlert as AlertCircle,
+  LuArrowUpRight as ArrowUpRight,
+  LuCalendarClock as CalendarClock,
+  LuPackageSearch as PackageSearch,
+  LuLightbulb as Lightbulb,
+  LuLoaderCircle as Loader2,
+  LuSparkles as Sparkles,
+  LuTarget as Target,
+  LuUserRoundX as UserRoundX,
+  LuX as X,
+} from 'react-icons/lu';
 import { recommendationsApi, Recommendation } from '../../infra/recommendationsApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';

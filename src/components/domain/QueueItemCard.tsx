@@ -2,21 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { QueueItem, Service, StaffMember } from '../../types';
 import { DynamicIcon } from '../ui/DynamicIcon';
 import {
-  MessageCircle,
-  Trash2,
-  LogOut,
-  CheckCircle,
-  Bell,
-  Clock,
-  Undo2,
-  Loader2,
-  CreditCard,
-  Banknote,
-  Smartphone,
-  UserPlus,
-  Scissors,
-  FlaskConical,
-} from 'lucide-react';
+  LuMessageCircle as MessageCircle,
+  LuTrash2 as Trash2,
+  LuLogOut as LogOut,
+  LuCircleCheck as CheckCircle,
+  LuBell as Bell,
+  LuClock as Clock,
+  LuUndo2 as Undo2,
+  LuLoaderCircle as Loader2,
+  LuCreditCard as CreditCard,
+  LuBanknote as Banknote,
+  LuSmartphone as Smartphone,
+  LuUserPlus as UserPlus,
+  LuScissors as Scissors,
+  LuFlaskConical as FlaskConical,
+} from 'react-icons/lu';
 import { notificationsApi } from '../../infra/notificationsApi';
 import { clientsApi, ProcedureRecord } from '../../infra/clientsApi';
 import { getErrorMessage } from '../../utils/errorMessage';

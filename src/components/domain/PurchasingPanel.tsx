@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import {
-  ShoppingCart,
-  Plus,
-  Trash2,
-  Loader2,
-  CheckCircle2,
-} from 'lucide-react';
+  LuShoppingCart as ShoppingCart,
+  LuPlus as Plus,
+  LuTrash2 as Trash2,
+  LuLoaderCircle as Loader2,
+  LuCircleCheck as CheckCircle2,
+} from 'react-icons/lu';
 import { purchasingApi, PurchaseOrder } from '../../infra/purchasingApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';

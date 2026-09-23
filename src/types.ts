@@ -106,6 +106,8 @@ export type EmployeePermission =
   | 'CLIENTS_MANAGE'
   | 'PACKAGES_SELL'
   | 'FINANCE_VIEW'
+  | 'FINANCE_CREATE'
+  | 'FINANCE_EDIT'
   | 'FINANCE_MANAGE'
   | 'REPORTS_VIEW'
   | 'MARKETING_MANAGE'

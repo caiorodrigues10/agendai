@@ -6,16 +6,16 @@ import { authApi } from '../../infra/authApi';
 import { usersApi } from '../../infra/usersApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import {
-  Download,
-  Trash2,
-  AlertTriangle,
-  Loader2,
-  FileJson,
-  FileText,
-  ShieldCheck,
-  Mail,
-  RefreshCw,
-} from 'lucide-react';
+  LuDownload as Download,
+  LuTrash2 as Trash2,
+  LuTriangleAlert as AlertTriangle,
+  LuLoaderCircle as Loader2,
+  LuFileJson as FileJson,
+  LuFileText as FileText,
+  LuShieldCheck as ShieldCheck,
+  LuMail as Mail,
+  LuRefreshCw as RefreshCw,
+} from 'react-icons/lu';
 
 const token = () => authStorage.getAccessToken() || '';
 

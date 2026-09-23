@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-  MessageSquare,
-  Loader2,
-  UserCheck,
-  BarChart3,
-  Phone,
-  Clock,
-  ArrowLeft,
-  Send,
-} from 'lucide-react';
+  LuMessageSquare as MessageSquare,
+  LuLoaderCircle as Loader2,
+  LuUserCheck as UserCheck,
+  LuChartColumn as BarChart3,
+  LuPhone as Phone,
+  LuClock as Clock,
+  LuArrowLeft as ArrowLeft,
+  LuSend as Send,
+} from 'react-icons/lu';
 import {
   whatsappAiApi,
   AiConversation,

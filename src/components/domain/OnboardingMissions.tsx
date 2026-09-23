@@ -1,5 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Check, ChevronRight, ExternalLink, Rocket } from 'lucide-react';
+import {
+  LuCheck as Check,
+  LuChevronRight as ChevronRight,
+  LuExternalLink as ExternalLink,
+  LuRocket as Rocket,
+} from 'react-icons/lu';
 import { barbershopApi } from '../../infra/barbershopApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 
@@ -49,7 +54,7 @@ export const OnboardingMissions: React.FC<Props> = ({ barbershopId, shopName, on
         {!step.completed && <div className="mt-3 flex justify-end"><button type="button" disabled={busy} onClick={() => confirm(step)} className="min-h-11 rounded-xl border border-border px-3 text-xs font-bold text-text-secondary hover:border-accent">Já configurei</button></div>}
       </div>)}
     </section>
-    {required.every(s => s.completed) && <section className="rounded-2xl border border-success/40 bg-success/10 p-5 text-center"><div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-success text-white"><Check /></div><h2 className="mt-3 text-xl font-black text-text-primary">Salão no ar 🎉</h2><p className="mt-1 text-sm text-text-secondary">Seu espaço está pronto para receber clientes.</p><div className="mt-4 flex flex-wrap justify-center gap-2"><button type="button" onClick={() => onNavigate('link')} className="min-h-11 rounded-xl bg-accent px-4 text-sm font-bold text-accent-fg">Compartilhar link</button><button type="button" onClick={onDone} className="min-h-11 rounded-xl border border-border px-4 text-sm font-bold text-text-secondary"><ExternalLink size={15} className="mr-1 inline" />Ir para o painel</button></div></section>}
+    {required.every(s => s.completed) && <section className="rounded-2xl border border-success/40 bg-success/10 p-5 text-center"><div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-success text-white"><Check size={24} /></div><h2 className="mt-3 text-xl font-black text-text-primary">Salão no ar 🎉</h2><p className="mt-1 text-sm text-text-secondary">Seu espaço está pronto para receber clientes.</p><div className="mt-4 flex flex-wrap justify-center gap-2"><button type="button" onClick={() => onNavigate('link')} className="min-h-11 rounded-xl bg-accent px-4 text-sm font-bold text-accent-fg">Compartilhar link</button><button type="button" onClick={onDone} className="min-h-11 rounded-xl border border-border px-4 text-sm font-bold text-text-secondary"><ExternalLink size={15} className="mr-1 inline" />Ir para o painel</button></div></section>}
     {required.every(s => s.completed) && <section className="rounded-2xl border border-border bg-surface p-5"><h2 className="font-bold text-text-primary">Deixe o AgendAI ainda melhor</h2><p className="mt-1 text-sm text-text-secondary">Estas melhorias são opcionais e podem ser feitas quando quiser.</p><div className="mt-3 grid gap-2 sm:grid-cols-2"><button type="button" onClick={() => onNavigate('settings')} className="min-h-11 rounded-xl border border-border px-3 text-left text-sm font-semibold text-text-primary">🔔 Configure um alerta de fila cheia</button><button type="button" onClick={() => onNavigate('settings')} className="min-h-11 rounded-xl border border-border px-3 text-left text-sm font-semibold text-text-primary">📱 Instale o AgendAI no celular</button><button type="button" onClick={() => onNavigate('team')} className="min-h-11 rounded-xl border border-border px-3 text-left text-sm font-semibold text-text-primary">👥 Cadastre sua equipe</button><button type="button" onClick={() => onNavigate('settings')} className="min-h-11 rounded-xl border border-border px-3 text-left text-sm font-semibold text-text-primary">⚙️ Personalize suas preferências</button></div></section>}
     <div className="text-center"><button type="button" onClick={() => { void barbershopApi.dismissOnboarding(barbershopId).finally(onDone); }} className="min-h-11 px-4 text-sm text-text-muted underline">Continuar depois</button></div>
   </div>;

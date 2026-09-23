@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { AlertTriangle, Settings } from 'lucide-react';
+import { LuTriangleAlert as AlertTriangle, LuSettings as Settings } from 'react-icons/lu';
 import { barbershopApi, QueueAlertSettings } from '../../infra/barbershopApi';
 
 export const QueueCapacityBanner: React.FC<{ barbershopId?: string; waiting: number; onNavigate: (tab: string) => void; canConfigure?: boolean }> = ({ barbershopId, waiting, onNavigate, canConfigure }) => {

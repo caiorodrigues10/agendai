@@ -1,6 +1,10 @@
 import React from 'react';
 import FocusLock from 'react-focus-lock';
-import { AlertCircle, Clock, Settings } from 'lucide-react';
+import {
+  LuCircleAlert as AlertCircle,
+  LuClock as Clock,
+  LuSettings as Settings,
+} from 'react-icons/lu';
 import { DaySchedule } from '../../types';
 
 interface ClosedSalonJoinModalProps {

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Check, Plus, Minus } from 'lucide-react';
+import { LuCheck as Check, LuPlus as Plus, LuMinus as Minus } from 'react-icons/lu';
 import type { Service } from '../../types';
 
 interface Variation {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Cookie, ShieldCheck } from 'lucide-react';
+import { LuCookie as Cookie, LuShieldCheck as ShieldCheck } from 'react-icons/lu';
 import { cookieConsentStorage } from '../../utils/cookieConsentStorage';
 
 export const CookieConsent: React.FC = () => {

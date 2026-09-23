@@ -1,13 +1,13 @@
 /* eslint-disable jsx-a11y/media-has-caption -- vídeo demonstrativo pode ser fornecido sem faixa de áudio */
 import React from 'react';
 import {
-  CheckCircle2,
-  Download,
-  Loader2,
-  MoreVertical,
-  Share2,
-  Smartphone,
-} from 'lucide-react';
+  LuCircleCheck as CheckCircle2,
+  LuDownload as Download,
+  LuLoaderCircle as Loader2,
+  LuEllipsisVertical as MoreVertical,
+  LuShare2 as Share2,
+  LuSmartphone as Smartphone,
+} from 'react-icons/lu';
 import { usePwaInstall } from '../../contexts/PwaInstallContext';
 
 interface PwaInstallCardProps {

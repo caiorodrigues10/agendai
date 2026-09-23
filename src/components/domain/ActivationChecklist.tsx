@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Check, ChevronRight, Loader2, Rocket } from 'lucide-react';
+import {
+  LuCheck as Check,
+  LuChevronRight as ChevronRight,
+  LuLoaderCircle as Loader2,
+  LuRocket as Rocket,
+} from 'react-icons/lu';
 import { barbershopApi } from '../../infra/barbershopApi';
 
 interface Props {

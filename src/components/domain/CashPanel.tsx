@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  AlertCircle,
-  Banknote,
-  CreditCard,
-  Filter,
-  Loader2,
-  Plus,
-  RefreshCcw,
-  Smartphone,
-  X,
-} from 'lucide-react';
+  LuCircleAlert as AlertCircle,
+  LuBanknote as Banknote,
+  LuCreditCard as CreditCard,
+  LuFilter as Filter,
+  LuLoaderCircle as Loader2,
+  LuPlus as Plus,
+  LuRefreshCcw as RefreshCcw,
+  LuSmartphone as Smartphone,
+  LuX as X,
+} from 'react-icons/lu';
 import { cashApi, CashMovement, CashSummary } from '../../infra/cashApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { useAuth } from '../../contexts/AuthContext';

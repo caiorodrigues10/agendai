@@ -1,5 +1,9 @@
 import React from 'react';
-import { Check, HelpCircle, AlertCircle } from 'lucide-react';
+import {
+  LuCheck as Check,
+  LuCircleHelp as HelpCircle,
+  LuCircleAlert as AlertCircle,
+} from 'react-icons/lu';
 
 interface ConsentCheckboxProps {
   label: string;

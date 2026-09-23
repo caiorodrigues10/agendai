@@ -5,19 +5,19 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
 import {
-  AlertCircle,
-  ArrowRight,
-  BadgeDollarSign,
-  HelpCircle,
-  CheckCircle2,
-  Clock,
-  Headphones,
-  Handshake,
-  Loader2,
-  Mail,
-  MessageSquare,
-  Phone,
-} from 'lucide-react';
+  LuCircleAlert as AlertCircle,
+  LuArrowRight as ArrowRight,
+  LuBadgeDollarSign as BadgeDollarSign,
+  LuCircleHelp as HelpCircle,
+  LuCircleCheck as CheckCircle2,
+  LuClock as Clock,
+  LuHeadphones as Headphones,
+  LuHandshake as Handshake,
+  LuLoaderCircle as Loader2,
+  LuMail as Mail,
+  LuMessageSquare as MessageSquare,
+  LuPhone as Phone,
+} from 'react-icons/lu';
 import { MarketingNav } from '../../components/marketing/MarketingNav';
 import { MarketingFooter } from '../../components/marketing/MarketingFooter';
 import { SeoHead } from '../../components/marketing/SeoHead';
@@ -151,7 +151,7 @@ export const ContactPage: React.FC = () => {
             <div className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-accent/20 blur-3xl" />
             <div className="relative flex items-start justify-between gap-4">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-accent/20 bg-accent/10 text-accent-light">
-                <Headphones className="h-5 w-5" />
+                <Headphones size={24} className="h-5 w-5" />
               </div>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-accent-light">
                 <span className="h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_10px_currentColor]" /> Online
@@ -162,7 +162,7 @@ export const ContactPage: React.FC = () => {
               Explique o que aconteceu e a equipe assume a conversa com todo o contexto.
             </p>
             <div className="relative mt-5 flex items-center gap-3 border-t border-white/10 pt-4 text-xs font-semibold text-neutral-300">
-              <Clock className="h-4 w-4 text-accent" />
+              <Clock size={24} className="h-4 w-4 text-accent" />
               Retorno em até 1 dia útil
             </div>
           </motion.div>
@@ -187,7 +187,7 @@ export const ContactPage: React.FC = () => {
                 href={`mailto:${CONTACT_EMAIL}`}
                 className="mt-3 inline-flex items-center gap-2 text-lg font-bold text-white transition hover:text-accent-light"
               >
-                <Mail className="h-5 w-5 text-accent" />
+                <Mail size={24} className="h-5 w-5 text-accent" />
                 {CONTACT_EMAIL}
               </a>
               <p className="mt-3 text-sm font-medium text-neutral-500">
@@ -203,7 +203,7 @@ export const ContactPage: React.FC = () => {
               className="rounded-4xl border border-white/10 bg-surface p-6"
             >
               <div className="flex items-center gap-2 text-accent-light">
-                <Clock className="h-4 w-4" />
+                <Clock size={24} className="h-4 w-4" />
                 <span className="text-xs font-black uppercase tracking-wider">Horário</span>
               </div>
               <p className="mt-3 text-base font-semibold text-white">
@@ -231,7 +231,7 @@ export const ContactPage: React.FC = () => {
                 className="group mt-4 inline-flex items-center gap-2 text-sm font-black text-white transition hover:text-accent-light"
               >
                 Ver planos
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </button>
             </motion.div>
           </div>
@@ -250,12 +250,12 @@ export const ContactPage: React.FC = () => {
                 <p className="mt-2 max-w-lg text-sm leading-relaxed text-neutral-500">Escolha um assunto e conte os detalhes. Isso ajuda a gente a responder mais rápido.</p>
               </div>
               <div className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-neutral-400 sm:flex">
-                <MessageSquare className="h-5 w-5" />
+                <MessageSquare size={24} className="h-5 w-5" />
               </div>
             </div>
             {status === 'success' && (
               <div className="mb-8 flex items-start gap-3 rounded-2xl border border-accent/30 bg-accent/10 p-4 text-sm font-medium text-accent-light">
-                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
+                <CheckCircle2 size={24} className="mt-0.5 h-5 w-5 shrink-0" />
                 <div>
                   <p className="font-bold text-accent-light">Mensagem recebida.</p>
                   <p className="mt-1 text-accent-light/80">
@@ -267,7 +267,7 @@ export const ContactPage: React.FC = () => {
 
             {status === 'error' && serverError && (
               <div className="mb-8 flex items-start gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm font-medium text-red-300">
-                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+                <AlertCircle size={24} className="mt-0.5 h-5 w-5 shrink-0" />
                 {serverError}
               </div>
             )}
@@ -366,7 +366,7 @@ export const ContactPage: React.FC = () => {
                   <span className="normal-case tracking-normal text-neutral-600">(opcional)</span>
                 </label>
                 <div className="relative">
-                  <Phone className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
+                  <Phone size={24} className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
                   <input
                     id="contact-phone"
                     className={`${fieldClass(!!errors.phone)} pl-11`}
@@ -391,7 +391,7 @@ export const ContactPage: React.FC = () => {
                   Mensagem
                 </label>
                 <div className="relative">
-                  <MessageSquare className="pointer-events-none absolute left-4 top-4 h-4 w-4 text-neutral-500" />
+                  <MessageSquare size={24} className="pointer-events-none absolute left-4 top-4 h-4 w-4 text-neutral-500" />
                   <textarea
                     id="contact-message"
                     rows={6}
@@ -419,13 +419,13 @@ export const ContactPage: React.FC = () => {
                 >
                   {submitting ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 size={24} className="h-4 w-4 animate-spin" />
                       Enviando…
                     </>
                   ) : (
                     <>
                       Enviar mensagem
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </>
                   )}
                 </button>

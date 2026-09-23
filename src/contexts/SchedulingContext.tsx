@@ -9,7 +9,6 @@ import React, {
   ReactNode,
 } from 'react';
 import { useLocation } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
 import { Appointment, QueueItem, AIInsight } from '../types';
 import { schedulingApi, QueueUpdatePayload } from '../infra/schedulingApi';
 import { authStorage } from '../infra/authStorage';
@@ -78,7 +77,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   const [clientId, setClientId] = useState(() => {
     let cid = localStorage.getItem('barber_customer_id');
     if (!cid) {
-      cid = uuidv4();
+      cid = crypto.randomUUID();
       localStorage.setItem('barber_customer_id', cid);
     }
     return cid;
@@ -121,11 +120,18 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       if (!barbershopId) return;
       if (!authStorage.getAccessToken()) return;
       try {
-        let params: { barbershopId: string; date?: string; from?: string; to?: string } = {
+        let params: {
+          barbershopId: string;
+          date?: string;
+          from?: string;
+          to?: string;
+          limit: number;
+        } = {
           barbershopId,
+          limit: 100,
         };
         if (options?.reuseLast && lastAppointmentQueryRef.current) {
-          params = { barbershopId, ...lastAppointmentQueryRef.current };
+          params = { barbershopId, limit: 100, ...lastAppointmentQueryRef.current };
         } else if (date) {
           params.date = date;
           lastAppointmentQueryRef.current = { date };
@@ -139,6 +145,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
           params.to = to;
           lastAppointmentQueryRef.current = { from, to };
         }
+        params.limit = 100;
         const data = await schedulingApi.listAppointments(params);
         const mapped = (data ?? []).map(mapAppointmentFromApi);
         setAppointments(prev => (sameSnapshot(prev, mapped) ? prev : mapped));

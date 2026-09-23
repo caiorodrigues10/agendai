@@ -3,26 +3,25 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShopSettings, FeedPost, StaffMember, Service, DaySchedule } from '../../types';
 import {
-  Type,
-  Send,
-  Trash2,
-  Heart,
-  Image as ImageIcon,
-  MapPin,
-  Star,
-  Scissors,
-  MoreHorizontal,
-  Film,
-  X,
-  Clock,
-  MessageCircle,
-  List,
-  CalendarDays,
-  ExternalLink,
-  Camera,
-  Loader2,
-} from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid';
+  LuType as Type,
+  LuSend as Send,
+  LuTrash2 as Trash2,
+  LuHeart as Heart,
+  LuImage as ImageIcon,
+  LuMapPin as MapPin,
+  LuStar as Star,
+  LuScissors as Scissors,
+  LuEllipsis as MoreHorizontal,
+  LuFilm as Film,
+  LuX as X,
+  LuClock as Clock,
+  LuMessageCircle as MessageCircle,
+  LuList as List,
+  LuCalendarDays as CalendarDays,
+  LuExternalLink as ExternalLink,
+  LuCamera as Camera,
+  LuLoaderCircle as Loader2,
+} from 'react-icons/lu';
 import { barbershopApi } from '../../infra/barbershopApi';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
@@ -262,7 +261,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
     setIsPosting(true);
 
     const post: FeedPost = {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       type: newPostType,
       title: newPostTitle,
       content: newPostContent,

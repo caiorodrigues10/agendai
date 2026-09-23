@@ -17,7 +17,7 @@ function RunSummary({ run }: { run: CrmBackfillRun }) {
   </div>;
 }
 
-export function CrmBackfillPanel({ global = false, onUpdated }: { global?: boolean; onUpdated?: () => void }) {
+export function CrmBackfillPanel({ global = false, onUpdated, onClose }: { global?: boolean; onUpdated?: () => void; onClose?: () => void }) {
   const { user } = useAuth();
   const allowed = global ? user?.role === 'MASTER_ADMIN' : user?.role === 'OWNER';
   const [runs, setRuns] = useState<CrmBackfillRun[]>([]);
@@ -49,7 +49,10 @@ export function CrmBackfillPanel({ global = false, onUpdated }: { global?: boole
   });
   if (!allowed) return null;
   return <section className="space-y-4 rounded-xl border border-border bg-surface p-4 text-sm text-text-primary">
-    <h3 className="font-bold">{global ? 'Reprocessamento global do CRM' : 'Manutenção do histórico do salão'}</h3>
+    <div className="flex items-center justify-between">
+      <h3 className="font-bold">{global ? 'Reprocessamento global do CRM' : 'Manutenção do histórico do salão'}</h3>
+      {onClose && <button type="button" onClick={onClose} className="rounded-lg p-1 text-text-muted hover:bg-bg" aria-label="Fechar">✕</button>}
+    </div>
     <p className="text-text-secondary">{global ? 'Reconstrói vínculos e eventos financeiros de todos os salões ativos. A execução pode demorar; o resultado informa falhas por salão.' : 'Reconstrói vínculos de clientes e eventos financeiros do seu salão a partir dos registros existentes.'}</p>
     <form onSubmit={submit} className="space-y-3">
       <Field label="Digite REPROCESSAR para confirmar" error={errors.confirmation?.message}><input aria-label="Digite REPROCESSAR para confirmar" autoComplete="off" className={FIELD_CONTROL} disabled={isSubmitting} {...register('confirmation')} /></Field>

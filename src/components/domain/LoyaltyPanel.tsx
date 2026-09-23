@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  AlertCircle,
-  Check,
-  Gift,
-  Info,
-  Loader2,
-  Save,
-  Star,
-  ToggleLeft,
-  ToggleRight,
-} from 'lucide-react';
+  LuCircleAlert as AlertCircle,
+  LuCheck as Check,
+  LuGift as Gift,
+  LuInfo as Info,
+  LuLoaderCircle as Loader2,
+  LuSave as Save,
+  LuStar as Star,
+  LuToggleLeft as ToggleLeft,
+  LuToggleRight as ToggleRight,
+} from 'react-icons/lu';
 import { loyaltyApi, LoyaltyProgram } from '../../infra/loyaltyApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';

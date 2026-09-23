@@ -2,27 +2,27 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { SmartSelect } from '../../components/ui/SmartSelect';
 import {
-  Search,
-  RefreshCcw,
-  XCircle,
-  CheckCircle2,
-  Wallet,
-  Receipt,
-  CreditCard,
-  Layers,
-  Ban,
-  AlertCircle,
-  Unlock,
-  Plus,
-  Pencil,
-  Trash2,
-  QrCode,
-  Bell,
-  ExternalLink,
-  RotateCcw,
-  X,
-  Landmark,
-} from 'lucide-react';
+  LuSearch as Search,
+  LuRefreshCcw as RefreshCcw,
+  LuCircleX as XCircle,
+  LuCircleCheck as CheckCircle2,
+  LuWallet as Wallet,
+  LuReceipt as Receipt,
+  LuCreditCard as CreditCard,
+  LuLayers as Layers,
+  LuBan as Ban,
+  LuCircleAlert as AlertCircle,
+  LuLockOpen as Unlock,
+  LuPlus as Plus,
+  LuPencil as Pencil,
+  LuTrash2 as Trash2,
+  LuQrCode as QrCode,
+  LuBell as Bell,
+  LuExternalLink as ExternalLink,
+  LuRotateCcw as RotateCcw,
+  LuX as X,
+  LuLandmark as Landmark,
+} from 'react-icons/lu';
 import {
   adminApi,
   AdminNotificationItem,
@@ -812,7 +812,7 @@ const SubscriptionsSection: React.FC = () => {
 
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
+          <Search size={24} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
           <input
             type="text"
             value={search}
@@ -1407,7 +1407,7 @@ const BlockedSection: React.FC = () => {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
+          <Search size={24} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
           <input
             type="text"
             value={search}

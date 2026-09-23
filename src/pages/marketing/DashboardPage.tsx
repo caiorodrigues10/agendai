@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import { LuArrowRight as ArrowRight, LuCircleCheck as CheckCircle2 } from 'react-icons/lu';
 import { MarketingNav } from '../../components/marketing/MarketingNav';
 import { MarketingFooter } from '../../components/marketing/MarketingFooter';
 import { SeoHead } from '../../components/marketing/SeoHead';
@@ -103,7 +103,7 @@ export const DashboardPage: React.FC = () => {
                 className="group inline-flex items-center justify-center gap-3 rounded-full bg-accent px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-accent-light"
               >
                 {trialCampaign.cta}
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </button>
               <button
                 type="button"
@@ -111,7 +111,7 @@ export const DashboardPage: React.FC = () => {
                 className="group inline-flex items-center justify-center gap-2 px-4 py-3 text-base font-bold text-neutral-300 transition hover:text-white"
               >
                 Ver planos
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </button>
             </motion.div>
           </div>
@@ -503,13 +503,13 @@ export const DashboardPage: React.FC = () => {
                 </span>
                 <span className="text-center text-sm font-bold text-neutral-500">
                   {row.essential ? (
-                    <CheckCircle2 className="mx-auto h-5 w-5 text-neutral-400" />
+                    <CheckCircle2 size={24} className="mx-auto h-5 w-5 text-neutral-400" />
                   ) : (
                     '—'
                   )}
                 </span>
                 <span className="text-center">
-                  {row.pro ? <CheckCircle2 className="mx-auto h-5 w-5 text-accent" /> : '—'}
+                  {row.pro ? <CheckCircle2 size={24} className="mx-auto h-5 w-5 text-accent" /> : '—'}
                 </span>
               </div>
             ))}
@@ -538,7 +538,7 @@ export const DashboardPage: React.FC = () => {
                 className="group inline-flex items-center justify-center gap-3 rounded-full bg-white px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-accent-light"
               >
                 {trialCampaign.cta}
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </button>
               <button
                 type="button"

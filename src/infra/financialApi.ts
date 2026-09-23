@@ -88,6 +88,7 @@ export interface ExpenseItem {
   receiptUrl: string | null;
   notes: string | null;
   createdById: string;
+  updatedById: string | null;
   createdAt: string;
   updatedAt: string;
   locked?: boolean;
@@ -121,6 +122,7 @@ export interface FiadoItem {
   dueDate: string | null;
   notes: string | null;
   createdById: string;
+  updatedById: string | null;
   createdAt: string;
   updatedAt: string;
   isOverdue: boolean;

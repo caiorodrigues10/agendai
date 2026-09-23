@@ -1,6 +1,10 @@
 import React from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
+import {
+  LuCircleCheck as CheckCircle2,
+  LuCircleAlert as AlertCircle,
+  LuArrowRight as ArrowRight,
+} from 'react-icons/lu';
 import { MarketingNav } from '../components/marketing/MarketingNav';
 import { MarketingFooter } from '../components/marketing/MarketingFooter';
 

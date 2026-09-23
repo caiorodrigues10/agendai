@@ -1,7 +1,12 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FocusLock from 'react-focus-lock';
-import { ArrowRight, Check, Users, X } from 'lucide-react';
+import {
+  LuArrowRight as ArrowRight,
+  LuCheck as Check,
+  LuUsers as Users,
+  LuX as X,
+} from 'react-icons/lu';
 import { Plan } from '../../infra/plansApi';
 import { formatCurrencyBRL } from '../../utils/formatters';
 

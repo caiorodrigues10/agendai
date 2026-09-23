@@ -1,20 +1,20 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Megaphone,
-  Clock3,
-  Trash2,
-  Loader2,
-  CalendarDays,
-  Sparkles,
-  Download,
-  Send,
-  ImagePlus,
-  Check,
-  ChevronRight,
-  ChevronLeft,
-  Palette,
-  X,
-} from 'lucide-react';
+  LuMegaphone as Megaphone,
+  LuClock3 as Clock3,
+  LuTrash2 as Trash2,
+  LuLoaderCircle as Loader2,
+  LuCalendarDays as CalendarDays,
+  LuSparkles as Sparkles,
+  LuDownload as Download,
+  LuSend as Send,
+  LuImagePlus as ImagePlus,
+  LuCheck as Check,
+  LuChevronRight as ChevronRight,
+  LuChevronLeft as ChevronLeft,
+  LuPalette as Palette,
+  LuX as X,
+} from 'react-icons/lu';
 import { postsApi, type PostStatus, type PostPaletteDef, type PostMedia } from '../../infra/postsApi';
 import { barbershopApi, PostAiSuggestion } from '../../infra/barbershopApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
@@ -25,6 +25,7 @@ import { Toast } from '../ui/Toast';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { Skeleton } from '../ui/Skeleton';
 import { PostEditor } from './PostEditor';
+import { PostPreviewBox } from './PostPreviewBox';
 
 type PostType = 'haircut' | 'beard' | 'announcement';
 type PostTone = 'promocional' | 'informativo' | 'divertido' | null;
@@ -372,14 +373,17 @@ export const PostsManager: React.FC = () => {
             const badge = statusBadge(post.status);
             return (
               <li key={post.id} className="group rounded-xl border border-border bg-surface overflow-hidden">
-                <div className="relative aspect-square bg-bg">
-                  {post.imageUrl ? (
-                    <img src={post.imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-text-muted"><Megaphone size={24} /></div>
-                  )}
+                <div className="relative bg-bg">
+                  <PostPreviewBox
+                    format={(post.format as any) ?? 'square'}
+                    previewUrl={post.imageUrl ?? null}
+                    className="!rounded-none !border-0"
+                  />
                   <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold ${badge.className}`}>
                     {badge.label}
+                  </span>
+                  <span className="absolute right-2 bottom-2 rounded-full bg-black/50 px-1.5 py-0.5 text-[9px] font-bold text-white">
+                    {post.format === 'portrait' ? '4:5' : post.format === 'story' ? '9:16' : '1:1'}
                   </span>
                 </div>
                 <div className="p-3 space-y-1.5">

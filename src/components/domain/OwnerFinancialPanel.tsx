@@ -4,24 +4,24 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  AlertCircle,
-  Banknote,
-  Check,
-  CheckCircle,
-  CreditCard,
-  Download,
-  Edit3,
-  Filter,
-  Loader2,
-  Plus,
-  Receipt,
-  RefreshCcw,
-  Trash2,
-  TrendingDown,
-  Users,
-  Wallet,
-  X,
-} from 'lucide-react';
+  LuCircleAlert as AlertCircle,
+  LuBanknote as Banknote,
+  LuCheck as Check,
+  LuCircleCheck as CheckCircle,
+  LuCreditCard as CreditCard,
+  LuDownload as Download,
+  LuPencilLine as Edit3,
+  LuFilter as Filter,
+  LuLoaderCircle as Loader2,
+  LuPlus as Plus,
+  LuReceipt as Receipt,
+  LuRefreshCcw as RefreshCcw,
+  LuTrash2 as Trash2,
+  LuTrendingDown as TrendingDown,
+  LuUsers as Users,
+  LuWallet as Wallet,
+  LuX as X,
+} from 'react-icons/lu';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_GRID } from '../ui/Field';
@@ -36,6 +36,9 @@ import {
   FinancialSummary,
   ListMeta,
 } from '../../infra/financialApi';
+import { cashApi, CashSummary } from '../../infra/cashApi';
+import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
+import { usePermissions } from '../../hooks/usePermissions';
 import { ExpenseSchema, ExpenseFormData, FiadoSchema, FiadoFormData } from '../../schemas';
 import { formatCurrencyBRL, formatDateBR, formatDateTimeBR } from '../../utils/formatters';
 import {
@@ -45,6 +48,8 @@ import {
   FiadoStatusBadge,
   FinanceSummaryCard,
 } from '../../features/finance';
+import { FinanceResumoSkeleton } from './skeletons/FinanceResumoSkeleton';
+import { Skeleton, SkeletonRegion } from '../ui/Skeleton';
 
 type Tab = 'resumo' | 'despesas' | 'fiado';
 
@@ -103,6 +108,12 @@ export const OwnerFinancialPanel: React.FC = () => {
   const [paymentSubmitting, setPaymentSubmitting] = useState(false);
   const [deleteFiadoId, setDeleteFiadoId] = useState<string | null>(null);
   const [deleteFiadoLoading, setDeleteFiadoLoading] = useState(false);
+
+  const { barbershopId } = useBarbershopFilters();
+  const { hasPermission } = usePermissions();
+  const canCreate = hasPermission('FINANCE_CREATE') || hasPermission('FINANCE_MANAGE');
+  const [cashSummary, setCashSummary] = useState<CashSummary | null>(null);
+  const [cashLoading, setCashLoading] = useState(true);
 
   const {
     register: registerExpense,
@@ -195,6 +206,15 @@ export const OwnerFinancialPanel: React.FC = () => {
   useEffect(() => {
     loadData();
   }, [loadData, refreshKey]);
+
+  useEffect(() => {
+    if (tab !== 'resumo' || !barbershopId) return;
+    setCashLoading(true);
+    cashApi.getSummary(barbershopId, todayIso())
+      .then(setCashSummary)
+      .catch(() => setCashSummary(null))
+      .finally(() => setCashLoading(false));
+  }, [tab, barbershopId, refreshKey]);
 
   const handleRefresh = () => setRefreshKey(k => k + 1);
 
@@ -389,7 +409,7 @@ export const OwnerFinancialPanel: React.FC = () => {
         <div className="flex flex-col gap-4 bg-surface p-4 rounded-xl border border-border">
           <div className="flex justify-between items-center gap-3">
             <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
-              <Banknote className="text-accent" /> Financeiro
+              <Banknote size={24} className="text-accent" /> Financeiro
             </h2>
             <button
               onClick={handleRefresh}
@@ -437,168 +457,201 @@ export const OwnerFinancialPanel: React.FC = () => {
         {tab === 'resumo' && (
           <div className="space-y-4">
             {loading && !summary ? (
-              <div className="flex items-center justify-center py-16 text-text-muted gap-2">
-                <Loader2 size={20} className="animate-spin text-accent" />
-                <span className="text-sm">Carregando resumo...</span>
-              </div>
+              <FinanceResumoSkeleton />
             ) : summary ? (
               <>
-                <p className="text-xs text-text-muted uppercase font-bold tracking-wider">
-                  Despesas
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <FinanceSummaryCard
-                    icon={<TrendingDown size={48} />}
-                    label="Total"
-                    value={formatCurrencyBRL(summary.expenses.total)}
-                    tone="negative"
-                  />
-                  <FinanceSummaryCard
-                    icon={<Check size={48} />}
-                    label="Pagas"
-                    value={formatCurrencyBRL(summary.expenses.totalPaid)}
-                    tone="positive"
-                  />
-                  <FinanceSummaryCard
-                    icon={<Receipt size={48} />}
-                    label="Pendentes"
-                    value={formatCurrencyBRL(summary.expenses.totalPending)}
-                  />
-                  <FinanceSummaryCard
-                    icon={<Receipt size={48} />}
-                    label="Lançamentos"
-                    value={String(summary.expenses.count)}
-                    isCount
-                  />
-                </div>
-
-                <p className="text-xs text-text-muted uppercase font-bold tracking-wider pt-2">
-                  Fiado
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <FinanceSummaryCard
-                    icon={<Users size={48} />}
-                    label="Devedores"
-                    value={String(summary.fiados.activeDebtors)}
-                    isCount
-                  />
-                  <FinanceSummaryCard
-                    icon={<CreditCard size={48} />}
-                    label="Em aberto"
-                    value={formatCurrencyBRL(summary.fiados.totalPending)}
-                    tone="negative"
-                  />
-                  <FinanceSummaryCard
-                    icon={<Wallet size={48} />}
-                    label="Já recebido"
-                    value={formatCurrencyBRL(summary.fiados.totalPaid)}
-                    tone="positive"
-                  />
-                  <FinanceSummaryCard
-                    icon={<AlertCircle size={48} />}
-                    label="Vencidos"
-                    value={formatCurrencyBRL(summary.fiados.overdueAmount)}
-                    hint={`${summary.fiados.overdueCount} fiado(s)`}
-                    tone="negative"
-                  />
-                </div>
-
-                {summary.packages && (
-                  <>
-                    <p className="text-xs text-text-muted uppercase font-bold tracking-wider pt-2">
-                      Pacotes vendidos
-                    </p>
-                    <div className="grid grid-cols-2 gap-3">
-                      <FinanceSummaryCard
-                        icon={<CreditCard size={48} />}
-                        label="Vendas"
-                        value={String(summary.packages.count)}
-                        isCount
-                      />
-                      <FinanceSummaryCard
-                        icon={<Wallet size={48} />}
-                        label="Recebido"
-                        value={formatCurrencyBRL(summary.packages.totalPaid)}
-                        tone="positive"
-                      />
-                    </div>
-                  </>
-                )}
-
-                {summary.products && (
-                  <>
-                    <p className="text-xs text-text-muted uppercase font-bold tracking-wider pt-2">
-                      Produtos
-                    </p>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      <FinanceSummaryCard
-                        icon={<Wallet size={48} />}
-                        label="Receita de produtos"
-                        value={formatCurrencyBRL(
-                          summary.products.netRevenue ?? summary.products.revenue
-                        )}
-                      />
-                      {summary.products.refunded > 0 && (
-                        <FinanceSummaryCard
-                          icon={<Receipt size={48} />}
-                          label="Estornos"
-                          value={formatCurrencyBRL(summary.products.refunded)}
-                          tone="negative"
-                        />
-                      )}
-                      <FinanceSummaryCard
-                        icon={<CreditCard size={48} />}
-                        label="CMV"
-                        value={formatCurrencyBRL(summary.products.cogs)}
-                      />
-                      <FinanceSummaryCard
-                        icon={<Wallet size={48} />}
-                        label="Margem bruta"
-                        value={formatCurrencyBRL(summary.products.margin)}
-                        tone="positive"
-                      />
-                      <FinanceSummaryCard
-                        icon={<Receipt size={48} />}
-                        label="Compras de estoque"
-                        value={formatCurrencyBRL(summary.products.stockPurchases)}
-                      />
-                      <FinanceSummaryCard
-                        icon={<Wallet size={48} />}
-                        label="Valor em estoque"
-                        value={formatCurrencyBRL(summary.products.inventoryValue)}
-                      />
-                      <FinanceSummaryCard
-                        icon={<AlertCircle size={48} />}
-                        label="Abaixo do mínimo"
-                        value={String(summary.products.lowStockCount)}
-                        isCount
-                        tone="negative"
-                      />
-                    </div>
-                    <p className="text-xs text-text-muted">
-                      A margem de varejo usa o custo congelado da venda e já desconta estornos na
-                      receita líquida.
-                    </p>
-                  </>
-                )}
-
-                {Array.isArray(summary.expenses?.byType) && summary.expenses.byType.length > 0 && (
-                  <div className="bg-surface p-5 rounded-xl border border-border">
-                    <h3 className="text-sm font-bold text-text-primary mb-4">Despesas por tipo</h3>
-                    <div className="space-y-2">
-                      {summary.expenses.byType.map(row => (
-                        <div key={row.type} className="flex justify-between items-center text-sm">
-                          <span className="text-text-secondary">
-                            {EXPENSE_TYPE_LABELS[row.type] ?? row.type}
-                            <span className="text-text-muted ml-2">({row.count})</span>
-                          </span>
-                          <span className="font-bold text-text-primary">
-                            {formatCurrencyBRL(row.total)}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                {/* ── Priority indicators ── */}
+                <SkeletonRegion loading={loading} label="Atualizando resumo">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <FinanceSummaryCard
+                      icon={<Receipt size={20} />}
+                      label="Despesas pendentes"
+                      value={formatCurrencyBRL(summary.expenses.totalPending)}
+                      hint={`${summary.expenses.count} lançamento(s) no total`}
+                    />
+                    <FinanceSummaryCard
+                      icon={<CreditCard size={20} />}
+                      label="Fiado em aberto"
+                      value={formatCurrencyBRL(summary.fiados.totalPending)}
+                      hint={`${summary.fiados.activeDebtors} devedor(es)`}
+                      tone="negative"
+                    />
+                    <FinanceSummaryCard
+                      icon={<AlertCircle size={20} />}
+                      label="Fiado vencido"
+                      value={formatCurrencyBRL(summary.fiados.overdueAmount)}
+                      hint={summary.fiados.overdueCount > 0 ? `${summary.fiados.overdueCount} fiado(s) vencido(s)` : undefined}
+                      tone={summary.fiados.overdueCount > 0 ? 'negative' : undefined}
+                    />
+                    <FinanceSummaryCard
+                      icon={<Check size={20} />}
+                      label="Despesas pagas"
+                      value={formatCurrencyBRL(summary.expenses.totalPaid)}
+                      tone="positive"
+                    />
                   </div>
+                </SkeletonRegion>
+
+                {/* ── Caixa do dia ── */}
+                <SkeletonRegion loading={cashLoading} label="Carregando caixa do dia">
+                  <div className="rounded-xl border border-accent/20 bg-accent/5 p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-text-muted uppercase font-bold tracking-wider">Caixa do dia</p>
+                      {canCreate && (
+                        <span className="text-[10px] text-accent font-bold">Registrar movimentação</span>
+                      )}
+                    </div>
+                    {cashLoading ? (
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="rounded-lg bg-bg/60 p-3"><Skeleton width="50%" height="1rem" /><Skeleton width="70%" height="1.25rem" className="mt-1" /></div>
+                        <div className="rounded-lg bg-bg/60 p-3"><Skeleton width="50%" height="1rem" /><Skeleton width="70%" height="1.25rem" className="mt-1" /></div>
+                      </div>
+                    ) : cashSummary ? (
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="rounded-lg bg-bg/60 p-3">
+                          <p className="text-[10px] font-bold uppercase text-text-muted">Total recebido</p>
+                          <p className="text-lg font-bold text-text-primary">{formatCurrencyBRL(cashSummary.total ?? 0)}</p>
+                        </div>
+                        <div className="rounded-lg bg-bg/60 p-3">
+                          <p className="text-[10px] font-bold uppercase text-text-muted">Movimentações</p>
+                          <p className="text-lg font-bold text-text-primary">{Object.values(cashSummary.byMethod ?? {}).reduce((s, m) => s + (m.count ?? 0), 0)}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-text-muted">Sem dados de caixa para hoje.</p>
+                    )}
+                  </div>
+                </SkeletonRegion>
+
+                {/* ── Detail blocks ── */}
+                <SkeletonRegion loading={loading} label="Carregando detalhes">
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {/* Despesas */}
+                    <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
+                      <p className="text-xs text-text-muted uppercase font-bold tracking-wider">Despesas</p>
+                      <div className="space-y-1.5 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-text-secondary">Total</span>
+                          <span className="font-bold text-text-primary">{formatCurrencyBRL(summary.expenses.total)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-text-secondary">Pagas</span>
+                          <span className="font-bold text-success">{formatCurrencyBRL(summary.expenses.totalPaid)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-text-secondary">Pendentes</span>
+                          <span className="font-bold text-text-primary">{formatCurrencyBRL(summary.expenses.totalPending)}</span>
+                        </div>
+                        {Array.isArray(summary.expenses.byType) && summary.expenses.byType.length > 0 && (
+                          <div className="pt-1.5 mt-1.5 border-t border-border">
+                            {summary.expenses.byType.map(row => (
+                              <div key={row.type} className="flex justify-between text-xs">
+                                <span className="text-text-muted">{EXPENSE_TYPE_LABELS[row.type] ?? row.type} ({row.count})</span>
+                                <span className="text-text-secondary">{formatCurrencyBRL(row.total)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Recebimentos de fiado */}
+                    <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
+                      <p className="text-xs text-text-muted uppercase font-bold tracking-wider">Recebimentos de fiado</p>
+                      <div className="space-y-1.5 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-text-secondary">Em aberto</span>
+                          <span className="font-bold text-danger">{formatCurrencyBRL(summary.fiados.totalPending)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-text-secondary">Já recebido</span>
+                          <span className="font-bold text-success">{formatCurrencyBRL(summary.fiados.totalPaid)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-text-secondary">Devedores</span>
+                          <span className="font-bold text-text-primary">{summary.fiados.activeDebtors}</span>
+                        </div>
+                        {summary.fiados.overdueCount > 0 && (
+                          <div className="flex justify-between">
+                            <span className="text-text-secondary">Vencidos</span>
+                            <span className="font-bold text-danger">{summary.fiados.overdueCount}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Vendas de produtos e pacotes */}
+                    {(summary.products || summary.packages) && (
+                      <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
+                        <p className="text-xs text-text-muted uppercase font-bold tracking-wider">Vendas de produtos e pacotes</p>
+                        <div className="space-y-1.5 text-sm">
+                          {summary.products && (
+                            <>
+                              <div className="flex justify-between">
+                                <span className="text-text-secondary">Receita de produtos</span>
+                                <span className="font-bold text-text-primary">{formatCurrencyBRL(summary.products.netRevenue ?? summary.products.revenue)}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-text-secondary">Custo dos produtos vendidos</span>
+                                <span className="font-bold text-text-primary">{formatCurrencyBRL(summary.products.cogs)}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-text-secondary">Margem bruta</span>
+                                <span className="font-bold text-success">{formatCurrencyBRL(summary.products.margin)}</span>
+                              </div>
+                              {summary.products.refunded > 0 && (
+                                <div className="flex justify-between">
+                                  <span className="text-text-secondary">Estornos</span>
+                                  <span className="font-bold text-danger">{formatCurrencyBRL(summary.products.refunded)}</span>
+                                </div>
+                              )}
+                            </>
+                          )}
+                          {summary.packages && (
+                            <>
+                              <div className="flex justify-between">
+                                <span className="text-text-secondary">Pacotes vendidos</span>
+                                <span className="font-bold text-text-primary">{summary.packages.count}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-text-secondary">Recebido de pacotes</span>
+                                <span className="font-bold text-success">{formatCurrencyBRL(summary.packages.totalPaid)}</span>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </SkeletonRegion>
+
+                {/* ── Estoque (compact) ── */}
+                {summary.products && (
+                  <SkeletonRegion loading={loading} label="Carregando estoque">
+                    <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
+                      <p className="text-xs text-text-muted uppercase font-bold tracking-wider">Estoque</p>
+                      <div className="flex flex-wrap gap-3 text-sm">
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-text-secondary">Valor em estoque:</span>
+                          <span className="font-bold text-text-primary">{formatCurrencyBRL(summary.products.inventoryValue)}</span>
+                        </div>
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-text-secondary">Compras:</span>
+                          <span className="font-bold text-text-primary">{formatCurrencyBRL(summary.products.stockPurchases)}</span>
+                        </div>
+                        {summary.products.lowStockCount > 0 && (
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="text-text-secondary">Abaixo do mínimo:</span>
+                            <span className="font-bold text-danger">{summary.products.lowStockCount}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </SkeletonRegion>
+                )}
+
+                {loading && summary && (
+                  <p className="text-xs text-text-muted text-center">Atualizando…</p>
                 )}
               </>
             ) : null}
@@ -891,8 +944,16 @@ export const OwnerFinancialPanel: React.FC = () => {
               </div>
               <div className="max-h-[420px] overflow-y-auto">
                 {loading ? (
-                  <div className="p-8 text-center text-text-muted text-sm flex items-center justify-center gap-2">
-                    <Loader2 size={16} className="animate-spin" /> Carregando...
+                  <div className="p-4 space-y-2" aria-label="Carregando despesas">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="flex items-center gap-3 rounded-lg border border-border bg-bg p-3">
+                        <div className="flex-1 space-y-1.5">
+                          <div className="h-3 w-1/3 rounded bg-surface-2" />
+                          <div className="h-2.5 w-1/5 rounded bg-surface-2" />
+                        </div>
+                        <div className="h-4 w-20 rounded bg-surface-2" />
+                      </div>
+                    ))}
                   </div>
                 ) : expenses.length === 0 ? (
                   <div className="p-8 text-center text-text-muted text-sm">
@@ -1259,8 +1320,16 @@ export const OwnerFinancialPanel: React.FC = () => {
               </div>
               <div className="max-h-[420px] overflow-y-auto">
                 {loading ? (
-                  <div className="p-8 text-center text-text-muted text-sm flex items-center justify-center gap-2">
-                    <Loader2 size={16} className="animate-spin" /> Carregando...
+                  <div className="p-4 space-y-2" aria-label="Carregando fiados">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="flex items-center gap-3 rounded-lg border border-border bg-bg p-3">
+                        <div className="flex-1 space-y-1.5">
+                          <div className="h-3 w-1/4 rounded bg-surface-2" />
+                          <div className="h-2.5 w-1/3 rounded bg-surface-2" />
+                        </div>
+                        <div className="h-4 w-16 rounded bg-surface-2" />
+                      </div>
+                    ))}
                   </div>
                 ) : fiados.length === 0 ? (
                   <div className="p-8 text-center text-text-muted text-sm">

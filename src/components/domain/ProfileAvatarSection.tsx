@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { Avatar } from '../ui/Avatar';
 import { usersApi } from '../../infra/usersApi';
 import { getErrorMessage } from '../../utils/errorMessage';
-import { Camera, Trash2, Loader2 } from 'lucide-react';
+import { LuCamera as Camera, LuTrash2 as Trash2, LuLoaderCircle as Loader2 } from 'react-icons/lu';
 
 interface ProfileAvatarSectionProps {
   userId: string;

@@ -1,5 +1,12 @@
 import React from 'react';
-import { Clock, Sparkles, Users, CheckCircle2, Scissors, Store } from 'lucide-react';
+import {
+  LuClock as Clock,
+  LuSparkles as Sparkles,
+  LuUsers as Users,
+  LuCircleCheck as CheckCircle2,
+  LuScissors as Scissors,
+  LuStore as Store,
+} from 'react-icons/lu';
 import { AIInsight } from '../../types';
 
 type BusyLevel = AIInsight['busyLevel'];

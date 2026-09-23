@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Pencil, Plus, Package } from 'lucide-react';
+import { LuPencil as Pencil, LuPlus as Plus, LuPackage as Package } from 'react-icons/lu';
 import { Service, ServicePackage } from '../../types';
 import { packagesApi } from '../../infra/packagesApi';
 import { getErrorMessage } from '../../utils/errorMessage';

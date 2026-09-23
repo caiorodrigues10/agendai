@@ -1,7 +1,12 @@
 import React from 'react';
 import { Logo } from './Logo';
 import { Avatar } from './Avatar';
-import { Clock3, Lock, LogOut, Wallet } from 'lucide-react';
+import {
+  LuClock3 as Clock3,
+  LuLock as Lock,
+  LuLogOut as LogOut,
+  LuWallet as Wallet,
+} from 'react-icons/lu';
 import { StaffMember } from '../../types';
 import { ThemeToggle } from './ThemeToggle';
 import { Link } from 'react-router-dom';

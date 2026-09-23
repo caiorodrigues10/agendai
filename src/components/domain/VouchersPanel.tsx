@@ -1,14 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  Plus,
-  Loader2,
-  Trash2,
-  Tag,
-  Check,
-  X,
-  Search,
-  Ticket,
-} from 'lucide-react';
+  LuPlus as Plus,
+  LuLoaderCircle as Loader2,
+  LuTrash2 as Trash2,
+  LuTag as Tag,
+  LuCheck as Check,
+  LuX as X,
+  LuSearch as Search,
+  LuTicket as Ticket,
+} from 'react-icons/lu';
 import { vouchersApi, Voucher, VoucherUsage } from '../../infra/vouchersApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { useBarbershop } from '../../contexts/BarbershopContext';
@@ -521,7 +521,7 @@ export const VouchersPanel: React.FC = () => {
                   </div>
                   <h5 className="text-[10px] font-bold text-text-secondary">Histórico de uso</h5>
                   {usagesLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-accent" />
+                    <Loader2 size={24} className="w-4 h-4 animate-spin text-accent" />
                   ) : usages.length === 0 ? (
                     <p className="text-xs text-text-muted">Nenhum uso registrado.</p>
                   ) : (

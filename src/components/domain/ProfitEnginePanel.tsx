@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  DollarSign,
-  TrendingUp,
-  BarChart3,
-  Users,
-  Scissors,
-  Loader2,
-  AlertCircle,
-  Settings,
-  RefreshCw,
-} from 'lucide-react';
+  LuDollarSign as DollarSign,
+  LuTrendingUp as TrendingUp,
+  LuChartColumn as BarChart3,
+  LuUsers as Users,
+  LuScissors as Scissors,
+  LuLoaderCircle as Loader2,
+  LuCircleAlert as AlertCircle,
+  LuSettings as Settings,
+  LuRefreshCw as RefreshCw,
+} from 'react-icons/lu';
 import { CartesianGrid, XAxis, YAxis, Line, LineChart } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '../ui/chart';
 import {
@@ -129,7 +129,7 @@ export const ProfitEnginePanel: React.FC<ProfitEnginePanelProps> = ({ barbershop
   if (loading && !periodData) {
     return (
       <div className="flex items-center justify-center rounded-2xl border border-border bg-surface p-12">
-        <Loader2 className="h-6 w-6 animate-spin text-accent" />
+        <Loader2 size={24} className="h-6 w-6 animate-spin text-accent" />
       </div>
     );
   }
@@ -140,7 +140,7 @@ export const ProfitEnginePanel: React.FC<ProfitEnginePanelProps> = ({ barbershop
         <div className="flex flex-col gap-4 border-b border-border bg-gradient-to-r from-accent/10 via-transparent to-transparent p-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-start gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-accent/25 bg-accent/12 text-accent">
-              <DollarSign className="h-5 w-5" />
+              <DollarSign size={24} className="h-5 w-5" />
             </span>
             <div>
               <h2 className="text-xl font-extrabold text-text-primary">Motor de Lucro</h2>
@@ -162,7 +162,7 @@ export const ProfitEnginePanel: React.FC<ProfitEnginePanelProps> = ({ barbershop
               className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-bg px-3 text-text-secondary transition hover:bg-surface-2 hover:text-text-primary"
               aria-label="Configurações do motor de lucro"
             >
-              <Settings className="h-4 w-4" />
+              <Settings size={24} className="h-4 w-4" />
             </button>
             <button
               type="button"
@@ -170,7 +170,7 @@ export const ProfitEnginePanel: React.FC<ProfitEnginePanelProps> = ({ barbershop
               disabled={computing}
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-accent-fg shadow-lg shadow-accent/15 transition hover:bg-accent-hover disabled:opacity-50"
             >
-              {computing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              {computing ? <Loader2 size={24} className="h-4 w-4 animate-spin" /> : <RefreshCw size={24} className="h-4 w-4" />}
               Computar
             </button>
           </div>
@@ -226,7 +226,7 @@ export const ProfitEnginePanel: React.FC<ProfitEnginePanelProps> = ({ barbershop
 
       {error && (
           <div className="mx-5 flex items-start gap-2 rounded-xl border border-danger/30 bg-danger/10 p-3 text-sm text-danger">
-          <AlertCircle className="h-4 w-4" />
+          <AlertCircle size={24} className="h-4 w-4" />
           {error}
         </div>
       )}
@@ -258,9 +258,9 @@ export const ProfitEnginePanel: React.FC<ProfitEnginePanelProps> = ({ barbershop
             }`}
           >
             {tab === 'overview' && 'Resumo'}
-            {tab === 'service' && <span className="flex items-center gap-1"><Scissors className="h-3 w-3" /> Por Serviço</span>}
-            {tab === 'staff' && <span className="flex items-center gap-1"><Users className="h-3 w-3" /> Por Profissional</span>}
-            {tab === 'trend' && <span className="flex items-center gap-1"><BarChart3 className="h-3 w-3" /> Tendência</span>}
+            {tab === 'service' && <span className="flex items-center gap-1"><Scissors size={24} className="h-3 w-3" /> Por Serviço</span>}
+            {tab === 'staff' && <span className="flex items-center gap-1"><Users size={24} className="h-3 w-3" /> Por Profissional</span>}
+            {tab === 'trend' && <span className="flex items-center gap-1"><BarChart3 size={24} className="h-3 w-3" /> Tendência</span>}
           </button>
         ))}
       </div>

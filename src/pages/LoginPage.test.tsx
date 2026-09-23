@@ -1,18 +1,37 @@
 /// <reference types="vitest/globals" />
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { LoginPage } from './LoginPage';
 import { renderWithProviders } from '../tests/testUtils';
+import type { StaffMember } from '../types';
 
 const loginMock = vi.fn();
 const registerMock = vi.fn();
 const registerWithGoogleMock = vi.fn();
+const loginWithGoogleMock = vi.fn();
+const loginWithSavedAccountMock = vi.fn();
+const forgetSavedAccountMock = vi.fn();
+const navigateMock = vi.fn();
+
+let authState: { user: StaffMember | null; loading: boolean };
+let hasStoredSessionMock = false;
+let savedAccountsMock: Array<{ id: string; name: string; email: string; avatarUrl?: string }> = [];
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => navigateMock,
+  };
+});
 
 vi.mock('../contexts/AuthContext', () => ({
   useAuth: () => ({
-    user: null,
-    loading: false,
+    user: authState.user,
+    loading: authState.loading,
     login: loginMock,
-    loginWithGoogle: vi.fn(),
+    loginWithGoogle: loginWithGoogleMock,
+    loginWithSavedAccount: loginWithSavedAccountMock,
+    forgetSavedAccount: forgetSavedAccountMock,
     register: registerMock,
     registerWithGoogle: registerWithGoogleMock,
     logout: vi.fn(),
@@ -28,11 +47,26 @@ vi.mock('../utils/referralStorage', () => ({
   },
 }));
 
+vi.mock('../infra/authStorage', () => ({
+  authStorage: {
+    getSavedAccounts: () => savedAccountsMock,
+    hasStoredSession: () => hasStoredSessionMock,
+    getUser: () => authState.user,
+  },
+}));
+
 describe('LoginPage (usabilidade)', () => {
   beforeEach(() => {
+    authState = { user: null, loading: false };
+    hasStoredSessionMock = false;
+    savedAccountsMock = [];
     loginMock.mockReset();
     registerMock.mockReset();
     registerWithGoogleMock.mockReset();
+    loginWithGoogleMock.mockReset();
+    loginWithSavedAccountMock.mockReset();
+    forgetSavedAccountMock.mockReset();
+    navigateMock.mockReset();
   });
 
   it('renderiza formulário de login com e-mail e senha', () => {
@@ -47,6 +81,33 @@ describe('LoginPage (usabilidade)', () => {
     const submit = screen.getAllByRole('button', { name: /entrar/i })[0];
     fireEvent.click(submit);
     expect(loginMock).not.toHaveBeenCalled();
+  });
+
+  it('redireciona sessão master restaurada direto para o painel master', async () => {
+    authState = {
+      loading: false,
+      user: {
+        id: 'admin-1',
+        name: 'Admin',
+        email: 'admin@example.com',
+        role: 'MASTER_ADMIN',
+      } as StaffMember,
+    };
+
+    renderWithProviders(<LoginPage />, { route: '/login' });
+
+    await waitFor(() => {
+      expect(navigateMock).toHaveBeenCalledWith('/master/work', { replace: true });
+    });
+  });
+
+  it('aguarda restauracao antes de mostrar contas salvas', () => {
+    authState = { user: null, loading: true };
+    savedAccountsMock = [{ id: 'user-1', name: 'Caio', email: 'caio@example.com' }];
+
+    renderWithProviders(<LoginPage />, { route: '/login' });
+
+    expect(screen.queryByText(/contas salvas/i)).not.toBeInTheDocument();
   });
 
   it('renderiza passo 1 do cadastro com campos de acesso', () => {

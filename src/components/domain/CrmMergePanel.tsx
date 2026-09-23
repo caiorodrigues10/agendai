@@ -10,7 +10,7 @@ import { getErrorMessage } from '../../utils/errorMessage';
 import { Field, FIELD_CONTROL } from '../ui/Field';
 import { SmartSelect } from '../ui/SmartSelect';
 
-export function CrmMergePanel({ onMerged }: { onMerged: (targetId: string) => void }) {
+export function CrmMergePanel({ onMerged, onClose }: { onMerged: (targetId: string) => void; onClose?: () => void }) {
   const [search, setSearch] = useState('');
   const [clients, setClients] = useState<SalonClient[]>([]);
   const [matches, setMatches] = useState<string[]>([]);
@@ -59,7 +59,10 @@ export function CrmMergePanel({ onMerged }: { onMerged: (targetId: string) => vo
     finally { lock.current = false; }
   });
   return <form onSubmit={submit} className="space-y-3 rounded-xl border border-border bg-surface p-4 text-sm text-text-primary">
-    <h3 className="font-bold">Mesclar clientes duplicados</h3>
+    <div className="flex items-center justify-between">
+      <h3 className="font-bold">Mesclar clientes duplicados</h3>
+      {onClose && <button type="button" onClick={onClose} className="rounded-lg p-1 text-text-muted hover:bg-bg" aria-label="Fechar">✕</button>}
+    </div>
     <p className="text-text-secondary">Busque por nome ou WhatsApp. Até 50 resultados por busca; os selecionados são mantidos.</p>
     <Field label="Buscar cadastros"><input aria-label="Buscar cadastros" className={FIELD_CONTROL} value={search} onChange={event => setSearch(event.target.value)} disabled={isSubmitting} /></Field>
     <Controller name="targetId" control={control} render={({ field }) => <SmartSelect label="Cadastro principal" options={options.filter(option => !sourceIds.includes(option.value))} value={field.value || null} onChange={value => field.onChange(value || '')} loading={loading} disabled={isSubmitting} error={errors.targetId?.message} />} />

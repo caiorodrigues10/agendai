@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import {
-  ShieldCheck,
-  Plus,
-  Trash2,
-  Loader2,
-  ClipboardCheck,
-  TrendingUp,
-  TrendingDown,
-  Minus,
-} from 'lucide-react';
+  LuShieldCheck as ShieldCheck,
+  LuPlus as Plus,
+  LuTrash2 as Trash2,
+  LuLoaderCircle as Loader2,
+  LuClipboardCheck as ClipboardCheck,
+  LuTrendingUp as TrendingUp,
+  LuTrendingDown as TrendingDown,
+  LuMinus as Minus,
+} from 'react-icons/lu';
 import { qualityApi, QualityProtocol, QualityAudit, QualityOverview } from '../../infra/qualityApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';

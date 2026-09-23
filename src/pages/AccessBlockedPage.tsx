@@ -1,6 +1,13 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldAlert, CalendarX2, Check, Users, ArrowRight, LogOut } from 'lucide-react';
+import {
+  LuShieldAlert as ShieldAlert,
+  LuCalendarX2 as CalendarX2,
+  LuCheck as Check,
+  LuUsers as Users,
+  LuArrowRight as ArrowRight,
+  LuLogOut as LogOut,
+} from 'react-icons/lu';
 import { useAuth } from '../contexts/AuthContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { Plan } from '../infra/plansApi';

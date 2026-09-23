@@ -10,7 +10,13 @@ import {
   useInteractions,
   FloatingPortal,
 } from '@floating-ui/react';
-import { Check, ChevronDown, Loader2, Search, X } from 'lucide-react';
+import {
+  LuCheck as Check,
+  LuChevronDown as ChevronDown,
+  LuLoaderCircle as Loader2,
+  LuSearch as Search,
+  LuX as X,
+} from 'react-icons/lu';
 
 export interface SelectOption<T extends string = string> {
   value: T;

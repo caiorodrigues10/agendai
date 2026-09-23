@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Loader2, Check, X } from 'lucide-react';
+import { LuLoaderCircle as Loader2, LuCheck as Check, LuX as X } from 'react-icons/lu';
 import { depositsApi, AppointmentDeposit } from '../../infra/depositsApi';
 import { formatCurrencyBRL, formatDateBR } from '../../utils/formatters';
 

@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import {
-  CalendarDays,
-  Store,
-  Clock,
-  Gift,
-  User,
-  Loader2,
-  ChevronRight,
-  Unlink,
-  Phone,
-  LogOut,
-  Smartphone,
-} from 'lucide-react';
+  LuCalendarDays as CalendarDays,
+  LuStore as Store,
+  LuClock as Clock,
+  LuGift as Gift,
+  LuUser as User,
+  LuLoaderCircle as Loader2,
+  LuChevronRight as ChevronRight,
+  LuUnlink as Unlink,
+  LuPhone as Phone,
+  LuLogOut as LogOut,
+  LuSmartphone as Smartphone,
+} from 'react-icons/lu';
 import { clientPortalApi, ClientIdentity, ClientSalonLink, ClientAppointment, ClientBenefit } from '../../infra/clientPortalApi';
 import { SmartSelect } from '../ui/SmartSelect';
 import { getErrorMessage } from '../../utils/errorMessage';

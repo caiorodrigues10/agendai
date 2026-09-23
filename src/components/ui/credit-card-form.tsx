@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { CreditCard } from 'lucide-react';
+import { LuCreditCard as CreditCard } from 'react-icons/lu';
 
 interface CardState {
   number: string;

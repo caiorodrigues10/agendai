@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Sparkles,
-  CheckCircle2,
-  XCircle,
-  Eye,
-  Loader2,
-  RefreshCw,
-} from 'lucide-react';
+  LuSparkles as Sparkles,
+  LuCircleCheck as CheckCircle2,
+  LuCircleX as XCircle,
+  LuEye as Eye,
+  LuLoaderCircle as Loader2,
+  LuRefreshCw as RefreshCw,
+} from 'react-icons/lu';
 import { copilotApi, CopilotSuggestion } from '../../infra/copilotApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';

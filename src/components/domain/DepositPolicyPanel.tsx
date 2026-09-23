@@ -1,5 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Loader2, Save, Shield, AlertTriangle } from 'lucide-react';
+import {
+  LuLoaderCircle as Loader2,
+  LuSave as Save,
+  LuShield as Shield,
+  LuTriangleAlert as AlertTriangle,
+} from 'react-icons/lu';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { depositsApi, DepositPolicy } from '../../infra/depositsApi';
 import { getErrorMessage } from '../../utils/errorMessage';

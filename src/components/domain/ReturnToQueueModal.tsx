@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import FocusLock from 'react-focus-lock';
-import { ListOrdered, Loader2, X } from 'lucide-react';
+import { LuListOrdered as ListOrdered, LuLoaderCircle as Loader2, LuX as X } from 'react-icons/lu';
 import { QueueItem, Service } from '../../types';
 
 interface ReturnToQueueModalProps {

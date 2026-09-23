@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Bell, Loader2 } from 'lucide-react';
+import { LuBell as Bell, LuLoaderCircle as Loader2 } from 'react-icons/lu';
 import { barbershopApi, QueueAlertSettings as QueueAlert } from '../../infra/barbershopApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';

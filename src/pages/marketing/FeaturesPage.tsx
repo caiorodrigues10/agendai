@@ -3,28 +3,28 @@ import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
-  Clock,
-  Calendar,
-  BarChart3,
-  Users,
-  Bell,
-  ShieldCheck,
-  Smartphone,
-  Wallet,
-  ArrowRight,
-  Sparkles,
-  TrendingUp,
-  MessageSquare,
-  Eye,
-  UserCog,
-  CreditCard,
-  Receipt,
-  Store,
-  Play,
-  ChevronRight,
-  Check,
-  X,
-} from 'lucide-react';
+  LuClock as Clock,
+  LuCalendar as Calendar,
+  LuChartColumn as BarChart3,
+  LuUsers as Users,
+  LuBell as Bell,
+  LuShieldCheck as ShieldCheck,
+  LuSmartphone as Smartphone,
+  LuWallet as Wallet,
+  LuArrowRight as ArrowRight,
+  LuSparkles as Sparkles,
+  LuTrendingUp as TrendingUp,
+  LuMessageSquare as MessageSquare,
+  LuEye as Eye,
+  LuUserCog as UserCog,
+  LuCreditCard as CreditCard,
+  LuReceipt as Receipt,
+  LuStore as Store,
+  LuPlay as Play,
+  LuChevronRight as ChevronRight,
+  LuCheck as Check,
+  LuX as X,
+} from 'react-icons/lu';
 import { MarketingNav } from '../../components/marketing/MarketingNav';
 import { MarketingFooter } from '../../components/marketing/MarketingFooter';
 import { SeoHead } from '../../components/marketing/SeoHead';
@@ -64,12 +64,12 @@ const PainSolution = ({
   return (
     <div ref={ref} className="flex items-center gap-4 py-3 opacity-0">
       <div className="flex items-center gap-2 flex-1">
-        <X className="w-4 h-4 text-red-400 shrink-0" />
+        <X size={24} className="w-4 h-4 text-red-400 shrink-0" />
         <span className="text-neutral-500 text-sm line-through">{pain}</span>
       </div>
-      <ChevronRight className="w-4 h-4 text-accent shrink-0" />
+      <ChevronRight size={24} className="w-4 h-4 text-accent shrink-0" />
       <div className="flex items-center gap-2 flex-1">
-        <Check className="w-4 h-4 text-accent shrink-0" />
+        <Check size={24} className="w-4 h-4 text-accent shrink-0" />
         <span className="text-white text-sm font-medium">{solution}</span>
       </div>
     </div>
@@ -134,7 +134,7 @@ const QueueSimulation = () => {
         ))}
         <div className="mt-4 p-3 rounded-xl bg-accent/5 border border-accent/20">
           <div className="flex items-center gap-2 mb-1">
-            <Bell className="w-3 h-3 text-accent" />
+            <Bell size={24} className="w-3 h-3 text-accent" />
             <span className="text-[10px] font-bold text-accent uppercase tracking-wider">
               Próximo aviso
             </span>
@@ -196,7 +196,7 @@ const DashboardMini = () => {
           <div className="mt-1 text-3xl font-black text-white">R$ 6.160</div>
         </div>
         <div className="flex items-center gap-1.5 text-accent">
-          <TrendingUp className="h-4 w-4" />
+          <TrendingUp size={24} className="h-4 w-4" />
           <span className="text-xs font-bold">+18%</span>
         </div>
       </div>
@@ -469,7 +469,7 @@ export const FeaturesPage: React.FC = () => {
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 relative z-10">
           <div className="flex-1 text-center lg:text-left">
             <div className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-accent/20 bg-accent/5 text-accent text-[10px] font-black uppercase tracking-[0.3em] mb-8 opacity-0">
-              <Sparkles className="w-3.5 h-3.5" />
+              <Sparkles size={24} className="w-3.5 h-3.5" />
               Para quem não para
             </div>
             <h1
@@ -496,13 +496,13 @@ export const FeaturesPage: React.FC = () => {
                 className="bg-accent text-white px-8 py-4 rounded-2xl font-bold text-sm hover:bg-accent transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
               >
                 Começar grátis
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight size={24} className="w-4 h-4" />
               </button>
               <button
                 onClick={() => navigate('/queue')}
                 className="bg-white/5 border border-white/10 text-white px-8 py-4 rounded-2xl font-bold text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-2"
               >
-                <Play className="w-4 h-4" />
+                <Play size={24} className="w-4 h-4" />
                 Ver fila ao vivo
               </button>
             </div>
@@ -561,7 +561,7 @@ export const FeaturesPage: React.FC = () => {
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
           <div className="feature-text flex-1">
             <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/20 bg-accent/5 text-accent text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
-              <Clock className="w-3.5 h-3.5" />
+              <Clock size={24} className="w-3.5 h-3.5" />
               Fila Digital
             </div>
             <h2 className="section-title text-4xl md:text-6xl font-black tracking-tight mb-6 leading-[1.05]">
@@ -639,7 +639,7 @@ export const FeaturesPage: React.FC = () => {
           </div>
           <div className="feature-text flex-1">
             <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-teal-500/20 bg-teal-500/5 text-teal-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
-              <Calendar className="w-3.5 h-3.5" />
+              <Calendar size={24} className="w-3.5 h-3.5" />
               Agendamento 24/7
             </div>
             <h2 className="section-title text-4xl md:text-6xl font-black tracking-tight mb-6 leading-[1.05]">
@@ -679,7 +679,7 @@ export const FeaturesPage: React.FC = () => {
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
           <div className="feature-text flex-1">
             <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/20 bg-cyan-500/5 text-cyan-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
-              <Wallet className="w-3.5 h-3.5" />
+              <Wallet size={24} className="w-3.5 h-3.5" />
               Financeiro
             </div>
             <h2 className="section-title text-4xl md:text-6xl font-black tracking-tight mb-6 leading-[1.05]">
@@ -719,7 +719,7 @@ export const FeaturesPage: React.FC = () => {
       <section className="py-24 md:py-36 px-6 relative z-10 bg-neutral-950/50 border-y border-white/5">
         <div className="max-w-5xl mx-auto text-center">
           <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-500/20 bg-blue-500/5 text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
-            <Users className="w-3.5 h-3.5" />
+            <Users size={24} className="w-3.5 h-3.5" />
             Equipe
           </div>
           <h2 className="section-title text-4xl md:text-6xl font-black tracking-tight mb-6 leading-[1.05]">
@@ -834,7 +834,7 @@ export const FeaturesPage: React.FC = () => {
           </div>
           <div className="feature-text flex-1">
             <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
-              <MessageSquare className="w-3.5 h-3.5" />
+              <MessageSquare size={24} className="w-3.5 h-3.5" />
               WhatsApp Automático
             </div>
             <h2 className="section-title text-4xl md:text-6xl font-black tracking-tight mb-6 leading-[1.05]">
@@ -876,7 +876,7 @@ export const FeaturesPage: React.FC = () => {
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-16 lg:flex-row-reverse">
           <div className="feature-text flex-1">
             <div className="feature-badge mb-6 inline-flex items-center gap-2 rounded-full border border-green-500/20 bg-green-500/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-green-400 opacity-0">
-              <Store className="h-3.5 w-3.5" />
+              <Store size={24} className="h-3.5 w-3.5" />
               Perfil Público
             </div>
             <h2 className="section-title mb-6 text-4xl font-black leading-[1.05] tracking-tight md:text-6xl">
@@ -983,7 +983,7 @@ export const FeaturesPage: React.FC = () => {
       <section className="py-24 md:py-36 px-6 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-teal-500/20 bg-teal-500/5 text-teal-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
-            <ShieldCheck className="w-3.5 h-3.5" />
+            <ShieldCheck size={24} className="w-3.5 h-3.5" />
             Segurança
           </div>
           <h2 className="section-title text-4xl md:text-6xl font-black tracking-tight mb-6 leading-[1.05]">
@@ -1036,7 +1036,7 @@ export const FeaturesPage: React.FC = () => {
                 className="group inline-flex items-center justify-center gap-3 rounded-full bg-black px-8 py-4 text-base font-black text-white transition duration-300 hover:-translate-y-0.5 hover:bg-accent hover:text-black"
               >
                 {trialCampaign.cta}
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </button>
               <button
                 type="button"
@@ -1044,7 +1044,7 @@ export const FeaturesPage: React.FC = () => {
                 className="group inline-flex items-center justify-center gap-2 px-2 py-3 text-sm font-bold text-neutral-600 transition hover:text-black sm:justify-start sm:px-3"
               >
                 Ver demonstração
-                <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                <ChevronRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </button>
             </div>
           </div>

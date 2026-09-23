@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { Loader2, Phone, KeyRound, ArrowRight, LogOut } from 'lucide-react';
+import {
+  LuLoaderCircle as Loader2,
+  LuPhone as Phone,
+  LuKeyRound as KeyRound,
+  LuArrowRight as ArrowRight,
+  LuLogOut as LogOut,
+} from 'react-icons/lu';
 import { clientPortalApi } from '../../infra/clientPortalApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 

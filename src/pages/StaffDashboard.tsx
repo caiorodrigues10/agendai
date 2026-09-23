@@ -33,7 +33,7 @@ import { PublicLinkPanel } from '../components/domain/PublicLinkPanel';
 import { PwaInstallCard } from '../components/pwa/PwaInstallCard';
 import { getErrorMessage } from '../utils/errorMessage';
 import { QueueItem } from '../types';
-import { Loader2 } from 'lucide-react';
+import { LuLoaderCircle as Loader2 } from 'react-icons/lu';
 import { DemandAlertBanner } from '../components/domain/DemandAlertBanner';
 import { StaffNavigation } from '../components/ui/StaffNavigation';
 import { supportsQueue, supportsAppointments } from '../utils/operationMode';
@@ -52,7 +52,7 @@ import { GoalsPanel } from '../components/domain/GoalsPanel';
 import { RecommendationsPanel } from '../components/domain/RecommendationsPanel';
 import { DepositPolicyPanel } from '../components/domain/DepositPolicyPanel';
 import { WaitlistPanel } from '../components/domain/WaitlistPanel';
-import { MembershipsPanel } from '../components/domain/MembershipsPanel';
+import { RecurringPackagesPanel } from '../components/domain/RecurringPackagesPanel';
 import { OrganizationsPanel } from '../components/domain/OrganizationsPanel';
 import { ProfitEnginePanel } from '../components/domain/ProfitEnginePanel';
 import { ErrorBoundary } from '../components/infra/ErrorBoundary';
@@ -520,7 +520,7 @@ export const StaffDashboard: React.FC = () => {
                 <WaitlistPanel />
               </ErrorBoundary>
               <ErrorBoundary variant="section">
-                <MembershipsPanel />
+                <RecurringPackagesPanel />
               </ErrorBoundary>
               <ErrorBoundary variant="section">
                 <LoyaltyPanel />

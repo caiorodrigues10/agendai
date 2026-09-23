@@ -2,7 +2,7 @@ import { MySubscription } from '../infra/subscriptionsApi';
 
 export function staffHomePath(role?: string | null): string {
   const r = (role ?? '').toUpperCase();
-  if (r === 'MASTER_ADMIN' || r === 'ADMIN') return '/master/dashboard';
+  if (r === 'MASTER_ADMIN' || r === 'ADMIN') return '/master/work';
   return '/app/queue';
 }
 

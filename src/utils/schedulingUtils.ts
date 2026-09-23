@@ -162,6 +162,18 @@ export function getServiceName(serviceId: string, services: Service[]): string {
   return services.find(s => s.id === serviceId)?.name ?? 'Serviço';
 }
 
+/** `@db.Date` chega como `YYYY-MM-DD` ou `YYYY-MM-DDT00:00:00.000Z`. A grade compara só o dia. */
+export function calendarDateKey(value: unknown): string {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString().slice(0, 10);
+  }
+  if (typeof value === 'string') {
+    const match = /^(\d{4}-\d{2}-\d{2})/.exec(value);
+    if (match) return match[1];
+  }
+  return '';
+}
+
 export function mapAppointmentFromApi(raw: any): Appointment {
   return {
     id: raw.id,
@@ -170,8 +182,8 @@ export function mapAppointmentFromApi(raw: any): Appointment {
     whatsapp: raw.whatsapp,
     serviceId: raw.serviceId,
     staffId: raw.staffId ?? 'any',
-    date: raw.date,
-    time: raw.time,
+    date: calendarDateKey(raw.date),
+    time: typeof raw.time === 'string' ? raw.time.slice(0, 5) : raw.time,
     createdAt: raw.createdAt ?? Date.now(),
     status: (raw.status ?? 'confirmed').toLowerCase(),
     serviceName: raw.serviceName,

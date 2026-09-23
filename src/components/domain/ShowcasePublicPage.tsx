@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Loader2, Filter, CalendarDays, MessageCircle } from 'lucide-react';
+import {
+  LuLoaderCircle as Loader2,
+  LuFilter as Filter,
+  LuCalendarDays as CalendarDays,
+  LuMessageCircle as MessageCircle,
+} from 'react-icons/lu';
 import { showcaseApi, ShowcaseEntry } from '../../infra/showcaseApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { formatCurrencyBRL } from '../../utils/formatters';

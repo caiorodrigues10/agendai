@@ -15,7 +15,15 @@ import {
 import { maskPhone } from '../../utils/documentUtils';
 import { clientsApi } from '../../infra/clientsApi';
 import { packagesApi } from '../../infra/packagesApi';
-import { X, Calendar, User, Smartphone, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import {
+  LuX as X,
+  LuCalendar as Calendar,
+  LuUser as User,
+  LuSmartphone as Smartphone,
+  LuCircleCheck as CheckCircle,
+  LuCircleAlert as AlertCircle,
+  LuClock as Clock,
+} from 'react-icons/lu';
 import { Avatar } from '../ui/Avatar';
 import { DynamicIcon } from '../ui/DynamicIcon';
 import { ThemedCalendar, toLocalISO } from '../ui/ThemedCalendar';

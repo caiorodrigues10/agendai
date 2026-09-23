@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Mail, ShieldCheck, Loader2, AlertTriangle, CalendarDays } from 'lucide-react';
+import {
+  LuMail as Mail,
+  LuShieldCheck as ShieldCheck,
+  LuLoaderCircle as Loader2,
+  LuTriangleAlert as AlertTriangle,
+  LuCalendarDays as CalendarDays,
+} from 'react-icons/lu';
 import { emailApi } from '../../infra/emailApi';
 import { Toast } from '../ui/Toast';
 

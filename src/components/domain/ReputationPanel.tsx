@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Star,
-  MessageSquare,
-  Minus,
-  Loader2,
-  ThumbsUp,
-  ThumbsDown,
-  Send,
-} from 'lucide-react';
+  LuStar as Star,
+  LuMessageSquare as MessageSquare,
+  LuMinus as Minus,
+  LuLoaderCircle as Loader2,
+  LuThumbsUp as ThumbsUp,
+  LuThumbsDown as ThumbsDown,
+  LuSend as Send,
+} from 'react-icons/lu';
 import { reputationApi, ReputationStats, Review } from '../../infra/reputationApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';

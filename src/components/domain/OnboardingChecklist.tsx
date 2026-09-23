@@ -1,6 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, ChevronRight, Rocket, ArrowRight, SkipForward } from 'lucide-react';
+import {
+  LuCheck as Check,
+  LuChevronRight as ChevronRight,
+  LuRocket as Rocket,
+  LuArrowRight as ArrowRight,
+  LuSkipForward as SkipForward,
+} from 'react-icons/lu';
 import { barbershopApi } from '../../infra/barbershopApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 

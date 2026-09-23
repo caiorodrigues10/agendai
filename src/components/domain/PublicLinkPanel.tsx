@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { CalendarDays, Check, Copy, ExternalLink, QrCode, Share2, Store, Users } from 'lucide-react';
+import {
+  LuCalendarDays as CalendarDays,
+  LuCheck as Check,
+  LuCopy as Copy,
+  LuExternalLink as ExternalLink,
+  LuQrCode as QrCode,
+  LuShare2 as Share2,
+  LuStore as Store,
+  LuUsers as Users,
+} from 'react-icons/lu';
 import type { OperationMode } from '../../types';
 
 interface PublicLinkPanelProps { barbershopId: string; operationMode?: OperationMode; }

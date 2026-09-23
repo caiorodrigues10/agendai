@@ -1,20 +1,20 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  AlertCircle,
-  Calendar,
-  Check,
-  Loader2,
-  MessageSquare,
-  Plug,
-  RefreshCw,
-  Settings,
-  Trash2,
-  X,
-  Zap,
-  Bot,
-  CreditCard,
-  FileText,
-} from 'lucide-react';
+  LuCircleAlert as AlertCircle,
+  LuCalendar as Calendar,
+  LuCheck as Check,
+  LuLoaderCircle as Loader2,
+  LuMessageSquare as MessageSquare,
+  LuPlug as Plug,
+  LuRefreshCw as RefreshCw,
+  LuSettings as Settings,
+  LuTrash2 as Trash2,
+  LuX as X,
+  LuZap as Zap,
+  LuBot as Bot,
+  LuCreditCard as CreditCard,
+  LuFileText as FileText,
+} from 'react-icons/lu';
 import {
   integrationsApi,
   Integration,
@@ -27,47 +27,47 @@ import { SmartSelect } from '../ui/SmartSelect';
 
 const TYPE_META: Record<string, { icon: React.ReactNode; label: string; description: string }> = {
   GOOGLE_CALENDAR: {
-    icon: <Calendar className="w-5 h-5" />,
+    icon: <Calendar size={24} className="w-5 h-5" />,
     label: 'Google Calendar',
     description: 'Sincronize agenda com Google Calendar',
   },
   ICALENDAR: {
-    icon: <Calendar className="w-5 h-5" />,
+    icon: <Calendar size={24} className="w-5 h-5" />,
     label: 'iCal / CalDAV',
     description: 'Importe/exporte calendários iCal',
   },
   TWILIO: {
-    icon: <MessageSquare className="w-5 h-5" />,
+    icon: <MessageSquare size={24} className="w-5 h-5" />,
     label: 'Twilio',
     description: 'Envio de SMS e WhatsApp via Twilio',
   },
   EVOLUTION_API: {
-    icon: <MessageSquare className="w-5 h-5" />,
+    icon: <MessageSquare size={24} className="w-5 h-5" />,
     label: 'Evolution API',
     description: 'WhatsApp via Evolution API',
   },
   OPENAI: {
-    icon: <Bot className="w-5 h-5" />,
+    icon: <Bot size={24} className="w-5 h-5" />,
     label: 'OpenAI',
     description: 'Copilot e respostas automáticas com IA',
   },
   ASAAS: {
-    icon: <CreditCard className="w-5 h-5" />,
+    icon: <CreditCard size={24} className="w-5 h-5" />,
     label: 'Asaas',
     description: 'Gateway de pagamento Asaas',
   },
   NFSE: {
-    icon: <FileText className="w-5 h-5" />,
+    icon: <FileText size={24} className="w-5 h-5" />,
     label: 'NFS-e',
     description: 'Emissão de Nota Fiscal de Serviço',
   },
   ZAPI: {
-    icon: <MessageSquare className="w-5 h-5" />,
+    icon: <MessageSquare size={24} className="w-5 h-5" />,
     label: 'Z-API',
     description: 'WhatsApp via Z-API',
   },
   WHATSAPP_CLOUD: {
-    icon: <MessageSquare className="w-5 h-5" />,
+    icon: <MessageSquare size={24} className="w-5 h-5" />,
     label: 'WhatsApp Cloud',
     description: 'WhatsApp Business API oficial',
   },
@@ -245,7 +245,7 @@ export const IntegrationsPanel: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-6 h-6 animate-spin text-accent" />
+        <Loader2 size={24} className="w-6 h-6 animate-spin text-accent" />
       </div>
     );
   }
@@ -261,28 +261,28 @@ export const IntegrationsPanel: React.FC = () => {
           onClick={openCreateModal}
           className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent/90 transition-colors"
         >
-          <Plug className="w-4 h-4" />
+          <Plug size={24} className="w-4 h-4" />
           Nova Integração
         </button>
       </div>
 
       {error && (
         <div className="rounded-lg bg-danger/10 p-3 text-sm text-danger flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0" />
+          <AlertCircle size={24} className="w-4 h-4 shrink-0" />
           {error}
         </div>
       )}
 
       {integrations.length === 0 ? (
         <div className="rounded-xl border border-border bg-surface p-12 text-center">
-          <Plug className="w-10 h-10 mx-auto mb-3 text-text-muted" />
+          <Plug size={24} className="w-10 h-10 mx-auto mb-3 text-text-muted" />
           <p className="text-sm text-text-muted">Nenhuma integração configurada</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {integrations.map(integration => {
             const meta = TYPE_META[integration.type] ?? {
-              icon: <Settings className="w-5 h-5" />,
+              icon: <Settings size={24} className="w-5 h-5" />,
               label: integration.type,
               description: integration.provider,
             };
@@ -319,7 +319,7 @@ export const IntegrationsPanel: React.FC = () => {
                     onClick={() => openEditModal(integration)}
                     className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-accent/5 transition-colors"
                   >
-                    <Settings className="w-3.5 h-3.5" />
+                    <Settings size={24} className="w-3.5 h-3.5" />
                     Configurar
                   </button>
                   <button
@@ -328,9 +328,9 @@ export const IntegrationsPanel: React.FC = () => {
                     className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-accent/5 transition-colors disabled:opacity-50"
                   >
                     {testingId === integration.id ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <Loader2 size={24} className="w-3.5 h-3.5 animate-spin" />
                     ) : (
-                      <Zap className="w-3.5 h-3.5" />
+                      <Zap size={24} className="w-3.5 h-3.5" />
                     )}
                     Testar
                   </button>
@@ -340,9 +340,9 @@ export const IntegrationsPanel: React.FC = () => {
                     className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-accent/5 transition-colors disabled:opacity-50"
                   >
                     {syncingId === integration.id ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <Loader2 size={24} className="w-3.5 h-3.5 animate-spin" />
                     ) : (
-                      <RefreshCw className="w-3.5 h-3.5" />
+                      <RefreshCw size={24} className="w-3.5 h-3.5" />
                     )}
                     Sincronizar
                   </button>
@@ -350,14 +350,14 @@ export const IntegrationsPanel: React.FC = () => {
                     onClick={() => loadLogs(integration.id)}
                     className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-accent/5 transition-colors"
                   >
-                    <FileText className="w-3.5 h-3.5" />
+                    <FileText size={24} className="w-3.5 h-3.5" />
                     Logs
                   </button>
                   <button
                     onClick={() => handleDelete(integration.id)}
                     className="flex items-center gap-1.5 rounded-lg border border-danger/30 px-3 py-1.5 text-xs font-medium text-danger hover:bg-danger/5 transition-colors ml-auto"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 size={24} className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
@@ -383,12 +383,12 @@ export const IntegrationsPanel: React.FC = () => {
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-text-primary">Histórico de Sincronizações</h3>
             <button onClick={() => setLogsIntegrationId(null)} className="text-text-muted hover:text-text-primary">
-              <X className="w-4 h-4" />
+              <X size={24} className="w-4 h-4" />
             </button>
           </div>
           {logsLoading ? (
             <div className="flex justify-center py-4">
-              <Loader2 className="w-5 h-5 animate-spin text-accent" />
+              <Loader2 size={24} className="w-5 h-5 animate-spin text-accent" />
             </div>
           ) : syncLogs.length === 0 ? (
             <p className="text-xs text-text-muted py-4 text-center">Nenhum log de sincronização</p>
@@ -437,7 +437,7 @@ export const IntegrationsPanel: React.FC = () => {
                 {editingId ? 'Editar Integração' : 'Nova Integração'}
               </h3>
               <button onClick={() => setModalOpen(false)} className="text-text-muted hover:text-text-primary">
-                <X className="w-5 h-5" />
+                <X size={24} className="w-5 h-5" />
               </button>
             </div>
 
@@ -654,7 +654,7 @@ export const IntegrationsPanel: React.FC = () => {
                 disabled={saving || !form.provider}
                 className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent/90 transition-colors disabled:opacity-50"
               >
-                {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                {saving && <Loader2 size={24} className="w-4 h-4 animate-spin" />}
                 {editingId ? 'Salvar' : 'Criar'}
               </button>
             </div>

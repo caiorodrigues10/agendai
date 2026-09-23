@@ -1,16 +1,16 @@
-# Graph Report - agendai  (2026-09-18)
+# Graph Report - agendai  (2026-09-22)
 
 ## Corpus Check
-- 333 files · ~251,410 words
+- 355 files · ~268,511 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1869 nodes · 4471 edges · 127 communities (119 shown, 8 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 41 edges (avg confidence: 0.72)
+- 2044 nodes · 4775 edges · 139 communities (128 shown, 11 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 43 edges (avg confidence: 0.72)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4cf5c6ae`
+- Built from commit: `64a69663`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -94,7 +94,7 @@
 - credit-card-form.tsx
 - Arquitetura do frontend
 - AboutPage.tsx
-- Inventário de pacotes — Frontend (agendai)
+- errorMessage.ts
 - audit-frontend-structure.mjs
 - PaginationBar.tsx
 - copilot-instructions.md
@@ -103,19 +103,19 @@
 - AccessBlockedPage.tsx
 - credit-card-form.tsx
 - ForgotPasswordPage.tsx
-- errorMessage
+- FinancialDashboard.tsx
 - FeaturesPage.tsx
 - Mapa de domínio — Frontend ↔ API
 - ApiError
-- PublicAppointmentManagePage.tsx
-- goalsApi.ts
+- GoalsPanel.tsx
+- ProductReportsPanel.tsx
 - goalsApi.ts
 - softwareApplicationLd
 - commissionsApi.ts
 - GiftCardsPanel.tsx
 - enhancedForecastApi.ts
 - README.md
-- CrmIntelligencePanel.tsx
+- SubscriptionContext.tsx
 - reputationApi.ts
 - PasswordInput.tsx
 - qualityApi.ts
@@ -125,68 +125,80 @@
 - index.ts
 - barbershopApi
 - data
-- ProductCatalogPanel.tsx
-- PlansPage.tsx
+- ForgotPasswordPage.tsx
 - productsApi.ts
 - CrmMergePanel.tsx
-- ProductStockPanel.tsx
+- AiPredictivePage.tsx
 - ConfirmDialog.tsx
 - LandingPage.tsx
 - RetailCheckoutBlock.tsx
 - credit-card-form.tsx
+- RetailCheckoutBlock.tsx
+- emailApi.ts
+- walletApi.ts
+- CurrencyInput.tsx
+- ReferralsTab.tsx
+- DashboardPage.tsx
+- BillingPage.tsx
+- CorporatePanel.tsx
+- ShopFloorControls.tsx
+- dateRanges.ts
+- StaffDashboard
+- walletApi.ts
+- Inventário de pacotes — Frontend (agendai)
 
 ## God Nodes (most connected - your core abstractions)
-1. `getErrorMessage()` - 158 edges
-2. `useBarbershopFilters()` - 65 edges
-3. `apiClient()` - 62 edges
-4. `authStorage` - 48 edges
-5. `useAuth()` - 47 edges
+1. `getErrorMessage()` - 160 edges
+2. `useBarbershopFilters()` - 67 edges
+3. `apiClient()` - 67 edges
+4. `useAuth()` - 53 edges
+5. `authStorage` - 53 edges
 6. `SmartSelect()` - 36 edges
-7. `Service` - 36 edges
-8. `useBarbershop()` - 31 edges
-9. `StaffMember` - 29 edges
-10. `maskPhone()` - 28 edges
+7. `Service` - 35 edges
+8. `StaffMember` - 30 edges
+9. `useBarbershop()` - 29 edges
+10. `data()` - 28 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `AuthProvider()` --indirect_call--> `token()`  [INFERRED]
-  src/contexts/AuthContext.tsx → src/infra/usersApi.ts
 - `UsersTab()` --indirect_call--> `data()`  [INFERRED]
   src/pages/MasterAdmin/MasterAdminDashboard.tsx → src/infra/crmApi.ts
-- `LoginPage()` --indirect_call--> `token()`  [INFERRED]
-  src/pages/LoginPage.tsx → src/infra/subscriptionsApi.ts
+- `TaskDetailPage()` --indirect_call--> `data()`  [INFERRED]
+  src/pages/MasterAdmin/TaskDetailPage.tsx → src/infra/crmApi.ts
 - `ActivationChecklist()` --indirect_call--> `data()`  [INFERRED]
   src/components/domain/ActivationChecklist.tsx → src/infra/crmApi.ts
 - `AddCustomerFormProps` --references--> `Service`  [EXTRACTED]
   src/components/domain/AddCustomerForm.tsx → src/types.ts
+- `AppointmentScheduler()` --indirect_call--> `data()`  [INFERRED]
+  src/components/domain/AppointmentScheduler.tsx → src/infra/crmApi.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (127 total, 8 thin omitted)
+## Communities (139 total, 11 thin omitted)
 
 ### Community 0 - "StaffDashboard.tsx"
-Cohesion: 0.18
-Nodes (15): StaffNavigation(), StaffNavigationProps, visibleTabs(), ALL_TAB_IDS, canAccessTab(), canAccessTabByMode(), getDefaultTab(), getPrimaryTabForMode() (+7 more)
+Cohesion: 0.12
+Nodes (20): CashPanel(), CrmBackfillPanel(), ProductCatalogPanel(), ProductSalesPanel(), formatStockQty(), ProductStockPanel(), HubTab, ProductsHub() (+12 more)
 
 ### Community 1 - "LoginPage.tsx"
 Cohesion: 0.16
 Nodes (15): intentColor(), intentLabel(), statusColor(), statusLabel(), View, WhatsAppAIPanel(), AiConversation, AiIntentLog (+7 more)
 
 ### Community 2 - "OwnerFinancialPanel.tsx"
-Cohesion: 0.10
-Nodes (22): EMPTY_META, errorMessage(), OwnerFinancialPanel(), Tab, TABS, todayIso(), ShopWeatherDay, EnhancedForecastReport (+14 more)
+Cohesion: 0.11
+Nodes (22): EMPTY_META, Tab, TABS, FinanceSummaryCard(), FinanceSummaryCardProps, EXPENSE_RECURRENCE_LABELS, EXPENSE_TYPE_LABELS, FINANCE_PAYMENT_METHODS (+14 more)
 
 ### Community 3 - "schedulingUtils.ts"
-Cohesion: 0.11
-Nodes (21): OwnerReferralsPanel(), OwnerReferralsPanelProps, STATUS_LABEL, STATUS_STYLES, brl(), CANCEL_REASONS, OwnerSubscriptionPanel(), RETENTION_BENEFITS (+13 more)
+Cohesion: 0.16
+Nodes (13): OwnerReferralsPanelProps, STATUS_LABEL, STATUS_STYLES, ReferralTierBadge(), ReferralTierBadgeProps, TIER_CONFIG, ShareReferralButton(), ShareReferralButtonProps (+5 more)
 
 ### Community 4 - "devDependencies"
 Cohesion: 0.13
-Nodes (15): CrmBackfillPanel(), RunSummary(), statusLabel(), auth, run, CrmBackfillResult, CrmBackfillRun, CrmCampaign (+7 more)
+Nodes (12): RunSummary(), statusLabel(), auth, run, CrmBackfillResult, CrmBackfillRun, CrmCampaign, CrmClientMetric (+4 more)
 
 ### Community 5 - "CheckoutPage.tsx"
-Cohesion: 0.14
-Nodes (18): brl, clientPhoneLabel(), ClientProfileSheet(), PAYMENT_LABEL, ProfileTab, shortDate(), ClientEditFormData, ClientEditSchema (+10 more)
+Cohesion: 0.12
+Nodes (23): brl, clientPhoneLabel(), ClientProfileSheet(), PAYMENT_LABEL, ProfileTab, shortDate(), clientPhoneLabel(), ClientsManager() (+15 more)
 
 ### Community 6 - "BillingTab.tsx"
 Cohesion: 0.07
@@ -194,51 +206,51 @@ Nodes (28): BillingSection, BlockedSection(), brl, CANCEL_REASON_LABELS, EMPTY_M
 
 ### Community 7 - "dependencies"
 Cohesion: 0.12
-Nodes (21): AddCustomerFormProps, ClientCreateFormData, ClientCreateSchema, CustomerQueueFormData, CustomerQueueSchema, CustomerQueueStaffFormData, CustomerQueueStaffSchema, LoginFormData (+13 more)
+Nodes (22): AddCustomerFormProps, ServiceCard(), ClientEditFormData, ClientEditSchema, CustomerQueueFormData, CustomerQueueSchema, CustomerQueueStaffFormData, CustomerQueueStaffSchema (+14 more)
 
 ### Community 8 - "MasterAdminDashboard.tsx"
-Cohesion: 0.08
-Nodes (16): BillingTab(), AuditLogDrawerProps, BarbershopsTab(), COLOR_MAP, EditUserModalProps, KPICardProps, ManageBarbershopModal(), ManageBarbershopModalProps (+8 more)
+Cohesion: 0.11
+Nodes (17): AdminNotificationItem, AuditLog, BarbershopListItem, BlockedEntityItem, DashboardChartPoint, DashboardData, DashboardKPIs, DashboardPeriod (+9 more)
 
 ### Community 9 - "compilerOptions"
 Cohesion: 0.09
 Nodes (23): DOM, DOM.Iterable, ES2022, node, ./src/*, compilerOptions, allowImportingTsExtensions, allowJs (+15 more)
 
 ### Community 10 - "adminApi.ts"
-Cohesion: 0.09
-Nodes (20): adminApi, AdminNotificationItem, AuditLog, BarbershopListItem, BlockedEntityItem, DashboardChartPoint, DashboardData, DashboardKPIs (+12 more)
+Cohesion: 0.15
+Nodes (13): CYCLE_LABELS, INITIAL_PLAN_FORM, MEMBERSHIP_STATUS_LABELS, MEMBERSHIP_STATUS_STYLES, PlanFormData, Tab, ClientRecurringPackage, membershipsApi (+5 more)
 
 ### Community 11 - "App.tsx"
-Cohesion: 0.07
-Nodes (26): AboutPage, AccessBlockedPage, AiPredictivePage, CheckoutPage, ClientPortalPage, CommercialIntentPage, ContactPage, DashboardPage (+18 more)
+Cohesion: 0.05
+Nodes (38): AboutPage, AccessBlockedPage, AccountsPage, AdminLayout, AiPredictivePage, AuditPage, BillingPage, CheckoutPage (+30 more)
 
 ### Community 12 - "OwnerReferralsPanel.tsx"
-Cohesion: 0.15
-Nodes (20): ACCESS_BLOCKED_CODES, AccessBlockedCode, apiClient(), apiFetch(), ApiRequestOptions, buildApiError(), calls, checkRateLimit() (+12 more)
+Cohesion: 0.17
+Nodes (19): AccessBlockedCode, apiClient(), apiFetch(), ApiRequestOptions, buildApiError(), calls, checkRateLimit(), doRefreshAccessToken() (+11 more)
 
 ### Community 13 - "MarketingNav.tsx"
 Cohesion: 0.11
 Nodes (22): ClientPortalDashboard(), PortalTab, TABS, ClientPortalLogin(), ClientPortalLoginProps, asRecord(), ClientAppointment, ClientBenefit (+14 more)
 
 ### Community 14 - "paymentsApi.ts"
-Cohesion: 0.12
-Nodes (17): CatalogTab, catalogApi, ServiceAddon, ServiceCombo, ServiceVariation, ClientMembership, MembershipBenefit, MembershipCycle (+9 more)
+Cohesion: 0.25
+Nodes (7): INITIAL_FORM, STATUS_LABELS, STATUS_STYLES, WaitlistFormData, EmptyState(), EmptyStateProps, WaitlistEntry
 
 ### Community 15 - "MarketingFooter.tsx"
-Cohesion: 0.12
-Nodes (25): AddCustomerForm(), clientPhoneLabel(), ClientsManager(), ClientsManagerProps, QueueAlertSettings(), AppointmentPolicySection(), BusinessSegmentSection(), DEFAULT_APPOINTMENT_POLICY (+17 more)
+Cohesion: 0.08
+Nodes (15): AuditLogDrawerProps, BarbershopsTab(), COLOR_MAP, EditUserModalProps, KPICardProps, ManageBarbershopModal(), ManageBarbershopModalProps, METRIC_CHART_CONFIG (+7 more)
 
 ### Community 16 - "apiClient.ts"
 Cohesion: 0.07
 Nodes (38): deliveryDestination(), EMPTY_FILTERS, EMPTY_META, ERROR_LABELS, Filters, formatDateTime(), friendlyError(), NotificationDeliveriesPanel() (+30 more)
 
 ### Community 17 - "subscriptionsApi.ts"
-Cohesion: 0.25
-Nodes (20): CatalogManager(), DepositPolicyPanel(), FormsPanel(), GiftCardsPanel(), IntegrationsPanel(), PackageCatalog(), PostsManager(), ProductCatalogPanel() (+12 more)
+Cohesion: 0.06
+Nodes (29): adminInternalApi, Invitation, PaginatedResponse, Task, TaskComment, TaskHistory, TeamMember, Ticket (+21 more)
 
 ### Community 18 - "ContactPage.tsx"
-Cohesion: 0.16
-Nodes (18): DepositIndicators(), formatMetricValue(), GoalFormData, GoalMetric, GoalsPanel(), INITIAL_FORM, METRIC_LABELS, progressColor() (+10 more)
+Cohesion: 0.05
+Nodes (45): DepositIndicators(), DepositIndicatorsProps, STATUS_LABELS, STATUS_STYLES, formatMetricValue(), GoalFormData, GoalMetric, GoalsPanel() (+37 more)
 
 ### Community 19 - "server.js"
 Cohesion: 0.22
@@ -249,48 +261,48 @@ Cohesion: 0.15
 Nodes (5): IntersectionObserverMock, liveIntervals, nativeClearInterval, nativeSetInterval, ResizeObserverMock
 
 ### Community 21 - "SubscriptionContext.tsx"
-Cohesion: 0.12
-Nodes (18): Header(), HeaderProps, owner, subscription, Logo(), LogoProps, sizeMap, PasswordInput (+10 more)
+Cohesion: 0.52
+Nodes (5): ForgotPasswordPage(), inputClass(), getRecaptchaToken(), loadScript(), useRecaptchaBadge()
 
 ### Community 22 - "Diretrizes universais para IAs"
 Cohesion: 0.33
 Nodes (5): Arquitetura, Checklist de PR (orientação), Convenções de commits, Diretrizes para IAs — Frontend, Qualidade
 
 ### Community 23 - "AiPredictivePage.tsx"
-Cohesion: 0.16
-Nodes (13): CashPanel(), INITIAL_FORM, MOVEMENT_TYPE_LABELS, MovementFormData, MovementType, movementTypeOptions, PAYMENT_METHOD_ICONS, PAYMENT_METHOD_LABELS (+5 more)
+Cohesion: 0.13
+Nodes (14): INITIAL_FORM, MOVEMENT_TYPE_LABELS, MovementFormData, MovementType, movementTypeOptions, PAYMENT_METHOD_ICONS, PAYMENT_METHOD_LABELS, PaymentMethod (+6 more)
 
 ### Community 24 - "DashboardPage.tsx"
 Cohesion: 0.11
-Nodes (27): BarbershopContext, BarbershopContextValue, BarbershopProvider(), isShopStaffRole(), AddPostPayload, AddServicePayload, AppointmentPolicy, BarbershopData (+19 more)
+Nodes (19): QueueCapacityBanner(), AddPostPayload, AddServicePayload, AppointmentPolicy, BarbershopData, PostAiSuggestion, PostConfigPayload, QueueAlertSettings (+11 more)
 
 ### Community 25 - "FeaturesPage.tsx"
-Cohesion: 0.12
-Nodes (16): ShowcasePublicPage(), asNumber(), CreateShowcaseEntryInput, normalizeEntry(), normalizeList(), ShowcaseAnalytics, showcaseApi, ShowcaseEntry (+8 more)
+Cohesion: 0.20
+Nodes (12): ShopWeatherDay, categoryApi(), enhancedForecastApi, EnhancedForecastReport, ForecastFactor, getForecastReport(), normalizePredictions(), token() (+4 more)
 
 ### Community 26 - "CookieConsent.tsx"
-Cohesion: 0.14
-Nodes (15): AccountPrivacyPanel(), AccountPrivacyPanelProps, ROLE_LABEL, token(), ProfileAvatarSection(), ProfileAvatarSectionProps, AuthContext, AuthContextValue (+7 more)
+Cohesion: 0.06
+Nodes (34): AdminLayout(), NAV_ITEMS, installSteps, PwaInstallCard(), PwaInstallCardProps, ThemeToggle(), BarbershopFiltersProvider(), BeforeInstallPromptEvent (+26 more)
 
 ### Community 27 - "AboutPage.tsx"
-Cohesion: 0.12
-Nodes (19): AccessState, deriveAccessState(), deriveHasDashboard(), SubscriptionContext, SubscriptionContextValue, SubscriptionProvider(), Payment, CancelResponse (+11 more)
+Cohesion: 0.18
+Nodes (10): INITIAL_FORM, STATUS_COLORS, TYPE_LABELS, VOUCHER_TYPES, VoucherForm, VouchersPanel(), voucherTypeOptions, Voucher (+2 more)
 
 ### Community 28 - "Run and deploy your AI Studio app"
-Cohesion: 0.12
-Nodes (9): DepositIndicatorsProps, STATUS_LABELS, STATUS_STYLES, authStorage, SavedAccount, AppointmentDeposit, depositsApi, LoyaltyAccount (+1 more)
+Cohesion: 0.09
+Nodes (21): CATEGORY_LABELS, CONDITION_LABELS, CONDITION_STYLES, EquipmentFormData, HubTab, INITIAL_EQUIP_FORM, INITIAL_MOVEMENT_FORM, INITIAL_NEED_FORM (+13 more)
 
 ### Community 31 - "PublicHome.test.tsx"
-Cohesion: 0.16
-Nodes (12): cashApi, CashMovement, CashSummary, EnhancedForecast, enhancedForecastApi, ForecastFactor, getForecastReport(), normalizePredictions() (+4 more)
+Cohesion: 0.39
+Nodes (5): unwrap(), waitlistApi, WaitlistOffer, unwrapData(), unwrapList()
 
 ### Community 36 - "LandingPage.tsx"
 Cohesion: 0.18
 Nodes (10): 1. Posicionamento, 2. Estrutura recomendada da landing, 3. Vídeo: onde colocar, 4. Use real screenshots, 5. Separação de login e cadastro, 6. PWA mobile-first, 7. Guardrails de marketing, 8. KPIs (+2 more)
 
 ### Community 37 - "AppointmentBookingModal.tsx"
-Cohesion: 0.20
-Nodes (7): ListMeta, PaymentProvider, paymentsApi, PaymentStatus, PixQrCode, Refund, RefundListResponse
+Cohesion: 0.11
+Nodes (17): ClientsManagerProps, CrmMergePanel(), QueueItemCard(), item, service, ServiceCardProps, DynamicIcon(), DynamicIconProps (+9 more)
 
 ### Community 38 - "ClientsManager.tsx"
 Cohesion: 0.29
@@ -301,28 +313,28 @@ Cohesion: 0.14
 Nodes (15): StatusBadge(), StatusBadgeProps, Tone, TONES, classes, FiadoStatusBadge(), FiadoStatusBadgeProps, FiadoStatus (+7 more)
 
 ### Community 40 - "ErrorBoundary.tsx"
-Cohesion: 0.16
-Nodes (16): ReturnToQueueModal(), ReturnToQueueModalProps, sameSnapshot(), SchedulingContext, SchedulingContextValue, SchedulingProvider(), realtimeWsUrl(), JoinQueuePayload (+8 more)
+Cohesion: 0.07
+Nodes (30): EmailHistoryPanel(), EmailHistoryPanelProps, LogEntry, STATUS_META, CATEGORIES, CategoryDef, EmailPreferencesPanel(), EmailPreferencesPanelProps (+22 more)
 
 ### Community 41 - "eslint-config-prettier"
-Cohesion: 0.21
-Nodes (13): AgendaView, AppointmentCalendar(), getDaysInMonth(), getFirstDayOfMonth(), MONTH_NAMES, WEEKDAYS, DAY_NAMES, DEFAULT_SCHEDULE (+5 more)
+Cohesion: 0.19
+Nodes (16): AgendaView, AppointmentCalendar(), getDaysInMonth(), getFirstDayOfMonth(), MONTH_NAMES, WEEKDAYS, calendarDateKey(), DAY_NAMES (+8 more)
 
 ### Community 42 - "eslint-plugin-jsx-a11y"
-Cohesion: 0.24
-Nodes (9): brl(), FinancialDashboard(), isOwnerLike(), metric(), CommissionEntry, commissionsApi, CommissionSummary, BarbershopInsights (+1 more)
+Cohesion: 0.14
+Nodes (19): clearDraft(), downloadImage(), draftKey(), EditorTab, FORMAT_OPTIONS, LocalDraftPayload, MODE_OPTIONS, ObjectiveId (+11 more)
 
 ### Community 43 - "referralStorage.ts"
 Cohesion: 0.40
 Nodes (3): ReferralRefCapture(), referralStorage, Stored
 
 ### Community 44 - "jsdom"
-Cohesion: 0.12
-Nodes (16): CYCLE_LABELS, INITIAL_PLAN_FORM, MEMBERSHIP_STATUS_LABELS, MEMBERSHIP_STATUS_STYLES, PlanFormData, Tab, INITIAL_FORM, STATUS_LABELS (+8 more)
+Cohesion: 0.32
+Nodes (5): PRIORITY_CONFIG, RecommendationsPanel(), TYPE_CONFIG, Recommendation, recommendationsApi
 
 ### Community 45 - "playwright"
-Cohesion: 0.23
-Nodes (15): adsPurchaseLabel(), adsSignupLabel(), googleAdsId(), initGtag(), initMetaPixel(), loadScript(), measurementId(), MetaPixelFunction (+7 more)
+Cohesion: 0.20
+Nodes (19): AnalyticsListener(), PRIVATE_PREFIXES, adsPurchaseLabel(), adsSignupLabel(), googleAdsId(), initAnalytics(), initGtag(), initMetaPixel() (+11 more)
 
 ### Community 46 - "postcss"
 Cohesion: 0.40
@@ -333,44 +345,44 @@ Cohesion: 0.18
 Nodes (10): Auditoria backend ↔ frontend, Backend sem experiência completa no frontend, Baixa prioridade ou uso interno, Correções aplicadas, Escopo e método, Evolução recomendada, Ordem sugerida, Prioridade alta (+2 more)
 
 ### Community 48 - "tailwindcss"
-Cohesion: 0.28
-Nodes (6): CommonProps, normalize(), SelectOption, SmartSelect(), SmartSelectProps, options
+Cohesion: 0.16
+Nodes (10): CatalogTemplateModal(), Props, CatalogTemplatePreview, CatalogTemplatePreviewItem, InventoryReceiptItem, ListMeta, StockAlertItem, StockMovement (+2 more)
 
 ### Community 49 - "@tailwindcss/postcss"
-Cohesion: 0.14
-Nodes (14): ActivationChecklist(), Props, DESCRIPTIONS, DESTINATIONS, OnboardingChecklist(), OnboardingChecklistProps, Step, TITLES (+6 more)
+Cohesion: 0.22
+Nodes (8): ServiceForm(), ServiceManagerProps, Button, ButtonProps, ButtonSize, ButtonVariant, sizes, variants
 
 ### Community 50 - "@testing-library/jest-dom"
-Cohesion: 0.33
-Nodes (6): FinanceSummaryCard(), FinanceSummaryCardProps, EXPENSE_RECURRENCE_LABELS, EXPENSE_TYPE_LABELS, FINANCE_PAYMENT_METHODS, ExpenseType
+Cohesion: 0.21
+Nodes (10): brl(), getCurrentPeriod(), pct(), ProfitEnginePanel(), ProfitEnginePanelProps, profitApi, ProfitEntry, ProfitPeriodData (+2 more)
 
 ### Community 51 - "@testing-library/react"
-Cohesion: 0.17
-Nodes (19): pickPlanForCheckout(), formatPrice(), REJECTION_MESSAGES, rejectionMessage(), SubscriptionCheckout(), SubscriptionCheckoutProps, subscribe, LoginPage() (+11 more)
+Cohesion: 0.15
+Nodes (18): PublicLinkPanel(), PublicLinkPanelProps, qrUrl(), StaffNavigation(), StaffNavigationProps, visibleTabs(), ALL_TAB_IDS, canAccessTab() (+10 more)
 
 ### Community 53 - "@types/react"
-Cohesion: 0.17
-Nodes (11): brl, PackageCatalogProps, packagesApi, ClientPackage, PackagePaymentMethod, PostMedia, PostTemplate, SalonClientAppointment (+3 more)
+Cohesion: 0.15
+Nodes (13): ClosedSalonJoinModal(), ClosedSalonJoinModalProps, brl, packagesApi, ClientPackageStatus, DaySchedule, PackagePaymentMethod, PostMedia (+5 more)
 
 ### Community 54 - "PrivateRoute.tsx"
-Cohesion: 0.15
-Nodes (7): Claude, dependencies, devDependencies, Inventário de pacotes — Frontend (agendai), Gemini, AgendAI — Frontend, Rodar localmente
+Cohesion: 0.22
+Nodes (4): Claude, Gemini, AgendAI — Frontend, Rodar localmente
 
 ### Community 55 - "typescript"
-Cohesion: 0.33
-Nodes (4): Addon, Combo, ServiceBookingSelectorProps, Variation
+Cohesion: 0.14
+Nodes (18): busyCopy(), BusyLevel, busyStyles(), QueueStatusCard(), QueueStatusCardProps, sameSnapshot(), SchedulingContext, SchedulingContextValue (+10 more)
 
 ### Community 56 - "typescript-eslint"
-Cohesion: 0.16
-Nodes (18): DemandAlertBanner(), DemandAlertBannerProps, RISK_STYLES, dateLabel(), EnhancedForecastPanel(), getWeatherIcon(), RISK_STYLES, WeatherForecastWidget() (+10 more)
+Cohesion: 0.15
+Nodes (19): DemandAlertBanner(), DemandAlertBannerProps, RISK_STYLES, dateLabel(), EnhancedForecastPanel(), getWeatherIcon(), RISK_STYLES, WeatherForecastWidget() (+11 more)
 
 ### Community 57 - "@typescript-eslint/eslint-plugin"
-Cohesion: 0.20
-Nodes (23): AppointmentBookingModal(), fieldClass(), AppointmentScheduler(), firstOpenDate(), BookPackageSessionsModal(), PickedSlot, Avatar(), AvatarProps (+15 more)
+Cohesion: 0.29
+Nodes (17): AppointmentBookingModal(), fieldClass(), AppointmentScheduler(), firstOpenDate(), BookPackageSessionsModal(), BookPackageSessionsModalProps, PickedSlot, parseLocalISO() (+9 more)
 
 ### Community 58 - "@typescript-eslint/parser"
-Cohesion: 0.52
-Nodes (6): addDaysISO(), DefaultPeriod, getDefaultPeriod(), getPeriodRange(), todayISO(), toLocalIsoDate()
+Cohesion: 0.22
+Nodes (17): pickPlanForCheckout(), token(), formatPrice(), REJECTION_MESSAGES, rejectionMessage(), SubscriptionCheckout(), SubscriptionCheckoutProps, getPanelPathForRole() (+9 more)
 
 ### Community 59 - "vite"
 Cohesion: 0.21
@@ -381,24 +393,24 @@ Cohesion: 0.29
 Nodes (12): backend, backendRoutes(), checkContract(), frontendRequests(), literal(), methods, normalize(), parse() (+4 more)
 
 ### Community 61 - "vitest"
-Cohesion: 0.14
-Nodes (20): CategoryManager(), Props, category, Harness(), mocks, ServiceForm(), ServiceFormProps, ServiceManager() (+12 more)
+Cohesion: 0.21
+Nodes (11): CategoryManager(), Props, category, Harness(), mocks, useCategories(), CategoryInput, expenseCategoriesApi (+3 more)
 
 ### Community 62 - "@vitest/coverage-v8"
-Cohesion: 0.36
-Nodes (5): ShopFloorControls(), ShopFloorControlsProps, statusCopy(), supportsAppointments(), supportsQueue()
+Cohesion: 0.19
+Nodes (14): ClientCard(), ClientTableRow(), CrmIntelligencePanel(), FACTOR_LABELS, formatFactor(), IntelTab, Kpi(), money() (+6 more)
 
 ### Community 64 - "autoprefixer"
-Cohesion: 0.22
-Nodes (8): JsonLd, SeoHead(), SeoHeadProps, upsertJsonLd(), upsertLink(), upsertMeta(), sections, sections
+Cohesion: 0.18
+Nodes (11): JsonLd, SeoHead(), SeoHeadProps, upsertJsonLd(), upsertLink(), upsertMeta(), AboutPage(), beats (+3 more)
 
 ### Community 65 - "OwnerSubscriptionPanel.tsx"
 Cohesion: 0.20
 Nodes (11): ChartConfig, ChartContainer(), ChartContext, ChartContextProps, ChartTooltipContent(), getPayloadConfigFromPayload(), THEMES, useChart() (+3 more)
 
 ### Community 66 - "eslint-plugin-react-hooks"
-Cohesion: 0.25
-Nodes (8): 0. Regras essenciais (leia antes de editar), 1. O que é este app, 2. Como trabalhar, 3. Comandos frequentes, 4. Arquitetura (resumo), 5. Documentos legados, 6. Checklist rápido, AGENTS.md — AgendAI Frontend
+Cohesion: 0.22
+Nodes (9): 0. Regras essenciais (leia antes de editar), 1. O que é este app, 2. Como trabalhar, 3. Comandos frequentes, 4. Arquitetura (resumo), 5. Documentos legados, 6. Risco conhecido: Vitest `pool: 'threads'` trava após testes completarem, 7. Checklist rápido (+1 more)
 
 ### Community 67 - "QueueItemCard.tsx"
 Cohesion: 0.25
@@ -409,16 +421,16 @@ Cohesion: 0.29
 Nodes (7): Assinatura e acesso, Fila / agenda / híbrido, Notificações, Pacotes / fiado / produtos, Papéis, Pendências documentais, Regras de negócio (visão frontend)
 
 ### Community 69 - "postcss"
-Cohesion: 0.13
-Nodes (13): PricingPersuasionCharts(), PricingPersuasionChartsProps, softwareApplicationLd(), trialCampaign, AboutPage(), beats, beliefs, friendships (+5 more)
+Cohesion: 0.22
+Nodes (9): PricingPersuasionCharts(), PricingPersuasionChartsProps, trialCampaign, daySlots, flowSteps, pros, SchedulingPage(), matrix (+1 more)
 
 ### Community 70 - "@types/node"
 Cohesion: 0.33
 Nodes (5): Comandos (PowerShell / bash), Delegação a subagentes, Graphify — Frontend, Procedimento obrigatório, Regras
 
 ### Community 71 - "AboutPage.tsx"
-Cohesion: 0.21
-Nodes (10): brl(), getCurrentPeriod(), pct(), ProfitEnginePanel(), ProfitEnginePanelProps, profitApi, ProfitEntry, ProfitPeriodData (+2 more)
+Cohesion: 0.18
+Nodes (12): CatalogPurpose, Props, PURPOSE_META, SEGMENTS, formatDateOnlyBR(), isLowStock(), STOCK_UNIT_LABELS, STOCK_UNIT_OPTIONS (+4 more)
 
 ### Community 72 - "vite-plugin-pwa"
 Cohesion: 0.33
@@ -426,35 +438,31 @@ Nodes (5): Componentes UI compartilhados (reusar antes de criar), Contexts, Estr
 
 ### Community 73 - "PostsManager.tsx"
 Cohesion: 0.12
-Nodes (14): downloadPostImage(), MODE_LABEL, MODE_OPTIONS, PostTone, PostType, QUICK_PRESETS, TEMPLATE_COLORS, TEMPLATE_OPTIONS (+6 more)
+Nodes (18): clearLocalDraft(), downloadPostImage(), draftKey(), EditorStep, FORMAT_OPTIONS, formatDate(), MODE_OPTIONS, ObjectiveId (+10 more)
 
 ### Community 74 - "@testing-library/user-event"
 Cohesion: 0.14
 Nodes (14): CONDITIONS, DISCOUNT_TYPES, INITIAL_FORM, RULE_TYPE_LABELS, RULE_TYPES, RuleForm, STATUS_COLORS, PriceEvaluation (+6 more)
 
 ### Community 75 - "PwaInstallContext.tsx"
-Cohesion: 0.05
-Nodes (30): App(), ErrorBoundary, Props, State, actionClassName, SystemStateAction, SystemStatePage(), SystemStatePageProps (+22 more)
+Cohesion: 0.17
+Nodes (5): ErrorBoundary, Props, State, getLastCorrelationId(), logger
 
 ### Community 76 - "scripts"
-Cohesion: 0.47
-Nodes (5): busyCopy(), BusyLevel, busyStyles(), QueueStatusCard(), QueueStatusCardProps
+Cohesion: 0.10
+Nodes (11): authStorage, SavedAccount, LoyaltyAccount, loyaltyApi, LoyaltyLedgerEntry, LoyaltyProgram, PurchaseOrder, PurchaseOrderItem (+3 more)
 
 ### Community 77 - "CheckoutPage.tsx"
-Cohesion: 0.32
-Nodes (15): AppointmentBookingModalProps, AppointmentCalendarProps, AppointmentSchedulerProps, BookPackageSessionsModalProps, ClientProfileSheetProps, ClientsSection, ClientsTabProps, FinancialDashboardProps (+7 more)
+Cohesion: 0.14
+Nodes (20): AppointmentBookingModalProps, AppointmentCalendarProps, AppointmentSchedulerProps, ClientProfileSheetProps, FinancialDashboardProps, PackageCatalogProps, QueueItemCardProps, ReturnToQueueModal() (+12 more)
 
 ### Community 79 - "index.tsx"
-Cohesion: 0.40
-Nodes (4): ServiceCard(), ServiceCardProps, DynamicIcon(), DynamicIconProps
-
-### Community 80 - "ShopProfile.tsx"
-Cohesion: 0.21
-Nodes (12): brl, digitsOnly(), formatBrPhone(), shopInitials(), ShopProfile(), todaySchedule(), waLink(), useScheduling() (+4 more)
+Cohesion: 0.32
+Nodes (7): Avatar(), AvatarProps, AvatarSize, COLORS, getColorClass(), getInitials(), SIZE_MAP
 
 ### Community 81 - "MarketingNav.tsx"
-Cohesion: 0.21
-Nodes (9): contactApi, ContactPayload, ContactResult, ContactTopic, ContactFormData, ContactPage(), ContactSchema, fieldClass() (+1 more)
+Cohesion: 0.18
+Nodes (6): ACCESS_BLOCKED_CODES, ApiError, contactApi, ContactPayload, ContactResult, ContactTopic
 
 ### Community 82 - "credit-card-form.tsx"
 Cohesion: 0.40
@@ -465,52 +473,52 @@ Cohesion: 0.40
 Nodes (4): Arquitetura do frontend, Auditoria, Estrutura, Regras
 
 ### Community 85 - "AboutPage.tsx"
-Cohesion: 0.33
-Nodes (5): FiscalPanel(), fiscalApi, FiscalConfig, FiscalStats, NfeRecord
+Cohesion: 0.39
+Nodes (4): fiscalApi, FiscalConfig, FiscalStats, NfeRecord
 
-### Community 86 - "Inventário de pacotes — Frontend (agendai)"
-Cohesion: 0.33
-Nodes (3): walletApi, WalletBalance, WalletEntry
+### Community 86 - "errorMessage.ts"
+Cohesion: 0.14
+Nodes (12): destinations, OnboardingMissions(), Props, Step, titles, Appointment, isoDate(), PublicAppointmentManagePage() (+4 more)
 
 ### Community 91 - "CheckoutPage.tsx"
-Cohesion: 0.31
-Nodes (5): OrganizationsPanel(), Organization, organizationsApi, OrganizationFormData, OrganizationSchema
+Cohesion: 0.33
+Nodes (4): Organization, organizationsApi, OrganizationFormData, OrganizationSchema
 
 ### Community 92 - "AccessBlockedPage.tsx"
-Cohesion: 0.13
-Nodes (14): TrialExpiredPaywallModal(), TrialExpiredPaywallModalProps, ConsentCheckbox(), ConsentCheckboxProps, Plan, PlanBillingCycle, plansApi, BlockInfo (+6 more)
+Cohesion: 0.11
+Nodes (17): TrialExpiredPaywallModal(), TrialExpiredPaywallModalProps, ConsentCheckbox(), ConsentCheckboxProps, Plan, PlanBillingCycle, plansApi, BlockInfo (+9 more)
 
 ### Community 93 - "credit-card-form.tsx"
 Cohesion: 0.29
 Nodes (5): Contrato API e smoke de entrega, Smoke manual mínimo após deploy, Verificação offline, Inventário de scripts — Frontend (`agendai`), Observações
 
 ### Community 94 - "ForgotPasswordPage.tsx"
-Cohesion: 0.13
-Nodes (12): DEPOSIT_REQUIRED_OPTIONS, NO_SHOW_RULE_OPTIONS, REFUND_RULE_OPTIONS, INITIAL_CONFIG, LoyaltyConfig, LoyaltyPanel(), BarbershopFiltersContext, BarbershopFiltersValue (+4 more)
+Cohesion: 0.53
+Nodes (4): QueueAlertSettings(), normalizePhoneBR(), formatBrPhone(), maskedOrFallbackPhone()
 
-### Community 95 - "errorMessage"
-Cohesion: 0.14
-Nodes (15): BookingFormData, dateTimeLocalToIso(), endOfDayIso(), INITIAL_BOOKING_FORM, INITIAL_FORM, ResourceFormData, ResourcesPanel(), startOfDayIso() (+7 more)
+### Community 95 - "FinancialDashboard.tsx"
+Cohesion: 0.24
+Nodes (9): brl(), FinancialDashboard(), isOwnerLike(), metric(), CommissionEntry, commissionsApi, CommissionSummary, BarbershopInsights (+1 more)
 
 ### Community 96 - "FeaturesPage.tsx"
-Cohesion: 0.05
-Nodes (62): CatalogTemplateModal(), Props, CatalogPurpose, Props, PURPOSE_META, SEGMENTS, ProductFormModal(), Props (+54 more)
+Cohesion: 0.15
+Nodes (11): PostDesignOptions, PostFormat, PostListResponse, PostMedia, PostPaletteDef, postsApi, PostStatus, PostTemplateDef (+3 more)
 
 ### Community 97 - "Mapa de domínio — Frontend ↔ API"
-Cohesion: 0.12
-Nodes (24): CalendarSkeleton(), ClientsSkeleton(), TeamSkeleton(), DashboardSkeleton(), FinancialSkeleton(), ReportsSkeleton(), PublicPageSkeleton(), QueueSkeleton() (+16 more)
+Cohesion: 0.10
+Nodes (25): CalendarSkeleton(), ClientsSkeleton(), TeamSkeleton(), DashboardSkeleton(), FinanceResumoSkeleton(), FinancialSkeleton(), ReportsSkeleton(), PublicPageSkeleton() (+17 more)
 
 ### Community 98 - "ApiError"
-Cohesion: 0.33
-Nodes (5): comparison, DashboardPage(), hourHeat, staffRows, weekBars
+Cohesion: 0.10
+Nodes (24): brl(), CANCEL_REASONS, RETENTION_BENEFITS, STATUS_LABEL, AccessState, deriveAccessState(), deriveHasDashboard(), SubscriptionContext (+16 more)
 
-### Community 99 - "PublicAppointmentManagePage.tsx"
-Cohesion: 0.80
-Nodes (4): AnalyticsListener(), PRIVATE_PREFIXES, initAnalytics(), trackPageView()
+### Community 99 - "GoalsPanel.tsx"
+Cohesion: 0.20
+Nodes (7): ListMeta, PaymentProvider, paymentsApi, PaymentStatus, PixQrCode, Refund, RefundListResponse
 
-### Community 100 - "goalsApi.ts"
-Cohesion: 0.22
-Nodes (9): ClientsTab(), initialPeriod(), ProductsHub(), ProfileSettingsPanel(), PrivateRoute(), PrivateRouteProps, useAuth(), usePermissions() (+1 more)
+### Community 100 - "ProductReportsPanel.tsx"
+Cohesion: 0.20
+Nodes (10): FORMAT_ASPECT, FORMAT_MAX_HEIGHT, PostPreviewBox(), PostPreviewBoxProps, LocalDraft, CreatePostPayload, GeneratePostPayload, CreatePostPayload (+2 more)
 
 ### Community 101 - "goalsApi.ts"
 Cohesion: 0.17
@@ -518,11 +526,11 @@ Nodes (12): asNumber(), flattenGoal(), flattenList(), GoalMetric, GoalPeriod, Go
 
 ### Community 102 - "softwareApplicationLd"
 Cohesion: 0.29
-Nodes (9): COMMERCIAL_PAGES, CommercialFaq, commercialPageByPath(), CommercialPageContent, canonicalUrl(), getPublicSiteUrl(), breadcrumbLd(), faqPageLd() (+1 more)
+Nodes (10): COMMERCIAL_PAGES, CommercialFaq, commercialPageByPath(), CommercialPageContent, canonicalUrl(), getPublicSiteUrl(), breadcrumbLd(), faqPageLd() (+2 more)
 
 ### Community 103 - "commissionsApi.ts"
-Cohesion: 0.19
-Nodes (9): INITIAL_FORM, STATUS_COLORS, TYPE_LABELS, VOUCHER_TYPES, VoucherForm, voucherTypeOptions, Voucher, vouchersApi (+1 more)
+Cohesion: 0.53
+Nodes (5): BarbershopContext, BarbershopProvider(), isShopStaffRole(), mapScheduleFromApi(), mapStaffFromApi()
 
 ### Community 104 - "GiftCardsPanel.tsx"
 Cohesion: 0.24
@@ -536,69 +544,61 @@ Nodes (13): DAY_LABELS, DAYS, STATUS_COLORS, STATUS_LABELS, asNumber(), normaliz
 Cohesion: 0.29
 Nodes (6): FIELD_TYPE_LABELS, FIELD_TYPES, Form, FormField, FormResponse, formsApi
 
-### Community 107 - "CrmIntelligencePanel.tsx"
-Cohesion: 0.20
-Nodes (13): ClientCard(), ClientTableRow(), CrmIntelligencePanel(), FACTOR_LABELS, formatFactor(), Kpi(), money(), Props (+5 more)
+### Community 107 - "SubscriptionContext.tsx"
+Cohesion: 0.28
+Nodes (6): CommonProps, normalize(), SelectOption, SmartSelect(), SmartSelectProps, options
 
 ### Community 108 - "reputationApi.ts"
 Cohesion: 0.27
 Nodes (7): ReputationPanel(), responseTextOf(), sentimentIcon(), reputationApi, ReputationStats, Review, ReviewResponse
 
 ### Community 109 - "PasswordInput.tsx"
-Cohesion: 0.24
-Nodes (8): PasswordInputProps, STRENGTH_BAR, STRENGTH_BORDER, STRENGTH_TEXT, getPasswordStrength(), LABELS, PasswordStrengthLevel, PasswordStrengthResult
+Cohesion: 0.18
+Nodes (9): PasswordInput, PasswordInputProps, STRENGTH_BAR, STRENGTH_BORDER, STRENGTH_TEXT, getPasswordStrength(), LABELS, PasswordStrengthLevel (+1 more)
 
 ### Community 110 - "qualityApi.ts"
-Cohesion: 0.33
-Nodes (5): QualityPanel(), qualityApi, QualityAudit, QualityOverview, QualityProtocol
+Cohesion: 0.39
+Nodes (4): qualityApi, QualityAudit, QualityOverview, QualityProtocol
 
 ### Community 111 - "CopilotPanel.tsx"
-Cohesion: 0.31
-Nodes (5): CorporatePanel(), corporateApi, CorporatePlan, CorporateSubscription, CorporateValidation
-
-### Community 112 - "SeoHead.tsx"
-Cohesion: 0.14
-Nodes (6): companyLinks, exploreLinks, MarketingFooter(), platformLinks, socialLinks, AiPredictivePage()
+Cohesion: 0.12
+Nodes (31): CatalogManager(), CorporatePanel(), DEPOSIT_REQUIRED_OPTIONS, DepositPolicyPanel(), NO_SHOW_RULE_OPTIONS, REFUND_RULE_OPTIONS, EquipmentPanel(), FiscalPanel() (+23 more)
 
 ### Community 113 - "purchasingApi.ts"
-Cohesion: 0.32
-Nodes (4): PurchasingPanel(), PurchaseOrder, PurchaseOrderItem, purchasingApi
+Cohesion: 0.40
+Nodes (5): ContactFormData, ContactPage(), ContactSchema, fieldClass(), topics
 
 ### Community 114 - "index.ts"
-Cohesion: 0.14
-Nodes (14): TeamManager(), TeamManagerProps, Button, ButtonProps, ButtonSize, ButtonVariant, sizes, variants (+6 more)
+Cohesion: 0.12
+Nodes (7): companyLinks, exploreLinks, MarketingFooter(), platformLinks, socialLinks, AiPredictivePage(), sections
 
 ### Community 115 - "barbershopApi"
-Cohesion: 0.15
-Nodes (10): destinations, OnboardingMissions(), Props, Step, titles, ApiError, formatApiFieldErrors(), friendlyTechnicalMessage() (+2 more)
+Cohesion: 0.14
+Nodes (17): AccountPrivacyPanel(), AccountPrivacyPanelProps, ROLE_LABEL, token(), ProfileAvatarSectionProps, AuthContext, AuthContextValue, AuthProvider() (+9 more)
 
 ### Community 116 - "data"
 Cohesion: 0.36
 Nodes (4): CopilotPanel(), priorityLabel(), copilotApi, CopilotSuggestion
 
-### Community 117 - "ProductCatalogPanel.tsx"
-Cohesion: 0.50
-Nodes (4): schedulingApi, Appointment, isoDate(), PublicAppointmentManagePage()
-
-### Community 118 - "PlansPage.tsx"
-Cohesion: 0.26
-Nodes (9): pageLinks, sectionLinks, matrix, objections, PlansPage(), hasPanelAccess(), isPaidSubscription(), needsPaywallAfterAuth() (+1 more)
+### Community 117 - "ForgotPasswordPage.tsx"
+Cohesion: 0.28
+Nodes (7): ServiceFormProps, ICON_OPTIONS, Field(), FieldProps, Category, ServiceFormData, ServiceSchema
 
 ### Community 119 - "productsApi.ts"
-Cohesion: 0.50
-Nodes (3): Domínios, Mapa de domínio — Frontend ↔ API, Variáveis de ambiente (frontend) — nomes e finalidade
+Cohesion: 0.14
+Nodes (14): actionClassName, SystemStateAction, SystemStatePage(), SystemStatePageProps, pageLinks, sectionLinks, Logo(), LogoProps (+6 more)
 
 ### Community 120 - "CrmMergePanel.tsx"
-Cohesion: 0.16
-Nodes (13): CrmMergePanel(), QueueItemCard(), item, service, METHODS, Props, RetailCheckoutBlock(), clientsApi (+5 more)
+Cohesion: 0.14
+Nodes (18): MOVEMENT_LABEL, PAYMENT_LABEL, PRODUCT_PURPOSE_LABEL, PRODUCT_PURPOSE_SHORT, productMoney, SALE_STATUS_LABEL, Props, Props (+10 more)
 
-### Community 121 - "ProductStockPanel.tsx"
-Cohesion: 0.67
-Nodes (3): ClosedSalonJoinModal(), ClosedSalonJoinModalProps, DaySchedule
+### Community 121 - "AiPredictivePage.tsx"
+Cohesion: 0.27
+Nodes (9): AttentionKey, BANDS, initialPeriod(), ProductReportsPanel(), Props, purposeLabel(), ProductAttentionItem, ProductReports (+1 more)
 
 ### Community 122 - "ConfirmDialog.tsx"
-Cohesion: 0.28
-Nodes (6): PRIORITY_CONFIG, TYPE_CONFIG, ConfirmDialog(), ConfirmDialogProps, Recommendation, recommendationsApi
+Cohesion: 0.20
+Nodes (9): Props, ConfirmDialog(), ConfirmDialogProps, InventoryReceipt, Supplier, StockAdjustmentFormData, StockAdjustmentSchema, StockReceiptFormData (+1 more)
 
 ### Community 123 - "LandingPage.tsx"
 Cohesion: 0.22
@@ -608,25 +608,73 @@ Nodes (9): MarketingNav(), scrollToSection(), LandingPage(), marqueeItems, planF
 Cohesion: 0.38
 Nodes (6): CardState, CardValidity, clampDigits(), CreditCardForm(), formatNumberSpaces(), Props
 
+### Community 129 - "RetailCheckoutBlock.tsx"
+Cohesion: 0.50
+Nodes (3): Domínios, Mapa de domínio — Frontend ↔ API, Variáveis de ambiente (frontend) — nomes e finalidade
+
+### Community 131 - "emailApi.ts"
+Cohesion: 0.39
+Nodes (5): CatalogTab, catalogApi, ServiceAddon, ServiceCombo, ServiceVariation
+
+### Community 132 - "walletApi.ts"
+Cohesion: 0.33
+Nodes (4): Addon, Combo, ServiceBookingSelectorProps, Variation
+
+### Community 133 - "CurrencyInput.tsx"
+Cohesion: 0.22
+Nodes (12): ProductFormModal(), Props, TITLE_CASE_EXCEPTIONS, toTitleCase(), CurrencyInput(), CurrencyInputProps, formatDisplay(), parseRawDigits() (+4 more)
+
+### Community 134 - "ReferralsTab.tsx"
+Cohesion: 0.40
+Nodes (3): adminApi, ReferralPlatformStats, ReferralsTab()
+
+### Community 135 - "DashboardPage.tsx"
+Cohesion: 0.33
+Nodes (5): comparison, DashboardPage(), hourHeat, staffRows, weekBars
+
+### Community 137 - "CorporatePanel.tsx"
+Cohesion: 0.36
+Nodes (4): corporateApi, CorporatePlan, CorporateSubscription, CorporateValidation
+
+### Community 138 - "ShopFloorControls.tsx"
+Cohesion: 0.10
+Nodes (22): ActivationChecklist(), Props, DESCRIPTIONS, DESTINATIONS, OnboardingChecklist(), OnboardingChecklistProps, Step, TITLES (+14 more)
+
+### Community 139 - "dateRanges.ts"
+Cohesion: 0.52
+Nodes (6): addDaysISO(), DefaultPeriod, getDefaultPeriod(), getPeriodRange(), todayISO(), toLocalIsoDate()
+
+### Community 140 - "StaffDashboard"
+Cohesion: 0.19
+Nodes (13): AddCustomerForm(), brl, digitsOnly(), formatBrPhone(), shopInitials(), ShopProfile(), todaySchedule(), waLink() (+5 more)
+
+### Community 141 - "walletApi.ts"
+Cohesion: 0.33
+Nodes (3): walletApi, WalletBalance, WalletEntry
+
+### Community 145 - "Inventário de pacotes — Frontend (agendai)"
+Cohesion: 0.50
+Nodes (3): dependencies, devDependencies, Inventário de pacotes — Frontend (agendai)
+
 ## Knowledge Gaps
-- **557 isolated node(s):** `root`, `findings`, `root`, `backend`, `methods` (+552 more)
+- **642 isolated node(s):** `root`, `findings`, `root`, `backend`, `methods` (+637 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **8 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `getErrorMessage()` connect `subscriptionsApi.ts` to `StaffDashboard.tsx`, `LoginPage.tsx`, `OwnerFinancialPanel.tsx`, `schedulingUtils.ts`, `devDependencies`, `CheckoutPage.tsx`, `BillingTab.tsx`, `dependencies`, `MasterAdminDashboard.tsx`, `adminApi.ts`, `MarketingNav.tsx`, `paymentsApi.ts`, `MarketingFooter.tsx`, `apiClient.ts`, `ContactPage.tsx`, `AiPredictivePage.tsx`, `FeaturesPage.tsx`, `CookieConsent.tsx`, `jsdom`, `@tailwindcss/postcss`, `@testing-library/react`, `@types/react`, `typescript-eslint`, `@typescript-eslint/eslint-plugin`, `vite`, `vitest`, `@vitest/coverage-v8`, `PostsManager.tsx`, `@testing-library/user-event`, `ShopProfile.tsx`, `MarketingNav.tsx`, `AboutPage.tsx`, `CheckoutPage.tsx`, `ForgotPasswordPage.tsx`, `errorMessage`, `FeaturesPage.tsx`, `goalsApi.ts`, `commissionsApi.ts`, `GiftCardsPanel.tsx`, `enhancedForecastApi.ts`, `README.md`, `CrmIntelligencePanel.tsx`, `reputationApi.ts`, `qualityApi.ts`, `CopilotPanel.tsx`, `purchasingApi.ts`, `index.ts`, `barbershopApi`, `data`, `ProductCatalogPanel.tsx`, `PlansPage.tsx`, `CrmMergePanel.tsx`, `ConfirmDialog.tsx`?**
-  _High betweenness centrality (0.132) - this node is a cross-community bridge._
-- **Why does `useAuth()` connect `goalsApi.ts` to `StaffDashboard.tsx`, `devDependencies`, `MasterAdminDashboard.tsx`, `subscriptionsApi.ts`, `SubscriptionContext.tsx`, `AiPredictivePage.tsx`, `DashboardPage.tsx`, `CookieConsent.tsx`, `AboutPage.tsx`, `ErrorBoundary.tsx`, `jsdom`, `@tailwindcss/postcss`, `@testing-library/react`, `vitest`, `PwaInstallContext.tsx`, `CheckoutPage.tsx`, `ShopProfile.tsx`, `AccessBlockedPage.tsx`, `FeaturesPage.tsx`, `index.ts`, `PlansPage.tsx`, `LandingPage.tsx`?**
-  _High betweenness centrality (0.034) - this node is a cross-community bridge._
+- **Why does `getErrorMessage()` connect `CopilotPanel.tsx` to `StaffDashboard.tsx`, `LoginPage.tsx`, `OwnerFinancialPanel.tsx`, `emailApi.ts`, `devDependencies`, `CheckoutPage.tsx`, `schedulingUtils.ts`, `dependencies`, `CurrencyInput.tsx`, `CorporatePanel.tsx`, `ShopFloorControls.tsx`, `adminApi.ts`, `StaffDashboard`, `MarketingNav.tsx`, `paymentsApi.ts`, `BillingTab.tsx`, `apiClient.ts`, `MarketingFooter.tsx`, `ContactPage.tsx`, `AiPredictivePage.tsx`, `AboutPage.tsx`, `Run and deploy your AI Studio app`, `ReferralsTab.tsx`, `AppointmentBookingModal.tsx`, `ErrorBoundary.tsx`, `eslint-plugin-jsx-a11y`, `jsdom`, `tailwindcss`, `@testing-library/react`, `@types/react`, `typescript-eslint`, `@typescript-eslint/eslint-plugin`, `@typescript-eslint/parser`, `vite`, `vitest`, `@vitest/coverage-v8`, `postcss`, `AboutPage.tsx`, `PostsManager.tsx`, `@testing-library/user-event`, `MarketingNav.tsx`, `AboutPage.tsx`, `errorMessage.ts`, `CheckoutPage.tsx`, `ForgotPasswordPage.tsx`, `ApiError`, `GiftCardsPanel.tsx`, `enhancedForecastApi.ts`, `README.md`, `reputationApi.ts`, `qualityApi.ts`, `purchasingApi.ts`, `barbershopApi`, `data`, `CrmMergePanel.tsx`, `AiPredictivePage.tsx`, `ConfirmDialog.tsx`?**
+  _High betweenness centrality (0.141) - this node is a cross-community bridge._
+- **Why does `authStorage` connect `scripts` to `LoginPage.tsx`, `OwnerFinancialPanel.tsx`, `emailApi.ts`, `devDependencies`, `schedulingUtils.ts`, `MasterAdminDashboard.tsx`, `CorporatePanel.tsx`, `adminApi.ts`, `OwnerReferralsPanel.tsx`, `apiClient.ts`, `subscriptionsApi.ts`, `ContactPage.tsx`, `AiPredictivePage.tsx`, `DashboardPage.tsx`, `FeaturesPage.tsx`, `AboutPage.tsx`, `Run and deploy your AI Studio app`, `PublicHome.test.tsx`, `AppointmentBookingModal.tsx`, `ErrorBoundary.tsx`, `jsdom`, `tailwindcss`, `@testing-library/jest-dom`, `@types/react`, `typescript`, `vite`, `vitest`, `@testing-library/user-event`, `AboutPage.tsx`, `CheckoutPage.tsx`, `AccessBlockedPage.tsx`, `FinancialDashboard.tsx`, `FeaturesPage.tsx`, `ApiError`, `GoalsPanel.tsx`, `goalsApi.ts`, `GiftCardsPanel.tsx`, `enhancedForecastApi.ts`, `README.md`, `reputationApi.ts`, `qualityApi.ts`, `barbershopApi`, `data`?**
+  _High betweenness centrality (0.042) - this node is a cross-community bridge._
+- **Why does `useAuth()` connect `StaffDashboard.tsx` to `devDependencies`, `CheckoutPage.tsx`, `ShopFloorControls.tsx`, `StaffDashboard`, `MarketingFooter.tsx`, `subscriptionsApi.ts`, `ContactPage.tsx`, `AiPredictivePage.tsx`, `CookieConsent.tsx`, `@testing-library/react`, `typescript`, `@typescript-eslint/parser`, `vitest`, `postcss`, `AboutPage.tsx`, `PostsManager.tsx`, `ShopProfile.tsx`, `AccessBlockedPage.tsx`, `ApiError`, `commissionsApi.ts`, `barbershopApi`, `productsApi.ts`, `CrmMergePanel.tsx`, `LandingPage.tsx`?**
+  _High betweenness centrality (0.040) - this node is a cross-community bridge._
 - **What connects `root`, `findings`, `root` to the rest of the system?**
-  _557 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _642 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `StaffDashboard.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.11594202898550725 - nodes in this community are weakly interconnected._
 - **Should `OwnerFinancialPanel.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.09971509971509972 - nodes in this community are weakly interconnected._
-- **Should `schedulingUtils.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.10826210826210826 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.10574712643678161 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**
-  _Cohesion score 0.13157894736842105 - nodes in this community are weakly interconnected._
-- **Should `CheckoutPage.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.14285714285714285 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.13450292397660818 - nodes in this community are weakly interconnected._

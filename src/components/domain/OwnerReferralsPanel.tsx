@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import {
-  AlertCircle,
-  Check,
-  Gift,
-  Loader2,
-  Ticket,
-  Users,
-  TrendingUp,
-  XCircle,
-} from 'lucide-react';
+  LuCircleAlert as AlertCircle,
+  LuCheck as Check,
+  LuGift as Gift,
+  LuLoaderCircle as Loader2,
+  LuTicket as Ticket,
+  LuUsers as Users,
+  LuTrendingUp as TrendingUp,
+  LuCircleX as XCircle,
+} from 'react-icons/lu';
 import { referralsApi, ReferralDashboard } from '../../infra/referralsApi';
 import { ReferralTierBadge } from './ReferralTierBadge';
 import { ShareReferralButton } from './ShareReferralButton';

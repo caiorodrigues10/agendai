@@ -1,5 +1,9 @@
 import React, { useEffect } from 'react';
-import { CheckCircle, AlertCircle, Bot } from 'lucide-react';
+import {
+  LuCircleCheck as CheckCircle,
+  LuCircleAlert as AlertCircle,
+  LuBot as Bot,
+} from 'react-icons/lu';
 
 interface ToastProps {
   message: string;

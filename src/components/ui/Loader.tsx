@@ -1,5 +1,5 @@
 import React from 'react';
-import { Loader2 } from 'lucide-react';
+import { LuLoaderCircle as Loader2 } from 'react-icons/lu';
 
 export const Loader: React.FC = () => (
   <div className="flex items-center justify-center h-screen w-full fixed inset-0 bg-background">

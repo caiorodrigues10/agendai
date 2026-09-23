@@ -6,14 +6,14 @@ import { ServiceCard } from './ServiceCard';
 import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
 import {
-  X,
-  Loader2,
-  UserCheck,
-  AlertCircle,
-  Sparkles,
-  MessageCircle,
-  Scissors,
-} from 'lucide-react';
+  LuX as X,
+  LuLoaderCircle as Loader2,
+  LuUserCheck as UserCheck,
+  LuCircleAlert as AlertCircle,
+  LuSparkles as Sparkles,
+  LuMessageCircle as MessageCircle,
+  LuScissors as Scissors,
+} from 'react-icons/lu';
 import {
   CustomerQueueSchema,
   CustomerQueueStaffSchema,

@@ -26,11 +26,22 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+const isTemporaryAuthError = (err: unknown) =>
+  err instanceof ApiError &&
+  (err.statusCode === 0 ||
+    err.code === 'NETWORK_ERROR' ||
+    err.statusCode === 429 ||
+    err.statusCode >= 500);
+
+const normalizeRole = (role: unknown): StaffMember['role'] => {
+  const normalized = typeof role === 'string' ? role.toUpperCase() : role;
+  return (normalized === 'ADMIN' ? 'MASTER_ADMIN' : normalized) as StaffMember['role'];
+};
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  /** Normaliza o role pra uppercase — o backend retorna "owner", "employee" etc. */
   const normalizeUser = (u: unknown): StaffMember => {
     const raw = u as StaffMember;
-    return { ...raw, role: (raw.role?.toUpperCase?.() ?? raw.role) as StaffMember['role'] };
+    return { ...raw, role: normalizeRole(raw.role) };
   };
 
   const [user, setUser] = useState<StaffMember | null>(() => {
@@ -60,13 +71,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           // Erros de rede / rate limit / backend indisponível: mantém sessão
           // local em vez de forçar logout — evita expulsar o usuário por
           // instabilidade temporária.
-          if (
-            err instanceof ApiError &&
-            (err.statusCode === 0 ||
-              err.code === 'NETWORK_ERROR' ||
-              err.statusCode === 429 ||
-              err.statusCode >= 500)
-          ) {
+          if (isTemporaryAuthError(err)) {
             if (cachedUser) {
               setUser(normalizeUser(cachedUser));
               success = true;
@@ -78,7 +83,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (!success) {
         const refreshToken = authStorage.getRefreshToken();
-        if (refreshToken || cachedUser) {
+        if (refreshToken || cachedUser || authStorage.getRememberMe()) {
           try {
             const refreshed = await refreshAccessToken();
             if (!isCurrent()) return;
@@ -87,12 +92,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           } catch (err) {
             if (!isCurrent()) return;
             if (
-              err instanceof ApiError &&
-              (err.statusCode === 0 ||
-                err.code === 'NETWORK_ERROR' ||
-                err.statusCode === 429 ||
-                err.statusCode >= 500) &&
-              cachedUser
+              isTemporaryAuthError(err) && cachedUser
             ) {
               // Rede indisponível: mantém sessão local; o próximo request
               // tentará refresh novamente.
@@ -172,7 +172,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       persistSession(resp, true);
       return { ok: true };
     } catch (err) {
-      authStorage.removeSavedAccount(userId);
+      if (!isTemporaryAuthError(err)) {
+        authStorage.removeSavedAccount(userId);
+      }
       return { ok: false, message: getErrorMessage(err, 'Sessão expirada. Faça login novamente.') };
     }
   };

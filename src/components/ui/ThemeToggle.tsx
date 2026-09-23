@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sun, Moon } from 'lucide-react';
+import { LuSun as Sun, LuMoon as Moon } from 'react-icons/lu';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export const ThemeToggle: React.FC<{ className?: string }> = ({ className = '' }) => {

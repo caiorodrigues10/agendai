@@ -1,4 +1,4 @@
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { LuCircleAlert as AlertCircle, LuRefreshCw as RefreshCw } from 'react-icons/lu';
 
 interface SectionErrorProps {
   message: string;

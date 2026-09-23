@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2, RefreshCw, WifiOff, X } from 'lucide-react';
+import {
+  LuCircleCheck as CheckCircle2,
+  LuRefreshCw as RefreshCw,
+  LuWifiOff as WifiOff,
+  LuX as X,
+} from 'react-icons/lu';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 
 export const PwaUpdatePrompt: React.FC = () => {

@@ -11,27 +11,27 @@ import { PasswordInput } from '../components/ui/PasswordInput';
 import { Toast } from '../components/ui/Toast';
 import { ConsentCheckbox } from '../components/ui/ConsentCheckbox';
 import {
-  ArrowRight,
-  ArrowLeft,
-  AlertCircle,
-  Mail,
-  Loader2,
-  User,
-  Store,
-  Smartphone,
-  CreditCard,
-  Building2,
-  MapPin,
-  CalendarCheck,
-  Users,
-  TrendingUp,
-  ShieldCheck,
-  Sparkles,
-  Check,
-  X,
-  Hash,
-  LucideIcon,
-} from 'lucide-react';
+  LuArrowRight as ArrowRight,
+  LuArrowLeft as ArrowLeft,
+  LuCircleAlert as AlertCircle,
+  LuMail as Mail,
+  LuLoaderCircle as Loader2,
+  LuUser as User,
+  LuStore as Store,
+  LuSmartphone as Smartphone,
+  LuCreditCard as CreditCard,
+  LuBuilding2 as Building2,
+  LuMapPin as MapPin,
+  LuCalendarCheck as CalendarCheck,
+  LuUsers as Users,
+  LuTrendingUp as TrendingUp,
+  LuShieldCheck as ShieldCheck,
+  LuSparkles as Sparkles,
+  LuCheck as Check,
+  LuX as X,
+  LuHash as Hash,
+} from 'react-icons/lu';
+import type { IconType } from 'react-icons';
 import { Avatar } from '../components/ui/Avatar';
 import {
   normalizeDocument,
@@ -49,6 +49,7 @@ import { plansApi, Plan } from '../infra/plansApi';
 import { subscriptionsApi } from '../infra/subscriptionsApi';
 import { needsPaywallAfterAuth } from '../utils/subscriptionPaywall';
 import { TrialExpiredPaywallModal } from '../components/domain/TrialExpiredPaywallModal';
+import type { StaffMember } from '../types';
 
 type Tab = 'login' | 'register';
 type RegisterStep = 1 | 2;
@@ -69,7 +70,7 @@ const inputClass = (hasError: boolean) =>
 
 interface FieldProps {
   label: string;
-  icon: LucideIcon;
+  icon: IconType;
   error?: string;
   optional?: boolean;
   children: React.ReactNode;
@@ -107,6 +108,13 @@ const QUEUE_MOCK = [
   { name: 'Rafael S.', service: 'Corte + Barba', status: '~12 min' },
   { name: 'Júlia A.', service: 'Escova', status: '~25 min' },
 ] as const;
+
+const getPanelPathForRole = (role?: StaffMember['role'] | string | null) => {
+  const normalizedRole = role?.toUpperCase();
+  return normalizedRole === 'MASTER_ADMIN' || normalizedRole === 'ADMIN'
+    ? '/master/work'
+    : '/app/queue';
+};
 
 const BrandPanel: React.FC = () => (
   <div className="relative hidden lg:flex flex-col overflow-hidden bg-bg text-white">
@@ -241,7 +249,7 @@ const BrandPanel: React.FC = () => (
 export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, login, loginWithGoogle, loginWithSavedAccount, forgetSavedAccount, register: registerUser, registerWithGoogle } = useAuth();
+  const { user, loading, login, loginWithGoogle, loginWithSavedAccount, forgetSavedAccount, register: registerUser, registerWithGoogle } = useAuth();
   const [tab, setTab] = useState<Tab>(mode);
   const [registerStep, setRegisterStep] = useState<RegisterStep>(1);
   const [showPassword, setShowPassword] = useState(false);
@@ -269,7 +277,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   const [savedAccounts, setSavedAccounts] = useState(authStorage.getSavedAccounts);
   const [showManualLoginForm, setShowManualLoginForm] = useState(false);
   const [switchingAccountId, setSwitchingAccountId] = useState<string | null>(null);
-  const hadSessionOnMount = useRef(Boolean(authStorage.getUser()));
   useRecaptchaBadge();
 
   const showErrorToast = (message: string) => {
@@ -292,9 +299,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     setSubmitting(false);
     if (!result.ok && 'message' in result) {
       setGoogleError(result.message);
-      return;
     }
-    await navigateAfterAuth();
   };
 
   useEffect(() => {
@@ -483,26 +488,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       navigate('/');
       return;
     }
-    const role = user.role.toUpperCase();
-    if (role === 'MASTER_ADMIN' || role === 'ADMIN') {
-      navigate('/master/dashboard');
-      return;
-    }
-    navigate('/app/queue');
+    navigate(getPanelPathForRole(user.role));
   };
 
-  const navigateAfterAuth = async () => {
+  const navigateAfterAuth = useCallback(async (authUser: StaffMember | null = user) => {
     const planId = searchParams.get('planId');
     if (planId) {
       const billing = searchParams.get('billing') === 'YEARLY' ? 'YEARLY' : 'MONTHLY';
-      navigate(`/checkout?planId=${encodeURIComponent(planId)}&billing=${billing}`);
+      navigate(`/checkout?planId=${encodeURIComponent(planId)}&billing=${billing}`, { replace: true });
       return;
     }
-    const loggedUser = authStorage.getUser();
-    if (loggedUser) {
-      const role = loggedUser.role.toUpperCase();
-      if (role === 'MASTER_ADMIN' || role === 'ADMIN') {
-        navigate('/master/dashboard');
+    if (authUser) {
+      const panelPath = getPanelPathForRole(authUser.role);
+      if (panelPath === '/master/work') {
+        navigate(panelPath, { replace: true });
         return;
       }
     }
@@ -525,15 +524,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     } catch {
       // GET /subscriptions/me falhou: entra no painel; 402 global manda a /bloqueado
     }
-    navigate('/app/queue');
-  };
+    navigate(getPanelPathForRole(authUser?.role), { replace: true });
+  }, [navigate, searchParams, user]);
 
   useEffect(() => {
-    if (!hadSessionOnMount.current || !user || paywallOpen) return;
-    void navigateAfterAuth();
-    // Só na sessão já existente ao abrir /login — login/cadastro chamam navigateAfterAuth sozinhos.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+    if (loading || !user || paywallOpen) return;
+    void navigateAfterAuth(user);
+  }, [loading, navigateAfterAuth, paywallOpen, user]);
 
   const handleLogin = async (data: LoginFormData) => {
     setSubmitting(true);
@@ -542,9 +539,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     setSubmitting(false);
     if (result.ok === false) {
       showErrorToast(result.message);
-      return;
     }
-    await navigateAfterAuth();
   };
 
   const showRegisterValidationError = () => {
@@ -664,7 +659,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       return;
     }
     referralStorage.clear();
-    await navigateAfterAuth();
   };
 
   const registerPassword = registerForm.watch('password') ?? '';
@@ -821,7 +815,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
             )}
 
             <AnimatePresence mode="wait" initial={false}>
-              {tab === 'login' && !showManualLoginForm && savedAccounts.length > 0 && !authStorage.hasStoredSession() ? (
+              {tab === 'login' && !loading && !showManualLoginForm && savedAccounts.length > 0 && !authStorage.hasStoredSession() ? (
                 <motion.div
                   key="account-switcher"
                   initial={{ opacity: 0, x: -16 }}
@@ -850,9 +844,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                             setSwitchingAccountId(account.id);
                             const result = await loginWithSavedAccount(account.id);
                             setSwitchingAccountId(null);
-                            if (result.ok) {
-                              await navigateAfterAuth();
-                            } else {
+                            if (!result.ok) {
                               showErrorToast(result.message);
                               setSavedAccounts(authStorage.getSavedAccounts());
                             }

@@ -1,5 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { AlertCircle, BarChart3, CloudSun, Droplets, Info, Loader2, TrendingUp } from 'lucide-react';
+import {
+  LuCircleAlert as AlertCircle,
+  LuChartColumn as BarChart3,
+  LuCloudSun as CloudSun,
+  LuDroplets as Droplets,
+  LuInfo as Info,
+  LuLoaderCircle as Loader2,
+  LuTrendingUp as TrendingUp,
+} from 'react-icons/lu';
 import { enhancedForecastApi, EnhancedForecast } from '../../infra/enhancedForecastApi';
 import type { ShopWeatherDay } from '../../infra/barbershopApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';

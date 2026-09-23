@@ -1,7 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Calendar, CalendarCheck, CheckCircle2, Repeat, UserCheck } from 'lucide-react';
+import {
+  LuArrowRight as ArrowRight,
+  LuCalendar as Calendar,
+  LuCalendarCheck as CalendarCheck,
+  LuCircleCheck as CheckCircle2,
+  LuRepeat as Repeat,
+  LuUserCheck as UserCheck,
+} from 'react-icons/lu';
 import { MarketingNav } from '../../components/marketing/MarketingNav';
 import { MarketingFooter } from '../../components/marketing/MarketingFooter';
 import { SeoHead } from '../../components/marketing/SeoHead';
@@ -91,7 +98,7 @@ export const SchedulingPage: React.FC = () => {
               transition={{ duration: 0.5 }}
               className="inline-flex items-center gap-2.5 rounded-full border border-accent/25 bg-accent/8 px-5 py-2.5 text-sm font-black uppercase tracking-[0.16em] text-accent-light md:text-base"
             >
-              <CalendarCheck className="h-4 w-4 md:h-5 md:w-5" />
+              <CalendarCheck size={24} className="h-4 w-4 md:h-5 md:w-5" />
               Agendamento
             </motion.div>
 
@@ -127,7 +134,7 @@ export const SchedulingPage: React.FC = () => {
                 className="group inline-flex items-center justify-center gap-3 rounded-full bg-white px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-accent-light"
               >
                 {trialCampaign.cta}
-                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                <ArrowRight size={24} className="h-5 w-5 transition-transform group-hover:translate-x-1" />
               </button>
               <button
                 type="button"
@@ -145,15 +152,15 @@ export const SchedulingPage: React.FC = () => {
               className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-base font-semibold text-neutral-300 md:text-lg"
             >
               <span className="inline-flex items-center gap-2.5">
-                <CheckCircle2 className="h-5 w-5 text-accent" />
+                <CheckCircle2 size={24} className="h-5 w-5 text-accent" />
                 Sem instalar app
               </span>
               <span className="inline-flex items-center gap-2.5">
-                <CheckCircle2 className="h-5 w-5 text-accent" />
+                <CheckCircle2 size={24} className="h-5 w-5 text-accent" />
                 Por profissional
               </span>
               <span className="inline-flex items-center gap-2.5">
-                <CheckCircle2 className="h-5 w-5 text-accent" />
+                <CheckCircle2 size={24} className="h-5 w-5 text-accent" />
                 Sync com a fila
               </span>
             </motion.div>
@@ -520,7 +527,7 @@ export const SchedulingPage: React.FC = () => {
                             {step.n}
                           </span>
                           {step.done ? (
-                            <CheckCircle2 className="h-3.5 w-3.5 text-cyan-300" />
+                            <CheckCircle2 size={24} className="h-3.5 w-3.5 text-cyan-300" />
                           ) : (
                             <span className="text-[10px] font-black uppercase">agora</span>
                           )}
@@ -626,7 +633,7 @@ export const SchedulingPage: React.FC = () => {
                   <div className="flex items-center gap-3 py-3 pl-2">
                     <div className="h-10 w-px bg-linear-to-b from-white/20 via-accent/60 to-accent" />
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-accent-light">
-                      <Repeat className="h-3 w-3" />
+                      <Repeat size={24} className="h-3 w-3" />
                       Check-in
                     </span>
                   </div>
@@ -694,7 +701,7 @@ export const SchedulingPage: React.FC = () => {
 
           <div className="relative z-10 mx-auto max-w-3xl">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-black shadow-[0_16px_45px_rgba(52,211,153,0.24)]">
-              <CalendarCheck className="h-7 w-7" />
+              <CalendarCheck size={24} className="h-7 w-7" />
             </div>
 
             <p className="mt-8 text-base font-black uppercase tracking-[0.18em] text-accent-light">
@@ -711,15 +718,15 @@ export const SchedulingPage: React.FC = () => {
 
             <div className="mx-auto mt-8 flex max-w-xl flex-wrap items-center justify-center gap-x-6 gap-y-3 text-base font-semibold text-accent-light/90 md:text-lg">
               <span className="inline-flex items-center gap-2.5">
-                <CheckCircle2 className="h-5 w-5 text-accent" />
+                <CheckCircle2 size={24} className="h-5 w-5 text-accent" />
                 Marcação 24h
               </span>
               <span className="inline-flex items-center gap-2.5">
-                <CheckCircle2 className="h-5 w-5 text-accent" />
+                <CheckCircle2 size={24} className="h-5 w-5 text-accent" />
                 Menos faltas
               </span>
               <span className="inline-flex items-center gap-2.5">
-                <CheckCircle2 className="h-5 w-5 text-accent" />
+                <CheckCircle2 size={24} className="h-5 w-5 text-accent" />
                 Sync com a fila
               </span>
             </div>
@@ -731,7 +738,7 @@ export const SchedulingPage: React.FC = () => {
                 className="group inline-flex items-center justify-center gap-3 rounded-full bg-white px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-1 hover:bg-accent-light"
               >
                 {trialCampaign.cta}
-                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                <ArrowRight size={24} className="h-5 w-5 transition-transform group-hover:translate-x-1" />
               </button>
               <button
                 type="button"

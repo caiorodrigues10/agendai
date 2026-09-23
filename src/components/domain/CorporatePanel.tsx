@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Building2,
-  Plus,
-  Trash2,
-  Loader2,
-  CreditCard,
-  CheckCircle2,
-} from 'lucide-react';
+  LuBuilding2 as Building2,
+  LuPlus as Plus,
+  LuTrash2 as Trash2,
+  LuLoaderCircle as Loader2,
+  LuCreditCard as CreditCard,
+  LuCircleCheck as CheckCircle2,
+} from 'react-icons/lu';
 import { corporateApi, CorporatePlan, CorporateSubscription } from '../../infra/corporateApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';

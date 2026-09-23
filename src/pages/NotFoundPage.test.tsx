@@ -62,7 +62,7 @@ describe('NotFoundPage', () => {
 
     expect(screen.getByRole('link', { name: 'Ir para o painel' })).toHaveAttribute(
       'href',
-      '/master/dashboard'
+      '/master/work'
     );
   });
 

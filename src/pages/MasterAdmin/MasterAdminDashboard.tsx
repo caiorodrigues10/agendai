@@ -1,33 +1,33 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Building2,
-  Users,
-  CreditCard,
-  PieChart,
-  LogOut,
-  Search,
-  Clock,
-  TrendingUp,
-  TrendingDown,
-  Scissors,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
-  RefreshCcw,
-  BarChart3,
-  ChevronRight,
-  UserPlus,
-  MoreVertical,
-  ShieldCheck,
-  UserCog,
-  History,
-  Trash2,
-  Ban,
-  Mail,
-  Shield,
-  Gift,
-} from 'lucide-react';
+  LuBuilding2 as Building2,
+  LuUsers as Users,
+  LuCreditCard as CreditCard,
+  LuChartPie as PieChart,
+  LuLogOut as LogOut,
+  LuSearch as Search,
+  LuClock as Clock,
+  LuTrendingUp as TrendingUp,
+  LuTrendingDown as TrendingDown,
+  LuScissors as Scissors,
+  LuCircleCheck as CheckCircle2,
+  LuCircleX as XCircle,
+  LuCircleAlert as AlertCircle,
+  LuRefreshCcw as RefreshCcw,
+  LuChartColumn as BarChart3,
+  LuChevronRight as ChevronRight,
+  LuUserPlus as UserPlus,
+  LuEllipsisVertical as MoreVertical,
+  LuShieldCheck as ShieldCheck,
+  LuUserCog as UserCog,
+  LuHistory as History,
+  LuTrash2 as Trash2,
+  LuBan as Ban,
+  LuMail as Mail,
+  LuShield as Shield,
+  LuGift as Gift,
+} from 'react-icons/lu';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
@@ -798,7 +798,7 @@ const BarbershopsTab: React.FC = () => {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
+          <Search size={24} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
           <input
             type="text"
             value={search}
@@ -1363,7 +1363,7 @@ const UsersTab: React.FC = () => {
 
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
+          <Search size={24} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
           <input
             type="text"
             value={search}

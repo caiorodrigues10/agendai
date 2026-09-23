@@ -12,18 +12,18 @@ import {
 } from '../../utils/schedulingUtils';
 import { AppointmentBookingModal } from './AppointmentBookingModal';
 import {
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  CalendarDays,
-  Users,
-  User,
-  CheckCircle,
-  Trash2,
-  UserX,
-  Phone,
-  ChevronDown,
-} from 'lucide-react';
+  LuChevronLeft as ChevronLeft,
+  LuChevronRight as ChevronRight,
+  LuPlus as Plus,
+  LuCalendarDays as CalendarDays,
+  LuUsers as Users,
+  LuUser as User,
+  LuCircleCheck as CheckCircle,
+  LuTrash2 as Trash2,
+  LuUserX as UserX,
+  LuPhone as Phone,
+  LuChevronDown as ChevronDown,
+} from 'react-icons/lu';
 import { Avatar } from '../ui/Avatar';
 
 type AgendaView = 'salon' | 'professional';
@@ -157,13 +157,15 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   }, [view, selectedStaffId, staff]);
 
   const getAppointmentsForColumn = (columnId: string | null) => {
+    const knownStaff = new Set(staff.map(member => member.id));
     return dayAppointments.filter(a => {
       const apptStaff = a.staffId === 'any' ? null : a.staffId;
+      const unassigned = !apptStaff || apptStaff === 'any' || !knownStaff.has(apptStaff);
       if (view === 'professional') {
         const filterId = selectedStaffId === 'any' ? null : selectedStaffId;
-        return apptStaff === filterId || (filterId === null && !apptStaff);
+        return apptStaff === filterId || (filterId === null && unassigned);
       }
-      if (columnId === null) return !apptStaff || apptStaff === 'any';
+      if (columnId === null) return unassigned;
       return apptStaff === columnId;
     });
   };

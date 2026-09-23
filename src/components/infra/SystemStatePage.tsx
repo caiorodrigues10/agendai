@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { LifeBuoy } from 'lucide-react';
+import { LuLifeBuoy as LifeBuoy } from 'react-icons/lu';
 import { Logo } from '../ui/Logo';
 
 export interface SystemStateAction {

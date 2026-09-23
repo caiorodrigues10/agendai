@@ -1,6 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { AlertCircle, CheckCircle, Clock, X } from 'lucide-react';
+import {
+  LuCircleAlert as AlertCircle,
+  LuCircleCheck as CheckCircle,
+  LuClock as Clock,
+  LuX as X,
+} from 'react-icons/lu';
 import { ClientPackage, ShopSettings, StaffMember } from '../../types';
 import { Avatar } from '../ui/Avatar';
 import { schedulingApi } from '../../infra/schedulingApi';

@@ -1,27 +1,29 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Loader2,
-  ChevronRight,
-  ChevronLeft,
-  Clock3,
-  Sparkles,
-  Download,
-  ImagePlus,
-  Check,
-  Palette,
-  CalendarClock,
-  Eye,
-  Megaphone,
-} from 'lucide-react';
+  LuLoaderCircle as Loader2,
+  LuChevronRight as ChevronRight,
+  LuChevronLeft as ChevronLeft,
+  LuClock3 as Clock3,
+  LuSparkles as Sparkles,
+  LuDownload as Download,
+  LuImagePlus as ImagePlus,
+  LuCheck as Check,
+  LuPalette as Palette,
+  LuCalendarClock as CalendarClock,
+  LuMegaphone as Megaphone,
+  LuRectangleHorizontal as RectangleHorizontal,
+  LuRectangleVertical as RectangleVertical,
+  LuSmartphone as Smartphone,
+} from 'react-icons/lu';
 import { postsApi, type PostMedia, type PostPaletteDef } from '../../infra/postsApi';
 import { barbershopApi, PostAiSuggestion } from '../../infra/barbershopApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { FeedPost, PostFormat, PostMode } from '../../types';
-
+import { PostPreviewBox } from './PostPreviewBox';
 
 type PostType = 'haircut' | 'beard' | 'announcement';
 type PostTone = 'promocional' | 'informativo' | 'divertido' | null;
-type EditorStep = 'goal' | 'content' | 'review';
+type EditorTab = 'content' | 'image' | 'format' | 'identity';
 
 const OBJECTIVES = [
   { id: 'promote-service', label: 'Divulgar serviço', description: 'Destaque um serviço e seu preço', templateKey: 'servico-destaque', type: 'haircut' as PostType },
@@ -34,10 +36,33 @@ const OBJECTIVES = [
 
 type ObjectiveId = (typeof OBJECTIVES)[number]['id'];
 
-const FORMAT_OPTIONS: { id: PostFormat; label: string; hint: string }[] = [
-  { id: 'square', label: 'Quadrado', hint: '1:1' },
-  { id: 'portrait', label: 'Retrato', hint: '4:5' },
-  { id: 'story', label: 'Story', hint: '9:16' },
+const TEMPLATE_GROUPS: { key: string; label: string }[] = [
+  { key: 'agenda', label: 'Agenda' },
+  { key: 'ofertas', label: 'Ofertas' },
+  { key: 'resultados', label: 'Resultados' },
+  { key: 'equipe', label: 'Equipe' },
+  { key: 'depoimentos', label: 'Depoimentos' },
+];
+
+const TEMPLATE_OPTIONS: { key: string; name: string; group: string; requiredMedia: number }[] = [
+  { key: 'agenda-aberta', name: 'Agenda aberta', group: 'agenda', requiredMedia: 0 },
+  { key: 'ultimas-vagas', name: 'Últimas vagas', group: 'agenda', requiredMedia: 1 },
+  { key: 'horario-especial', name: 'Horário especial', group: 'agenda', requiredMedia: 0 },
+  { key: 'promocao-relampago', name: 'Promoção relâmpago', group: 'ofertas', requiredMedia: 1 },
+  { key: 'servico-destaque', name: 'Serviço em destaque', group: 'ofertas', requiredMedia: 1 },
+  { key: 'menu-servicos', name: 'Menu de serviços', group: 'ofertas', requiredMedia: 0 },
+  { key: 'novidade', name: 'Novidade', group: 'ofertas', requiredMedia: 1 },
+  { key: 'antes-depois', name: 'Antes e depois', group: 'resultados', requiredMedia: 2 },
+  { key: 'transformacao', name: 'Transformação', group: 'resultados', requiredMedia: 1 },
+  { key: 'editorial-minimalista', name: 'Editorial minimalista', group: 'resultados', requiredMedia: 1 },
+  { key: 'profissional-destaque', name: 'Profissional em destaque', group: 'equipe', requiredMedia: 1 },
+  { key: 'depoimento', name: 'Depoimento', group: 'depoimentos', requiredMedia: 1 },
+];
+
+const FORMAT_OPTIONS: { id: PostFormat; label: string; hint: string; icon: React.ReactNode }[] = [
+  { id: 'square', label: 'Quadrado', hint: '1:1', icon: <RectangleHorizontal size={16} /> },
+  { id: 'portrait', label: 'Retrato', hint: '4:5', icon: <RectangleVertical size={16} /> },
+  { id: 'story', label: 'Story', hint: '9:16', icon: <Smartphone size={16} /> },
 ];
 
 const MODE_OPTIONS: { id: PostMode; label: string }[] = [
@@ -52,10 +77,11 @@ const TONE_OPTIONS: { id: NonNullable<PostTone>; label: string }[] = [
   { id: 'divertido', label: 'Descontraído' },
 ];
 
-const STEP_LABELS: { id: EditorStep; label: string; num: number }[] = [
-  { id: 'goal', label: 'Objetivo', num: 1 },
-  { id: 'content', label: 'Conteúdo', num: 2 },
-  { id: 'review', label: 'Revisão', num: 3 },
+const TAB_LABELS: { id: EditorTab; label: string; num: number }[] = [
+  { id: 'content', label: 'Conteúdo', num: 1 },
+  { id: 'image', label: 'Imagem', num: 2 },
+  { id: 'format', label: 'Formato', num: 3 },
+  { id: 'identity', label: 'Identidade', num: 4 },
 ];
 
 const DRAFT_VERSION = 1;
@@ -142,7 +168,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   const isEditing = !!post;
   const storageKey = post?.id ?? 'new';
 
-  const [step, setStep] = useState<EditorStep>('goal');
+  const [tab, setTab] = useState<EditorTab>('content');
   const [objectiveId, setObjectiveId] = useState<ObjectiveId | null>(null);
   const [templateKey, setTemplateKey] = useState(post?.templateKey ?? 'agenda-aberta');
   const [paletteKey, setPaletteKey] = useState(post?.paletteKey ?? 'brand');
@@ -171,13 +197,20 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   const [submitting, setSubmitting] = useState(false);
 
   const [showMediaPicker, setShowMediaPicker] = useState<'primary' | 'secondary' | null>(null);
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
+  const [templateFilter, setTemplateFilter] = useState<string>('all');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const liveRef = useRef<{ templateKey: string; paletteKey: string; format: PostFormat; title: string; ctaText: string; primaryMediaId: string | null; secondaryMediaId: string | null; postMode: PostMode; type: PostType }>({
     templateKey, paletteKey, format, title, ctaText, primaryMediaId, secondaryMediaId, postMode, type,
   });
 
-  // Persist o rascunho local a cada mudança relevante
+  const selectedTemplate = useMemo(() => TEMPLATE_OPTIONS.find(t => t.key === templateKey), [templateKey]);
+  const filteredTemplates = useMemo(() =>
+    templateFilter === 'all' ? TEMPLATE_OPTIONS : TEMPLATE_OPTIONS.filter(t => t.group === templateFilter),
+    [templateFilter]
+  );
+
   const persistDraft = useCallback(() => {
     writeDraft(userId, barbershopId, storageKey, {
       objectiveId, templateKey, paletteKey, format, postMode, type, title, ctaText, primaryMediaId, secondaryMediaId,
@@ -186,7 +219,6 @@ export const PostEditor: React.FC<PostEditorProps> = ({
 
   useEffect(() => { persistDraft(); }, [persistDraft]);
 
-  // Recupera rascunho local ao abrir (somente novo post)
   useEffect(() => {
     if (isEditing) return;
     const saved = readDraft(userId, barbershopId, 'new');
@@ -203,7 +235,6 @@ export const PostEditor: React.FC<PostEditorProps> = ({
     setSecondaryMediaId(saved.secondaryMediaId);
   }, [isEditing, userId, barbershopId]);
 
-  // Debounce 500ms para prévia
   const triggerPreview = useCallback(() => {
     if (!barbershopId) return;
     setPreviewStale(true);
@@ -223,7 +254,6 @@ export const PostEditor: React.FC<PostEditorProps> = ({
           primaryMediaId: snap.primaryMediaId,
           secondaryMediaId: snap.secondaryMediaId,
         });
-        // Descarta se os dados mudaram enquanto a requisição estava em voo
         const cur = liveRef.current;
         if (
           cur.templateKey === snap.templateKey &&
@@ -259,7 +289,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
     setObjectiveId(id);
     setTemplateKey(obj.templateKey);
     setType(obj.type);
-    setStep('content');
+    setTab('content');
   };
 
   const handleGenerate = async () => {
@@ -343,11 +373,48 @@ export const PostEditor: React.FC<PostEditorProps> = ({
     }
   };
 
-  const backDisabled = submitting;
+  const handleSelectTemplate = (key: string) => {
+    setTemplateKey(key);
+    setShowTemplatePicker(false);
+  };
+
+  if (!objectiveId && !isEditing) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 sm:items-center p-0 sm:p-4">
+        <div className="flex h-full w-full max-w-4xl flex-col overflow-hidden bg-surface sm:h-auto sm:max-h-[92vh] sm:rounded-2xl sm:border sm:border-border">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
+            <h3 className="font-bold text-text-primary">Criar post</h3>
+            <button type="button" onClick={onClose} className="rounded-lg p-2 text-text-muted hover:text-text-primary" aria-label="Fechar">
+              ✕
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4">
+            <p className="mb-3 text-xs font-bold text-text-secondary">Qual o objetivo do post?</p>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {OBJECTIVES.map(obj => (
+                <button
+                  key={obj.id}
+                  type="button"
+                  onClick={() => pickObjective(obj.id)}
+                  className="flex flex-col items-start gap-2 rounded-xl border border-border bg-surface p-4 text-left transition hover:border-accent/50"
+                >
+                  <p className="text-sm font-bold text-text-primary">{obj.label}</p>
+                  <p className="text-xs leading-relaxed text-text-muted">{obj.description}</p>
+                  <span className="flex items-center gap-1 text-xs font-semibold text-text-muted">
+                    Escolher <ChevronRight size={12} aria-hidden />
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 sm:items-center p-0 sm:p-4">
-      <div className="flex h-full w-full max-w-4xl flex-col overflow-hidden bg-surface sm:h-auto sm:max-h-[92vh] sm:rounded-2xl sm:border sm:border-border">
+      <div className="flex h-full w-full max-w-5xl flex-col overflow-hidden bg-surface sm:h-auto sm:max-h-[92vh] sm:rounded-2xl sm:border sm:border-border">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <h3 className="font-bold text-text-primary">
@@ -358,34 +425,29 @@ export const PostEditor: React.FC<PostEditorProps> = ({
           </button>
         </div>
 
-        {/* Body — scrollable */}
-        <div className="flex-1 overflow-y-auto">
-          {step === 'goal' && (
-            <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3">
-              {OBJECTIVES.map(obj => (
-                <button
-                  key={obj.id}
-                  type="button"
-                  onClick={() => pickObjective(obj.id)}
-                  className={`flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition ${
-                    objectiveId === obj.id
-                      ? 'border-accent bg-accent/10'
-                      : 'border-border bg-surface hover:border-text-muted'
-                  }`}
-                >
-                  <p className="text-sm font-bold text-text-primary">{obj.label}</p>
-                  <p className="text-xs leading-relaxed text-text-muted">{obj.description}</p>
-                  <span className={`flex items-center gap-1 text-xs font-semibold ${objectiveId === obj.id ? 'text-accent' : 'text-text-muted'}`}>
-                    Escolher <ChevronRight size={12} aria-hidden />
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
+        {/* Tab bar */}
+        <div className="flex border-b border-border">
+          {TAB_LABELS.map(t => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTab(t.id)}
+              className={`flex-1 py-2.5 text-center text-xs font-bold transition ${
+                tab === t.id
+                  ? 'border-b-2 border-accent text-accent'
+                  : 'text-text-muted hover:text-text-secondary'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
 
-          {step === 'content' && (
-            <div className="grid gap-4 p-4 lg:grid-cols-2">
-              {/* Col 1: form */}
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto">
+          {/* Tab: Conteúdo */}
+          {tab === 'content' && (
+            <div className="grid gap-4 p-4 lg:grid-cols-[1fr_360px]">
               <div className="space-y-4">
                 {/* Título */}
                 <div>
@@ -415,21 +477,8 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                   />
                 </div>
 
-                {/* Formato + CTA destino */}
+                {/* Modo + Tipo */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label htmlFor="post-format" className="mb-1 block text-xs font-bold text-text-secondary">Formato</label>
-                    <select
-                      id="post-format"
-                      value={format}
-                      onChange={e => setFormat(e.target.value as PostFormat)}
-                      className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm focus:border-accent focus:outline-none"
-                    >
-                      {FORMAT_OPTIONS.map(f => (
-                        <option key={f.id} value={f.id}>{f.label} · {f.hint}</option>
-                      ))}
-                    </select>
-                  </div>
                   <div>
                     <label htmlFor="post-mode" className="mb-1 block text-xs font-bold text-text-secondary">Destino do CTA</label>
                     <select
@@ -443,62 +492,15 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                       ))}
                     </select>
                   </div>
-                </div>
-
-                {/* Personalizar */}
-                <details className="rounded-xl border border-border bg-bg/50 p-3">
-                  <summary className="cursor-pointer text-xs font-bold text-text-secondary">
-                    <Palette size={13} className="mr-1 inline" aria-hidden /> Personalizar (paleta)
-                  </summary>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {palettes.map(p => (
-                      <button
-                        key={p.key}
-                        type="button"
-                        onClick={() => setPaletteKey(p.key)}
-                        title={p.label}
-                        className={`h-9 rounded-lg px-3 text-xs font-semibold capitalize transition ${
-                          paletteKey === p.key
-                            ? 'bg-accent text-accent-fg'
-                            : 'bg-surface text-text-secondary hover:bg-bg'
-                        }`}
-                      >
-                        {p.label}
-                      </button>
-                    ))}
-                  </div>
-                </details>
-
-                {/* Fotos */}
-                <div className="space-y-2">
-                  <p className="text-xs font-bold text-text-secondary">Fotos</p>
-                  <div className="flex flex-wrap gap-2">
-                    {(['primary', 'secondary'] as const).map(slot => {
-                      const mediaId = slot === 'primary' ? primaryMediaId : secondaryMediaId;
-                      const media = mediaLibrary.find(m => m.id === mediaId);
-                      return (
-                        <button key={slot} type="button"
-                          onClick={() => setShowMediaPicker(slot)}
-                          className={`flex h-20 w-24 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed ${
-                            media ? 'border-accent bg-accent/5' : 'border-border bg-bg'
-                          } p-1 text-center transition hover:border-accent/50`}
-                        >
-                          {media ? (
-                            <>
-                              <img src={media.url} alt="" className="h-10 w-full rounded object-cover" />
-                              <span className="text-[10px] text-accent">Trocar foto</span>
-                            </>
-                          ) : (
-                            <>
-                              <ImagePlus size={18} className="text-text-muted" aria-hidden />
-                              <span className="text-[10px] text-text-muted">
-                                {slot === 'primary' ? 'Foto principal' : 'Antes (opcional)'}
-                              </span>
-                            </>
-                          )}
-                        </button>
-                      );
-                    })}
+                  <div>
+                    <label htmlFor="post-template" className="mb-1 block text-xs font-bold text-text-secondary">Modelo</label>
+                    <button
+                      type="button"
+                      onClick={() => setShowTemplatePicker(true)}
+                      className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-left text-sm hover:border-accent/50 focus:border-accent focus:outline-none"
+                    >
+                      {selectedTemplate ? selectedTemplate.name : 'Selecionar modelo…'}
+                    </button>
                   </div>
                 </div>
 
@@ -549,37 +551,175 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                 )}
               </div>
 
-              {/* Col 2: preview */}
-              <div>
-                <div className="sticky top-0 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Eye size={14} className="text-text-muted" aria-hidden />
-                    <span className="text-xs font-bold text-text-secondary">Prévia do post</span>
-                    {previewLoading && <span className="text-[10px] text-text-muted">Gerando…</span>}
-                    {previewStale && !previewLoading && <span className="text-[10px] text-warning">Desatualizada</span>}
-                  </div>
-                  <div className="aspect-square w-full overflow-hidden rounded-2xl border border-border bg-bg">
-                    {previewLoading && !previewUrl ? (
-                      <div className="flex h-full items-center justify-center">
-                        <Loader2 size={28} className="animate-spin text-accent" aria-hidden />
-                      </div>
-                    ) : previewUrl ? (
-                      <img src={previewUrl} alt="Prévia do post" className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="flex h-full flex-col items-center justify-center gap-2 p-4 text-center text-text-muted">
-                        <Megaphone size={28} aria-hidden />
-                        <p className="text-xs">Aguardando informações…</p>
-                      </div>
-                    )}
-                  </div>
+              {/* Preview lateral */}
+              <div className="hidden lg:block">
+                <div className="sticky top-0">
+                  <PostPreviewBox
+                    format={format}
+                    previewUrl={previewUrl}
+                    loading={previewLoading}
+                    stale={previewStale}
+                  />
                 </div>
               </div>
             </div>
           )}
 
-          {step === 'review' && (
-            <div className="grid gap-4 p-4 lg:grid-cols-2">
-              {/* Left: info */}
+          {/* Tab: Imagem */}
+          {tab === 'image' && (
+            <div className="grid gap-4 p-4 lg:grid-cols-[1fr_360px]">
+              <div className="space-y-4">
+                <p className="text-xs font-bold text-text-secondary">Gerenciar fotos do post</p>
+                <div className="flex flex-wrap gap-3">
+                  {(['primary', 'secondary'] as const).map(slot => {
+                    const mediaId = slot === 'primary' ? primaryMediaId : secondaryMediaId;
+                    const media = mediaLibrary.find(m => m.id === mediaId);
+                    const required = (selectedTemplate?.requiredMedia ?? 0) >= (slot === 'primary' ? 1 : 2);
+                    return (
+                      <button key={slot} type="button"
+                        onClick={() => setShowMediaPicker(slot)}
+                        className={`relative flex h-36 w-40 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed ${
+                          media ? 'border-accent bg-accent/5' : required ? 'border-warning bg-warning/5' : 'border-border bg-bg'
+                        } p-2 text-center transition hover:border-accent/50`}
+                      >
+                        {media ? (
+                          <>
+                            <img src={media.url} alt="" className="h-20 w-full rounded object-cover" />
+                            <span className="text-[10px] font-semibold text-accent">Trocar foto</span>
+                          </>
+                        ) : (
+                          <>
+                            <ImagePlus size={22} className="text-text-muted" aria-hidden />
+                            <span className="text-[10px] text-text-muted">
+                              {slot === 'primary' ? 'Foto principal' : 'Foto secundária'}
+                            </span>
+                            {required && <span className="text-[10px] font-bold text-warning">Requerida</span>}
+                          </>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-[10px] text-text-muted">
+                  {selectedTemplate?.requiredMedia === 0
+                    ? 'Este modelo não requer fotos.'
+                    : `Este modelo requer ${selectedTemplate?.requiredMedia} foto(s).`}
+                </p>
+              </div>
+
+              <div className="hidden lg:block">
+                <div className="sticky top-0">
+                  <PostPreviewBox
+                    format={format}
+                    previewUrl={previewUrl}
+                    loading={previewLoading}
+                    stale={previewStale}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tab: Formato */}
+          {tab === 'format' && (
+            <div className="grid gap-4 p-4 lg:grid-cols-[1fr_360px]">
+              <div className="space-y-4">
+                {/* Formato */}
+                <div>
+                  <p className="mb-2 text-xs font-bold text-text-secondary">Formato da arte</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {FORMAT_OPTIONS.map(f => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setFormat(f.id)}
+                        className={`flex flex-col items-center gap-1.5 rounded-xl border p-3 transition ${
+                          format === f.id
+                            ? 'border-accent bg-accent/10 text-accent'
+                            : 'border-border text-text-muted hover:border-text-muted'
+                        }`}
+                      >
+                        {f.icon}
+                        <span className="text-xs font-bold">{f.label}</span>
+                        <span className="text-[10px] text-text-muted">{f.hint}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Paleta */}
+                <div>
+                  <p className="mb-2 text-xs font-bold text-text-secondary">
+                    <Palette size={13} className="mr-1 inline" aria-hidden /> Paleta de cores
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {palettes.map(p => (
+                      <button
+                        key={p.key}
+                        type="button"
+                        onClick={() => setPaletteKey(p.key)}
+                        title={p.label}
+                        className={`h-9 rounded-lg px-3 text-xs font-semibold capitalize transition ${
+                          paletteKey === p.key
+                            ? 'bg-accent text-accent-fg'
+                            : 'bg-surface text-text-secondary hover:bg-bg'
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Modelo */}
+                <div>
+                  <p className="mb-2 text-xs font-bold text-text-secondary">Modelo</p>
+                  <div className="space-y-1.5">
+                    {TEMPLATE_GROUPS.map(group => {
+                      const templates = TEMPLATE_OPTIONS.filter(t => t.group === group.key);
+                      if (templates.length === 0) return null;
+                      return (
+                        <div key={group.key}>
+                          <p className="mb-1 text-[10px] font-bold uppercase text-text-muted">{group.label}</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {templates.map(t => (
+                              <button
+                                key={t.key}
+                                type="button"
+                                onClick={() => setTemplateKey(t.key)}
+                                className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition ${
+                                  templateKey === t.key
+                                    ? 'bg-accent text-accent-fg'
+                                    : 'bg-surface text-text-secondary hover:bg-bg'
+                                }`}
+                              >
+                                {t.name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="hidden lg:block">
+                <div className="sticky top-0">
+                  <PostPreviewBox
+                    format={format}
+                    previewUrl={previewUrl}
+                    loading={previewLoading}
+                    stale={previewStale}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tab: Identidade */}
+          {tab === 'identity' && (
+            <div className="grid gap-4 p-4 lg:grid-cols-[1fr_360px]">
               <div className="space-y-4">
                 <div className="rounded-xl border border-border bg-bg/50 p-4 space-y-3">
                   <p className="text-xs font-bold text-text-secondary">Resumo do post</p>
@@ -593,14 +733,18 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                       <dd className="font-semibold text-text-primary text-right">{ctaText || '—'}</dd>
                     </div>
                     <div className="flex justify-between gap-2">
-                      <dt className="text-text-muted">Paleta</dt>
-                      <dd className="font-semibold text-text-primary capitalize text-right">{paletteKey}</dd>
+                      <dt className="text-text-muted">Modelo</dt>
+                      <dd className="font-semibold text-text-primary text-right">{selectedTemplate?.name ?? '—'}</dd>
                     </div>
                     <div className="flex justify-between gap-2">
                       <dt className="text-text-muted">Formato</dt>
                       <dd className="font-semibold text-text-primary text-right">
                         {FORMAT_OPTIONS.find(f => f.id === format)?.label ?? format}
                       </dd>
+                    </div>
+                    <div className="flex justify-between gap-2">
+                      <dt className="text-text-muted">Paleta</dt>
+                      <dd className="font-semibold text-text-primary capitalize text-right">{paletteKey}</dd>
                     </div>
                   </dl>
                 </div>
@@ -615,22 +759,14 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                 </button>
               </div>
 
-              {/* Right: preview grande */}
-              <div className="space-y-3">
-                <p className="text-xs font-bold text-text-secondary">Prévia final</p>
-                <div className="aspect-square w-full overflow-hidden rounded-2xl border border-border bg-bg">
-                  {previewLoading && !previewUrl ? (
-                    <div className="flex h-full items-center justify-center">
-                      <Loader2 size={28} className="animate-spin text-accent" aria-hidden />
-                    </div>
-                  ) : previewUrl ? (
-                    <img src={previewUrl} alt="Prévia do post" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full flex-col items-center justify-center gap-2 p-4 text-center text-text-muted">
-                      <Megaphone size={36} aria-hidden />
-                      <p className="text-xs">Complete o conteúdo para gerar a prévia.</p>
-                    </div>
-                  )}
+              <div className="hidden lg:block">
+                <div className="sticky top-0">
+                  <PostPreviewBox
+                    format={format}
+                    previewUrl={previewUrl}
+                    loading={previewLoading}
+                    stale={previewStale}
+                  />
                 </div>
               </div>
             </div>
@@ -639,87 +775,45 @@ export const PostEditor: React.FC<PostEditorProps> = ({
 
         {/* Footer — actions */}
         <div className="border-t border-border bg-surface px-4 py-3">
-          {step === 'content' ? (
-            <div className="flex items-center justify-between gap-2">
-              <button type="button" onClick={() => setStep('goal')} disabled={backDisabled}
-                className="flex min-h-11 items-center gap-1.5 rounded-xl border border-border px-4 text-sm font-semibold text-text-secondary disabled:opacity-40"
-              >
-                <ChevronLeft size={15} aria-hidden /> Voltar
-              </button>
-              <button type="button"
-                onClick={() => { persistDraft(); setStep('review'); }}
-                className="flex min-h-11 items-center gap-2 rounded-xl bg-accent px-5 text-sm font-bold text-accent-fg hover:bg-accent-hover"
-              >
-                Revisar <ChevronRight size={15} aria-hidden />
-              </button>
-            </div>
-          ) : step === 'goal' ? (
-            <div className="flex justify-end">
-              <button type="button" disabled={!objectiveId}
-                onClick={() => setStep('content')}
-                className="flex min-h-11 items-center gap-2 rounded-xl bg-accent px-5 text-sm font-bold text-accent-fg hover:bg-accent-hover disabled:opacity-40"
-              >
-                Continuar <ChevronRight size={15} aria-hidden />
-              </button>
-            </div>
-          ) : (
-            /* Review — opções de publicação */
-            <div className="space-y-3">
-              {/* Agendamento */}
-              <div className="flex items-center gap-2">
-                <label htmlFor="schedule-mode" className="flex items-center gap-1.5 text-xs text-text-muted whitespace-nowrap">
-                  <Clock3 size={13} aria-hidden /> Agendar para:
-                </label>
+          <div className="flex items-center justify-between gap-2">
+            <button type="button" onClick={onClose} disabled={submitting}
+              className="flex min-h-11 items-center gap-1.5 rounded-xl border border-border px-4 text-sm font-semibold text-text-secondary disabled:opacity-40"
+            >
+              Cancelar
+            </button>
+            <div className="flex items-center gap-2">
+              {/* Agendamento inline */}
+              <div className="hidden sm:flex items-center gap-1.5">
+                <Clock3 size={13} className="text-text-muted" aria-hidden />
                 <input
-                  id="schedule-mode"
                   type="datetime-local"
                   min={new Date(Date.now() + 5 * 60_000).toISOString().slice(0, 16)}
                   value={scheduledFor}
                   onChange={e => { setScheduledFor(e.target.value); if (e.target.value) setPublishMode('schedule'); }}
                   onFocus={() => setPublishMode('schedule')}
-                  disabled={publishMode !== 'schedule'}
-                  className="flex-1 rounded-xl border border-border bg-bg px-3 py-2.5 text-sm focus:border-accent focus:outline-none disabled:opacity-40"
+                  className="w-44 rounded-xl border border-border bg-bg px-2.5 py-2 text-xs focus:border-accent focus:outline-none"
                 />
-                <button type="button" onClick={() => setPublishMode('schedule')}
-                  className={`min-h-11 rounded-xl border px-3 text-xs font-bold transition ${
-                    publishMode === 'schedule'
-                      ? 'border-accent bg-accent/10 text-accent'
-                      : 'border-border text-text-muted hover:border-text-muted'
-                  }`}
-                  aria-pressed={publishMode === 'schedule'}
-                >
-                  Agendar
-                </button>
               </div>
-
-              {/* Ações principais */}
-              <div className="grid grid-cols-3 gap-2">
-                <button type="button" onClick={() => void handleSave('draft')} disabled={submitting}
-                  className="flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-xl border border-border px-2 text-xs font-semibold text-text-secondary hover:border-text-muted disabled:opacity-40"
-                >
-                  {submitting ? <Loader2 size={14} className="animate-spin" aria-hidden /> : null}
-                  Salvar rascunho
-                </button>
-                <button type="button"
-                  onClick={() => publishMode === 'schedule' ? void handleSave('schedule') : void handleSave('publish')}
-                  disabled={submitting || (publishMode === 'schedule' && !scheduledFor)}
-                  className="flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-xl bg-accent px-2 text-xs font-bold text-accent-fg hover:bg-accent-hover disabled:opacity-40"
-                >
-                  {submitting ? <Loader2 size={14} className="animate-spin" aria-hidden /> : (
-                    publishMode === 'schedule'
-                      ? <CalendarClock size={14} aria-hidden />
-                      : <Check size={14} aria-hidden />
-                  )}
-                  {publishMode === 'schedule' ? 'Agendar publicação' : 'Publicar no perfil'}
-                </button>
-                <button type="button" onClick={onClose} disabled={submitting}
-                  className="min-h-11 rounded-xl border border-border px-2 text-xs font-semibold text-text-muted hover:text-text-primary disabled:opacity-40"
-                >
-                  Cancelar
-                </button>
-              </div>
+              <button type="button" onClick={() => void handleSave('draft')} disabled={submitting}
+                className="flex min-h-11 items-center gap-1.5 rounded-xl border border-border px-4 text-xs font-semibold text-text-secondary hover:border-text-muted disabled:opacity-40"
+              >
+                {submitting ? <Loader2 size={14} className="animate-spin" aria-hidden /> : null}
+                Rascunho
+              </button>
+              <button type="button"
+                onClick={() => publishMode === 'schedule' ? void handleSave('schedule') : void handleSave('publish')}
+                disabled={submitting || (publishMode === 'schedule' && !scheduledFor)}
+                className="flex min-h-11 items-center gap-2 rounded-xl bg-accent px-5 text-sm font-bold text-accent-fg hover:bg-accent-hover disabled:opacity-40"
+              >
+                {submitting ? <Loader2 size={14} className="animate-spin" aria-hidden /> : (
+                  publishMode === 'schedule'
+                    ? <CalendarClock size={14} aria-hidden />
+                    : <Check size={14} aria-hidden />
+                )}
+                {publishMode === 'schedule' ? 'Agendar' : 'Publicar'}
+              </button>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -729,9 +823,9 @@ export const PostEditor: React.FC<PostEditorProps> = ({
           <div className="w-full max-w-lg rounded-2xl bg-surface border border-border">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <h4 className="text-sm font-bold text-text-primary">Escolher foto</h4>
-            <button type="button" onClick={() => setShowMediaPicker(null)} className="rounded-lg p-1 text-text-muted hover:bg-bg" aria-label="Fechar">
-              ✕
-            </button>
+              <button type="button" onClick={() => setShowMediaPicker(null)} className="rounded-lg p-1 text-text-muted hover:bg-bg" aria-label="Fechar">
+                ✕
+              </button>
             </div>
             <div className="max-h-80 overflow-y-auto p-4">
               <div className="grid grid-cols-3 gap-2">
@@ -767,8 +861,65 @@ export const PostEditor: React.FC<PostEditorProps> = ({
           </div>
         </div>
       )}
+
+      {/* Template Picker Overlay */}
+      {showTemplatePicker && (
+        <div className="absolute inset-0 z-[110] flex items-end justify-center bg-black/80 sm:items-center sm:p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-surface border border-border">
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+              <h4 className="text-sm font-bold text-text-primary">Escolher modelo</h4>
+              <button type="button" onClick={() => setShowTemplatePicker(false)} className="rounded-lg p-1 text-text-muted hover:bg-bg" aria-label="Fechar">
+                ✕
+              </button>
+            </div>
+            <div className="flex gap-1.5 border-b border-border px-4 pt-3 pb-2 overflow-x-auto">
+              <button
+                type="button"
+                onClick={() => setTemplateFilter('all')}
+                className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                  templateFilter === 'all' ? 'bg-accent text-accent-fg' : 'text-text-muted hover:bg-bg'
+                }`}
+              >
+                Todos
+              </button>
+              {TEMPLATE_GROUPS.map(g => (
+                <button
+                  key={g.key}
+                  type="button"
+                  onClick={() => setTemplateFilter(g.key)}
+                  className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                    templateFilter === g.key ? 'bg-accent text-accent-fg' : 'text-text-muted hover:bg-bg'
+                  }`}
+                >
+                  {g.label}
+                </button>
+              ))}
+            </div>
+            <div className="max-h-80 overflow-y-auto p-4 space-y-1.5">
+              {filteredTemplates.map(t => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => handleSelectTemplate(t.key)}
+                  className={`w-full rounded-xl border p-3 text-left transition ${
+                    templateKey === t.key
+                      ? 'border-accent bg-accent/10'
+                      : 'border-border hover:border-accent/40'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-text-primary">{t.name}</span>
+                    {templateKey === t.key && <Check size={14} className="text-accent" aria-hidden />}
+                  </div>
+                  <span className="text-[10px] text-text-muted">
+                    {t.requiredMedia === 0 ? 'Sem foto' : `${t.requiredMedia} foto(s)`}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
-
-// Removendo imports não usados

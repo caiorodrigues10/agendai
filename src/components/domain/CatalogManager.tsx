@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Plus,
-  Pencil,
-  Trash2,
-  Loader2,
-  GripVertical,
-  Package,
-  Puzzle,
-  Layers,
-  Tag,
-} from 'lucide-react';
+  LuPlus as Plus,
+  LuPencil as Pencil,
+  LuTrash2 as Trash2,
+  LuLoaderCircle as Loader2,
+  LuGripVertical as GripVertical,
+  LuPackage as Package,
+  LuPuzzle as Puzzle,
+  LuLayers as Layers,
+  LuTag as Tag,
+} from 'react-icons/lu';
 import { catalogApi, ServiceVariation, ServiceAddon, ServiceCombo } from '../../infra/catalogApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { useBarbershop } from '../../contexts/BarbershopContext';

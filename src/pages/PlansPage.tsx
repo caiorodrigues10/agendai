@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { AlertCircle, ArrowRight, Check, CheckCircle2, Loader2, X } from 'lucide-react';
+import {
+  LuCircleAlert as AlertCircle,
+  LuArrowRight as ArrowRight,
+  LuCheck as Check,
+  LuCircleCheck as CheckCircle2,
+  LuLoaderCircle as Loader2,
+  LuX as X,
+} from 'react-icons/lu';
 import { plansApi, Plan } from '../infra/plansApi';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -216,7 +223,7 @@ export const PlansPage: React.FC = () => {
                 className="group inline-flex items-center justify-center gap-3 rounded-full bg-accent px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-accent-light"
               >
                 {heroCta}
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </button>
               {goToExistingPanel && user?.role?.toUpperCase() === 'OWNER' && (
                 <div className="mt-3">
@@ -226,7 +233,7 @@ export const PlansPage: React.FC = () => {
                     className="inline-flex items-center justify-center gap-2 rounded-full border border-accent/50 bg-accent/10 px-6 py-3 text-sm font-black text-accent-light hover:bg-accent/20"
                   >
                     Gerenciar plano no painel
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight size={24} className="h-4 w-4" />
                   </button>
                 </div>
               )}
@@ -448,7 +455,7 @@ export const PlansPage: React.FC = () => {
                             ? 'Pagar com PIX ou cartão'
                             : trialCampaign.cta}
                         {!isCurrent && (
-                          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                          <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                         )}
                       </button>
                       {!isCurrent && (
@@ -500,16 +507,16 @@ export const PlansPage: React.FC = () => {
                     <span className="text-sm font-semibold text-neutral-200">{row.label}</span>
                     <span className="flex justify-center">
                       {row.essential ? (
-                        <CheckCircle2 className="h-5 w-5 text-neutral-400" />
+                        <CheckCircle2 size={24} className="h-5 w-5 text-neutral-400" />
                       ) : (
-                        <X className="h-5 w-5 text-neutral-700" />
+                        <X size={24} className="h-5 w-5 text-neutral-700" />
                       )}
                     </span>
                     <span className="flex justify-center">
                       {row.pro ? (
-                        <CheckCircle2 className="h-5 w-5 text-accent" />
+                        <CheckCircle2 size={24} className="h-5 w-5 text-accent" />
                       ) : (
-                        <X className="h-5 w-5 text-neutral-700" />
+                        <X size={24} className="h-5 w-5 text-neutral-700" />
                       )}
                     </span>
                   </div>
@@ -564,7 +571,7 @@ export const PlansPage: React.FC = () => {
           className="group inline-flex items-center gap-2.5 rounded-full bg-accent px-6 py-3.5 text-sm font-black text-black shadow-[0_16px_50px_rgba(16,185,129,0.45)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-accent-light md:px-7 md:text-base"
         >
           {stickyCta}
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </button>
       </div>
     </div>

@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  Plus,
-  Loader2,
-  Trash2,
-  Calendar,
-  Clock,
-  Check,
-  X,
-} from 'lucide-react';
+  LuPlus as Plus,
+  LuLoaderCircle as Loader2,
+  LuTrash2 as Trash2,
+  LuCalendar as Calendar,
+  LuClock as Clock,
+  LuCheck as Check,
+  LuX as X,
+} from 'react-icons/lu';
 import { staffApi, StaffScheduleEntry, StaffService, TimeOffRequest } from '../../infra/staffApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { useBarbershop } from '../../contexts/BarbershopContext';

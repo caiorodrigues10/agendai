@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,7 +12,13 @@ import {
   RiLoader4Line,
   RiAddLine,
 } from 'react-icons/ri';
-import { MessageCircle, X, Scissors, FlaskConical, Clock } from 'lucide-react';
+import {
+  LuMessageCircle as MessageCircle,
+  LuX as X,
+  LuScissors as Scissors,
+  LuFlaskConical as FlaskConical,
+  LuClock as Clock,
+} from 'react-icons/lu';
 import {
   ClientPackage,
   PackagePaymentMethod,
@@ -99,6 +105,7 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
   const [crmProfile, setCrmProfile] = useState<CrmClientProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -411,6 +418,13 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
     ? (CRM_SEGMENT_LABEL[crmProfile.segment] ?? crmProfile.segment)
     : null;
 
+  // Save focus when opening
+  useEffect(() => {
+    if (clientId && !previousFocusRef.current) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
+    }
+  }, [clientId]);
+
   if (!clientId) return null;
 
   return createPortal(
@@ -421,15 +435,21 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
         aria-modal="true"
         aria-label="Perfil do cliente"
       >
-        <button type="button" aria-label="Fechar" onClick={onClose} className="absolute inset-0" />
+        <button type="button" aria-label="Fechar" onClick={() => {
+          document.body.style.overflow = '';
+          previousFocusRef.current?.focus();
+          previousFocusRef.current = null;
+          onClose();
+        }} className="absolute inset-0" />
         <div className="relative flex max-h-[92dvh] w-full max-w-2xl flex-col rounded-t-2xl border border-border bg-surface shadow-2xl sm:rounded-2xl">
           <header className="shrink-0 border-b border-border px-4 py-4 sm:px-5">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 {loading && !detail ? (
-                  <div className="flex items-center gap-2 text-text-muted">
-                    <RiLoader4Line className="animate-spin text-accent" size={18} />
-                    Carregando…
+                  <div className="space-y-3 animate-pulse">
+                    <div className="h-6 w-32 rounded bg-bg" />
+                    <div className="h-4 w-48 rounded bg-bg" />
+                    <div className="h-4 w-24 rounded bg-bg" />
                   </div>
                 ) : (
                   <>
@@ -473,7 +493,12 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                 )}
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={() => {
+                    document.body.style.overflow = '';
+                    previousFocusRef.current?.focus();
+                    previousFocusRef.current = null;
+                    onClose();
+                  }}
                   className="rounded-lg p-2 text-text-muted hover:bg-bg"
                   aria-label="Fechar perfil"
                 >

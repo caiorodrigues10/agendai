@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { AlertCircle, Gift, RefreshCcw, TrendingUp, Users, Award } from 'lucide-react';
+import {
+  LuCircleAlert as AlertCircle,
+  LuGift as Gift,
+  LuRefreshCcw as RefreshCcw,
+  LuTrendingUp as TrendingUp,
+  LuUsers as Users,
+  LuAward as Award,
+} from 'react-icons/lu';
 import { adminApi, ReferralPlatformStats } from '../../infra/adminApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 

@@ -2,44 +2,38 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FocusLock from 'react-focus-lock';
 import {
-  CreditCard,
-  Loader2,
-  AlertCircle,
-  CheckCircle2,
-  PiggyBank,
-  TrendingDown,
-  Calendar,
-  ArrowRight,
-  XCircle,
-  X,
-  Users,
-  Banknote,
-  CalendarCheck,
-  Megaphone,
-  Clock,
-  ListOrdered,
-  MessageCircle,
-  Sparkles,
-  Wallet,
-  ArrowRightLeft,
-  HeartHandshake,
-  Gift,
-  Zap,
-  ShieldCheck,
-} from 'lucide-react';
+  LuCreditCard as CreditCard,
+  LuLoaderCircle as Loader2,
+  LuCircleAlert as AlertCircle,
+  LuCircleCheck as CheckCircle2,
+  LuPiggyBank as PiggyBank,
+  LuCalendar as Calendar,
+  LuArrowRight as ArrowRight,
+  LuCircleX as XCircle,
+  LuX as X,
+  LuUsers as Users,
+  LuBanknote as Banknote,
+  LuCalendarCheck as CalendarCheck,
+  LuMegaphone as Megaphone,
+  LuClock as Clock,
+  LuListOrdered as ListOrdered,
+  LuMessageCircle as MessageCircle,
+  LuSparkles as Sparkles,
+  LuWallet as Wallet,
+  LuArrowRightLeft as ArrowRightLeft,
+  LuHeartHandshake as HeartHandshake,
+  LuZap as Zap,
+  LuShieldCheck as ShieldCheck,
+} from 'react-icons/lu';
 import { useSubscription } from '../../contexts/SubscriptionContext';
 import {
   subscriptionsApi,
-  PlanEconomics,
   MySubscription,
   CancellationContext,
 } from '../../infra/subscriptionsApi';
 import { plansApi, Plan } from '../../infra/plansApi';
-import { referralsApi, ReferralDashboard } from '../../infra/referralsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { SmartSelect } from '../ui/SmartSelect';
-import { trialCampaign } from '../../marketing/trialCampaign';
-import { ShareReferralButton } from './ShareReferralButton';
 import { SubscriptionCheckout } from '../../pages/CheckoutPage';
 
 const brl = (n: number) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -101,7 +95,6 @@ export const OwnerSubscriptionPanel: React.FC = () => {
   const [detail, setDetail] = useState<MySubscription | null>(data);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
-  const [referral, setReferral] = useState<ReferralDashboard | null>(null);
   const [loading, setLoading] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -132,13 +125,9 @@ export const OwnerSubscriptionPanel: React.FC = () => {
     let cancelled = false;
     (async () => {
       try {
-        const [planList, ref] = await Promise.all([
-          plansApi.list().catch(() => [] as Plan[]),
-          referralsApi.me().catch(() => null),
-        ]);
+        const planList = await plansApi.list();
         if (cancelled) return;
         setPlans(planList.filter(p => p.active !== false));
-        setReferral(ref);
       } catch {
         /* silent — painel principal continua */
       } finally {
@@ -159,14 +148,11 @@ export const OwnerSubscriptionPanel: React.FC = () => {
     return () => window.removeEventListener('keydown', onKey);
   }, [showCancelModal]);
 
-  const economics: PlanEconomics | undefined = detail?.economics;
   const sub = detail?.subscription;
   const trial = detail?.trial;
   const inCalendarTrial = Boolean(trial && !trial.isExpired);
   const needsCard = inCalendarTrial && !sub?.hasPaymentMethod;
   const hasPendingPayment = sub?.latestInvoice?.status === 'PENDING';
-  const onYearly = economics?.currentBillingCycle === 'YEARLY';
-  const onMonthly = economics?.currentBillingCycle === 'MONTHLY';
 
   const displayPlans = useMemo(() => {
     const source = plans.length > 0 ? plans : (detail?.plans ?? []);
@@ -265,10 +251,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
         <h2 className="text-lg font-bold flex items-center gap-2">
           <CreditCard size={20} className="text-accent" /> Assinatura
         </h2>
-        <p className="text-sm text-text-secondary mt-1">
-          Escolha Essencial ou Pro e pague no checkout (PIX ou cartão). O atalho também fica no
-          topo: <span className="font-semibold text-text-primary">Plano</span>.
-        </p>
+        <p className="text-sm text-text-secondary mt-1">Veja seu plano atual e escolha a melhor opção para o salão.</p>
       </div>
 
       {error && (
@@ -282,89 +265,12 @@ export const OwnerSubscriptionPanel: React.FC = () => {
         </div>
       )}
 
-      <div className="rounded-2xl border-2 border-accent/50 bg-accent/10 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
-        <div className="flex-1">
-          <p className="text-sm font-extrabold text-text-primary">Pagar o plano</p>
-          <p className="text-xs text-text-secondary mt-0.5">
-            PIX ou cartão no checkout. Escolha Essencial ou Pro abaixo.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => payPreferred(true)}
-          className="shrink-0 px-4 py-3 rounded-xl bg-accent text-accent-fg text-sm font-bold flex items-center justify-center gap-2 hover:bg-accent-hover shadow-lg shadow-accent/20"
-        >
-          <CreditCard size={16} /> Ir para o pagamento
-        </button>
-      </div>
-
-      {/* Indicação — card em destaque */}
-      <div className="relative overflow-hidden rounded-2xl border border-accent/40 bg-linear-to-br from-accent/15 via-surface to-surface p-5">
-        <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-accent/10 blur-2xl pointer-events-none" />
-        <div className="relative flex flex-col sm:flex-row sm:items-start gap-4">
-          <div className="w-12 h-12 shrink-0 rounded-2xl bg-accent text-accent-fg flex items-center justify-center shadow-lg shadow-accent/25">
-            <Gift size={24} />
-          </div>
-          <div className="flex-1 min-w-0 space-y-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-accent">
-              Programa de indicação
-            </p>
-            <h3 className="text-lg font-extrabold text-text-primary leading-tight">
-              Indique um salão e ganhe{' '}
-              <span className="text-accent">+{referral?.rewardDays ?? 30} dias grátis</span>
-            </h3>
-            <p className="text-sm text-text-secondary">
-              Cada amigo que assinar estende sua assinatura. Quanto mais indicar, mais sobe de nível
-              (Bronze → Prata → Ouro) e maior a recompensa.
-            </p>
-            {referral ? (
-              <div className="flex flex-wrap items-center gap-2 pt-1">
-                <code className="text-[11px] bg-bg/80 border border-border rounded-lg px-2.5 py-1.5 text-text-primary truncate max-w-[min(100%,280px)]">
-                  {referral.shareUrl}
-                </code>
-                <ShareReferralButton
-                  shareUrl={referral.shareUrl}
-                  shareText={`Use meu link e ganhe trial no AGENDAI: ${referral.shareUrl}`}
-                />
-                <button
-                  type="button"
-                  onClick={() => navigate('/app/referrals')}
-                  className="text-xs font-bold text-accent hover:underline"
-                >
-                  Ver minhas indicações →
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => navigate('/app/referrals')}
-                className="inline-flex items-center gap-2 mt-1 px-4 py-2.5 rounded-xl bg-accent text-accent-fg text-sm font-bold hover:bg-accent-hover"
-              >
-                <Gift size={15} /> Abrir indicações e copiar link
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Status atual + urgência */}
+      {/* Situação do plano atual */}
       <div
         className={`rounded-2xl p-5 space-y-3 border ${
           needsCard ? 'border-warning/50 bg-warning/5' : 'border-border bg-surface'
         }`}
       >
-        {needsCard && (
-          <div className="flex items-start gap-2 rounded-xl bg-warning/15 border border-warning/30 px-3 py-2.5">
-            <Zap size={16} className="text-warning shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-bold text-warning">{trialCampaign.huntHeadline}</p>
-              <p className="text-xs text-text-secondary mt-0.5">
-                {trial?.daysRemainingInTrial ?? 30} dias restantes no trial.
-              </p>
-            </div>
-          </div>
-        )}
-
         {sub ? (
           <>
             <div className="flex items-start justify-between gap-3">
@@ -436,10 +342,6 @@ export const OwnerSubscriptionPanel: React.FC = () => {
               {needsCard
                 ? 'Checkout direto — cartão em 1 minuto, sem cobrança no trial.'
                 : 'Anual = 2 meses grátis. Troque quando quiser.'}
-            </p>
-            <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[11px] font-semibold text-accent">
-              <ArrowRight size={12} />
-              Toque no plano abaixo para seguir com o pagamento
             </p>
           </div>
           <div className="flex bg-surface border border-border rounded-xl p-0.5 text-xs font-bold">
@@ -558,80 +460,6 @@ export const OwnerSubscriptionPanel: React.FC = () => {
           </button>
         )}
       </div>
-
-      {economics && economics.yearlySavingsPerYear > 0 && (
-        <div className="grid gap-3">
-          <div className="bg-surface border border-border rounded-2xl p-5">
-            <div className="flex items-center gap-2 text-success mb-2">
-              <PiggyBank size={18} />
-              <h3 className="font-bold text-sm">Economia com o plano anual</h3>
-            </div>
-            {onYearly ? (
-              <>
-                <p className="text-2xl font-bold text-success">{brl(economics.savedSoFar)}</p>
-                <p className="text-xs text-text-secondary mt-1">
-                  Economia acumulada por usar o plano anual.
-                </p>
-                <p className="text-xs text-text-muted mt-2">
-                  Economia total em 12 meses: {brl(economics.projectedYearlySavings)}.
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="text-2xl font-bold text-success">{brl(economics.yearlySavingsPerYear)}<span className="ml-1 text-sm font-semibold">/ano</span></p>
-                <p className="text-xs text-text-secondary mt-1">
-                  Esta é a economia possível ao escolher o plano anual em vez do mensal.
-                </p>
-              </>
-            )}
-          </div>
-
-          <div className="bg-surface border border-border rounded-2xl p-5">
-            <div className="flex items-center gap-2 text-warning mb-2">
-              <TrendingDown size={18} />
-              <h3 className="font-bold text-sm">
-                {onMonthly
-                ? 'Economia disponível no plano anual'
-                  : 'Desconto concedido no plano anual'}
-              </h3>
-            </div>
-            {onMonthly ? (
-              <>
-                <p className="text-2xl font-bold text-warning">{brl(economics.missedSavingsPerYear)}<span className="ml-1 text-sm font-semibold">/ano</span></p>
-                <p className="text-xs text-text-secondary mt-1">
-                  Ao permanecer no mensal, você deixa de aproveitar essa economia todos os anos.
-                </p>
-              </>
-            ) : onYearly ? (
-              <>
-                <p className="text-2xl font-bold text-warning">
-                  {brl(economics.platformForegoneRevenueSoFar)}
-                </p>
-                <p className="text-xs text-text-secondary mt-1">
-                  Esse é o desconto concedido pelo AGENDAI por você escolher o plano anual.
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="text-2xl font-bold text-warning">
-                  {brl(economics.yearlySavingsPerYear)}
-                </p>
-                <p className="text-xs text-text-secondary mt-1">
-                  Desconto anual disponível se você migrar do mensal para o anual.
-                </p>
-              </>
-            )}
-          </div>
-
-          {economics.monthlyPlan && economics.yearlyPlan && (
-            <p className="text-[11px] text-text-muted px-1">
-              Comparativo: {economics.monthlyPlan.name} {brl(economics.monthlyPlan.price)}/mês × 12
-              = {brl(economics.monthlyPlan.price * 12)} vs {economics.yearlyPlan.name}{' '}
-              {brl(economics.yearlyPlan.price)}/ano.
-            </p>
-          )}
-        </div>
-      )}
 
       {showCancelModal && (
         <div

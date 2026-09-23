@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, ShieldCheck } from 'lucide-react';
+import { LuArrowRight as ArrowRight, LuShieldCheck as ShieldCheck } from 'react-icons/lu';
 import { MarketingNav } from '../../components/marketing/MarketingNav';
 import { MarketingFooter } from '../../components/marketing/MarketingFooter';
 import { SeoHead } from '../../components/marketing/SeoHead';
@@ -113,7 +113,7 @@ export const PrivacyPolicyPage: React.FC = () => {
             transition={{ duration: 0.4 }}
           >
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-accent">
-              <ShieldCheck className="h-3.5 w-3.5" />
+              <ShieldCheck size={24} className="h-3.5 w-3.5" />
               Privacidade e LGPD
             </div>
 
@@ -172,7 +172,7 @@ export const PrivacyPolicyPage: React.FC = () => {
               className="group inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-black text-black transition hover:bg-accent-light"
             >
               Falar com a gente
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
             <Link
               to="/"

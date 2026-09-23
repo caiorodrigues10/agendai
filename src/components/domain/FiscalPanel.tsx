@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { FileText, Loader2, Settings, XCircle } from 'lucide-react';
+import {
+  LuFileText as FileText,
+  LuLoaderCircle as Loader2,
+  LuSettings as Settings,
+  LuCircleX as XCircle,
+} from 'react-icons/lu';
 import { fiscalApi, FiscalConfig, NfeRecord, FiscalStats } from '../../infra/fiscalApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';

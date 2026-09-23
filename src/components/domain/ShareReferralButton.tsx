@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, CheckCircle2, Share2 } from 'lucide-react';
+import { LuCopy as Copy, LuCircleCheck as CheckCircle2, LuShare2 as Share2 } from 'react-icons/lu';
 
 interface ShareReferralButtonProps {
   shareUrl: string;

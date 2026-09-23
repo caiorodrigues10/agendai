@@ -1,13 +1,13 @@
 import React, { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  AlertCircle,
-  ChevronLeft,
-  ChevronRight,
-  Mail,
-  MessageCircle,
-  RefreshCcw,
-  RotateCcw,
-} from 'lucide-react';
+  LuCircleAlert as AlertCircle,
+  LuChevronLeft as ChevronLeft,
+  LuChevronRight as ChevronRight,
+  LuMail as Mail,
+  LuMessageCircle as MessageCircle,
+  LuRefreshCcw as RefreshCcw,
+  LuRotateCcw as RotateCcw,
+} from 'react-icons/lu';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { SmartSelect } from '../ui/SmartSelect';
 import {
