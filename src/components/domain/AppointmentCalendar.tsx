@@ -25,6 +25,7 @@ import {
   LuChevronDown as ChevronDown,
 } from 'react-icons/lu';
 import { Avatar } from '../ui/Avatar';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 type AgendaView = 'salon' | 'professional';
 
@@ -95,6 +96,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   );
   const [showBooking, setShowBooking] = useState(false);
   const [selectedAppt, setSelectedAppt] = useState<Appointment | null>(null);
+  const [confirmAction, setConfirmAction] = useState<'checkin' | 'cancel' | 'noshow' | null>(null);
 
   const [showStaffDropdown, setShowStaffDropdown] = useState(false);
   const staffDropdownRef = useRef<HTMLDivElement>(null);
@@ -495,23 +497,13 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
             </div>
             <div className="flex gap-2">
               <button
-                onClick={() => {
-                  if (confirm('Mover para a fila de espera?')) {
-                    onCheckIn(selectedAppt);
-                    setSelectedAppt(null);
-                  }
-                }}
+                onClick={() => setConfirmAction('checkin')}
                 className="flex-1 py-2.5 bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 rounded-xl text-xs font-bold flex items-center justify-center gap-1"
               >
                 <CheckCircle size={14} /> Check-in
               </button>
               <button
-                onClick={() => {
-                  if (confirm('Cancelar agendamento?')) {
-                    onCancel(selectedAppt.id);
-                    setSelectedAppt(null);
-                  }
-                }}
+                onClick={() => setConfirmAction('cancel')}
                 className="px-4 py-2.5 bg-danger/10 hover:bg-danger/20 text-danger border border-danger/30 rounded-xl text-xs font-bold"
               >
                 <Trash2 size={14} />
@@ -519,12 +511,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
             </div>
             {selectedAppt.status === 'confirmed' && (
               <button
-                onClick={() => {
-                  if (confirm('Marcar este cliente como não compareceu?')) {
-                    onNoShow(selectedAppt.id);
-                    setSelectedAppt(null);
-                  }
-                }}
+                onClick={() => setConfirmAction('noshow')}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface-2 py-2.5 text-xs font-bold text-text-secondary hover:text-text-primary"
               >
                 <UserX size={14} /> Não compareceu
@@ -552,6 +539,44 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
           onClose={() => setShowBooking(false)}
         />
       )}
+
+      <ConfirmDialog
+        open={confirmAction === 'checkin'}
+        title="Check-in"
+        message="Mover para a fila de espera?"
+        confirmLabel="Check-in"
+        onConfirm={() => {
+          if (selectedAppt) onCheckIn(selectedAppt);
+          setSelectedAppt(null);
+          setConfirmAction(null);
+        }}
+        onCancel={() => setConfirmAction(null)}
+      />
+      <ConfirmDialog
+        open={confirmAction === 'cancel'}
+        title="Cancelar agendamento"
+        message="Cancelar agendamento?"
+        confirmLabel="Cancelar agendamento"
+        variant="danger"
+        onConfirm={() => {
+          if (selectedAppt) onCancel(selectedAppt.id);
+          setSelectedAppt(null);
+          setConfirmAction(null);
+        }}
+        onCancel={() => setConfirmAction(null)}
+      />
+      <ConfirmDialog
+        open={confirmAction === 'noshow'}
+        title="Não compareceu"
+        message="Marcar este cliente como não compareceu?"
+        confirmLabel="Marcar"
+        onConfirm={() => {
+          if (selectedAppt) onNoShow(selectedAppt.id);
+          setSelectedAppt(null);
+          setConfirmAction(null);
+        }}
+        onCancel={() => setConfirmAction(null)}
+      />
     </div>
   );
 };

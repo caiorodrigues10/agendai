@@ -18,6 +18,7 @@ import {
   RiShoppingBag3Line,
   RiImageLine,
   RiApps2Line,
+  RiQuestionLine,
 } from 'react-icons/ri';
 import type { OperationMode } from '../types';
 
@@ -92,6 +93,7 @@ export const TAB_GROUPS: TabGroup[] = [
     label: 'Conta',
     tabs: [
       { id: 'settings', label: 'Configurações', icon: RiSettings4Line },
+      { id: 'support', label: 'Ajuda', icon: RiQuestionLine },
       { id: 'subscription', label: 'Plano', icon: RiWalletLine, roles: ['OWNER', 'MASTER_ADMIN'] },
       { id: 'profile', label: 'Perfil', icon: RiStore2Line },
     ],

@@ -9,6 +9,7 @@ import { fiscalApi, FiscalConfig, NfeRecord, FiscalStats } from '../../infra/fis
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { SmartSelect } from '../ui/SmartSelect';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 export const FiscalPanel: React.FC = () => {
   const { barbershopId } = useBarbershopFilters();
@@ -20,6 +21,7 @@ export const FiscalPanel: React.FC = () => {
   const [error, setError] = useState('');
   const [tab, setTab] = useState<'config' | 'records' | 'stats'>('config');
   const [submitting, setSubmitting] = useState(false);
+  const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
 
   // Config form
   const [cnpj, setCnpj] = useState('');
@@ -111,7 +113,6 @@ export const FiscalPanel: React.FC = () => {
 
   const handleCancel = async (id: string) => {
     if (!barbershopId) return;
-    if (!confirm('Deseja cancelar esta NFS-e?')) return;
     setSubmitting(true);
     setError('');
     try {
@@ -121,6 +122,7 @@ export const FiscalPanel: React.FC = () => {
       setError(getErrorMessage(err, 'Erro ao cancelar NFS-e.'));
     } finally {
       setSubmitting(false);
+      setConfirmCancelId(null);
     }
   };
 
@@ -141,6 +143,16 @@ export const FiscalPanel: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      <ConfirmDialog
+        open={confirmCancelId !== null}
+        title="Cancelar NFS-e"
+        message="Deseja cancelar esta NFS-e?"
+        confirmLabel="Cancelar NFS-e"
+        variant="danger"
+        loading={submitting}
+        onConfirm={() => confirmCancelId && void handleCancel(confirmCancelId)}
+        onCancel={() => setConfirmCancelId(null)}
+      />
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-lg font-bold text-text-primary">Fiscal / NFS-e</h3>
         <div className="flex gap-2">
@@ -317,7 +329,7 @@ export const FiscalPanel: React.FC = () => {
                   <span className="text-sm font-bold text-text-primary">R$ {Number(r.serviceValue).toFixed(2)}</span>
                   {r.status === 'AUTHORIZED' && (
                     <button
-                      onClick={() => void handleCancel(r.id)}
+                      onClick={() => setConfirmCancelId(r.id)}
                       disabled={submitting}
                       className="text-error hover:text-error/80"
                     >

@@ -21,6 +21,7 @@ import { notificationsApi } from '../../infra/notificationsApi';
 import { clientsApi, ProcedureRecord } from '../../infra/clientsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { RetailCheckoutBlock } from './RetailCheckoutBlock';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import type { RetailSalePayload } from '../../infra/productsApi';
 
 interface QueueItemCardProps {
@@ -86,6 +87,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
   const [procedureTitle, setProcedureTitle] = useState('');
   const [procedureFormula, setProcedureFormula] = useState('');
   const [procedureDetails, setProcedureDetails] = useState('');
+  const [confirmLeave, setConfirmLeave] = useState(false);
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'in_chair':
@@ -253,9 +255,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
 
           {isCurrentUser && item.status === 'waiting' && !isAdmin && (
             <button
-              onClick={() => {
-                if (confirm('Deseja realmente sair da fila?')) onLeaveQueue(item.id);
-              }}
+              onClick={() => setConfirmLeave(true)}
               className="mt-1 px-3 py-1.5 rounded-lg bg-danger/10 border border-danger/30 hover:bg-danger/20 text-danger text-xs font-bold transition-all flex items-center gap-2 group"
             >
               <LogOut size={12} className="group-hover:-translate-x-0.5 transition-transform" />
@@ -445,6 +445,18 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
           </div>
         </div>
       )}
+      <ConfirmDialog
+        open={confirmLeave}
+        title="Sair da fila"
+        message="Deseja realmente sair da fila?"
+        confirmLabel="Sair da fila"
+        variant="danger"
+        onConfirm={() => {
+          onLeaveQueue(item.id);
+          setConfirmLeave(false);
+        }}
+        onCancel={() => setConfirmLeave(false)}
+      />
     </div>
   );
 };

@@ -27,12 +27,12 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const CHANNEL_LABELS: Record<string, string> = {
-  WHATSAPP: 'WhatsApp', EMAIL: 'E-mail', PHONE: 'Telefone', OTHER: 'Outro',
+  WHATSAPP: 'WhatsApp', EMAIL: 'E-mail', PHONE: 'Telefone', OTHER: 'Outro', IN_APP: 'App do usuário',
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
   ACCESS: 'Acesso', BILLING: 'Cobrança', SCHEDULE: 'Agenda',
-  ERROR: 'Erro', QUESTION: 'Dúvida',
+  ERROR: 'Erro', QUESTION: 'Dúvida', SUGGESTION: 'Sugestão', FEEDBACK: 'Feedback',
 };
 
 export const TicketDetailPage: React.FC = () => {
@@ -145,6 +145,11 @@ export const TicketDetailPage: React.FC = () => {
             <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${STATUS_COLORS[ticket.status]}`}>
               {STATUS_LABELS[ticket.status]}
             </span>
+            {ticket.channel === 'IN_APP' && (
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold text-support bg-support/10">
+                Relatório do usuário
+              </span>
+            )}
           </div>
           <h1 className="text-lg font-bold mt-1">{ticket.title}</h1>
           <div className="flex items-center gap-4 mt-2 text-xs text-text-muted">
@@ -202,7 +207,7 @@ export const TicketDetailPage: React.FC = () => {
       {/* Metadata */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <MetaItem label="Categoria" value={CATEGORY_LABELS[ticket.category] ?? ticket.category} />
-        <MetaItem label="Criado por" value={ticket.createdBy.name} />
+        <MetaItem label="Criado por" value={ticket.createdBy?.name ?? '—'} />
         <MetaItem label="Responsável" value={ticket.assignedTo?.name ?? '—'} />
         <MetaItem label="Prioridade" value={ticket.priority} />
       </div>

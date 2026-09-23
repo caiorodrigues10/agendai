@@ -24,6 +24,7 @@ import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { FIELD_CONTROL, FORM_FOOTER } from '../ui/Field';
 import { SmartSelect } from '../ui/SmartSelect';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 const TYPE_META: Record<string, { icon: React.ReactNode; label: string; description: string }> = {
   GOOGLE_CALENDAR: {
@@ -117,6 +118,7 @@ export const IntegrationsPanel: React.FC = () => {
   const [testResult, setTestResult] = useState<{ id: string; ok: boolean; message: string } | null>(null);
 
   const [syncingId, setSyncingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [syncResult, setSyncResult] = useState<{ id: string; count: number } | null>(null);
 
   const [logsIntegrationId, setLogsIntegrationId] = useState<string | null>(null);
@@ -211,12 +213,13 @@ export const IntegrationsPanel: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     if (!barbershopId) return;
-    if (!window.confirm('Tem certeza que deseja remover esta integração?')) return;
     try {
       await integrationsApi.delete(barbershopId, id);
       await load();
     } catch (err) {
       setError(getErrorMessage(err));
+    } finally {
+      setConfirmDeleteId(null);
     }
   };
 
@@ -354,7 +357,7 @@ export const IntegrationsPanel: React.FC = () => {
                     Logs
                   </button>
                   <button
-                    onClick={() => handleDelete(integration.id)}
+                    onClick={() => setConfirmDeleteId(integration.id)}
                     className="flex items-center gap-1.5 rounded-lg border border-danger/30 px-3 py-1.5 text-xs font-medium text-danger hover:bg-danger/5 transition-colors ml-auto"
                   >
                     <Trash2 size={24} className="w-3.5 h-3.5" />
@@ -661,6 +664,15 @@ export const IntegrationsPanel: React.FC = () => {
           </div>
         </div>
       )}
+      <ConfirmDialog
+        open={confirmDeleteId !== null}
+        title="Remover integração"
+        message="Tem certeza que deseja remover esta integração?"
+        confirmLabel="Remover"
+        variant="danger"
+        onConfirm={() => confirmDeleteId && void handleDelete(confirmDeleteId)}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   );
 };

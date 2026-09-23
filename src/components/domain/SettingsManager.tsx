@@ -8,6 +8,7 @@ import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { finiteNumber } from '../../utils/weatherVisuals';
 import { AccountPrivacyPanel } from './AccountPrivacyPanel';
+import { SupportPanel } from './SupportPanel';
 import { OwnerNotificationsPanel } from './OwnerNotificationsPanel';
 import { QueueAlertSettings } from './QueueAlertSettings';
 import { ShopFloorControls } from './ShopFloorControls';
@@ -37,6 +38,7 @@ import {
   LuCloudSun as CloudSun,
   LuSun as Sun,
   LuMail as Mail,
+  LuCircleHelp as CircleHelp,
 } from 'react-icons/lu';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import type { AppointmentPolicy } from '../../infra/barbershopApi';
@@ -670,7 +672,7 @@ const OperationModeSection: React.FC<OperationModeSectionProps> = ({
   );
 };
 
-type SettingsSection = 'account' | 'shop' | 'whatsapp' | 'operation' | 'email' | 'privacy';
+type SettingsSection = 'account' | 'shop' | 'whatsapp' | 'operation' | 'email' | 'privacy' | 'help';
 
 const SETTINGS_SECTIONS: { id: SettingsSection; label: string; icon: React.ElementType }[] = [
   { id: 'account', label: 'Conta', icon: UserRound },
@@ -679,6 +681,7 @@ const SETTINGS_SECTIONS: { id: SettingsSection; label: string; icon: React.Eleme
   { id: 'operation', label: 'Funcionamento', icon: Clock },
   { id: 'email', label: 'E-mail e notificações', icon: Mail },
   { id: 'privacy', label: 'Privacidade', icon: ShieldCheck },
+  { id: 'help', label: 'Ajuda e suporte', icon: CircleHelp },
 ];
 
 interface SettingsManagerProps {
@@ -983,6 +986,8 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
       )}
 
       {activeSection === 'privacy' && <AccountPrivacyPanel onNotify={onNotify} />}
+
+      {activeSection === 'help' && <SupportPanel />}
 
       {activeSection === 'email' && barbershopId && (
         <div className="space-y-4">

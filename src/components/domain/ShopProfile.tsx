@@ -26,6 +26,7 @@ import { barbershopApi } from '../../infra/barbershopApi';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -128,6 +129,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
   const [logoUrl, setLogoUrl] = useState<string | undefined>(settings.logoUrl);
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoError, setLogoError] = useState<string | null>(null);
+  const [confirmDeleteLogo, setConfirmDeleteLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -157,7 +159,6 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
 
   const handleDeleteLogo = async () => {
     if (!barbershopId || !logoUrl) return;
-    if (!confirm('Remover a logo do salão?')) return;
 
     setLogoUploading(true);
     setLogoError(null);
@@ -171,6 +172,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
       onNotify?.(msg, 'error');
     } finally {
       setLogoUploading(false);
+      setConfirmDeleteLogo(false);
     }
   };
 
@@ -379,7 +381,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
           {canEditLogo && logoUrl && !logoUploading && (
             <button
               type="button"
-              onClick={handleDeleteLogo}
+              onClick={() => setConfirmDeleteLogo(true)}
               className="mx-auto mb-2 px-3 py-1.5 text-[11px] font-medium text-danger bg-danger/10 rounded-lg border border-danger/20 hover:bg-danger/20 transition-colors flex items-center gap-1"
             >
               <Trash2 size={12} /> Remover logo
@@ -743,6 +745,16 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
           AGENDAI
         </p>
       )}
+      <ConfirmDialog
+        open={confirmDeleteLogo}
+        title="Remover logo"
+        message="Remover a logo do salão?"
+        confirmLabel="Remover"
+        variant="danger"
+        loading={logoUploading}
+        onConfirm={() => void handleDeleteLogo()}
+        onCancel={() => setConfirmDeleteLogo(false)}
+      />
     </div>
   );
 };

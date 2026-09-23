@@ -11,6 +11,7 @@ import { organizationsApi, Organization } from '@/infra/organizationsApi';
 import { OrganizationSchema, OrganizationFormData } from '@/schemas';
 import { getErrorMessage } from '@/utils/errorMessage';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR } from '../ui/Field';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 const primary =
   'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-accent-fg hover:bg-accent-hover disabled:opacity-50';
@@ -25,6 +26,7 @@ export function OrganizationsPanel() {
   const [error, setError] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -64,7 +66,7 @@ export function OrganizationsPanel() {
     }
   }
   async function handleDelete(id: string) {
-    if (deleting || !confirm('Excluir organização?')) return;
+    if (deleting) return;
     setDeleting(true);
     setError('');
     try {
@@ -75,6 +77,7 @@ export function OrganizationsPanel() {
       setError(getErrorMessage(err, 'Não foi possível excluir a organização.'));
     } finally {
       setDeleting(false);
+      setConfirmDeleteId(null);
     }
   }
   return (
@@ -239,7 +242,7 @@ export function OrganizationsPanel() {
                   <button
                     type="button"
                     disabled={deleting}
-                    onClick={() => void handleDelete(org.id)}
+                    onClick={() => setConfirmDeleteId(org.id)}
                     className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-danger/30 px-3 py-2 text-sm text-danger hover:bg-danger/10 disabled:opacity-50"
                   >
                     <Trash2 size={16} />
@@ -251,6 +254,16 @@ export function OrganizationsPanel() {
           ))}
         </div>
       )}
+      <ConfirmDialog
+        open={confirmDeleteId !== null}
+        title="Excluir organização"
+        message="Tem certeza que deseja excluir esta organização? Esta ação não pode ser desfeita."
+        confirmLabel="Excluir"
+        variant="danger"
+        loading={deleting}
+        onConfirm={() => confirmDeleteId && void handleDelete(confirmDeleteId)}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </section>
   );
 }

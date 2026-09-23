@@ -7,6 +7,7 @@ import { AddCustomerForm } from '../components/domain/AddCustomerForm';
 import { ReturnToQueueModal } from '../components/domain/ReturnToQueueModal';
 import { ServiceManager } from '../components/domain/ServiceManager';
 import { SettingsManager } from '../components/domain/SettingsManager';
+import { SupportPanel } from '../components/domain/SupportPanel';
 import { AccountPrivacyPanel } from '../components/domain/AccountPrivacyPanel';
 import { ProfileAvatarSection } from '../components/domain/ProfileAvatarSection';
 import { ProfileSettingsPanel } from '../components/domain/ProfileSettingsPanel';
@@ -634,6 +635,8 @@ export const StaffDashboard: React.FC = () => {
               )}
             </>
           )}
+
+          {activeTab === 'support' && <SupportPanel />}
 
           {activeTab === 'profile' && settings && (
             <ShopProfile

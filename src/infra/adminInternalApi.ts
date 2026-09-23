@@ -45,7 +45,7 @@ export interface Ticket {
   cancelledAt: string | null;
   cancelReason: string | null;
   resolveNote: string | null;
-  createdBy: { id: string; name: string; avatarUrl?: string | null };
+  createdBy?: { id: string; name: string; email?: string; avatarUrl?: string | null };
   assignedTo: { id: string; name: string; avatarUrl?: string | null } | null;
   barbershop: { id: string; name: string } | null;
   comments?: TicketComment[];

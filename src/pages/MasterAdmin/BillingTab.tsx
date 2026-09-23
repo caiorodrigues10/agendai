@@ -39,6 +39,8 @@ import { paymentsApi, Refund } from '../../infra/paymentsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { NotificationDeliveriesPanel } from '../../components/domain/NotificationDeliveriesPanel';
 import { NotificationHealthPanel } from '../../components/domain/NotificationHealthPanel';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { Toast } from '../../components/ui/Toast';
 
 // ─────────────────────────────────────────────
 // Helpers
@@ -704,6 +706,8 @@ const SubscriptionsSection: React.FC = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [confirmCancel, setConfirmCancel] = useState<{ id: string; name?: string } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'bot' } | null>(null);
 
   const fetchEconomics = useCallback(async () => {
     try {
@@ -743,15 +747,16 @@ const SubscriptionsSection: React.FC = () => {
   }, [fetchSubs]);
 
   const handleCancel = async (barbershopId: string, shopName?: string) => {
-    if (!window.confirm(`Cancelar assinatura de "${shopName ?? barbershopId}"?`)) return;
     setCancellingId(barbershopId);
     try {
       await adminApi.cancelSubscription(barbershopId);
       await Promise.all([fetchSubs(), fetchEconomics()]);
+      setToast({ message: 'Assinatura cancelada.', type: 'success' });
     } catch (err) {
       setError(errorMessage(err));
     } finally {
       setCancellingId(null);
+      setConfirmCancel(null);
     }
   };
 
@@ -909,7 +914,7 @@ const SubscriptionsSection: React.FC = () => {
                       <td className="px-6 py-4">
                         {s.status !== 'CANCELED' ? (
                           <button
-                            onClick={() => handleCancel(s.barbershopId, s.barbershopName)}
+                            onClick={() => setConfirmCancel({ id: s.barbershopId, name: s.barbershopName })}
                             disabled={cancellingId === s.barbershopId}
                             className="text-[10px] font-bold uppercase tracking-wider text-danger hover:underline disabled:opacity-50"
                           >
@@ -928,6 +933,17 @@ const SubscriptionsSection: React.FC = () => {
           <PaginationBar meta={meta} page={page} loading={loading} onPageChange={setPage} />
         </div>
       )}
+      <ConfirmDialog
+        open={confirmCancel !== null}
+        title="Cancelar assinatura"
+        message={`Cancelar assinatura de "${confirmCancel?.name ?? confirmCancel?.id ?? ''}"?`}
+        confirmLabel="Cancelar assinatura"
+        variant="danger"
+        loading={cancellingId !== null}
+        onConfirm={() => confirmCancel && void handleCancel(confirmCancel.id, confirmCancel.name)}
+        onCancel={() => setConfirmCancel(null)}
+      />
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };
@@ -1193,6 +1209,9 @@ const PlansSection: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<PlanItem | null>(null);
+  const [confirmDeactivate, setConfirmDeactivate] = useState<PlanItem | null>(null);
+  const [deactivating, setDeactivating] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'bot' } | null>(null);
 
   const fetchPlans = useCallback(async () => {
     setLoading(true);
@@ -1212,18 +1231,16 @@ const PlansSection: React.FC = () => {
   }, [fetchPlans]);
 
   const handleDeactivate = async (plan: PlanItem) => {
-    if (
-      !confirm(
-        `Desativar o plano "${plan.name}"? Salões que já assinam continuam até o vencimento.`
-      )
-    )
-      return;
+    setDeactivating(true);
     try {
       const res = await adminApi.deactivatePlan(plan.id);
-      if (res.data?.info) alert(res.data.info);
+      if (res.data?.info) setToast({ message: res.data.info, type: 'success' });
       fetchPlans();
     } catch (err) {
-      alert(errorMessage(err));
+      setToast({ message: errorMessage(err), type: 'error' });
+    } finally {
+      setDeactivating(false);
+      setConfirmDeactivate(null);
     }
   };
 
@@ -1320,7 +1337,7 @@ const PlansSection: React.FC = () => {
                 </button>
                 {plan.active && (
                   <button
-                    onClick={() => handleDeactivate(plan)}
+                    onClick={() => setConfirmDeactivate(plan)}
                     className="flex items-center justify-center gap-1.5 px-3 py-2 border border-red-500/20 rounded-xl text-xs font-bold text-red-400 hover:bg-red-500/10 transition-all"
                   >
                     <Trash2 size={12} />
@@ -1343,6 +1360,17 @@ const PlansSection: React.FC = () => {
           }}
         />
       )}
+      <ConfirmDialog
+        open={confirmDeactivate !== null}
+        title="Desativar plano"
+        message={`Desativar o plano "${confirmDeactivate?.name ?? ''}"? Salões que já assinam continuam até o vencimento.`}
+        confirmLabel="Desativar"
+        variant="danger"
+        loading={deactivating}
+        onConfirm={() => confirmDeactivate && void handleDeactivate(confirmDeactivate)}
+        onCancel={() => setConfirmDeactivate(null)}
+      />
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };
@@ -1360,6 +1388,8 @@ const BlockedSection: React.FC = () => {
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('active');
   const [unblockingId, setUnblockingId] = useState<string | null>(null);
+  const [confirmUnblock, setConfirmUnblock] = useState<BlockedEntityItem | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'bot' } | null>(null);
 
   const fetchEntities = useCallback(async () => {
     setLoading(true);
@@ -1386,20 +1416,16 @@ const BlockedSection: React.FC = () => {
   }, [fetchEntities]);
 
   const handleUnblock = async (entity: BlockedEntityItem) => {
-    if (
-      !confirm(
-        `Desbloquear ${entity.type} ${entity.value}? O acesso será restaurado imediatamente.`
-      )
-    )
-      return;
     setUnblockingId(entity.id);
     try {
       await adminApi.unblockEntity(entity.id);
       fetchEntities();
+      setToast({ message: 'Entidade desbloqueada.', type: 'success' });
     } catch (err) {
-      alert(errorMessage(err));
+      setToast({ message: errorMessage(err), type: 'error' });
     } finally {
       setUnblockingId(null);
+      setConfirmUnblock(null);
     }
   };
 
@@ -1493,7 +1519,7 @@ const BlockedSection: React.FC = () => {
                       <td className="px-6 py-4 text-right">
                         {entity.isActive && (
                           <button
-                            onClick={() => handleUnblock(entity)}
+                            onClick={() => setConfirmUnblock(entity)}
                             disabled={unblockingId === entity.id}
                             className="inline-flex items-center gap-1.5 text-xs font-bold text-green-400 hover:text-green-300 border border-green-500/20 hover:bg-green-500/10 rounded-lg px-3 py-1.5 transition-all disabled:opacity-50"
                           >
@@ -1515,6 +1541,16 @@ const BlockedSection: React.FC = () => {
           <PaginationBar meta={meta} page={page} loading={loading} onPageChange={setPage} />
         </div>
       )}
+      <ConfirmDialog
+        open={confirmUnblock !== null}
+        title="Desbloquear entidade"
+        message={`Desbloquear ${confirmUnblock?.type ?? ''} ${confirmUnblock?.value ?? ''}? O acesso será restaurado imediatamente.`}
+        confirmLabel="Desbloquear"
+        loading={unblockingId !== null}
+        onConfirm={() => confirmUnblock && void handleUnblock(confirmUnblock)}
+        onCancel={() => setConfirmUnblock(null)}
+      />
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };

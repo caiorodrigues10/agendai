@@ -3,6 +3,7 @@ import { Avatar } from '../ui/Avatar';
 import { usersApi } from '../../infra/usersApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { LuCamera as Camera, LuTrash2 as Trash2, LuLoaderCircle as Loader2 } from 'react-icons/lu';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 interface ProfileAvatarSectionProps {
   userId: string;
@@ -21,6 +22,7 @@ export const ProfileAvatarSection: React.FC<ProfileAvatarSectionProps> = ({
 }) => {
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,7 +50,6 @@ export const ProfileAvatarSection: React.FC<ProfileAvatarSectionProps> = ({
   };
 
   const handleDelete = async () => {
-    if (!confirm('Remover foto de perfil?')) return;
     setDeleting(true);
     try {
       await usersApi.deleteAvatar(userId);
@@ -58,6 +59,7 @@ export const ProfileAvatarSection: React.FC<ProfileAvatarSectionProps> = ({
       onNotify(getErrorMessage(err, 'Erro ao remover foto'), 'error');
     } finally {
       setDeleting(false);
+      setConfirmDelete(false);
     }
   };
 
@@ -101,7 +103,7 @@ export const ProfileAvatarSection: React.FC<ProfileAvatarSectionProps> = ({
             {avatarUrl && (
               <button
                 type="button"
-                onClick={handleDelete}
+                onClick={() => setConfirmDelete(true)}
                 disabled={deleting}
                 className="px-3 py-1.5 text-xs font-medium text-danger bg-danger/10 rounded-lg border border-danger/20 hover:bg-danger/20 transition-colors flex items-center gap-1"
               >
@@ -113,6 +115,16 @@ export const ProfileAvatarSection: React.FC<ProfileAvatarSectionProps> = ({
           <p className="text-[11px] text-text-muted">JPEG, PNG ou WebP. Máximo 5 MB.</p>
         </div>
       </div>
+      <ConfirmDialog
+        open={confirmDelete}
+        title="Remover foto"
+        message="Remover foto de perfil?"
+        confirmLabel="Remover"
+        variant="danger"
+        loading={deleting}
+        onConfirm={() => void handleDelete()}
+        onCancel={() => setConfirmDelete(false)}
+      />
     </div>
   );
 };

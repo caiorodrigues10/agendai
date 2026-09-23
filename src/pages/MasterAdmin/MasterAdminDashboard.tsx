@@ -60,6 +60,9 @@ import { BillingTab } from './BillingTab';
 import { ReferralsTab } from './ReferralsTab';
 import { CrmBackfillPanel } from '../../components/domain/CrmBackfillPanel';
 import { SmartSelect } from '../../components/ui/SmartSelect';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { PromptModal } from '../../components/ui/PromptModal';
+import { Toast } from '../../components/ui/Toast';
 
 // ─────────────────────────────────────────────
 // Types
@@ -534,6 +537,8 @@ const ManageBarbershopModal: React.FC<ManageBarbershopModalProps> = ({
 }) => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmToggle, setConfirmToggle] = useState(false);
+  const [showRejectPrompt, setShowRejectPrompt] = useState(false);
 
   const mutate = async (body: {
     active?: boolean;
@@ -554,17 +559,13 @@ const ManageBarbershopModal: React.FC<ManageBarbershopModalProps> = ({
   };
 
   const handleToggleActive = () => {
-    const target = !shop.active;
-    if (!confirm(`Deseja realmente ${target ? 'ativar' : 'desativar'} o salão "${shop.name}"?`))
-      return;
-    mutate({ active: target });
+    setConfirmToggle(true);
   };
 
   const handleApprove = () => mutate({ approvalStatus: 'APPROVED' });
 
   const handleReject = () => {
-    const reason = prompt('Motivo da rejeição (opcional):') ?? undefined;
-    mutate({ approvalStatus: 'REJECTED', ...(reason ? { rejectionReason: reason } : {}) });
+    setShowRejectPrompt(true);
   };
 
   return (
@@ -697,6 +698,35 @@ const ManageBarbershopModal: React.FC<ManageBarbershopModalProps> = ({
           </button>
         </div>
       </motion.div>
+      <ConfirmDialog
+        open={confirmToggle}
+        title={shop.active ? 'Desativar salão' : 'Ativar salão'}
+        message={`Deseja realmente ${shop.active ? 'desativar' : 'ativar'} o salão "${shop.name}"?`}
+        confirmLabel={shop.active ? 'Desativar' : 'Ativar'}
+        variant={shop.active ? 'danger' : 'default'}
+        loading={saving}
+        onConfirm={() => {
+          setConfirmToggle(false);
+          mutate({ active: !shop.active });
+        }}
+        onCancel={() => setConfirmToggle(false)}
+      />
+      <PromptModal
+        open={showRejectPrompt}
+        title="Rejeitar salão"
+        message="Motivo da rejeição (opcional):"
+        placeholder="Descreva o motivo..."
+        confirmLabel="Rejeitar"
+        loading={saving}
+        onConfirm={value => {
+          setShowRejectPrompt(false);
+          mutate({
+            approvalStatus: 'REJECTED',
+            ...(value.trim() ? { rejectionReason: value.trim() } : {}),
+          });
+        }}
+        onCancel={() => setShowRejectPrompt(false)}
+      />
     </div>
   );
 };
@@ -1030,13 +1060,15 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
     active: user?.active ?? true,
     barbershopId: user?.barbershopId || '',
   });
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.barbershopId && formData.role !== 'MASTER_ADMIN') {
-      alert('Por favor, selecione um salão para este usuário.');
+      setValidationError('Por favor, selecione um salão para este usuário.');
       return;
     }
+    setValidationError(null);
     onSave(formData);
   };
 
@@ -1060,6 +1092,11 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {validationError && (
+            <div className="bg-red-500/5 border border-red-500/20 rounded-xl px-4 py-2.5 text-xs text-red-400">
+              {validationError}
+            </div>
+          )}
           <div>
             <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
               Nome Completo
@@ -1283,6 +1320,9 @@ const UsersTab: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<UserListItem | null>(null);
   const [logUser, setLogUser] = useState<UserListItem | null>(null);
   const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'bot' } | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<UserListItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -1321,20 +1361,25 @@ const UsersTab: React.FC = () => {
       }
       setModalOpen(false);
       fetchUsers();
+      setToast({ message: 'Usuário salvo com sucesso.', type: 'success' });
     } catch (err) {
-      alert('Erro ao salvar usuário');
+      setToast({ message: 'Erro ao salvar usuário', type: 'error' });
     } finally {
       setSaving(false);
     }
   };
 
   const handleDeleteUser = async (user: UserListItem) => {
-    if (!confirm(`Deseja realmente excluir ${user.name}? Esta ação é irreversível.`)) return;
+    setDeleting(true);
     try {
       await adminApi.deleteUser(user.id);
       fetchUsers();
+      setToast({ message: 'Usuário excluído.', type: 'success' });
     } catch (err) {
-      alert('Erro ao excluir usuário');
+      setToast({ message: 'Erro ao excluir usuário', type: 'error' });
+    } finally {
+      setDeleting(false);
+      setConfirmDelete(null);
     }
   };
 
@@ -1503,7 +1548,7 @@ const UsersTab: React.FC = () => {
                         </button>
                         <div className="w-px h-4 bg-surface-2 mx-0.5" />
                         <button
-                          onClick={() => handleDeleteUser(u)}
+                          onClick={() => setConfirmDelete(u)}
                           title="Excluir"
                           className="p-2 text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
                         >
@@ -1555,6 +1600,18 @@ const UsersTab: React.FC = () => {
       )}
 
       {logUser && <AuditLogDrawer user={logUser} onClose={() => setLogUser(null)} />}
+
+      <ConfirmDialog
+        open={confirmDelete !== null}
+        title="Excluir usuário"
+        message={`Deseja realmente excluir ${confirmDelete?.name ?? ''}? Esta ação é irreversível.`}
+        confirmLabel="Excluir"
+        variant="danger"
+        loading={deleting}
+        onConfirm={() => confirmDelete && void handleDeleteUser(confirmDelete)}
+        onCancel={() => setConfirmDelete(null)}
+      />
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };

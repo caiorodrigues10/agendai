@@ -3,6 +3,8 @@ import {
   LuLoader, LuTriangleAlert, LuMail, LuShield, LuShieldOff, LuRefreshCcw, LuSend, LuX
 } from 'react-icons/lu';
 import { adminInternalApi, TeamMember, Invitation } from '../../infra/adminInternalApi';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { Toast } from '../../components/ui/Toast';
 
 export const TeamPage: React.FC = () => {
   const [members, setMembers] = useState<TeamMember[]>([]);
@@ -12,6 +14,9 @@ export const TeamPage: React.FC = () => {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviting, setInviting] = useState(false);
   const [search, setSearch] = useState('');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'bot' } | null>(null);
+  const [confirm, setConfirm] = useState<{ type: 'deactivate' | 'revoke'; id: string; name?: string } | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -36,20 +41,25 @@ export const TeamPage: React.FC = () => {
       await adminInternalApi.inviteTeamMember(inviteEmail.trim());
       setInviteEmail('');
       load();
+      setToast({ message: 'Convite enviado.', type: 'success' });
     } catch (err: any) {
-      alert(err?.message ?? 'Erro ao enviar convite.');
+      setToast({ message: err?.message ?? 'Erro ao enviar convite.', type: 'error' });
     } finally {
       setInviting(false);
     }
   };
 
-  const handleDeactivate = async (id: string, name: string) => {
-    if (!confirm(`Desativar ${name}? Esta ação revoga o acesso imediatamente.`)) return;
+  const handleDeactivate = async (id: string) => {
+    setConfirmLoading(true);
     try {
       await adminInternalApi.deactivateMember(id);
       load();
+      setToast({ message: 'Membro desativado.', type: 'success' });
     } catch (err: any) {
-      alert(err?.message ?? 'Erro ao desativar.');
+      setToast({ message: err?.message ?? 'Erro ao desativar.', type: 'error' });
+    } finally {
+      setConfirmLoading(false);
+      setConfirm(null);
     }
   };
 
@@ -57,18 +67,23 @@ export const TeamPage: React.FC = () => {
     try {
       await adminInternalApi.resendInvitation(id);
       load();
+      setToast({ message: 'Convite reenviado.', type: 'success' });
     } catch (err: any) {
-      alert(err?.message ?? 'Erro ao reenviar.');
+      setToast({ message: err?.message ?? 'Erro ao reenviar.', type: 'error' });
     }
   };
 
   const handleRevoke = async (id: string) => {
-    if (!confirm('Revogar este convite?')) return;
+    setConfirmLoading(true);
     try {
       await adminInternalApi.revokeInvitation(id);
       load();
+      setToast({ message: 'Convite revogado.', type: 'success' });
     } catch (err: any) {
-      alert(err?.message ?? 'Erro ao revogar.');
+      setToast({ message: err?.message ?? 'Erro ao revogar.', type: 'error' });
+    } finally {
+      setConfirmLoading(false);
+      setConfirm(null);
     }
   };
 
@@ -139,7 +154,7 @@ export const TeamPage: React.FC = () => {
                 </div>
                 {m.active && (
                   <button
-                    onClick={() => handleDeactivate(m.id, m.name)}
+                    onClick={() => setConfirm({ type: 'deactivate', id: m.id, name: m.name })}
                     className="p-1.5 rounded hover:bg-danger/10 text-danger"
                     title="Desativar"
                   >
@@ -172,7 +187,7 @@ export const TeamPage: React.FC = () => {
                   <button onClick={() => handleResend(inv.id)} className="p-1.5 rounded hover:bg-surface-2" title="Reenviar">
                     <LuRefreshCcw size={14} className="text-text-muted" />
                   </button>
-                  <button onClick={() => handleRevoke(inv.id)} className="p-1.5 rounded hover:bg-danger/10" title="Revogar">
+                  <button onClick={() => setConfirm({ type: 'revoke', id: inv.id })} className="p-1.5 rounded hover:bg-danger/10" title="Revogar">
                     <LuX size={14} className="text-danger" />
                   </button>
                 </div>
@@ -181,6 +196,27 @@ export const TeamPage: React.FC = () => {
           </div>
         </div>
       )}
+      <ConfirmDialog
+        open={confirm?.type === 'deactivate'}
+        title="Desativar membro"
+        message={`Desativar ${confirm?.name ?? ''}? Esta ação revoga o acesso imediatamente.`}
+        confirmLabel="Desativar"
+        variant="danger"
+        loading={confirmLoading}
+        onConfirm={() => confirm && void handleDeactivate(confirm.id)}
+        onCancel={() => setConfirm(null)}
+      />
+      <ConfirmDialog
+        open={confirm?.type === 'revoke'}
+        title="Revogar convite"
+        message="Revogar este convite?"
+        confirmLabel="Revogar"
+        variant="danger"
+        loading={confirmLoading}
+        onConfirm={() => confirm && void handleRevoke(confirm.id)}
+        onCancel={() => setConfirm(null)}
+      />
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };

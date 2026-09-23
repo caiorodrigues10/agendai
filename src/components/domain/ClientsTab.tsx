@@ -24,10 +24,10 @@ type ClientsSection = 'clientes' | 'analises' | 'organizar';
 
 const VALID_SECTIONS: ClientsSection[] = ['clientes', 'analises', 'organizar'];
 
-const SECTION_META: { id: ClientsSection; label: string; icon: React.ReactNode; requiresAnalytics: boolean; requiresTools: boolean }[] = [
+const SECTION_META: { id: ClientsSection; label: string; shortLabel?: string; icon: React.ReactNode; requiresAnalytics: boolean; requiresTools: boolean }[] = [
   { id: 'clientes', label: 'Clientes', icon: <Users size={14} />, requiresAnalytics: false, requiresTools: false },
   { id: 'analises', label: 'Análises', icon: <BarChart3 size={14} />, requiresAnalytics: true, requiresTools: false },
-  { id: 'organizar', label: 'Organizar cadastros', icon: <Settings2 size={14} />, requiresAnalytics: true, requiresTools: true },
+  { id: 'organizar', label: 'Organizar cadastros', shortLabel: 'Organizar', icon: <Settings2 size={14} />, requiresAnalytics: true, requiresTools: true },
 ];
 
 interface ClientsTabProps {
@@ -143,14 +143,16 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
               key={s.id}
               type="button"
               onClick={() => setSection(s.id)}
-              className={`min-h-10 flex-1 rounded-lg text-xs font-bold transition-colors ${
+              aria-current={section === s.id ? 'page' : undefined}
+              className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-1.5 text-xs font-bold transition-colors sm:px-3 ${
                 section === s.id
                   ? 'bg-accent text-accent-fg'
                   : 'text-text-muted hover:bg-bg hover:text-text-secondary'
               }`}
             >
-              <span className="mr-1 inline-flex">{s.icon}</span>
-              {s.label}
+              <span className="shrink-0 inline-flex">{s.icon}</span>
+              <span className="sm:hidden">{s.shortLabel ?? s.label}</span>
+              <span className="hidden sm:inline">{s.label}</span>
             </button>
           ))}
         </nav>

@@ -42,6 +42,7 @@ export const TicketsPage: React.FC = () => {
   const status = searchParams.get('status') ?? '';
   const priority = searchParams.get('priority') ?? '';
   const unassigned = searchParams.get('unassigned') ?? '';
+  const channel = searchParams.get('channel') ?? '';
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -49,6 +50,7 @@ export const TicketsPage: React.FC = () => {
     try {
       const res = await adminInternalApi.listTickets({
         page, limit: 25, search, status, priority, unassigned: unassigned || undefined,
+        channel: channel || undefined,
       });
       setTickets(res.data);
       setMeta(res.meta);
@@ -57,7 +59,7 @@ export const TicketsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, search, status, priority, unassigned]);
+  }, [page, search, status, priority, unassigned, channel]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -116,6 +118,12 @@ export const TicketsPage: React.FC = () => {
             options={[['LOW', 'Baixa'], ['NORMAL', 'Normal'], ['HIGH', 'Alta'], ['URGENT', 'Urgente']]}
             onChange={(v) => updateParam('priority', v)}
           />
+          <FilterChip
+            label="Origem"
+            value={channel}
+            options={[['IN_APP', 'App do usuário'], ['OTHER', 'Interno']]}
+            onChange={(v) => updateParam('channel', v)}
+          />
           <button
             onClick={() => updateParam('unassigned', unassigned ? '' : 'true')}
             className={`px-3 py-1 rounded-full text-xs border transition-colors ${
@@ -145,38 +153,7 @@ export const TicketsPage: React.FC = () => {
       ) : (
         <div className="bg-surface border border-border rounded-xl overflow-hidden divide-y divide-border/50">
           {tickets.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => navigate(`/master/tickets/${t.id}`)}
-              className="w-full text-left flex items-center gap-4 p-4 hover:bg-surface-2 transition-colors"
-            >
-              <span className={`px-2 py-0.5 rounded text-[10px] font-bold shrink-0 ${PRIORITY_COLORS[t.priority] ?? ''}`}>
-                {t.priority}
-              </span>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-mono text-text-muted">{t.protocol}</span>
-                  <span className="text-sm font-medium truncate">{t.title}</span>
-                </div>
-                <div className="flex items-center gap-3 mt-1">
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${STATUS_COLORS[t.status] ?? ''}`}>
-                    {STATUS_LABELS[t.status] ?? t.status}
-                  </span>
-                  {t.barbershop && <span className="text-xs text-text-muted">{t.barbershop.name}</span>}
-                  <span className="text-xs text-text-muted">
-                    {new Date(t.createdAt).toLocaleDateString('pt-BR')}
-                  </span>
-                </div>
-              </div>
-              <div className="text-right shrink-0">
-                {t.assignedTo ? (
-                  <span className="text-xs text-text-muted">{t.assignedTo.name}</span>
-                ) : (
-                  <span className="text-xs text-warning">Sem responsável</span>
-                )}
-              </div>
-              <LuArrowRight size={14} className="text-text-muted shrink-0" />
-            </button>
+            <TicketRow key={t.id} ticket={t} onOpen={() => navigate(`/master/tickets/${t.id}`)} />
           ))}
         </div>
       )}
@@ -207,6 +184,48 @@ export const TicketsPage: React.FC = () => {
     </div>
   );
 };
+
+// ── TicketRow ─────────────────────────────────────────────────────────────────
+
+const TicketRow: React.FC<{ ticket: Ticket; onOpen: () => void }> = ({ ticket: t, onOpen }) => (
+  <button
+    onClick={onOpen}
+    className="w-full text-left flex items-center gap-4 p-4 hover:bg-surface-2 transition-colors"
+  >
+    <span className={`px-2 py-0.5 rounded text-[10px] font-bold shrink-0 ${PRIORITY_COLORS[t.priority] ?? ''}`}>
+      {t.priority}
+    </span>
+    <div className="flex-1 min-w-0">
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-mono text-text-muted">{t.protocol}</span>
+        <span className="text-sm font-medium truncate">{t.title}</span>
+        {t.channel === 'IN_APP' && (
+          <span className="px-2 py-0.5 rounded text-[10px] font-bold text-support bg-support/10 shrink-0">
+            App
+          </span>
+        )}
+      </div>
+      <div className="flex items-center gap-3 mt-1">
+        <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${STATUS_COLORS[t.status] ?? ''}`}>
+          {STATUS_LABELS[t.status] ?? t.status}
+        </span>
+        {t.createdBy?.name && <span className="text-xs text-text-muted">{t.createdBy.name}</span>}
+        {t.barbershop && <span className="text-xs text-text-muted">{t.barbershop.name}</span>}
+        <span className="text-xs text-text-muted">
+          {new Date(t.createdAt).toLocaleDateString('pt-BR')}
+        </span>
+      </div>
+    </div>
+    <div className="text-right shrink-0">
+      {t.assignedTo ? (
+        <span className="text-xs text-text-muted">{t.assignedTo.name}</span>
+      ) : (
+        <span className="text-xs text-warning">Sem responsável</span>
+      )}
+    </div>
+    <LuArrowRight size={14} className="text-text-muted shrink-0" />
+  </button>
+);
 
 // ── FilterChip ────────────────────────────────────────────────────────────────
 

@@ -335,3 +335,26 @@ export const OrganizationSchema = z.object({
   logoUrl: z.string().trim().url('Informe uma URL válida').or(z.literal('')),
 });
 export type OrganizationFormData = z.infer<typeof OrganizationSchema>;
+
+// --- Support Report Schema ---
+export const SupportReportSchema = z.object({
+  category: z.enum(
+    ['BUG', 'WRONG_DATA', 'SUGGESTION', 'QUESTION', 'BILLING', 'ACCESS', 'SCHEDULE'],
+    { errorMap: () => ({ message: 'Selecione uma categoria' }) }
+  ),
+  priority: z.enum(['LOW', 'NORMAL', 'HIGH', 'URGENT'], {
+    errorMap: () => ({ message: 'Selecione uma prioridade' }),
+  }),
+  title: z
+    .string()
+    .trim()
+    .min(5, 'Informe um título com pelo menos 5 caracteres')
+    .max(200, 'Título pode ter no máximo 200 caracteres'),
+  description: z
+    .string()
+    .trim()
+    .min(10, 'Descreva o problema com pelo menos 10 caracteres')
+    .max(4000, 'Descrição pode ter no máximo 4000 caracteres'),
+});
+
+export type SupportReportFormData = z.infer<typeof SupportReportSchema>;
