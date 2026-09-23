@@ -47,7 +47,8 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
 
   return (
     <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
-      <div className="bg-surface w-full max-w-md rounded-2xl p-6 shadow-2xl border border-border max-h-[90vh] overflow-y-auto">
+      <div className="bg-surface w-full max-w-md rounded-2xl shadow-2xl border border-border max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-y-auto ag-scroll p-6">
         <h2 className="text-xl font-bold text-text-primary mb-6">
           {initialService ? 'Editar Serviço' : 'Novo Serviço'}
         </h2>
@@ -103,7 +104,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
 
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-2">Ícone</label>
-            <div className="bg-bg p-3 rounded-xl border border-border max-h-48 overflow-y-auto custom-scrollbar">
+            <div className="bg-bg p-3 rounded-xl border border-border max-h-48 overflow-y-auto ag-scroll">
               <div className="grid grid-cols-5 gap-2">
                 {ICON_OPTIONS.map(i => (
                   <button
@@ -139,6 +140,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({ initialService, onSave
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );

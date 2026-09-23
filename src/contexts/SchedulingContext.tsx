@@ -17,7 +17,7 @@ import { useBarbershopFilters } from './BarbershopFiltersContext';
 import { useAuth } from './AuthContext';
 import { getQueueInsight } from '../services/geminiService';
 import { useBarbershop } from './BarbershopContext';
-import { AvailabilitySlot, mapAppointmentFromApi } from '../utils/schedulingUtils';
+import { AvailabilitySlot, mapAppointmentFromApi, formatDateISO } from '../utils/schedulingUtils';
 import { logger } from '../utils/logger';
 
 interface SchedulingContextValue {
@@ -137,10 +137,10 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
           lastAppointmentQueryRef.current = { date };
         } else {
           const today = new Date();
-          const from = today.toISOString().split('T')[0];
+          const from = formatDateISO(today);
           const toDate = new Date(today);
           toDate.setDate(toDate.getDate() + 30);
-          const to = toDate.toISOString().split('T')[0];
+          const to = formatDateISO(toDate);
           params.from = from;
           params.to = to;
           lastAppointmentQueryRef.current = { from, to };
@@ -181,7 +181,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
         await refreshAppointments();
       }
 
-      const today = new Date().toISOString().split('T')[0];
+      const today = formatDateISO(new Date());
       await loadAvailability(today);
 
       setLoading(false);

@@ -120,7 +120,7 @@ export const BookPackageSessionsModal: React.FC<BookPackageSessionsModalProps> =
       onClick={onClose}
     >
       <div
-        className="bg-surface border border-border rounded-2xl w-full max-w-md max-h-[min(88dvh,calc(100dvh-2.5rem))] flex flex-col shadow-2xl"
+        className="bg-surface border border-border rounded-2xl w-full max-w-md max-h-[min(88dvh,calc(100dvh-2.5rem))] flex flex-col shadow-2xl overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         <div className="shrink-0 px-5 pt-5 pb-4 border-b border-border flex items-center justify-between">

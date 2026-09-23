@@ -441,7 +441,7 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
           previousFocusRef.current = null;
           onClose();
         }} className="absolute inset-0" />
-        <div className="relative flex max-h-[92dvh] w-full max-w-2xl flex-col rounded-t-2xl border border-border bg-surface shadow-2xl sm:rounded-2xl">
+        <div className="relative flex max-h-[92dvh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl border border-border bg-surface shadow-2xl sm:rounded-2xl">
           <header className="shrink-0 border-b border-border px-4 py-4 sm:px-5">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">

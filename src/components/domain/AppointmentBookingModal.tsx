@@ -207,7 +207,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
         className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-[2px]"
       />
       <div
-        className="relative bg-surface border border-border rounded-2xl w-full max-w-md max-h-[min(88dvh,calc(100dvh-2.5rem))] flex flex-col shadow-2xl animate-fade-in"
+        className="relative bg-surface border border-border rounded-2xl w-full max-w-md max-h-[min(88dvh,calc(100dvh-2.5rem))] flex flex-col shadow-2xl animate-fade-in overflow-hidden"
         role="dialog"
         aria-modal="true"
         aria-labelledby="appointment-booking-title"

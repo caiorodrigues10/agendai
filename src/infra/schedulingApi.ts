@@ -40,7 +40,9 @@ export interface QueueUpdatePayload {
 
 export const schedulingApi = {
   listQueue: async (barbershopId?: string, sessionId?: string) => {
-    const qs = buildQuery({ barbershopId, sessionId });
+    // status=all: o FinancialDashboard precisa do histórico (completed);
+    // a exibição da fila filtra activeQueue no cliente.
+    const qs = buildQuery({ barbershopId, sessionId, status: 'all' });
     // Token opcional: staff autenticado recebe a fila completa (com whatsapp);
     // visitante recebe a visão pública mascarada (customerId só da própria sessão).
     const token = authStorage.getAccessToken() || undefined;
