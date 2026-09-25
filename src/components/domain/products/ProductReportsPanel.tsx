@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { productsApi, type ProductAttentionItem, type ProductReports } from '../../../infra/productsApi';
 import { getErrorMessage } from '../../../utils/errorMessage';
+import { addDaysISO, todayISO } from '../../../utils/dateRanges';
 import { PRODUCT_PURPOSE_SHORT, productMoney } from './productMoney';
 
 const initialPeriod = () => ({
-  from: new Date(Date.now() - 29 * 86_400_000).toISOString().slice(0, 10),
-  to: new Date().toISOString().slice(0, 10),
+  from: addDaysISO(-29),
+  to: todayISO(),
 });
 
 interface Props {

@@ -22,6 +22,7 @@ const TYPE_LABELS: Record<string, string> = {
   PERCENTAGE: 'Percentual',
   FIXED: 'Valor fixo',
   FREE_SERVICE: 'Serviço grátis',
+  BUY_X_GET_Y: 'Compra + brinde',
 };
 
 const voucherTypeOptions = VOUCHER_TYPES.map(value => ({ value, label: TYPE_LABELS[value] }));
@@ -32,8 +33,14 @@ const STATUS_COLORS: Record<string, string> = {
   EXPIRED: 'bg-error/15 text-error',
 };
 
+const toDateInput = (iso?: string) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
 interface VoucherForm {
-  name: string;
   description: string;
   code: string;
   type: string;
@@ -46,7 +53,6 @@ interface VoucherForm {
 }
 
 const INITIAL_FORM: VoucherForm = {
-  name: '',
   description: '',
   code: '',
   type: 'PERCENTAGE',
@@ -77,7 +83,7 @@ export const VouchersPanel: React.FC = () => {
   const [validateCode, setValidateCode] = useState('');
   const [validateServiceId, setValidateServiceId] = useState('');
   const [validatePurchaseAmount, setValidatePurchaseAmount] = useState('');
-  const [validateResult, setValidateResult] = useState<{ valid: boolean; discount: number; message?: string } | null>(null);
+  const [validateResult, setValidateResult] = useState<{ valid: boolean; discount?: number; message?: string } | null>(null);
   const [validating, setValidating] = useState(false);
 
   // Detail & usages
@@ -112,7 +118,6 @@ export const VouchersPanel: React.FC = () => {
   const handleOpenEdit = (voucher: Voucher) => {
     setEditVoucher(voucher);
     setForm({
-      name: voucher.name,
       description: voucher.description || '',
       code: voucher.code,
       type: voucher.type,
@@ -120,20 +125,19 @@ export const VouchersPanel: React.FC = () => {
       minPurchase: voucher.minPurchase ? String(voucher.minPurchase) : '',
       maxUses: voucher.maxUses ? String(voucher.maxUses) : '',
       perClientLimit: voucher.perClientLimit ? String(voucher.perClientLimit) : '',
-      validFrom: voucher.validFrom ? voucher.validFrom.slice(0, 10) : '',
-      validUntil: voucher.validUntil ? voucher.validUntil.slice(0, 10) : '',
+      validFrom: toDateInput(voucher.validFrom),
+      validUntil: toDateInput(voucher.validUntil),
     });
     setShowForm(true);
   };
 
   const handleSave = async () => {
-    if (!barbershopId || !form.name.trim() || !form.value || !form.validUntil) return;
+    if (!barbershopId || !form.description.trim() || !form.value || !form.validUntil) return;
     setSaving(true);
     setError(null);
     try {
       const payload = {
-        name: form.name.trim(),
-        description: form.description.trim() || undefined,
+        description: form.description.trim(),
         code: form.code.trim() || undefined,
         type: form.type,
         value: parseFloat(form.value),
@@ -141,7 +145,7 @@ export const VouchersPanel: React.FC = () => {
         maxUses: form.maxUses ? parseInt(form.maxUses, 10) : undefined,
         perClientLimit: form.perClientLimit ? parseInt(form.perClientLimit, 10) : undefined,
         validFrom: form.validFrom || undefined,
-        validUntil: new Date(form.validUntil).toISOString(),
+        validUntil: form.validUntil,
       };
 
       if (editVoucher) {
@@ -303,7 +307,7 @@ export const VouchersPanel: React.FC = () => {
                   {validateResult.valid ? 'Voucher válido!' : 'Voucher inválido'}
                 </span>
               </div>
-              {validateResult.valid && (
+              {validateResult.valid && validateResult.discount != null && (
                 <p className="text-xs text-text-secondary">
                   Desconto: <strong className="text-accent">{fmt(validateResult.discount)}</strong>
                 </p>
@@ -323,12 +327,12 @@ export const VouchersPanel: React.FC = () => {
             {editVoucher ? 'Editar voucher' : 'Novo voucher'}
           </h4>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Nome *">
+            <Field label="Descrição *">
               <input
                 type="text"
-                placeholder="Ex: Black Friday 20%"
-                value={form.name}
-                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                placeholder="Ex: 20% de desconto na primeira visita"
+                value={form.description}
+                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                 className={FIELD_CONTROL}
               />
             </Field>
@@ -342,15 +346,6 @@ export const VouchersPanel: React.FC = () => {
               />
             </Field>
           </div>
-          <Field label="Descrição (opcional)">
-            <input
-              type="text"
-              placeholder="Descrição do voucher"
-              value={form.description}
-              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-              className={FIELD_CONTROL}
-            />
-          </Field>
           <div className="grid grid-cols-3 gap-3">
             <Field label="Tipo *">
               <SmartSelect
@@ -398,7 +393,7 @@ export const VouchersPanel: React.FC = () => {
             <Field label="Limite por cliente">
               <input
                 type="number"
-                placeholder="Ilimitado"
+                placeholder="Padrão: 1"
                 value={form.perClientLimit}
                 onChange={e => setForm(f => ({ ...f, perClientLimit: e.target.value }))}
                 className={FIELD_CONTROL}
@@ -429,7 +424,7 @@ export const VouchersPanel: React.FC = () => {
           <div className={FORM_FOOTER}>
             <button
               onClick={() => void handleSave()}
-              disabled={saving || !form.name.trim() || !form.value || !form.validUntil}
+              disabled={saving || !form.description.trim() || !form.value || !form.validUntil}
               className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-xs font-bold text-accent-fg disabled:opacity-50"
             >
               {saving ? <Loader2 className="animate-spin" size={14} /> : <Check size={14} />}
@@ -467,7 +462,7 @@ export const VouchersPanel: React.FC = () => {
               <div className="flex items-center gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-bold text-text-primary">{voucher.name}</p>
+                    <p className="text-sm font-bold text-text-primary">{voucher.description || voucher.code}</p>
                     <span className="font-mono text-[10px] bg-surface-2 px-1.5 py-0.5 rounded text-text-muted">
                       {voucher.code}
                     </span>
@@ -517,7 +512,6 @@ export const VouchersPanel: React.FC = () => {
                     <span className="text-text-secondary">Validade: {formatDate(voucher.validFrom)} — {formatDate(voucher.validUntil)}</span>
                     {voucher.minPurchase && <span className="text-text-secondary">Compra mín.: {fmt(voucher.minPurchase)}</span>}
                     {voucher.perClientLimit && <span className="text-text-secondary">Limite/cliente: {voucher.perClientLimit}</span>}
-                    {voucher.description && <span className="text-text-secondary col-span-2">{voucher.description}</span>}
                   </div>
                   <h5 className="text-[10px] font-bold text-text-secondary">Histórico de uso</h5>
                   {usagesLoading ? (

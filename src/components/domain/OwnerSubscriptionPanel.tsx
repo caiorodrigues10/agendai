@@ -108,7 +108,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
   const [pixKeyType, setPixKeyType] = useState<'CPF' | 'CNPJ' | 'PHONE' | 'EMAIL' | 'RANDOM'>(
     'EMAIL'
   );
-  const [billingYearly, setBillingYearly] = useState(true);
+  const [billingYearly, setBillingYearly] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
   const [paySetupTrial, setPaySetupTrial] = useState(false);
   const [payPlanId, setPayPlanId] = useState<string | null>(null);

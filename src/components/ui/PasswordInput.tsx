@@ -89,8 +89,10 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
               <button
                 type="button"
                 onClick={onToggleShow}
-                className="flex h-11 w-11 items-center justify-center text-text-muted hover:text-accent transition-colors focus:outline-none cursor-pointer"
-                tabIndex={-1}
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                aria-pressed={showPassword}
+                title={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                className="flex h-11 w-11 items-center justify-center text-text-muted hover:text-accent transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent cursor-pointer"
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>

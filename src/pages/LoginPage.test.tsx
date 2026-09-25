@@ -11,6 +11,7 @@ const loginWithGoogleMock = vi.fn();
 const loginWithSavedAccountMock = vi.fn();
 const forgetSavedAccountMock = vi.fn();
 const navigateMock = vi.fn();
+const subscriptionsMeMock = vi.hoisted(() => vi.fn());
 
 let authState: { user: StaffMember | null; loading: boolean };
 let hasStoredSessionMock = false;
@@ -55,6 +56,10 @@ vi.mock('../infra/authStorage', () => ({
   },
 }));
 
+vi.mock('../infra/subscriptionsApi', () => ({
+  subscriptionsApi: { me: subscriptionsMeMock },
+}));
+
 describe('LoginPage (usabilidade)', () => {
   beforeEach(() => {
     authState = { user: null, loading: false };
@@ -67,6 +72,8 @@ describe('LoginPage (usabilidade)', () => {
     loginWithSavedAccountMock.mockReset();
     forgetSavedAccountMock.mockReset();
     navigateMock.mockReset();
+    subscriptionsMeMock.mockReset();
+    subscriptionsMeMock.mockRejectedValue(new Error('offline'));
   });
 
   it('renderiza formulário de login com e-mail e senha', () => {
@@ -99,6 +106,50 @@ describe('LoginPage (usabilidade)', () => {
     await waitFor(() => {
       expect(navigateMock).toHaveBeenCalledWith('/master/work', { replace: true });
     });
+  });
+
+  it('honra o deep link preservado (location.state.from) após autenticação', async () => {
+    authState = {
+      loading: false,
+      user: {
+        id: 'owner-1',
+        name: 'Caio',
+        email: 'caio@example.com',
+        role: 'OWNER',
+      } as StaffMember,
+    };
+
+    renderWithProviders(<LoginPage />, {
+      route: '/login',
+      entryState: { from: { pathname: '/app/financeiro' } },
+    });
+
+    await waitFor(() => {
+      expect(navigateMock).toHaveBeenCalledWith('/app/financeiro', { replace: true });
+    });
+    expect(navigateMock).not.toHaveBeenCalledWith('/app/queue', { replace: true });
+  });
+
+  it('ignora deep link de rota de outro papel e cai no painel do usuário', async () => {
+    authState = {
+      loading: false,
+      user: {
+        id: 'emp-1',
+        name: 'João',
+        email: 'joao@example.com',
+        role: 'EMPLOYEE',
+      } as StaffMember,
+    };
+
+    renderWithProviders(<LoginPage />, {
+      route: '/login',
+      entryState: { from: { pathname: '/master/tickets' } },
+    });
+
+    await waitFor(() => {
+      expect(navigateMock).toHaveBeenCalledWith('/app/queue', { replace: true });
+    });
+    expect(navigateMock).not.toHaveBeenCalledWith('/master/tickets', { replace: true });
   });
 
   it('aguarda restauracao antes de mostrar contas salvas', () => {

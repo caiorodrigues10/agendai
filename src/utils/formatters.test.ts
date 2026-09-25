@@ -12,4 +12,11 @@ describe('formatters', () => {
     expect(formatDateTimeBR(undefined)).toBe('—');
     expect(formatTimeBR(null)).toBe('—');
   });
+
+  it('renders calendar dates (date-only/midnight UTC) without shifting a day back', () => {
+    //25/09 à meia-noite UTC exibiria 24/09 em UTC-3 se parseado como instante
+    expect(formatDateBR('2026-09-25T00:00:00.000Z')).toBe('25/09/2026');
+    expect(formatDateBR('2026-09-25')).toBe('25/09/2026');
+    expect(formatDateBR(new Date('2026-09-25T00:00:00.000Z'))).toBe('25/09/2026');
+  });
 });

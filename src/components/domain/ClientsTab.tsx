@@ -12,6 +12,7 @@ import { Service, ShopSettings, StaffMember } from '../../types';
 import { AppointmentFormData } from '../../schemas';
 import { AvailabilitySlot } from '../../utils/schedulingUtils';
 import { METRIC_LABEL } from '../../utils/metricLabels';
+import { addDaysISO, todayISO } from '../../utils/dateRanges';
 import { ClientsManager } from './ClientsManager';
 import { CrmIntelligencePanel } from './CrmIntelligencePanel';
 import { ClientProfileSheet } from './ClientProfileSheet';
@@ -44,8 +45,8 @@ interface ClientsTabProps {
 }
 
 const initialPeriod = () => ({
-  from: new Date(Date.now() - 29 * 86_400_000).toISOString().slice(0, 10),
-  to: new Date().toISOString().slice(0, 10),
+  from: addDaysISO(-29),
+  to: todayISO(),
 });
 
 export const ClientsTab: React.FC<ClientsTabProps> = ({

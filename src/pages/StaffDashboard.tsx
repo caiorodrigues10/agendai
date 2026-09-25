@@ -38,6 +38,7 @@ import { LuLoaderCircle as Loader2 } from 'react-icons/lu';
 import { DemandAlertBanner } from '../components/domain/DemandAlertBanner';
 import { StaffNavigation } from '../components/ui/StaffNavigation';
 import { supportsQueue, supportsAppointments } from '../utils/operationMode';
+import { todayISO } from '../utils/dateRanges';
 import { ClosedSalonJoinModal } from '../components/domain/ClosedSalonJoinModal';
 import { ShopFloorControls } from '../components/domain/ShopFloorControls';
 import { usePermissions } from '../hooks/usePermissions';
@@ -324,7 +325,7 @@ export const StaffDashboard: React.FC = () => {
                       <p className="text-xs text-text-muted">Agendamentos</p>
                       <p className="text-xl font-bold">
                         {appointments.filter(a => {
-                          const today = new Date().toISOString().slice(0, 10);
+                          const today = todayISO();
                           return a.date === today && (a.status === 'confirmed' || a.status === 'checked_in');
                         }).length}
                       </p>

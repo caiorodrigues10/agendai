@@ -30,4 +30,30 @@ describe('getErrorMessage', () => {
       'Não foi possível carregar estes dados agora. Tente novamente em instantes.'
     );
   });
+
+  it('falls back to friendly upgrade copy when DASHBOARD_REQUIRED has no message', () => {
+    const error = new ApiError('   ', 403, 'DASHBOARD_REQUIRED');
+
+    expect(getErrorMessage(error)).toBe(
+      'Seu plano não inclui dashboard de relatórios e financeiro. Faça upgrade para o Pro.'
+    );
+  });
+
+  it('keeps the backend DASHBOARD_REQUIRED message when it is already friendly', () => {
+    const error = new ApiError(
+      'Seu plano não inclui dashboard de relatórios e financeiro. Faça upgrade para o Pro.',
+      403,
+      'DASHBOARD_REQUIRED'
+    );
+
+    expect(getErrorMessage(error)).toBe(
+      'Seu plano não inclui dashboard de relatórios e financeiro. Faça upgrade para o Pro.'
+    );
+  });
+
+  it('maps SESSION_EXPIRED to a re-login copy', () => {
+    const error = new ApiError('Token inválido', 401, 'SESSION_EXPIRED');
+
+    expect(getErrorMessage(error)).toBe('Sua sessão expirou. Faça login novamente.');
+  });
 });

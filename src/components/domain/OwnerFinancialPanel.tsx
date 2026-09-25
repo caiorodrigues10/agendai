@@ -41,6 +41,7 @@ import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { usePermissions } from '../../hooks/usePermissions';
 import { ExpenseSchema, ExpenseFormData, FiadoSchema, FiadoFormData } from '../../schemas';
 import { formatCurrencyBRL, formatDateBR, formatDateTimeBR } from '../../utils/formatters';
+import { todayISO } from '../../utils/dateRanges';
 import {
   EXPENSE_RECURRENCE_LABELS,
   EXPENSE_TYPE_LABELS,
@@ -62,8 +63,6 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'despesas', label: 'Despesas', icon: <Receipt size={14} /> },
   { id: 'fiado', label: 'Fiado', icon: <CreditCard size={14} /> },
 ];
-
-const todayIso = () => new Date().toISOString().slice(0, 10);
 
 export const OwnerFinancialPanel: React.FC = () => {
   const [tab, setTab] = useState<Tab>('resumo');
@@ -97,6 +96,7 @@ export const OwnerFinancialPanel: React.FC = () => {
   const [editingExpense, setEditingExpense] = useState<ExpenseItem | null>(null);
 
   const [fiadoSubmitting, setFiadoSubmitting] = useState(false);
+  const [fiadoModalOpen, setFiadoModalOpen] = useState(false);
 
   const [paymentFiadoId, setPaymentFiadoId] = useState<string | null>(null);
   const [chargeFiadoId, setChargeFiadoId] = useState<string | null>(null);
@@ -129,7 +129,7 @@ export const OwnerFinancialPanel: React.FC = () => {
       title: '',
       amount: 0,
       type: 'VARIABLE',
-      referenceDate: todayIso(),
+      referenceDate: todayISO(),
       categoryId: '',
       description: '',
       notes: '',
@@ -161,6 +161,15 @@ export const OwnerFinancialPanel: React.FC = () => {
       setExpensesPage(1);
     }
   }, [tab, expenseFilters]);
+
+  useEffect(() => {
+    if (!fiadoModalOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setFiadoModalOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [fiadoModalOpen]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -201,7 +210,7 @@ export const OwnerFinancialPanel: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [tab, expensesPage, fiadosPage, expenseFilters]);
+  }, [tab, expensesPage, fiadosPage, expenseFilters, barbershopId]);
 
   useEffect(() => {
     loadData();
@@ -210,7 +219,7 @@ export const OwnerFinancialPanel: React.FC = () => {
   useEffect(() => {
     if (tab !== 'resumo' || !barbershopId) return;
     setCashLoading(true);
-    cashApi.getSummary(barbershopId, todayIso())
+    cashApi.getSummary(barbershopId, todayISO())
       .then(setCashSummary)
       .catch(() => setCashSummary(null))
       .finally(() => setCashLoading(false));
@@ -288,13 +297,17 @@ export const OwnerFinancialPanel: React.FC = () => {
   };
 
   const handleDeleteExpense = async (id: string) => {
+    if (expenseSubmitting) return;
     setError(null);
+    setExpenseSubmitting(true);
     try {
       await financialApi.deleteExpense(id);
       setDeleteExpenseId(null);
       handleRefresh();
     } catch (err) {
       setError(errorMessage(err));
+    } finally {
+      setExpenseSubmitting(false);
     }
   };
 
@@ -324,6 +337,7 @@ export const OwnerFinancialPanel: React.FC = () => {
         dueDate: data.dueDate || null,
       });
       resetFiado();
+      setFiadoModalOpen(false);
       handleRefresh();
     } catch (err) {
       setError(errorMessage(err));
@@ -333,7 +347,7 @@ export const OwnerFinancialPanel: React.FC = () => {
   };
 
   const handleDeleteFiado = async () => {
-    if (!deleteFiadoId) return;
+    if (!deleteFiadoId || deleteFiadoLoading) return;
     setDeleteFiadoLoading(true);
     setError(null);
     try {
@@ -509,7 +523,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                     ) : cashSummary ? (
                       <div className="grid grid-cols-2 gap-3">
                         <div className="rounded-lg bg-bg/60 p-3">
-                          <p className="text-[10px] font-bold uppercase text-text-muted">Total recebido</p>
+                          <p className="text-[10px] font-bold uppercase text-text-muted">Saldo do dia</p>
                           <p className="text-lg font-bold text-text-primary">{formatCurrencyBRL(cashSummary.total ?? 0)}</p>
                         </div>
                         <div className="rounded-lg bg-bg/60 p-3">
@@ -1247,69 +1261,21 @@ export const OwnerFinancialPanel: React.FC = () => {
 
         {tab === 'fiado' && (
           <div className="space-y-4">
-            <form
-              onSubmit={handleFiadoSubmit(onCreateFiado)}
-              className="bg-surface p-4 rounded-xl border border-border space-y-3"
-            >
-              <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-                <Plus size={16} className="text-accent" /> Novo fiado
-              </h3>
-              <div className={FORM_GRID}>
-                <Field label="Nome do cliente" error={fiadoErrors.customerName?.message}>
-                  <input
-                    type="text"
-                    placeholder="Nome completo"
-                    className={fiadoErrors.customerName ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                    {...registerFiado('customerName')}
-                  />
-                </Field>
-                <Field label="WhatsApp" error={fiadoErrors.whatsapp?.message}>
-                  <input
-                    type="text"
-                    placeholder="(00) 00000-0000"
-                    className={fiadoErrors.whatsapp ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                    {...registerFiado('whatsapp')}
-                  />
-                </Field>
+            <div className="bg-surface p-4 rounded-xl border border-border flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
+                  <Plus size={16} className="text-accent" /> Novo fiado
+                </h3>
+                <p className="mt-1 text-xs text-text-muted">Registre um serviço fiado para um cliente.</p>
               </div>
-              <Field label="Descrição" error={fiadoErrors.description?.message}>
-                <input
-                  type="text"
-                  placeholder="Ex.: Corte + escova"
-                  className={fiadoErrors.description ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                  {...registerFiado('description')}
-                />
-              </Field>
-              <div className={FORM_GRID}>
-                <Field label="Valor (R$)" error={fiadoErrors.amount?.message}>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    placeholder="0,00"
-                    className={fiadoErrors.amount ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                    {...registerFiado('amount')}
-                  />
-                </Field>
-                <Field label="Vencimento" error={fiadoErrors.dueDate?.message}>
-                  <input type="date" className={FIELD_CONTROL} {...registerFiado('dueDate')} />
-                </Field>
-              </div>
-              <div className="flex justify-end">
-                <button
-                  type="submit"
-                  disabled={fiadoSubmitting}
-                  className="min-h-11 px-4 py-2 bg-accent text-accent-fg rounded-lg text-xs font-bold uppercase tracking-wider hover:brightness-110 transition-all disabled:opacity-50 flex items-center gap-2"
-                >
-                  {fiadoSubmitting ? (
-                    <Loader2 size={14} className="animate-spin" />
-                  ) : (
-                    <Plus size={14} />
-                  )}
-                  Registrar fiado
-                </button>
-              </div>
-            </form>
+              <button
+                type="button"
+                onClick={() => setFiadoModalOpen(true)}
+                className="min-h-11 px-4 py-2 bg-accent text-accent-fg rounded-lg text-xs font-bold uppercase tracking-wider hover:brightness-110 transition-all flex items-center gap-2"
+              >
+                <Plus size={14} /> Registrar fiado
+              </button>
+            </div>
 
             <div className="bg-surface rounded-xl border border-border overflow-hidden">
               <div className="p-4 border-b border-border flex justify-between items-center bg-surface/50">
@@ -1524,6 +1490,106 @@ export const OwnerFinancialPanel: React.FC = () => {
           </div>
         )}
       </div>
+
+      {fiadoModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm animate-fade-in">
+          <button
+            type="button"
+            aria-label="Fechar"
+            onClick={() => setFiadoModalOpen(false)}
+            className="absolute inset-0 cursor-default"
+          />
+          <form
+            onSubmit={handleFiadoSubmit(onCreateFiado)}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="fiado-modal-title"
+            className="relative w-full max-w-md rounded-2xl border border-border bg-surface p-5 shadow-2xl max-h-[90vh] overflow-y-auto space-y-3"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h3 id="fiado-modal-title" className="text-sm font-bold text-text-primary flex items-center gap-2">
+                  <Plus size={16} className="text-accent" /> Novo fiado
+                </h3>
+                <p className="mt-1 text-xs text-text-muted">Preencha os dados do fiado.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFiadoModalOpen(false)}
+                aria-label="Fechar"
+                className="rounded-lg p-1 text-text-muted hover:bg-bg"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className={FORM_GRID}>
+              <Field label="Nome do cliente" error={fiadoErrors.customerName?.message}>
+                <input
+                  type="text"
+                  placeholder="Nome completo"
+                  className={fiadoErrors.customerName ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                  {...registerFiado('customerName')}
+                />
+              </Field>
+              <Field label="WhatsApp" error={fiadoErrors.whatsapp?.message}>
+                <input
+                  type="text"
+                  placeholder="(00) 00000-0000"
+                  className={fiadoErrors.whatsapp ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                  {...registerFiado('whatsapp')}
+                />
+              </Field>
+            </div>
+            <Field label="Descrição" error={fiadoErrors.description?.message}>
+              <input
+                type="text"
+                placeholder="Ex.: Corte + escova"
+                className={fiadoErrors.description ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                {...registerFiado('description')}
+              />
+            </Field>
+            <div className={FORM_GRID}>
+              <Field label="Valor (R$)" error={fiadoErrors.amount?.message}>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  placeholder="0,00"
+                  className={fiadoErrors.amount ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                  {...registerFiado('amount')}
+                />
+              </Field>
+              <Field label="Vencimento" error={fiadoErrors.dueDate?.message}>
+                <input type="date" className={FIELD_CONTROL} {...registerFiado('dueDate')} />
+              </Field>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setFiadoModalOpen(false)}
+                className="min-h-11 px-4 py-2 border border-border rounded-lg text-xs font-bold text-text-muted hover:text-text-secondary"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={fiadoSubmitting}
+                className="min-h-11 px-4 py-2 bg-accent text-accent-fg rounded-lg text-xs font-bold uppercase tracking-wider hover:brightness-110 transition-all disabled:opacity-50 flex items-center gap-2"
+              >
+                {fiadoSubmitting ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <Plus size={14} />
+                )}
+                Registrar fiado
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       <ConfirmDialog
         open={!!deleteFiadoId}
         title="Excluir fiado?"
@@ -1532,7 +1598,7 @@ export const OwnerFinancialPanel: React.FC = () => {
         variant="danger"
         loading={deleteFiadoLoading}
         onConfirm={() => void handleDeleteFiado()}
-        onCancel={() => setDeleteFiadoId(null)}
+        onCancel={() => { if (!deleteFiadoLoading) setDeleteFiadoId(null); }}
       />
     </>
   );

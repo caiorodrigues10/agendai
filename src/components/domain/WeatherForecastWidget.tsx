@@ -61,6 +61,7 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [locationMissing, setLocationMissing] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -86,7 +87,7 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
     };
     void load();
     return () => { cancelled = true; };
-  }, []);
+  }, [reloadKey]);
 
   if (loading) {
     return (
@@ -107,6 +108,16 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
             ? 'Cadastre a cidade do salão em Configurações para ativar a previsão climática.'
             : 'Verifique sua conexão e tente novamente. Enquanto isso, o restante do painel continua funcionando normalmente.'}
         </p>
+        {!locationMissing && <p className="mt-1 text-[11px] text-text-muted/80">{error}</p>}
+        {!locationMissing && (
+          <button
+            type="button"
+            onClick={() => setReloadKey(k => k + 1)}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg px-3 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary"
+          >
+            <Loader2 size={12} /> Tentar novamente
+          </button>
+        )}
       </div>
     );
   }
@@ -139,7 +150,7 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
           <AlertTriangle size={24} className={`h-5 w-5 ${style.icon}`} />
           <div>
             <p className={`text-sm font-bold ${style.text}`}>
-              Amanhã: {tomorrow.condition} — {Math.abs(finiteNumber(tomorrow.dropPct))}% menos clientes
+              {formatWeatherDayLabel(tomorrow.date)}: {tomorrow.condition} — {Math.abs(finiteNumber(tomorrow.dropPct))}% menos clientes
             </p>
             <p className="mt-0.5 text-xs text-text-muted">{tomorrow.recommendation}</p>
           </div>
@@ -164,13 +175,13 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
       {insights.modelTrained && predictions.length > 0 && summary?.bestDay && summary?.worstDay && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <div className="rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Média semana</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Média da semana</p>
           <p className={`mt-1.5 text-lg font-black ${summary.avgDropPct <= -10 ? 'text-red-400' : 'text-emerald-400'}`}>
             {finiteNumber(summary.avgDropPct) > 0 ? '+' : ''}{finiteNumber(summary.avgDropPct)}%
           </p>
         </div>
         <div className="rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Dias arriscados</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Dias de queda</p>
           <p className={`mt-1.5 text-lg font-black ${summary.highRiskCount > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
             {summary.highRiskCount}
           </p>
@@ -204,7 +215,6 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
           const visual = getWeatherVisual(weatherCode, condition);
           const rainProbability = 'precipProbability' in p ? finiteNumber(p.precipProbability) : 0;
           const rainAmount = 'precipMm' in p ? finiteNumber(p.precipMm) : 0;
-          const isToday = index === 0;
           return (
             <div
               key={date}
@@ -217,7 +227,7 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
                 {/* Header: day + glow dot */}
                 <div className="flex items-center justify-between">
                   <p className="text-[11px] font-bold text-white/80">
-                    {isToday ? 'Hoje' : formatWeatherDayLabel(date)}
+                    {formatWeatherDayLabel(date)}
                   </p>
                   <span className={`h-2 w-2 rounded-full ${visual.glow}`} />
                 </div>

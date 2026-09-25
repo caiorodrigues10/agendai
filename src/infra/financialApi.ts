@@ -3,6 +3,7 @@ import { apiClient, apiFetch } from './apiClient';
 import { authStorage } from './authStorage';
 import type { ShopWeatherDay } from './barbershopApi';
 import { buildQuery } from '../utils/query';
+import { todayISO } from '../utils/dateRanges';
 import { getSelectedBarbershopId } from './selectedShopStore';
 
 function unwrap<T>(res: unknown): T {
@@ -350,7 +351,7 @@ export const financialApi = {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `despesas_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `despesas_${todayISO()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   },

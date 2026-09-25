@@ -6,13 +6,13 @@ import { PwaInstallProvider } from '../contexts/PwaInstallContext';
 /** Wrapper leve — ThemeProvider real exige AuthProvider (mockado em setup.ts). */
 export function renderWithProviders(
   ui: React.ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'> & { route?: string }
+  options?: Omit<RenderOptions, 'wrapper'> & { route?: string; entryState?: unknown }
 ) {
-  const { route = '/', ...renderOptions } = options ?? {};
+  const { route = '/', entryState, ...renderOptions } = options ?? {};
 
   function Wrapper({ children }: PropsWithChildren) {
     return (
-      <MemoryRouter initialEntries={[route]}>
+      <MemoryRouter initialEntries={[{ pathname: route, state: entryState }]}>
         <PwaInstallProvider>{children}</PwaInstallProvider>
       </MemoryRouter>
     );

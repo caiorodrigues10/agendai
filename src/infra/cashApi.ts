@@ -2,13 +2,10 @@ import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
 import { buildQuery } from '../utils/query';
 import { unwrapData, unwrapList } from '../utils/apiData';
+import { todayISO } from '../utils/dateRanges';
 
 function token() {
   return authStorage.getAccessToken() || '';
-}
-
-function todayIso() {
-  return new Date().toISOString().slice(0, 10);
 }
 
 export interface CashMovement {
@@ -73,7 +70,7 @@ export const cashApi = {
           : {};
       const total = Object.values(byMethod).reduce((sum, entry) => sum + (entry?.total ?? 0), 0);
       return {
-        date: todayIso(),
+        date: date ?? todayISO(),
         movements: [],
         byMethod,
         total,

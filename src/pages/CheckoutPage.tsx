@@ -11,7 +11,6 @@ import {
   LuCircleCheck as CheckCircle2,
   LuClock as Clock,
   LuPartyPopper as PartyPopper,
-  LuLandmark as Landmark,
 } from 'react-icons/lu';
 import { plansApi, Plan, pickPlanForCheckout } from '../infra/plansApi';
 import { subscriptionsApi, SubscribePayload } from '../infra/subscriptionsApi';
@@ -26,10 +25,14 @@ import {
   normalizeDocument,
   maskCpf,
   maskCnpj,
+  maskPhone,
+  normalizePhoneBR,
   isValidDocument,
 } from '../utils/documentUtils';
 
 const PIX_POLL_INTERVAL_MS = 5_000;
+const PIX_POLL_MAX_INTERVAL_MS = 15_000;
+const PIX_POLL_BACKOFF_STEP_MS = 3_000;
 
 const formatPrice = (price: number) =>
   price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -54,6 +57,34 @@ const rejectionMessage = (statusDetail?: string) =>
 
 const inputClass =
   'w-full bg-bg border border-border rounded-xl py-3 px-4 text-text-primary text-sm outline-none transition-colors placeholder:text-text-muted focus:border-accent/60 hover:border-border-strong';
+
+function PixMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} aria-hidden="true">
+      <path
+        fill="#32BCAD"
+        d="M11.917 11.71a2.046 2.046 0 0 1-1.454-.602l-2.1-2.1a.4.4 0 0 0-.551 0l-2.108 2.108a2.044 2.044 0 0 1-1.454.602h-.414l2.66 2.66c.83.83 2.177.83 3.007 0l2.667-2.668h-.253zM4.25 4.282c.547 0 1.061.213 1.447.599l2.108 2.108a.39.39 0 0 0 .552 0l2.1-2.1a2.04 2.04 0 0 1 1.453-.599h.253L9.503 1.615a2.127 2.127 0 0 0-3.007 0l-2.66 2.667h.414z"
+      />
+      <path
+        fill="#32BCAD"
+        d="m14.465 6.302-1.612-1.612a.127.127 0 0 1-.049-.098h-.845c-.38 0-.747.154-1.016.424l-2.1 2.1a1.045 1.045 0 0 1-1.477 0L5.254 5.004a1.427 1.427 0 0 0-1.018-.422H3.4a.125.125 0 0 1-.05.098L1.74 6.292a2.127 2.127 0 0 0 0 3.007l1.61 1.61a.127.127 0 0 1 .049.098h.845c.38 0 .747-.154 1.016-.424l2.108-2.108a1.045 1.045 0 0 1 1.477 0l2.1 2.1c.269.27.636.424 1.016.424h.845a.127.127 0 0 1 .049-.098l1.612-1.612a2.127 2.127 0 0 0 0-3.007z"
+      />
+    </svg>
+  );
+}
+
+function CardMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 40 28" className={className} aria-hidden="true">
+      <rect width="40" height="28" rx="5" fill="#143d32" />
+      <rect y="6" width="40" height="5" fill="#0e2c24" />
+      <rect x="5" y="14" width="8" height="6" rx="1.2" fill="#E4C56A" />
+      <path d="M5 17h8M7.3 14v6M9.7 14v6" stroke="#B8923A" strokeWidth="0.7" />
+      <rect x="16" y="16.2" width="9" height="1.7" rx="0.8" fill="white" fillOpacity="0.75" />
+      <rect x="27" y="16.2" width="5" height="1.7" rx="0.8" fill="white" fillOpacity="0.4" />
+    </svg>
+  );
+}
 
 export interface SubscriptionCheckoutProps {
   planId?: string | null;
@@ -97,13 +128,19 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
   const [lastName, setLastName] = useState('');
   const [docType, setDocType] = useState<'CPF' | 'CNPJ'>('CPF');
   const [docNumber, setDocNumber] = useState('');
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardHolder, setCardHolder] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvv, setCardCvv] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [addressNumber, setAddressNumber] = useState('');
+  const [holderPhone, setHolderPhone] = useState('');
 
   // PIX
   const [pixPayment, setPixPayment] = useState<Payment | null>(null);
   const [pixCopied, setPixCopied] = useState(false);
   const [pixExpired, setPixExpired] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -153,41 +190,51 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
     };
   }, [planId, billingParam, subscriptionData?.plans]);
 
-  const stopPolling = useCallback(() => {
-    if (pollRef.current) {
-      clearInterval(pollRef.current);
-      pollRef.current = null;
-    }
-  }, []);
-
   const handleApproved = useCallback(() => {
-    stopPolling();
     setSuccess(true);
     sessionStorage.removeItem('agendai:access-block-info');
     refreshSubscription();
-  }, [stopPolling, refreshSubscription]);
+  }, [refreshSubscription]);
 
-  // Polling do status do pagamento PIX
+  // Polling do status do pagamento PIX.
+  // setTimeout encadeado: a próxima consulta só é agendada quando a atual
+  // termina (nunca há requisições sobrepostas/fila), com backoff progressivo
+  // para não martelar a API durante cold start do Render.
   useEffect(() => {
     if (!pixPayment || success || pixExpired) return;
 
-    pollRef.current = setInterval(async () => {
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let delay = PIX_POLL_INTERVAL_MS;
+
+    const check = async () => {
       try {
         const updated = await paymentsApi.getStatus(pixPayment.id);
+        if (cancelled) return;
         if (updated.status === 'approved') {
           handleApproved();
-        } else if (['rejected', 'cancelled'].includes(updated.status)) {
-          stopPolling();
+          return;
+        }
+        if (['rejected', 'cancelled'].includes(updated.status)) {
           setPixPayment(null);
           setError(rejectionMessage(updated.statusDetail));
+          return;
         }
       } catch {
-        // Falha transitória de rede — o próximo tick tenta de novo
+        // Falha transitória de rede — mantém o mesmo atraso e tenta de novo
       }
-    }, PIX_POLL_INTERVAL_MS);
+      if (cancelled) return;
+      delay = Math.min(delay + PIX_POLL_BACKOFF_STEP_MS, PIX_POLL_MAX_INTERVAL_MS);
+      timer = setTimeout(() => void check(), delay);
+    };
 
-    return stopPolling;
-  }, [pixPayment, success, pixExpired, handleApproved, stopPolling]);
+    timer = setTimeout(() => void check(), delay);
+
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [pixPayment, success, pixExpired, handleApproved]);
 
   // Contagem regressiva de expiração do PIX
   useEffect(() => {
@@ -200,13 +247,12 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
       setSecondsLeft(remaining);
       if (remaining <= 0) {
         setPixExpired(true);
-        stopPolling();
       }
     };
     tick();
     const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
-  }, [pixPayment, success, stopPolling]);
+  }, [pixPayment, success]);
 
   const validatePayerForm = (): string | null => {
     if (!payerEmail || !/\S+@\S+\.\S+/.test(payerEmail)) return 'Informe um e-mail válido.';
@@ -218,11 +264,34 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
     return null;
   };
 
-  const redirectToHostedCheckout = (url: string | null | undefined) => {
-    if (!url) {
-      throw new Error('O checkout hospedado Asaas não retornou uma URL. Tente novamente.');
+  const buildCardPayload = () => {
+    const expiry = cardExpiry.replace(/\D/g, '');
+    const month = expiry.slice(0, 2);
+    const year = expiry.slice(2, 4);
+    return {
+      holderName: cardHolder.trim(),
+      number: cardNumber.replace(/\D/g, ''),
+      expiryMonth: month,
+      expiryYear: year.length === 2 ? `20${year}` : year,
+      ccv: cardCvv.replace(/\D/g, ''),
+      postalCode: postalCode.replace(/\D/g, ''),
+      addressNumber: addressNumber.trim(),
+      phone: normalizePhoneBR(holderPhone),
+    };
+  };
+
+  const validateCardForm = (): string | null => {
+    const card = buildCardPayload();
+    if (card.number.length < 13 || card.number.length > 19) return 'Número do cartão inválido.';
+    if (card.holderName.length < 2) return 'Informe o nome impresso no cartão.';
+    if (!/^(0[1-9]|1[0-2])$/.test(card.expiryMonth) || card.expiryYear.length !== 4) {
+      return 'Validade inválida. Use mês e ano.';
     }
-    window.location.assign(url);
+    if (card.ccv.length < 3) return 'CVV inválido.';
+    if (card.postalCode.length !== 8) return 'CEP inválido.';
+    if (!card.addressNumber) return 'Informe o número do endereço.';
+    if (card.phone.length < 10) return 'Telefone inválido.';
+    return null;
   };
 
   const buildBasePayload = (): SubscribePayload => {
@@ -277,9 +346,15 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
       setError(`${docType} inválido. Confira o número.`);
       return;
     }
+    const cardError = validateCardForm();
+    if (cardError) {
+      setError(cardError);
+      return;
+    }
     setError(null);
     setSubmitting(true);
     try {
+      const card = buildCardPayload();
       if (isTrialSetup) {
         const sub = await subscriptionsApi.setupTrialCard({
           planId: plan!.id,
@@ -287,17 +362,16 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
           payerFirstName: firstName.trim() || undefined,
           payerLastName: lastName.trim() || undefined,
           payerIdentification: { type: docType, number: doc },
+          asaasCreditCard: card,
         }, idempotencyKeys.current.TRIAL);
-        if (sub.payment?.checkoutUrl) {
-          redirectToHostedCheckout(sub.payment.checkoutUrl);
-          return;
-        }
         await refreshSubscription();
         if (sub.hasPaymentMethod || sub.status === 'TRIALING') {
+          setCardNumber('');
+          setCardCvv('');
           setSuccess(true);
           sessionStorage.removeItem('agendai:access-block-info');
         } else {
-          setError('Não foi possível iniciar o checkout do cartão. Tente novamente.');
+          setError('Não foi possível cadastrar o cartão. Tente novamente.');
         }
         return;
       }
@@ -305,10 +379,24 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
       const subscription = await subscriptionsApi.subscribe({
         ...buildBasePayload(),
         asaasBillingType: 'CREDIT_CARD',
+        asaasCreditCard: card,
       }, idempotencyKeys.current.CREDIT_CARD);
-      redirectToHostedCheckout(subscription.payment?.checkoutUrl);
+      const status = subscription.payment?.status;
+      if (status === 'approved' || status === 'authorized' || subscription.status === 'ACTIVE') {
+        setCardNumber('');
+        setCardCvv('');
+        await refreshSubscription();
+        setSuccess(true);
+        sessionStorage.removeItem('agendai:access-block-info');
+        return;
+      }
+      if (status === 'rejected' || status === 'cancelled') {
+        setError(rejectionMessage(subscription.payment?.statusDetail));
+        return;
+      }
+      setError('Pagamento em análise. Permaneça nesta página; a confirmação chega em instantes.');
     } catch (err: any) {
-      setError(getErrorMessage(err, 'Erro ao abrir o checkout do cartão.'));
+      setError(getErrorMessage(err, 'Erro ao processar o cartão.'));
     } finally {
       setSubmitting(false);
     }
@@ -586,42 +674,194 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
 
                 {!isTrialSetup && (
                   <>
-                    <div className="flex bg-bg/60 p-1 rounded-xl border border-border gap-0.5">
+                    <div
+                      role="group"
+                      aria-label="Forma de pagamento"
+                      className="grid grid-cols-2 gap-3"
+                    >
                       {(
                         [
-                          { id: 'PIX', label: 'PIX', icon: QrCode },
-                          { id: 'CREDIT_CARD', label: 'Cartão', icon: CreditCard },
+                          {
+                            id: 'PIX',
+                            label: 'PIX',
+                            hint: 'QR Code na hora',
+                            mark: <PixMark className="h-7 w-7" />,
+                          },
+                          {
+                            id: 'CREDIT_CARD',
+                            label: 'Cartão',
+                            hint: 'Crédito',
+                            mark: <CardMark className="h-7 w-10" />,
+                          },
                         ] as const
-                      ).map(opt => (
-                        <button
-                          key={opt.id}
-                          type="button"
-                          onClick={() => {
-                            setAsaasBillingType(opt.id);
-                            setError(null);
-                          }}
-                          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
-                            asaasBillingType === opt.id
-                              ? 'bg-accent/15 text-accent'
-                              : 'text-text-muted hover:text-text-secondary'
-                          }`}
-                        >
-                          <opt.icon size={13} /> {opt.label}
-                        </button>
-                      ))}
+                      ).map(opt => {
+                        const active = asaasBillingType === opt.id;
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            aria-pressed={active}
+                            aria-label={opt.label}
+                            onClick={() => {
+                              setAsaasBillingType(opt.id);
+                              setError(null);
+                            }}
+                            className={`flex items-center gap-3 rounded-2xl border px-3 py-3 text-left transition-all ${
+                              active
+                                ? 'border-accent bg-selection shadow-sm'
+                                : 'border-border bg-bg hover:border-border-strong hover:bg-surface-2'
+                            }`}
+                          >
+                            <span
+                              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border ${
+                                active
+                                  ? 'border-accent/30 bg-surface'
+                                  : 'border-border bg-surface'
+                              }`}
+                            >
+                              {opt.mark}
+                            </span>
+                            <span className="min-w-0">
+                              <span
+                                className={`block text-sm font-bold leading-tight ${
+                                  active ? 'text-text-primary' : 'text-text-secondary'
+                                }`}
+                              >
+                                {opt.label}
+                              </span>
+                              <span className="mt-0.5 block text-[11px] leading-tight text-text-muted">
+                                {opt.hint}
+                              </span>
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
                     <p className="text-xs text-text-muted">
-                      Pagamento processado pelo Asaas{' '}
                       {asaasBillingType === 'PIX'
-                        ? 'via PIX — o QR Code é gerado aqui mesmo.'
-                        : 'via cartão — você informa os dados no checkout seguro da Asaas.'}
+                        ? 'O QR Code do PIX é gerado aqui mesmo.'
+                        : 'O cartão é cobrado nesta página. O número não fica salvo.'}
                     </p>
                   </>
                 )}
 
+                {asaasBillingType === 'CREDIT_CARD' && (
+                  <div className="space-y-3 rounded-2xl border border-border bg-bg p-4">
+                    <div>
+                      <label htmlFor="card-number" className="text-xs font-bold text-text-secondary block mb-1">
+                        Número do cartão *
+                      </label>
+                      <input
+                        id="card-number"
+                        inputMode="numeric"
+                        autoComplete="cc-number"
+                        className={inputClass}
+                        placeholder="0000 0000 0000 0000"
+                        value={cardNumber}
+                        onChange={e => {
+                          const digits = e.target.value.replace(/\D/g, '').slice(0, 19);
+                          setCardNumber(digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim());
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="card-holder" className="text-xs font-bold text-text-secondary block mb-1">
+                        Nome no cartão *
+                      </label>
+                      <input
+                        id="card-holder"
+                        autoComplete="cc-name"
+                        className={inputClass}
+                        placeholder="Como está impresso"
+                        value={cardHolder}
+                        onChange={e => setCardHolder(e.target.value.toUpperCase())}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label htmlFor="card-expiry" className="text-xs font-bold text-text-secondary block mb-1">
+                          Validade *
+                        </label>
+                        <input
+                          id="card-expiry"
+                          inputMode="numeric"
+                          autoComplete="cc-exp"
+                          className={inputClass}
+                          placeholder="MM/AA"
+                          value={cardExpiry}
+                          onChange={e => {
+                            const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+                            setCardExpiry(digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="card-cvv" className="text-xs font-bold text-text-secondary block mb-1">
+                          CVV *
+                        </label>
+                        <input
+                          id="card-cvv"
+                          inputMode="numeric"
+                          autoComplete="cc-csc"
+                          className={inputClass}
+                          placeholder="123"
+                          value={cardCvv}
+                          onChange={e => setCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label htmlFor="card-postal" className="text-xs font-bold text-text-secondary block mb-1">
+                          CEP *
+                        </label>
+                        <input
+                          id="card-postal"
+                          inputMode="numeric"
+                          autoComplete="postal-code"
+                          className={inputClass}
+                          placeholder="00000-000"
+                          value={postalCode}
+                          onChange={e => {
+                            const digits = e.target.value.replace(/\D/g, '').slice(0, 8);
+                            setPostalCode(digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="card-address-number" className="text-xs font-bold text-text-secondary block mb-1">
+                          Número *
+                        </label>
+                        <input
+                          id="card-address-number"
+                          autoComplete="address-line2"
+                          className={inputClass}
+                          placeholder="123"
+                          value={addressNumber}
+                          onChange={e => setAddressNumber(e.target.value.slice(0, 20))}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label htmlFor="card-phone" className="text-xs font-bold text-text-secondary block mb-1">
+                        Celular *
+                      </label>
+                      <input
+                        id="card-phone"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        className={inputClass}
+                        placeholder="(00) 00000-0000"
+                        value={holderPhone}
+                        onChange={e => setHolderPhone(maskPhone(e.target.value))}
+                      />
+                    </div>
+                  </div>
+                )}
+
                 {isTrialSetup && (
                   <p className="text-xs text-text-muted">
-                    Sem cobrança até o fim dos 30 dias. O cartão é informado no checkout hospedado da Asaas — o número não passa pelo AgendAI.
+                    Sem cobrança até o fim dos 30 dias. O cartão fica cadastrado aqui e só é cobrado depois do trial.
                   </p>
                 )}
 
@@ -637,7 +877,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
                     </>
                   ) : isTrialSetup ? (
                     <>
-                      <Landmark size={16} /> Continuar no checkout Asaas
+                      <CreditCard size={16} /> Cadastrar cartão
                     </>
                   ) : asaasBillingType === 'PIX' ? (
                     <>
@@ -645,7 +885,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
                     </>
                   ) : (
                     <>
-                      <CreditCard size={16} /> Pagar {formatPrice(plan.price)} no Asaas
+                      <CreditCard size={16} /> Pagar {formatPrice(plan.price)}
                     </>
                   )}
                 </button>

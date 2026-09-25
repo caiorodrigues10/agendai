@@ -15,6 +15,7 @@ import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { formatCurrencyBRL, formatDateTimeBR } from '../../utils/formatters';
+import { todayISO } from '../../utils/dateRanges';
 import { Field, FIELD_CONTROL, FORM_FOOTER } from '../ui/Field';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { SmartSelect } from '../ui/SmartSelect';
@@ -31,6 +32,16 @@ const MOVEMENT_TYPE_LABELS: Record<MovementType, string> = {
   OTHER: 'Outro',
 };
 
+const MOVEMENT_TYPE_DISPLAY_LABELS: Record<string, string> = {
+  ...MOVEMENT_TYPE_LABELS,
+  PACKAGE_SALE: 'Pacote',
+  FIADO_PAYMENT: 'Receb. fiado',
+  REFUND: 'Estorno',
+  SUPPLY: 'Reposição',
+  WITHDRAWAL: 'Saque',
+  ADJUSTMENT: 'Ajuste',
+};
+
 const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   CASH: 'Dinheiro',
   PIX: 'PIX',
@@ -40,11 +51,11 @@ const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
 };
 
 const PAYMENT_METHOD_ICONS: Record<PaymentMethod, React.ReactNode> = {
-  CASH: <Banknote size={16} />,
-  PIX: <Smartphone size={16} />,
-  CREDIT_CARD: <CreditCard size={16} />,
-  DEBIT_CARD: <CreditCard size={16} />,
-  FIADO: <Banknote size={16} />,
+  CASH: <Banknote size={56} />,
+  PIX: <Smartphone size={56} />,
+  CREDIT_CARD: <CreditCard size={56} />,
+  DEBIT_CARD: <CreditCard size={56} />,
+  FIADO: <Banknote size={56} />,
 };
 
 interface MovementFormData {
@@ -60,8 +71,6 @@ const INITIAL_FORM: MovementFormData = {
   paymentMethod: 'PIX',
   description: '',
 };
-
-const todayIso = () => new Date().toISOString().slice(0, 10);
 
 const movementTypeOptions = (Object.keys(MOVEMENT_TYPE_LABELS) as MovementType[]).map(value => ({
   value,
@@ -97,10 +106,11 @@ export const CashPanel: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
+      const today = todayISO();
       const [s, m] = await Promise.all([
-        cashApi.getSummary(barbershopId, todayIso()),
+        cashApi.getSummary(barbershopId, today),
         cashApi.getMovements(barbershopId, {
-          date: todayIso(),
+          date: today,
           paymentMethod: filterMethod || undefined,
         }),
       ]);
@@ -185,8 +195,11 @@ export const CashPanel: React.FC = () => {
       )}
 
       <div className="rounded-2xl border border-border bg-surface p-5 shadow-[0_18px_44px_-32px_rgba(0,0,0,0.65)]">
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          <div className="rounded-xl border border-accent/30 bg-selection p-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="relative col-span-2 overflow-hidden rounded-xl border border-accent/30 bg-selection p-4 sm:col-span-3 lg:col-span-1">
+            <div className="pointer-events-none absolute -right-3 -top-3 text-accent opacity-15">
+              <Banknote size={64} />
+            </div>
             <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
               Total recebido
             </p>
@@ -197,22 +210,20 @@ export const CashPanel: React.FC = () => {
             return (
               <div
                 key={method}
-                className="flex items-center gap-3 rounded-xl border border-border bg-bg p-4"
+                className="relative overflow-hidden rounded-xl border border-border bg-bg p-4"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-text-muted">
+                <div className="pointer-events-none absolute -right-2 -top-2 text-border opacity-20">
                   {PAYMENT_METHOD_ICONS[method]}
-                </span>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
-                    {PAYMENT_METHOD_LABELS[method]}
-                  </p>
-                  <p className="truncate text-sm font-semibold text-text-primary">
-                    {formatCurrencyBRL(entry?.total ?? 0)}
-                  </p>
-                  <p className="text-[11px] text-text-muted">
-                    {entry?.count ?? 0} {entry?.count === 1 ? 'movimentação' : 'movimentações'}
-                  </p>
                 </div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                  {PAYMENT_METHOD_LABELS[method]}
+                </p>
+                <p className="mt-1 truncate text-lg font-bold text-text-primary">
+                  {formatCurrencyBRL(entry?.total ?? 0)}
+                </p>
+                <p className="text-[11px] text-text-muted">
+                  {entry?.count ?? 0} {entry?.count === 1 ? 'movimentação' : 'movimentações'}
+                </p>
               </div>
             );
           })}
@@ -255,7 +266,7 @@ export const CashPanel: React.FC = () => {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-text-primary">
-                      {MOVEMENT_TYPE_LABELS[m.type as MovementType] ?? m.type}
+                      {MOVEMENT_TYPE_DISPLAY_LABELS[m.type] ?? m.type}
                     </span>
                     <span className="inline-flex items-center gap-1 rounded-md bg-surface-2 px-2 py-0.5 text-[10px] font-semibold uppercase text-text-muted">
                       {PAYMENT_METHOD_LABELS[m.paymentMethod as PaymentMethod] ?? m.paymentMethod}

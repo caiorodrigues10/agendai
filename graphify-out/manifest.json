@@ -25,8 +25,8 @@
     "semantic_hash": ""
   },
   "src/App.tsx": {
-    "mtime": 1790126257.4459338,
-    "ast_hash": "cc907db42995c7cf8a329c014cbaa7dd",
+    "mtime": 1790353259.2725296,
+    "ast_hash": "3c171615b05f015277cba7cc819ac3a9",
     "semantic_hash": ""
   },
   "src/components/domain/AddCustomerForm.tsx": {
@@ -50,13 +50,13 @@
     "semantic_hash": ""
   },
   "src/components/domain/FinancialDashboard.tsx": {
-    "mtime": 1790126257.4775963,
-    "ast_hash": "7b7e5d2cb588d301a924e93191adb914",
+    "mtime": 1790358944.3796904,
+    "ast_hash": "40e1708547f21e2f98be2dc7d6532d2e",
     "semantic_hash": ""
   },
   "src/components/domain/OwnerFinancialPanel.tsx": {
-    "mtime": 1790126257.49565,
-    "ast_hash": "7fced6ecad65b1cf7497f6dc00ea7f26",
+    "mtime": 1790367079.0794218,
+    "ast_hash": "35c6b7043b30a28e7bddb83a35d9e590",
     "semantic_hash": ""
   },
   "src/components/domain/OwnerReferralsPanel.tsx": {
@@ -65,8 +65,8 @@
     "semantic_hash": ""
   },
   "src/components/domain/OwnerSubscriptionPanel.tsx": {
-    "mtime": 1790126257.500183,
-    "ast_hash": "630e2dde37ec49e9f4179793760265bd",
+    "mtime": 1790364344.3790061,
+    "ast_hash": "01d4aef69c8bbd4e47b027304b2cbce5",
     "semantic_hash": ""
   },
   "src/components/domain/PostsManager.tsx": {
@@ -75,8 +75,8 @@
     "semantic_hash": ""
   },
   "src/components/domain/QueueItemCard.tsx": {
-    "mtime": 1790135470.2214806,
-    "ast_hash": "596465843af632c68c2c38746b26177b",
+    "mtime": 1790372068.6109533,
+    "ast_hash": "aa3b0e569a896e5da07c0a023f1bc95a",
     "semantic_hash": ""
   },
   "src/components/domain/ReferralTierBadge.tsx": {
@@ -100,8 +100,8 @@
     "semantic_hash": ""
   },
   "src/components/domain/SettingsManager.tsx": {
-    "mtime": 1790136746.0779371,
-    "ast_hash": "c6f8aead543e30c922d2688a0cb1238a",
+    "mtime": 1790351990.0987575,
+    "ast_hash": "a3d2c6f0b5e554ead9b91e7f288ded2c",
     "semantic_hash": ""
   },
   "src/components/domain/ShareReferralButton.tsx": {
@@ -120,8 +120,8 @@
     "semantic_hash": ""
   },
   "src/components/infra/AccessBlockedListener.tsx": {
-    "mtime": 1787852124.6897962,
-    "ast_hash": "c4268d91bde39f3761011ce8f322051c",
+    "mtime": 1790352257.367342,
+    "ast_hash": "939313400f570f1fa6a5dc3453ecbcbe",
     "semantic_hash": ""
   },
   "src/components/infra/CookieConsent.tsx": {
@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   "src/components/infra/PrivateRoute.tsx": {
-    "mtime": 1790126257.5597415,
-    "ast_hash": "07c25ccb452e895b0fd9a5947a079f5b",
+    "mtime": 1790353256.9874601,
+    "ast_hash": "69762cb2381e121297c565d10e584227",
     "semantic_hash": ""
   },
   "src/components/infra/ReferralRefCapture.tsx": {
@@ -175,8 +175,8 @@
     "semantic_hash": ""
   },
   "src/components/ui/PasswordInput.tsx": {
-    "mtime": 1790126257.5717688,
-    "ast_hash": "03dcde8adc20fd4d512301dd5a6b6496",
+    "mtime": 1790353412.2315438,
+    "ast_hash": "8229c6a35bd7d0ff25d23e6a95b724dd",
     "semantic_hash": ""
   },
   "src/components/ui/ThemeToggle.tsx": {
@@ -200,8 +200,8 @@
     "semantic_hash": ""
   },
   "src/contexts/AuthContext.tsx": {
-    "mtime": 1790126257.57829,
-    "ast_hash": "e00fc8b52b17fb5e60dfbc10ae23cc49",
+    "mtime": 1790353394.8378482,
+    "ast_hash": "f8c74a2bb2bc991899ba45e10633405f",
     "semantic_hash": ""
   },
   "src/contexts/BarbershopContext.tsx": {
@@ -240,8 +240,8 @@
     "semantic_hash": ""
   },
   "src/infra/apiClient.ts": {
-    "mtime": 1789586874.3178482,
-    "ast_hash": "6ef29e0d2fc371d6bb2f88655c91da81",
+    "mtime": 1790356210.706432,
+    "ast_hash": "3ac8ba185fcaea81867b679138e502bd",
     "semantic_hash": ""
   },
   "src/infra/authApi.ts": {
@@ -265,8 +265,8 @@
     "semantic_hash": ""
   },
   "src/infra/financialApi.ts": {
-    "mtime": 1790126257.5823026,
-    "ast_hash": "867d6a654fa0837303fa7d7e435da3c4",
+    "mtime": 1790351680.666052,
+    "ast_hash": "00e8ef1f5a5036c64ee8bf95bdf67eaf",
     "semantic_hash": ""
   },
   "src/infra/paymentsApi.ts": {
@@ -290,8 +290,8 @@
     "semantic_hash": ""
   },
   "src/infra/subscriptionsApi.ts": {
-    "mtime": 1789761948.2550485,
-    "ast_hash": "32a83c89268a0fb67bef9ccb36b84b88",
+    "mtime": 1790366639.022513,
+    "ast_hash": "b4acb9de7f6eb947a012b4fc1c2532f8",
     "semantic_hash": ""
   },
   "src/lib/utils.ts": {
@@ -310,8 +310,8 @@
     "semantic_hash": ""
   },
   "src/pages/CheckoutPage.tsx": {
-    "mtime": 1790126257.5890608,
-    "ast_hash": "222e053efde2a6f6676f9d4d86d8cb66",
+    "mtime": 1790370354.6900961,
+    "ast_hash": "fb22f278f94ae1ca1320b172dfb10135",
     "semantic_hash": ""
   },
   "src/pages/EmailVerifiedPage.tsx": {
@@ -330,13 +330,13 @@
     "semantic_hash": ""
   },
   "src/pages/LoginPage.test.tsx": {
-    "mtime": 1790126282.294632,
-    "ast_hash": "d45963c0d76c0f65907e11c0849cb4a0",
+    "mtime": 1790354134.7681048,
+    "ast_hash": "ce578bfb9ecc50b215098c616b9df7c0",
     "semantic_hash": ""
   },
   "src/pages/LoginPage.tsx": {
-    "mtime": 1790126274.1470997,
-    "ast_hash": "0df4605ff93bc4665e8e4adc7a2b9cf1",
+    "mtime": 1790356169.9354668,
+    "ast_hash": "50114fec821a9084d3ebe334fd53b07a",
     "semantic_hash": ""
   },
   "src/pages/MasterAdmin/BillingTab.tsx": {
@@ -375,8 +375,8 @@
     "semantic_hash": ""
   },
   "src/pages/StaffDashboard.tsx": {
-    "mtime": 1790136741.1638489,
-    "ast_hash": "3ebf6fb99c3b53b29f3600aba42e84a7",
+    "mtime": 1790351669.11605,
+    "ast_hash": "bd83a7e54a57041c5da9e8a68d6a95bb",
     "semantic_hash": ""
   },
   "src/pages/marketing/AboutPage.tsx": {
@@ -430,8 +430,8 @@
     "semantic_hash": ""
   },
   "src/tests/testUtils.tsx": {
-    "mtime": 1788025338.9645271,
-    "ast_hash": "e5a9249d488e1490a9dc249b9bf299a1",
+    "mtime": 1790354107.4293206,
+    "ast_hash": "3a4dde60d0f5f4cb6aab1f6b7e7d4d14",
     "semantic_hash": ""
   },
   "src/types.ts": {
@@ -455,8 +455,8 @@
     "semantic_hash": ""
   },
   "src/utils/errorMessage.ts": {
-    "mtime": 1789432987.9094954,
-    "ast_hash": "075cd5865d12658853eff143056de58f",
+    "mtime": 1790356208.437488,
+    "ast_hash": "4ed6a22ed8450b9cba9ff365975155a0",
     "semantic_hash": ""
   },
   "src/utils/passwordStrength.ts": {
@@ -550,8 +550,8 @@
     "semantic_hash": ""
   },
   "src/components/domain/ClientsManager.tsx": {
-    "mtime": 1788879279.5429924,
-    "ast_hash": "9eb2e74d647c0d864bdb92ea56994ff6",
+    "mtime": 1790352288.874512,
+    "ast_hash": "9277eadaf41e87054e67712affe2b5cf",
     "semantic_hash": ""
   },
   "src/components/domain/PackageCatalog.tsx": {
@@ -565,8 +565,8 @@
     "semantic_hash": ""
   },
   "src/infra/clientsApi.ts": {
-    "mtime": 1789170543.892052,
-    "ast_hash": "acd08639ea4c1c7c2301dafaad7c0576",
+    "mtime": 1790351434.914323,
+    "ast_hash": "3a19a4f3679eaa2fb307aaa2626fc0b3",
     "semantic_hash": ""
   },
   "src/infra/packagesApi.ts": {
@@ -600,13 +600,13 @@
     "semantic_hash": ""
   },
   "src/pages/ForgotPasswordPage.tsx": {
-    "mtime": 1790126257.591062,
-    "ast_hash": "2c94042ba2d9b59a375abcd6d4da7e90",
+    "mtime": 1790353414.5585978,
+    "ast_hash": "5775cb538c2e76c5ef39b59250fc0ff9",
     "semantic_hash": ""
   },
   "src/pages/ResetPasswordPage.tsx": {
-    "mtime": 1790126257.6236584,
-    "ast_hash": "8ef0af4613c45c4c529e167cfa6616ea",
+    "mtime": 1790353423.1981707,
+    "ast_hash": "5ed988754cece8ca6498b4dcebba0b89",
     "semantic_hash": ""
   },
   "src/utils/recaptcha.ts": {
@@ -770,8 +770,8 @@
     "semantic_hash": ""
   },
   "src/components/domain/ClientsTab.tsx": {
-    "mtime": 1790135895.1770914,
-    "ast_hash": "47bd9b00d9e620891bae3bfd2fc378c1",
+    "mtime": 1790351670.3245597,
+    "ast_hash": "17f16d12bd1288ee30c55f160e1b1f26",
     "semantic_hash": ""
   },
   "src/components/domain/ClosedSalonJoinModal.tsx": {
@@ -810,8 +810,8 @@
     "semantic_hash": ""
   },
   "src/components/domain/WeatherForecastWidget.tsx": {
-    "mtime": 1790126257.5502253,
-    "ast_hash": "a7b8c9c3d00940a755005217ebedab7f",
+    "mtime": 1790353469.5637047,
+    "ast_hash": "fe7afcb88d1fb0eb6c94cb8e9a7af4e1",
     "semantic_hash": ""
   },
   "src/components/infra/ErrorBoundary.test.tsx": {
@@ -905,8 +905,8 @@
     "semantic_hash": ""
   },
   "src/components/domain/ProductsHub.tsx": {
-    "mtime": 1790036211.005928,
-    "ast_hash": "fd32828a7cbf21c7561027ed9d8f7207",
+    "mtime": 1790351669.8013163,
+    "ast_hash": "0c698a13b487e1dbc6f7aa0f131b5d1c",
     "semantic_hash": ""
   },
   "src/components/domain/QueueAlertSettings.tsx": {
@@ -950,8 +950,8 @@
     "semantic_hash": ""
   },
   "src/components/domain/products/ProductReportsPanel.tsx": {
-    "mtime": 1789170580.5497174,
-    "ast_hash": "c8d56d7e7e1d8b005afcfe3e083b2b65",
+    "mtime": 1790351649.6154149,
+    "ast_hash": "996fc405dc6d2862b354d3ba093af166",
     "semantic_hash": ""
   },
   "src/components/domain/products/ProductSalesPanel.tsx": {
@@ -1090,13 +1090,13 @@
     "semantic_hash": ""
   },
   "src/utils/formatters.test.ts": {
-    "mtime": 1789761210.1293728,
-    "ast_hash": "04f68d2fd3909c5263b52668a3330f2c",
+    "mtime": 1790351692.2784798,
+    "ast_hash": "9378030d97fb970f85a53030e45c92de",
     "semantic_hash": ""
   },
   "src/utils/formatters.ts": {
-    "mtime": 1788891554.8924308,
-    "ast_hash": "8af29d464ceb8c77df5c8fe9912428c9",
+    "mtime": 1790351713.585004,
+    "ast_hash": "e70490fadf2d36143105ed026cd307b1",
     "semantic_hash": ""
   },
   "src/utils/metricLabels.ts": {
@@ -1125,8 +1125,8 @@
     "semantic_hash": ""
   },
   "src/utils/weatherUtils.ts": {
-    "mtime": 1788891730.4558444,
-    "ast_hash": "f9265ca21714cf58e3816720cf87be98",
+    "mtime": 1790352043.0883007,
+    "ast_hash": "cee389db9db0d80307e5845cf8ca725b",
     "semantic_hash": ""
   },
   ".github/copilot-instructions.md": {
@@ -1195,8 +1195,8 @@
     "semantic_hash": ""
   },
   "src/components/domain/CashPanel.tsx": {
-    "mtime": 1790126257.4550593,
-    "ast_hash": "37b11e9b407971da9f19bea3707b5908",
+    "mtime": 1790366769.335102,
+    "ast_hash": "716ef019bbe0ca30d372aa6de76f6ea2",
     "semantic_hash": ""
   },
   "src/components/domain/EnhancedForecastPanel.tsx": {
@@ -1210,8 +1210,8 @@
     "semantic_hash": ""
   },
   "src/components/domain/LoyaltyPanel.tsx": {
-    "mtime": 1790126257.4876287,
-    "ast_hash": "5d772507de2d13504b35c5aae968b90f",
+    "mtime": 1790367103.219285,
+    "ast_hash": "76a6c962cf8ce781fc434899512b33d6",
     "semantic_hash": ""
   },
   "src/components/domain/RecommendationsPanel.tsx": {
@@ -1220,8 +1220,8 @@
     "semantic_hash": ""
   },
   "src/infra/cashApi.ts": {
-    "mtime": 1789758509.1880207,
-    "ast_hash": "da19f9ae15d6ec98f923ea69909b243d",
+    "mtime": 1790351580.9790473,
+    "ast_hash": "ff057ad6f3f5969bdc93a71473aaafd1",
     "semantic_hash": ""
   },
   "src/infra/enhancedForecastApi.ts": {
@@ -1270,8 +1270,8 @@
     "semantic_hash": ""
   },
   "src/components/domain/CatalogManager.tsx": {
-    "mtime": 1790126257.4560597,
-    "ast_hash": "3a11d84b4fa33ef56f3f89501a35012a",
+    "mtime": 1790366495.3340688,
+    "ast_hash": "eb7c7626ceb8b73789a05f9bdd07c297",
     "semantic_hash": ""
   },
   "src/components/domain/ClientPortalDashboard.tsx": {
@@ -1375,8 +1375,8 @@
     "semantic_hash": ""
   },
   "src/components/domain/VouchersPanel.tsx": {
-    "mtime": 1790126257.5472019,
-    "ast_hash": "a3a9c6ec8a00499fd6fc74e75fb5bfaa",
+    "mtime": 1790347568.5799317,
+    "ast_hash": "32316614f3237c43e003ff439f4763f1",
     "semantic_hash": ""
   },
   "src/infra/copilotApi.ts": {
@@ -1430,8 +1430,8 @@
     "semantic_hash": ""
   },
   "src/infra/vouchersApi.ts": {
-    "mtime": 1789758509.177126,
-    "ast_hash": "e9a5df1d502bbb2e5ce9e23747bc32a4",
+    "mtime": 1790347508.4200332,
+    "ast_hash": "ed9df744beebb01310bac75b07ace201",
     "semantic_hash": ""
   },
   "src/infra/walletApi.ts": {
@@ -1540,8 +1540,8 @@
     "semantic_hash": ""
   },
   "src/utils/weatherVisuals.ts": {
-    "mtime": 1789259796.3625329,
-    "ast_hash": "54045baf98470865ddb0947709ae0bc5",
+    "mtime": 1790352042.208565,
+    "ast_hash": "ff2def0b7000970691618d0f8e6c332e",
     "semantic_hash": ""
   },
   "docs/agents/DELIVERY_CHECKS.md": {
@@ -1615,8 +1615,8 @@
     "semantic_hash": ""
   },
   "src/utils/errorMessage.test.ts": {
-    "mtime": 1789761210.1287954,
-    "ast_hash": "91589cc021e894bd93033fc40fa388d2",
+    "mtime": 1790356431.0633307,
+    "ast_hash": "ea17cbf30d47e201707fbbfb57731564",
     "semantic_hash": ""
   },
   "src/utils/operationMode.ts": {
@@ -1715,8 +1715,8 @@
     "semantic_hash": ""
   },
   "src/pages/CheckoutPage.test.tsx": {
-    "mtime": 1789765002.1941674,
-    "ast_hash": "bcb7c138b8a4a400ad1a92281a4dadcc",
+    "mtime": 1790366661.7831113,
+    "ast_hash": "added94be4babd657d493434664b57d8",
     "semantic_hash": ""
   },
   "src/tests/jest-dom.d.ts": {
@@ -1922,6 +1922,11 @@
   "src/infra/supportApi.ts": {
     "mtime": 1790138135.5649333,
     "ast_hash": "e4903018076e71cb8ece8639c0a8cc24",
+    "semantic_hash": ""
+  },
+  ".opencode/snapshots/before-20260925_122823.json": {
+    "mtime": 1790350104.0038714,
+    "ast_hash": "82ff78b4efe92908e9550e9af43ca63e",
     "semantic_hash": ""
   }
 }

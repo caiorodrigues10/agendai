@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -51,24 +51,36 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
     defaultValues: { name: '', whatsapp: '' },
   });
 
+  const requestSeq = useRef(0);
+
   const loadList = useCallback(async () => {
+    const seq = ++requestSeq.current;
     setLoading(true);
     setError(null);
     try {
       const result = await clientsApi.list({ search: search.trim() || undefined, page, limit: 15 });
+      if (seq !== requestSeq.current) return; // resposta obsoleta (corrida de buscas)
+      // Página além do total (ex.: após filtro/exclusão): volta para a última válida
+      if (page > result.meta.totalPages) {
+        setPage(result.meta.totalPages);
+        return;
+      }
       setClients(result.data);
       setMeta(result.meta);
     } catch (err) {
+      if (seq !== requestSeq.current) return;
       setError(getErrorMessage(err));
     } finally {
-      setLoading(false);
+      if (seq === requestSeq.current) setLoading(false);
     }
   }, [search, page]);
+
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     const t = setTimeout(loadList, 300);
     return () => clearTimeout(t);
-  }, [loadList, refreshSignal]);
+  }, [loadList, refreshSignal, reloadKey]);
 
   const handleCreate = async (data: ClientCreateFormData) => {
     setSaving(true);
@@ -81,7 +93,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
       reset();
       setShowCreate(false);
       setPage(1);
-      await loadList();
+      setReloadKey(k => k + 1);
       onSelectClient(created.id);
     } catch (err) {
       setError(getErrorMessage(err));

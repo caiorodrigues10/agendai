@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { productsApi } from '../../infra/productsApi';
 import { usePermissions } from '../../hooks/usePermissions';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { addDaysISO, todayISO } from '../../utils/dateRanges';
 import { ProductCatalogPanel } from './products/ProductCatalogPanel';
 import { ProductStockPanel } from './products/ProductStockPanel';
 import { ProductSalesPanel } from './products/ProductSalesPanel';
@@ -35,8 +36,8 @@ export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'succes
       const result = await productsApi.listProducts({ active: 'true', lowStock: 'true', limit: 1, page: 1 });
       setLowStockCount(result.meta.total);
       if (canReports) {
-        const from = new Date(Date.now() - 29 * 86_400_000).toISOString().slice(0, 10);
-        const to = new Date().toISOString().slice(0, 10);
+        const from = addDaysISO(-29);
+        const to = todayISO();
         const reports = await productsApi.reports(from, to);
         setNeedsReorderCount(reports.attention?.needsReorder.length ?? 0);
       } else {

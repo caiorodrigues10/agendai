@@ -124,7 +124,10 @@ export const ForgotPasswordPage: React.FC = () => {
                   Informe o e-mail associado à sua conta para recuperar sua senha.
                 </p>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-accent">
+                  <label
+                    htmlFor="forgot-password-email"
+                    className="text-[10px] font-bold uppercase tracking-wider text-accent"
+                  >
                     E-mail
                   </label>
                   <div className="relative group">
@@ -135,9 +138,11 @@ export const ForgotPasswordPage: React.FC = () => {
                       />
                     </div>
                     <input
+                      id="forgot-password-email"
                       type="email"
                       className={inputClass(false)}
                       placeholder="seu@email.com"
+                      autoComplete="email"
                       autoFocus
                       value={email}
                       onChange={e => setEmail(e.target.value)}

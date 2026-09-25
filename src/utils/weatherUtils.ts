@@ -2,6 +2,7 @@ import { dateAtNoon } from './dateRanges';
 
 export function formatWeatherDayLabel(date: string): string {
   const value = dateAtNoon(date);
+  if (Number.isNaN(value.getTime())) return date || '';
   const today = new Date();
   today.setHours(12, 0, 0, 0);
 

@@ -62,18 +62,19 @@ describe('SubscriptionCheckout PCI', () => {
     subscribe.mockReset();
   });
 
-  it('não coleta PAN/CVV e oferece PIX e checkout hospedado de cartão', async () => {
+  it('cobra o cartão na mesma página, sem redirecionar', async () => {
     renderWithProviders(<SubscriptionCheckout billing="MONTHLY" />, { route: '/checkout' });
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /^PIX$/i })).toBeInTheDocument();
     });
     expect(screen.getByRole('button', { name: /^Cartão$/i })).toBeInTheDocument();
-    expect(screen.queryByLabelText(/cvv/i)).not.toBeInTheDocument();
-    expect(screen.queryByPlaceholderText(/•••• •••• •••• ••••/)).not.toBeInTheDocument();
-    expect(document.body.textContent).not.toMatch(/número do cartão/i);
+    expect(screen.queryByLabelText(/número do cartão/i)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /^Cartão$/i }));
-    expect(screen.queryByLabelText(/cvv/i)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/número do cartão/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/cvv/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /pagar/i })).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/checkout hospedado/i);
   });
 });

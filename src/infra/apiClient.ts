@@ -24,8 +24,8 @@ export type AccessBlockedCode = (typeof ACCESS_BLOCKED_CODES)[number];
 
 export const ACCESS_BLOCKED_EVENT = 'agendai:access-blocked';
 
-/** Rotas em que 401 NÃO deve disparar refresh (login/refresh). */
-const NO_REFRESH_PATHS = ['/api/auth/login', '/api/auth/register', '/api/auth/refresh'];
+/** Rotas em que 401 NÃO deve disparar refresh (login/refresh/logout). */
+const NO_REFRESH_PATHS = ['/api/auth/login', '/api/auth/register', '/api/auth/refresh', '/api/auth/logout'];
 
 export class ApiError extends Error {
   statusCode: number;
@@ -97,7 +97,13 @@ async function doRefreshAccessToken(): Promise<string | null> {
     if (revision !== authStorage.getRevision()) return null;
     const rememberMe = authStorage.isPersistent();
     authStorage.setTokens(accessToken, typeof data.refreshToken === 'string' ? data.refreshToken : undefined, rememberMe);
-    if (data.user && typeof data.user === 'object') authStorage.setUser(data.user as Record<string, unknown>, rememberMe);
+    if (data.user && typeof data.user === 'object') {
+      // Merge: o payload de refresh não traz permissions/avatarUrl — preserva
+      // os campos que o /auth/me já carregou em vez de sobrescrever o usuário
+      const incoming = data.user as Record<string, unknown>;
+      const previous = authStorage.getUser();
+      authStorage.setUser(previous ? { ...previous, ...incoming } : incoming, rememberMe);
+    }
     return accessToken;
   } catch (error) {
     if (error instanceof ApiError) throw error;
@@ -262,6 +268,20 @@ export const apiClient = async <T>(
 
     const text = await res.text();
     const error = buildApiError(res.status, text);
+    // 401 com access token apresentado e fora das rotas de login/registro:
+    // a sessão é inválida/expirada (refresh não resolveu). Marca com um código
+    // próprio para o getErrorMessage traduzir em PT-BR amigável.
+    if (
+      res.status === 401 &&
+      Boolean(token) &&
+      !NO_REFRESH_PATHS.some(p => url.startsWith(p)) &&
+      !error.code
+    ) {
+      error.code = 'SESSION_EXPIRED';
+      if (!error.message || /^HTTP\s*\d+$/i.test(error.message)) {
+        error.message = 'Sua sessão expirou. Faça login novamente.';
+      }
+    }
     notifyIfAccessBlocked(error);
     throw error;
   }
@@ -269,11 +289,8 @@ export const apiClient = async <T>(
   // Defensivo: lê como texto primeiro para tratar 2xx com body vazio/inválido
   const bodyText = await res.text();
   if (!bodyText) {
-    throw new ApiError(
-      'O servidor respondeu sem dados. Tente novamente em instantes.',
-      res.status,
-      'EMPTY_RESPONSE'
-    );
+    // 2xx sem conteúdo é sucesso legítimo (ex.: DELETE → 204)
+    return undefined as unknown as T;
   }
   const parsed = tryParseJson(bodyText);
   if (!parsed) {

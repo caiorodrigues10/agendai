@@ -102,6 +102,7 @@ export interface SubscribePayload {
   paymentMethod: 'pix' | 'credit_card' | 'payment_link' | 'asaas';
   /** Meio de pagamento embutido do Asaas (PIX por padrão). */
   asaasBillingType?: 'PIX' | 'CREDIT_CARD';
+  asaasCreditCard?: AsaasCreditCardPayload;
   cardToken?: string;
   cardPaymentMethodId?: string;
   payerEmail: string;
@@ -110,12 +111,24 @@ export interface SubscribePayload {
   payerIdentification?: PayerIdentification;
 }
 
+export interface AsaasCreditCardPayload {
+  holderName: string;
+  number: string;
+  expiryMonth: string;
+  expiryYear: string;
+  ccv: string;
+  postalCode: string;
+  addressNumber: string;
+  phone: string;
+}
+
 export interface SetupTrialCardPayload {
   planId: string;
   payerEmail: string;
   payerFirstName?: string;
   payerLastName?: string;
   payerIdentification: PayerIdentification;
+  asaasCreditCard: AsaasCreditCardPayload;
 }
 
 function unwrap<T>(res: unknown): T {

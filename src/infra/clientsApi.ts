@@ -2,6 +2,7 @@ import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
 import { SalonClient } from '../types';
 import { buildQuery } from '../utils/query';
+import { getSelectedBarbershopId } from './selectedShopStore';
 
 function unwrap<T>(res: unknown): T {
   if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
@@ -10,6 +11,15 @@ function unwrap<T>(res: unknown): T {
 
 function token() {
   return authStorage.getAccessToken() || '';
+}
+
+/** MASTER_ADMIN precisa indicar a barbearia; o BE responde 400 sem barbershopId. */
+function resolveBarbershopId(): string | undefined {
+  const user = authStorage.getUser();
+  if (user?.role === 'MASTER_ADMIN') {
+    return getSelectedBarbershopId() ?? undefined;
+  }
+  return undefined;
 }
 
 export interface ListMeta {
@@ -38,7 +48,7 @@ export interface ProcedureRecord {
 export const clientsApi = {
   list: async (params?: { search?: string; page?: number; limit?: number }) => {
     const res = await apiClient<{ success: boolean; data: SalonClient[]; meta: ListMeta }>(
-      `/api/clients${buildQuery(params)}`,
+      `/api/clients${buildQuery({ ...params, barbershopId: resolveBarbershopId() })}`,
       'GET',
       undefined,
       token()
@@ -65,10 +75,11 @@ export const clientsApi = {
   },
 
   create: async (body: { name: string; whatsapp: string; notes?: string | null }) => {
+    const barbershopId = resolveBarbershopId();
     const res = await apiClient<{ success: boolean; data: SalonClient }>(
       '/api/clients',
       'POST',
-      body,
+      barbershopId ? { ...body, barbershopId } : body,
       token()
     );
     return unwrap<SalonClient>(res);

@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { QueueItem, Service, StaffMember } from '../../types';
 import {
   LuDollarSign as DollarSign,
@@ -58,6 +59,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
   onDeleteHistoryItem,
 }) => {
   const owner = isOwnerLike(currentUser.role);
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<'personal' | 'shop'>(owner ? 'shop' : 'personal');
   const [timeFilter, setTimeFilter] = useState<'today' | 'week' | 'month' | 'all'>('month');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
@@ -65,9 +67,11 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
   const [insights, setInsights] = useState<BarbershopInsights | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
   const [insightsError, setInsightsError] = useState<string | null>(null);
+  const [insightsUpgrade, setInsightsUpgrade] = useState(false);
   const [commissionSummary, setCommissionSummary] = useState<CommissionSummary | null>(null);
   const [commissionLoading, setCommissionLoading] = useState(false);
   const [commissionError, setCommissionError] = useState<string | null>(null);
+  const [commissionUpgrade, setCommissionUpgrade] = useState(false);
   const [commissionProfessionalId, setCommissionProfessionalId] = useState('');
 
   useEffect(() => {
@@ -75,6 +79,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
     let cancelled = false;
     setInsightsLoading(true);
     setInsightsError(null);
+    setInsightsUpgrade(false);
     financialApi
       .getInsights(period)
       .then(data => {
@@ -89,11 +94,13 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
       .catch(err => {
         if (cancelled) return;
         if (err instanceof ApiError && err.code === 'DASHBOARD_REQUIRED') {
-          setInsightsError('Insights disponíveis no plano Pro.');
+          setInsightsError(err.message || 'Insights disponíveis no plano Pro.');
+          setInsightsUpgrade(true);
         } else {
           setInsightsError(
             'Não foi possível atualizar o relatório. Tente novamente em instantes.'
           );
+          setInsightsUpgrade(false);
         }
       })
       .finally(() => {
@@ -121,6 +128,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
 
     setCommissionLoading(true);
     setCommissionError(null);
+    setCommissionUpgrade(false);
     commissionsApi
       .summary({
         from: formatDate(from),
@@ -133,7 +141,13 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
       .catch(error => {
         if (cancelled) return;
         setCommissionSummary(null);
-        setCommissionError('Não foi possível atualizar as comissões. Tente novamente em instantes.');
+        if (error instanceof ApiError && error.code === 'DASHBOARD_REQUIRED') {
+          setCommissionError(error.message || 'Comissões disponíveis no plano Pro.');
+          setCommissionUpgrade(true);
+        } else {
+          setCommissionError('Não foi possível atualizar as comissões. Tente novamente em instantes.');
+          setCommissionUpgrade(false);
+        }
       })
       .finally(() => {
         if (!cancelled) setCommissionLoading(false);
@@ -303,8 +317,17 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
               </div>
             )}
             {commissionError && !commissionLoading && (
-              <div className="mt-4 flex items-center gap-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
+              <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
                 <AlertCircle size={15} /> {commissionError}
+                {commissionUpgrade && (
+                  <button
+                    type="button"
+                    onClick={() => navigate('/planos')}
+                    className="ml-auto rounded-lg bg-danger px-3 py-1.5 text-xs font-bold text-white transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+                  >
+                    Fazer upgrade
+                  </button>
+                )}
               </div>
             )}
             {!commissionLoading && !commissionError && commissionSummary && (
@@ -347,8 +370,17 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
           )}
 
           {insightsError && (
-            <div className="bg-danger/10 border border-danger/30 rounded-xl px-4 py-3 text-sm text-danger flex items-center gap-2">
+            <div className="bg-danger/10 border border-danger/30 rounded-xl px-4 py-3 text-sm text-danger flex flex-wrap items-center gap-2">
               <AlertCircle size={16} /> {insightsError}
+              {insightsUpgrade && (
+                <button
+                  type="button"
+                  onClick={() => navigate('/planos')}
+                  className="ml-auto rounded-lg bg-danger px-3 py-1.5 text-xs font-bold text-white transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+                >
+                  Fazer upgrade
+                </button>
+              )}
             </div>
           )}
 

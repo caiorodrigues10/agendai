@@ -243,23 +243,45 @@ export const LoyaltyPanel: React.FC = () => {
             <Gift size={16} className="text-accent" />
             <h3 className="text-sm font-semibold text-text-primary">Status do programa</h3>
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-4">
+          <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="rounded-xl border border-border bg-bg p-3">
               <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Tipo</p>
               <p className="mt-0.5 text-sm font-medium text-text-primary">
-                {program.type === 'visits' ? 'Por visitas' : program.type}
+                {program.type.toUpperCase() === 'VISITS' ? 'Por visitas' : program.type}
               </p>
             </div>
             <div className="rounded-xl border border-border bg-bg p-3">
               <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
                 Status
               </p>
-              <p className="mt-0.5 text-sm font-medium text-text-primary">
-                {isActive ? (
-                  <span className="text-success">Ativo</span>
-                ) : (
-                  <span className="text-text-muted">Inativo</span>
-                )}
+              <div className="mt-1.5 grid grid-cols-2 gap-1 rounded-lg bg-surface-2 p-1">
+                <button
+                  type="button"
+                  onClick={() => setIsActive(true)}
+                  aria-pressed={isActive}
+                  className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
+                    isActive
+                      ? 'bg-success/15 text-success shadow-sm'
+                      : 'text-text-muted hover:text-text-secondary'
+                  }`}
+                >
+                  Ativo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsActive(false)}
+                  aria-pressed={!isActive}
+                  className={`rounded-md px-3 py-1.5 text-xs font-bold transition-colors ${
+                    !isActive
+                      ? 'bg-surface text-text-primary shadow-sm'
+                      : 'text-text-muted hover:text-text-secondary'
+                  }`}
+                >
+                  Inativo
+                </button>
+              </div>
+              <p className="mt-1.5 text-[11px] text-text-muted">
+                {isActive ? 'Clientes acumulando visitas' : 'Contagem de visitas pausada'}
               </p>
             </div>
           </div>

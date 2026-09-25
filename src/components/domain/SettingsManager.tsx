@@ -85,9 +85,9 @@ const ShopCityField: React.FC<{
 }> = ({ city, onCityChange, settings }) => {
   const cityTrim = city.trim();
   const locationReady =
-    cityTrim.toLowerCase() === (settings.city || '').trim().toLowerCase() &&
     settings.latitude != null &&
-    settings.longitude != null;
+    settings.longitude != null &&
+    (settings.city || cityTrim).trim().length > 0;
 
   return (
     <div>
@@ -119,10 +119,7 @@ const WeatherForecastCard: React.FC<{
 }> = ({ barbershopId, settings }) => {
   const [forecast, setForecast] = useState<ShopWeatherDay[] | null>(null);
   const [weatherFailed, setWeatherFailed] = useState(false);
-  const locationReady =
-    settings.latitude != null &&
-    settings.longitude != null &&
-    (settings.city || '').trim().length > 0;
+  const locationReady = settings.latitude != null && settings.longitude != null;
 
   useEffect(() => {
     if (!barbershopId || settings.latitude == null || settings.longitude == null) return;

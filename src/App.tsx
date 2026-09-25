@@ -91,10 +91,7 @@ const App: React.FC = () => {
           <Route
             path="/checkout"
             element={
-              <PrivateRoute
-                roles={['OWNER', 'MASTER_ADMIN']}
-                fallback={<Navigate to="/login" replace />}
-              >
+              <PrivateRoute roles={['OWNER', 'MASTER_ADMIN']}>
                 <CheckoutPage />
               </PrivateRoute>
             }
@@ -102,7 +99,7 @@ const App: React.FC = () => {
           <Route
             path="/master"
             element={
-              <PrivateRoute roles={['MASTER_ADMIN']} fallback={<Navigate to="/login" replace />}>
+              <PrivateRoute roles={['MASTER_ADMIN']}>
                 <AdminLayout />
               </PrivateRoute>
             }
@@ -128,10 +125,7 @@ const App: React.FC = () => {
           <Route
             path="/app/:tab"
             element={
-              <PrivateRoute
-                roles={['OWNER', 'EMPLOYEE', 'MASTER_ADMIN']}
-                fallback={<Navigate to="/login" replace />}
-              >
+              <PrivateRoute roles={['OWNER', 'EMPLOYEE', 'MASTER_ADMIN']}>
                 <StaffDashboard />
               </PrivateRoute>
             }

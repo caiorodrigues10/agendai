@@ -158,10 +158,15 @@ export const ResetPasswordPage: React.FC = () => {
               </p>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-accent">
+                <label
+                  htmlFor="reset-new-password"
+                  className="text-[10px] font-bold uppercase tracking-wider text-accent"
+                >
                   Nova senha
                 </label>
                 <PasswordInput
+                  id="reset-new-password"
+                  autoComplete="new-password"
                   showStrength
                   showPassword={showPassword}
                   onToggleShow={() => setShowPassword(v => !v)}
@@ -172,10 +177,15 @@ export const ResetPasswordPage: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-accent">
+                <label
+                  htmlFor="reset-confirm-password"
+                  className="text-[10px] font-bold uppercase tracking-wider text-accent"
+                >
                   Confirmar nova senha
                 </label>
                 <PasswordInput
+                  id="reset-confirm-password"
+                  autoComplete="new-password"
                   showPassword={showPassword}
                   onToggleShow={() => setShowPassword(v => !v)}
                   placeholder="Repita a nova senha"

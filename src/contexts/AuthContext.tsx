@@ -33,6 +33,24 @@ const isTemporaryAuthError = (err: unknown) =>
     err.statusCode === 429 ||
     err.statusCode >= 500);
 
+// Evita spinner infinito no boot quando o backend não responde: após o
+// timeout, o erro é tratado como temporário (mantém sessão local em cache).
+const AUTH_BOOT_TIMEOUT_MS = 10_000;
+const withAuthBootTimeout = <T,>(promise: Promise<T>, ms = AUTH_BOOT_TIMEOUT_MS): Promise<T> => {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      timer = setTimeout(
+        () => reject(new ApiError('Tempo esgotado ao carregar a sessão.', 0, 'NETWORK_ERROR')),
+        ms,
+      );
+    }),
+  ]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+};
+
 const normalizeRole = (role: unknown): StaffMember['role'] => {
   const normalized = typeof role === 'string' ? role.toUpperCase() : role;
   return (normalized === 'ADMIN' ? 'MASTER_ADMIN' : normalized) as StaffMember['role'];
@@ -61,7 +79,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (token) {
         try {
-          const me = await authApi.me(token);
+          const me = await withAuthBootTimeout(authApi.me(token));
           if (!isCurrent()) return;
           setUser(normalizeUser(me.user));
           authStorage.setUser(me.user, authStorage.isPersistent());
@@ -85,7 +103,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const refreshToken = authStorage.getRefreshToken();
         if (refreshToken || cachedUser || authStorage.getRememberMe()) {
           try {
-            const refreshed = await refreshAccessToken();
+            const refreshed = await withAuthBootTimeout(refreshAccessToken());
             if (!isCurrent()) return;
             const refreshedUser = authStorage.getUser();
             setUser(refreshed && refreshedUser ? normalizeUser(refreshedUser) : null);

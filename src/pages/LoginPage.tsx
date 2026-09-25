@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useId } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LoginSchema, LoginFormData, RegisterSchema, RegisterFormData } from '../schemas';
 import { useAuth } from '../contexts/AuthContext';
@@ -76,32 +76,41 @@ interface FieldProps {
   children: React.ReactNode;
 }
 
-const Field: React.FC<FieldProps> = ({ label, icon: Icon, error, optional, children }) => (
-  <div className="space-y-1">
-    <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
-      {label}
-      {optional && <span className="text-text-muted font-normal normal-case"> (opcional)</span>}
-    </span>
-    <div className="relative group">
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-        <Icon
-          size={15}
-          className={`transition-colors ${
-            error ? 'text-danger' : 'text-text-muted group-focus-within:text-accent'
-          }`}
-        />
+const Field: React.FC<FieldProps> = ({ label, icon: Icon, error, optional, children }) => {
+  const generatedId = useId();
+  const childId = React.isValidElement(children)
+    ? ((children.props as { id?: string }).id ?? generatedId)
+    : generatedId;
+  return (
+    <div className="space-y-1">
+      <label htmlFor={childId} className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+        {label}
+        {optional && <span className="text-text-muted font-normal normal-case"> (opcional)</span>}
+      </label>
+      <div className="relative group">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+          <Icon
+            size={15}
+            className={`transition-colors ${
+              error ? 'text-danger' : 'text-text-muted group-focus-within:text-accent'
+            }`}
+          />
+        </div>
+        {React.isValidElement(children)
+          ? React.cloneElement(
+              children as React.ReactElement<React.InputHTMLAttributes<HTMLInputElement>>,
+              { id: childId, 'aria-label': label }
+            )
+          : children}
       </div>
-      {React.isValidElement(children)
-        ? React.cloneElement(children as React.ReactElement<React.InputHTMLAttributes<HTMLInputElement>>, { 'aria-label': label })
-        : children}
+      {error && (
+        <span className="text-[10px] font-medium text-danger flex items-center gap-1">
+          <AlertCircle size={10} /> {error}
+        </span>
+      )}
     </div>
-    {error && (
-      <span className="text-[10px] font-medium text-danger flex items-center gap-1">
-        <AlertCircle size={10} /> {error}
-      </span>
-    )}
-  </div>
-);
+  );
+};
 
 const QUEUE_MOCK = [
   { name: 'Mariana C.', service: 'Coloração', status: 'Na cadeira' },
@@ -248,6 +257,7 @@ const BrandPanel: React.FC = () => (
 
 export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { user, loading, login, loginWithGoogle, loginWithSavedAccount, forgetSavedAccount, register: registerUser, registerWithGoogle } = useAuth();
   const [tab, setTab] = useState<Tab>(mode);
@@ -498,6 +508,32 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       navigate(`/checkout?planId=${encodeURIComponent(planId)}&billing=${billing}`, { replace: true });
       return;
     }
+
+    // Deep link: rota tentada antes do login, preservada pelo PrivateRoute
+    // em `location.state.from` (e também suportada via ?returnTo=).
+    const fromState = (location.state as { from?: { pathname?: string; search?: string } } | null)?.from;
+    const returnTo = searchParams.get('returnTo');
+    const rawFrom = fromState?.pathname
+      ? `${fromState.pathname}${fromState.search ?? ''}`
+      : returnTo;
+    const isInternalPath =
+      !!rawFrom &&
+      rawFrom.startsWith('/') &&
+      !rawFrom.startsWith('//') &&
+      !rawFrom.startsWith('/login') &&
+      !rawFrom.startsWith('/cadastro') &&
+      !rawFrom.startsWith('/bloqueado');
+    const canAccessFrom =
+      isInternalPath &&
+      (!rawFrom.startsWith('/master') || authUser?.role === 'MASTER_ADMIN') &&
+      (!rawFrom.startsWith('/checkout') || authUser?.role === 'OWNER' || authUser?.role === 'MASTER_ADMIN');
+    const allowedFrom = canAccessFrom && authUser ? rawFrom : null;
+
+    // MasterAdmin: painel sem paywall; aprofunda direto (ex.: /master/tickets).
+    if (allowedFrom && allowedFrom.startsWith('/master')) {
+      navigate(allowedFrom, { replace: true });
+      return;
+    }
     if (authUser) {
       const panelPath = getPanelPathForRole(authUser.role);
       if (panelPath === '/master/work') {
@@ -524,8 +560,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     } catch {
       // GET /subscriptions/me falhou: entra no painel; 402 global manda a /bloqueado
     }
-    navigate(getPanelPathForRole(authUser?.role), { replace: true });
-  }, [navigate, searchParams, user]);
+    navigate(allowedFrom ?? getPanelPathForRole(authUser?.role), { replace: true });
+  }, [navigate, searchParams, location.state, user]);
 
   useEffect(() => {
     if (loading || !user || paywallOpen) return;

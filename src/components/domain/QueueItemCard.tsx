@@ -16,10 +16,13 @@ import {
   LuUserPlus as UserPlus,
   LuScissors as Scissors,
   LuFlaskConical as FlaskConical,
+  LuPhone as Phone,
 } from 'react-icons/lu';
 import { notificationsApi } from '../../infra/notificationsApi';
 import { clientsApi, ProcedureRecord } from '../../infra/clientsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { buildWhatsAppUrl } from '../../utils/whatsappUtils';
+import { maskPhone } from '../../utils/documentUtils';
 import { RetailCheckoutBlock } from './RetailCheckoutBlock';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import type { RetailSalePayload } from '../../infra/productsApi';
@@ -76,7 +79,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
     }
   }, [item.clientId, item.status]);
   const [retailSale, setRetailSale] = useState<(RetailSalePayload & { total: number }) | null>(null);
-  const [sending, setSending] = useState<'reminder' | 'next' | null>(null);
+  const [sending, setSending] = useState<'reminder' | 'next' | 'called' | null>(null);
   const [showPaymentPicker, setShowPaymentPicker] = useState(false);
   const [submittingFinalization, setSubmittingFinalization] = useState(false);
   const [commissionSplits, setCommissionSplits] = useState<{ professionalId: string; percentage: number }[]>(() => {
@@ -116,12 +119,14 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
     }
   };
 
-  const sendWhatsApp = async (kind: 'reminder' | 'next') => {
+  const sendWhatsApp = async (kind: 'reminder' | 'next' | 'called') => {
     const phone = item.whatsapp.replace(/\D/g, '');
     const msg =
       kind === 'reminder'
         ? `Olá ${item.customerName}! Sua vez no ${shopName} está chegando (aprox. 15 min). Já pode vir!`
-        : `Olá ${item.customerName}! Você é o próximo na fila do ${shopName}. Por favor, fique atento!`;
+        : kind === 'called'
+          ? `Olá ${item.customerName}! 🔔 É a sua vez no ${shopName}! Pode entrar agora — sua cadeira está pronta. Estamos te esperando!`
+          : `Olá ${item.customerName}! Você é o próximo na fila do ${shopName}. Por favor, fique atento!`;
     const shopId = barbershopId || item.barbershopId;
     if (!shopId) {
       onNotify?.('Conecte o WhatsApp do salão em Configurações para enviar mensagens.', 'error');
@@ -134,7 +139,14 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
         message: msg,
         barbershopId: shopId,
       });
-      onNotify?.(kind === 'reminder' ? 'Aviso de 15 min enviado.' : 'Cliente avisado que é o próximo.', 'success');
+      onNotify?.(
+        kind === 'reminder'
+          ? 'Aviso de 15 min enviado.'
+          : kind === 'called'
+            ? '🔔 Cliente avisado que é a sua vez — mensagem enviada!'
+            : 'Cliente avisado que é o próximo.',
+        'success'
+      );
     } catch (err) {
       onNotify?.(
         getErrorMessage(err, 'Conecte o WhatsApp do salão em Configurações para enviar mensagens.'),
@@ -147,6 +159,17 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
 
   const hasValidPhone =
     item.whatsapp && item.whatsapp !== '00000000000' && item.whatsapp.replace(/\D/g, '').length > 5;
+  const whatsappUrl = hasValidPhone ? buildWhatsAppUrl(item.whatsapp) : null;
+
+  // Chamar: avisa o cliente no WhatsApp (se houver telefone) e move para a cadeira.
+  const handleCall = async () => {
+    if (hasValidPhone) {
+      await sendWhatsApp('called');
+    } else {
+      onNotify?.('Cliente sem telefone no cadastro — chamado sem aviso no WhatsApp.', 'error');
+    }
+    onStatusChange(item.id, 'in_chair');
+  };
 
   const paymentOptions = [
     { value: 'pix' as const, label: 'PIX', icon: Smartphone },
@@ -223,6 +246,12 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
                 })}
               </span>
             </div>
+            {isAdmin && hasValidPhone && (
+              <div className="flex items-center gap-1 text-xs text-text-secondary mt-1">
+                <Phone size={10} className="shrink-0" />
+                <span>{maskPhone(item.whatsapp)}</span>
+              </div>
+            )}
             {lastProcedure && item.status === 'in_chair' && (
               <div className="mt-2 rounded-lg border border-border bg-surface px-2 py-1.5 text-xs">
                 <p className="flex items-center gap-1 font-medium text-text-secondary">
@@ -269,6 +298,17 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
         <div className="mt-4 pt-3 border-t border-border flex flex-wrap justify-end gap-2">
           {item.status === 'waiting' && (
             <>
+              {hasValidPhone && whatsappUrl && (
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 text-xs text-accent bg-accent/10 border border-accent/30 hover:bg-accent/20 rounded flex items-center gap-1 transition-colors"
+                  aria-label={`Falar com ${item.customerName} no WhatsApp`}
+                >
+                  <Phone size={14} /> Falar
+                </a>
+              )}
               {hasValidPhone && (
                 <>
                   <button
@@ -313,10 +353,16 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
                 <Trash2 size={14} /> Cancelar
               </button>
               <button
-                onClick={() => onStatusChange(item.id, 'in_chair')}
-                className="px-4 py-1.5 text-xs font-bold text-accent-fg bg-accent hover:bg-accent-hover rounded shadow-lg shadow-accent/20 flex items-center gap-1 transition-colors"
+                onClick={() => void handleCall()}
+                disabled={sending !== null}
+                className="px-4 py-1.5 text-xs font-bold text-accent-fg bg-accent hover:bg-accent-hover rounded shadow-lg shadow-accent/20 flex items-center gap-1 transition-colors disabled:opacity-50 cursor-pointer"
               >
-                <Bell size={14} /> Chamar
+                {sending === 'called' ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <Bell size={14} />
+                )}
+                {sending === 'called' ? 'Avisando…' : 'Chamar'}
               </button>
             </>
           )}
