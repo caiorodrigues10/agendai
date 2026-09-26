@@ -19,6 +19,29 @@ export interface Organization {
   members?: { id: string; userId: string; role: string; user: { name: string; email: string } }[];
 }
 
+export interface OrganizationDashboardShop {
+  barbershopId: string;
+  name: string;
+  logoUrl: string | null;
+  isOpen: boolean;
+  accessLevel: 'FULL' | 'OPERATIONAL';
+  liveNow: number;
+  revenue?: { today: number; week: number; month: number };
+}
+
+export interface AvailableBarbershop {
+  id: string;
+  name: string;
+  logoUrl?: string | null;
+  city?: string | null;
+}
+
+export interface AttachedBarbershop {
+  id: string;
+  name: string;
+  organizationId: string | null;
+}
+
 export const organizationsApi = {
   listMy: () =>
     apiClient<{ data: Organization[] }>('/api/organizations', 'GET', undefined, token()).then(r => unwrap<Organization[]>(r)),
@@ -46,4 +69,16 @@ export const organizationsApi = {
 
   removeMember: (orgId: string, memberId: string) =>
     apiClient(`/api/organizations/${orgId}/members/${memberId}`, 'DELETE', undefined, token()),
+
+  getDashboard: (orgId: string) =>
+    apiClient<{ data: OrganizationDashboardShop[] }>(`/api/organizations/${orgId}/dashboard`, 'GET', undefined, token()).then(r => unwrap<OrganizationDashboardShop[]>(r)),
+
+  listAvailableBarbershops: (orgId: string) =>
+    apiClient<{ data: AvailableBarbershop[] }>(`/api/organizations/${orgId}/available-barbershops`, 'GET', undefined, token()).then(r => unwrap<AvailableBarbershop[]>(r)),
+
+  attachBarbershop: (orgId: string, barbershopId: string) =>
+    apiClient<{ data: AttachedBarbershop }>(`/api/organizations/${orgId}/barbershops`, 'POST', { barbershopId }, token()).then(r => unwrap<AttachedBarbershop>(r)),
+
+  detachBarbershop: (orgId: string, barbershopId: string) =>
+    apiClient<{ data: AttachedBarbershop }>(`/api/organizations/${orgId}/barbershops/${barbershopId}`, 'DELETE', undefined, token()).then(r => unwrap<AttachedBarbershop>(r)),
 };
