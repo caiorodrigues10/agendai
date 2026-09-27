@@ -5,6 +5,11 @@ import { organizationsApi } from '@/infra/organizationsApi';
 vi.mock('@/infra/organizationsApi', () => ({
   organizationsApi: { listMy: vi.fn(), create: vi.fn(), delete: vi.fn() },
 }));
+vi.mock('./MultiUnitDashboard', () => ({
+  MultiUnitDashboard: ({ orgId }: { orgId: string }) => (
+    <div data-testid="multi-unit-dashboard" data-org-id={orgId} />
+  ),
+}));
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(organizationsApi.listMy).mockResolvedValue([]);
@@ -34,5 +39,23 @@ it('offers retry instead of showing an empty list after a load failure', async (
   await waitFor(() =>
     expect(screen.getByText('Sua primeira organização começa aqui')).toBeVisible()
   );
+});
+it('renders MultiUnitDashboard with the org id when the organization is expanded', async () => {
+  vi.mocked(organizationsApi.listMy).mockResolvedValue([
+    {
+      id: 'org-1',
+      name: 'Grupo Aurora',
+      slug: 'grupo-aurora',
+      barbershops: [{ id: 's1', name: 'Salão X' }],
+      members: [],
+    },
+  ]);
+  render(<OrganizationsPanel />);
+  fireEvent.click(await screen.findByRole('button', { name: /Grupo Aurora/ }));
+  const dash = await screen.findByTestId('multi-unit-dashboard');
+  expect(dash).toHaveAttribute('data-org-id', 'org-1');
+  // fluxo existente permanece: linha de membros + excluir organização
+  expect(screen.getByText('0 membros')).toBeVisible();
+  expect(screen.getByRole('button', { name: /Excluir organização/ })).toBeVisible();
 });
 

@@ -25,7 +25,12 @@ export interface OrganizationDashboardShop {
   logoUrl: string | null;
   isOpen: boolean;
   accessLevel: 'FULL' | 'OPERATIONAL';
+  /** = waitingCount + inServiceCount (mantido por compatibilidade). */
   liveNow: number;
+  /** Fila aguardando (QueueItem WAITING, hoje no fuso do salão). */
+  waitingCount: number;
+  /** Em atendimento: fila IN_CHAIR (hoje) + agendamento CONFIRMED na janela prevista. */
+  inServiceCount: number;
   revenue?: { today: number; week: number; month: number };
 }
 

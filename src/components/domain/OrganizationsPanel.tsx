@@ -12,6 +12,7 @@ import { OrganizationSchema, OrganizationFormData } from '@/schemas';
 import { getErrorMessage } from '@/utils/errorMessage';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR } from '../ui/Field';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { MultiUnitDashboard } from './MultiUnitDashboard';
 
 const primary =
   'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-accent-fg hover:bg-accent-hover disabled:opacity-50';
@@ -237,17 +238,22 @@ export function OrganizationsPanel() {
                 />
               </button>
               {selected === org.id && (
-                <div className="mx-5 flex flex-wrap items-center justify-between gap-3 border-t border-border py-4">
-                  <p className="text-sm text-text-secondary">{org.members?.length ?? 0} membros</p>
-                  <button
-                    type="button"
-                    disabled={deleting}
-                    onClick={() => setConfirmDeleteId(org.id)}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-danger/30 px-3 py-2 text-sm text-danger hover:bg-danger/10 disabled:opacity-50"
-                  >
-                    <Trash2 size={16} />
-                    {deleting ? 'Excluindo…' : 'Excluir organização'}
-                  </button>
+                <div>
+                  <div className="mx-5 pt-4">
+                    <MultiUnitDashboard orgId={org.id} />
+                  </div>
+                  <div className="mx-5 flex flex-wrap items-center justify-between gap-3 border-t border-border py-4">
+                    <p className="text-sm text-text-secondary">{org.members?.length ?? 0} membros</p>
+                    <button
+                      type="button"
+                      disabled={deleting}
+                      onClick={() => setConfirmDeleteId(org.id)}
+                      className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-danger/30 px-3 py-2 text-sm text-danger hover:bg-danger/10 disabled:opacity-50"
+                    >
+                      <Trash2 size={16} />
+                      {deleting ? 'Excluindo…' : 'Excluir organização'}
+                    </button>
+                  </div>
                 </div>
               )}
             </article>

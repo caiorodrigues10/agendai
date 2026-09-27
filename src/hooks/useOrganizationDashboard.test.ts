@@ -44,7 +44,9 @@ const dashboardShop = (id: string) => ({
   logoUrl: null,
   isOpen: true,
   accessLevel: 'FULL' as const,
-  liveNow: 2,
+  liveNow: 3,
+  waitingCount: 1,
+  inServiceCount: 2,
   revenue: { today: 10, week: 70, month: 300 },
 });
 
