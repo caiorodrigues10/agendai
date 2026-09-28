@@ -128,4 +128,43 @@ describe('StaffNavigation', () => {
       })
     ).not.toBeInTheDocument();
   });
+
+  it('não remonta o menu lateral ao trocar de aba — preserva o nó <nav> e o scroll', () => {
+    // Regressão: StaffDashboard usava key={activeTab}, desmontando/remontando o
+    // componente a cada navegação e resetando o scroll do menu para o topo.
+    const { rerender } = render(
+      <StaffNavigation activeTab="overview" userRole="OWNER" onNavigate={vi.fn()} />
+    );
+
+    const desktopNav = screen.getByRole('navigation', { name: 'Navegação do painel' });
+    // jsdom não simula rolagem física; o nó precisa sobreviver ao rerender
+    // (identidade), senão o React o recriaria com scrollTop 0 no browser.
+    desktopNav.scrollTop = 240;
+
+    rerender(<StaffNavigation activeTab="settings" userRole="OWNER" onNavigate={vi.fn()} />);
+
+    const desktopNavAfter = screen.getByRole('navigation', { name: 'Navegação do painel' });
+    expect(desktopNavAfter).toBe(desktopNav); // mesmo nó DOM — sem remount
+    expect(desktopNavAfter.scrollTop).toBe(240);
+
+    // destaque do item ativo acompanha a prop sem depender de remount
+    expect(
+      within(desktopNavAfter).getByRole('button', { name: 'Configurações' })
+    ).toHaveAttribute('aria-current', 'page');
+    expect(within(desktopNavAfter).getByRole('button', { name: 'Hoje' })).not.toHaveAttribute(
+      'aria-current'
+    );
+  });
+
+  it('fecha a folha Mais quando a aba muda por navegação externa ao menu', () => {
+    const { rerender } = render(
+      <StaffNavigation activeTab="overview" userRole="OWNER" onNavigate={vi.fn()} />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Mais' }));
+    expect(screen.getByRole('dialog', { name: 'Mais opções' })).toBeInTheDocument();
+
+    // navegação que não passa por navigateTo (ex.: botão voltar do navegador)
+    rerender(<StaffNavigation activeTab="finance" userRole="OWNER" onNavigate={vi.fn()} />);
+    expect(screen.queryByRole('dialog', { name: 'Mais opções' })).not.toBeInTheDocument();
+  });
 });

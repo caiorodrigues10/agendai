@@ -35,13 +35,12 @@ const visibleTabs = (
 
 export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions, operationMode, onboardingCompleted, onNavigate }: StaffNavigationProps) {
   const [moreOpen, setMoreOpen] = useState(false);
-  const extras = { hasDashboard, permissions };
 
   const groups = useMemo(
     () =>
       TAB_GROUPS.map(group => ({
         ...group,
-        tabs: visibleTabs(group, userRole, operationMode, extras, onboardingCompleted),
+        tabs: visibleTabs(group, userRole, operationMode, { hasDashboard, permissions }, onboardingCompleted),
       })).filter(group => group.tabs.length > 0),
     [userRole, hasDashboard, permissions, operationMode, onboardingCompleted]
   );
@@ -83,6 +82,13 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [moreOpen]);
+
+  // Fecha a folha "Mais opções" quando a aba muda por uma navegação externa ao
+  // menu (ex.: botão voltar do navegador) — cliques no menu já fecham em
+  // navigateTo. Substitui a antiga `key={activeTab}` em <StaffNavigation>, que
+  // remontava o componente a cada navegação e resetava o scroll do menu lateral.
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- reset pontual de estado ao trocar de aba; sem remount (key removida)
+  useEffect(() => setMoreOpen(false), [activeTab]);
 
   const navigateTo = (tabId: string) => {
     setMoreOpen(false);

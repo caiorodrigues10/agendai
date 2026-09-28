@@ -292,7 +292,6 @@ export const StaffDashboard: React.FC = () => {
 
       <div className="mx-auto flex w-full max-w-7xl gap-6 px-4 py-6 lg:px-6">
         <StaffNavigation
-          key={activeTab}
           activeTab={activeTab}
           userRole={user?.role}
           hasDashboard={hasDashboard}
