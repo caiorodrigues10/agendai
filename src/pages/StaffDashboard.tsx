@@ -71,7 +71,6 @@ export const StaffDashboard: React.FC = () => {
     settings,
     staff,
     feed,
-    addPost,
     deletePost,
     likePost,
     setSettings,
@@ -645,10 +644,6 @@ export const StaffDashboard: React.FC = () => {
               posts={feed}
               currentUser={user}
               audience="staff"
-              onAddPost={p => {
-                addPost(p);
-                showToast('Postado!');
-              }}
               onDeletePost={deletePost}
               onLikePost={likePost}
               onNotify={showToast}

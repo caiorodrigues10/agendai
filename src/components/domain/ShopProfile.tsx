@@ -3,17 +3,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShopSettings, FeedPost, StaffMember, Service, DaySchedule } from '../../types';
 import {
-  LuType as Type,
-  LuSend as Send,
   LuTrash2 as Trash2,
   LuHeart as Heart,
   LuImage as ImageIcon,
   LuMapPin as MapPin,
-  LuStar as Star,
   LuScissors as Scissors,
   LuEllipsis as MoreHorizontal,
-  LuFilm as Film,
-  LuX as X,
   LuClock as Clock,
   LuMessageCircle as MessageCircle,
   LuList as List,
@@ -34,7 +29,6 @@ interface ShopProfileProps {
   settings: ShopSettings;
   posts: FeedPost[];
   currentUser: StaffMember | null;
-  onAddPost: (post: FeedPost) => void;
   onDeletePost: (id: string) => void;
   onLikePost: (id: string) => void;
   /** Perfil do cliente no link público vs. aba Perfil da equipe. */
@@ -88,7 +82,6 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
   settings,
   posts,
   currentUser,
-  onAddPost,
   onDeletePost,
   onLikePost,
   audience = 'public',
@@ -112,17 +105,6 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
           currentUser.role === 'EMPLOYEE' ||
           currentUser.role === 'MASTER_ADMIN')
     );
-
-  const [newPostContent, setNewPostContent] = useState('');
-  const [newPostTitle, setNewPostTitle] = useState('');
-  const [newPostType, setNewPostType] = useState<'haircut' | 'beard' | 'announcement'>('haircut');
-  const [newPostImage, setNewPostImage] = useState<string | null>(null);
-  const [newPostVideoUrl, setNewPostVideoUrl] = useState<string | null>(null);
-  const [newPostVideoPreview, setNewPostVideoPreview] = useState<string | null>(null);
-  const [videoError, setVideoError] = useState<string | null>(null);
-  const [isPosting, setIsPosting] = useState(false);
-  const videoInputRef = useRef<HTMLInputElement>(null);
-  const videoPreviewObjectUrl = useRef<string | null>(null);
 
   const canEditLogo =
     audience === 'staff' && Boolean(currentUser && currentUser.role === 'OWNER');
@@ -174,114 +156,6 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
       setLogoUploading(false);
       setConfirmDeleteLogo(false);
     }
-  };
-
-  useEffect(() => {
-    return () => {
-      if (videoPreviewObjectUrl.current) {
-        URL.revokeObjectURL(videoPreviewObjectUrl.current);
-      }
-    };
-  }, []);
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewPostImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setVideoError(null);
-
-    if (file.size > 25 * 1024 * 1024) {
-      setVideoError('Arquivo muito grande. Máximo: 25 MB');
-      return;
-    }
-
-    const video = document.createElement('video');
-    const objectUrl = URL.createObjectURL(file);
-    video.src = objectUrl;
-
-    video.onloadedmetadata = async () => {
-      if (video.duration > 60) {
-        URL.revokeObjectURL(objectUrl);
-        setVideoError('Vídeo muito longo. Máximo: 60 segundos');
-        return;
-      }
-
-      if (videoPreviewObjectUrl.current) {
-        URL.revokeObjectURL(videoPreviewObjectUrl.current);
-      }
-      videoPreviewObjectUrl.current = objectUrl;
-      setNewPostVideoPreview(objectUrl);
-
-      try {
-        if (!currentUser?.barbershopId) return;
-        const result = await barbershopApi.uploadPostVideo(currentUser.barbershopId, file);
-        setNewPostVideoUrl(result.videoUrl);
-      } catch (err) {
-        setVideoError(err instanceof Error ? err.message : 'Erro ao enviar vídeo');
-        setNewPostVideoPreview(null);
-        if (videoPreviewObjectUrl.current) {
-          URL.revokeObjectURL(videoPreviewObjectUrl.current);
-          videoPreviewObjectUrl.current = null;
-        }
-      }
-    };
-
-    video.onerror = () => {
-      URL.revokeObjectURL(objectUrl);
-      setVideoError('Formato de vídeo não suportado');
-    };
-  };
-
-  const handleRemoveVideo = () => {
-    if (videoPreviewObjectUrl.current) {
-      URL.revokeObjectURL(videoPreviewObjectUrl.current);
-      videoPreviewObjectUrl.current = null;
-    }
-    setNewPostVideoPreview(null);
-    setNewPostVideoUrl(null);
-    setVideoError(null);
-    if (videoInputRef.current) {
-      videoInputRef.current.value = '';
-    }
-  };
-
-  const handleSubmitPost = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newPostContent && !newPostImage && !newPostVideoUrl && !newPostTitle) return;
-
-    setIsPosting(true);
-
-    const post: FeedPost = {
-      id: crypto.randomUUID(),
-      type: newPostType,
-      title: newPostTitle,
-      content: newPostContent,
-      imageUrl: newPostImage || undefined,
-      videoUrl: newPostVideoUrl || undefined,
-      createdAt: Date.now(),
-      likes: 0,
-      authorName: currentUser?.name || 'Equipe',
-    };
-
-    setTimeout(() => {
-      onAddPost(post);
-      setNewPostContent('');
-      setNewPostTitle('');
-      setNewPostImage(null);
-      handleRemoveVideo();
-      setIsPosting(false);
-    }, 500);
   };
 
   const getPostTypeLabel = (type: string) => {
@@ -526,111 +400,6 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
               Ver todos ({services.length}) na agenda
             </button>
           )}
-        </div>
-      )}
-
-      {canCompose && (
-        <div className="bg-surface p-4 rounded-xl border border-border">
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-              <Scissors size={16} className="text-accent" /> Novo post
-            </h3>
-            <button
-              type="button"
-              onClick={() => navigate('/app/posts')}
-              className="text-[11px] font-bold text-accent hover:underline"
-            >
-              Gerar com IA
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmitPost} className="space-y-3">
-            <div className="flex gap-2 mb-2 overflow-x-auto pb-1 no-scrollbar">
-              {[
-                { id: 'haircut', label: 'Look', icon: Scissors },
-                { id: 'beard', label: 'Acabamento', icon: Star },
-                { id: 'announcement', label: 'Aviso', icon: Type },
-              ].map(type => (
-                <button
-                  key={type.id}
-                  type="button"
-                  onClick={() => setNewPostType(type.id as 'haircut' | 'beard' | 'announcement')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 border transition-all
-                        ${newPostType === type.id ? 'bg-accent border-accent text-accent-fg' : 'bg-bg border-border text-text-muted'}
-                      `}
-                >
-                  <type.icon size={14} /> {type.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="space-y-2">
-              <input
-                type="text"
-                value={newPostTitle}
-                onChange={e => setNewPostTitle(e.target.value)}
-                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent"
-                placeholder="Título do post (opcional)"
-              />
-              <textarea
-                value={newPostContent}
-                onChange={e => setNewPostContent(e.target.value)}
-                className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-primary text-sm outline-none focus:ring-2 focus:ring-accent min-h-[90px]"
-                placeholder="Escreva algo para seus clientes..."
-              />
-            </div>
-
-            {newPostImage && (
-              <div className="relative rounded-xl overflow-hidden border border-border">
-                <img src={newPostImage} alt="Preview" className="w-full h-40 object-cover" />
-              </div>
-            )}
-
-            {newPostVideoPreview && (
-              <div className="relative rounded-xl overflow-hidden border border-border">
-                <video src={newPostVideoPreview} className="w-full h-40 object-cover" controls />
-                <button
-                  type="button"
-                  onClick={handleRemoveVideo}
-                  className="absolute top-2 right-2 p-1.5 bg-bg/80 rounded-full text-text-secondary hover:text-danger transition-colors"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            )}
-
-            {videoError && <p className="text-xs text-danger">{videoError}</p>}
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <label className="px-3 py-2 text-xs bg-bg text-text-secondary rounded-lg border border-border cursor-pointer hover:bg-surface flex items-center gap-2">
-                  <ImageIcon size={14} /> Imagem
-                  <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                </label>
-                <label className="px-3 py-2 text-xs bg-bg text-text-secondary rounded-lg border border-border cursor-pointer hover:bg-surface flex items-center gap-2">
-                  <Film size={14} /> Vídeo
-                  <input
-                    ref={videoInputRef}
-                    type="file"
-                    accept="video/mp4,video/webm,video/quicktime"
-                    onChange={handleVideoUpload}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-              <button
-                type="submit"
-                disabled={isPosting}
-                className={`px-4 py-2 text-xs font-bold rounded-lg flex items-center gap-2 ${
-                  isPosting
-                    ? 'bg-surface-2 text-text-muted'
-                    : 'bg-accent text-accent-fg hover:bg-accent-hover'
-                }`}
-              >
-                <Send size={14} /> Publicar
-              </button>
-            </div>
-          </form>
         </div>
       )}
 

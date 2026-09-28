@@ -42,7 +42,6 @@ export const PublicHome: React.FC = () => {
     settings,
     staff,
     feed,
-    addPost,
     deletePost,
     likePost,
     isShopOpen,
@@ -213,10 +212,6 @@ export const PublicHome: React.FC = () => {
             audience="public"
             onGoQueue={() => setActiveTab('queue')}
             onGoAppointments={() => setActiveTab('appointments')}
-            onAddPost={p => {
-              addPost(p);
-              showToast('Postado!');
-            }}
             onDeletePost={deletePost}
             onLikePost={likePost}
           />
