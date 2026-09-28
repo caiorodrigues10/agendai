@@ -283,6 +283,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     6: { isOpen: true, openTime: '09:00', closeTime: '19:00' },
   });
   const [paywallOpen, setPaywallOpen] = useState(false);
+  const [paywallDismissed, setPaywallDismissed] = useState(false);
   const [paywallPlans, setPaywallPlans] = useState<Plan[]>([]);
   const [cepStatus, setCepStatus] = useState<'idle' | 'loading' | 'found' | 'not_found'>('idle');
   const [savedAccounts, setSavedAccounts] = useState(authStorage.getSavedAccounts);
@@ -307,6 +308,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
 
   const handleGoogleCredential = async (idToken: string) => {
     setGoogleError(null);
+    setPaywallDismissed(false);
     setSubmitting(true);
     const result = await loginWithGoogle(idToken);
     setSubmitting(false);
@@ -567,11 +569,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   }, [navigate, searchParams, location.state, user]);
 
   useEffect(() => {
-    if (loading || !user || paywallOpen || registerVerificationEmail) return;
+    if (loading || !user || paywallOpen || paywallDismissed || registerVerificationEmail) return;
     void navigateAfterAuth(user);
-  }, [loading, navigateAfterAuth, paywallOpen, user, registerVerificationEmail]);
+  }, [loading, navigateAfterAuth, paywallDismissed, paywallOpen, user, registerVerificationEmail]);
 
   const handleLogin = async (data: LoginFormData) => {
+    setPaywallDismissed(false);
     setSubmitting(true);
     const token = await getRecaptchaToken('login');
     const result = await login(data.email, data.password, token, rememberMe);
@@ -635,6 +638,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
         return;
       }
     }
+    setPaywallDismissed(false);
     setSubmitting(true);
     const referralCode = referralStorage.get() ?? undefined;
     const token = await getRecaptchaToken('register');
@@ -961,6 +965,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                           type="button"
                           disabled={switchingAccountId !== null}
                           onClick={async () => {
+                            setPaywallDismissed(false);
                             setSwitchingAccountId(account.id);
                             const result = await loginWithSavedAccount(account.id);
                             setSwitchingAccountId(null);
@@ -1600,7 +1605,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
         open={paywallOpen}
         plans={paywallPlans}
         isOwner={(authStorage.getUser()?.role ?? '').toUpperCase() === 'OWNER'}
-        onClose={() => setPaywallOpen(false)}
+        onClose={() => {
+          setPaywallDismissed(true);
+          setPaywallOpen(false);
+        }}
       />
     </div>
   );
