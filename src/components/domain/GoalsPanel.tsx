@@ -182,11 +182,11 @@ export const GoalsPanel: React.FC = () => {
                   <span
                     className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
                       index === 0
-                        ? 'bg-yellow-400 text-yellow-900'
+                        ? 'bg-tertiary text-accent-fg'
                         : index === 1
-                        ? 'bg-gray-300 text-gray-700'
+                        ? 'bg-border-strong text-text-primary'
                         : index === 2
-                        ? 'bg-amber-600 text-amber-100'
+                        ? 'bg-tertiary/30 text-text-primary'
                         : 'bg-surface-2 text-text-muted'
                     }`}
                   >

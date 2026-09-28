@@ -16,17 +16,17 @@ interface DemandAlertBannerProps {
 }
 
 function getWeatherIcon(code: number): React.ReactNode {
-  if (code <= 1) return <Sun size={24} className="h-4 w-4 text-yellow-400" />;
-  if (code <= 3) return <CloudSun size={24} className="h-4 w-4 text-neutral-400" />;
-  if (code >= 51) return <CloudRain size={24} className="h-4 w-4 text-blue-400" />;
-  return <Cloud size={24} className="h-4 w-4 text-neutral-400" />;
+  if (code <= 1) return <Sun size={24} className="h-4 w-4 text-warning" />;
+  if (code <= 3) return <CloudSun size={24} className="h-4 w-4 text-text-muted" />;
+  if (code >= 51) return <CloudRain size={24} className="h-4 w-4 text-support" />;
+  return <Cloud size={24} className="h-4 w-4 text-text-muted" />;
 }
 
 const RISK_STYLES: Record<string, { bg: string; border: string; text: string; icon: string }> = {
   low: { bg: 'bg-success/5', border: 'border-success/20', text: 'text-success', icon: 'text-success' },
-  medium: { bg: 'bg-yellow-400/5', border: 'border-yellow-400/20', text: 'text-yellow-400', icon: 'text-yellow-400' },
-  high: { bg: 'bg-red-400/5', border: 'border-red-400/20', text: 'text-red-400', icon: 'text-red-400' },
-  critical: { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-400', icon: 'text-red-400' },
+  medium: { bg: 'bg-warning/5', border: 'border-warning/20', text: 'text-warning', icon: 'text-warning' },
+  high: { bg: 'bg-danger/5', border: 'border-danger/20', text: 'text-danger', icon: 'text-danger' },
+  critical: { bg: 'bg-danger/10', border: 'border-danger/30', text: 'text-danger', icon: 'text-danger' },
 };
 
 export const DemandAlertBanner: React.FC<DemandAlertBannerProps> = ({ compact = true }) => {

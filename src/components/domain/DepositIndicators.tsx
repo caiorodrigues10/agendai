@@ -4,12 +4,12 @@ import { depositsApi, AppointmentDeposit } from '../../infra/depositsApi';
 import { formatCurrencyBRL, formatDateBR } from '../../utils/formatters';
 
 const STATUS_STYLES: Record<string, string> = {
-  PENDING: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
+  PENDING: 'bg-warning/10 text-warning border-warning/30',
   CONFIRMED: 'bg-success/10 text-success border-success/30',
-  EXPIRED: 'bg-red-500/10 text-red-400 border-red-500/30',
-  WAIVED: 'bg-gray-500/10 text-gray-400 border-gray-500/30',
-  REJECTED: 'bg-red-500/10 text-red-400 border-red-500/30',
-  REFUNDED: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+  EXPIRED: 'bg-danger/10 text-danger border-danger/30',
+  WAIVED: 'bg-surface-2 text-text-secondary border-border',
+  REJECTED: 'bg-danger/10 text-danger border-danger/30',
+  REFUNDED: 'bg-support/10 text-support border-support/30',
 };
 
 const STATUS_LABELS: Record<string, string> = {

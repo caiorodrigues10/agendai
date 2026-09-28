@@ -904,7 +904,7 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                           <span
                             className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${
                               APPOINTMENT_STATUS_STYLE[a.status] ??
-                              'border border-gray-500/30 bg-gray-500/15 text-gray-400'
+                              'border border-border bg-surface-2 text-text-secondary'
                             }`}
                           >
                             {APPOINTMENT_STATUS_LABEL[a.status] ?? a.status}

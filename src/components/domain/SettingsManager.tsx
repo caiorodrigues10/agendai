@@ -62,7 +62,7 @@ function weatherIcon(code: number) {
   if (code <= 1) return <Sun size={16} className="text-warning" />;
   if (code <= 3) return <CloudSun size={16} className="text-text-secondary" />;
   if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82) || code >= 95) {
-    return <CloudRain size={16} className="text-blue-400" />;
+    return <CloudRain size={16} className="text-support" />;
   }
   return <Cloud size={16} className="text-text-muted" />;
 }
@@ -172,7 +172,7 @@ const WeatherForecastCard: React.FC<{
               <p className="text-[10px] text-text-muted">{Math.round(finiteNumber(day.tempMin))}°</p>
               <p className="mt-1 text-[10px] text-text-secondary leading-tight line-clamp-2">{day.condition}</p>
               {finiteNumber(day.precipProbability) > 0 && (
-                <p className="mt-0.5 text-[10px] text-blue-400">{Math.round(finiteNumber(day.precipProbability))}%</p>
+                <p className="mt-0.5 text-[10px] text-support">{Math.round(finiteNumber(day.precipProbability))}%</p>
               )}
             </div>
           ))}

@@ -43,7 +43,7 @@ const CONDITION_STYLES: Record<string, string> = {
   GOOD: 'border-accent/30 bg-accent/10 text-accent',
   WORN: 'border-warning/30 bg-warning/10 text-warning',
   BROKEN: 'border-danger/30 bg-danger/10 text-danger',
-  IN_MAINTENANCE: 'border-blue-400/30 bg-blue-400/10 text-blue-400',
+  IN_MAINTENANCE: 'border-support/30 bg-support/10 text-support',
 };
 
 const MOVEMENT_TYPE_LABELS: Record<string, string> = {
@@ -57,8 +57,8 @@ const MOVEMENT_TYPE_LABELS: Record<string, string> = {
 const MOVEMENT_TYPE_ICONS: Record<string, React.ReactNode> = {
   IN: <ArrowDownCircle size={24} className="h-4 w-4 text-success" />,
   OUT: <ArrowUpCircle size={24} className="h-4 w-4 text-danger" />,
-  MAINTENANCE: <Wrench size={24} className="h-4 w-4 text-blue-400" />,
-  LOSS: <Trash2 size={24} className="h-4 w-4 text-red-400" />,
+  MAINTENANCE: <Wrench size={24} className="h-4 w-4 text-support" />,
+  LOSS: <Trash2 size={24} className="h-4 w-4 text-danger" />,
   ADJUSTMENT: <Edit3 size={24} className="h-4 w-4 text-text-muted" />,
 };
 
@@ -87,7 +87,7 @@ const STATUS_LABELS: Record<string, string> = {
 const STATUS_STYLES: Record<string, string> = {
   REQUESTED: 'border-accent/30 bg-accent/10 text-accent',
   APPROVED: 'border-success/30 bg-success/10 text-success',
-  ORDERED: 'border-blue-400/30 bg-blue-400/10 text-blue-400',
+  ORDERED: 'border-support/30 bg-support/10 text-support',
   RECEIVED: 'border-success/30 bg-success/10 text-success',
   REJECTED: 'border-danger/30 bg-danger/10 text-danger',
 };
@@ -532,7 +532,7 @@ export const EquipmentPanel: React.FC = () => {
                       </button>
                       <button
                         onClick={() => setDeleteTarget(equip)}
-                        className="rounded p-1 text-red-400 hover:bg-red-500/10"
+                        className="rounded p-1 text-danger hover:bg-danger/10"
                         title="Remover"
                       >
                         <Trash2 size={24} className="h-4 w-4" />
@@ -707,7 +707,7 @@ export const EquipmentPanel: React.FC = () => {
             </h3>
             <form onSubmit={handleEquipSubmit} className="space-y-3">
               {equipSubmitError && (
-                <div className="rounded-md bg-red-500/10 p-2 text-sm text-red-400">{equipSubmitError}</div>
+                <div className="rounded-md bg-danger/10 p-2 text-sm text-danger">{equipSubmitError}</div>
               )}
               <Field label="Nome">
                 <input type="text" value={equipForm.name} onChange={(e) => setEquipForm(p => ({ ...p, name: e.target.value }))} className={FIELD_CONTROL} required maxLength={150} />
@@ -772,7 +772,7 @@ export const EquipmentPanel: React.FC = () => {
             <h3 className="mb-4 text-lg font-semibold text-text-primary">Nova movimentacao</h3>
             <form onSubmit={handleMovSubmit} className="space-y-3">
               {movSubmitError && (
-                <div className="rounded-md bg-red-500/10 p-2 text-sm text-red-400">{movSubmitError}</div>
+                <div className="rounded-md bg-danger/10 p-2 text-sm text-danger">{movSubmitError}</div>
               )}
               <Field label="Equipamento">
                 <SmartSelect value={movForm.equipmentId} onChange={(v) => setMovForm(p => ({ ...p, equipmentId: v ?? '' }))} options={equipSelectOptions} placeholder="Buscar equipamento" searchable required />
@@ -807,7 +807,7 @@ export const EquipmentPanel: React.FC = () => {
             <h3 className="mb-4 text-lg font-semibold text-text-primary">Nova necessidade</h3>
             <form onSubmit={handleNeedSubmit} className="space-y-3">
               {needSubmitError && (
-                <div className="rounded-md bg-red-500/10 p-2 text-sm text-red-400">{needSubmitError}</div>
+                <div className="rounded-md bg-danger/10 p-2 text-sm text-danger">{needSubmitError}</div>
               )}
               <Field label="Nome">
                 <input type="text" value={needForm.name} onChange={(e) => setNeedForm(p => ({ ...p, name: e.target.value }))} className={FIELD_CONTROL} required maxLength={150} />

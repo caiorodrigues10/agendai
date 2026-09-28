@@ -66,9 +66,9 @@ const SectionError: React.FC<{ message: string; onRetry?: () => void }> = ({
   message,
   onRetry,
 }) => (
-  <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-5 flex items-center gap-3">
-    <AlertCircle size={18} className="text-red-400 shrink-0" />
-    <p className="text-sm text-red-400 flex-1">{message}</p>
+  <div className="bg-danger/5 border border-danger/20 rounded-2xl p-5 flex items-center gap-3">
+    <AlertCircle size={18} className="text-danger shrink-0" />
+    <p className="text-sm text-danger flex-1">{message}</p>
     {onRetry && (
       <button
         onClick={onRetry}
@@ -150,13 +150,13 @@ const BillingKpiCard: React.FC<{
 }> = ({ icon, value, label, hint, tone = 'default', loading }) => {
   const toneClass =
     tone === 'positive'
-      ? 'text-green-400'
+      ? 'text-success'
       : tone === 'negative'
-        ? 'text-red-400'
+        ? 'text-danger'
         : 'text-text-primary';
   return (
     <div className="bg-surface border border-border p-5 rounded-2xl hover:border-border-strong transition-colors">
-      <div className="w-9 h-9 bg-violet-500/10 border border-violet-500/20 rounded-xl flex items-center justify-center text-violet-400 mb-4">
+      <div className="w-9 h-9 bg-accent/10 border border-accent/20 rounded-xl flex items-center justify-center text-accent mb-4">
         {icon}
       </div>
       {loading ? (
@@ -175,30 +175,30 @@ const BillingKpiCard: React.FC<{
 // ─────────────────────────────────────────────
 
 const PAYMENT_STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  approved: { label: 'Aprovado', className: 'bg-green-500/10 text-green-400 border-green-500/20' },
+  approved: { label: 'Aprovado', className: 'bg-success/10 text-success border-success/20' },
   authorized: {
     label: 'Autorizado',
-    className: 'bg-green-500/10 text-green-400 border-green-500/20',
+    className: 'bg-success/10 text-success border-success/20',
   },
   pending: {
     label: 'Pendente',
-    className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    className: 'bg-warning/10 text-warning border-warning/20',
   },
   in_process: {
     label: 'Em análise',
-    className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    className: 'bg-warning/10 text-warning border-warning/20',
   },
   in_mediation: {
     label: 'Mediação',
-    className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    className: 'bg-warning/10 text-warning border-warning/20',
   },
-  rejected: { label: 'Rejeitado', className: 'bg-red-500/10 text-red-400 border-red-500/20' },
+  rejected: { label: 'Rejeitado', className: 'bg-danger/10 text-danger border-danger/20' },
   cancelled: { label: 'Cancelado', className: 'bg-surface-2 text-text-muted border-border-strong' },
   refunded: {
     label: 'Reembolsado',
-    className: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    className: 'bg-support/10 text-support border-support/20',
   },
-  charged_back: { label: 'Chargeback', className: 'bg-red-500/10 text-red-400 border-red-500/20' },
+  charged_back: { label: 'Chargeback', className: 'bg-danger/10 text-danger border-danger/20' },
 };
 
 const PaymentStatusBadge: React.FC<{ status: string }> = ({ status }) => {
@@ -216,13 +216,13 @@ const PaymentStatusBadge: React.FC<{ status: string }> = ({ status }) => {
 };
 
 const SUBSCRIPTION_STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  ACTIVE: { label: 'Ativa', className: 'bg-green-500/10 text-green-400 border-green-500/20' },
-  TRIALING: { label: 'Trial', className: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+  ACTIVE: { label: 'Ativa', className: 'bg-success/10 text-success border-success/20' },
+  TRIALING: { label: 'Trial', className: 'bg-support/10 text-support border-support/20' },
   PAST_DUE: {
     label: 'Em atraso',
-    className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    className: 'bg-warning/10 text-warning border-warning/20',
   },
-  UNPAID: { label: 'Não paga', className: 'bg-red-500/10 text-red-400 border-red-500/20' },
+  UNPAID: { label: 'Não paga', className: 'bg-danger/10 text-danger border-danger/20' },
   CANCELED: { label: 'Cancelada', className: 'bg-surface-2 text-text-muted border-border-strong' },
 };
 
@@ -316,7 +316,7 @@ const RefundModal: React.FC<RefundModalProps> = ({ payment, onClose, onSubmit, b
         </div>
 
         {error && (
-          <div className="bg-red-500/5 border border-red-500/20 text-red-400 text-xs rounded-xl px-4 py-2.5 mb-4">
+          <div className="bg-danger/5 border border-danger/20 text-danger text-xs rounded-xl px-4 py-2.5 mb-4">
             {error}
           </div>
         )}
@@ -330,13 +330,13 @@ const RefundModal: React.FC<RefundModalProps> = ({ payment, onClose, onSubmit, b
           value={reason}
           onChange={e => setReason(e.target.value)}
           placeholder="Ex: cobrança indevida, solicitação do cliente..."
-          className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-all resize-none"
+          className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-focus transition-all resize-none"
         />
         <p className="text-[10px] text-text-muted text-right mt-1">{reason.length}/500</p>
 
-        <div className="rounded-xl bg-yellow-500/10 border border-yellow-500/20 px-4 py-3 flex gap-2 mt-3">
-          <AlertCircle size={15} className="text-yellow-400 shrink-0 mt-0.5" />
-          <p className="text-xs text-yellow-400">
+        <div className="rounded-xl bg-warning/10 border border-warning/20 px-4 py-3 flex gap-2 mt-3">
+          <AlertCircle size={15} className="text-warning shrink-0 mt-0.5" />
+          <p className="text-xs text-warning">
             Reembolso TOTAL — a assinatura do salão será cancelada.
           </p>
         </div>
@@ -351,7 +351,7 @@ const RefundModal: React.FC<RefundModalProps> = ({ payment, onClose, onSubmit, b
           <button
             onClick={() => onSubmit(reason.trim())}
             disabled={!valid || busy}
-            className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-400 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 bg-danger text-white rounded-xl text-sm font-bold hover:bg-danger transition-all disabled:opacity-40 flex items-center justify-center gap-2"
           >
             {busy ? <RefreshCcw size={14} className="animate-spin" /> : <RotateCcw size={14} />}
             Confirmar reembolso
@@ -469,7 +469,7 @@ const RevenueSection: React.FC = () => {
                       initial={{ width: 0 }}
                       animate={{ width: `${(item.total / maxByType) * 100}%` }}
                       transition={{ duration: 0.6, ease: 'easeOut' }}
-                      className="h-full bg-linear-to-r from-violet-500/60 to-violet-400/80 rounded-full"
+                      className="h-full bg-linear-to-r from-chart-2/60 to-chart-2/80 rounded-full"
                     />
                   </div>
                 </div>
@@ -503,7 +503,7 @@ const RevenueSection: React.FC = () => {
                 <p className="text-[10px] text-text-muted uppercase tracking-widest font-semibold mb-1">
                   Total pago
                 </p>
-                <p className="text-lg font-black text-green-400">
+                <p className="text-lg font-black text-success">
                   {brl.format(summary.fiados.totalPaid)}
                 </p>
               </div>
@@ -511,7 +511,7 @@ const RevenueSection: React.FC = () => {
                 <p className="text-[10px] text-text-muted uppercase tracking-widest font-semibold mb-1">
                   Pendente
                 </p>
-                <p className="text-lg font-black text-yellow-400">
+                <p className="text-lg font-black text-warning">
                   {brl.format(summary.fiados.totalPending)}
                 </p>
               </div>
@@ -519,7 +519,7 @@ const RevenueSection: React.FC = () => {
                 <p className="text-[10px] text-text-muted uppercase tracking-widest font-semibold mb-1">
                   Vencido ({summary.fiados.overdueCount})
                 </p>
-                <p className="text-lg font-black text-red-400">
+                <p className="text-lg font-black text-danger">
                   {brl.format(summary.fiados.overdueAmount)}
                 </p>
               </div>
@@ -587,7 +587,7 @@ const PaymentsSection: React.FC<{ shopNames: Map<string, string> }> = ({ shopNam
   return (
     <div className="bg-surface border border-border rounded-2xl overflow-hidden">
       {refundNotice && (
-        <div className="mx-4 mt-4 bg-green-500/10 border border-green-500/20 text-green-400 text-xs rounded-xl px-4 py-2.5 flex items-center gap-2">
+        <div className="mx-4 mt-4 bg-success/10 border border-success/20 text-success text-xs rounded-xl px-4 py-2.5 flex items-center gap-2">
           <CheckCircle2 size={14} className="shrink-0" /> {refundNotice}
         </div>
       )}
@@ -651,7 +651,7 @@ const PaymentsSection: React.FC<{ shopNames: Map<string, string> }> = ({ shopNam
                           setRefundError(null);
                           setRefundTarget(p);
                         }}
-                        className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-yellow-400 border border-yellow-500/20 hover:bg-yellow-500/10 rounded-lg px-2.5 py-1.5 transition-all"
+                        className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-warning border border-warning/20 hover:bg-warning/10 rounded-lg px-2.5 py-1.5 transition-all"
                       >
                         <RotateCcw size={11} />
                         Reembolsar
@@ -826,7 +826,7 @@ const SubscriptionsSection: React.FC = () => {
               setPage(1);
             }}
             placeholder="Buscar por salão ou CNPJ..."
-            className="w-full bg-surface border border-border text-text-primary text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-text-muted"
+            className="w-full bg-surface border border-border text-text-primary text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-focus focus:ring-1 focus:ring-focus transition-all placeholder:text-text-muted"
           />
         </div>
         <div className="flex items-center gap-1.5 bg-surface border border-border rounded-xl p-1 overflow-x-auto scroller-hidden">
@@ -839,7 +839,7 @@ const SubscriptionsSection: React.FC = () => {
               }}
               className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
                 statusFilter === s
-                  ? 'bg-violet-500 text-black'
+                  ? 'bg-accent text-accent-fg'
                   : 'text-text-muted hover:text-text-primary hover:bg-surface-2'
               }`}
             >
@@ -893,7 +893,7 @@ const SubscriptionsSection: React.FC = () => {
                       <td className="px-6 py-4">
                         <SubscriptionStatusBadge status={s.status} />
                         {s.cancelReason && (
-                          <div className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border border-yellow-500/20 bg-yellow-500/10 text-yellow-400">
+                          <div className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border border-warning/20 bg-warning/10 text-warning">
                             Motivo: {CANCEL_REASON_LABELS[s.cancelReason] ?? s.cancelReason}
                           </div>
                         )}
@@ -1051,7 +1051,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
-            <div className="bg-red-500/5 border border-red-500/20 rounded-xl px-4 py-2.5 text-xs text-red-400">
+            <div className="bg-danger/5 border border-danger/20 rounded-xl px-4 py-2.5 text-xs text-danger">
               {error}
             </div>
           )}
@@ -1065,7 +1065,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
               minLength={2}
               value={form.name}
               onChange={e => setForm({ ...form, name: e.target.value })}
-              className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-all"
+              className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-focus transition-all"
               placeholder="Ex: Plano Pro"
             />
           </div>
@@ -1077,7 +1077,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
               type="text"
               value={form.description}
               onChange={e => setForm({ ...form, description: e.target.value })}
-              className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-all"
+              className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-focus transition-all"
               placeholder="Descrição curta do plano"
             />
           </div>
@@ -1092,7 +1092,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
                 inputMode="decimal"
                 value={form.price}
                 onChange={e => setForm({ ...form, price: e.target.value })}
-                className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-all"
+                className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-focus transition-all"
                 placeholder="99.90"
               />
             </div>
@@ -1119,7 +1119,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
               min={0}
               value={form.maxEmployees}
               onChange={e => setForm({ ...form, maxEmployees: e.target.value })}
-              className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-all"
+              className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-focus transition-all"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -1146,7 +1146,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
                 onClick={() => setForm({ ...form, hasDashboard: !form.hasDashboard })}
                 className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-bold transition-all ${
                   form.hasDashboard
-                    ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                    ? 'bg-success/10 text-success border-success/20'
                     : 'bg-surface-2 text-text-muted border-border'
                 }`}
               >
@@ -1163,7 +1163,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
               rows={4}
               value={form.features}
               onChange={e => setForm({ ...form, features: e.target.value })}
-              className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-all resize-none"
+              className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-focus transition-all resize-none"
               placeholder={'Fila digital\nAgendamentos ilimitados\nRelatórios'}
             />
           </div>
@@ -1173,8 +1173,8 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
               onClick={() => setForm({ ...form, active: !form.active })}
               className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-bold transition-all ${
                 form.active
-                  ? 'bg-green-500/10 text-green-400 border-green-500/20'
-                  : 'bg-red-500/10 text-red-500 border-red-500/20'
+                  ? 'bg-success/10 text-success border-success/20'
+                  : 'bg-danger/10 text-danger border-danger/20'
               }`}
             >
               {form.active ? <CheckCircle2 size={16} /> : <Ban size={16} />}
@@ -1192,7 +1192,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 px-4 py-2.5 bg-violet-500 text-black rounded-xl text-sm font-bold hover:bg-violet-400 transition-all disabled:opacity-50"
+              className="flex-1 px-4 py-2.5 bg-accent text-accent-fg rounded-xl text-sm font-bold hover:bg-accent-hover transition-all disabled:opacity-50"
             >
               {saving ? 'Salvando...' : 'Confirmar'}
             </button>
@@ -1254,7 +1254,7 @@ const PlansSection: React.FC = () => {
             setSelectedPlan(null);
             setModalOpen(true);
           }}
-          className="bg-violet-500 hover:bg-violet-400 text-black px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all active:scale-95"
+          className="bg-accent hover:bg-accent-hover text-black px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all active:scale-95"
         >
           <Plus size={16} />
           Novo Plano
@@ -1294,7 +1294,7 @@ const PlansSection: React.FC = () => {
                 <span
                   className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${
                     plan.active
-                      ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                      ? 'bg-success/10 text-success border-success/20'
                       : 'bg-surface-2 text-text-muted border-border-strong'
                   }`}
                 >
@@ -1319,7 +1319,7 @@ const PlansSection: React.FC = () => {
               <ul className="space-y-1.5 flex-1">
                 {plan.features.map((f, i) => (
                   <li key={i} className="flex items-center gap-2 text-xs text-text-secondary">
-                    <CheckCircle2 size={12} className="text-violet-400 shrink-0" />
+                    <CheckCircle2 size={12} className="text-accent shrink-0" />
                     {f}
                   </li>
                 ))}
@@ -1338,7 +1338,7 @@ const PlansSection: React.FC = () => {
                 {plan.active && (
                   <button
                     onClick={() => setConfirmDeactivate(plan)}
-                    className="flex items-center justify-center gap-1.5 px-3 py-2 border border-red-500/20 rounded-xl text-xs font-bold text-red-400 hover:bg-red-500/10 transition-all"
+                    className="flex items-center justify-center gap-1.5 px-3 py-2 border border-danger/20 rounded-xl text-xs font-bold text-danger hover:bg-danger/10 transition-all"
                   >
                     <Trash2 size={12} />
                     Desativar
@@ -1442,7 +1442,7 @@ const BlockedSection: React.FC = () => {
               setPage(1);
             }}
             placeholder="Buscar por valor ou motivo..."
-            className="w-full bg-surface border border-border text-text-primary text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-text-muted"
+            className="w-full bg-surface border border-border text-text-primary text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-focus focus:ring-1 focus:ring-focus transition-all placeholder:text-text-muted"
           />
         </div>
         <div className="flex items-center gap-1.5 bg-surface border border-border rounded-xl p-1">
@@ -1455,7 +1455,7 @@ const BlockedSection: React.FC = () => {
               }}
               className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
                 activeFilter === s
-                  ? 'bg-violet-500 text-black'
+                  ? 'bg-accent text-accent-fg'
                   : 'text-text-muted hover:text-text-primary hover:bg-surface-2'
               }`}
             >
@@ -1503,8 +1503,8 @@ const BlockedSection: React.FC = () => {
                         <span
                           className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${
                             entity.isActive
-                              ? 'bg-red-500/10 text-red-400 border-red-500/20'
-                              : 'bg-green-500/10 text-green-400 border-green-500/20'
+                              ? 'bg-danger/10 text-danger border-danger/20'
+                              : 'bg-success/10 text-success border-success/20'
                           }`}
                         >
                           {entity.isActive ? <Ban size={9} /> : <CheckCircle2 size={9} />}
@@ -1521,7 +1521,7 @@ const BlockedSection: React.FC = () => {
                           <button
                             onClick={() => setConfirmUnblock(entity)}
                             disabled={unblockingId === entity.id}
-                            className="inline-flex items-center gap-1.5 text-xs font-bold text-green-400 hover:text-green-300 border border-green-500/20 hover:bg-green-500/10 rounded-lg px-3 py-1.5 transition-all disabled:opacity-50"
+                            className="inline-flex items-center gap-1.5 text-xs font-bold text-success border border-success/20 hover:bg-success/10 rounded-lg px-3 py-1.5 transition-all disabled:opacity-50"
                           >
                             {unblockingId === entity.id ? (
                               <RefreshCcw size={12} className="animate-spin" />
@@ -1637,7 +1637,7 @@ const NotificationsSection: React.FC = () => {
               }}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
                 filter === f
-                  ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
+                  ? 'bg-accent/20 text-accent border border-accent/30'
                   : 'text-text-muted hover:text-text-primary hover:bg-surface-2 border border-transparent'
               }`}
             >
@@ -1651,7 +1651,7 @@ const NotificationsSection: React.FC = () => {
           {(meta?.unreadCount ?? 0) > 0 && (
             <button
               onClick={handleMarkAllRead}
-              className="text-xs font-bold text-violet-400 hover:text-violet-300 border border-violet-500/20 hover:bg-violet-500/10 rounded-lg px-3 py-1.5 transition-all"
+              className="text-xs font-bold text-accent hover:text-accent-hover border border-accent/20 hover:bg-accent/10 rounded-lg px-3 py-1.5 transition-all"
             >
               Marcar todas como lidas
             </button>
@@ -1690,7 +1690,7 @@ const NotificationsSection: React.FC = () => {
                   items.map(n => (
                     <tr
                       key={n.id}
-                      className={`hover:bg-surface-2/20 transition-colors ${!n.read ? 'bg-violet-500/5' : ''}`}
+                      className={`hover:bg-surface-2/20 transition-colors ${!n.read ? 'bg-accent/5' : ''}`}
                     >
                       <td className="px-6 py-4">
                         <p
@@ -1718,7 +1718,7 @@ const NotificationsSection: React.FC = () => {
                         ) : (
                           <button
                             onClick={() => handleMarkRead(n.id)}
-                            className="text-xs font-bold text-violet-400 hover:text-violet-300 border border-violet-500/20 hover:bg-violet-500/10 rounded-lg px-3 py-1.5 transition-all"
+                            className="text-xs font-bold text-accent hover:text-accent-hover border border-accent/20 hover:bg-accent/10 rounded-lg px-3 py-1.5 transition-all"
                           >
                             Marcar lida
                           </button>
@@ -1746,16 +1746,16 @@ const NotificationsSection: React.FC = () => {
 const REFUND_STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   SUCCEEDED: {
     label: 'Concluído',
-    className: 'bg-green-500/10 text-green-400 border-green-500/20',
+    className: 'bg-success/10 text-success border-success/20',
   },
-  FAILED: { label: 'Falhou', className: 'bg-red-500/10 text-red-400 border-red-500/20' },
+  FAILED: { label: 'Falhou', className: 'bg-danger/10 text-danger border-danger/20' },
   PENDING: {
     label: 'Pendente',
-    className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    className: 'bg-warning/10 text-warning border-warning/20',
   },
   RECONCILIATION_REQUIRED: {
     label: 'Conciliação pendente',
-    className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    className: 'bg-warning/10 text-warning border-warning/20',
   },
 };
 
@@ -1913,7 +1913,7 @@ export const BillingTab: React.FC = () => {
               onClick={() => setSection(opt.value)}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold tracking-wider uppercase transition-all flex items-center gap-1.5 whitespace-nowrap ${
                 section === opt.value
-                  ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
+                  ? 'bg-accent/20 text-accent border border-accent/30'
                   : 'text-text-muted hover:text-text-primary hover:bg-surface-2'
               }`}
             >

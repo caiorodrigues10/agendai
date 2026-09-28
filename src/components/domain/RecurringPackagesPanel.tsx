@@ -29,9 +29,9 @@ const CYCLE_LABELS: Record<string, string> = {
 
 const MEMBERSHIP_STATUS_STYLES: Record<string, string> = {
   ACTIVE: 'bg-success/10 text-success border-success/30',
-  PAUSED: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
-  CANCELLED: 'bg-red-500/10 text-red-400 border-red-500/30',
-  PENDING: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+  PAUSED: 'bg-warning/10 text-warning border-warning/30',
+  CANCELLED: 'bg-danger/10 text-danger border-danger/30',
+  PENDING: 'bg-support/10 text-support border-support/30',
 };
 
 const MEMBERSHIP_STATUS_LABELS: Record<string, string> = {
@@ -342,7 +342,7 @@ export const RecurringPackagesPanel: React.FC = () => {
                       </button>
                     )}
                     {m.status === 'ACTIVE' && (
-                      <button onClick={() => setActionTarget({ membership: m, action: 'pause' })} className="flex items-center gap-1 rounded-md bg-yellow-500/10 px-2 py-1 text-xs font-medium text-yellow-400 hover:bg-yellow-500/20">
+                      <button onClick={() => setActionTarget({ membership: m, action: 'pause' })} className="flex items-center gap-1 rounded-md bg-warning/10 px-2 py-1 text-xs font-medium text-warning hover:bg-warning/20">
                         <Pause size={12} /> Pausar
                       </button>
                     )}

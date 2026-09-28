@@ -40,8 +40,8 @@ const STATUS_LABELS: Record<NotificationDeliveryStatus, string> = {
 
 const STATUS_STYLES: Record<NotificationDeliveryStatus, string> = {
   PENDING: 'border-warning/30 bg-warning/10 text-warning',
-  QUEUED: 'border-blue-500/30 bg-blue-500/10 text-blue-400',
-  PROCESSING: 'border-blue-500/30 bg-blue-500/10 text-blue-400',
+  QUEUED: 'border-support/30 bg-support/10 text-support',
+  PROCESSING: 'border-support/30 bg-support/10 text-support',
   RETRYING: 'border-warning/30 bg-warning/10 text-warning',
   SENT: 'border-accent/30 bg-accent/10 text-accent',
   DELIVERED: 'border-success/30 bg-success/10 text-success',

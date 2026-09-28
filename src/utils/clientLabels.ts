@@ -15,10 +15,10 @@ export const APPOINTMENT_STATUS_LABEL: Record<string, string> = {
 };
 
 export const APPOINTMENT_STATUS_STYLE: Record<string, string> = {
-  CONFIRMED: 'bg-blue-500/15 text-blue-400 border border-blue-500/30',
-  COMPLETED: 'bg-green-500/15 text-green-400 border border-green-500/30',
-  CANCELLED: 'bg-red-500/15 text-red-400 border border-red-500/30',
-  NO_SHOW: 'bg-gray-500/15 text-gray-400 border border-gray-500/30',
+  CONFIRMED: 'bg-support/15 text-support border border-support/30',
+  COMPLETED: 'bg-success/15 text-success border border-success/30',
+  CANCELLED: 'bg-danger/15 text-danger border border-danger/30',
+  NO_SHOW: 'bg-surface-2 text-text-secondary border border-border',
 };
 
 export const CRM_SEGMENT_LABEL: Record<string, string> = {

@@ -69,7 +69,7 @@ export const PwaInstallCard: React.FC<PwaInstallCardProps> = ({
                       AI
                     </div>
                     <p className="mt-5 text-2xl font-black leading-tight">AgendAI na tela inicial</p>
-                    <p className="mt-2 text-sm leading-relaxed text-neutral-400">
+                    <p className="mt-2 text-sm leading-relaxed text-white/60">
                       Um guia visual curto, pronto para receber o vídeo vertical de instalação.
                     </p>
                   </div>
@@ -112,7 +112,7 @@ export const PwaInstallCard: React.FC<PwaInstallCardProps> = ({
           <p
             className={
               marketing
-                ? 'mt-6 max-w-xl text-base leading-relaxed text-neutral-300 sm:text-lg'
+                ? 'mt-6 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg'
                 : 'mt-3 text-sm leading-relaxed text-text-secondary'
             }
           >
@@ -139,7 +139,7 @@ export const PwaInstallCard: React.FC<PwaInstallCardProps> = ({
                 >
                   {isIos && index === 0 ? <Share2 size={14} /> : <Icon size={14} />}
                 </span>
-                <span className={marketing ? 'text-sm font-semibold text-neutral-200' : 'text-xs font-semibold'}>
+                <span className={marketing ? 'text-sm font-semibold text-white/90' : 'text-xs font-semibold'}>
                   {index + 1}. {label}
                 </span>
               </div>
@@ -166,7 +166,7 @@ export const PwaInstallCard: React.FC<PwaInstallCardProps> = ({
                 Instalar AgendAI
               </button>
             ) : (
-              <p className={marketing ? 'text-sm leading-relaxed text-neutral-400' : 'text-xs leading-relaxed text-text-muted'}>
+              <p className={marketing ? 'text-sm leading-relaxed text-white/60' : 'text-xs leading-relaxed text-text-muted'}>
                 {installHelp}
               </p>
             )}

@@ -98,34 +98,34 @@ interface KPICardProps {
 
 const COLOR_MAP = {
   cyan: {
-    bg: 'bg-violet-500/10',
-    border: 'border-violet-500/20',
-    text: 'text-violet-400',
-    glow: 'bg-violet-500/5 group-hover:bg-violet-500/10',
+    bg: 'bg-chart-3/10',
+    border: 'border-chart-3/20',
+    text: 'text-chart-3',
+    glow: 'bg-chart-3/5 group-hover:bg-chart-3/10',
   },
   green: {
-    bg: 'bg-green-500/10',
-    border: 'border-green-500/20',
-    text: 'text-green-400',
-    glow: 'bg-green-500/5 group-hover:bg-green-500/10',
+    bg: 'bg-success/10',
+    border: 'border-success/20',
+    text: 'text-success',
+    glow: 'bg-success/5 group-hover:bg-success/10',
   },
   red: {
-    bg: 'bg-red-500/10',
-    border: 'border-red-500/20',
-    text: 'text-red-400',
-    glow: 'bg-red-500/5 group-hover:bg-red-500/10',
+    bg: 'bg-danger/10',
+    border: 'border-danger/20',
+    text: 'text-danger',
+    glow: 'bg-danger/5 group-hover:bg-danger/10',
   },
   purple: {
-    bg: 'bg-purple-500/10',
-    border: 'border-purple-500/20',
-    text: 'text-purple-400',
-    glow: 'bg-purple-500/5 group-hover:bg-purple-500/10',
+    bg: 'bg-chart-2/10',
+    border: 'border-chart-2/20',
+    text: 'text-chart-2',
+    glow: 'bg-chart-2/5 group-hover:bg-chart-2/10',
   },
   blue: {
-    bg: 'bg-blue-500/10',
-    border: 'border-blue-500/20',
-    text: 'text-blue-400',
-    glow: 'bg-blue-500/5 group-hover:bg-blue-500/10',
+    bg: 'bg-support/10',
+    border: 'border-support/20',
+    text: 'text-support',
+    glow: 'bg-support/5 group-hover:bg-support/10',
   },
 };
 
@@ -158,7 +158,7 @@ const KPICard: React.FC<KPICardProps> = ({
         {trend && (
           <span
             className={`text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 ${
-              trendUp ? 'text-green-400 bg-green-400/10' : 'text-red-400 bg-red-400/10'
+              trendUp ? 'text-success bg-success/10' : 'text-danger bg-danger/10'
             }`}
           >
             {trendUp ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
@@ -278,7 +278,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({ selected, onChange }) =
         onClick={() => onChange(opt.value)}
         className={`px-3 py-1.5 rounded-lg text-xs font-bold tracking-wider uppercase transition-all ${
           selected === opt.value
-            ? 'bg-violet-500 text-black shadow-[0_0_12px_rgba(6,182,212,0.4)]'
+            ? 'bg-accent text-accent-fg shadow-[0_0_12px_color-mix(in_srgb,var(--ag-accent)_40%,transparent)]'
             : 'text-text-muted hover:text-text-primary hover:bg-surface-2'
         }`}
       >
@@ -295,13 +295,13 @@ const ApprovalBadge: React.FC<{ status: 'PENDING' | 'APPROVED' | 'REJECTED' }> =
   const cfg = {
     PENDING: {
       label: 'Pendente',
-      colorClass: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+      colorClass: 'bg-warning/10 text-warning border-warning/20',
     },
     APPROVED: {
       label: 'Aprovada',
-      colorClass: 'bg-green-500/10 text-green-400 border-green-500/20',
+      colorClass: 'bg-success/10 text-success border-success/20',
     },
-    REJECTED: { label: 'Rejeitada', colorClass: 'bg-red-500/10 text-red-400 border-red-500/20' },
+    REJECTED: { label: 'Rejeitada', colorClass: 'bg-danger/10 text-danger border-danger/20' },
   }[status];
   return (
     <span
@@ -401,7 +401,7 @@ const OverviewTab: React.FC<{
           {/* Chart header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <BarChart3 size={18} className="text-violet-400" />
+              <BarChart3 size={18} className="text-accent" />
               <span className="font-bold text-text-primary text tracking-tight">
                 Evolução do Período
               </span>
@@ -413,7 +413,7 @@ const OverviewTab: React.FC<{
                   onClick={() => onMetricChange(m.value)}
                   className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
                     chartMetric === m.value
-                      ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
+                      ? 'bg-accent/20 text-accent border border-accent/30'
                       : 'text-text-muted hover:text-text-primary'
                   }`}
                 >
@@ -460,7 +460,7 @@ const OverviewTab: React.FC<{
               <div className="mt-2 flex items-center gap-2">
                 <div
                   className={`flex items-center gap-1 text-xs font-bold ${
-                    !data.kpis.growthRate.startsWith('-') ? 'text-green-400' : 'text-red-400'
+                    !data.kpis.growthRate.startsWith('-') ? 'text-success' : 'text-danger'
                   }`}
                 >
                   {!data.kpis.growthRate.startsWith('-') ? (
@@ -484,7 +484,7 @@ const OverviewTab: React.FC<{
           >
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm font-bold text-text-primary">Recém Cadastradas</span>
-              <span className="text-[10px] text-violet-400 font-bold uppercase tracking-wider">
+              <span className="text-[10px] text-accent font-bold uppercase tracking-wider">
                 Ao vivo
               </span>
             </div>
@@ -500,7 +500,7 @@ const OverviewTab: React.FC<{
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <div className="font-bold text-xs text-text-primary group-hover:text-violet-400 transition-colors truncate">
+                          <div className="font-bold text-xs text-text-primary group-hover:text-accent transition-colors truncate">
                             {shop.name}
                           </div>
                           <div className="text-[10px] text-text-muted flex items-center gap-1 mt-0.5">
@@ -592,7 +592,7 @@ const ManageBarbershopModal: React.FC<ManageBarbershopModalProps> = ({
 
         <div className="p-6 space-y-4">
           {error && (
-            <div className="bg-red-500/5 border border-red-500/20 rounded-xl px-4 py-2.5 text-xs text-red-400">
+            <div className="bg-danger/5 border border-danger/20 rounded-xl px-4 py-2.5 text-xs text-danger">
               {error}
             </div>
           )}
@@ -661,7 +661,7 @@ const ManageBarbershopModal: React.FC<ManageBarbershopModalProps> = ({
               <button
                 onClick={handleApprove}
                 disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-success/10 text-success border border-success/20 hover:bg-success/20 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
               >
                 <CheckCircle2 size={16} />
                 Aprovar
@@ -669,7 +669,7 @@ const ManageBarbershopModal: React.FC<ManageBarbershopModalProps> = ({
               <button
                 onClick={handleReject}
                 disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-danger/10 text-danger border border-danger/20 hover:bg-danger/20 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
               >
                 <XCircle size={16} />
                 Rejeitar
@@ -683,8 +683,8 @@ const ManageBarbershopModal: React.FC<ManageBarbershopModalProps> = ({
             disabled={saving}
             className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-bold transition-all disabled:opacity-50 ${
               shop.active
-                ? 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20'
-                : 'bg-green-500/10 text-green-400 border-green-500/20 hover:bg-green-500/20'
+                ? 'bg-danger/10 text-danger border-danger/20 hover:bg-danger/20'
+                : 'bg-success/10 text-success border-success/20 hover:bg-success/20'
             }`}
           >
             {saving ? (
@@ -818,7 +818,7 @@ const BarbershopsTab: React.FC = () => {
             setCreateError(null);
             setShowCreate(true);
           }}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-violet-500 px-4 py-2.5 text-xs font-bold text-black hover:bg-violet-400"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-xs font-bold text-black hover:bg-accent-hover"
         >
           <Building2 size={16} />
           Novo salão
@@ -837,7 +837,7 @@ const BarbershopsTab: React.FC = () => {
               setPage(1);
             }}
             placeholder="Buscar por nome, CNPJ ou endereço..."
-            className="w-full bg-surface border border-border text-text-primary text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-text-muted"
+            className="w-full bg-surface border border-border text-text-primary text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-focus focus:ring-1 focus:ring-focus transition-all placeholder:text-text-muted"
           />
         </div>
         <div className="flex items-center gap-1.5 bg-surface border border-border rounded-xl p-1">
@@ -850,7 +850,7 @@ const BarbershopsTab: React.FC = () => {
               }}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
                 statusFilter === s
-                  ? 'bg-violet-500 text-black'
+                  ? 'bg-accent text-accent-fg'
                   : 'text-text-muted hover:text-text-primary hover:bg-surface-2'
               }`}
             >
@@ -899,7 +899,7 @@ const BarbershopsTab: React.FC = () => {
                       <span
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
                           shop.active
-                            ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                            ? 'bg-success/10 text-success border-success/20'
                             : 'bg-surface-2 text-text-muted border-border-strong'
                         }`}
                       >
@@ -920,7 +920,7 @@ const BarbershopsTab: React.FC = () => {
                     <td className="px-6 py-4 text-right">
                       <button
                         onClick={() => setManagedShop(shop)}
-                        className="inline-flex items-center gap-1 text-xs font-bold text-violet-500 hover:text-violet-400 transition-colors"
+                        className="inline-flex items-center gap-1 text-xs font-bold text-accent hover:text-accent-hover transition-colors"
                       >
                         Gerenciar <ChevronRight size={12} />
                       </button>
@@ -1013,7 +1013,7 @@ const BarbershopsTab: React.FC = () => {
               <button
                 type="submit"
                 disabled={creating}
-                className="flex-1 rounded-xl bg-violet-500 py-3 text-sm font-bold text-black disabled:opacity-50"
+                className="flex-1 rounded-xl bg-accent py-3 text-sm font-bold text-black disabled:opacity-50"
               >
                 {creating ? 'Salvando…' : 'Cadastrar'}
               </button>
@@ -1093,7 +1093,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {validationError && (
-            <div className="bg-red-500/5 border border-red-500/20 rounded-xl px-4 py-2.5 text-xs text-red-400">
+            <div className="bg-danger/5 border border-danger/20 rounded-xl px-4 py-2.5 text-xs text-danger">
               {validationError}
             </div>
           )}
@@ -1106,7 +1106,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
               required
               value={formData.name}
               onChange={e => setFormData({ ...formData, name: e.target.value })}
-              className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-all"
+              className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-focus transition-all"
               placeholder="Ex: João Silva"
             />
           </div>
@@ -1119,7 +1119,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
               required
               value={formData.email}
               onChange={e => setFormData({ ...formData, email: e.target.value })}
-              className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-all"
+              className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-focus transition-all"
               placeholder="email@exemplo.com"
             />
           </div>
@@ -1133,7 +1133,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                 required={!user}
                 value={formData.password}
                 onChange={e => setFormData({ ...formData, password: e.target.value })}
-                className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-violet-500 transition-all"
+                className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-focus transition-all"
                 placeholder="Mínimo 6 caracteres"
               />
             </div>
@@ -1166,8 +1166,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                 onClick={() => setFormData({ ...formData, active: !formData.active })}
                 className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-bold transition-all ${
                   formData.active
-                    ? 'bg-green-500/10 text-green-400 border-green-500/20'
-                    : 'bg-red-500/10 text-red-500 border-red-500/20'
+                    ? 'bg-success/10 text-success border-success/20'
+                    : 'bg-danger/10 text-danger border-danger/20'
                 }`}
               >
                 {formData.active ? <CheckCircle2 size={16} /> : <Ban size={16} />}
@@ -1210,7 +1210,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2.5 bg-violet-500 text-black rounded-xl text-sm font-bold hover:bg-violet-400 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] disabled:opacity-50"
+              className="flex-1 px-4 py-2.5 bg-accent text-accent-fg rounded-xl text-sm font-bold hover:bg-accent-hover transition-all shadow-[0_0_15px_color-mix(in_srgb,var(--ag-accent)_30%,transparent)] disabled:opacity-50"
             >
               {loading ? 'Salvando...' : 'Confirmar'}
             </button>
@@ -1248,7 +1248,7 @@ const AuditLogDrawer: React.FC<AuditLogDrawerProps> = ({ user, onClose }) => {
     <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-surface border-l border-border shadow-2xl flex flex-col">
       <div className="p-6 border-b border-border flex justify-between items-center bg-bg/40">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center text-violet-400 border border-violet-500/20">
+          <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent border border-accent/20">
             <History size={20} />
           </div>
           <div>
@@ -1281,10 +1281,10 @@ const AuditLogDrawer: React.FC<AuditLogDrawerProps> = ({ user, onClose }) => {
         ) : (
           logs.map(log => (
             <div key={log.id} className="relative pl-6 border-l border-border pb-2 last:pb-0">
-              <div className="absolute left-[-5px] top-0 w-2 h-2 rounded-full bg-violet-500 ring-4 ring-surface" />
+              <div className="absolute left-[-5px] top-0 w-2 h-2 rounded-full bg-accent ring-4 ring-surface" />
               <div className="bg-bg/40 border border-border/50 rounded-xl p-3.5 group hover:border-border-strong transition-colors">
                 <div className="flex justify-between items-start gap-2 mb-1.5">
-                  <span className="text-[10px] font-black text-violet-400 uppercase tracking-tighter">
+                  <span className="text-[10px] font-black text-accent uppercase tracking-tighter">
                     {log.action}
                   </span>
                   <span className="text-[9px] text-text-muted font-medium">
@@ -1399,7 +1399,7 @@ const UsersTab: React.FC = () => {
             setSelectedUser(null);
             setModalOpen(true);
           }}
-          className="bg-violet-500 hover:bg-violet-400 text-black px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] active:scale-95"
+          className="bg-accent hover:bg-accent-hover text-black px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-[0_0_15px_color-mix(in_srgb,var(--ag-accent)_30%,transparent)] active:scale-95"
         >
           <UserPlus size={18} />
           Adicionar Usuário
@@ -1417,7 +1417,7 @@ const UsersTab: React.FC = () => {
               setPage(1);
             }}
             placeholder="Buscar por nome ou e-mail..."
-            className="w-full bg-surface border border-border text-text-primary text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all placeholder:text-text-muted"
+            className="w-full bg-surface border border-border text-text-primary text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-focus focus:ring-1 focus:ring-focus transition-all placeholder:text-text-muted"
           />
         </div>
         <div className="flex items-center gap-1.5 bg-surface border border-border rounded-xl p-1 overflow-x-auto scroller-hidden">
@@ -1430,7 +1430,7 @@ const UsersTab: React.FC = () => {
               }}
               className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
                 roleFilter === r
-                  ? 'bg-violet-500 text-black'
+                  ? 'bg-accent text-accent-fg'
                   : 'text-text-muted hover:text-text-primary hover:bg-surface-2'
               }`}
             >
@@ -1475,7 +1475,7 @@ const UsersTab: React.FC = () => {
                         <div
                           className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-[10px] ${
                             u.role === 'MASTER_ADMIN'
-                              ? 'bg-violet-500 text-black'
+                              ? 'bg-accent text-accent-fg'
                               : 'bg-surface-2 text-text-secondary'
                           }`}
                         >
@@ -1495,11 +1495,11 @@ const UsersTab: React.FC = () => {
                       <span
                         className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tighter border ${
                           u.role === 'MASTER_ADMIN'
-                            ? 'bg-violet-500/10 text-violet-400 border-violet-500/20'
+                            ? 'bg-accent/10 text-accent border-accent/20'
                             : u.role === 'OWNER'
-                              ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                              ? 'bg-tertiary/10 text-tertiary border-tertiary/20'
                               : u.role === 'EMPLOYEE'
-                                ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                                ? 'bg-support/10 text-support border-support/20'
                                 : 'bg-surface-2 text-text-muted border-border-strong'
                         }`}
                       >
@@ -1516,12 +1516,12 @@ const UsersTab: React.FC = () => {
                       <span
                         className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${
                           u.active
-                            ? 'bg-green-500/10 text-green-400 border-green-500/20'
-                            : 'bg-red-500/10 text-red-500 border-red-500/20'
+                            ? 'bg-success/10 text-success border-success/20'
+                            : 'bg-danger/10 text-danger border-danger/20'
                         }`}
                       >
                         <span
-                          className={`w-1 h-1 rounded-full ${u.active ? 'bg-green-400 animate-pulse' : 'bg-red-500'}`}
+                          className={`w-1 h-1 rounded-full ${u.active ? 'bg-success animate-pulse' : 'bg-danger'}`}
                         />
                         {u.active ? 'Ativo' : 'Suspenso'}
                       </span>
@@ -1531,7 +1531,7 @@ const UsersTab: React.FC = () => {
                         <button
                           onClick={() => setLogUser(u)}
                           title="Ver Atividades"
-                          className="p-2 text-text-muted hover:text-violet-400 hover:bg-violet-500/10 rounded-lg transition-all"
+                          className="p-2 text-text-muted hover:text-accent hover:bg-accent/10 rounded-lg transition-all"
                         >
                           <History size={16} />
                         </button>
@@ -1550,7 +1550,7 @@ const UsersTab: React.FC = () => {
                         <button
                           onClick={() => setConfirmDelete(u)}
                           title="Excluir"
-                          className="p-2 text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                          className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-all"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -1687,14 +1687,14 @@ export const MasterAdminDashboard: React.FC = () => {
       <aside className="w-60 bg-bg border-r border-border/70 hidden md:flex flex-col shrink-0">
         {/* Brand */}
         <div className="p-5 border-b border-border/70 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-linear-to-br from-violet-500 to-blue-600 flex items-center justify-center font-black text-white text-sm shadow-[0_0_20px_rgba(6,182,212,0.3)]">
+          <div className="w-8 h-8 rounded-xl bg-linear-to-br from-brand to-brand-hover flex items-center justify-center font-black text-white text-sm shadow-[0_0_20px_color-mix(in_srgb,var(--ag-accent)_30%,transparent)]">
             M
           </div>
           <div>
             <p className="font-bold text-text-primary text-xs tracking-tight leading-none">
               Master Admin
             </p>
-            <p className="text-[10px] text-violet-400/70 uppercase tracking-widest mt-0.5">
+            <p className="text-[10px] text-accent/70 uppercase tracking-widest mt-0.5">
               AGENDAI Master
             </p>
           </div>
@@ -1708,7 +1708,7 @@ export const MasterAdminDashboard: React.FC = () => {
               onClick={() => setActiveTab(tab)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm font-medium ${
                 activeTab === tab
-                  ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20 shadow-[inset_0_0_10px_rgba(6,182,212,0.05)]'
+                  ? 'bg-accent/10 text-accent border border-accent/20 shadow-[inset_0_0_10px_color-mix(in_srgb,var(--ag-accent)_5%,transparent)]'
                   : 'text-text-muted hover:text-text-primary hover:bg-surface-2/60'
               }`}
             >
@@ -1726,7 +1726,7 @@ export const MasterAdminDashboard: React.FC = () => {
         {/* User + Logout */}
         <div className="p-3 border-t border-border/70 space-y-1">
           <div className="flex items-center gap-3 px-3 py-2.5">
-            <div className="w-7 h-7 rounded-full bg-linear-to-br from-violet-500 to-blue-600 flex items-center justify-center text-white font-black text-xs shrink-0">
+            <div className="w-7 h-7 rounded-full bg-accent/20 flex items-center justify-center text-accent font-black text-xs shrink-0">
               {user?.name?.[0]?.toUpperCase() ?? 'A'}
             </div>
             <div className="min-w-0">
@@ -1738,7 +1738,7 @@ export const MasterAdminDashboard: React.FC = () => {
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all text-sm font-medium"
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-danger/70 hover:text-danger hover:bg-danger/10 rounded-xl transition-all text-sm font-medium"
           >
             <LogOut size={17} />
             Sair
@@ -1769,7 +1769,7 @@ export const MasterAdminDashboard: React.FC = () => {
                 title="Atualizar"
                 className="w-8 h-8 flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface-2 rounded-lg transition-all"
               >
-                <RefreshCcw size={14} className={loading ? 'animate-spin text-violet-400' : ''} />
+                <RefreshCcw size={14} className={loading ? 'animate-spin text-accent' : ''} />
               </button>
             )}
           </div>

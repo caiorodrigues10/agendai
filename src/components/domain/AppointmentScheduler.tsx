@@ -177,7 +177,7 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
             rel="noopener noreferrer"
             className="w-full py-3 bg-surface-2 hover:bg-border-strong text-text-primary text-xs font-bold rounded-xl flex items-center justify-center gap-2 border border-border-strong"
           >
-            <Calendar size={16} className="text-blue-400" /> Adicionar ao Google Agenda
+            <Calendar size={16} className="text-support" /> Adicionar ao Google Agenda
           </a>
           <button
             type="button"

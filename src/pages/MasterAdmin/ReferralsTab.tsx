@@ -72,7 +72,7 @@ export const ReferralsTab: React.FC = () => {
       <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-extrabold text-text-primary flex items-center gap-2">
-            <Gift size={18} className="text-violet-400" />
+            <Gift size={18} className="text-accent" />
             Indicações da plataforma
           </h2>
           <p className="text-xs text-text-muted mt-1">Métricas globais do programa dono→dono</p>
@@ -84,7 +84,7 @@ export const ReferralsTab: React.FC = () => {
           className="w-8 h-8 flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface-2 rounded-lg transition-all"
           title="Atualizar"
         >
-          <RefreshCcw size={14} className={loading ? 'animate-spin text-violet-400' : ''} />
+          <RefreshCcw size={14} className={loading ? 'animate-spin text-accent' : ''} />
         </button>
       </div>
 
@@ -96,7 +96,7 @@ export const ReferralsTab: React.FC = () => {
           { label: 'Dias creditados', value: data.totalCreditDays, icon: Award },
         ].map(kpi => (
           <div key={kpi.label} className="rounded-xl border border-border bg-surface px-4 py-3">
-            <kpi.icon size={14} className="text-violet-400 mb-2" />
+            <kpi.icon size={14} className="text-accent mb-2" />
             <p className="text-2xl font-black text-text-primary">{kpi.value}</p>
             <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mt-1">
               {kpi.label}
@@ -130,7 +130,7 @@ export const ReferralsTab: React.FC = () => {
                       {r.totalReferrals !== 1 ? 's' : ''}
                     </p>
                   </div>
-                  <p className="text-sm font-bold text-violet-400 shrink-0">+{r.creditDays}d</p>
+                  <p className="text-sm font-bold text-accent shrink-0">+{r.creditDays}d</p>
                 </li>
               ))}
             </ul>
@@ -153,7 +153,7 @@ export const ReferralsTab: React.FC = () => {
                 >
                   <span className="text-[9px] text-text-muted">{m.count}</span>
                   <div
-                    className="w-full rounded-t bg-violet-500/70 min-h-[2px]"
+                    className="w-full rounded-t bg-chart-2/70 min-h-[2px]"
                     style={{ height: `${(m.count / maxMonth) * 100}%` }}
                   />
                   <span className="text-[8px] text-text-muted truncate w-full text-center">

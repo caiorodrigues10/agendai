@@ -456,9 +456,9 @@ export const OwnerFinancialPanel: React.FC = () => {
         </div>
 
         {error && (
-          <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 flex items-center gap-3">
-            <AlertCircle size={18} className="text-red-400 shrink-0" />
-            <p className="text-sm text-red-400 flex-1">{error}</p>
+          <div className="bg-danger/5 border border-danger/20 rounded-xl p-4 flex items-center gap-3">
+            <AlertCircle size={18} className="text-danger shrink-0" />
+            <p className="text-sm text-danger flex-1">{error}</p>
             <button
               onClick={handleRefresh}
               className="text-xs font-bold text-text-secondary hover:text-text-primary border border-border rounded-lg px-3 py-1.5 hover:bg-surface-2 transition-colors"
@@ -1016,11 +1016,11 @@ export const OwnerFinancialPanel: React.FC = () => {
                               </td>
                               <td className="p-3 hidden lg:table-cell">
                                 {item.paidAt ? (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-green-500/10 text-green-400 border border-green-500/20">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20">
                                     Pago
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-warning/10 text-warning border border-warning/20">
                                     Pendente
                                   </span>
                                 )}
@@ -1051,7 +1051,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                                         onClick={() => handleMarkAsPaid(item.id)}
                                         title="Marcar como pago"
                                         disabled={expenseSubmitting}
-                                        className="text-text-muted hover:text-green-400 disabled:opacity-30"
+                                        className="text-text-muted hover:text-success disabled:opacity-30"
                                       >
                                         <CheckCircle size={14} />
                                       </button>

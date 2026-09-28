@@ -42,7 +42,7 @@
   /* Foco distinto do estado ativo para preservar a navegação por teclado. */
   --ag-focus: #249b76;
   --ag-danger: #dc2626;
-  --ag-success: #16a34a;
+  --ag-success: #107836;
   --ag-warning: #b45309;
   /* shadcn/recharts — séries alinhadas ao tema */
   --chart-1: #1c7e61;
@@ -77,7 +77,7 @@
   --ag-action-secondary: #303a34;
   --ag-selection: rgba(44, 181, 138, 0.16);
   --ag-focus: #2cb58a;
-  --ag-danger: #ef4444;
+  --ag-danger: #f16161;
   --ag-success: #22c55e;
   --ag-warning: #f59e0b;
   --chart-1: #2cb58a;

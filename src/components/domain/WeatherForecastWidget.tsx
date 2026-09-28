@@ -18,38 +18,38 @@ import { finiteNumber, getWeatherVisual } from '../../utils/weatherVisuals';
 
 const RISK_STYLES: Record<string, { bg: string; border: string; text: string; icon: string }> = {
   low: {
-    bg: 'bg-emerald-400/5',
-    border: 'border-emerald-400/20',
-    text: 'text-emerald-400',
-    icon: 'text-emerald-400',
+    bg: 'bg-success/5',
+    border: 'border-success/20',
+    text: 'text-success',
+    icon: 'text-success',
   },
   medium: {
-    bg: 'bg-yellow-400/5',
-    border: 'border-yellow-400/20',
-    text: 'text-yellow-400',
-    icon: 'text-yellow-400',
+    bg: 'bg-warning/5',
+    border: 'border-warning/20',
+    text: 'text-warning',
+    icon: 'text-warning',
   },
   high: {
-    bg: 'bg-red-400/5',
-    border: 'border-red-400/20',
-    text: 'text-red-400',
-    icon: 'text-red-400',
+    bg: 'bg-danger/5',
+    border: 'border-danger/20',
+    text: 'text-danger',
+    icon: 'text-danger',
   },
   critical: {
-    bg: 'bg-red-500/10',
-    border: 'border-red-500/30',
-    text: 'text-red-400',
-    icon: 'text-red-400',
+    bg: 'bg-danger/10',
+    border: 'border-danger/30',
+    text: 'text-danger',
+    icon: 'text-danger',
   },
 };
 
 function getWeatherIcon(code: number): React.ReactNode {
-  if (code <= 1) return <Sun size={24} className="h-6 w-6 text-yellow-400" />;
-  if (code <= 3) return <CloudSun size={24} className="h-6 w-6 text-neutral-400" />;
-  if (code >= 51 && code <= 67) return <CloudRain size={24} className="h-6 w-6 text-blue-400" />;
-  if (code >= 80 && code <= 82) return <CloudRain size={24} className="h-6 w-6 text-blue-400" />;
-  if (code >= 95) return <CloudRain size={24} className="h-6 w-6 text-purple-400" />;
-  return <Cloud size={24} className="h-6 w-6 text-neutral-400" />;
+  if (code <= 1) return <Sun size={24} className="h-6 w-6 text-warning" />;
+  if (code <= 3) return <CloudSun size={24} className="h-6 w-6 text-text-muted" />;
+  if (code >= 51 && code <= 67) return <CloudRain size={24} className="h-6 w-6 text-support" />;
+  if (code >= 80 && code <= 82) return <CloudRain size={24} className="h-6 w-6 text-support" />;
+  if (code >= 95) return <CloudRain size={24} className="h-6 w-6 text-danger" />;
+  return <Cloud size={24} className="h-6 w-6 text-text-muted" />;
 }
 
 interface WeatherForecastWidgetProps {
@@ -176,26 +176,26 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <div className="rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
           <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Média da semana</p>
-          <p className={`mt-1.5 text-lg font-black ${summary.avgDropPct <= -10 ? 'text-red-400' : 'text-emerald-400'}`}>
+          <p className={`mt-1.5 text-lg font-black ${summary.avgDropPct <= -10 ? 'text-danger' : 'text-success'}`}>
             {finiteNumber(summary.avgDropPct) > 0 ? '+' : ''}{finiteNumber(summary.avgDropPct)}%
           </p>
         </div>
         <div className="rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
           <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Dias de queda</p>
-          <p className={`mt-1.5 text-lg font-black ${summary.highRiskCount > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
+          <p className={`mt-1.5 text-lg font-black ${summary.highRiskCount > 0 ? 'text-warning' : 'text-success'}`}>
             {summary.highRiskCount}
           </p>
         </div>
         <div className="rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
           <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Melhor dia</p>
-          <p className="mt-1.5 text-sm font-bold text-emerald-400">
+          <p className="mt-1.5 text-sm font-bold text-success">
             {formatWeatherDayLabel(summary.bestDay.date)}
           </p>
           <p className="text-[10px] text-white/45">{summary.bestDay.condition}</p>
         </div>
         <div className="rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
           <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Pior dia</p>
-          <p className="mt-1.5 text-sm font-bold text-red-400">
+          <p className="mt-1.5 text-sm font-bold text-danger">
             {formatWeatherDayLabel(summary.worstDay.date)}
           </p>
           <p className="text-[10px] text-white/45">{summary.worstDay.condition}</p>
@@ -260,10 +260,10 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
                       <div
                         className={`h-full rounded-full transition-all ${
                           prediction.riskLevel === 'high' || prediction.riskLevel === 'critical'
-                            ? 'bg-red-400'
+                            ? 'bg-danger'
                             : prediction.riskLevel === 'medium'
-                              ? 'bg-yellow-400'
-                              : 'bg-emerald-400'
+                              ? 'bg-warning'
+                              : 'bg-success'
                         }`}
                         style={{ width: `${Math.min(100, Math.max(8, 100 + finiteNumber(prediction.dropPct)))}%` }}
                       />
