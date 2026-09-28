@@ -48,7 +48,7 @@ export const Logo: React.FC<LogoProps> = ({
     return (
       <img
         src="/favicon.png"
-        alt="AGENDAI"
+        alt="AgendaJá"
         className={`${s.iconOnly} select-none object-contain`}
       />
     );
@@ -56,8 +56,8 @@ export const Logo: React.FC<LogoProps> = ({
 
   return (
     <span className={`inline-flex select-none ${className ?? ''}`}>
-      <img src="/brand/agendai-logo.png" alt="AgendAI" className={`${s.img} object-contain dark:hidden`} />
-      <img src="/brand/agendai-logo-dark.png" alt="AgendAI" className={`${s.img} hidden object-contain dark:block`} />
+      <img src="/brand/agendai-logo.png" alt="AgendaJá" className={`${s.img} object-contain dark:hidden`} />
+      <img src="/brand/agendai-logo-dark.png" alt="AgendaJá" className={`${s.img} hidden object-contain dark:block`} />
     </span>
   );
 };
