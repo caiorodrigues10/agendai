@@ -53,6 +53,15 @@ vi.mock('../infra/authStorage', () => ({
     getSavedAccounts: () => savedAccountsMock,
     hasStoredSession: () => hasStoredSessionMock,
     getUser: () => authState.user,
+    getAccessToken: () => 'token-123',
+  },
+}));
+
+const resendVerificationMock = vi.hoisted(() => vi.fn());
+
+vi.mock('../infra/authApi', () => ({
+  authApi: {
+    resendVerification: resendVerificationMock,
   },
 }));
 
@@ -74,6 +83,8 @@ describe('LoginPage (usabilidade)', () => {
     navigateMock.mockReset();
     subscriptionsMeMock.mockReset();
     subscriptionsMeMock.mockRejectedValue(new Error('offline'));
+    resendVerificationMock.mockReset();
+    resendVerificationMock.mockResolvedValue({ success: true, message: 'ok' });
   });
 
   it('renderiza formulário de login com e-mail e senha', () => {
@@ -166,5 +177,82 @@ describe('LoginPage (usabilidade)', () => {
     expect(screen.getByPlaceholderText('João Silva')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('000.000.000-00')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /continuar/i })).toBeInTheDocument();
+  });
+
+  const fillRegisterAndSubmit = async () => {
+    fireEvent.focus(screen.getByPlaceholderText('seu@email.com'));
+    fireEvent.change(screen.getByPlaceholderText('João Silva'), {
+      target: { value: 'João Silva' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('seu@email.com'), {
+      target: { value: 'caio@example.com' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('000.000.000-00'), {
+      target: { value: '52998224725' },
+    });
+    fireEvent.focus(screen.getByPlaceholderText('Crie uma senha segura'));
+    fireEvent.change(screen.getByPlaceholderText('Crie uma senha segura'), {
+      target: { value: 'senha123' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /continuar/i }));
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Salão Beleza & Estilo')).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByPlaceholderText('Salão Beleza & Estilo'), {
+      target: { value: 'Barbearia Teste' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('(11) 99999-9999'), {
+      target: { value: '(11) 99999-9999' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('São Paulo'), {
+      target: { value: 'São Paulo' },
+    });
+    fireEvent.click(screen.getByLabelText(/li e aceito os termos de uso/i));
+    fireEvent.click(screen.getByLabelText(/consinto com o tratamento dos meus dados/i));
+
+    registerMock.mockImplementation(async () => {
+      authState.user = {
+        id: 'owner-1',
+        name: 'João Silva',
+        email: 'caio@example.com',
+        role: 'OWNER',
+      } as StaffMember;
+      return { ok: true };
+    });
+    fireEvent.click(screen.getByRole('button', { name: /criar conta/i }));
+  };
+
+  it('após cadastro por e-mail mostra tela de confirmação e não redireciona', async () => {
+    renderWithProviders(<LoginPage mode="register" />, { route: '/cadastro' });
+    await fillRegisterAndSubmit();
+
+    await waitFor(() => {
+      expect(screen.getByText('Confira seu e-mail')).toBeInTheDocument();
+    });
+    expect(screen.getByText(/caio@example\.com/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /reenviar link/i })).toBeInTheDocument();
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
+  it('permite reenviar o link de verificação e continuar para o painel', async () => {
+    renderWithProviders(<LoginPage mode="register" />, { route: '/cadastro' });
+    await fillRegisterAndSubmit();
+
+    await waitFor(() => {
+      expect(screen.getByText('Confira seu e-mail')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /reenviar link/i }));
+    await waitFor(() => {
+      expect(resendVerificationMock).toHaveBeenCalledWith('token-123');
+      expect(screen.getByText(/link reenviado/i)).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /já confirmei, entrar no painel/i }));
+    await waitFor(() => {
+      expect(navigateMock).toHaveBeenCalled();
+    });
   });
 });

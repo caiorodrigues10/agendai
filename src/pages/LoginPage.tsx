@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LoginSchema, LoginFormData, RegisterSchema, RegisterFormData } from '../schemas';
 import { useAuth } from '../contexts/AuthContext';
 import { authStorage } from '../infra/authStorage';
+import { authApi } from '../infra/authApi';
 import { Logo } from '../components/ui/Logo';
 import { PasswordInput } from '../components/ui/PasswordInput';
 import { Toast } from '../components/ui/Toast';
@@ -287,6 +288,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   const [savedAccounts, setSavedAccounts] = useState(authStorage.getSavedAccounts);
   const [showManualLoginForm, setShowManualLoginForm] = useState(false);
   const [switchingAccountId, setSwitchingAccountId] = useState<string | null>(null);
+  const [registerVerificationEmail, setRegisterVerificationEmail] = useState<string | null>(null);
+  const [resendVerificationStatus, setResendVerificationStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
   useRecaptchaBadge();
 
   const showErrorToast = (message: string) => {
@@ -564,9 +567,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   }, [navigate, searchParams, location.state, user]);
 
   useEffect(() => {
-    if (loading || !user || paywallOpen) return;
+    if (loading || !user || paywallOpen || registerVerificationEmail) return;
     void navigateAfterAuth(user);
-  }, [loading, navigateAfterAuth, paywallOpen, user]);
+  }, [loading, navigateAfterAuth, paywallOpen, user, registerVerificationEmail]);
 
   const handleLogin = async (data: LoginFormData) => {
     setSubmitting(true);
@@ -695,6 +698,23 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       return;
     }
     referralStorage.clear();
+    if (data.authMethod !== 'google') {
+      setResendVerificationStatus('idle');
+      setRegisterVerificationEmail(data.email.trim());
+    }
+  };
+
+  const handleResendVerification = async () => {
+    const token = authStorage.getAccessToken();
+    if (!token || resendVerificationStatus === 'sending') return;
+    setResendVerificationStatus('sending');
+    try {
+      await authApi.resendVerification(token);
+      setResendVerificationStatus('sent');
+    } catch {
+      setResendVerificationStatus('idle');
+      showErrorToast('Não foi possível reenviar o link. Aguarde alguns minutos e tente novamente.');
+    }
   };
 
   const registerPassword = registerForm.watch('password') ?? '';
@@ -784,7 +804,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
               >
                 <Logo size="md" />
               </button>
-              {tab === 'register' ? (
+              {registerVerificationEmail ? (
+                <>
+                  <span className="mt-5 inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-accent">
+                    <Mail size={12} /> Confirmação de e-mail
+                  </span>
+                  <h1 className="mt-4 text-center text-2xl font-black tracking-tight text-text-primary sm:text-3xl">
+                    Confira seu e-mail
+                  </h1>
+                  <p className="mt-2 max-w-sm text-center text-sm leading-relaxed text-text-muted">
+                    Enviamos um link de confirmação para{' '}
+                    <strong className="text-text-primary break-all">{registerVerificationEmail}</strong>. Clique
+                    no link para ativar sua conta.
+                  </p>
+                </>
+              ) : tab === 'register' ? (
                 <>
                   <span className="mt-5 inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-accent">
                     <Sparkles size={12} /> 30 dias grátis no Pro
@@ -806,18 +840,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
               )}
             </div>
 
-            <div className="mb-6 flex w-full items-center justify-center gap-2 text-center text-xs text-text-muted">
-              <span>{tab === 'login' ? 'Ainda não tem uma conta?' : 'Já possui uma conta?'}</span>
-              <button
-                type="button"
-                onClick={() => goToAuthMode(tab === 'login' ? 'register' : 'login')}
-                className="inline-flex min-h-11 items-center font-bold text-tertiary underline decoration-tertiary/30 underline-offset-4 transition hover:decoration-tertiary"
-              >
-                {tab === 'login' ? 'Criar conta grátis' : 'Entrar agora'}
-              </button>
-            </div>
+            {!registerVerificationEmail && (
+              <div className="mb-6 flex w-full items-center justify-center gap-2 text-center text-xs text-text-muted">
+                <span>{tab === 'login' ? 'Ainda não tem uma conta?' : 'Já possui uma conta?'}</span>
+                <button
+                  type="button"
+                  onClick={() => goToAuthMode(tab === 'login' ? 'register' : 'login')}
+                  className="inline-flex min-h-11 items-center font-bold text-tertiary underline decoration-tertiary/30 underline-offset-4 transition hover:decoration-tertiary"
+                >
+                  {tab === 'login' ? 'Criar conta grátis' : 'Entrar agora'}
+                </button>
+              </div>
+            )}
 
-            {tab === 'register' && (
+            {tab === 'register' && !registerVerificationEmail && (
               <div className="relative mb-6 w-full px-2">
                 <div className="absolute left-[20%] right-[20%] top-4 h-px bg-border" />
                 <div
@@ -843,7 +879,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
               </div>
             )}
 
-            {tab === 'register' && pendingReferral && (
+            {tab === 'register' && !registerVerificationEmail && pendingReferral && (
               <p className="w-full mb-3 text-[11px] text-center text-accent bg-accent/10 border border-accent/20 rounded-lg px-3 py-2">
                 Indicação ativa · código{' '}
                 <strong className="tracking-wider">{pendingReferral}</strong>
@@ -851,7 +887,55 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
             )}
 
             <AnimatePresence mode="wait" initial={false}>
-              {tab === 'login' && !loading && !showManualLoginForm && savedAccounts.length > 0 && !authStorage.hasStoredSession() ? (
+              {registerVerificationEmail ? (
+                <motion.div
+                  key="verify-email"
+                  initial={{ opacity: 0, x: 16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -16 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-full space-y-4"
+                >
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-accent/20 bg-accent/10">
+                    <Mail size={26} className="text-accent" />
+                  </div>
+                  <div className="space-y-2 text-center text-[13px] leading-relaxed text-text-muted">
+                    <p>
+                      O link expira em <strong className="text-text-primary">24 horas</strong>. Não esqueça de
+                      checar a pasta de <strong className="text-text-primary">spam</strong>.
+                    </p>
+                    {resendVerificationStatus === 'sent' && (
+                      <p className="font-bold text-success">
+                        Link reenviado! Confira sua caixa de entrada.
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => void handleResendVerification()}
+                      disabled={resendVerificationStatus === 'sending'}
+                      className={primaryBtn}
+                    >
+                      {resendVerificationStatus === 'sending' ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : resendVerificationStatus === 'sent' ? (
+                        'Reenviar novamente'
+                      ) : (
+                        'Reenviar link'
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRegisterVerificationEmail(null)}
+                      className="w-full min-h-12 px-5 rounded-xl border border-border bg-bg text-text-secondary hover:text-text-primary hover:border-border-strong font-black text-xs uppercase tracking-[0.16em] flex items-center justify-center gap-3 transition-colors cursor-pointer"
+                    >
+                      Já confirmei, entrar no painel
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
+                </motion.div>
+              ) : tab === 'login' && !loading && !showManualLoginForm && savedAccounts.length > 0 && !authStorage.hasStoredSession() ? (
                 <motion.div
                   key="account-switcher"
                   initial={{ opacity: 0, x: -16 }}
