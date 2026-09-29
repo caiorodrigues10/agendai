@@ -73,8 +73,8 @@ export const AboutPage: React.FC = () => {
   return (
     <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
       <SeoHead
-        title="Sobre o AgendAI — A tecnologia que protege o vínculo do salão | AgendAI"
-        description="O AgendAI nasceu para devolver tempo ao que importa: olhar no olho, fazer o serviço certo e manter a amizade que sustenta o negócio."
+        title="Sobre a Agenda Já — A tecnologia que protege o vínculo do salão | Agenda Já"
+        description="A Agenda Já nasceu para devolver tempo ao que importa: olhar no olho, fazer o serviço certo e manter a amizade que sustenta o negócio."
         path="/sobre"
         jsonLd={softwareApplicationLd('/sobre')}
       />
@@ -105,7 +105,7 @@ export const AboutPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="text-xs font-bold uppercase tracking-[0.28em] text-accent/90"
               >
-                Sobre o AgendAI
+                Sobre a Agenda Já
               </motion.p>
               <motion.h1
                 initial={{ opacity: 0, y: 22 }}
@@ -124,7 +124,7 @@ export const AboutPage: React.FC = () => {
                 className="mt-8 max-w-xl text-lg font-medium leading-relaxed text-neutral-400 md:text-xl"
               >
                 Em todo salão e barbearia do Brasil existe uma verdade quieta: o cliente não volta
-                só pelo serviço. Volta pela pessoa. O AgendAI nasceu para proteger essa relação —
+                só pelo serviço. Volta pela pessoa. A Agenda Já nasceu para proteger essa relação —
                 tirando o caos do caminho.
               </motion.p>
             </div>
@@ -294,7 +294,7 @@ export const AboutPage: React.FC = () => {
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.28em] text-accent/90">
-                O que o AgendAI faz
+                O que a Agenda Já faz
               </p>
               <h2 className="mt-4 text-4xl font-black tracking-[-0.04em] text-white md:text-6xl">
                 Menos atrito.
@@ -336,7 +336,7 @@ export const AboutPage: React.FC = () => {
                     side: 'left' as const,
                   },
                   {
-                    from: 'AgendAI',
+                    from: 'Agenda Já',
                     text: 'Horário livre. Confirmado. Lembrete amanhã às 20h.',
                     side: 'right' as const,
                   },
@@ -431,7 +431,7 @@ export const AboutPage: React.FC = () => {
                   </span>
                 </h2>
                 <p className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-neutral-400">
-                  O AgendAI não nasceu num pitch de Silicon Valley. Nasceu da observação próxima:
+                  A Agenda Já não nasceu num pitch de Silicon Valley. Nasceu da observação próxima:
                   barbearias e salões onde o profissional é quase da família — e onde o celular
                   ainda era o "sistema".
                 </p>

@@ -12,7 +12,7 @@ const sections = [
   {
     title: '1. Quem somos',
     body: [
-      'O AgendAI é uma plataforma SaaS multi-tenant para gestão de salões de beleza, barbearias e studios — atendimento feminino, masculino ou unissex. Sede em Bebedouro-SP, Brasil.',
+      'A Agenda Já é uma plataforma SaaS multi-tenant para gestão de salões de beleza, barbearias e studios — atendimento feminino, masculino ou unissex. Sede em Bebedouro-SP, Brasil.',
       'Esta política descreve como tratamos dados pessoais em conformidade com a Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018).',
     ],
   },
@@ -21,7 +21,7 @@ const sections = [
     body: [
       'Conta e cadastro: nome, e-mail, telefone, CPF/CNPJ do responsável e dados do estabelecimento (nome, endereço, horários).',
       'Fila e agendamentos: nome, telefone e serviço escolhido — informados pelo cliente ao entrar na fila ou agendar.',
-      'Financeiro e assinatura: dados de pagamento são processados por Mercado Pago e AbacatePay; o AgendAI não armazena número completo de cartão.',
+      'Financeiro e assinatura: dados de pagamento são processados por Mercado Pago e AbacatePay; a Agenda Já não armazena número completo de cartão.',
       'Contato: nome, e-mail, telefone e mensagem enviados pelo formulário de contato — usados apenas para responder.',
     ],
   },
@@ -94,8 +94,8 @@ export const PrivacyPolicyPage: React.FC = () => {
   return (
     <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
       <SeoHead
-        title="Política de Privacidade — LGPD | AgendAI"
-        description="Transparência sobre como o AgendAI trata seus dados. Conformidade com a LGPD, dados isolados por salão e senhas criptografadas."
+        title="Política de Privacidade — LGPD | Agenda Já"
+        description="Transparência sobre como a Agenda Já trata seus dados. Conformidade com a LGPD, dados isolados por salão e senhas criptografadas."
         path="/privacidade"
       />
       <div className="pointer-events-none fixed inset-0 z-0">
@@ -124,7 +124,7 @@ export const PrivacyPolicyPage: React.FC = () => {
               Última atualização: agosto de 2026
             </p>
             <p className="mt-6 text-base leading-relaxed text-neutral-400">
-              Transparência sobre como o AgendAI trata seus dados — alinhado ao que prometemos na
+              Transparência sobre como a Agenda Já trata seus dados — alinhado ao que prometemos na
               plataforma: cada salão é um mundo isolado e seus dados estão protegidos.
             </p>
           </motion.div>

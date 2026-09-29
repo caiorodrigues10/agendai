@@ -1,3 +1,4 @@
+import { BRAND_NAME, BRAND_TITLE_SUFFIX } from '../config/brand';
 import React, { useEffect } from 'react';
 import {
   LuHouse as Home,
@@ -24,7 +25,7 @@ export const NotFoundPage: React.FC = () => {
       document.head.appendChild(robotsMeta);
     }
 
-    document.title = 'Página não encontrada | AgendAI';
+    document.title = `Página não encontrada${BRAND_TITLE_SUFFIX}`;
     robotsMeta.content = 'noindex, nofollow';
 
     return () => {
@@ -43,7 +44,7 @@ export const NotFoundPage: React.FC = () => {
     <SystemStatePage
       code="404"
       title="Página não encontrada"
-      description="Este endereço não existe ou pode ter mudado. Você pode voltar ao início ou seguir para sua área no AgendAI."
+      description={`Este endereço não existe ou pode ter mudado. Você pode voltar ao início ou seguir para sua área na ${BRAND_NAME}.`}
       icon={<SearchX size={36} strokeWidth={1.8} aria-hidden="true" />}
       primaryAction={{
         label: 'Voltar ao início',

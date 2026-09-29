@@ -43,7 +43,7 @@ const CATEGORIES: CategoryDef[] = [
   {
     key: 'MARKETING',
     label: 'Novidades e conteúdo',
-    description: 'Dicas, novidades e conteúdo sobre o AgendAI.',
+    description: 'Dicas, novidades e conteúdo sobre a Agenda Já.',
     examples: ['Como melhorar seu agendamento', 'Novos recursos no painel'],
     canDisable: true,
     icon: Mail,

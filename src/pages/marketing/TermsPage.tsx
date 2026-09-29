@@ -12,21 +12,21 @@ const sections = [
   {
     title: '1. Aceitação dos termos',
     body: [
-      'Estes Termos e Condições de Uso regulam o acesso e a utilização da plataforma AgendAI, serviço SaaS multi-tenant para gestão de salões de beleza, barbearias e studios, com sede em Bebedouro-SP, Brasil.',
+      'Estes Termos e Condições de Uso regulam o acesso e a utilização da plataforma Agenda Já, serviço SaaS multi-tenant para gestão de salões de beleza, barbearias e studios, com sede em Bebedouro-SP, Brasil.',
       'Ao criar uma conta, assinar um plano ou utilizar qualquer funcionalidade da plataforma, você declara que leu, entendeu e concorda com estes termos.',
     ],
   },
   {
     title: '2. Serviço e planos',
     body: [
-      'O AgendAI oferece planos de assinatura mensais e anuais (Essencial e Pro). Qualquer plano começa com 30 dias de Pro completo a partir do cadastro, conforme campanha vigente.',
+      'A Agenda Já oferece planos de assinatura mensais e anuais (Essencial e Pro). Qualquer plano começa com 30 dias de Pro completo a partir do cadastro, conforme campanha vigente.',
       'O valor do plano e a forma de cobrança são informados no momento da assinatura e podem ser alterados mediante comunicação prévia, respeitados os períodos já pagos.',
     ],
   },
   {
     title: '3. Pagamentos',
     body: [
-      'Os pagamentos de assinatura são processados por provedores de pagamento (Mercado Pago, AbacatePay e Asaas). O AgendAI não armazena número completo de cartão.',
+      'Os pagamentos de assinatura são processados por provedores de pagamento (Mercado Pago, AbacatePay e Asaas). A Agenda Já não armazena número completo de cartão.',
       'A não renovação do pagamento pode suspender o acesso à plataforma até a regularização ou o encerramento da assinatura.',
     ],
   },
@@ -35,7 +35,7 @@ const sections = [
     body: [
       'O cancelamento pode ser feito a qualquer momento pelo painel. O acesso permanece ativo até o fim do período já pago.',
       'Se houver período pago e não utilizado, o valor proporcional é devolvido automaticamente com multa de cancelamento de 20% sobre o valor do reembolso. Exemplo: com R$ 150,00 restantes, o reembolso é de R$ 120,00.',
-      'Em caso de reembolso integral (por decisão do suporte ou do AgendAI), não há incidência de multa.',
+      'Em caso de reembolso integral (por decisão do suporte ou da Agenda Já), não há incidência de multa.',
     ],
     list: [
       'Mercado Pago e Asaas: estorno parcial real no valor proporcional com a multa aplicada.',
@@ -59,14 +59,14 @@ const sections = [
   {
     title: '7. Limitação de responsabilidade',
     body: [
-      'O AgendAI envidará esforços para manter o serviço disponível e os dados seguros, mas não se responsabiliza por interrupções decorrentes de manutenção, falhas de terceiros ou casos fortuitos e de força maior.',
+      'A Agenda Já envidará esforços para manter o serviço disponível e os dados seguros, mas não se responsabiliza por interrupções decorrentes de manutenção, falhas de terceiros ou casos fortuitos e de força maior.',
       'Dados de fila, agendamentos e financeiro são de responsabilidade do estabelecimento; recomendamos a guarda de backups próprios.',
     ],
   },
   {
     title: '8. Suspensão e encerramento',
     body: [
-      'O AgendAI pode suspender o acesso temporariamente em caso de inadimplência, uso indevido ou violação destes termos, mediante comunicação.',
+      'A Agenda Já pode suspender o acesso temporariamente em caso de inadimplência, uso indevido ou violação destes termos, mediante comunicação.',
       'O encerramento definitivo pode ocorrer por decisão de qualquer das partes, respeitados os períodos já pagos e o modelo de reembolso previsto.',
     ],
   },
@@ -81,7 +81,7 @@ const sections = [
     title: '10. Contato',
     body: [
       `Dúvidas sobre estes termos ou sobre reembolsos: ${CONTACT_EMAIL}.`,
-      'Ao utilizar o AgendAI, você concorda também com nossa Política de Privacidade.',
+      'Ao utilizar a Agenda Já, você concorda também com nossa Política de Privacidade.',
     ],
   },
 ] as const;
@@ -90,8 +90,8 @@ export const TermsPage: React.FC = () => {
   return (
     <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
       <SeoHead
-        title="Termos e Condições de Uso | AgendAI"
-        description="Regras de uso, pagamento, cancelamento e reembolso da plataforma AgendAI para salões de beleza, barbearias e studios."
+        title="Termos e Condições de Uso | Agenda Já"
+        description="Regras de uso, pagamento, cancelamento e reembolso da plataforma Agenda Já para salões de beleza, barbearias e studios."
         path="/termos"
       />
       <div className="pointer-events-none fixed inset-0 z-0">
@@ -120,7 +120,7 @@ export const TermsPage: React.FC = () => {
               Última atualização: agosto de 2026
             </p>
             <p className="mt-6 text-base leading-relaxed text-neutral-400">
-              As regras de uso, pagamento, cancelamento e reembolso da plataforma AgendAI.
+              As regras de uso, pagamento, cancelamento e reembolso da plataforma Agenda Já.
             </p>
           </motion.div>
 

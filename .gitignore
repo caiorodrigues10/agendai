@@ -41,3 +41,5 @@ graphify-out/202*
 # Playwright artifacts
 test-results/
 playwright-report/
+
+.screenshots-tmp/

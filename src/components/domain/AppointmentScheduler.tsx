@@ -145,7 +145,7 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
     if (!evt) return;
     const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
     const ics = [
-      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//AgendAI//Appointment//PT-BR',
+      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Agenda Já//Appointment//PT-BR',
       'BEGIN:VEVENT', `UID:${Date.now()}@agendai`, `DTSTART:${fmt(evt.start)}`, `DTEND:${fmt(evt.end)}`,
       `SUMMARY:${evt.title}`, `DESCRIPTION:${evt.details}`, `LOCATION:${evt.location}`,
       'END:VEVENT', 'END:VCALENDAR',

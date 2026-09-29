@@ -104,7 +104,7 @@ export const TeamPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Equipe AgendAI</h1>
+        <h1 className="text-xl font-bold">Equipe Agenda Já</h1>
         <button onClick={load} className="p-2 rounded-lg hover:bg-surface-2 text-text-muted"><LuRefreshCcw size={16} /></button>
       </div>
 

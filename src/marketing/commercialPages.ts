@@ -1,3 +1,4 @@
+import { BRAND_NAME } from '../config/brand';
 export interface CommercialFaq {
   question: string;
   answer: string;
@@ -30,8 +31,8 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     h1: 'Software para salão de beleza',
     h1Accent: 'que organiza fila, agenda e caixa.',
     description:
-      'O AgendAI reúne agendamento online, fila digital, pacotes, fiado e comissão num painel feito para o ritmo do salão — sem planilha e sem WhatsApp como sistema.',
-    metaTitle: 'Software para salão de beleza | AgendAI',
+      `A ${BRAND_NAME} reúne agendamento online, fila digital, pacotes, fiado e comissão num painel feito para o ritmo do salão — sem planilha e sem WhatsApp como sistema.`,
+    metaTitle: `Software para salão de beleza | ${BRAND_NAME}`,
     metaDescription:
       'Software para salão de beleza com agenda online, fila digital, CRM, fiado e financeiro. 30 dias de Pro grátis, sem cartão.',
     painTitle: 'O que trava o salão no dia a dia',
@@ -41,7 +42,7 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
       'Cliente some e ninguém percebe; pacote vendido some no papel.',
       'Fiado solto no caderno, sem saldo nem cobrança organizada.',
     ],
-    solutionTitle: 'Como o AgendAI resolve no salão',
+    solutionTitle: `Como a ${BRAND_NAME} resolve no salão`,
     solutions: [
       {
         title: 'Agenda e fila no mesmo fluxo',
@@ -67,7 +68,7 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     ],
     proofTitle: 'Feito para operação, não só para vitrine',
     proofBody:
-      'O AgendAI já cobre fila, agenda, clientes, financeiro e produtos no painel. O teste de 30 dias é o Pro completo, sem cartão. Essencial fica R$ 14/mês; Pro, R$ 20/mês.',
+      `A ${BRAND_NAME} já cobre fila, agenda, clientes, financeiro e produtos no painel. O teste de 30 dias é o Pro completo, sem cartão. Essencial fica R$ 14/mês; Pro, R$ 20/mês.`,
     faqs: [
       {
         question: 'Serve para salão feminino e unissex?',
@@ -101,8 +102,8 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     h1: 'Sistema para barbearia',
     h1Accent: 'com fila digital de verdade.',
     description:
-      'Chega de “quem é o próximo?” na calçada. O AgendAI mostra a fila, o tempo estimado e a agenda do barbeiro no celular — com caixa, fiado e comissão no mesmo lugar.',
-    metaTitle: 'Sistema para barbearia | AgendAI',
+      `Chega de “quem é o próximo?” na calçada. A ${BRAND_NAME} mostra a fila, o tempo estimado e a agenda do barbeiro no celular — com caixa, fiado e comissão no mesmo lugar.`,
+    metaTitle: `Sistema para barbearia | ${BRAND_NAME}`,
     metaDescription:
       'Sistema para barbearia com fila digital, agenda, comissão e financeiro. Organize a espera e o caixa. 30 dias grátis, sem cartão.',
     painTitle: 'Dor típica da barbearia',
@@ -138,7 +139,7 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     ],
     proofTitle: 'Barbearia não precisa de ERP pesado',
     proofBody:
-      'O AgendAI é mobile-first: o barbeiro opera no celular. Trial de 30 dias no Pro, sem cartão. Planos a partir de R$ 14/mês.',
+      `A ${BRAND_NAME} é mobile-first: o barbeiro opera no celular. Trial de 30 dias no Pro, sem cartão. Planos a partir de R$ 14/mês.`,
     faqs: [
       {
         question: 'Funciona se a barbearia só atende por ordem de chegada?',
@@ -173,7 +174,7 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     h1Accent: 'sem forçar ninguém a baixar nada.',
     description:
       'A cliente escolhe serviço, profissional e horário no link do salão. Você vê a agenda num calendário só. No dia, o horário vira fila — sem telefonema e sem horário duplicado.',
-    metaTitle: 'App para agendamento de salão | AgendAI',
+    metaTitle: `App para agendamento de salão | ${BRAND_NAME}`,
     metaDescription:
       'App para agendamento de salão pelo link público: horários livres, profissional, check-in na fila e lembretes. 30 dias grátis.',
     painTitle: 'Por que o telefone não escala',
@@ -214,7 +215,7 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
       {
         question: 'É um aplicativo da App Store?',
         answer:
-          'Para a cliente, não precisa. Ela agenda no navegador. A equipe pode instalar o AgendAI como PWA no celular, com atalho para fila e agenda.',
+          `Para a cliente, não precisa. Ela agenda no navegador. A equipe pode instalar a ${BRAND_NAME} como PWA no celular, com atalho para fila e agenda.`,
       },
       {
         question: 'Posso limitar até quando a cliente marca?',
@@ -244,7 +245,7 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     h1Accent: 'para parar de perder cliente na porta.',
     description:
       'O cliente entra na fila pelo celular, vê a posição e espera sentado — não na calçada. Você chama na ordem, mede a espera e fecha o atendimento com pagamento na hora.',
-    metaTitle: 'Sistema para fila de barbearia | AgendAI',
+    metaTitle: `Sistema para fila de barbearia | ${BRAND_NAME}`,
     metaDescription:
       'Sistema para fila de barbearia: posição na espera, check-in, tempo estimado e caixa no mesmo painel. 30 dias grátis sem cartão.',
     painTitle: 'Fila na rua custa movimento',
@@ -280,7 +281,7 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     ],
     proofTitle: 'A fila é o produto, não um extra',
     proofBody:
-      'O AgendAI nasceu da operação de espera. Agenda, CRM e financeiro entram em volta da fila — não o contrário. 30 dias de Pro, sem cartão.',
+      `A ${BRAND_NAME} nasceu da operação de espera. Agenda, CRM e financeiro entram em volta da fila — não o contrário. 30 dias de Pro, sem cartão.`,
     faqs: [
       {
         question: 'O cliente precisa ficar com o site aberto?',
@@ -314,8 +315,8 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     h1: 'Sistema para salão de beleza',
     h1Accent: 'que a cliente acessa pelo celular.',
     description:
-      'O AgendAI é um sistema completo para salão de beleza: agenda online, fila digital, pacotes, fiado e comissão — tudo num link público que a cliente abre no navegador.',
-    metaTitle: 'Sistema para salão de beleza | AgendAI',
+      `A ${BRAND_NAME} é um sistema completo para salão de beleza: agenda online, fila digital, pacotes, fiado e comissão — tudo num link público que a cliente abre no navegador.`,
+    metaTitle: `Sistema para salão de beleza | ${BRAND_NAME}`,
     metaDescription:
       'Sistema para salão de beleza com agenda online, fila digital, pacotes, fiado e comissão. 30 dias de Pro grátis, sem cartão.',
     painTitle: 'Salão de beleza perde o controle no WhatsApp',
@@ -351,7 +352,7 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     ],
     proofTitle: 'Feito para salão, não para escritório',
     proofBody:
-      'O AgendAI já cobre fila, agenda, clientes, financeiro e produtos. 30 dias de Pro completo, sem cartão. Essencial fica R$ 14/mês; Pro, R$ 20/mês.',
+      'A Agenda Já já cobre fila, agenda, clientes, financeiro e produtos. 30 dias de Pro completo, sem cartão. Essencial fica R$ 14/mês; Pro, R$ 20/mês.',
     faqs: [
       {
         question: 'Precisa instalar alguma coisa?',
@@ -378,8 +379,8 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     h1: 'Sistema para manicure',
     h1Accent: 'que agenda sem WhatsApp.',
     description:
-      'O AgendAI organiza a agenda da manicure com link público, lembrete automático e controle de pacotes. A cliente marca sozinha, sem ligar.',
-    metaTitle: 'Sistema para manicure | AgendAI',
+      'A Agenda Já organiza a agenda da manicure com link público, lembrete automático e controle de pacotes. A cliente marca sozinha, sem ligar.',
+    metaTitle: 'Sistema para manicure | Agenda Já',
     metaDescription:
       'Sistema para manicure com agenda online, lembrete por WhatsApp, pacotes e fiado. 30 dias grátis sem cartão.',
     painTitle: 'Manicure perde cliente por falta de organização',
@@ -438,8 +439,8 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     h1: 'Sistema para lash designer',
     h1Accent: 'com agenda que respeita o tempo.',
     description:
-      'O AgendAI agenda extensão de cílios com duração real, lembrete automático e controle de manutenção. A cliente marca sem ligar.',
-    metaTitle: 'Sistema para lash designer | AgendAI',
+      'A Agenda Já agenda extensão de cílios com duração real, lembrete automático e controle de manutenção. A cliente marca sem ligar.',
+    metaTitle: 'Sistema para lash designer | Agenda Já',
     metaDescription:
       'Sistema para lash designer com agenda online, manutenção programada, lembrete e pacotes. 30 dias grátis.',
     painTitle: 'Lash designer perde agendamento no WhatsApp',
@@ -498,8 +499,8 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     h1: 'CRM para salão de beleza',
     h1Accent: 'que lembra quem está sumindo.',
     description:
-      'O AgendAI mostra última visita, frequência, valor total e risco de evasão de cada cliente. Você retoma o contato sem exportar planilha.',
-    metaTitle: 'CRM para salão de beleza | AgendAI',
+      'A Agenda Já mostra última visita, frequência, valor total e risco de evasão de cada cliente. Você retoma o contato sem exportar planilha.',
+    metaTitle: 'CRM para salão de beleza | Agenda Já',
     metaDescription:
       'CRM para salão de beleza: histórico do cliente, frequência, pacotes, fiado e retorno automático. 30 dias grátis.',
     painTitle: 'Salão perde cliente sem perceber',
@@ -535,7 +536,7 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     ],
     proofTitle: 'Dado que estava no WhatsApp vira decisão',
     proofBody:
-      'O CRM do AgendAI é alimentado automaticamente pela operação. 30 dias de Pro, sem cartão.',
+      'O CRM da Agenda Já é alimentado automaticamente pela operação. 30 dias de Pro, sem cartão.',
     faqs: [
       {
         question: 'Preciso cadastrar os clientes?',
@@ -558,8 +559,8 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     h1: 'Controle financeiro para salão',
     h1Accent: 'sem planilha e sem surpresa.',
     description:
-      'O AgendAI mostra entradas, despesas, fiado e lucro líquido em tempo real. Você vê o resultado do dia sem abrir planilha.',
-    metaTitle: 'Controle financeiro para salão | AgendAI',
+      'A Agenda Já mostra entradas, despesas, fiado e lucro líquido em tempo real. Você vê o resultado do dia sem abrir planilha.',
+    metaTitle: 'Controle financeiro para salão | Agenda Já',
     metaDescription:
       'Controle financeiro para salão: entradas, despesas, fiado e lucro em tempo real. 30 dias de Pro grátis, sem cartão.',
     painTitle: 'Salão não sabe quanto lucra de verdade',

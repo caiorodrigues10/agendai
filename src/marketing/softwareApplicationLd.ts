@@ -1,10 +1,11 @@
+import { BRAND_NAME } from '../config/brand';
 import { canonicalUrl } from './siteUrl';
 
 export function softwareApplicationLd(path = '/') {
   return {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'AgendAI',
+    name: `${BRAND_NAME}`,
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
     url: canonicalUrl(path),
@@ -18,7 +19,7 @@ export function softwareApplicationLd(path = '/') {
     },
     publisher: {
       '@type': 'Organization',
-      name: 'AgendAI',
+      name: `${BRAND_NAME}`,
       url: canonicalUrl('/'),
     },
   };

@@ -1,4 +1,4 @@
-/** Unwrap `{ success, data }` envelopes used by the AgendAI API. */
+/** Unwrap `{ success, data }` envelopes used by the Agenda Já API. */
 export function unwrapData<T>(res: unknown): T {
   if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
   return res as T;

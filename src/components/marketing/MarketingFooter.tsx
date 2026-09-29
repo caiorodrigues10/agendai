@@ -1,3 +1,4 @@
+import { BRAND_NAME } from '../../config/brand';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Logo } from '../ui/Logo';
@@ -78,7 +79,7 @@ export const MarketingFooter: React.FC = () => {
             <ol className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
               <li>
                 <Link to="/" className="transition-colors hover:text-neutral-300">
-                  AgendAI
+                  {BRAND_NAME}
                 </Link>
               </li>
               <li aria-hidden className="text-neutral-700">
@@ -124,7 +125,7 @@ export const MarketingFooter: React.FC = () => {
         </div>
 
         <div className="flex flex-col gap-4 pt-7 text-[11px] font-medium leading-relaxed text-neutral-600 md:flex-row md:items-center md:justify-between md:text-[12px]">
-          <p>Copyright © {year} AgendAI. Todos os direitos reservados.</p>
+          <p>Copyright © {year} {BRAND_NAME}. Todos os direitos reservados.</p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <span>Brasil</span>
             <span className="hidden text-neutral-700 sm:inline" aria-hidden>

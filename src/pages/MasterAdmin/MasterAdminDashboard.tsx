@@ -1,3 +1,4 @@
+import { BRAND_NAME_UPPER } from '../../config/brand';
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -1695,7 +1696,7 @@ export const MasterAdminDashboard: React.FC = () => {
               Master Admin
             </p>
             <p className="text-[10px] text-accent/70 uppercase tracking-widest mt-0.5">
-              AGENDAI Master
+              {BRAND_NAME_UPPER} Master
             </p>
           </div>
         </div>

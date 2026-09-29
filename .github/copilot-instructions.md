@@ -1,4 +1,4 @@
-# GitHub Copilot — AgendAI Frontend
+# GitHub Copilot — Agenda Já Frontend
 
 Leia e siga **AGENTS.md** na raiz deste repositório (`agendai/`).
 

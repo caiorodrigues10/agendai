@@ -17,7 +17,7 @@ export const CommercialIntentPage: React.FC = () => {
   if (!page) return <Navigate to="/" replace />;
 
   const jsonLd = [softwareApplicationLd(page.path), faqPageLd(page.faqs), breadcrumbLd([
-    { name: 'AgendAI', path: '/' },
+    { name: 'Agenda Já', path: '/' },
     { name: page.eyebrow, path: page.path },
   ])];
 

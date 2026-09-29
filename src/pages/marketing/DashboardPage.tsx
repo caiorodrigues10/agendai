@@ -39,7 +39,7 @@ export const DashboardPage: React.FC = () => {
   return (
     <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
       <SeoHead
-        title="Dashboard e relatórios — Visão de dono em tempo real | AgendAI"
+        title="Dashboard e relatórios — Visão de dono em tempo real | Agenda Já"
         description="Faturamento, ticket médio, comissão e produtividade da equipe em tempo real. Insights de movimento e financeiro no painel Pro."
         path="/dashboard"
         jsonLd={softwareApplicationLd('/dashboard')}

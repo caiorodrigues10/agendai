@@ -1,3 +1,4 @@
+import { BRAND_NAME } from '../config/brand';
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
@@ -655,7 +656,7 @@ export const LandingPage: React.FC = () => {
       className="min-h-screen overflow-x-hidden bg-[#050706] font-sans text-neutral-100 selection:bg-emerald-400/30"
     >
       <SeoHead
-        title="AgendAI — Fila, agenda e financeiro para salão e barbearia"
+        title={`${BRAND_NAME} — Fila, agenda e financeiro para salão e barbearia`}
         description="Fila digital com estimativa de espera, agendamento online 24h e financeiro no mesmo painel. 30 dias de Pro grátis, sem cartão."
         path="/"
         jsonLd={softwareApplicationLd('/')}
@@ -1637,7 +1638,7 @@ export const LandingPage: React.FC = () => {
                   Decisões com contexto, não achismo.
                 </h2>
                 <p className="mt-6 max-w-2xl text-base font-medium leading-relaxed text-emerald-950/75 sm:mt-8 sm:text-xl md:text-2xl">
-                  Acompanhe movimento, tempo de espera e resultado financeiro. A AgendAI transforma
+                  Acompanhe movimento, tempo de espera e resultado financeiro. A {BRAND_NAME} transforma
                   a rotina do estabelecimento em uma visão simples para agir.
                 </p>
 
@@ -1848,7 +1849,7 @@ export const LandingPage: React.FC = () => {
                 O clima muda. Seu planejamento também.
               </h2>
               <p className="mt-5 max-w-2xl text-base font-medium leading-relaxed text-neutral-400 sm:mt-6 sm:text-lg md:text-xl">
-                O AgendAI cruza dados climáticos com o histórico do seu salão para prever
+                A {BRAND_NAME} cruza dados climáticos com o histórico do seu salão para prever
                 quando a demanda vai cair — e o que fazer antes que aconteça.
               </p>
             </div>

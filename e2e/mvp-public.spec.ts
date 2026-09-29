@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 import { expect, test } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {

@@ -411,7 +411,7 @@ export const AiPredictivePage: React.FC = () => {
       className="min-h-screen bg-black text-neutral-100 selection:bg-accent/30 font-sans overflow-x-hidden"
     >
       <SeoHead
-        title="IA Preditiva — Previsão de demanda e risco de cancelamento | AgendAI"
+        title="IA Preditiva — Previsão de demanda e risco de cancelamento | Agenda Já"
         description="Inteligência artificial que prevê quedas de demanda, risco de cancelamento e melhores horários para o salão. 30 dias de Pro grátis."
         path="/ia-preditiva"
         jsonLd={softwareApplicationLd('/ia-preditiva')}

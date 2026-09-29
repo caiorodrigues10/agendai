@@ -139,7 +139,7 @@ export const ShowcasePublicPage: React.FC = () => {
                 Agendar
               </a>
               <a
-                href={`https://wa.me/?text=${encodeURIComponent(`Olá! Vi seu resultado no AgendAI e queria agendar.`)}`}
+                href={`https://wa.me/?text=${encodeURIComponent(`Olá! Vi seu resultado na Agenda Já e queria agendar.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={handleWhatsAppClick}

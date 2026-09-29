@@ -101,7 +101,7 @@ export const ContactPage: React.FC = () => {
   return (
     <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
       <SeoHead
-        title="Contato — Fale com a equipe AgendAI | AgendAI"
+        title="Contato — Fale com a equipe Agenda Já | Agenda Já"
         description="Planos, suporte ou parceria — envie sua mensagem e receba retorno em 1 dia útil. Sem mailto, sem caixa de spam perdida."
         path="/contato"
       />
@@ -138,7 +138,7 @@ export const ContactPage: React.FC = () => {
               transition={{ delay: 0.1 }}
               className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-neutral-400"
             >
-              Planos, suporte ou parceria — a mensagem cai no painel da equipe AgendAI. Sem mailto,
+              Planos, suporte ou parceria — a mensagem cai no painel da equipe Agenda Já. Sem mailto,
               sem caixa de spam perdida.
             </motion.p>
           </div>

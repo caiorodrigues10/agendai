@@ -15,7 +15,7 @@ vi.mock('../contexts/AuthContext', () => ({
 }));
 
 vi.mock('../components/marketing/MarketingNav', () => ({
-  MarketingNav: () => <nav data-testid="marketing-nav">AgendAI</nav>,
+  MarketingNav: () => <nav data-testid="marketing-nav">Agenda Já</nav>,
 }));
 
 vi.mock('../components/marketing/MarketingFooter', () => ({

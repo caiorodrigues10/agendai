@@ -1,4 +1,5 @@
 /* eslint-disable jsx-a11y/media-has-caption -- mídia enviada pelo salão não possui trilha de legenda separada */
+import { BRAND_NAME_UPPER } from '../../config/brand';
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShopSettings, FeedPost, StaffMember, Service, DaySchedule } from '../../types';
@@ -511,7 +512,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
 
       {isPublic && (
         <p className="text-center text-[10px] font-bold tracking-[0.25em] text-text-muted pt-1">
-          AGENDAI
+          {BRAND_NAME_UPPER}
         </p>
       )}
       <ConfirmDialog

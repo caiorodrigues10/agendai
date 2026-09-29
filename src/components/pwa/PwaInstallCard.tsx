@@ -68,7 +68,7 @@ export const PwaInstallCard: React.FC<PwaInstallCardProps> = ({
                     <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#00c2b3] font-black text-[#0a0f18] shadow-lg">
                       AI
                     </div>
-                    <p className="mt-5 text-2xl font-black leading-tight">AgendAI na tela inicial</p>
+                    <p className="mt-5 text-2xl font-black leading-tight">Agenda Já na tela inicial</p>
                     <p className="mt-2 text-sm leading-relaxed text-white/60">
                       Um guia visual curto, pronto para receber o vídeo vertical de instalação.
                     </p>
@@ -116,7 +116,7 @@ export const PwaInstallCard: React.FC<PwaInstallCardProps> = ({
                 : 'mt-3 text-sm leading-relaxed text-text-secondary'
             }
           >
-            Instale o AgendAI direto pelo navegador. Ele abre em tela cheia e fica junto dos outros
+            Instale a Agenda Já direto pelo navegador. Ele abre em tela cheia e fica junto dos outros
             aplicativos, sem depender de loja.
           </p>
 
@@ -149,7 +149,7 @@ export const PwaInstallCard: React.FC<PwaInstallCardProps> = ({
           <div className={marketing ? 'mt-8' : 'mt-4'}>
             {isInstalled ? (
               <p className="inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-2 text-sm font-bold text-accent">
-                <CheckCircle2 size={17} /> AgendAI já está instalado
+                <CheckCircle2 size={17} /> Agenda Já está instalada
               </p>
             ) : canInstall ? (
               <button
@@ -163,7 +163,7 @@ export const PwaInstallCard: React.FC<PwaInstallCardProps> = ({
                 }
               >
                 {installing ? <Loader2 className="animate-spin" size={17} /> : <Download size={17} />}
-                Instalar AgendAI
+                Instalar Agenda Já
               </button>
             ) : (
               <p className={marketing ? 'text-sm leading-relaxed text-white/60' : 'text-xs leading-relaxed text-text-muted'}>

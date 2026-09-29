@@ -1,6 +1,6 @@
-# AgendAI — Frontend
+# Agenda Já — Frontend
 
-SPA React + Vite do AgendAI.
+SPA React + Vite da Agenda Já.
 
 > **Manual para IAs e contribuidores:** [`AGENTS.md`](./AGENTS.md) · inventários em [`docs/agents/`](./docs/agents/)
 

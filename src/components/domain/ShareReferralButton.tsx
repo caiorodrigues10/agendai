@@ -17,7 +17,7 @@ export const ShareReferralButton: React.FC<ShareReferralButtonProps> = ({
     try {
       if (navigator.share) {
         await navigator.share({
-          title: 'Indique o AGENDAI',
+          title: 'Indique a Agenda Já',
           text: shareText,
           url: shareUrl,
         });

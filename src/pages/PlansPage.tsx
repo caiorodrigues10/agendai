@@ -145,7 +145,7 @@ export const PlansPage: React.FC = () => {
   return (
     <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
       <SeoHead
-        title="Planos e preços — Essencial e Pro | AgendAI"
+        title="Planos e preços — Essencial e Pro | Agenda Já"
         description="Fila digital, agenda online e equipe ilimitada a partir de R$ 14/mês. 30 dias de Pro grátis, sem cartão. Anual com 2 meses grátis."
         path="/planos"
         jsonLd={softwareApplicationLd('/planos')}

@@ -35,7 +35,7 @@ export const PublicLinkPanel: React.FC<PublicLinkPanelProps> = ({ barbershopId, 
   const handleShare = async (id: string, label: string, url: string) => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: `${label} — AgendAI`, text: `Acesse ${label.toLowerCase()}`, url });
+        await navigator.share({ title: `${label} — Agenda Já`, text: `Acesse ${label.toLowerCase()}`, url });
         return;
       } catch {
         return;

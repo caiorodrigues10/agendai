@@ -1,3 +1,4 @@
+import { BRAND_NAME } from './src/config/brand';
 import path from 'path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -33,8 +34,8 @@ export default defineConfig(() => {
 				],
 				manifest: {
 					id: '/',
-					name: 'AgendAI — Gestão para salões, barbearias e studios',
-					short_name: 'AgendAI',
+					name: `${BRAND_NAME} — Gestão para salões, barbearias e studios`,
+					short_name: BRAND_NAME,
 					description:
 						'Fila digital, agenda, clientes e gestão do salão em uma experiência mobile-first.',
 					lang: 'pt-BR',

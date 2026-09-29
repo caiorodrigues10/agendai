@@ -1,4 +1,4 @@
-# AGENTS.md — AgendAI Frontend
+# AGENTS.md — Agenda Já Frontend
 
 > **Ponto de entrada obrigatório** para qualquer IA neste repositório (`agendai/`).
 > Este manual é autossuficiente: não depende da pasta externa do monorepo para entender o frontend.
@@ -23,7 +23,7 @@
 
 ## 1. O que é este app
 
-SPA **React 18 + Vite 6 + TypeScript** do SaaS AgendAI (salões/barbearias/studios). Painel staff, fila/agenda pública, checkout de assinatura, master admin.
+SPA **React 18 + Vite 6 + TypeScript** do SaaS Agenda Já (salões/barbearias/studios). Painel staff, fila/agenda pública, checkout de assinatura, master admin.
 
 Stack resumida: React Router 6, Tailwind CSS v4, Framer Motion, Zod, react-hook-form, Vitest, Playwright. Estado global = Context API (sem Redux/React Query).
 
