@@ -23,8 +23,10 @@ import { FloatingPathsBackground } from '../components/ui/floating-paths';
 import { trialCampaign } from '../marketing/trialCampaign';
 import { softwareApplicationLd } from '../marketing/softwareApplicationLd';
 import { getWeatherVisual } from '../utils/weatherVisuals';
+import { registerScrollTrigger } from '../components/infra/scrollTriggerRuntime';
 
 gsap.registerPlugin(ScrollTrigger);
+registerScrollTrigger(ScrollTrigger);
 
 const marqueeItems = [
   'Fila digital',
@@ -1890,6 +1892,10 @@ export const LandingPage: React.FC = () => {
                       <img
                         src={visual.image}
                         alt=""
+                        loading="lazy"
+                        decoding="async"
+                        width={480}
+                        height={720}
                         className={`weather-image weather-image--${visual.effect} absolute inset-0 h-full w-full object-cover`}
                       />
                       <span aria-hidden="true" className={`weather-effect weather-effect--${visual.effect}`} />

@@ -1,9 +1,6 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
+import { refreshScrollTrigger } from './scrollTriggerRuntime';
 
 function jumpToTop() {
   const html = document.documentElement;
@@ -60,7 +57,7 @@ export function ScrollToTop() {
   useEffect(() => {
     if (hash) {
       skipReset.current = false;
-      const id = requestAnimationFrame(() => ScrollTrigger.refresh());
+      const id = requestAnimationFrame(() => refreshScrollTrigger());
       return () => cancelAnimationFrame(id);
     }
 
@@ -72,11 +69,11 @@ export function ScrollToTop() {
     jumpToTop();
     const raf = requestAnimationFrame(() => {
       jumpToTop();
-      ScrollTrigger.refresh();
+      refreshScrollTrigger();
     });
     const timer = window.setTimeout(() => {
       jumpToTop();
-      ScrollTrigger.refresh();
+      refreshScrollTrigger();
     }, 50);
 
     return () => {

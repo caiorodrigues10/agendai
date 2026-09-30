@@ -208,6 +208,10 @@ export const ShowcasePublicPage: React.FC = () => {
                   <img
                     src={entry.mediaUrl}
                     alt={entry.altText || entry.title}
+                    loading="lazy"
+                    decoding="async"
+                    width={1080}
+                    height={1080}
                     className="h-full w-full object-cover transition-transform group-hover:scale-105"
                   />
                 )}

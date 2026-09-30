@@ -26,8 +26,10 @@ import { MarketingNav } from '../../components/marketing/MarketingNav';
 import { MarketingFooter } from '../../components/marketing/MarketingFooter';
 import { SeoHead } from '../../components/marketing/SeoHead';
 import { softwareApplicationLd } from '../../marketing/softwareApplicationLd';
+import { registerScrollTrigger } from '../../components/infra/scrollTriggerRuntime';
 
 gsap.registerPlugin(ScrollTrigger);
+registerScrollTrigger(ScrollTrigger);
 
 const PhoneMockup = ({ children }: { children: React.ReactNode }) => (
   <div className="relative mx-auto w-[280px] h-[560px] rounded-[3rem] border-[3px] border-neutral-700 bg-neutral-950 shadow-[0_0_80px_rgba(16,185,129,0.2)] overflow-hidden">

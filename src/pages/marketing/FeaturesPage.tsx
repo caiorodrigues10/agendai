@@ -30,8 +30,10 @@ import { MarketingFooter } from '../../components/marketing/MarketingFooter';
 import { SeoHead } from '../../components/marketing/SeoHead';
 import { trialCampaign } from '../../marketing/trialCampaign';
 import { softwareApplicationLd } from '../../marketing/softwareApplicationLd';
+import { registerScrollTrigger } from '../../components/infra/scrollTriggerRuntime';
 
 gsap.registerPlugin(ScrollTrigger);
+registerScrollTrigger(ScrollTrigger);
 
 const PainSolution = ({
   pain,

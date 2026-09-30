@@ -30,7 +30,6 @@ export default defineConfig(() => {
 					'favicon.png',
 					'brand/*.png',
 					'icons/*.png',
-					'screenshots/*.png',
 				],
 				manifest: {
 					id: '/',

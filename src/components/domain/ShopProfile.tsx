@@ -451,7 +451,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
               )}
             </div>
             {post.imageUrl && (
-              <img src={post.imageUrl} alt="" className="w-full aspect-square object-cover bg-bg" />
+              <img src={post.imageUrl} alt="" loading="lazy" decoding="async" width={1080} height={1080} className="w-full aspect-square object-cover bg-bg" />
             )}
             {post.videoUrl && !post.imageUrl && (
               <video src={post.videoUrl} className="w-full aspect-square object-cover bg-bg" controls />

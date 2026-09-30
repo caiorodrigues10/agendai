@@ -280,7 +280,7 @@ export const ShowcasePanel: React.FC = () => {
                 {entry.mediaType?.startsWith('video') ? (
                   <div className="flex h-full items-center justify-center"><Film size={16} className="text-text-muted" /></div>
                 ) : entry.mediaUrl ? (
-                  <img src={entry.mediaUrl} alt={entry.altText || entry.title} className="h-full w-full object-cover" />
+                  <img src={entry.mediaUrl} alt={entry.altText || entry.title} loading="lazy" decoding="async" width={48} height={48} className="h-full w-full object-cover" />
                 ) : (
                   <div className="flex h-full items-center justify-center"><ImageIcon size={16} className="text-text-muted" /></div>
                 )}

@@ -220,7 +220,7 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
               key={date}
               className="group relative overflow-hidden rounded-2xl border border-white/10 bg-bg text-left shadow-lg transition-transform duration-200 hover:scale-[1.03]"
             >
-              <img src={visual.image} alt="" className={`weather-image weather-image--${visual.effect} absolute inset-0 h-full w-full object-cover`} />
+              <img src={visual.image} alt="" loading="lazy" decoding="async" width={480} height={720} className={`weather-image weather-image--${visual.effect} absolute inset-0 h-full w-full object-cover`} />
               <span aria-hidden="true" className={`weather-effect weather-effect--${visual.effect}`} />
               <div className="absolute inset-0 z-[2] bg-gradient-to-b from-black/10 via-black/30 to-black/80" />
               <div className="relative z-10 flex flex-col p-3">

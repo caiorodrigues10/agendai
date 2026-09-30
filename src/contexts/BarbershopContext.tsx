@@ -92,63 +92,61 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
       setFeed([]);
 
       try {
-        const servicesData = await barbershopApi.listServices(barbershopId);
+        const settle = <T,>(promise: Promise<T>, message: string, fallback: T): Promise<T> =>
+          promise.catch(e => {
+            logger.error(message, e);
+            return fallback;
+          });
+
+        const [servicesData, staffData, feedData, shopData, scheduleData] = await Promise.all([
+          settle(barbershopApi.listServices(barbershopId), 'Falha ao carregar serviços', []),
+          settle(barbershopApi.listStaff(barbershopId), 'Falha ao carregar equipe', []),
+          settle(barbershopApi.listFeed(barbershopId), 'Falha ao carregar feed', []),
+          settle(
+            barbershopApi.getBarbershop(barbershopId) as Promise<{
+              name?: string;
+              whatsapp?: string;
+              address?: string | null;
+              city?: string | null;
+              logoUrl?: string | null;
+              latitude?: number | null;
+              longitude?: number | null;
+              operationMode?: OperationMode;
+              openingMode?: OpeningMode;
+              businessSegment?: import('../types').BusinessSegment;
+              manualStatus?: ManualShopStatus;
+              openState?: ShopOpenState;
+            } | null>,
+            'Falha ao carregar configurações do salão',
+            null
+          ),
+          settle(
+            barbershopApi.getSchedule(barbershopId) as Promise<
+              | { dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }[]
+              | {
+                  schedule?: {
+                    dayOfWeek: number;
+                    isOpen: boolean;
+                    openTime: string;
+                    closeTime: string;
+                  }[];
+                }
+              | null
+            >,
+            'Falha ao carregar horários',
+            null
+          ),
+        ]);
+
         setServices(Array.isArray(servicesData) ? (servicesData as Service[]) : []);
-      } catch (e) {
-        logger.error('Falha ao carregar serviços', e);
-        setServices([]);
-      }
-
-      try {
-        const staffData = await barbershopApi.listStaff(barbershopId);
-        setStaff(Array.isArray(staffData) ? (staffData as Record<string, unknown>[]).map(mapStaffFromApi) : []);
-      } catch (e) {
-        logger.error('Falha ao carregar equipe', e);
-        setStaff([]);
-      }
-
-      try {
-        const feedData = await barbershopApi.listFeed(barbershopId);
+        setStaff(
+          Array.isArray(staffData) ? (staffData as Record<string, unknown>[]).map(mapStaffFromApi) : []
+        );
         setFeed(Array.isArray(feedData) ? (feedData as FeedPost[]) : []);
-      } catch (e) {
-        logger.error('Falha ao carregar feed', e);
-        setFeed([]);
-      }
 
-      try {
-        const shopData = (await barbershopApi.getBarbershop(barbershopId)) as {
-          name?: string;
-          whatsapp?: string;
-          address?: string | null;
-          city?: string | null;
-          logoUrl?: string | null;
-          latitude?: number | null;
-          longitude?: number | null;
-          operationMode?: OperationMode;
-          openingMode?: OpeningMode;
-          businessSegment?: import('../types').BusinessSegment;
-          manualStatus?: ManualShopStatus;
-          openState?: ShopOpenState;
-        } | null;
-        let schedule = mapScheduleFromApi(null);
-        try {
-          const scheduleData = (await barbershopApi.getSchedule(barbershopId)) as
-            | { dayOfWeek: number; isOpen: boolean; openTime: string; closeTime: string }[]
-            | {
-                schedule?: {
-                  dayOfWeek: number;
-                  isOpen: boolean;
-                  openTime: string;
-                  closeTime: string;
-                }[];
-              }
-            | null;
-          schedule = mapScheduleFromApi(
-            Array.isArray(scheduleData) ? scheduleData : scheduleData?.schedule
-          );
-        } catch (e) {
-          logger.error('Falha ao carregar horários', e);
-        }
+        const schedule = mapScheduleFromApi(
+          Array.isArray(scheduleData) ? scheduleData : scheduleData?.schedule
+        );
 
         if (shopData) {
           setSettingsState({
@@ -170,7 +168,10 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
           setSettingsState(null);
         }
       } catch (e) {
-        logger.error('Falha ao carregar configurações do salão', e);
+        logger.error('Falha ao carregar dados do salão', e);
+        setServices([]);
+        setStaff([]);
+        setFeed([]);
         setSettingsState(null);
       }
 
