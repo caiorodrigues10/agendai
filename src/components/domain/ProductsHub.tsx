@@ -92,7 +92,7 @@ export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'succes
       )}
 
       {tab === 'catalog' && (canView || canManage) && (
-        <ProductCatalogPanel canManage={canManage} canView={canView} canSeeCost={canSeeCost} loadError={error} onNotify={onNotify} onReload={reload} />
+        <ProductCatalogPanel canManage={canManage} canView={canView} canSeeCost={canSeeCost} loadError={error} onNotify={onNotify} onReload={reload} onGoReservations={() => setTab('reservations')} />
       )}
       {tab === 'stock' && canInventory && (
         <ProductStockPanel loadError={error} onNotify={onNotify} onReload={reload} />

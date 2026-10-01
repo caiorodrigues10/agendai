@@ -8,8 +8,11 @@ import { ConfirmDialog } from '../../ui/ConfirmDialog';
 import { ProductFormModal } from './ProductFormModal';
 import { CatalogTemplateModal } from './CatalogTemplateModal';
 import { PRODUCT_PURPOSE_SHORT, productMoney } from './productMoney';
-import { formatStockQty, isLowStock, formatDateOnlyBR } from './productStock';
-import { LuPackage as Package, LuClock as Clock, LuTriangleAlert as AlertTriangle, LuPencil as Pencil, LuTrash2 as Trash2 } from 'react-icons/lu';
+import { formatStockQty, isLowStock } from './productStock';
+import { formatBrPhone } from '../../../utils/phoneDisplay';
+import { normalizePhoneBR } from '../../../utils/documentUtils';
+import { formatDateTimeBR } from '../../../utils/formatters';
+import { LuPackage as Package, LuClock as Clock, LuTriangleAlert as AlertTriangle, LuPencil as Pencil, LuTrash2 as Trash2, LuBookmark as Bookmark, LuChevronDown as ChevronDown, LuChevronUp as ChevronUp, LuMessageCircle as MessageCircle } from 'react-icons/lu';
 
 const SEGMENTS: Record<BusinessSegment, string> = {
   BARBERSHOP: 'Barbearia',
@@ -44,9 +47,11 @@ interface Props {
   loadError: string | null;
   onNotify?: (message: string, type?: 'success' | 'error') => void;
   onReload: () => void;
+  /** Atalho "Ver todas" → aba Reservas do ProductsHub. */
+  onGoReservations?: () => void;
 }
 
-export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSeeCost, loadError, onNotify, onReload }) => {
+export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSeeCost, loadError, onNotify, onReload, onGoReservations }) => {
   const { user } = useAuth();
   const { settings } = useBarbershop();
   const barbershopId = user?.barbershopId;
@@ -64,6 +69,7 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
   const [templateOpen, setTemplateOpen] = useState(false);
   const [confirmToggle, setConfirmToggle] = useState<Product | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Product | null>(null);
+  const [openReservations, setOpenReservations] = useState<string | null>(null);
   const limit = 30;
   const purposeMeta = PURPOSE_META[catalogPurpose];
 
@@ -207,6 +213,7 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
                           {PRODUCT_PURPOSE_SHORT.BOTH}
                         </span>
                       )}
+                      <ReservedBadge product={product} />
                       {isLowStock(product) && (
                         <span className="inline-flex items-center gap-0.5 rounded-lg border border-warning/30 bg-warning/10 px-2 py-0.5 text-[10px] font-bold text-warning">
                           <AlertTriangle size={10} /> estoque baixo
@@ -229,10 +236,17 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
                       {product.minStock > 0 ? ` · mín ${product.minStock}` : ''}
                       {canSeeCost && product.averageCost != null ? ` · custo ${productMoney.format(product.averageCost)}` : ''}
                     </p>
+                    <ReservedSummary product={product} />
                     {product.category?.name && <p className="text-xs text-text-secondary">{product.category.name}</p>}
                   </div>
                 </div>
               </button>
+              <ReservationsBlock
+                product={product}
+                open={openReservations === product.id}
+                onToggle={() => setOpenReservations(prev => (prev === product.id ? null : product.id))}
+                onGoReservations={onGoReservations}
+              />
               {canManage && (
                 <div className="mt-2 flex items-center gap-3 border-t border-border pt-2">
                   <button
@@ -321,3 +335,77 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
     </div>
   );
 };
+
+function ReservedBadge({ product }: { product: Product }) {
+  const reservedQty = product.reservedQty ?? 0;
+  if (reservedQty <= 0) return null;
+  return (
+    <span className="inline-flex items-center gap-0.5 rounded-lg border border-accent/30 bg-accent/10 px-2 py-0.5 text-[10px] font-bold text-accent">
+      <Bookmark size={10} aria-hidden /> Reservado · {formatStockQty(reservedQty, product.unit)}
+    </span>
+  );
+}
+
+function ReservedSummary({ product }: { product: Product }) {
+  const reservedQty = product.reservedQty ?? 0;
+  if (reservedQty <= 0 || typeof product.availableQty !== 'number') return null;
+  return (
+    <p className="text-xs text-text-secondary">
+      Em estoque {product.stockQty} · reservado {reservedQty} · livre {product.availableQty}
+    </p>
+  );
+}
+
+interface ReservationsBlockProps {
+  product: Product;
+  open: boolean;
+  onToggle: () => void;
+  onGoReservations?: () => void;
+}
+
+function ReservationsBlock({ product, open, onToggle, onGoReservations }: ReservationsBlockProps) {
+  const reservations = product.reservations ?? [];
+  if (!reservations.length) return null;
+  return (
+    <div className="mt-2 border-t border-border pt-2">
+      <div className="flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={open}
+          className="flex items-center gap-1 text-xs font-bold text-text-secondary transition-colors hover:text-accent"
+        >
+          {open ? <ChevronUp size={13} aria-hidden /> : <ChevronDown size={13} aria-hidden />}
+          Ver reservas ({reservations.length})
+        </button>
+        {onGoReservations && (
+          <button type="button" onClick={onGoReservations} className="text-xs font-bold text-accent hover:underline">
+            Ver todas
+          </button>
+        )}
+      </div>
+      {open && (
+        <ul className="mt-2 space-y-2">
+          {reservations.map(reservation => (
+            <li key={reservation.id} className="rounded-lg border border-border bg-bg px-2.5 py-2">
+              <p className="text-xs font-semibold text-text-primary">
+                {reservation.quantity}× · {reservation.customerName} · {formatBrPhone(reservation.whatsapp)}
+              </p>
+              <p className="text-[11px] text-text-muted">
+                retirar até {formatDateTimeBR(reservation.expiresAt)}
+              </p>
+              <a
+                href={`https://wa.me/55${normalizePhoneBR(reservation.whatsapp)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-accent hover:underline"
+              >
+                <MessageCircle size={13} aria-hidden /> Chamar no WhatsApp
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}

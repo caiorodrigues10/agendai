@@ -58,6 +58,21 @@ export interface Product {
   expirationStatus?: 'expired' | 'expiring' | null;
   daysToExpire?: number | null;
   category?: { id: string; name: string } | null;
+  /** Soma das reservas vigentes (RESERVED e não vencidas) deste produto. */
+  reservedQty?: number;
+  /** `null` quando o produto não controla estoque (`trackStock` false). */
+  availableQty?: number | null;
+  /** Só vem para quem pode ver a aba Reservas (nome/WhatsApp do cliente). */
+  reservations?: ProductReservationSummary[];
+}
+
+/** Reserva vigente exibida no card do catálogo. */
+export interface ProductReservationSummary {
+  id: string;
+  customerName: string;
+  whatsapp: string;
+  quantity: number;
+  expiresAt: string;
 }
 
 export interface ProductCategory {

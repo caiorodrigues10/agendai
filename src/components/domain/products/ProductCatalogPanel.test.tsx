@@ -97,3 +97,111 @@ describe('ProductCatalogPanel — ações do card', () => {
   });
 });
 
+const RESERVED_PRODUCT = {
+  id: 'prod-2',
+  name: 'Pomada modeladora',
+  type: 'RETAIL',
+  salePrice: 10,
+  unit: 'UNIT',
+  minStock: 0,
+  active: true,
+  averageCost: null,
+  imageUrl: null,
+  category: null,
+  expirationStatus: null,
+  stockQty: 5,
+  reservedQty: 2,
+  availableQty: 3,
+  reservations: [
+    { id: 'res-1', customerName: 'Ana Souza', whatsapp: '11988887777', quantity: 1, expiresAt: '2026-10-03T18:00:00.000Z' },
+    { id: 'res-2', customerName: 'Bia Ramos', whatsapp: '11977776666', quantity: 1, expiresAt: '2026-10-04T18:00:00.000Z' },
+  ],
+} as never;
+
+const RESERVED_NO_LIST = {
+  id: 'prod-3',
+  name: 'Cera forte',
+  type: 'RETAIL',
+  salePrice: 20,
+  unit: 'UNIT',
+  minStock: 0,
+  active: true,
+  averageCost: null,
+  imageUrl: null,
+  category: null,
+  expirationStatus: null,
+  stockQty: 5,
+  reservedQty: 2,
+  availableQty: 3,
+} as never;
+
+function renderReserved(product: unknown, extra: { onGoReservations?: () => void } = {}) {
+  mocks.api.listProducts.mockResolvedValue({ data: [product], meta: { total: 1 } });
+  return render(
+    <ProductCatalogPanel
+      canManage
+      canView
+      canSeeCost={false}
+      loadError={null}
+      onNotify={mocks.notify}
+      onReload={mocks.reload}
+      {...extra}
+    />
+  );
+}
+
+describe('ProductCatalogPanel — reservas no card', () => {
+  it('mostra selo Reservado e o resumo de estoque quando há reserva vigente', async () => {
+    renderReserved(RESERVED_PRODUCT);
+
+    expect(await screen.findByText('Reservado · 2 un')).toBeInTheDocument();
+    expect(screen.getByText('Em estoque 5 · reservado 2 · livre 3')).toBeInTheDocument();
+  });
+
+  it('expande a lista de reservas sem abrir o modal de edição', async () => {
+    renderReserved(RESERVED_PRODUCT);
+    fireEvent.click(await screen.findByRole('button', { name: /Ver reservas \(2\)/ }));
+
+    expect(await screen.findByText('1× · Ana Souza · (11) 98888-7777')).toBeInTheDocument();
+    expect(screen.getByText('1× · Bia Ramos · (11) 97777-6666')).toBeInTheDocument();
+    const links = screen.getAllByRole('link', { name: /Chamar no WhatsApp/ });
+    expect(links[0]).toHaveAttribute('href', 'https://wa.me/5511988887777');
+    expect(links[1]).toHaveAttribute('href', 'https://wa.me/5511977776666');
+    expect(screen.queryByRole('heading', { name: 'Editar produto' })).not.toBeInTheDocument();
+  });
+
+  it('recolhe a lista ao clicar de novo em Ver reservas', async () => {
+    renderReserved(RESERVED_PRODUCT);
+    const toggle = await screen.findByRole('button', { name: /Ver reservas \(2\)/ });
+
+    fireEvent.click(toggle);
+    expect(await screen.findByText('1× · Ana Souza · (11) 98888-7777')).toBeInTheDocument();
+
+    fireEvent.click(toggle);
+    expect(screen.queryByText('1× · Ana Souza · (11) 98888-7777')).not.toBeInTheDocument();
+  });
+
+  it('atalho "Ver todas" aciona a navegação para a aba de reservas', async () => {
+    const onGoReservations = vi.fn();
+    renderReserved(RESERVED_PRODUCT, { onGoReservations });
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Ver todas' }));
+    expect(onGoReservations).toHaveBeenCalledTimes(1);
+  });
+
+  it('sem lista de reservas exibe apenas o selo', async () => {
+    renderReserved(RESERVED_NO_LIST);
+
+    expect(await screen.findByText('Reservado · 2 un')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Ver reservas/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Ver todas' })).not.toBeInTheDocument();
+  });
+
+  it('sem reserva não mostra selo nem resumo de estoque', async () => {
+    renderReserved(PRODUCT);
+
+    expect(await screen.findByText('Shampoo hidratante')).toBeInTheDocument();
+    expect(screen.queryByText(/Reservado/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Em estoque/)).not.toBeInTheDocument();
+  });
+});
