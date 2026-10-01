@@ -182,13 +182,13 @@ export const ProductSchema = z.object({
   imageUrl: z.string().optional().default(''),
   type: z.enum(['RETAIL', 'CONSUMABLE', 'BOTH']),
   unit: z.enum(['UNIT', 'ML', 'L', 'G', 'KG', 'BOX', 'PACK', 'OTHER']).default('UNIT'),
-  unitLabel: z.string().min(1, 'Unidade é obrigatória').default(''),
+  unitLabel: z.string().default(''),
   minStock: z.coerce.number({ invalid_type_error: 'Estoque inválido' }).min(0).default(0),
   trackStock: z.boolean().default(true),
   expirationDate: z.string().optional().default(''),
   lotNumber: z.string().optional().default(''),
 }).superRefine((data, ctx) => {
-  if (data.unit === 'OTHER' && !data.unitLabel) {
+  if (data.unit === 'OTHER' && !data.unitLabel?.trim()) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: 'Quando a unidade é "Outra", o nome da unidade é obrigatório',

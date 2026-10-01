@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useForm, Controller, useWatch } from 'react-hook-form';
+import { useForm, Controller, useWatch, type FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { productsApi, type Product, type ProductCategory, type ProductType, type StockUnit } from '../../../infra/productsApi';
 import { SmartSelect } from '../../ui/SmartSelect';
@@ -181,6 +181,11 @@ export const ProductFormModal: React.FC<Props> = ({
     }
   };
 
+  const onInvalid = (fieldErrors: FieldErrors<ProductFormData>) => {
+    const firstError = Object.values(fieldErrors).find(issue => issue?.message);
+    onNotify?.(firstError?.message ?? 'Confira os campos destacados.', 'error');
+  };
+
   const addCategory = async () => {
     if (!newCategory.trim() || readOnly) return;
     const formattedName = toTitleCase(newCategory);
@@ -245,7 +250,7 @@ export const ProductFormModal: React.FC<Props> = ({
           </h3>
           <button type="button" onClick={onClose} className="text-sm text-text-muted">Fechar</button>
         </div>
-        <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+        <form className="space-y-5" onSubmit={handleSubmit(onSubmit, onInvalid)}>
           <div className="space-y-4">
             <p className={FORM_SECTION_TITLE}>Identidade</p>
             <Field label="Nome" error={errors.name?.message}>
