@@ -134,6 +134,9 @@ export function getErrorMessage(
     if (err.code === 'INSUFFICIENT_STOCK' || err.code === 'PRODUCTS_INVENTORY_REQUIRED') {
       return err.message?.trim() || fallback;
     }
+    if (err.code === 'PRODUCT_HAS_HISTORY' || err.code === 'PRODUCT_HAS_OPEN_RESERVATIONS') {
+      return err.message?.trim() || fallback;
+    }
     if (err.code === 'RESERVATION_LIMIT_REACHED') {
       return (
         err.message?.trim() ||

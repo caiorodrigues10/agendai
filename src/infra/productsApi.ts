@@ -251,6 +251,13 @@ export const productsApi = {
       payload,
       token()
     ).then(res => unwrap<Product>(res)),
+  deleteProduct: (id: string) =>
+    apiClient<{ success: boolean; data: { deleted: boolean } }>(
+      `/api/products/${id}`,
+      'DELETE',
+      undefined,
+      token()
+    ).then(res => unwrap<{ deleted: boolean }>(res)),
   uploadProductImage: async (productId: string, file: File): Promise<{ imageUrl: string }> => {
     const formData = new FormData();
     formData.append('file', file);

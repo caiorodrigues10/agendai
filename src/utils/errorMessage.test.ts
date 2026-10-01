@@ -76,4 +76,28 @@ describe('getErrorMessage', () => {
       'Esta reserva já foi finalizada e não pode ser alterada.'
     );
   });
+
+  it('keeps the backend message for PRODUCT_HAS_HISTORY', () => {
+    const error = new ApiError(
+      'Este produto já tem histórico de estoque ou vendas. Use Inativar para mantê-lo fora das listas.',
+      409,
+      'PRODUCT_HAS_HISTORY'
+    );
+
+    expect(getErrorMessage(error)).toBe(
+      'Este produto já tem histórico de estoque ou vendas. Use Inativar para mantê-lo fora das listas.'
+    );
+  });
+
+  it('keeps the backend message for PRODUCT_HAS_OPEN_RESERVATIONS', () => {
+    const error = new ApiError(
+      'Este produto tem reservas em aberto. Aguarde a retirada ou peça o cancelamento antes de apagar.',
+      409,
+      'PRODUCT_HAS_OPEN_RESERVATIONS'
+    );
+
+    expect(getErrorMessage(error)).toBe(
+      'Este produto tem reservas em aberto. Aguarde a retirada ou peça o cancelamento antes de apagar.'
+    );
+  });
 });

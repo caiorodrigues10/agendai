@@ -9,7 +9,7 @@ import { ProductFormModal } from './ProductFormModal';
 import { CatalogTemplateModal } from './CatalogTemplateModal';
 import { PRODUCT_PURPOSE_SHORT, productMoney } from './productMoney';
 import { formatStockQty, isLowStock, formatDateOnlyBR } from './productStock';
-import { LuPackage as Package, LuClock as Clock, LuTriangleAlert as AlertTriangle } from 'react-icons/lu';
+import { LuPackage as Package, LuClock as Clock, LuTriangleAlert as AlertTriangle, LuPencil as Pencil, LuTrash2 as Trash2 } from 'react-icons/lu';
 
 const SEGMENTS: Record<BusinessSegment, string> = {
   BARBERSHOP: 'Barbearia',
@@ -63,6 +63,7 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
   const [readOnly, setReadOnly] = useState(false);
   const [templateOpen, setTemplateOpen] = useState(false);
   const [confirmToggle, setConfirmToggle] = useState<Product | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<Product | null>(null);
   const limit = 30;
   const purposeMeta = PURPOSE_META[catalogPurpose];
 
@@ -126,6 +127,20 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
       onReload();
     } catch (err) {
       onNotify?.(getErrorMessage(err, 'Não foi possível atualizar o produto.'), 'error');
+    }
+  };
+
+  const confirmDeleteProduct = async () => {
+    if (!confirmDelete) return;
+    try {
+      await productsApi.deleteProduct(confirmDelete.id);
+      setConfirmDelete(null);
+      onNotify?.('Produto apagado.', 'success');
+      await load();
+      onReload();
+    } catch (err) {
+      setConfirmDelete(null);
+      onNotify?.(getErrorMessage(err, 'Não foi possível apagar o produto.'), 'error');
     }
   };
 
@@ -219,9 +234,33 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
                 </div>
               </button>
               {canManage && (
-                <button type="button" className="mt-2 text-xs font-bold text-text-secondary" onClick={() => setConfirmToggle(product)}>
-                  {product.active ? 'Inativar' : 'Ativar'}
-                </button>
+                <div className="mt-2 flex items-center gap-3 border-t border-border pt-2">
+                  <button
+                    type="button"
+                    aria-label="Editar produto"
+                    title="Editar produto"
+                    onClick={() => openProduct(product)}
+                    className="rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-surface-2 hover:text-accent"
+                  >
+                    <Pencil size={15} aria-hidden />
+                  </button>
+                  <button
+                    type="button"
+                    className="text-xs font-bold text-text-secondary"
+                    onClick={() => setConfirmToggle(product)}
+                  >
+                    {product.active ? 'Inativar' : 'Ativar'}
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Apagar produto"
+                    title="Apagar produto"
+                    onClick={() => setConfirmDelete(product)}
+                    className="ml-auto rounded-lg p-1.5 text-text-secondary transition-colors hover:bg-danger/10 hover:text-danger"
+                  >
+                    <Trash2 size={15} aria-hidden />
+                  </button>
+                </div>
               )}
             </div>
           ))}
@@ -264,6 +303,20 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
         variant={confirmToggle?.active ? 'danger' : 'default'}
         onConfirm={() => void toggleActive()}
         onCancel={() => setConfirmToggle(null)}
+      />
+
+      <ConfirmDialog
+        open={Boolean(confirmDelete)}
+        title="Apagar produto?"
+        message={
+          confirmDelete
+            ? `Apagar ${confirmDelete.name}? Esta ação não pode ser desfeita. Se o produto já teve vendas ou movimentação de estoque, use Inativar.`
+            : ''
+        }
+        confirmLabel="Apagar"
+        variant="danger"
+        onConfirm={() => void confirmDeleteProduct()}
+        onCancel={() => setConfirmDelete(null)}
       />
     </div>
   );
