@@ -21,7 +21,7 @@ Código existente ≠ comprovadamente funcional em produção. Distinguir:
 | Agenda | `AppointmentScheduler`, booking modal | `schedulingApi` | `/api/appointments` |
 | Clientes CRM | `ClientsManager`, `ClientProfileSheet` | `clientsApi`, `crmApi` | `/api/clients`, `/api/crm` |
 | Pacotes | `PackageCatalog`, `BookPackageSessionsModal` | `packagesApi` | `/api/service-packages`, `/api/client-packages` |
-| Produtos / estoque / PDV | `ProductsHub`, painéis em `products/` | `productsApi` | `/api/products`, inventory, retail |
+| Produtos / estoque / PDV | `ProductsHub`, painéis em `products/` | `productsApi` | `/api/products` (incl. `DELETE /api/products/:id`), inventory, retail |
 | Reserva de produto (público) | `PublicProductCarousel`, `PublicProductPage`, painel `ProductReservationsPanel` | `publicProductsApi`, `productsApi` | `/api/barbershops/:id/public-products*`, `/api/product-reservations` |
 | Financeiro owner | `OwnerFinancialPanel`, `FinancialDashboard` | `financialApi` | `/expenses`, `/fiado`, `/barbershop/*` |
 | Comissões | painéis de comissão (domain) | `commissionsApi` | `/api/commissions` |
