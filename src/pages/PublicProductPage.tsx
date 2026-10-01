@@ -393,7 +393,14 @@ export const PublicProductPage: React.FC = () => {
             )}
           </div>
 
-          <h1 className="text-xl font-bold">{product.name}</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl font-bold">{product.name}</h1>
+            {product.available === 0 && (
+              <span className="rounded-full border border-danger/40 bg-danger/10 px-2 py-0.5 text-[11px] font-bold text-danger">
+                Esgotado
+              </span>
+            )}
+          </div>
           <p className="mt-0.5 text-sm text-text-muted">{product.category ?? shop.name}</p>
           <p className="mt-3 text-2xl font-bold text-accent">
             {productMoney.format(product.price)}

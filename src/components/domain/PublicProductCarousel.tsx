@@ -8,18 +8,79 @@ interface Props {
   barbershopId: string;
 }
 
+/** `1–3` produtos viram grade (sem scroll horizontal); `4+` mantêm o carrossel. */
 function availabilityLabel(product: PublicProduct): string {
   if (product.available === null) return 'Disponível';
   return `${product.available} disponível${product.available === 1 ? '' : 'is'}`;
 }
 
+interface ProductCardProps {
+  barbershopId: string;
+  product: PublicProduct;
+  variant: 'grid' | 'carousel';
+}
+
+const ProductCard: React.FC<ProductCardProps> = ({ barbershopId, product, variant }) => {
+  const navigate = useNavigate();
+  const soldOut = product.available === 0;
+
+  return (
+    <button
+      type="button"
+      onClick={() => navigate(`/queue/${barbershopId}/produtos/${product.id}`)}
+      className={
+        variant === 'grid'
+          ? 'w-full rounded-xl border border-border bg-surface p-3 text-left transition-colors hover:border-accent/40 focus:outline-none focus-visible:border-accent'
+          : 'w-44 shrink-0 rounded-xl border border-border bg-surface p-3 text-left transition-colors hover:border-accent/40 focus:outline-none focus-visible:border-accent'
+      }
+      aria-label={`Ver ${product.name}`}
+    >
+      <div className="mb-2 flex h-20 w-full items-center justify-center overflow-hidden rounded-lg bg-surface-2 text-text-muted">
+        {product.imageUrl ? (
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <Package size={26} aria-hidden />
+        )}
+      </div>
+
+      <p className="truncate text-sm font-bold text-text-primary">{product.name}</p>
+      {variant === 'grid' && product.description && (
+        <p className="truncate text-[11px] text-text-secondary">{product.description}</p>
+      )}
+      <p className="truncate text-[11px] text-text-muted">
+        {product.category ?? product.unitLabel}
+      </p>
+
+      <div className="mt-2 flex items-center justify-between gap-1">
+        <span className="text-sm font-bold text-accent">
+          {productMoney.format(product.price)}
+        </span>
+        <ChevronRight size={14} className="text-text-muted" aria-hidden />
+      </div>
+
+      {soldOut ? (
+        <span className="mt-1 inline-block rounded-full border border-danger/40 bg-danger/10 px-2 py-0.5 text-[11px] font-bold text-danger">
+          Esgotado
+        </span>
+      ) : (
+        <p className="mt-0.5 text-[11px] text-text-secondary">{availabilityLabel(product)}</p>
+      )}
+    </button>
+  );
+};
+
 /**
- * Carrossel de produtos públicos da barbearia — renderizado abaixo do
- * agendador, na aba Agenda. Sem produtos, a seção inteira não é renderizada
- * (a reserva é conteúdo extra da página pública, nunca um bloqueio).
+ * Produtos públicos da barbearia — renderizado abaixo do agendador, na aba
+ * Agenda, e na aba Perfil. Sem produtos (ou falha da API), a seção inteira não
+ * é renderizada (a reserva é conteúdo extra da página pública, nunca um
+ * bloqueio); a falha vira `console.error` para o dono investigar.
  */
 export const PublicProductCarousel: React.FC<Props> = ({ barbershopId }) => {
-  const navigate = useNavigate();
   const [products, setProducts] = useState<PublicProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -30,7 +91,8 @@ export const PublicProductCarousel: React.FC<Props> = ({ barbershopId }) => {
       .then(res => {
         if (alive) setProducts(res.products);
       })
-      .catch(() => {
+      .catch(err => {
+        console.error('[PublicProductCarousel] falha ao carregar produtos públicos:', err);
         if (alive) setProducts([]);
       })
       .finally(() => {
@@ -43,53 +105,34 @@ export const PublicProductCarousel: React.FC<Props> = ({ barbershopId }) => {
 
   if (loading || products.length === 0) return null;
 
+  const variant = products.length <= 3 ? 'grid' : 'carousel';
+
   return (
     <section className="mt-8" aria-label="Produtos para reserva">
       <div className="mb-3 flex items-center justify-between gap-3">
         <h3 className="flex items-center gap-2 text-lg font-bold text-text-primary">
           <Package size={18} aria-hidden />
-          Produtos à reserva
+          Produtos
         </h3>
         <span className="rounded-full border border-border-strong bg-surface-2 px-2.5 py-0.5 text-xs font-bold text-text-secondary">
           {products.length}
         </span>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto pb-2">
+      <div
+        className={
+          variant === 'grid'
+            ? 'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3'
+            : 'flex gap-3 overflow-x-auto pb-2'
+        }
+      >
         {products.map(product => (
-          <button
+          <ProductCard
             key={product.id}
-            type="button"
-            onClick={() => navigate(`/queue/${barbershopId}/produtos/${product.id}`)}
-            className="w-44 shrink-0 rounded-xl border border-border bg-surface p-3 text-left transition-colors hover:border-accent/40 focus:outline-none focus-visible:border-accent"
-            aria-label={`Ver ${product.name}`}
-          >
-            <div className="mb-2 flex h-20 w-full items-center justify-center overflow-hidden rounded-lg bg-surface-2 text-text-muted">
-              {product.imageUrl ? (
-                <img
-                  src={product.imageUrl}
-                  alt={product.name}
-                  loading="lazy"
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <Package size={26} aria-hidden />
-              )}
-            </div>
-
-            <p className="truncate text-sm font-bold text-text-primary">{product.name}</p>
-            <p className="truncate text-[11px] text-text-muted">
-              {product.category ?? product.unitLabel}
-            </p>
-
-            <div className="mt-2 flex items-center justify-between gap-1">
-              <span className="text-sm font-bold text-accent">
-                {productMoney.format(product.price)}
-              </span>
-              <ChevronRight size={14} className="text-text-muted" aria-hidden />
-            </div>
-            <p className="mt-0.5 text-[11px] text-text-secondary">{availabilityLabel(product)}</p>
-          </button>
+            barbershopId={barbershopId}
+            product={product}
+            variant={variant}
+          />
         ))}
       </div>
     </section>
