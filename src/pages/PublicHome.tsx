@@ -4,6 +4,7 @@ import { QueueItemCard } from '../components/domain/QueueItemCard';
 import { AddCustomerForm } from '../components/domain/AddCustomerForm';
 import { ShopProfile } from '../components/domain/ShopProfile';
 import { AppointmentScheduler } from '../components/domain/AppointmentScheduler';
+import { PublicProductCarousel } from '../components/domain/PublicProductCarousel';
 import { QueueStatusCard } from '../components/domain/QueueStatusCard';
 import { Toast } from '../components/ui/Toast';
 import { useAuth } from '../contexts/AuthContext';
@@ -240,6 +241,12 @@ export const PublicHome: React.FC = () => {
             }}
             onDateChange={handleDateChange}
           />
+        )}
+
+        {/* Reserva de produtos: conteúdo extra da aba Agenda e da aba Perfil
+            (em QUEUE_ONLY só existe Perfil; a aba Fila nunca mostra o carrossel). */}
+        {(activeTab === 'appointments' || activeTab === 'profile') && (
+          <PublicProductCarousel barbershopId={barbershopId} />
         )}
 
         {activeTab === 'queue' && (

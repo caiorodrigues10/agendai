@@ -56,4 +56,24 @@ describe('getErrorMessage', () => {
 
     expect(getErrorMessage(error)).toBe('Sua sessão expirou. Faça login novamente.');
   });
+
+  it('keeps the backend message for RESERVATION_LIMIT_REACHED', () => {
+    const error = new ApiError(
+      'Você já tem 3 reservas abertas neste salão. Retire ou cancele antes de reservar de novo.',
+      409,
+      'RESERVATION_LIMIT_REACHED'
+    );
+
+    expect(getErrorMessage(error)).toBe(
+      'Você já tem 3 reservas abertas neste salão. Retire ou cancele antes de reservar de novo.'
+    );
+  });
+
+  it('falls back when RESERVATION_FINALIZED arrives without a message', () => {
+    const error = new ApiError('  ', 409, 'RESERVATION_FINALIZED');
+
+    expect(getErrorMessage(error)).toBe(
+      'Esta reserva já foi finalizada e não pode ser alterada.'
+    );
+  });
 });

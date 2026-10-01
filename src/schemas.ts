@@ -358,3 +358,21 @@ export const SupportReportSchema = z.object({
 });
 
 export type SupportReportFormData = z.infer<typeof SupportReportSchema>;
+
+// --- Reserva de produto (vitrine pública /queue/:id/produtos/:productId) ---
+export const ProductReservationSchema = z.object({
+  customerName: z
+    .string()
+    .trim()
+    .min(2, 'Informe seu nome')
+    .max(160, 'Nome muito longo'),
+  whatsapp: whatsappRequired,
+  quantity: z
+    .number()
+    .int('Quantidade deve ser um número inteiro')
+    .min(1, 'Quantidade mínima é 1')
+    .max(10, 'Máximo de 10 por reserva'),
+});
+
+export type ProductReservationFormData = z.infer<typeof ProductReservationSchema>;
+

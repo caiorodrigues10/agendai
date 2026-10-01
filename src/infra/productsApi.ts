@@ -200,6 +200,24 @@ export interface ProductAttentionItem {
   purpose: 'sale' | 'own' | 'both';
 }
 
+export type ProductReservationStatus = 'RESERVED' | 'PICKED_UP' | 'CANCELED';
+
+/** Reserva de produto feita pelo cliente público (sub-tab "Reservas"). */
+export interface ProductReservation {
+  id: string;
+  barbershopId: string;
+  productId: string;
+  productName: string;
+  customerName: string;
+  whatsapp: string;
+  quantity: number;
+  unitPrice: number;
+  status: ProductReservationStatus;
+  /** Prazo de retenção (padrão 48h) — a reserva expira sozinha sem cron. */
+  expiresAt: string;
+  createdAt: string;
+}
+
 export const productsApi = {
   listProducts: async (params: {
     search?: string;
@@ -425,6 +443,28 @@ export const productsApi = {
     }>(`/api/products/alerts${buildQuery({ days })}`, 'GET', undefined, token()).then(
       res => unwrap<{ days: number; expired: { count: number; items: StockAlertItem[] }; expiringSoon: { count: number; items: StockAlertItem[] } }>(res)
     ),
+
+  listReservations: async (params: {
+    status?: ProductReservationStatus;
+    page?: number;
+    limit?: number;
+  } = {}) => {
+    const res = await apiClient<{ success: boolean; data: ProductReservation[]; meta?: ListMeta }>(
+      `/api/product-reservations${buildQuery(params)}`,
+      'GET',
+      undefined,
+      token()
+    );
+    return { data: unwrap<ProductReservation[]>(res), meta: metaOf(res) };
+  },
+
+  updateReservationStatus: (id: string, status: Exclude<ProductReservationStatus, 'RESERVED'>) =>
+    apiClient<{ success: boolean; data: ProductReservation }>(
+      `/api/product-reservations/${id}/status`,
+      'PATCH',
+      { status },
+      token()
+    ).then(res => unwrap<ProductReservation>(res)),
 };
 
 export interface StockAlertItem {

@@ -58,6 +58,6 @@ agendai/
 
 ## Wrappers HTTP (`src/infra/`)
 
-`apiClient`, `authApi`, `authStorage`, `barbershopApi`, `schedulingApi`, `clientsApi`, `crmApi`, `packagesApi`, `productsApi`, `financialApi`, `commissionsApi`, `paymentsApi`, `plansApi`, `subscriptionsApi`, `adminApi`, `usersApi`, `notificationsApi`, `referralsApi`, `contactApi`, `realtimeWs`, `clientPortalApi`, `walletApi`, `catalogApi`, `pricingApi`, `purchasingApi`, `corporateApi`.
+`apiClient`, `authApi`, `authStorage`, `barbershopApi`, `schedulingApi`, `clientsApi`, `crmApi`, `packagesApi`, `productsApi`, `financialApi`, `commissionsApi`, `paymentsApi`, `plansApi`, `subscriptionsApi`, `adminApi`, `usersApi`, `notificationsApi`, `referralsApi`, `contactApi`, `realtimeWs`, `clientPortalApi`, `walletApi`, `catalogApi`, `pricingApi`, `purchasingApi`, `corporateApi`, `publicProductsApi`.
 
 **Regra:** novas chamadas HTTP só via `*Api.ts` / `apiClient` — nunca `fetch` solto nas páginas.

@@ -7,8 +7,9 @@ import { ProductCatalogPanel } from './products/ProductCatalogPanel';
 import { ProductStockPanel } from './products/ProductStockPanel';
 import { ProductSalesPanel } from './products/ProductSalesPanel';
 import { ProductReportsPanel } from './products/ProductReportsPanel';
+import { ProductReservationsPanel } from './products/ProductReservationsPanel';
 
-type HubTab = 'catalog' | 'stock' | 'sales' | 'reports';
+type HubTab = 'catalog' | 'stock' | 'sales' | 'reports' | 'reservations';
 
 export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'success' | 'error') => void }> = ({ onNotify }) => {
   const { hasPermission, isOwnerOrAdmin } = usePermissions();
@@ -73,6 +74,7 @@ export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'succes
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
         {tabBtn('catalog', 'Catálogo', canView || canManage)}
+        {tabBtn('reservations', 'Reservas', canView || canManage)}
         {tabBtn('stock', 'Estoque', canInventory)}
         {tabBtn('sales', 'Vendas', canSell)}
         {tabBtn('reports', 'Relatórios', canReports)}
@@ -94,6 +96,9 @@ export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'succes
       )}
       {tab === 'stock' && canInventory && (
         <ProductStockPanel loadError={error} onNotify={onNotify} onReload={reload} />
+      )}
+      {tab === 'reservations' && (canView || canManage) && (
+        <ProductReservationsPanel loadError={error} onNotify={onNotify} onReload={reload} />
       )}
       {tab === 'sales' && canSell && (
         <ProductSalesPanel canManage={canManage} canRefund={canRefund} loadError={error} onNotify={onNotify} onReload={reload} />

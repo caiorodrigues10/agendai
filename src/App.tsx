@@ -20,6 +20,7 @@ const ContactPage = lazy(() => import('./pages/marketing/ContactPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/marketing/PrivacyPolicyPage'));
 const TermsPage = lazy(() => import('./pages/marketing/TermsPage'));
 const PublicHome = lazy(() => import('./pages/PublicHome'));
+const PublicProductPage = lazy(() => import('./pages/PublicProductPage'));
 const PublicAppointmentManagePage = lazy(() => import('./pages/PublicAppointmentManagePage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
@@ -70,6 +71,7 @@ const App: React.FC = () => {
           <Route path="/termos" element={<TermsPage />} />
           <Route path="/queue" element={<PublicHome />} />
           <Route path="/queue/:id" element={<PublicHome />} />
+          <Route path="/queue/:id/produtos/:productId" element={<PublicProductPage />} />
           <Route path="/agendamento/gerenciar" element={<PublicAppointmentManagePage />} />
           <Route path="/login" element={<LoginPage mode="login" />} />
           <Route path="/cadastro" element={<LoginPage mode="register" />} />

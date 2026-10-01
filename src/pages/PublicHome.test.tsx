@@ -5,7 +5,11 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { render, fireEvent } from '@testing-library/react';
 import { PublicHome } from './PublicHome';
 
-const { mockJoinQueue } = vi.hoisted(() => ({ mockJoinQueue: vi.fn() }));
+const { mockJoinQueue, mockOperationMode, mockPublicProducts } = vi.hoisted(() => ({
+  mockJoinQueue: vi.fn(),
+  mockOperationMode: { value: 'HYBRID' as string },
+  mockPublicProducts: vi.fn(),
+}));
 
 vi.mock('../contexts/AuthContext', () => ({
   useAuth: () => ({
@@ -36,7 +40,7 @@ vi.mock('../contexts/BarbershopContext', () => ({
       whatsapp: '11999999999',
       schedule: [],
       logoUrl: undefined,
-      operationMode: 'HYBRID',
+      operationMode: mockOperationMode.value,
     },
     services: [{ id: 's1', name: 'Corte', price: 40, avgTimeMinutes: 30, icon: 'scissors' }],
     staff: [],
@@ -93,6 +97,14 @@ vi.mock('../components/domain/ShopProfile', () => ({
   ShopProfile: () => null,
 }));
 
+vi.mock('../infra/publicProductsApi', () => ({
+  publicProductsApi: {
+    list: mockPublicProducts,
+    get: vi.fn(),
+    reserve: vi.fn(),
+  },
+}));
+
 function renderPublicHome() {
   return render(
     <MemoryRouter initialEntries={['/queue/shop-1']}>
@@ -125,5 +137,64 @@ describe('PublicHome smoke', () => {
     await waitFor(() => {
       expect(mockJoinQueue).toHaveBeenCalledWith('Maria Silva', '', 's1', { additionalPerson: true });
     });
+  });
+});
+
+const PRODUCT = {
+  id: 'p1',
+  name: 'Pomada modeladora',
+  description: null,
+  imageUrl: null,
+  price: 30,
+  unitLabel: 'un',
+  category: null,
+  available: 2,
+};
+
+describe('PublicHome — carrossel de produtos', () => {
+  beforeEach(() => {
+    mockOperationMode.value = 'HYBRID';
+    mockPublicProducts.mockReset();
+    mockPublicProducts.mockResolvedValue({
+      shop: { name: 'Salão Teste', address: null, city: null, whatsapp: '11999999999' },
+      products: [PRODUCT],
+    });
+  });
+
+  afterEach(() => {
+    mockOperationMode.value = 'HYBRID';
+  });
+
+  it('não mostra o carrossel na aba Fila e mostra nas abas Agenda e Perfil', async () => {
+    renderPublicHome();
+
+    expect(screen.queryByRole('region', { name: 'Produtos para reserva' })).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Agenda' }));
+    expect(
+      await screen.findByRole('region', { name: 'Produtos para reserva' })
+    ).toBeInTheDocument();
+    expect(screen.getByText('Pomada modeladora')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Perfil' }));
+    expect(
+      await screen.findByRole('region', { name: 'Produtos para reserva' })
+    ).toBeInTheDocument();
+    expect(screen.getByText('Pomada modeladora')).toBeInTheDocument();
+  });
+
+  it('mostra os produtos pela aba Perfil quando o salão é só com fila (QUEUE_ONLY)', async () => {
+    mockOperationMode.value = 'QUEUE_ONLY';
+    renderPublicHome();
+
+    expect(screen.queryByRole('button', { name: 'Agenda' })).toBeNull();
+    expect(screen.queryByRole('region', { name: 'Produtos para reserva' })).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Perfil' }));
+    expect(
+      await screen.findByRole('region', { name: 'Produtos para reserva' })
+    ).toBeInTheDocument();
+    expect(screen.getByText('Pomada modeladora')).toBeInTheDocument();
+    expect(mockPublicProducts).toHaveBeenCalledWith('shop-1');
   });
 });

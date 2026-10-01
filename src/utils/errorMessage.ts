@@ -134,6 +134,15 @@ export function getErrorMessage(
     if (err.code === 'INSUFFICIENT_STOCK' || err.code === 'PRODUCTS_INVENTORY_REQUIRED') {
       return err.message?.trim() || fallback;
     }
+    if (err.code === 'RESERVATION_LIMIT_REACHED') {
+      return (
+        err.message?.trim() ||
+        'Você já tem reservas de produto aguardando retirada. Aguarde a retirada ou peça o cancelamento antes de reservar de novo.'
+      );
+    }
+    if (err.code === 'RESERVATION_FINALIZED') {
+      return err.message?.trim() || 'Esta reserva já foi finalizada e não pode ser alterada.';
+    }
     if (err.code === 'DASHBOARD_REQUIRED') {
       return (
         err.message?.trim() ||
