@@ -23,10 +23,13 @@ export interface Invitation {
   id: string;
   email: string;
   status: string;
+  permissions?: string[];
   expiresAt: string;
   createdAt: string;
   invitedBy: { name: string };
 }
+
+export type InternalProfile = 'ADMIN' | 'SUPPORT' | 'FINANCE' | 'COMMERCIAL' | 'READ_ONLY';
 
 export interface Ticket {
   id: string;
@@ -162,9 +165,9 @@ export const adminInternalApi = {
     );
   },
 
-  inviteTeamMember(email: string) {
+  inviteTeamMember(email: string, profile: InternalProfile = 'ADMIN') {
     return apiClient<{ success: boolean; data: Invitation }>(
-      '/api/admin/team/invitations', 'POST', { email }, token()
+      '/api/admin/team/invitations', 'POST', { email, profile }, token()
     );
   },
 
@@ -183,6 +186,12 @@ export const adminInternalApi = {
   deactivateMember(id: string) {
     return apiClient<{ success: boolean; data: { success: boolean } }>(
       `/api/admin/team/${id}/status`, 'PATCH', { active: false }, token()
+    );
+  },
+
+  reactivateMember(id: string) {
+    return apiClient<{ success: boolean; data: { success: boolean; alreadyActive?: boolean } }>(
+      `/api/admin/team/${id}/status`, 'PATCH', { active: true }, token()
     );
   },
 

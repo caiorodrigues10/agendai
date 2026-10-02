@@ -2,9 +2,17 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   LuLoader, LuTriangleAlert, LuMail, LuShield, LuShieldOff, LuRefreshCcw, LuSend, LuX
 } from 'react-icons/lu';
-import { adminInternalApi, TeamMember, Invitation } from '../../infra/adminInternalApi';
+import { adminInternalApi, TeamMember, Invitation, InternalProfile } from '../../infra/adminInternalApi';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Toast } from '../../components/ui/Toast';
+
+const profileOptions: Array<{ value: InternalProfile; label: string; hint: string }> = [
+  { value: 'ADMIN', label: 'Admin', hint: 'Acesso total' },
+  { value: 'SUPPORT', label: 'Suporte', hint: 'Chamados e operação' },
+  { value: 'FINANCE', label: 'Financeiro', hint: 'Receita e indicações' },
+  { value: 'COMMERCIAL', label: 'Comercial', hint: 'Salões e indicações' },
+  { value: 'READ_ONLY', label: 'Leitura', hint: 'Consulta geral' },
+];
 
 export const TeamPage: React.FC = () => {
   const [members, setMembers] = useState<TeamMember[]>([]);
@@ -12,10 +20,11 @@ export const TeamPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteProfile, setInviteProfile] = useState<InternalProfile>('ADMIN');
   const [inviting, setInviting] = useState(false);
   const [search, setSearch] = useState('');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'bot' } | null>(null);
-  const [confirm, setConfirm] = useState<{ type: 'deactivate' | 'revoke'; id: string; name?: string } | null>(null);
+  const [confirm, setConfirm] = useState<{ type: 'deactivate' | 'reactivate' | 'revoke'; id: string; name?: string } | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
 
   const load = useCallback(async () => {
@@ -38,7 +47,7 @@ export const TeamPage: React.FC = () => {
     if (!inviteEmail.trim()) return;
     setInviting(true);
     try {
-      await adminInternalApi.inviteTeamMember(inviteEmail.trim());
+      await adminInternalApi.inviteTeamMember(inviteEmail.trim(), inviteProfile);
       setInviteEmail('');
       load();
       setToast({ message: 'Convite enviado.', type: 'success' });
@@ -57,6 +66,20 @@ export const TeamPage: React.FC = () => {
       setToast({ message: 'Membro desativado.', type: 'success' });
     } catch (err: any) {
       setToast({ message: err?.message ?? 'Erro ao desativar.', type: 'error' });
+    } finally {
+      setConfirmLoading(false);
+      setConfirm(null);
+    }
+  };
+
+  const handleReactivate = async (id: string) => {
+    setConfirmLoading(true);
+    try {
+      await adminInternalApi.reactivateMember(id);
+      load();
+      setToast({ message: 'Membro reativado.', type: 'success' });
+    } catch (err: any) {
+      setToast({ message: err?.message ?? 'Erro ao reativar.', type: 'error' });
     } finally {
       setConfirmLoading(false);
       setConfirm(null);
@@ -108,22 +131,54 @@ export const TeamPage: React.FC = () => {
         <button onClick={load} className="p-2 rounded-lg hover:bg-surface-2 text-text-muted"><LuRefreshCcw size={16} /></button>
       </div>
 
+      <div className="bg-surface border border-border rounded-xl p-4">
+        <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-text-muted mb-2">
+          Buscar na equipe
+        </label>
+        <input
+          type="search"
+          placeholder="Nome ou e-mail"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full px-3 py-2 bg-bg border border-border rounded-lg text-sm focus:outline-none focus:border-accent"
+        />
+      </div>
+
       {/* Invite form */}
       <div className="bg-surface border border-border rounded-xl p-4">
-        <h2 className="text-sm font-bold mb-3">Convidar administrador</h2>
-        <div className="flex gap-2">
+        <h2 className="text-sm font-bold mb-3">Convidar funcionário interno</h2>
+        <div className="grid gap-3">
           <input
             type="email" placeholder="E-mail do convidado" value={inviteEmail}
             onChange={(e) => setInviteEmail(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
-            className="flex-1 px-3 py-2 bg-bg border border-border rounded-lg text-sm focus:outline-none focus:border-accent"
+            className="w-full px-3 py-2 bg-bg border border-border rounded-lg text-sm focus:outline-none focus:border-accent"
           />
-          <button
-            onClick={handleInvite} disabled={!inviteEmail.trim() || inviting}
-            className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium disabled:opacity-40 hover:bg-accent-hover"
-          >
-            <LuSend size={14} /> Enviar convite
-          </button>
+          <div className="grid gap-2 sm:grid-cols-5">
+            {profileOptions.map((profile) => (
+              <button
+                key={profile.value}
+                type="button"
+                onClick={() => setInviteProfile(profile.value)}
+                className={`rounded-lg border px-3 py-2 text-left transition ${
+                  inviteProfile === profile.value
+                    ? 'border-accent bg-accent/10 text-text-primary'
+                    : 'border-border bg-bg text-text-secondary hover:border-text-muted'
+                }`}
+              >
+                <span className="block text-xs font-bold">{profile.label}</span>
+                <span className="block text-[11px] text-text-muted">{profile.hint}</span>
+              </button>
+            ))}
+          </div>
+          <div className="flex justify-end">
+            <button
+              onClick={handleInvite} disabled={!inviteEmail.trim() || inviting}
+              className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium disabled:opacity-40 hover:bg-accent-hover"
+            >
+              <LuSend size={14} /> Enviar convite
+            </button>
+          </div>
         </div>
       </div>
 
@@ -152,13 +207,21 @@ export const TeamPage: React.FC = () => {
                 <div className={`px-2 py-0.5 rounded text-[10px] font-medium ${m.active ? 'text-success bg-success/10' : 'text-danger bg-danger/10'}`}>
                   {m.active ? 'Ativo' : 'Inativo'}
                 </div>
-                {m.active && (
+                {m.active ? (
                   <button
                     onClick={() => setConfirm({ type: 'deactivate', id: m.id, name: m.name })}
                     className="p-1.5 rounded hover:bg-danger/10 text-danger"
                     title="Desativar"
                   >
                     <LuShieldOff size={14} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setConfirm({ type: 'reactivate', id: m.id, name: m.name })}
+                    className="p-1.5 rounded hover:bg-success/10 text-success"
+                    title="Reativar"
+                  >
+                    <LuShield size={14} />
                   </button>
                 )}
               </div>
@@ -204,6 +267,15 @@ export const TeamPage: React.FC = () => {
         variant="danger"
         loading={confirmLoading}
         onConfirm={() => confirm && void handleDeactivate(confirm.id)}
+        onCancel={() => setConfirm(null)}
+      />
+      <ConfirmDialog
+        open={confirm?.type === 'reactivate'}
+        title="Reativar membro"
+        message={`Reativar ${confirm?.name ?? ''}? O usuário poderá acessar novamente com a conta dele.`}
+        confirmLabel="Reativar"
+        loading={confirmLoading}
+        onConfirm={() => confirm && void handleReactivate(confirm.id)}
         onCancel={() => setConfirm(null)}
       />
       <ConfirmDialog
