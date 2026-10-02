@@ -29,6 +29,7 @@ export interface ProfitEntry {
   revenue: number;
   directCosts: number;
   overheadCosts: number;
+  operationalCosts: number;
   taxAmount: number;
   commissionAmt: number;
   netProfit: number;
@@ -45,6 +46,7 @@ export interface ProfitPeriodData {
     revenue: number;
     directCosts: number;
     overheadCosts: number;
+    operationalCosts: number;
     taxAmount: number;
     commissionAmt: number;
     netProfit: number;

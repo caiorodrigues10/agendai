@@ -271,7 +271,9 @@ export const ProfitEnginePanel: React.FC<ProfitEnginePanelProps> = ({ barbershop
             <h3 className="mb-3 font-bold text-text-primary">Composição do Lucro</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between text-text-secondary"><span>Receita</span><span className="font-bold text-text-primary">{brl(periodData.totals.revenue)}</span></div>
+              <div className="flex justify-between text-text-secondary"><span>CMV (produtos)</span><span className="font-bold text-danger">-{brl(periodData.totals.directCosts ?? 0)}</span></div>
               <div className="flex justify-between text-text-secondary"><span>Custos Indiretos</span><span className="font-bold text-danger">-{brl(periodData.totals.overheadCosts)}</span></div>
+              <div className="flex justify-between text-text-secondary"><span>Custos Operacionais</span><span className="font-bold text-danger">-{brl(periodData.totals.operationalCosts ?? 0)}</span></div>
               <div className="flex justify-between text-text-secondary"><span>Impostos</span><span className="font-bold text-danger">-{brl(periodData.totals.taxAmount)}</span></div>
               <div className="flex justify-between text-text-secondary"><span>Comissões</span><span className="font-bold text-danger">-{brl(periodData.totals.commissionAmt)}</span></div>
               <div className="flex justify-between border-t border-border pt-3 font-bold text-text-primary">
