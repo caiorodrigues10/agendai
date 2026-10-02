@@ -23,6 +23,7 @@ import { maskPhone, normalizePhoneBR } from '../utils/documentUtils';
 import { getErrorMessage } from '../utils/errorMessage';
 import { productMoney } from '../features/products/productMoney';
 import { FIELD_CONTROL, FIELD_CONTROL_ERROR, Field } from '../components/ui/Field';
+import { StatusBadge } from '../components/ui/StatusBadge';
 
 const MAX_QUANTITY = 10;
 
@@ -395,11 +396,7 @@ export const PublicProductPage: React.FC = () => {
 
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-xl font-bold">{product.name}</h1>
-            {product.available === 0 && (
-              <span className="rounded-full border border-danger/40 bg-danger/10 px-2 py-0.5 text-[11px] font-bold text-danger">
-                Esgotado
-              </span>
-            )}
+            {product.available === 0 && <StatusBadge tone="danger">Esgotado</StatusBadge>}
           </div>
           <p className="mt-0.5 text-sm text-text-muted">{product.category ?? shop.name}</p>
           <p className="mt-3 text-2xl font-bold text-accent">

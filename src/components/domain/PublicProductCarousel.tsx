@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { LuPackage as Package, LuChevronRight as ChevronRight } from 'react-icons/lu';
 import { publicProductsApi, type PublicProduct } from '../../infra/publicProductsApi';
 import { productMoney } from '../../features/products/productMoney';
+import { StatusBadge } from '../ui/StatusBadge';
 
 interface Props {
   barbershopId: string;
@@ -64,9 +65,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ barbershopId, product, varian
       </div>
 
       {soldOut ? (
-        <span className="mt-1 inline-block rounded-full border border-danger/40 bg-danger/10 px-2 py-0.5 text-[11px] font-bold text-danger">
+        <StatusBadge tone="danger" className="mt-1">
           Esgotado
-        </span>
+        </StatusBadge>
       ) : (
         <p className="mt-0.5 text-[11px] text-text-secondary">{availabilityLabel(product)}</p>
       )}
