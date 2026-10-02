@@ -13,9 +13,9 @@ const mocks = vi.hoisted(() => ({
   notify: vi.fn(),
   reload: vi.fn(),
 }));
-vi.mock('../../../infra/productsApi', () => ({ productsApi: mocks.api }));
-vi.mock('../../../contexts/BarbershopContext', () => ({ useBarbershop: () => ({ settings: null }) }));
-vi.mock('../../../contexts/AuthContext', () => ({ useAuth: () => ({ user: { barbershopId: 'shop-1', role: 'OWNER' } }) }));
+vi.mock('../../infra/productsApi', () => ({ productsApi: mocks.api }));
+vi.mock('../../contexts/BarbershopContext', () => ({ useBarbershop: () => ({ settings: null }) }));
+vi.mock('../../contexts/AuthContext', () => ({ useAuth: () => ({ user: { barbershopId: 'shop-1', role: 'OWNER' } }) }));
 
 const PRODUCT = {
   id: 'prod-1',
@@ -203,5 +203,132 @@ describe('ProductCatalogPanel — reservas no card', () => {
     expect(await screen.findByText('Shampoo hidratante')).toBeInTheDocument();
     expect(screen.queryByText(/Reservado/)).not.toBeInTheDocument();
     expect(screen.queryByText(/Em estoque/)).not.toBeInTheDocument();
+  });
+});
+
+const ACTIVE_TRACKED = {
+  id: 'prod-act',
+  name: 'Gel reposto',
+  type: 'RETAIL',
+  salePrice: 25,
+  stockQty: 5,
+  unit: 'UNIT',
+  minStock: 1,
+  active: true,
+  trackStock: true,
+  averageCost: null,
+  imageUrl: null,
+  category: null,
+  expirationStatus: null,
+} as never;
+
+const INACTIVE_PRODUCT = {
+  id: 'prod-inact',
+  name: 'Shampoo hidratante',
+  type: 'RETAIL',
+  salePrice: 10,
+  stockQty: 5,
+  unit: 'UNIT',
+  minStock: 1,
+  active: false,
+  trackStock: true,
+  averageCost: null,
+  imageUrl: null,
+  category: null,
+  expirationStatus: null,
+} as never;
+
+const INACTIVE_RESERVED = {
+  id: 'prod-inact-res',
+  name: 'Cera forte',
+  type: 'RETAIL',
+  salePrice: 20,
+  stockQty: 5,
+  reservedQty: 2,
+  availableQty: 3,
+  unit: 'UNIT',
+  minStock: 1,
+  active: false,
+  trackStock: true,
+  averageCost: null,
+  imageUrl: null,
+  category: null,
+  expirationStatus: null,
+  reservations: [
+    { id: 'res-9', customerName: 'Ana Souza', whatsapp: '11988887777', quantity: 1, expiresAt: '2026-10-03T18:00:00.000Z' },
+    { id: 'res-10', customerName: 'Bia Ramos', whatsapp: '11977776666', quantity: 1, expiresAt: '2026-10-04T18:00:00.000Z' },
+  ],
+} as never;
+
+function renderWith(products: unknown[]) {
+  mocks.api.listProducts.mockResolvedValue({ data: products, meta: { total: products.length } });
+  return render(
+    <ProductCatalogPanel
+      canManage
+      canView
+      canSeeCost={false}
+      loadError={null}
+      onNotify={mocks.notify}
+      onReload={mocks.reload}
+    />
+  );
+}
+
+describe('ProductCatalogPanel — card inativo', () => {
+  it('mostra a faixa "Produto inativo", esconde o badge de estoque e oferece Ativar', async () => {
+    renderWith([INACTIVE_PRODUCT]);
+
+    expect(await screen.findByText('Produto inativo · não aparece no PDV nem na vitrine')).toBeInTheDocument();
+    expect(screen.queryByText('ok')).not.toBeInTheDocument();
+    expect(screen.getByText('Inativo')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ativar Shampoo hidratante' })).toBeInTheDocument();
+
+    const card = screen.getByTestId('inactive-strip').parentElement;
+    expect(card).toHaveClass('border-dashed', 'bg-bg/40', 'transition-colors', 'duration-200');
+    expect(card).not.toHaveClass('hover:shadow-sm');
+  });
+
+  it('mantém o selo Reservado e avisa sobre reservas pendentes na faixa', async () => {
+    renderWith([INACTIVE_RESERVED]);
+
+    expect(await screen.findByText('Reservado · 2 un')).toBeInTheDocument();
+    expect(screen.getByText(/Há 2 reservas pendentes/)).toBeInTheDocument();
+    expect(screen.queryByText('ok')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ver reservas (2)' })).toBeInTheDocument();
+  });
+
+  it('card ativo mantém o badge "ok" e o botão Inativar', async () => {
+    renderWith([ACTIVE_TRACKED]);
+
+    expect(await screen.findByText('ok')).toBeInTheDocument();
+    expect(screen.queryByTestId('inactive-strip')).not.toBeInTheDocument();
+    expect(screen.queryByText('Inativo')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Inativar' })).toBeInTheDocument();
+  });
+
+  it('ativa pelo rodapé: confirma, chama a API e avisa "Produto ativado"', async () => {
+    renderWith([INACTIVE_PRODUCT]);
+    fireEvent.click(await screen.findByRole('button', { name: 'Ativar Shampoo hidratante' }));
+
+    expect(await screen.findByRole('alertdialog')).toHaveTextContent('Reativar produto?');
+    fireEvent.click(screen.getByRole('button', { name: /^Ativar$/ }));
+
+    await waitFor(() => expect(mocks.api.updateProduct).toHaveBeenCalledWith('prod-inact', { active: true }));
+    expect(mocks.notify).toHaveBeenCalledWith('Produto ativado', 'success');
+    await waitFor(() => expect(mocks.api.listProducts).toHaveBeenCalledTimes(2));
+  });
+
+  it('lista inativos depois dos ativos e esconde quando "Mostrar inativos" é desmarcado', async () => {
+    renderWith([INACTIVE_PRODUCT, ACTIVE_TRACKED]);
+
+    const strip = await screen.findByTestId('inactive-strip');
+    expect(screen.getByRole('checkbox', { name: /Mostrar inativos \(1\)/ })).toBeChecked();
+    expect(screen.getByText('Gel reposto').compareDocumentPosition(strip) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('checkbox', { name: /Mostrar inativos/ }));
+
+    expect(screen.queryByTestId('inactive-strip')).not.toBeInTheDocument();
+    expect(screen.queryByText('Shampoo hidratante')).not.toBeInTheDocument();
+    expect(screen.getByText('Gel reposto')).toBeInTheDocument();
   });
 });
