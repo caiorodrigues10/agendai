@@ -33,6 +33,7 @@ import {
   ExpenseSummary,
   ExpenseType,
   FiadoItem,
+  FiadoPaymentMethod,
   financialApi,
   FinancialSummary,
   ListMeta,
@@ -51,6 +52,14 @@ import {
   FinanceSummaryCard,
 } from '../../../features/finance';
 import { FinanceResumoSkeleton, Skeleton, SkeletonRegion } from '../../../components/patterns/skeletons';
+
+const FIADO_PAYMENT_OPTIONS: { value: FiadoPaymentMethod; label: string }[] = [
+  { value: 'cash', label: 'Dinheiro' },
+  { value: 'pix', label: 'PIX' },
+  { value: 'credit_card', label: 'Cartão de crédito' },
+  { value: 'debit_card', label: 'Cartão de débito' },
+  { value: 'other', label: 'Outro' },
+];
 
 type Tab = 'resumo' | 'despesas' | 'fiado';
 
@@ -105,6 +114,7 @@ export const OwnerFinancialPanel: React.FC = () => {
   const [chargeSubmitting, setChargeSubmitting] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentNotes, setPaymentNotes] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<FiadoPaymentMethod>('pix');
   const [paymentSubmitting, setPaymentSubmitting] = useState(false);
   const [deleteFiadoId, setDeleteFiadoId] = useState<string | null>(null);
   const [deleteFiadoLoading, setDeleteFiadoLoading] = useState(false);
@@ -362,10 +372,12 @@ export const OwnerFinancialPanel: React.FC = () => {
       await financialApi.addFiadoPayment(fiadoId, {
         amount,
         notes: paymentNotes.trim() || undefined,
+        paymentMethod,
       });
       setPaymentFiadoId(null);
       setPaymentAmount('');
       setPaymentNotes('');
+      setPaymentMethod('pix');
       handleRefresh();
     } catch (err) {
       setError(errorMessage(err));
@@ -379,6 +391,7 @@ export const OwnerFinancialPanel: React.FC = () => {
     setPaymentFiadoId(fiado.id);
     setPaymentAmount(String(fiado.remainingAmount));
     setPaymentNotes('');
+    setPaymentMethod('pix');
   };
 
   const openChargeForm = (fiado: FiadoItem) => {
@@ -1370,6 +1383,20 @@ export const OwnerFinancialPanel: React.FC = () => {
                                         value={paymentAmount}
                                         onChange={e => setPaymentAmount(e.target.value)}
                                         className="bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary w-32 focus:outline-none focus:border-accent"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-[10px] text-text-muted uppercase font-bold block mb-1">
+                                        Forma de pagamento
+                                      </label>
+                                      <SmartSelect
+                                        mode="single"
+                                        options={FIADO_PAYMENT_OPTIONS}
+                                        value={paymentMethod}
+                                        onChange={value => setPaymentMethod((value as FiadoPaymentMethod) ?? 'pix')}
+                                        clearable={false}
+                                        size="sm"
+                                        aria-label="Forma de pagamento do fiado"
                                       />
                                     </div>
                                     <div className="flex-1 min-w-[160px]">

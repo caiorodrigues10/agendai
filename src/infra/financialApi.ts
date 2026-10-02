@@ -164,11 +164,15 @@ export interface CreateExpenseBody {
   supplierName?: string | null;
 }
 
+/** Formas aceitas no recebimento de fiado (mesmo enum do backend). */
+export type FiadoPaymentMethod = 'cash' | 'pix' | 'credit_card' | 'debit_card' | 'card' | 'other';
+
 export interface FiadoPayment {
   id: string;
   fiadoId: string;
   amount: number;
   notes: string | null;
+  paymentMethod: FiadoPaymentMethod | null;
   registeredById: string;
   createdAt: string;
 }
@@ -380,7 +384,7 @@ export const financialApi = {
       res => unwrap<FiadoItem>(res)
     ),
 
-  addFiadoPayment: (id: string, body: { amount: number; notes?: string }) =>
+  addFiadoPayment: (id: string, body: { amount: number; notes?: string; paymentMethod?: FiadoPaymentMethod }) =>
     apiClient<{ success: boolean; data: FiadoPayment }>(
       `/api/fiado/${id}/payments`,
       'POST',
