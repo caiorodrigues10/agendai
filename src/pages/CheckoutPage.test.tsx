@@ -53,7 +53,7 @@ vi.mock('../infra/subscriptionsApi', () => ({
   },
 }));
 
-vi.mock('../components/ui/ThemeToggle', () => ({
+vi.mock('../components/infra/ThemeToggle', () => ({
   ThemeToggle: () => <button type="button">Tema</button>,
 }));
 

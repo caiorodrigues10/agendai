@@ -42,7 +42,47 @@ export interface ReputationStats {
   computedAt?: string | null;
 }
 
+export interface PublicReviewContext {
+  id: string;
+  expiresAt: string;
+  alreadySubmitted: boolean;
+  barbershop: {
+    id: string;
+    name: string;
+    logoUrl?: string | null;
+    googleReviewUrl?: string | null;
+  };
+  serviceName: string;
+  staffName?: string | null;
+  customerName?: string | null;
+}
+
+export interface PublicReviewSummary {
+  average: number | null;
+  count: number;
+  threshold: number;
+  showAverage: boolean;
+  reviews: Review[];
+}
+
 export const reputationApi = {
+  getPublicReviewContext: (reviewToken: string) =>
+    apiClient<{ success: boolean; data: PublicReviewContext }>(
+      `/api/reviews/public/context?token=${encodeURIComponent(reviewToken)}`
+    ).then(r => unwrap<PublicReviewContext>(r)),
+
+  submitPublicReview: (reviewToken: string, rating: number, comment?: string) =>
+    apiClient<{ success: boolean; data: Review }>(
+      '/api/appointments/public/review',
+      'POST',
+      { token: reviewToken, rating, comment: comment?.trim() || undefined }
+    ).then(r => unwrap<Review>(r)),
+
+  getPublicSummary: (barbershopId: string) =>
+    apiClient<{ success: boolean; data: PublicReviewSummary }>(
+      `/api/barbershops/${barbershopId}/reviews?limit=6`
+    ).then(r => unwrap<PublicReviewSummary>(r)),
+
   getStats: (barbershopId: string) =>
     apiClient<{ success: boolean; data: ReputationStats }>(
       `/api/barbershops/${barbershopId}/reputation`,

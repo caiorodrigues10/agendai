@@ -31,7 +31,7 @@ import {
 } from 'react-icons/lu';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { ThemeToggle } from '../../components/ui/ThemeToggle';
+import { ThemeToggle } from '../../components/infra/ThemeToggle';
 import {
   ChartContainer,
   ChartTooltip,
@@ -59,7 +59,7 @@ import { getErrorMessage } from '../../utils/errorMessage';
 import { maskPhone } from '../../utils/documentUtils';
 import { BillingTab } from './BillingTab';
 import { ReferralsTab } from './ReferralsTab';
-import { CrmBackfillPanel } from '../../components/domain/CrmBackfillPanel';
+import { CrmBackfillPanel } from '../../features/crm';
 import { SmartSelect } from '../../components/ui/SmartSelect';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { PromptModal } from '../../components/ui/PromptModal';

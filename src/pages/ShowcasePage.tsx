@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShowcasePublicPage } from '../components/domain/ShowcasePublicPage';
+import { ShowcasePublicPage } from '../features/showcase';
 
 const ShowcasePage: React.FC = () => {
   return (

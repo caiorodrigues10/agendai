@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authApi } from '../infra/authApi';
 import { Logo } from '../components/ui/Logo';
-import { ThemeToggle } from '../components/ui/ThemeToggle';
+import { ThemeToggle } from '../components/infra/ThemeToggle';
 import { PasswordInput } from '../components/ui/PasswordInput';
 import {
   LuArrowRight as ArrowRight,

@@ -12,20 +12,14 @@ import {
 import { plansApi, Plan } from '../infra/plansApi';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useAuth } from '../contexts/AuthContext';
-import { MarketingNav } from '../components/marketing/MarketingNav';
-import { MarketingFooter } from '../components/marketing/MarketingFooter';
-import { SeoHead } from '../components/marketing/SeoHead';
-import { PricingPersuasionCharts } from '../components/marketing/PricingPersuasionCharts';
+import { MarketingLayout } from '../layouts/marketing/MarketingLayout';
+import { PricingPersuasionCharts } from '../features/marketing';
 import { softwareApplicationLd } from '../marketing/softwareApplicationLd';
 import { getErrorMessage } from '../utils/errorMessage';
 import { trialCampaign } from '../marketing/trialCampaign';
 import { isPaidSubscription, staffHomePath } from '../utils/subscriptionPaywall';
 import { formatCurrencyBRL } from '../utils/formatters';
-
-const ESSENTIAL_MONTHLY = 14;
-const PRO_MONTHLY = 20;
-const ESSENTIAL_YEARLY = 140;
-const PRO_YEARLY = 200;
+import { ESSENTIAL_MONTHLY, PRO_MONTHLY, ESSENTIAL_YEARLY, PRO_YEARLY } from '../marketing/planPrices';
 
 const matrix = [
   { label: 'Fila digital + agenda online', essential: true, pro: true },
@@ -56,6 +50,54 @@ const objections = [
   },
 ];
 
+type Tier = 'essential' | 'pro';
+
+function tierAmounts(tier: Tier, plan: Plan | undefined, yearly: boolean) {
+  const monthly = tier === 'pro' ? PRO_MONTHLY : ESSENTIAL_MONTHLY;
+  const yearlyTotal = tier === 'pro' ? PRO_YEARLY : ESSENTIAL_YEARLY;
+  if (!yearly) {
+    const amount =
+      plan && (plan.billingCycle ?? 'MONTHLY') !== 'YEARLY' && plan.price > 0
+        ? plan.price
+        : monthly;
+    return { amount, struck: null as number | null, billedYearly: null as number | null };
+  }
+  const billed =
+    plan && plan.billingCycle === 'YEARLY' && plan.price > 0 ? plan.price : yearlyTotal;
+  return { amount: billed / 12, struck: monthly, billedYearly: billed };
+}
+
+function FeatureList({
+  rows,
+  accent,
+}: {
+  rows: { label: string; included: boolean }[];
+  accent?: boolean;
+}) {
+  return (
+    <ul className="mt-6 flex-1 space-y-2.5">
+      {rows.map(row => (
+        <li
+          key={row.label}
+          aria-label={`${row.included ? 'Inclui' : 'Não inclui'} ${row.label}`}
+          className={`flex items-start gap-2.5 text-sm ${
+            row.included ? 'text-neutral-200' : 'text-neutral-500'
+          }`}
+        >
+          <span className="mt-0.5 shrink-0" aria-hidden>
+            {row.included ? (
+              <Check size={16} className={accent ? 'text-accent' : 'text-neutral-400'} />
+            ) : (
+              <X size={16} className="text-neutral-600" />
+            )}
+          </span>
+          <span>{row.label}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export const PlansPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -77,7 +119,7 @@ export const PlansPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const onScroll = () => setStickyVisible(window.scrollY > 520);
+    const onScroll = () => setStickyVisible(window.scrollY > 420);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -104,17 +146,6 @@ export const PlansPage: React.FC = () => {
   const pool = byCycle.length > 0 ? byCycle : plans;
   const proPlan = pool.find(p => isPro(p));
   const essentialPlan = pool.find(p => isEssential(p));
-  const displayPlans = [essentialPlan, proPlan].filter(Boolean) as Plan[];
-
-  const getDisplayPrice = (plan: Plan) => {
-    if (plan.price > 0) return plan.price;
-    if (isYearly) {
-      if (isPro(plan)) return PRO_YEARLY;
-      return ESSENTIAL_YEARLY;
-    }
-    if (isPro(plan)) return PRO_MONTHLY;
-    return ESSENTIAL_MONTHLY;
-  };
 
   const staffLoggedIn = Boolean(
     user && ['OWNER', 'EMPLOYEE', 'MASTER_ADMIN', 'ADMIN'].includes(user.role.toUpperCase())
@@ -122,166 +153,103 @@ export const PlansPage: React.FC = () => {
   /** Só manda ao painel quem já pagou. Trial com acesso ainda precisa chegar no PIX/cartão. */
   const goToExistingPanel = staffLoggedIn && alreadyPaid;
 
-  const startPro = () => {
-    if (goToExistingPanel && user) {
+  const startTrial = () => {
+    if (user) {
       navigate(staffHomePath(user.role));
       return;
     }
-    if (proPlan) {
-      handleSubscribe(proPlan);
-      return;
-    }
-    if (user && ['OWNER', 'MASTER_ADMIN'].includes(user.role.toUpperCase())) {
-      navigate('/checkout');
-      return;
-    }
-    navigate(user ? staffHomePath(user.role) : '/cadastro');
+    navigate('/cadastro');
   };
 
-  const payCta = user ? 'Pagar com PIX ou cartão' : trialCampaign.cta;
-  const heroCta = goToExistingPanel ? trialCampaign.ctaGoToPanel : payCta;
-  const stickyCta = goToExistingPanel ? trialCampaign.ctaGoToPanel : payCta;
+  const trialCta = goToExistingPanel ? trialCampaign.ctaGoToPanel : 'Começar teste grátis';
+
+  const paidCta = (name: 'Essencial' | 'Pro', isCurrent: boolean) => {
+    if (isCurrent) return 'Assinado';
+    if (user && !alreadyPaid) return 'Pagar com PIX ou cartão';
+    return name === 'Pro' ? 'Assinar Pro' : 'Assinar Essencial';
+  };
+
+  const essentialPrice = tierAmounts('essential', essentialPlan, isYearly);
+  const proPrice = tierAmounts('pro', proPlan, isYearly);
+  const essentialCurrent = Boolean(alreadyPaid && essentialPlan && essentialPlan.id === currentPlanId);
+  const proCurrent = Boolean(alreadyPaid && proPlan && proPlan.id === currentPlanId);
+
+  const trialRows = [
+    ...matrix.map(row => ({ label: row.label, included: row.pro })),
+    { label: 'Continua depois sem escolher um plano', included: false },
+  ];
+  const essentialRows = matrix.map(row => ({ label: row.label, included: row.essential }));
+  const proRows = matrix.map(row => ({ label: row.label, included: row.pro }));
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
-      <SeoHead
-        title="Planos e preços — Essencial e Pro | Agenda Já"
-        description="Fila digital, agenda online e equipe ilimitada a partir de R$ 14/mês. 30 dias de Pro grátis, sem cartão. Anual com 2 meses grátis."
-        path="/planos"
-        jsonLd={softwareApplicationLd('/planos')}
-      />
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -left-[15%] top-[-12%] h-[55%] w-[55%] rounded-full bg-accent/25 blur-[140px]" />
-        <div className="absolute -right-[10%] top-[25%] h-[40%] w-[40%] rounded-full bg-teal-900/15 blur-[120px]" />
-      </div>
-
-      <MarketingNav />
+    <MarketingLayout
+      title="Planos e preços — Essencial e Pro | Agenda Já"
+      description="Fila digital, agenda online e equipe ilimitada a partir de R$ 14/mês. 30 dias de Pro grátis, sem cartão. Anual com 2 meses grátis."
+      path="/planos"
+      jsonLd={softwareApplicationLd('/planos')}
+      background={
+        <>
+    <div className="pointer-events-none fixed inset-0 z-0">
+      <div className="absolute -left-[15%] top-[-12%] h-[55%] w-[55%] rounded-full bg-accent/25 blur-[140px]" />
+      <div className="absolute -right-[10%] top-[18%] h-[40%] w-[40%] rounded-full bg-teal-900/15 blur-[120px]" />
+    </div>
+        </>
+      }
+      afterFooter={
+        <>
+    <div
+      className={`fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 transition duration-300 md:justify-end md:px-8 md:pb-6 ${
+        stickyVisible
+          ? 'translate-y-0 opacity-100'
+          : 'pointer-events-none translate-y-4 opacity-0'
+      }`}
+      aria-hidden={!stickyVisible}
+    >
+      <button
+        type="button"
+        tabIndex={stickyVisible ? 0 : -1}
+        onClick={startTrial}
+        className="group inline-flex items-center gap-2.5 rounded-full bg-accent px-6 py-3.5 text-sm font-black text-black shadow-[0_16px_50px_rgba(16,185,129,0.45)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-accent-light md:px-7 md:text-base"
+      >
+        {trialCta}
+        <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+      </button>
+    </div>
+        </>
+      }
+    >
 
       <main className="relative z-10">
-        {/* Hero */}
-        <section className="px-6 pb-10 pt-36 md:px-10 md:pt-44 xl:px-12">
-          <div className="mx-auto max-w-4xl text-center">
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-xs font-bold uppercase tracking-[0.28em] text-accent/90"
-            >
-              {trialCampaign.eyebrow}
-            </motion.p>
-            <motion.h1
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 }}
-              className="mt-5 text-5xl font-black tracking-[-0.05em] text-white md:text-7xl"
-            >
-              Menos que um corte.
-              <br />
-              <span className="text-accent">Mais que o caderno.</span>
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 14 }}
+        <section id="precos" className="px-6 pb-16 pt-32 md:px-10 md:pb-20 md:pt-40 xl:px-12">
+          <div className="mx-auto max-w-6xl">
+            <div className="mx-auto max-w-2xl text-center">
+              <motion.h1
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl md:text-6xl"
+              >
+                Teste grátis ou escolha o plano
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="mx-auto mt-4 max-w-xl text-base font-medium leading-relaxed text-neutral-400 md:text-lg"
+              >
+                {trialCampaign.body} {trialCampaign.afterTrial}
+              </motion.p>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="mx-auto mt-6 max-w-2xl text-lg font-medium leading-relaxed text-neutral-400 md:text-xl"
+              className="mt-8 flex justify-center"
             >
-              {trialCampaign.body} {trialCampaign.afterTrial} Anual = 2 meses grátis. Equipe
-              ilimitada nos dois.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.16 }}
-              className="mx-auto mt-8 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3"
-            >
-              {[
-                { value: 'R$ 14', label: 'Essencial / mês' },
-                { value: 'R$ 20', label: 'Pro / mês' },
-                { value: '1 corte', label: 'paga o plano' },
-              ].map(item => (
-                <div
-                  key={item.label}
-                  className="rounded-2xl border border-white/8 bg-white/3 px-3 py-4"
-                >
-                  <p className="text-xl font-black text-white md:text-2xl">{item.value}</p>
-                  <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-neutral-500 md:text-xs">
-                    {item.label}
-                  </p>
-                </div>
-              ))}
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="mt-8"
-            >
-              <button
-                type="button"
-                onClick={startPro}
-                className="group inline-flex items-center justify-center gap-3 rounded-full bg-accent px-8 py-4 text-base font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-accent-light"
-              >
-                {heroCta}
-                <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </button>
-              {goToExistingPanel && user?.role?.toUpperCase() === 'OWNER' && (
-                <div className="mt-3">
-                  <button
-                    type="button"
-                    onClick={() => navigate('/app/subscription')}
-                    className="inline-flex items-center justify-center gap-2 rounded-full border border-accent/50 bg-accent/10 px-6 py-3 text-sm font-black text-accent-light hover:bg-accent/20"
-                  >
-                    Gerenciar plano no painel
-                    <ArrowRight size={24} className="h-4 w-4" />
-                  </button>
-                </div>
-              )}
-              <p className="mt-3 text-sm text-neutral-500">{trialCampaign.heroSubline}</p>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Loss aversion strip */}
-        <section className="border-y border-white/8 bg-white/2 px-6 py-10 md:px-10">
-          <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-3">
-            {[
-              {
-                title: '3 faltas no mês',
-                body: 'Com ticket de R$ 55, são R$ 165 sumindo — mais que 8× o Pro.',
-              },
-              {
-                title: 'R$ 6 a mais',
-                body: 'Pro vs Essencial. Menos que um café/semana por dashboard + financeiro.',
-              },
-              {
-                title: '2 meses grátis',
-                body: 'No anual você paga 10 e usa 12. Economia de R$ 40 no Pro.',
-              },
-            ].map((item, i) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-              >
-                <p className="text-lg font-black text-white">{item.title}</p>
-                <p className="mt-2 text-sm font-medium leading-relaxed text-neutral-400">
-                  {item.body}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        {/* Toggle + cards */}
-        <section id="precos" className="px-6 py-16 md:px-10 md:py-20 xl:px-12">
-          <div className="mx-auto max-w-5xl">
-            <div className="mb-10 flex flex-col items-center gap-4">
-              <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/4 p-1">
+              <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1">
                 <button
                   type="button"
+                  aria-pressed={!isYearly}
                   onClick={() => setIsYearly(false)}
                   className={`rounded-full px-5 py-2.5 text-sm font-bold transition ${
                     !isYearly ? 'bg-white text-black' : 'text-neutral-400 hover:text-white'
@@ -291,196 +259,228 @@ export const PlansPage: React.FC = () => {
                 </button>
                 <button
                   type="button"
+                  aria-pressed={isYearly}
                   onClick={() => setIsYearly(true)}
                   className={`rounded-full px-5 py-2.5 text-sm font-bold transition ${
-                    isYearly ? 'bg-accent text-black' : 'text-neutral-400 hover:text-white'
+                    isYearly ? 'bg-white text-black' : 'text-neutral-400 hover:text-white'
                   }`}
                 >
                   Anual
-                  <span className="ml-2 text-[10px] font-black uppercase tracking-wider opacity-80">
-                    −2 meses
-                  </span>
                 </button>
+                <span className="rounded-full bg-accent px-3 py-2 text-[10px] font-black uppercase tracking-wider text-black">
+                  2 meses grátis
+                </span>
               </div>
-              {isYearly && (
-                <p className="text-sm font-semibold text-accent-light">
-                  Melhor custo: anual já selecionado
-                </p>
-              )}
-            </div>
-
-            {loading && (
-              <div className="flex justify-center py-20 text-accent">
-                <Loader2 className="animate-spin" size={36} />
-              </div>
-            )}
+            </motion.div>
 
             {error && (
-              <div className="mx-auto mb-8 flex max-w-md items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
+              <div className="mx-auto mt-8 flex max-w-md items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
                 <AlertCircle size={16} /> {error}
               </div>
             )}
 
-            {!loading && !error && displayPlans.length > 0 && (
-              <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2">
-                {displayPlans.map(plan => {
-                  const currentIsPro = isPro(plan);
-                  const isCurrent = alreadyPaid && plan.id === currentPlanId;
-                  const price = getDisplayPrice(plan);
-                  const period = isYearly ? 'ano' : 'mês';
-                  const monthlyEquivalent = isYearly
-                    ? currentIsPro
-                      ? PRO_YEARLY / 12
-                      : ESSENTIAL_YEARLY / 12
-                    : null;
-                  const yearlySavings = currentIsPro
-                    ? PRO_MONTHLY * 12 - PRO_YEARLY
-                    : ESSENTIAL_MONTHLY * 12 - ESSENTIAL_YEARLY;
+            {loading ? (
+              <div className="flex justify-center py-20 text-accent">
+                <Loader2 className="animate-spin" size={36} />
+              </div>
+            ) : (
+              <div className="mt-10 grid grid-cols-1 items-stretch gap-5 lg:grid-cols-3 lg:items-end lg:gap-4 lg:py-4">
+                <motion.article
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex flex-col rounded-[1.75rem] border border-white/10 bg-surface p-6 md:p-7"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <h2 className="text-sm font-black uppercase tracking-[0.18em] text-white">
+                      Teste grátis
+                    </h2>
+                    <span className="rounded-full border border-white/15 bg-white/8 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-neutral-200">
+                      30 dias
+                    </span>
+                  </div>
+                  <p className="mt-3 text-sm font-medium leading-relaxed text-neutral-400">
+                    Para quem quer ver o Pro antes de pagar. Fila, agenda, dashboard e financeiro,
+                    sem cartão.
+                  </p>
+                  <div className="mt-5" data-testid="plan-price-trial">
+                    <span className="text-4xl font-black tracking-tight text-white sm:text-5xl">
+                      R$ 0
+                    </span>
+                    <p className="mt-1 text-xs font-medium text-neutral-400">por 30 dias</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={startTrial}
+                    className="mt-5 w-full rounded-2xl bg-white py-3.5 text-sm font-black text-black transition hover:bg-neutral-200"
+                  >
+                    {trialCta}
+                  </button>
+                  <p className="mt-2 text-center text-[11px] text-neutral-500">
+                    Sem cartão, sem cobrança automática
+                  </p>
+                  <FeatureList rows={trialRows} />
+                </motion.article>
 
-                  return (
-                    <motion.div
-                      key={plan.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      className={`relative flex flex-col rounded-[2rem] border p-8 transition ${
-                        currentIsPro
-                          ? 'border-accent/45 bg-surface shadow-[0_0_80px_rgba(52,211,153,0.12)] md:scale-[1.02]'
-                          : 'border-white/10 bg-surface'
-                      }`}
-                    >
-                      {currentIsPro && (
-                        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-accent px-4 py-1 text-[10px] font-black uppercase tracking-widest text-black">
-                          Recomendado
-                        </div>
-                      )}
-
-                      <div className="mb-2 flex items-center justify-between gap-3">
-                        <h2 className="text-2xl font-black text-white">{plan.name}</h2>
-                        {isCurrent && (
-                          <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-accent-light">
-                            Atual
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm font-medium text-neutral-400">
-                        {currentIsPro
-                          ? 'Dashboard, financeiro e insights — visão de dono.'
-                          : 'Fila, agenda e equipe. Operação limpa, preço baixo.'}
+                <motion.article
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 }}
+                  className="flex flex-col rounded-[1.75rem] border border-white/10 bg-linear-to-b from-accent/10 to-surface p-6 md:p-7"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <h2 className="text-sm font-black uppercase tracking-[0.18em] text-white">
+                      Essencial
+                    </h2>
+                    {essentialCurrent && (
+                      <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-accent-light">
+                        Atual
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-3 text-sm font-medium leading-relaxed text-neutral-400">
+                    Fila, agenda e equipe ilimitada, sem taxa por cadeira.
+                  </p>
+                  <div className="mt-5">
+                    {essentialPrice.struck != null && (
+                      <p className="text-sm font-semibold text-neutral-500 line-through">
+                        {formatCurrencyBRL(essentialPrice.struck)}
                       </p>
-                      <p className="mt-2 text-xs font-semibold text-accent-light/90">
-                        {trialCampaign.planIncluded}
-                      </p>
-
-                      <div className="mt-6 mb-2">
-                        <div className="flex items-baseline gap-1.5">
-                          <span
-                            className={`text-5xl font-black tracking-tight ${
-                              currentIsPro ? 'text-accent' : 'text-white'
-                            }`}
-                          >
-                            {formatCurrencyBRL(price)}
-                          </span>
-                          <span className="text-sm text-neutral-500">/{period}</span>
-                        </div>
-                        {monthlyEquivalent != null && (
-                          <p className="mt-2 text-sm font-semibold text-accent-light">
-                            ≈ {formatCurrencyBRL(monthlyEquivalent)}/mês · economize{' '}
-                            {formatCurrencyBRL(yearlySavings)}
-                          </p>
-                        )}
-                        {!isYearly && (
-                          <p className="mt-2 text-sm text-neutral-500">
-                            Ou {formatCurrencyBRL(currentIsPro ? PRO_YEARLY : ESSENTIAL_YEARLY)}
-                            /ano (2 meses grátis)
-                          </p>
-                        )}
-                      </div>
-
-                      <p className="mb-6 text-xs font-bold uppercase tracking-wider text-neutral-500">
-                        Funcionários ilimitados · sem taxa por cadeira
-                      </p>
-
-                      <ul className="mb-8 flex-1 space-y-3">
-                        {(plan.features.length > 0
-                          ? plan.features
-                          : currentIsPro
-                            ? [
-                                'Tudo do Essencial',
-                                'Dashboard e relatórios',
-                                'Financeiro, despesas e fiado',
-                                'Insights de movimento',
-                              ]
-                            : [
-                                'Fila digital e agenda online',
-                                'Funcionários ilimitados',
-                                'Serviços, perfil e feed',
-                                'Suporte por e-mail',
-                              ]
-                        ).map(feature => (
-                          <li
-                            key={feature}
-                            className="flex items-start gap-2.5 text-sm text-neutral-300"
-                          >
-                            <span
-                              className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
-                                currentIsPro ? 'bg-accent/15' : 'bg-white/6'
-                              }`}
-                            >
-                              <Check
-                                size={12}
-                                className={currentIsPro ? 'text-accent' : 'text-neutral-400'}
-                              />
-                            </span>
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-
-                      <button
-                        type="button"
-                        onClick={() => handleSubscribe(plan)}
-                        disabled={!!isCurrent}
-                        className={`group flex w-full items-center justify-center gap-2 rounded-full py-4 text-sm font-black transition ${
-                          isCurrent
-                            ? 'cursor-not-allowed bg-white/5 text-neutral-500'
-                            : currentIsPro
-                              ? 'bg-accent text-black hover:-translate-y-0.5 hover:bg-accent-light'
-                              : 'border border-white/15 bg-white/5 text-white hover:bg-white/10'
-                        }`}
+                    )}
+                    <div className="flex items-baseline gap-1.5">
+                      <span
+                        data-testid="plan-price-essential"
+                        className="text-4xl font-black tracking-tight text-white sm:text-5xl"
                       >
-                        {isCurrent
-                          ? 'Assinado'
-                          : user
-                            ? 'Pagar com PIX ou cartão'
-                            : trialCampaign.cta}
-                        {!isCurrent && (
-                          <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                        )}
-                      </button>
-                      {!isCurrent && (
-                        <p className="mt-2 text-center text-[11px] text-neutral-500">
-                          {currentIsPro
-                            ? trialCampaign.afterTrialThenPro
-                            : trialCampaign.afterTrialThenEssential}
-                        </p>
+                        {formatCurrencyBRL(essentialPrice.amount)}
+                      </span>
+                      <span className="text-sm text-neutral-400">/mês</span>
+                    </div>
+                    {essentialPrice.billedYearly != null && (
+                      <p
+                        data-testid="plan-billed-essential"
+                        className="mt-1 text-xs font-medium text-neutral-400"
+                      >
+                        cobrado {formatCurrencyBRL(essentialPrice.billedYearly)}/ano
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => essentialPlan && handleSubscribe(essentialPlan)}
+                    disabled={!essentialPlan || essentialCurrent}
+                    className={`mt-5 w-full rounded-2xl border py-3.5 text-sm font-black transition ${
+                      !essentialPlan || essentialCurrent
+                        ? 'cursor-not-allowed border-white/10 bg-white/5 text-neutral-500'
+                        : 'border-white/20 bg-transparent text-white hover:bg-white/10'
+                    }`}
+                  >
+                    {essentialPlan ? paidCta('Essencial', essentialCurrent) : 'Indisponível'}
+                  </button>
+                  {!essentialCurrent && (
+                    <p className="mt-2 text-center text-[11px] text-neutral-500">
+                      {trialCampaign.afterTrialThenEssential}
+                    </p>
+                  )}
+                  <FeatureList rows={essentialRows} />
+                </motion.article>
+
+                <motion.article
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="relative z-10 flex flex-col rounded-[1.75rem] border border-accent/50 bg-linear-to-b from-accent/25 to-[#07140f] p-6 shadow-[0_0_80px_rgba(52,211,153,0.16)] md:p-7 lg:scale-[1.02]"
+                >
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-1 text-[10px] font-black uppercase tracking-widest text-black">
+                    Mais escolhido
+                  </div>
+                  <div className="flex items-start justify-between gap-3">
+                    <h2 className="text-sm font-black uppercase tracking-[0.18em] text-white">
+                      Pro
+                    </h2>
+                    <div className="flex flex-wrap justify-end gap-1.5">
+                      {isYearly && (
+                        <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-black">
+                          2 meses grátis
+                        </span>
                       )}
-                    </motion.div>
-                  );
-                })}
+                      {proCurrent && (
+                        <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-accent-light">
+                          Atual
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <p className="mt-3 text-sm font-medium leading-relaxed text-neutral-300">
+                    Para quem quer enxergar o caixa: dashboard, financeiro, fiado e insights.
+                  </p>
+                  <div className="mt-5">
+                    {proPrice.struck != null && (
+                      <p className="text-sm font-semibold text-neutral-500 line-through">
+                        {formatCurrencyBRL(proPrice.struck)}
+                      </p>
+                    )}
+                    <div className="flex items-baseline gap-1.5">
+                      <span
+                        data-testid="plan-price-pro"
+                        className="text-4xl font-black tracking-tight text-accent sm:text-5xl"
+                      >
+                        {formatCurrencyBRL(proPrice.amount)}
+                      </span>
+                      <span className="text-sm text-neutral-400">/mês</span>
+                    </div>
+                    {proPrice.billedYearly != null && (
+                      <p data-testid="plan-billed-pro" className="mt-1 text-xs font-medium text-neutral-300">
+                        cobrado {formatCurrencyBRL(proPrice.billedYearly)}/ano
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => proPlan && handleSubscribe(proPlan)}
+                    disabled={!proPlan || proCurrent}
+                    className={`mt-5 w-full rounded-2xl py-3.5 text-sm font-black transition ${
+                      !proPlan || proCurrent
+                        ? 'cursor-not-allowed bg-white/10 text-neutral-500'
+                        : 'bg-accent text-black hover:-translate-y-0.5 hover:bg-accent-light'
+                    }`}
+                  >
+                    {proPlan ? paidCta('Pro', proCurrent) : 'Indisponível'}
+                  </button>
+                  {!proCurrent && (
+                    <p className="mt-2 text-center text-[11px] text-neutral-400">
+                      {trialCampaign.afterTrialThenPro}
+                    </p>
+                  )}
+                  <FeatureList rows={proRows} accent />
+                </motion.article>
+              </div>
+            )}
+
+            <p className="mx-auto mt-8 max-w-3xl text-center text-xs leading-relaxed text-neutral-500">
+              O teste de 30 dias de Pro começa no cadastro, sem cartão. A cobrança só é criada
+              quando você contrata Essencial ou Pro. No anual, você paga 10 meses e usa 12.
+            </p>
+            {goToExistingPanel && user?.role?.toUpperCase() === 'OWNER' && (
+              <div className="mt-4 text-center">
+                <button
+                  type="button"
+                  onClick={() => navigate('/app/subscription')}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-accent/50 bg-accent/10 px-6 py-3 text-sm font-black text-accent-light hover:bg-accent/20"
+                >
+                  Gerenciar plano no painel
+                  <ArrowRight size={16} />
+                </button>
               </div>
             )}
           </div>
         </section>
 
-        {/* Charts */}
         <section className="border-y border-white/8 bg-white/1.5 px-6 py-20 md:px-10 md:py-28 xl:px-12">
           <div className="mx-auto max-w-6xl">
             <PricingPersuasionCharts variant="dark" />
           </div>
         </section>
 
-        {/* Matrix */}
         <section className="px-6 py-20 md:px-10 xl:px-12">
           <div className="mx-auto max-w-4xl">
             <div className="mb-10 max-w-2xl">
@@ -526,7 +526,6 @@ export const PlansPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Objections */}
         <section className="border-y border-white/8 bg-white/2 px-6 py-20 md:px-10 xl:px-12">
           <div className="mx-auto max-w-4xl">
             <h2 className="mb-10 text-3xl font-black tracking-tight text-white md:text-4xl">
@@ -553,28 +552,7 @@ export const PlansPage: React.FC = () => {
         </section>
       </main>
 
-      <MarketingFooter />
-
-      {/* Sticky CTA */}
-      <div
-        className={`fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 transition duration-300 md:justify-end md:px-8 md:pb-6 ${
-          stickyVisible
-            ? 'translate-y-0 opacity-100'
-            : 'pointer-events-none translate-y-4 opacity-0'
-        }`}
-        aria-hidden={!stickyVisible}
-      >
-        <button
-          type="button"
-          tabIndex={stickyVisible ? 0 : -1}
-          onClick={startPro}
-          className="group inline-flex items-center gap-2.5 rounded-full bg-accent px-6 py-3.5 text-sm font-black text-black shadow-[0_16px_50px_rgba(16,185,129,0.45)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-accent-light md:px-7 md:text-base"
-        >
-          {stickyCta}
-          <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-        </button>
-      </div>
-    </div>
+    </MarketingLayout>
   );
 };
 

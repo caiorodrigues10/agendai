@@ -2,9 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LuArrowRight as ArrowRight, LuCircleCheck as CheckCircle2 } from 'react-icons/lu';
-import { MarketingNav } from '../../components/marketing/MarketingNav';
-import { MarketingFooter } from '../../components/marketing/MarketingFooter';
-import { SeoHead } from '../../components/marketing/SeoHead';
+import { MarketingLayout } from '../../layouts/marketing/MarketingLayout';
 import { trialCampaign } from '../../marketing/trialCampaign';
 import { softwareApplicationLd } from '../../marketing/softwareApplicationLd';
 
@@ -37,29 +35,30 @@ export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
-      <SeoHead
-        title="Dashboard e relatórios — Visão de dono em tempo real | Agenda Já"
-        description="Faturamento, ticket médio, comissão e produtividade da equipe em tempo real. Insights de movimento e financeiro no painel Pro."
-        path="/dashboard"
-        jsonLd={softwareApplicationLd('/dashboard')}
+    <MarketingLayout
+      title="Dashboard e relatórios — Visão de dono em tempo real | Agenda Já"
+      description="Faturamento, ticket médio, comissão e produtividade da equipe em tempo real. Insights de movimento e financeiro no painel Pro."
+      path="/dashboard"
+      jsonLd={softwareApplicationLd('/dashboard')}
+      background={
+        <>
+    <div className="pointer-events-none fixed inset-0 z-0">
+      <div className="absolute -left-[15%] top-[-12%] h-[55%] w-[55%] rounded-full bg-accent/25 blur-[140px]" />
+      <div className="absolute -right-[12%] top-[18%] h-[45%] w-[45%] rounded-full bg-teal-900/15 blur-[130px]" />
+      <div className="absolute bottom-[-18%] left-[25%] h-[40%] w-[50%] rounded-full bg-cyan-950/30 blur-[120px]" />
+      <div
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)',
+          backgroundSize: '80px 80px',
+          maskImage: 'radial-gradient(ellipse at top, black, transparent 70%)',
+        }}
       />
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -left-[15%] top-[-12%] h-[55%] w-[55%] rounded-full bg-accent/25 blur-[140px]" />
-        <div className="absolute -right-[12%] top-[18%] h-[45%] w-[45%] rounded-full bg-teal-900/15 blur-[130px]" />
-        <div className="absolute bottom-[-18%] left-[25%] h-[40%] w-[50%] rounded-full bg-cyan-950/30 blur-[120px]" />
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)',
-            backgroundSize: '80px 80px',
-            maskImage: 'radial-gradient(ellipse at top, black, transparent 70%)',
-          }}
-        />
-      </div>
-
-      <MarketingNav />
+    </div>
+        </>
+      }
+    >
 
       {/* Hero */}
       <section className="relative z-10 overflow-hidden px-6 pb-16 pt-36 md:px-10 md:pb-24 md:pt-44 xl:px-12">
@@ -552,8 +551,7 @@ export const DashboardPage: React.FC = () => {
         </div>
       </section>
 
-      <MarketingFooter />
-    </div>
+    </MarketingLayout>
   );
 };
 

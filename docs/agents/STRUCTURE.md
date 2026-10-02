@@ -8,24 +8,52 @@ agendai/
 ├── CLAUDE.md / GEMINI.md
 ├── package.json
 ├── vite.config.* / vitest.config.ts / playwright.config.*
+├── .storybook/               ← config Storybook + test-runner visual
+├── visual-regression/        ← snapshots de regressão visual (jest-image-snapshot)
 ├── e2e/                      ← Playwright
-├── scripts/                  ← auditorias e check-docs
+├── scripts/                  ← auditorias, check-docs, test:visual, patch storybook
 ├── docs/
 │   ├── agents/               ← inventários deste manual
+│   ├── restructure/          ← plano e status da reestruturação por etapas
 │   ├── ai-rules.md           ← legado (aponta para AGENTS.md)
 │   └── …
 └── src/
-    ├── index.tsx             ← providers
-    ├── App.tsx               ← rotas
-    ├── index.css             ← Tailwind v4 + tokens
+    ├── app/                  ← index.tsx (providers) + App.tsx (rotas)
+    ├── index.css             ← orquestrador (importa styles/*)
+    ├── styles/               ← tokens, base, vendors, features/weather
+    ├── mocks/                ← handlers MSW (Storybook/testes)
     ├── schemas.ts            ← Zod (formulários)
     ├── types.ts
+    ├── layouts/
+    │   ├── admin/             ← AdminLayout (rota /master)
+    │   ├── app/               ← AppLayout, Header, StaffNavigation (painel)
+    │   └── marketing/         ← MarketingLayout (SeoHead + fundo + Nav + Footer; 12 páginas)
+    ├── features/
+    │   ├── queue/             ← piloto de feature (barrel index.ts; padrão p/ demais áreas)
+    │   ├── clients/           ← AddCustomerForm, ServiceCard, ClientsTab, ClientsManager, ClientProfileSheet
+    │   ├── appointments/      ← Scheduler, Calendar, BookingModal, BookPackageSessionsModal
+    │   ├── onboarding/        ← OnboardingChecklist, ActivationChecklist
+    │   ├── crm/               ← CrmIntelligencePanel, CrmMergePanel(+test), CrmBackfillPanel(+test)
+    │   ├── shop/              ← ShopProfile, ShopFloorControls
+    │   ├── catalog/           ← CatalogManager, ServiceManager, ServiceForm, PackageCatalog, CategoryManager(+test)
+    │   ├── products/          ← ProductsHub + 7 painéis/modais + productMoney/productStock (Etapa 6b)
+    │   ├── finance/           ← CashPanel, FinancialDashboard, OwnerFinancialPanel, ProfitEngine, Weather, DemandAlert + barrel (Etapa 5b)
+    │   ├── goals/ loyalty/ waitlist/ recurring/ recommendations/ equipment/ deposits/
+    │   │                      ← painéis do StaffDashboard com barrel próprio (Etapa 5b)
+    │   ├── settings/          ← SettingsManager (+ ShopCityField, WeatherForecastCard, AppointmentPolicy,
+    │   │                          SalonWhatsAppConnection, BusinessSegmentSection, OperationModeSection extraídos),
+    │   │                          AccountPrivacy, EmailHistory/Preferences, ProfileSettings, ProfileAvatar,
+    │   │                          QueueAlertSettings + barrel (Etapa 6c)
+    │   ├── team/ support/ organizations/ referrals/
+    │   │                      ← TeamManager; SupportPanel + support/* (+test); OrganizationsPanel,
+    │   │                          MultiUnitDashboard (+test); OwnerReferralsPanel, ReferralTierBadge,
+    │   │                          ShareReferralButton — barrels próprios (Etapa 6c)
     ├── components/
     │   ├── ui/               ← Field, SmartSelect, Toast, ConfirmDialog, …
+    │   ├── patterns/         ← Card, Tabs, Tooltip, StatCard, ModalShell, states/, skeletons/
     │   ├── domain/           ← fluxos do painel (fila, clientes, produtos, …)
     │   ├── marketing/        ← nav/landing
-    │   ├── pwa/
-    │   └── infra/            ← ErrorBoundary, listeners
+    │   └── infra/            ← ErrorBoundary, listeners, ThemeToggle, PWA
     ├── contexts/             ← Auth, Subscription, Barbershop, Scheduling, Theme, …
     ├── hooks/                ← usePermissions
     ├── infra/                ← apiClient + *Api.ts (única camada HTTP)
@@ -42,7 +70,11 @@ agendai/
 
 ## Componentes UI compartilhados (reusar antes de criar)
 
-`Avatar`, `chart`, `ConfirmDialog`, `ConsentCheckbox`, `credit-card-form`, `DataTableState`, `DynamicIcon`, `EmptyState`, `Field`, `Header`, `Loader`, `Logo`, `PaginationBar`, `PasswordInput`, `SectionError`, `SmartSelect`, `StaffNavigation`, `StatusBadge`, `ThemedCalendar`, `ThemeToggle`, `Toast`.
+**`components/ui`:** `Avatar`, `chart`, `ConfirmDialog`, `ConsentCheckbox`, `credit-card-form`, `DynamicIcon`, `EmptyState`, `Field`, `Loader`, `Logo`, `PaginationBar`, `PasswordInput`, `SmartSelect`, `StatusBadge`, `ThemedCalendar`, `Toast`.
+
+**`components/patterns`:** `Card` (+Header/Title/Body), `ModalShell` (shell único dos modais), `Tabs`, `Tooltip`, `StatCard`, `DataTableState`/`SectionError` (trio estados), `skeletons/` (base + variantes + composições de domínio).
+
+**`components/infra`:** `ThemeToggle`, `PwaInstallCard`, `PwaUpdatePrompt` além dos listeners/boundaries. **`layouts/app`:** `AppLayout`, `Header`, `StaffNavigation`. **`layouts/admin`:** `AdminLayout`. **`layouts/marketing`:** `MarketingLayout` (forwardRef; props `title/description/path/jsonLd`, `wrapperClassName`, slots `background`/`afterFooter`).
 
 ## Contexts
 

@@ -75,6 +75,18 @@ export interface ProductReservationSummary {
   expiresAt: string;
 }
 
+export interface PublicSaleProduct {
+  id: string;
+  name: string;
+  description: string | null;
+  imageUrl: string | null;
+  salePrice: number;
+  stockQty: number;
+  trackStock: boolean;
+  unitLabel: string;
+  category?: { id: string; name: string; color?: string | null } | null;
+}
+
 export interface ProductCategory {
   id: string;
   name: string;
@@ -234,6 +246,10 @@ export interface ProductReservation {
 }
 
 export const productsApi = {
+  listPublicSaleProducts: (barbershopId: string) =>
+    apiClient<{ success: boolean; data: PublicSaleProduct[] }>(
+      `/api/barbershops/${barbershopId}/public-products`
+    ).then(res => unwrap<PublicSaleProduct[]>(res)),
   listProducts: async (params: {
     search?: string;
     categoryId?: string;

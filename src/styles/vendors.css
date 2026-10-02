@@ -1,0 +1,28 @@
+/*
+ * Mercado Pago Secure Fields: o SDK monta um iframe dentro de
+ * #*SecureField_container. Sem altura explícita o placeholder “vaza”
+ * para fora do box (ex.: sobre a label Validade).
+ */
+.mp-secure-field [id$='SecureField_container'] {
+  width: 100%;
+  height: 100%;
+  min-height: 40px;
+  display: block;
+  overflow: hidden;
+}
+
+.mp-secure-field [id$='SecureField_container'] iframe {
+  display: block;
+  width: 100% !important;
+  height: 40px !important;
+  border: 0;
+  overflow: hidden;
+}
+
+/* reCAPTCHA v3: badge só na página de login (`body.recaptcha-visible`). */
+.grecaptcha-badge {
+  visibility: hidden !important;
+}
+body.recaptcha-visible .grecaptcha-badge {
+  visibility: visible !important;
+}

@@ -2,9 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LuArrowRight as ArrowRight } from 'react-icons/lu';
-import { MarketingNav } from '../../components/marketing/MarketingNav';
-import { MarketingFooter } from '../../components/marketing/MarketingFooter';
-import { SeoHead } from '../../components/marketing/SeoHead';
+import { MarketingLayout } from '../../layouts/marketing/MarketingLayout';
 import { trialCampaign } from '../../marketing/trialCampaign';
 import { softwareApplicationLd } from '../../marketing/softwareApplicationLd';
 
@@ -71,29 +69,30 @@ export const AboutPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
-      <SeoHead
-        title="Sobre a Agenda Já — A tecnologia que protege o vínculo do salão | Agenda Já"
-        description="A Agenda Já nasceu para devolver tempo ao que importa: olhar no olho, fazer o serviço certo e manter a amizade que sustenta o negócio."
-        path="/sobre"
-        jsonLd={softwareApplicationLd('/sobre')}
+    <MarketingLayout
+      title="Sobre a Agenda Já — A tecnologia que protege o vínculo do salão | Agenda Já"
+      description="A Agenda Já nasceu para devolver tempo ao que importa: olhar no olho, fazer o serviço certo e manter a amizade que sustenta o negócio."
+      path="/sobre"
+      jsonLd={softwareApplicationLd('/sobre')}
+      background={
+        <>
+    <div className="pointer-events-none fixed inset-0 z-0">
+      <div className="absolute -left-[18%] top-[-14%] h-[55%] w-[55%] rounded-full bg-accent/28 blur-[150px]" />
+      <div className="absolute -right-[12%] top-[30%] h-[40%] w-[40%] rounded-full bg-teal-900/18 blur-[130px]" />
+      <div className="absolute bottom-[-20%] left-[30%] h-[45%] w-[50%] rounded-full bg-amber-950/20 blur-[140px]" />
+      <div
+        className="absolute inset-0 opacity-[0.035]"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(255,255,255,0.75) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.75) 1px, transparent 1px)',
+          backgroundSize: '72px 72px',
+          maskImage: 'radial-gradient(ellipse at top, black, transparent 72%)',
+        }}
       />
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -left-[18%] top-[-14%] h-[55%] w-[55%] rounded-full bg-accent/28 blur-[150px]" />
-        <div className="absolute -right-[12%] top-[30%] h-[40%] w-[40%] rounded-full bg-teal-900/18 blur-[130px]" />
-        <div className="absolute bottom-[-20%] left-[30%] h-[45%] w-[50%] rounded-full bg-amber-950/20 blur-[140px]" />
-        <div
-          className="absolute inset-0 opacity-[0.035]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(255,255,255,0.75) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.75) 1px, transparent 1px)',
-            backgroundSize: '72px 72px',
-            maskImage: 'radial-gradient(ellipse at top, black, transparent 72%)',
-          }}
-        />
-      </div>
-
-      <MarketingNav />
+    </div>
+        </>
+      }
+    >
 
       {/* Hero — brand + one truth */}
       <section className="relative z-10 px-6 pb-20 pt-36 md:px-10 md:pb-28 md:pt-44 xl:px-12">
@@ -499,8 +498,7 @@ export const AboutPage: React.FC = () => {
         </div>
       </section>
 
-      <MarketingFooter />
-    </div>
+    </MarketingLayout>
   );
 };
 

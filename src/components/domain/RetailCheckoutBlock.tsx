@@ -4,7 +4,7 @@ import { clientsApi } from '../../infra/clientsApi';
 import type { SalonClient } from '../../types';
 import { SmartSelect } from '../ui/SmartSelect';
 import { getErrorMessage } from '../../utils/errorMessage';
-import { productMoney } from './products/productMoney';
+import { productMoney } from '../../features/products/productMoney';
 
 export interface RetailCartItem {
   product: Product;

@@ -49,7 +49,7 @@ import { getRecaptchaToken, useRecaptchaBadge } from '../utils/recaptcha';
 import { plansApi, Plan } from '../infra/plansApi';
 import { subscriptionsApi } from '../infra/subscriptionsApi';
 import { needsPaywallAfterAuth } from '../utils/subscriptionPaywall';
-import { TrialExpiredPaywallModal } from '../components/domain/TrialExpiredPaywallModal';
+import { TrialExpiredPaywallModal } from '../features/subscription';
 import type { StaffMember } from '../types';
 
 type Tab = 'login' | 'register';

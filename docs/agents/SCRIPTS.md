@@ -21,6 +21,11 @@
 | `contract:check` | `node scripts/check-api-contract.mjs` | leitura | backend irmão | Compara wrappers HTTP com rotas |
 | `test:contract` | `node --test scripts/check-api-contract.test.mjs` | testes | Node | Testa o parser de contrato |
 | `verify:delivery` | `node scripts/verify-delivery.mjs` | leitura | `npm install` | Encadeia docs, typecheck, contrato e Vitest (sem produção) |
+| `storybook` | `storybook dev --no-open` | dev | `npm install` | Sobe Storybook local (porta 6006) |
+| `build-storybook` | `storybook build` | geração | `npm install` | Gera `storybook-static/` (artefato de CI) |
+| `test:storybook` | `vitest run --project storybook` | testes | `npm install` + browsers Playwright | Stories como testes (interação + a11y) |
+| `test:visual` | `node scripts/run-visual-tests.mjs` | testes | `npm install` + browsers Playwright | Regressão visual (build Storybook + servidor estático + test-storybook); args extras p/ test-storybook (ex.: `--updateSnapshot`) |
+| `postinstall` | `node scripts/patch-storybook-compat.mjs` | geração | `npm install` | Patches upstream do Storybook (paths não-ASCII #36045 e module.register/Jest #36116) |
 
 ## Observações
 

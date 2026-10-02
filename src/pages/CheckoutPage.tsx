@@ -19,7 +19,7 @@ import { getErrorMessage } from '../utils/errorMessage';
 import { trialCampaign } from '../marketing/trialCampaign';
 import { useAuth } from '../contexts/AuthContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
-import { ThemeToggle } from '../components/ui/ThemeToggle';
+import { ThemeToggle } from '../components/infra/ThemeToggle';
 import { Logo } from '../components/ui/Logo';
 import {
   normalizeDocument,

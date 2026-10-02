@@ -21,7 +21,7 @@ import {
 import { ProductReservationSchema, type ProductReservationFormData } from '../schemas';
 import { maskPhone, normalizePhoneBR } from '../utils/documentUtils';
 import { getErrorMessage } from '../utils/errorMessage';
-import { productMoney } from '../components/domain/products/productMoney';
+import { productMoney } from '../features/products/productMoney';
 import { FIELD_CONTROL, FIELD_CONTROL_ERROR, Field } from '../components/ui/Field';
 
 const MAX_QUANTITY = 10;

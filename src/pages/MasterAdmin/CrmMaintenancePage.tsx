@@ -1,5 +1,5 @@
 import React from 'react';
-import { CrmBackfillPanel } from '../../components/domain/CrmBackfillPanel';
+import { CrmBackfillPanel } from '../../features/crm';
 
 export const CrmMaintenancePage: React.FC = () => (
   <div className="space-y-4">

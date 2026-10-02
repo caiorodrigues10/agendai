@@ -169,6 +169,15 @@ export const AppointmentSchema = z.object({
   whatsapp: whatsappRequired,
   clientId: z.string().uuid().optional(),
   clientPackageId: z.string().uuid().optional(),
+  reservedProducts: z
+    .array(
+      z.object({
+        productId: z.string().uuid(),
+        quantity: z.number().int().min(1).max(10),
+      })
+    )
+    .max(10)
+    .optional(),
 });
 
 export type AppointmentFormData = z.infer<typeof AppointmentSchema>;

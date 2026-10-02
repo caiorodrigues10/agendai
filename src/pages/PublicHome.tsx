@@ -1,17 +1,17 @@
 import React, { useCallback, useState } from 'react';
 import { useNavigate, useParams, useSearchParams, Navigate } from 'react-router-dom';
-import { QueueItemCard } from '../components/domain/QueueItemCard';
-import { AddCustomerForm } from '../components/domain/AddCustomerForm';
-import { ShopProfile } from '../components/domain/ShopProfile';
-import { AppointmentScheduler } from '../components/domain/AppointmentScheduler';
+import { QueueItemCard, QueueStatusCard } from '../features/queue';
+import { AddCustomerForm } from '../features/clients';
+import { ShopProfile } from '../features/shop';
+import { AppointmentScheduler } from '../features/appointments';
 import { PublicProductCarousel } from '../components/domain/PublicProductCarousel';
-import { QueueStatusCard } from '../components/domain/QueueStatusCard';
 import { Toast } from '../components/ui/Toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useBarbershop } from '../contexts/BarbershopContext';
 import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
 import { useScheduling } from '../contexts/SchedulingContext';
 import { schedulingApi } from '../infra/schedulingApi';
+import { productsApi, PublicSaleProduct } from '../infra/productsApi';
 import { DynamicIcon } from '../components/ui/DynamicIcon';
 import {
   LuList as List,
@@ -67,6 +67,7 @@ export const PublicHome: React.FC = () => {
   const [activeTab, setActiveTab] = useState<PublicTab>(tabs[0]);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'bot' } | null>(null);
   const [publicSlots, setPublicSlots] = useState<string[] | undefined>();
+  const [publicProducts, setPublicProducts] = useState<PublicSaleProduct[]>([]);
 
   const handleDateChange = useCallback(
     (date: string, staffId?: string, serviceId?: string) => {
@@ -87,6 +88,18 @@ export const PublicHome: React.FC = () => {
       setBarbershopId(id);
     }
   }, [id, barbershopId, setBarbershopId]);
+
+  React.useEffect(() => {
+    if (!barbershopId) {
+      setPublicProducts([]);
+      return;
+    }
+
+    productsApi
+      .listPublicSaleProducts(barbershopId)
+      .then(products => setPublicProducts(Array.isArray(products) ? products : []))
+      .catch(() => setPublicProducts([]));
+  }, [barbershopId]);
 
   // Deep links used by the salon's public QR codes and post CTAs.
   React.useEffect(() => {
@@ -225,6 +238,7 @@ export const PublicHome: React.FC = () => {
             settings={settings}
             occupancy={availability}
             availableSlots={publicSlots}
+            publicProducts={publicProducts}
             onBook={async d => {
               try {
                 const created = await bookAppointmentPublic(d);

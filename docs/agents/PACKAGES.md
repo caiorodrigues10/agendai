@@ -30,7 +30,14 @@
 
 | Pacote | Versão | Categoria | Finalidade | Evidência de uso |
 |---|---|---|---|---|
+| `@chromatic-com/storybook` | `^10.6.0` | Storybook | Painel/manager Chromatic (sem upload; só UI local) | .storybook/main.ts |
 | `@playwright/test` | `^1.62.1` | Testes | Runner E2E | npm run test:e2e / e2e/ |
+| `@storybook/test-runner` | `^0.24.5` | Testes | Regressão visual das stories (Playwright + jest-image-snapshot) | npm run test:visual / .storybook/test-runner.ts |
+| `@storybook/addon-a11y` | `^10.6.0` | Storybook | Checks a11y nas stories | .storybook/main.ts |
+| `@storybook/addon-docs` | `^10.6.0` | Storybook | Docs autodocs das stories | .storybook/main.ts |
+| `@storybook/addon-mcp` | `^10.6.0` | Storybook | Servidor MCP p/ consumo das stories por agentes | .storybook/main.ts |
+| `@storybook/addon-vitest` | `^10.6.0` | Testes | Roda stories como testes Vitest (projeto `storybook`) | vitest.config.ts / .storybook/main.ts |
+| `@storybook/react-vite` | `^10.6.0` | Storybook | Framework react-vite do Storybook | .storybook/main.ts |
 | `@tailwindcss/postcss` | `^4.1.18` | CSS | Plugin PostCSS Tailwind v4 | postcss config |
 | `@testing-library/jest-dom` | `^7.0.1` | Testes | Matchers DOM | src/tests/setup.ts |
 | `@testing-library/react` | `^16.3.2` | Testes | Render de componentes | *.test.tsx |
@@ -41,16 +48,21 @@
 | `@typescript-eslint/eslint-plugin` | `^8.68.0` | Lint | Regras ESLint TS | eslint |
 | `@typescript-eslint/parser` | `^8.68.0` | Lint | Parser ESLint TS | eslint |
 | `@vitejs/plugin-react` | `^5.0.0` | Build | Plugin React do Vite | vite.config |
+| `@vitest/browser-playwright` | `^4.1.10` | Testes | Projeto Vitest em browser real (Playwright) | vitest.config.ts projeto `storybook` |
 | `@vitest/coverage-v8` | `^4.1.10` | Testes | Cobertura Vitest | declarado; scripts padrão não passam --coverage |
 | `autoprefixer` | `^10.4.24` | CSS | Prefixos CSS | postcss |
 | `eslint` | `^9.39.5` | Lint | Linter | npm run lint |
 | `eslint-config-prettier` | `^10.1.8` | Lint | Compat Prettier | eslint config |
 | `eslint-plugin-jsx-a11y` | `^6.10.2` | Lint | A11y JSX | eslint |
 | `eslint-plugin-react-hooks` | `^7.1.1` | Lint | Regras de Hooks | eslint |
+| `eslint-plugin-storybook` | `^10.6.0` | Lint | Regras das stories (flat/recommended) | eslint.config.js |
+| `jest-image-snapshot` | `^6.5.2` | Testes | Matcher de screenshot p/ regressão visual | .storybook/test-runner.ts |
 | `jsdom` | `^26.1.0` | Testes | Ambiente DOM Vitest | vitest.config.ts |
+| `msw` | `^2.15.0` | Testes | Mock HTTP em stories e testes | src/mocks/ + preview loader |
 | `playwright` | `^1.62.1` | Testes | Browser automation | test:e2e |
 | `postcss` | `^8.5.6` | CSS | Pipeline CSS | Tailwind |
 | `prettier` | `^3.9.6` | Formatação | Formatador | npm run format |
+| `storybook` | `^10.6.0` | Storybook | Runner/CLI do Storybook 10 | npm run storybook |
 | `tailwindcss` | `^4.1.18` | CSS | Utility CSS v4 | index.css / tokens |
 | `typescript` | `~5.8.2` | Core | Compilador TS | npm run typecheck |
 | `typescript-eslint` | `^8.68.0` | Lint | Flat-config ESLint TS | eslint |

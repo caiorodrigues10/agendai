@@ -24,7 +24,8 @@ export default defineConfig(() => {
 		},
 		plugins: [
 			react(),
-			VitePWA({
+			// No Storybook (env STORYBOOK) o app não é servido como PWA.
+			...(process.env.STORYBOOK ? [] : [VitePWA({
 				registerType: 'prompt',
 				injectRegister: null,
 				includeAssets: [
@@ -146,7 +147,7 @@ export default defineConfig(() => {
 					],
 				},
 				devOptions: { enabled: false },
-			}),
+			})]),
 		],
 		resolve: {
 			alias: {

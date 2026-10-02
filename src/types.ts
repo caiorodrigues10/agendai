@@ -46,6 +46,14 @@ export interface Appointment {
   serviceDurationMinutes?: number;
   clientId?: string | null;
   clientPackageId?: string | null;
+  reservedProducts?: {
+    id: string;
+    productId: string;
+    productName: string;
+    quantity: number;
+    unitPrice: number;
+    imageUrl?: string | null;
+  }[];
 }
 
 export interface DaySchedule {
@@ -88,6 +96,7 @@ export interface ShopSettings {
   businessSegment?: BusinessSegment;
   manualStatus?: ManualShopStatus;
   openState?: ShopOpenState;
+  googleReviewUrl?: string | null;
 }
 
 export interface AIInsight {

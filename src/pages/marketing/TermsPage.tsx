@@ -2,9 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LuArrowRight as ArrowRight, LuFileText as FileText } from 'react-icons/lu';
-import { MarketingNav } from '../../components/marketing/MarketingNav';
-import { MarketingFooter } from '../../components/marketing/MarketingFooter';
-import { SeoHead } from '../../components/marketing/SeoHead';
+import { MarketingLayout } from '../../layouts/marketing/MarketingLayout';
 
 const CONTACT_EMAIL = 'contato@agendai.com.br';
 
@@ -88,18 +86,19 @@ const sections = [
 
 export const TermsPage: React.FC = () => {
   return (
-    <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
-      <SeoHead
-        title="Termos e Condições de Uso | Agenda Já"
-        description="Regras de uso, pagamento, cancelamento e reembolso da plataforma Agenda Já para salões de beleza, barbearias e studios."
-        path="/termos"
-      />
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -left-[15%] top-[-12%] h-[50%] w-[50%] rounded-full bg-accent/25 blur-[140px]" />
-        <div className="absolute -right-[10%] bottom-[-10%] h-[45%] w-[45%] rounded-full bg-teal-900/15 blur-[120px]" />
-      </div>
-
-      <MarketingNav />
+    <MarketingLayout
+      title="Termos e Condições de Uso | Agenda Já"
+      description="Regras de uso, pagamento, cancelamento e reembolso da plataforma Agenda Já para salões de beleza, barbearias e studios."
+      path="/termos"
+      background={
+        <>
+    <div className="pointer-events-none fixed inset-0 z-0">
+      <div className="absolute -left-[15%] top-[-12%] h-[50%] w-[50%] rounded-full bg-accent/25 blur-[140px]" />
+      <div className="absolute -right-[10%] bottom-[-10%] h-[45%] w-[45%] rounded-full bg-teal-900/15 blur-[120px]" />
+    </div>
+        </>
+      }
+    >
 
       <section className="relative z-10 px-6 pb-20 pt-32 md:px-10 md:pt-40 xl:px-12">
         <div className="mx-auto max-w-3xl">
@@ -179,8 +178,7 @@ export const TermsPage: React.FC = () => {
         </div>
       </section>
 
-      <MarketingFooter />
-    </div>
+    </MarketingLayout>
   );
 };
 

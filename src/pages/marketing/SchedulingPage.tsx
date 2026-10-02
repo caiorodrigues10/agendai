@@ -9,9 +9,7 @@ import {
   LuRepeat as Repeat,
   LuUserCheck as UserCheck,
 } from 'react-icons/lu';
-import { MarketingNav } from '../../components/marketing/MarketingNav';
-import { MarketingFooter } from '../../components/marketing/MarketingFooter';
-import { SeoHead } from '../../components/marketing/SeoHead';
+import { MarketingLayout } from '../../layouts/marketing/MarketingLayout';
 import { trialCampaign } from '../../marketing/trialCampaign';
 import { softwareApplicationLd } from '../../marketing/softwareApplicationLd';
 
@@ -64,29 +62,30 @@ export const SchedulingPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
-      <SeoHead
-        title="Agendamento online 24h — Link público sem app | Agenda Já"
-        description="Cliente escolhe serviço, profissional e horário pelo link. Sem WhatsApp. Sem ligação. Sem erro. Agendamento que respeita o profissional."
-        path="/agendamento"
-        jsonLd={softwareApplicationLd('/agendamento')}
+    <MarketingLayout
+      title="Agendamento online 24h — Link público sem app | Agenda Já"
+      description="Cliente escolhe serviço, profissional e horário pelo link. Sem WhatsApp. Sem ligação. Sem erro. Agendamento que respeita o profissional."
+      path="/agendamento"
+      jsonLd={softwareApplicationLd('/agendamento')}
+      background={
+        <>
+    <div className="pointer-events-none fixed inset-0 z-0">
+      <div className="absolute -left-[15%] top-[-12%] h-[55%] w-[55%] rounded-full bg-accent/25 blur-[140px]" />
+      <div className="absolute -right-[10%] top-[20%] h-[45%] w-[45%] rounded-full bg-teal-900/15 blur-[130px]" />
+      <div className="absolute bottom-[-15%] left-[20%] h-[40%] w-[50%] rounded-full bg-text-primary/40 blur-[120px]" />
+      <div
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)',
+          backgroundSize: '80px 80px',
+          maskImage: 'radial-gradient(ellipse at top, black, transparent 70%)',
+        }}
       />
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -left-[15%] top-[-12%] h-[55%] w-[55%] rounded-full bg-accent/25 blur-[140px]" />
-        <div className="absolute -right-[10%] top-[20%] h-[45%] w-[45%] rounded-full bg-teal-900/15 blur-[130px]" />
-        <div className="absolute bottom-[-15%] left-[20%] h-[40%] w-[50%] rounded-full bg-text-primary/40 blur-[120px]" />
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)',
-            backgroundSize: '80px 80px',
-            maskImage: 'radial-gradient(ellipse at top, black, transparent 70%)',
-          }}
-        />
-      </div>
-
-      <MarketingNav />
+    </div>
+        </>
+      }
+    >
 
       {/* Hero */}
       <section className="relative z-10 overflow-hidden px-6 pb-20 pt-36 md:px-10 md:pb-28 md:pt-44 xl:px-12">
@@ -752,8 +751,7 @@ export const SchedulingPage: React.FC = () => {
         </motion.div>
       </section>
 
-      <MarketingFooter />
-    </div>
+    </MarketingLayout>
   );
 };
 

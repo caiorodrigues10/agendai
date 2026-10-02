@@ -1,5 +1,6 @@
 /// <reference types="vitest/globals" />
-import { screen, waitFor } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { PlansPage } from './PlansPage';
 import { renderWithProviders } from '../tests/testUtils';
 
@@ -61,7 +62,7 @@ vi.mock('../components/marketing/MarketingFooter', () => ({
   MarketingFooter: () => <footer data-testid="marketing-footer">footer</footer>,
 }));
 
-vi.mock('../components/marketing/PricingPersuasionCharts', () => ({
+vi.mock('../features/marketing', () => ({
   PricingPersuasionCharts: () => <div data-testid="pricing-charts" />,
 }));
 
@@ -70,11 +71,47 @@ describe('PlansPage', () => {
     vi.clearAllMocks();
   });
 
-  it('lista planos mockados sem crash', async () => {
+  it('mostra teste, essencial e pro com o selo do plano popular', async () => {
     renderWithProviders(<PlansPage />, { route: '/planos' });
     expect(screen.getByTestId('marketing-nav')).toBeInTheDocument();
-    await waitFor(() => {
-      expect(screen.getByText(/essencial \/ mês/i)).toBeInTheDocument();
-    });
+    expect(await screen.findByRole('heading', { name: /^essencial$/i })).toBeInTheDocument();
+    expect(document.querySelector('h1')?.textContent).toMatch(/teste grátis ou escolha o plano/i);
+    expect(screen.getByRole('heading', { name: /^teste grátis$/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /^pro$/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /começar teste grátis/i })).toBeInTheDocument();
+    expect(screen.getByText(/mais escolhido/i)).toBeInTheDocument();
+    expect(screen.getByTestId('pricing-charts')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /essencial opera\. pro enxerga/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /objeções que a gente já ouviu/i })).toBeInTheDocument();
+  });
+
+  it('alterna o preço mensal e o equivalente anual', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<PlansPage />, { route: '/planos' });
+
+    expect(await screen.findByTestId('plan-price-essential')).toHaveTextContent('11,67');
+    expect(screen.getByTestId('plan-price-pro')).toHaveTextContent('16,67');
+    expect(screen.getByTestId('plan-billed-essential')).toHaveTextContent('140,00');
+    expect(screen.getByTestId('plan-billed-pro')).toHaveTextContent('200,00');
+
+    await user.click(screen.getByRole('button', { name: /^mensal$/i }));
+
+    expect(screen.getByTestId('plan-price-essential')).toHaveTextContent('14,00');
+    expect(screen.getByTestId('plan-price-pro')).toHaveTextContent('20,00');
+    expect(screen.queryByTestId('plan-billed-essential')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('plan-billed-pro')).not.toBeInTheDocument();
+  });
+
+  it('marca no essencial o que o plano não inclui', async () => {
+    renderWithProviders(<PlansPage />, { route: '/planos' });
+    const essential = (await screen.findByRole('heading', { name: /^essencial$/i })).closest(
+      'article'
+    );
+    expect(essential).not.toBeNull();
+    expect(
+      within(essential as HTMLElement).getByRole('listitem', {
+        name: /não inclui dashboard e relatórios/i,
+      })
+    ).toBeInTheDocument();
   });
 });

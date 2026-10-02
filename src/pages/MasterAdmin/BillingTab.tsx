@@ -37,8 +37,7 @@ import {
 } from '../../infra/adminApi';
 import { paymentsApi, Refund } from '../../infra/paymentsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
-import { NotificationDeliveriesPanel } from '../../components/domain/NotificationDeliveriesPanel';
-import { NotificationHealthPanel } from '../../components/domain/NotificationHealthPanel';
+import { NotificationDeliveriesPanel, NotificationHealthPanel } from '../../features/notifications';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Toast } from '../../components/ui/Toast';
 

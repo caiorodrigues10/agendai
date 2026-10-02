@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { ClientPortalLogin } from '../components/domain/ClientPortalLogin';
-import { ClientPortalDashboard } from '../components/domain/ClientPortalDashboard';
+import { ClientPortalLogin, ClientPortalDashboard } from '../features/client-portal';
 
 const ClientPortalPage: React.FC = () => {
   const [authenticated, setAuthenticated] = useState(false);

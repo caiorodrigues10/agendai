@@ -1,0 +1,133 @@
+/*
+ * Design tokens semânticos — tema CLARO (padrão em :root).
+ * O tema escuro sobrescreve os mesmos tokens em `.dark`, mapeando os tons
+ * neutral-950/900/800 e emerald usados historicamente no app.
+ */
+:root {
+  --ag-bg: #fbfcfa;
+  --ag-surface: #f6f8f5;
+  --ag-surface-2: #e9eee9;
+  --ag-border: #d8e5dd;
+  --ag-border-strong: #abc5b7;
+  --ag-text-primary: #16251e;
+  --ag-text-secondary: #4d6256;
+  --ag-text-muted: #617267;
+  /* Marca e ação são papéis diferentes: marca identifica; ação confirma. */
+  --ag-brand: #249b76;
+  --ag-brand-hover: #1c7e61;
+  --ag-action-primary: #1c7e61;
+  --ag-action-primary-hover: #16664f;
+  --ag-action-primary-fg: #ffffff;
+  /* Alias idêntico de action-primary (mesma cor nos dois temas); vocabulário de facto do app: bg-accent. */
+  --ag-accent: var(--ag-action-primary);
+  --ag-accent-hover: var(--ag-action-primary-hover);
+  --ag-accent-fg: var(--ag-action-primary-fg);
+  /* Cor terciária: detalhes premium, sem competir com a marca. */
+  --ag-tertiary: #79613f;
+  /* Suporte: informação, ajuda e comparativos. */
+  --ag-support: #2563eb;
+  /* Botões secundários (outlined): cor da borda/texto. */
+  --ag-action-secondary: #d4d4d4;
+  /* Seleção: fundo de item selecionado (baixa opacidade). */
+  --ag-selection: rgba(36, 155, 118, 0.14);
+  /* Foco distinto do estado ativo para preservar a navegação por teclado. */
+  --ag-focus: #249b76;
+  --ag-danger: #dc2626;
+  --ag-success: #107836;
+  --ag-warning: #b45309;
+  /* shadcn/recharts — séries alinhadas ao tema */
+  --chart-1: #1c7e61;
+  --chart-2: #7c3aed;
+  --chart-3: #0891b2;
+  --chart-4: #b45309;
+  --chart-5: #525252;
+}
+
+/* Paleta inspirada no dark mode do YouTube: fundo #0f0f0f com superfícies
+   e bordas em cinzas mais claros (#212121/#3f3f3f), evitando o visual
+   "preto total" dos tons neutral-950/900. */
+.dark {
+  --ag-bg: #0f1110;
+  --ag-surface: #1b1f1d;
+  --ag-surface-2: #252b27;
+  --ag-border: #303a34;
+  --ag-border-strong: #445249;
+  --ag-text-primary: #f2f5f3;
+  --ag-text-secondary: #b7c2bb;
+  --ag-text-muted: #8b9990;
+  --ag-brand: #2cb58a;
+  --ag-brand-hover: #45c49b;
+  --ag-action-primary: #2cb58a;
+  --ag-action-primary-hover: #45c49b;
+  --ag-action-primary-fg: #0f1110;
+  --ag-accent: var(--ag-action-primary);
+  --ag-accent-hover: var(--ag-action-primary-hover);
+  --ag-accent-fg: var(--ag-action-primary-fg);
+  --ag-tertiary: #c6ad87;
+  --ag-support: #60a5fa;
+  --ag-action-secondary: #303a34;
+  --ag-selection: rgba(44, 181, 138, 0.16);
+  --ag-focus: #2cb58a;
+  --ag-danger: #f16161;
+  --ag-success: #22c55e;
+  --ag-warning: #f59e0b;
+  --chart-1: #2cb58a;
+  --chart-2: #a78bfa;
+  --chart-3: #22d3ee;
+  --chart-4: #f59e0b;
+  --chart-5: #aaaaaa;
+}
+
+/*
+ * Expõe os tokens como cores do Tailwind v4 (`@theme inline` referencia as
+ * custom properties em runtime), gerando utilities como `bg-bg`, `bg-surface`,
+ * `text-text-primary`, `border-border`, `bg-accent/10`, etc.
+ */
+@theme inline {
+  --color-bg: var(--ag-bg);
+  --color-surface: var(--ag-surface);
+  --color-surface-2: var(--ag-surface-2);
+  --color-border: var(--ag-border);
+  --color-border-strong: var(--ag-border-strong);
+  --color-text-primary: var(--ag-text-primary);
+  --color-text-secondary: var(--ag-text-secondary);
+  --color-text-muted: var(--ag-text-muted);
+  --color-accent: var(--ag-accent);
+  --color-accent-hover: var(--ag-accent-hover);
+  --color-accent-fg: var(--ag-accent-fg);
+  --color-brand: var(--ag-brand);
+  --color-brand-hover: var(--ag-brand-hover);
+  --color-action-primary: var(--ag-action-primary);
+  --color-action-primary-hover: var(--ag-action-primary-hover);
+  --color-action-primary-fg: var(--ag-action-primary-fg);
+  --color-tertiary: var(--ag-tertiary);
+  --color-support: var(--ag-support);
+  --color-action-secondary: var(--ag-action-secondary);
+  --color-selection: var(--ag-selection);
+  --color-focus: var(--ag-focus);
+  --color-danger: var(--ag-danger);
+  --color-success: var(--ag-success);
+  --color-warning: var(--ag-warning);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+}
+
+@theme {
+  --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Syne', ui-sans-serif, system-ui, sans-serif;
+  --animate-fade-in: fade-in 0.8s ease-out forwards;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

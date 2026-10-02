@@ -1,0 +1,1 @@
+export { WaitlistPanel } from './WaitlistPanel';

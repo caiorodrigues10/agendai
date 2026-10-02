@@ -93,7 +93,7 @@ vi.mock('../components/domain/AppointmentScheduler', () => ({
   AppointmentScheduler: () => null,
 }));
 
-vi.mock('../components/domain/ShopProfile', () => ({
+vi.mock('../features/shop', () => ({
   ShopProfile: () => null,
 }));
 

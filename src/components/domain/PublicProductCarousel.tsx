@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LuPackage as Package, LuChevronRight as ChevronRight } from 'react-icons/lu';
 import { publicProductsApi, type PublicProduct } from '../../infra/publicProductsApi';
-import { productMoney } from './products/productMoney';
+import { productMoney } from '../../features/products/productMoney';
 
 interface Props {
   barbershopId: string;

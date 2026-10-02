@@ -22,6 +22,7 @@ interface BarbershopData {
   businessSegment?: BusinessSegment;
   manualStatus?: ManualShopStatus;
   openState?: ShopOpenState;
+  googleReviewUrl?: string | null;
 }
 
 export interface ShopWeatherDay {

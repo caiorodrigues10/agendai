@@ -27,6 +27,9 @@
     "noEmit": true
   },
   "include": [
-    "src"
+    "src",
+    "./.storybook/**/*.ts",
+    "./.storybook/**/*.tsx",
+    "vitest.shims.d.ts"
   ]
 }

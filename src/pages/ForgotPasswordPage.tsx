@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { authApi } from '../infra/authApi';
 import { getRecaptchaToken } from '../utils/recaptcha';
 import { Logo } from '../components/ui/Logo';
-import { ThemeToggle } from '../components/ui/ThemeToggle';
+import { ThemeToggle } from '../components/infra/ThemeToggle';
 import {
   LuArrowRight as ArrowRight,
   LuLockKeyhole as LockKeyhole,

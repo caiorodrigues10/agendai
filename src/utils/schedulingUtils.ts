@@ -191,5 +191,6 @@ export function mapAppointmentFromApi(raw: any): Appointment {
     serviceDurationMinutes: raw.serviceDurationMinutes,
     clientId: raw.clientId ?? null,
     clientPackageId: raw.clientPackageId ?? null,
+    reservedProducts: Array.isArray(raw.reservedProducts) ? raw.reservedProducts : [],
   };
 }

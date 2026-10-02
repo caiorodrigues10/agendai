@@ -1,8 +1,19 @@
-﻿import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Header } from '../components/ui/Header';
-import { AddCustomerForm } from '../components/domain/AddCustomerForm';
-import { ReturnToQueueModal } from '../components/domain/ReturnToQueueModal';
+import { AppLayout } from '../layouts/app/AppLayout';
+import { ClosedSalonJoinModal, QueueCapacityBanner, QueueItemCard, QueueStatusCard, ReturnToQueueModal } from '../features/queue';
+import { AddCustomerForm, ClientsTab } from '../features/clients';
+import { ShopFloorControls, ShopProfile } from '../features/shop';
+import { CatalogManager, ServiceManager } from '../features/catalog';
+import { SettingsManager, AccountPrivacyPanel, ProfileAvatarSection, ProfileSettingsPanel } from '../features/settings';
+import { SupportPanel } from '../features/support';
+import { TeamManager } from '../features/team';
+import { CashPanel, DemandAlertBanner, FinancialDashboard, OwnerFinancialPanel, ProfitEnginePanel } from '../features/finance';
+import { OwnerReferralsPanel } from '../features/referrals';
+import { OwnerSubscriptionPanel } from '../features/subscription';
+import { PostsManager } from '../features/posts';
+import { ShowcasePanel, PublicLinkPanel } from '../features/showcase';
+import { AppointmentCalendar } from '../features/appointments';
 import { Toast } from '../components/ui/Toast';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../contexts/AuthContext';
@@ -11,56 +22,28 @@ import { useScheduling } from '../contexts/SchedulingContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
 import { ALL_TAB_IDS, getDefaultTab, canAccessTab, canAccessTabByMode, getPrimaryTabForMode } from '../config/tabRegistry';
+
+import { PwaInstallCard } from '../components/infra/PwaInstallCard';
 import { getErrorMessage } from '../utils/errorMessage';
 import { QueueItem } from '../types';
 import { LuLoaderCircle as Loader2 } from 'react-icons/lu';
-import { StaffNavigation } from '../components/ui/StaffNavigation';
 import { supportsQueue, supportsAppointments } from '../utils/operationMode';
 import { todayISO } from '../utils/dateRanges';
-import { ClosedSalonJoinModal } from '../components/domain/ClosedSalonJoinModal';
 import { usePermissions } from '../hooks/usePermissions';
+import { ActivationChecklist, OnboardingChecklist } from '../features/onboarding';
 import { useOnboardingStatus } from '../hooks/useOnboardingStatus';
+import { ProductsHub } from '../features/products';
 import { productsApi } from '../infra/productsApi';
+import { GoalsPanel } from '../features/goals';
+import { LoyaltyPanel } from '../features/loyalty';
+import { RecommendationsPanel } from '../features/recommendations';
+import { DepositPolicyPanel } from '../features/deposits';
+import { WaitlistPanel } from '../features/waitlist';
+import { RecurringPackagesPanel } from '../features/recurring';
+import { OrganizationsPanel } from '../features/organizations';
 import { ErrorBoundary } from '../components/infra/ErrorBoundary';
-import { lazyPanel } from '../components/infra/lazyPanel';
+import { EquipmentPanel } from '../features/equipment';
 
-const QueueItemCard = lazyPanel(() => import('../components/domain/QueueItemCard'), 'QueueItemCard');
-const QueueStatusCard = lazyPanel(() => import('../components/domain/QueueStatusCard'), 'QueueStatusCard');
-const QueueCapacityBanner = lazyPanel(() => import('../components/domain/QueueCapacityBanner'), 'QueueCapacityBanner');
-const ShopFloorControls = lazyPanel(() => import('../components/domain/ShopFloorControls'), 'ShopFloorControls');
-const ActivationChecklist = lazyPanel(() => import('../components/domain/ActivationChecklist'), 'ActivationChecklist');
-const DemandAlertBanner = lazyPanel(() => import('../components/domain/DemandAlertBanner'), 'DemandAlertBanner');
-const PwaInstallCard = lazyPanel(() => import('../components/pwa/PwaInstallCard'), 'PwaInstallCard');
-const OnboardingChecklist = lazyPanel(() => import('../components/domain/OnboardingChecklist'), 'OnboardingChecklist');
-const AppointmentCalendar = lazyPanel(() => import('../components/domain/AppointmentCalendar'), 'AppointmentCalendar');
-const ProductsHub = lazyPanel(() => import('../components/domain/ProductsHub'), 'ProductsHub');
-const ClientsTab = lazyPanel(() => import('../components/domain/ClientsTab'), 'ClientsTab');
-const ServiceManager = lazyPanel(() => import('../components/domain/ServiceManager'), 'ServiceManager');
-const CatalogManager = lazyPanel(() => import('../components/domain/CatalogManager'), 'CatalogManager');
-const TeamManager = lazyPanel(() => import('../components/domain/TeamManager'), 'TeamManager');
-const FinancialDashboard = lazyPanel(() => import('../components/domain/FinancialDashboard'), 'FinancialDashboard');
-const RecommendationsPanel = lazyPanel(() => import('../components/domain/RecommendationsPanel'), 'RecommendationsPanel');
-const OwnerFinancialPanel = lazyPanel(() => import('../components/domain/OwnerFinancialPanel'), 'OwnerFinancialPanel');
-const CashPanel = lazyPanel(() => import('../components/domain/CashPanel'), 'CashPanel');
-const DepositPolicyPanel = lazyPanel(() => import('../components/domain/DepositPolicyPanel'), 'DepositPolicyPanel');
-const WaitlistPanel = lazyPanel(() => import('../components/domain/WaitlistPanel'), 'WaitlistPanel');
-const RecurringPackagesPanel = lazyPanel(() => import('../components/domain/RecurringPackagesPanel'), 'RecurringPackagesPanel');
-const LoyaltyPanel = lazyPanel(() => import('../components/domain/LoyaltyPanel'), 'LoyaltyPanel');
-const GoalsPanel = lazyPanel(() => import('../components/domain/GoalsPanel'), 'GoalsPanel');
-const ProfitEnginePanel = lazyPanel(() => import('../components/domain/ProfitEnginePanel'), 'ProfitEnginePanel');
-const EquipmentPanel = lazyPanel(() => import('../components/domain/EquipmentPanel'), 'EquipmentPanel');
-const OrganizationsPanel = lazyPanel(() => import('../components/domain/OrganizationsPanel'), 'OrganizationsPanel');
-const PostsManager = lazyPanel(() => import('../components/domain/PostsManager'), 'PostsManager');
-const ShowcasePanel = lazyPanel(() => import('../components/domain/ShowcasePanel'), 'ShowcasePanel');
-const PublicLinkPanel = lazyPanel(() => import('../components/domain/PublicLinkPanel'), 'PublicLinkPanel');
-const OwnerReferralsPanel = lazyPanel(() => import('../components/domain/OwnerReferralsPanel'), 'OwnerReferralsPanel');
-const OwnerSubscriptionPanel = lazyPanel(() => import('../components/domain/OwnerSubscriptionPanel'), 'OwnerSubscriptionPanel');
-const SettingsManager = lazyPanel(() => import('../components/domain/SettingsManager'), 'SettingsManager');
-const ProfileAvatarSection = lazyPanel(() => import('../components/domain/ProfileAvatarSection'), 'ProfileAvatarSection');
-const ProfileSettingsPanel = lazyPanel(() => import('../components/domain/ProfileSettingsPanel'), 'ProfileSettingsPanel');
-const AccountPrivacyPanel = lazyPanel(() => import('../components/domain/AccountPrivacyPanel'), 'AccountPrivacyPanel');
-const SupportPanel = lazyPanel(() => import('../components/domain/SupportPanel'), 'SupportPanel');
-const ShopProfile = lazyPanel(() => import('../components/domain/ShopProfile'), 'ShopProfile');
 
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -273,36 +256,26 @@ export const StaffDashboard: React.FC = () => {
   const installVideoUrl = import.meta.env.VITE_PWA_INSTALL_VIDEO_URL as string | undefined;
 
   return (
-    <div className="min-h-screen bg-bg pb-[max(5.5rem,env(safe-area-inset-bottom))] text-text-primary lg:pb-0">
-      <a
-        href="#main-content"
-        className="sr-only fixed left-4 top-4 z-[90] rounded-lg bg-accent px-4 py-2 text-sm font-bold text-accent-fg focus:not-sr-only"
-      >
-        Pular para o conteúdo
-      </a>
-      <Header
-        currentUser={user}
-        onOpenLogin={() => navigate('/login')}
+    <>
+      <AppLayout
+        user={user}
+        logoUrl={settings?.logoUrl}
+        onLogin={() => navigate('/login')}
         onLogout={() => {
           logout();
           navigate('/');
         }}
-        logoUrl={settings?.logoUrl}
-      />
-
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-
-      <div className="mx-auto flex w-full max-w-7xl gap-6 px-4 py-6 lg:px-6">
-        <StaffNavigation
-          activeTab={activeTab}
-          userRole={user?.role}
-          hasDashboard={hasDashboard}
-          permissions={user?.permissions}
-          operationMode={operationMode}
-          onboardingCompleted={onboardingCompleted}
-          onNavigate={tabId => navigate(`/app/${tabId}`)}
-        />
-        <main id="main-content" className="min-w-0 flex-1">
+        toast={
+          toast ? <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} /> : undefined
+        }
+        activeTab={activeTab}
+        userRole={user?.role}
+        hasDashboard={hasDashboard}
+        permissions={user?.permissions}
+        operationMode={operationMode}
+        onboardingCompleted={onboardingCompleted}
+        onNavigate={tabId => navigate(`/app/${tabId}`)}
+      >
           {/* Tab Content */}
           {activeTab === 'overview' && (
             <div className="space-y-4">
@@ -650,8 +623,7 @@ export const StaffDashboard: React.FC = () => {
               onNotify={showToast}
             />
           )}
-        </main>
-      </div>
+      </AppLayout>
 
       {showJoinForm && (
         <AddCustomerForm
@@ -696,7 +668,7 @@ export const StaffDashboard: React.FC = () => {
           }}
         />
       )}
-    </div>
+    </>
   );
 };
 

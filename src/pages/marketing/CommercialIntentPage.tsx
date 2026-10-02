@@ -2,9 +2,7 @@ import React from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LuArrowRight as ArrowRight, LuCircleCheck as CheckCircle2 } from 'react-icons/lu';
-import { MarketingNav } from '../../components/marketing/MarketingNav';
-import { MarketingFooter } from '../../components/marketing/MarketingFooter';
-import { SeoHead } from '../../components/marketing/SeoHead';
+import { MarketingLayout } from '../../layouts/marketing/MarketingLayout';
 import { trialCampaign } from '../../marketing/trialCampaign';
 import { commercialPageByPath } from '../../marketing/commercialPages';
 import { breadcrumbLd, faqPageLd, softwareApplicationLd } from '../../marketing/softwareApplicationLd';
@@ -22,19 +20,20 @@ export const CommercialIntentPage: React.FC = () => {
   ])];
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30">
-      <SeoHead
-        title={page.metaTitle}
-        description={page.metaDescription}
-        path={page.path}
-        jsonLd={jsonLd}
-      />
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -left-[15%] top-[-12%] h-[55%] w-[55%] rounded-full bg-accent/25 blur-[140px]" />
-        <div className="absolute -right-[10%] top-[20%] h-[45%] w-[45%] rounded-full bg-teal-900/15 blur-[130px]" />
-      </div>
-
-      <MarketingNav />
+    <MarketingLayout
+      title={page.metaTitle}
+      description={page.metaDescription}
+      path={page.path}
+      jsonLd={jsonLd}
+      background={
+        <>
+    <div className="pointer-events-none fixed inset-0 z-0">
+      <div className="absolute -left-[15%] top-[-12%] h-[55%] w-[55%] rounded-full bg-accent/25 blur-[140px]" />
+      <div className="absolute -right-[10%] top-[20%] h-[45%] w-[45%] rounded-full bg-teal-900/15 blur-[130px]" />
+    </div>
+        </>
+      }
+    >
 
       <section className="relative z-10 px-6 pb-16 pt-36 md:px-10 md:pb-24 md:pt-44 xl:px-12">
         <div className="mx-auto max-w-375">
@@ -174,8 +173,7 @@ export const CommercialIntentPage: React.FC = () => {
         </div>
       </section>
 
-      <MarketingFooter />
-    </div>
+    </MarketingLayout>
   );
 };
 

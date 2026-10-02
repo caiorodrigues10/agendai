@@ -17,9 +17,7 @@ import {
   LuUsers as Users,
   LuZap as Zap,
 } from 'react-icons/lu';
-import { MarketingNav } from '../components/marketing/MarketingNav';
-import { MarketingFooter } from '../components/marketing/MarketingFooter';
-import { SeoHead } from '../components/marketing/SeoHead';
+import { MarketingLayout } from '../layouts/marketing/MarketingLayout';
 import { FloatingPathsBackground } from '../components/ui/floating-paths';
 import { trialCampaign } from '../marketing/trialCampaign';
 import { softwareApplicationLd } from '../marketing/softwareApplicationLd';
@@ -651,37 +649,37 @@ export const LandingPage: React.FC = () => {
   }, []);
 
   return (
-    <div
+    <MarketingLayout
       ref={pageRef}
-      className="min-h-screen overflow-x-hidden bg-[#050706] font-sans text-neutral-100 selection:bg-emerald-400/30"
-    >
-      <SeoHead
-        title={`${BRAND_NAME} — Fila, agenda e financeiro para salão e barbearia`}
-        description="Fila digital com estimativa de espera, agendamento online 24h e financeiro no mesmo painel. 30 dias de Pro grátis, sem cartão."
-        path="/"
-        jsonLd={softwareApplicationLd('/')}
+      wrapperClassName="min-h-screen overflow-x-hidden bg-[#050706] font-sans text-neutral-100 selection:bg-emerald-400/30"
+      title={`${BRAND_NAME} — Fila, agenda e financeiro para salão e barbearia`}
+      description="Fila digital com estimativa de espera, agendamento online 24h e financeiro no mesmo painel. 30 dias de Pro grátis, sem cartão."
+      path="/"
+      jsonLd={softwareApplicationLd('/')}
+      background={
+        <>
+    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
+      <div
+        data-ambient="one"
+        className="absolute -left-[10%] -top-[15%] h-192 w-3xl rounded-full bg-emerald-600/9 blur-[150px]"
       />
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
-        <div
-          data-ambient="one"
-          className="absolute -left-[10%] -top-[15%] h-192 w-3xl rounded-full bg-emerald-600/9 blur-[150px]"
-        />
-        <div
-          data-ambient="two"
-          className="absolute -bottom-[20%] -right-[12%] h-176 w-176 rounded-full bg-cyan-600/6 blur-[150px]"
-        />
-        <div
-          className="absolute inset-0 opacity-[0.035]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(255,255,255,.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.8) 1px, transparent 1px)',
-            backgroundSize: '64px 64px',
-            maskImage: 'linear-gradient(to bottom, black, transparent 75%)',
-          }}
-        />
-      </div>
-
-      <MarketingNav />
+      <div
+        data-ambient="two"
+        className="absolute -bottom-[20%] -right-[12%] h-176 w-176 rounded-full bg-cyan-600/6 blur-[150px]"
+      />
+      <div
+        className="absolute inset-0 opacity-[0.035]"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(255,255,255,.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.8) 1px, transparent 1px)',
+          backgroundSize: '64px 64px',
+          maskImage: 'linear-gradient(to bottom, black, transparent 75%)',
+        }}
+      />
+    </div>
+        </>
+      }
+    >
 
       <main className="relative z-10">
         <section className="relative flex min-h-screen items-center overflow-hidden px-5 pb-20 pt-24 sm:px-8 sm:pb-24 sm:pt-28 md:pt-32 xl:px-12 xl:pb-28 xl:pt-36">
@@ -2231,8 +2229,7 @@ export const LandingPage: React.FC = () => {
 
       </main>
 
-      <MarketingFooter />
-    </div>
+    </MarketingLayout>
   );
 };
 

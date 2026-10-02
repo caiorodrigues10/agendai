@@ -5,8 +5,7 @@ import {
   LuCircleAlert as AlertCircle,
   LuArrowRight as ArrowRight,
 } from 'react-icons/lu';
-import { MarketingNav } from '../components/marketing/MarketingNav';
-import { MarketingFooter } from '../components/marketing/MarketingFooter';
+import { MarketingLayout } from '../layouts/marketing/MarketingLayout';
 
 export const EmailVerifiedPage: React.FC = () => {
   const [params] = useSearchParams();
@@ -18,8 +17,9 @@ export const EmailVerifiedPage: React.FC = () => {
     : null;
 
   return (
-    <div className="min-h-screen bg-bg text-text-primary flex flex-col">
-      <MarketingNav />
+    <MarketingLayout
+      wrapperClassName="min-h-screen bg-bg text-text-primary flex flex-col"
+    >
       <main className="flex-1 flex items-center justify-center px-4 py-16">
         <div className="max-w-md w-full rounded-2xl border border-border bg-surface p-8 text-center space-y-4">
           {error ? (
@@ -49,8 +49,7 @@ export const EmailVerifiedPage: React.FC = () => {
           </Link>
         </div>
       </main>
-      <MarketingFooter />
-    </div>
+    </MarketingLayout>
   );
 };
 

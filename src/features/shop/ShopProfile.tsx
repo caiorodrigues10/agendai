@@ -1,0 +1,612 @@
+/* eslint-disable jsx-a11y/media-has-caption -- mídia enviada pelo salão não possui trilha de legenda separada */
+import { BRAND_NAME_UPPER } from '../../config/brand';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ShopSettings, FeedPost, StaffMember, Service, DaySchedule } from '../../types';
+import {
+  LuTrash2 as Trash2,
+  LuHeart as Heart,
+  LuImage as ImageIcon,
+  LuMapPin as MapPin,
+  LuScissors as Scissors,
+  LuEllipsis as MoreHorizontal,
+  LuClock as Clock,
+  LuMessageCircle as MessageCircle,
+  LuList as List,
+  LuCalendarDays as CalendarDays,
+  LuExternalLink as ExternalLink,
+  LuCamera as Camera,
+  LuLoaderCircle as Loader2,
+  LuStar as Star,
+} from 'react-icons/lu';
+import { barbershopApi } from '../../infra/barbershopApi';
+import { reputationApi, PublicReviewSummary } from '../../infra/reputationApi';
+import { useBarbershop } from '../../contexts/BarbershopContext';
+import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
+import { getErrorMessage } from '../../utils/errorMessage';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+
+const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+interface ShopProfileProps {
+  settings: ShopSettings;
+  posts: FeedPost[];
+  currentUser: StaffMember | null;
+  onDeletePost: (id: string) => void;
+  onLikePost: (id: string) => void;
+  /** Perfil do cliente no link público vs. aba Perfil da equipe. */
+  audience?: 'public' | 'staff';
+  onGoQueue?: () => void;
+  onGoAppointments?: () => void;
+  onNotify?: (message: string, type: 'success' | 'error') => void;
+}
+
+function digitsOnly(phone: string): string {
+  return phone.replace(/\D/g, '');
+}
+
+function waLink(phone: string): string | null {
+  const d = digitsOnly(phone);
+  if (d.length < 10) return null;
+  const withCc = d.startsWith('55') ? d : `55${d.replace(/^0/, '')}`;
+  return `https://wa.me/${withCc}`;
+}
+
+function formatBrPhone(phone: string): string {
+  const d = digitsOnly(phone);
+  const local = d.startsWith('55') && d.length > 11 ? d.slice(2) : d;
+  if (local.length === 11) {
+    return `(${local.slice(0, 2)}) ${local.slice(2, 7)}-${local.slice(7)}`;
+  }
+  if (local.length === 10) {
+    return `(${local.slice(0, 2)}) ${local.slice(2, 6)}-${local.slice(6)}`;
+  }
+  return phone;
+}
+
+function shopInitials(name: string): string {
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(w => w[0])
+      .join('')
+      .toUpperCase() || 'S'
+  );
+}
+
+function todaySchedule(schedule: DaySchedule[] | undefined): DaySchedule | null {
+  if (!schedule?.length) return null;
+  return schedule[new Date().getDay()] ?? null;
+}
+
+export const ShopProfile: React.FC<ShopProfileProps> = ({
+  settings,
+  posts,
+  currentUser,
+  onDeletePost,
+  onLikePost,
+  audience = 'public',
+  onGoQueue,
+  onGoAppointments,
+  onNotify,
+}) => {
+  const navigate = useNavigate();
+  const { services, isShopOpen, getTodayScheduleDisplay } = useBarbershop();
+  const { barbershopId } = useBarbershopFilters();
+  const isPublic = audience === 'public';
+  const open = isShopOpen();
+  const today = todaySchedule(settings.schedule);
+  const hoursLabel = getTodayScheduleDisplay();
+  const whatsappUrl = settings.whatsapp ? waLink(settings.whatsapp) : null;
+  const canCompose =
+    !isPublic &&
+    Boolean(
+      currentUser &&
+        (currentUser.role === 'OWNER' ||
+          currentUser.role === 'EMPLOYEE' ||
+          currentUser.role === 'MASTER_ADMIN')
+    );
+
+  const canEditLogo =
+    audience === 'staff' && Boolean(currentUser && currentUser.role === 'OWNER');
+  const [logoUrl, setLogoUrl] = useState<string | undefined>(settings.logoUrl);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const [confirmDeleteLogo, setConfirmDeleteLogo] = useState(false);
+  const [reviewSummary, setReviewSummary] = useState<PublicReviewSummary | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setLogoUrl(settings.logoUrl);
+  }, [settings.logoUrl]);
+
+  useEffect(() => {
+    if (!barbershopId) {
+      setReviewSummary(null);
+      return;
+    }
+    reputationApi
+      .getPublicSummary(barbershopId)
+      .then(setReviewSummary)
+      .catch(() => setReviewSummary(null));
+  }, [barbershopId]);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !barbershopId) return;
+
+    setLogoUploading(true);
+    setLogoError(null);
+    try {
+      const { logoUrl: newLogoUrl } = await barbershopApi.uploadLogoDirect(barbershopId, file);
+      setLogoUrl(newLogoUrl);
+      onNotify?.('Logo atualizada com sucesso!', 'success');
+    } catch (err) {
+      setLogoUrl(settings.logoUrl);
+      const msg = getErrorMessage(err, 'Não foi possível enviar a logo. Tente novamente.');
+      setLogoError(msg);
+      onNotify?.(msg, 'error');
+    } finally {
+      setLogoUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleDeleteLogo = async () => {
+    if (!barbershopId || !logoUrl) return;
+
+    setLogoUploading(true);
+    setLogoError(null);
+    try {
+      await barbershopApi.deleteLogo(barbershopId);
+      setLogoUrl(undefined);
+      onNotify?.('Logo removida.', 'success');
+    } catch (err) {
+      const msg = getErrorMessage(err, 'Erro ao remover a logo.');
+      setLogoError(msg);
+      onNotify?.(msg, 'error');
+    } finally {
+      setLogoUploading(false);
+      setConfirmDeleteLogo(false);
+    }
+  };
+
+  const getPostTypeLabel = (type: string) => {
+    switch (type) {
+      case 'haircut':
+        return 'Look da Semana';
+      case 'beard':
+        return 'Barba / Acabamento';
+      case 'announcement':
+        return 'Aviso';
+      default:
+        return 'Post';
+    }
+  };
+
+  const getPostTypeStyle = (type: string) => {
+    switch (type) {
+      case 'announcement':
+        return 'bg-accent/10 text-accent border-accent/20';
+      case 'beard':
+        return 'bg-warning/10 text-warning border-warning/20';
+      case 'haircut':
+      default:
+        return 'bg-success/10 text-success border-success/20';
+    }
+  };
+
+  const listedServices: Service[] = services.slice(0, 8);
+  const extraServiceCount = Math.max(0, services.length - listedServices.length);
+
+  return (
+    <div className="animate-fade-in space-y-5 pb-20">
+      <div className="bg-surface rounded-2xl overflow-hidden border border-border shadow-lg relative">
+        <div className="absolute inset-x-0 top-0 h-1 bg-accent z-20" />
+        <div className="h-28 bg-gradient-to-br from-accent/25 via-surface to-surface relative overflow-hidden">
+          <div
+            className="pointer-events-none absolute -top-10 -right-8 h-40 w-40 rounded-full bg-accent/25 blur-3xl"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute -bottom-12 -left-6 h-32 w-32 rounded-full bg-accent/10 blur-3xl"
+            aria-hidden
+          />
+        </div>
+
+        <div className="px-5 pb-5 -mt-12 relative text-center">
+          <div className="mx-auto mb-3 w-24 h-24">
+            {canEditLogo ? (
+              <div className="relative group w-full h-full rounded-2xl border-4 border-surface bg-bg shadow-lg overflow-hidden flex items-center justify-center">
+                {logoUploading ? (
+                  <Loader2 size={28} className="text-accent animate-spin" />
+                ) : logoUrl ? (
+                  <img
+                    src={logoUrl}
+                    alt={settings.shopName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-2xl font-black tracking-tight text-accent">
+                    {shopInitials(settings.shopName)}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => logoInputRef.current?.click()}
+                  disabled={logoUploading}
+                  className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                >
+                  <Camera size={24} className="text-white" />
+                </button>
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  onChange={handleLogoUpload}
+                  className="hidden"
+                  disabled={logoUploading}
+                />
+              </div>
+            ) : (
+              <div className="w-full h-full rounded-2xl border-4 border-surface bg-bg shadow-lg overflow-hidden flex items-center justify-center">
+                {logoUrl ? (
+                  <img
+                    src={logoUrl}
+                    alt={settings.shopName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-2xl font-black tracking-tight text-accent">
+                    {shopInitials(settings.shopName)}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {canEditLogo && logoUrl && !logoUploading && (
+            <button
+              type="button"
+              onClick={() => setConfirmDeleteLogo(true)}
+              className="mx-auto mb-2 px-3 py-1.5 text-[11px] font-medium text-danger bg-danger/10 rounded-lg border border-danger/20 hover:bg-danger/20 transition-colors flex items-center gap-1"
+            >
+              <Trash2 size={12} /> Remover logo
+            </button>
+          )}
+          {logoError && (
+            <p className="mx-auto mb-2 text-[11px] text-danger max-w-[200px]">{logoError}</p>
+          )}
+
+          <h1 className="text-2xl font-bold text-text-primary tracking-tight">{settings.shopName}</h1>
+
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+            <span
+              className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
+                open
+                  ? 'bg-success/15 text-success border-success/30'
+                  : 'bg-surface-2 text-text-secondary border-border-strong'
+              }`}
+            >
+              {open ? 'Aberto agora' : 'Fechado'}
+            </span>
+            {hoursLabel && (
+              <span className="text-[11px] font-bold text-text-secondary flex items-center gap-1">
+                <Clock size={12} className="text-accent" />
+                {today?.isOpen ? `Hoje ${hoursLabel}` : hoursLabel}
+              </span>
+            )}
+          </div>
+
+          {settings.address && (
+            <p className="mt-3 text-sm text-text-secondary flex items-center justify-center gap-1.5">
+              <MapPin size={14} className="text-accent shrink-0" />
+              <span>{settings.address}</span>
+            </p>
+          )}
+
+          <div className="mt-4 flex flex-col sm:flex-row gap-2">
+            {isPublic && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => onGoQueue?.()}
+                  className="flex-1 px-4 py-3 rounded-xl bg-accent text-accent-fg text-sm font-bold flex items-center justify-center gap-2 hover:bg-accent-hover shadow-lg shadow-accent/20"
+                >
+                  <List size={16} /> Entrar na fila
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onGoAppointments?.()}
+                  className="flex-1 px-4 py-3 rounded-xl bg-bg border border-border text-text-primary text-sm font-bold flex items-center justify-center gap-2 hover:border-accent"
+                >
+                  <CalendarDays size={16} /> Agendar
+                </button>
+              </>
+            )}
+            {whatsappUrl && (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${
+                  isPublic ? 'sm:flex-none' : 'flex-1'
+                } px-4 py-3 rounded-xl bg-bg border border-border text-text-primary text-sm font-bold flex items-center justify-center gap-2 hover:border-accent`}
+              >
+                <MessageCircle size={16} className="text-accent" />
+                {isPublic ? 'WhatsApp' : formatBrPhone(settings.whatsapp)}
+              </a>
+            )}
+          </div>
+
+          {isPublic && settings.whatsapp && (
+            <p className="mt-2 text-[11px] text-text-muted">{formatBrPhone(settings.whatsapp)}</p>
+          )}
+
+          {!isPublic && barbershopId && (
+            <button
+              type="button"
+              onClick={() => navigate(`/queue/${barbershopId}`)}
+              className="mt-3 text-[11px] font-bold text-accent inline-flex items-center gap-1 hover:underline"
+            >
+              <ExternalLink size={12} /> Ver como o cliente vê
+            </button>
+          )}
+        </div>
+      </div>
+
+      {settings.schedule?.length > 0 && (
+        <div className="bg-surface rounded-2xl border border-border p-4 shadow-sm">
+          <h2 className="text-sm font-bold text-text-primary mb-3 flex items-center gap-2">
+            <Clock size={16} className="text-accent" /> Horários
+          </h2>
+          <div className="space-y-1.5">
+            {settings.schedule.map((day, index) => {
+              const isToday = index === new Date().getDay();
+              return (
+                <div
+                  key={day.dayName}
+                  className={`flex items-center justify-between text-sm rounded-lg px-2 py-1.5 ${
+                    isToday ? 'bg-accent/10' : ''
+                  }`}
+                >
+                  <span
+                    className={`font-bold ${isToday ? 'text-accent' : 'text-text-secondary'}`}
+                  >
+                    {day.dayName}
+                    {isToday ? ' · hoje' : ''}
+                  </span>
+                  <span className={day.isOpen ? 'text-text-primary' : 'text-text-muted'}>
+                    {day.isOpen ? `${day.openTime} – ${day.closeTime}` : 'Fechado'}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {listedServices.length > 0 && (
+        <div className="bg-surface rounded-2xl border border-border p-4 shadow-sm">
+          <h2 className="text-sm font-bold text-text-primary mb-3 flex items-center gap-2">
+            <Scissors size={16} className="text-accent" /> Serviços
+          </h2>
+          <ul className="divide-y divide-border">
+            {listedServices.map(service => (
+              <li key={service.id} className="flex items-center justify-between py-2.5 gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-text-primary truncate">{service.name}</p>
+                  <p className="text-[11px] text-text-muted">{service.avgTimeMinutes} min</p>
+                </div>
+                <span className="text-sm font-bold text-accent shrink-0">
+                  {brl.format(service.price)}
+                </span>
+              </li>
+            ))}
+          </ul>
+          {extraServiceCount > 0 && isPublic && (
+            <button
+              type="button"
+              onClick={() => onGoAppointments?.()}
+              className="mt-2 w-full text-xs font-bold text-accent py-2"
+            >
+              Ver todos ({services.length}) na agenda
+            </button>
+          )}
+        </div>
+      )}
+
+      {reviewSummary && (reviewSummary.count > 0 || settings.googleReviewUrl) && (
+        <div className="bg-surface rounded-2xl border border-border p-4 shadow-sm">
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
+                <Star size={16} className="text-warning fill-warning" /> Avaliações
+              </h2>
+              {reviewSummary.showAverage && reviewSummary.average !== null ? (
+                <p className="mt-1 text-xs text-text-secondary">
+                  Nota {reviewSummary.average.toFixed(1)} de 5 em {reviewSummary.count} avaliações verificadas.
+                </p>
+              ) : reviewSummary.count > 0 ? (
+                <p className="mt-1 text-xs text-text-muted">
+                  Depoimentos verificados de clientes atendidos.
+                </p>
+              ) : null}
+            </div>
+            {reviewSummary.showAverage && reviewSummary.average !== null && (
+              <span className="rounded-lg border border-warning/20 bg-warning/10 px-2.5 py-1 text-sm font-black text-warning">
+                {reviewSummary.average.toFixed(1)}
+              </span>
+            )}
+          </div>
+
+          {reviewSummary.reviews.length > 0 && (
+            <div className="space-y-2">
+              {reviewSummary.reviews.slice(0, 3).map(review => (
+                <div key={review.id ?? review.createdAt} className="rounded-xl border border-border bg-bg p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-bold text-text-primary">
+                      {review.clientName || 'Cliente'}
+                    </span>
+                    <div className="flex">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          size={12}
+                          className={i < review.rating ? 'fill-warning text-warning' : 'text-text-muted'}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  {review.comment && (
+                    <p className="mt-2 text-xs leading-relaxed text-text-secondary">{review.comment}</p>
+                  )}
+                  {typeof review.response === 'string' && review.response && (
+                    <p className="mt-2 rounded-lg bg-surface-2 p-2 text-[11px] text-text-secondary">
+                      Resposta do salão: {review.response}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {settings.googleReviewUrl && (
+            <a
+              href={settings.googleReviewUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-bg px-4 py-3 text-xs font-bold text-text-primary hover:border-accent"
+            >
+              Ver avaliações no Google <ExternalLink size={14} />
+            </a>
+          )}
+        </div>
+      )}
+
+      <div className="space-y-3">
+        <h2 className="text-sm font-bold text-text-primary px-1">Publicações</h2>
+
+        {posts.length === 0 && (
+          <div className="text-center py-10 px-6 bg-surface border border-dashed border-border rounded-2xl">
+            <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
+              <ImageIcon size={20} className="text-accent" />
+            </div>
+            <p className="text-sm font-bold text-text-primary">Nenhuma publicação ainda</p>
+            <p className="text-xs text-text-muted mt-1 max-w-xs mx-auto">
+              {isPublic
+                ? 'Quando o salão postar fotos e avisos, eles aparecem aqui.'
+                : 'Publique em Posts para preencher o perfil que o cliente vê.'}
+            </p>
+            {!isPublic && (
+              <button
+                type="button"
+                onClick={() => navigate('/app/posts')}
+                className="mt-4 px-4 py-2 rounded-xl bg-accent text-accent-fg text-xs font-bold"
+              >
+                Criar primeiro post
+              </button>
+            )}
+          </div>
+        )}
+
+        {posts.map(post => (
+          <div
+            key={post.id}
+            className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm"
+          >
+            <div className="p-4 flex items-center justify-between gap-3">
+              <span
+                className={`text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded-md border ${getPostTypeStyle(post.type)}`}
+              >
+                {getPostTypeLabel(post.type)}
+              </span>
+              {canCompose ? (
+                <button type="button" className="text-text-muted hover:text-text-primary">
+                  <MoreHorizontal size={16} />
+                </button>
+              ) : (
+                <span className="text-[10px] text-text-muted font-bold">
+                  {new Date(post.createdAt).toLocaleDateString('pt-BR')}
+                </span>
+              )}
+            </div>
+            {post.imageUrl && (
+              <img src={post.imageUrl} alt="" loading="lazy" decoding="async" width={1080} height={1080} className="w-full aspect-square object-cover bg-bg" />
+            )}
+            {post.videoUrl && !post.imageUrl && (
+              <video src={post.videoUrl} className="w-full aspect-square object-cover bg-bg" controls />
+            )}
+            <div className="p-4 pt-3">
+              {post.title && (
+                <h3 className="text-text-primary font-bold mb-1 text-base">{post.title}</h3>
+              )}
+              {post.content && (
+                <p className="text-text-secondary text-sm leading-relaxed">{post.content}</p>
+              )}
+            </div>
+            {(post.postMode || post.ctaText) && post.barbershopId && (
+              <div className="px-4 pb-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isPublic && post.postMode === 'appointments' && onGoAppointments) {
+                      onGoAppointments();
+                      return;
+                    }
+                    if (isPublic && onGoQueue && post.postMode !== 'appointments') {
+                      onGoQueue();
+                      return;
+                    }
+                    navigate(
+                      `/queue/${post.barbershopId}${post.postMode === 'appointments' ? '?tab=appointments' : ''}`
+                    );
+                  }}
+                  className="w-full bg-accent text-accent-fg rounded-xl text-sm font-bold py-3 hover:bg-accent-hover transition-all"
+                >
+                  {post.ctaText || 'Agendar'}
+                </button>
+              </div>
+            )}
+            <div className="px-4 py-3 flex items-center justify-between border-t border-border">
+              <button
+                type="button"
+                onClick={() => onLikePost(post.id)}
+                className="flex items-center gap-1 text-xs text-text-secondary hover:text-danger"
+              >
+                <Heart size={14} /> {post.likes}
+              </button>
+              {canCompose && (
+                <button
+                  type="button"
+                  onClick={() => onDeletePost(post.id)}
+                  className="flex items-center gap-1 text-xs text-text-muted hover:text-danger"
+                >
+                  <Trash2 size={14} /> Excluir
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {isPublic && (
+        <p className="text-center text-[10px] font-bold tracking-[0.25em] text-text-muted pt-1">
+          {BRAND_NAME_UPPER}
+        </p>
+      )}
+      <ConfirmDialog
+        open={confirmDeleteLogo}
+        title="Remover logo"
+        message="Remover a logo do salão?"
+        confirmLabel="Remover"
+        variant="danger"
+        loading={logoUploading}
+        onConfirm={() => void handleDeleteLogo()}
+        onCancel={() => setConfirmDeleteLogo(false)}
+      />
+    </div>
+  );
+};

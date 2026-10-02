@@ -310,3 +310,6 @@ export const useAuth = () => {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 };
+
+/** Acesso opcional (sem throw) — para camadas de política que funcionam fora do AuthProvider (ex.: Storybook). */
+export const useAuthOptional = () => useContext(AuthContext);

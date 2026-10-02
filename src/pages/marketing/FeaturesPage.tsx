@@ -25,9 +25,7 @@ import {
   LuCheck as Check,
   LuX as X,
 } from 'react-icons/lu';
-import { MarketingNav } from '../../components/marketing/MarketingNav';
-import { MarketingFooter } from '../../components/marketing/MarketingFooter';
-import { SeoHead } from '../../components/marketing/SeoHead';
+import { MarketingLayout } from '../../layouts/marketing/MarketingLayout';
 import { trialCampaign } from '../../marketing/trialCampaign';
 import { softwareApplicationLd } from '../../marketing/softwareApplicationLd';
 import { registerScrollTrigger } from '../../components/infra/scrollTriggerRuntime';
@@ -449,22 +447,22 @@ export const FeaturesPage: React.FC = () => {
   }, []);
 
   return (
-    <div
+    <MarketingLayout
       ref={pageRef}
-      className="min-h-screen bg-black text-neutral-100 selection:bg-accent/30 font-sans overflow-x-hidden"
+      wrapperClassName="min-h-screen bg-black text-neutral-100 selection:bg-accent/30 font-sans overflow-x-hidden"
+      title="Funcionalidades — Fila, agenda, financeiro e mais | Agenda Já"
+      description="Fila digital, agendamento 24/7, financeiro, equipe ilimitada, WhatsApp automático e previsão de demanda — tudo num só painel para salão e barbearia."
+      path="/funcionalidades"
+      jsonLd={softwareApplicationLd('/funcionalidades')}
+      background={
+        <>
+    <div className="fixed inset-0 pointer-events-none z-0">
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-accent/20 rounded-full blur-[120px]" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-teal-900/10 rounded-full blur-[120px]" />
+    </div>
+        </>
+      }
     >
-      <SeoHead
-        title="Funcionalidades — Fila, agenda, financeiro e mais | Agenda Já"
-        description="Fila digital, agendamento 24/7, financeiro, equipe ilimitada, WhatsApp automático e previsão de demanda — tudo num só painel para salão e barbearia."
-        path="/funcionalidades"
-        jsonLd={softwareApplicationLd('/funcionalidades')}
-      />
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-accent/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-teal-900/10 rounded-full blur-[120px]" />
-      </div>
-
-      <MarketingNav />
 
       {/* Hero */}
       <section className="relative pt-40 pb-20 md:pt-52 md:pb-28 px-6 overflow-hidden">
@@ -1053,8 +1051,7 @@ export const FeaturesPage: React.FC = () => {
         </div>
       </section>
 
-      <MarketingFooter />
-    </div>
+    </MarketingLayout>
   );
 };
 
