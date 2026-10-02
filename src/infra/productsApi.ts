@@ -271,7 +271,7 @@ export const productsApi = {
     );
     return { data: unwrap<Product[]>(res), meta: metaOf(res) };
   },
-  createProduct: (payload: Partial<Product>) =>
+  createProduct: (payload: Partial<Product> & { initialStock?: number }) =>
     apiClient<{ success: boolean; data: Product }>('/api/products', 'POST', payload, token()).then(
       res => unwrap<Product>(res)
     ),

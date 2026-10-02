@@ -76,6 +76,7 @@ export const ProductFormModal: React.FC<Props> = ({
       type: defaultType,
       unit: 'UNIT',
       unitLabel: '',
+      initialStock: 0,
       minStock: 0,
       trackStock: true,
       expirationDate: '',
@@ -102,6 +103,7 @@ export const ProductFormModal: React.FC<Props> = ({
         type: product.type,
         unit: product.unit ?? 'UNIT',
         unitLabel: product.unitLabel,
+        initialStock: product.stockQty ?? 0,
         minStock: product.minStock,
         trackStock: product.trackStock,
         expirationDate: product.expirationDate ?? '',
@@ -118,6 +120,7 @@ export const ProductFormModal: React.FC<Props> = ({
         type: defaultType,
         unit: 'UNIT',
         unitLabel: '',
+        initialStock: 0,
         minStock: 0,
         trackStock: true,
         expirationDate: '',
@@ -152,10 +155,34 @@ export const ProductFormModal: React.FC<Props> = ({
         expirationDate: isRetail ? null : (data.expirationDate || null),
         lotNumber: isRetail ? null : (data.lotNumber?.trim() || null),
       };
+      // Estoque inicial só existe no cadastro e só quando o produto controla estoque.
+      if (!product && data.trackStock) {
+        payload.initialStock = Number(data.initialStock) || 0;
+      }
       let savedId: string;
       if (product) {
         await productsApi.updateProduct(product.id, payload);
         savedId = product.id;
+        // O saldo nunca é gravado direto no produto: a diferença vira ajuste auditado.
+        if (data.trackStock && typeof product.stockQty === 'number') {
+          const novo = Number(data.initialStock);
+          const diff = novo - product.stockQty;
+          const delta = Math.round(diff * 1000) / 1000;
+          if (Number.isFinite(novo) && Math.abs(diff) > 0.0001 && delta !== 0) {
+            try {
+              await productsApi.adjustStock({
+                productId: product.id,
+                quantity: delta,
+                reason: 'Ajuste de estoque pela edição do produto',
+                type: 'MANUAL_ADJUSTMENT',
+              });
+            } catch (adjustErr) {
+              const msg = getErrorMessage(adjustErr, 'Erro desconhecido');
+              onNotify?.(`Produto salvo, mas não foi possível ajustar o estoque: ${msg}`, 'error');
+              return;
+            }
+          }
+        }
         onNotify?.('Produto atualizado.', 'success');
       } else {
         const created = await productsApi.createProduct(payload);
@@ -250,7 +277,7 @@ export const ProductFormModal: React.FC<Props> = ({
           </h3>
           <button type="button" onClick={onClose} className="text-sm text-text-muted">Fechar</button>
         </div>
-        <form className="space-y-5" onSubmit={handleSubmit(onSubmit, onInvalid)}>
+        <form className="space-y-5" noValidate onSubmit={handleSubmit(onSubmit, onInvalid)}>
           <div className="space-y-4">
             <p className={FORM_SECTION_TITLE}>Identidade</p>
             <Field label="Nome" error={errors.name?.message}>
@@ -452,17 +479,57 @@ export const ProductFormModal: React.FC<Props> = ({
               name="trackStock"
               render={({ field: { value: trackStock } }) =>
                 trackStock ? (
-                  <Field label="Estoque mínimo" error={errors.minStock?.message}>
-                    <input
-                      disabled={readOnly}
-                      type="number"
-                      min={0}
-                      step="0.001"
-                      placeholder="0"
-                      className={errors.minStock ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                      {...register('minStock')}
-                    />
-                  </Field>
+                  <>
+                    {!product && (
+                      <Field
+                        label="Estoque inicial"
+                        hint="Quantidade que você tem agora. Depois, ajuste pela aba Estoque."
+                        error={errors.initialStock?.message}
+                      >
+                        <input
+                          disabled={readOnly}
+                          type="number"
+                          min={0}
+                          step="0.001"
+                          placeholder="0"
+                          className={errors.initialStock ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                          {...register('initialStock')}
+                        />
+                      </Field>
+                    )}
+                    {product && typeof product.stockQty === 'number' && (
+                      <Field
+                        label="Estoque atual"
+                        hint="Ao salvar, a diferença é registrada como ajuste manual no histórico do estoque."
+                        error={errors.initialStock?.message}
+                      >
+                        <input
+                          disabled={readOnly}
+                          type="number"
+                          min={0}
+                          step="0.001"
+                          placeholder="0"
+                          className={errors.initialStock ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                          {...register('initialStock')}
+                        />
+                      </Field>
+                    )}
+                    <Field
+                      label="Estoque mínimo"
+                      hint="Avisa quando o estoque chegar nesse valor ou abaixo. Não altera a quantidade."
+                      error={errors.minStock?.message}
+                    >
+                      <input
+                        disabled={readOnly}
+                        type="number"
+                        min={0}
+                        step="0.001"
+                        placeholder="0"
+                        className={errors.minStock ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                        {...register('minStock')}
+                      />
+                    </Field>
+                  </>
                 ) : null
               }
             />

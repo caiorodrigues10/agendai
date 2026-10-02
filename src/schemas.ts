@@ -192,6 +192,7 @@ export const ProductSchema = z.object({
   type: z.enum(['RETAIL', 'CONSUMABLE', 'BOTH']),
   unit: z.enum(['UNIT', 'ML', 'L', 'G', 'KG', 'BOX', 'PACK', 'OTHER']).default('UNIT'),
   unitLabel: z.string().default(''),
+  initialStock: z.coerce.number({ invalid_type_error: 'Quantidade inválida' }).min(0, 'Quantidade não pode ser negativa').default(0),
   minStock: z.coerce.number({ invalid_type_error: 'Estoque inválido' }).min(0).default(0),
   trackStock: z.boolean().default(true),
   expirationDate: z.string().optional().default(''),

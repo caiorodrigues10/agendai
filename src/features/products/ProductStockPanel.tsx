@@ -254,9 +254,12 @@ export const ProductStockPanel: React.FC<Props> = ({ loadError, onNotify, onRelo
         <p className="mb-2 font-bold text-text-primary">Movimentações recentes</p>
         <div className="space-y-2 text-sm">
           {movements.map(m => (
-            <div key={m.id} className="flex justify-between gap-2 border-b border-border pb-2">
-              <span className="text-text-primary">{m.product?.name ?? 'Produto'}</span>
-              <span className="text-text-muted">{MOVEMENT_LABEL[m.type] ?? m.type} · {m.quantity > 0 ? '+' : ''}{m.quantity}</span>
+            <div key={m.id} className="border-b border-border pb-2">
+              <div className="flex justify-between gap-2">
+                <span className="text-text-primary">{m.product?.name ?? 'Produto'}</span>
+                <span className="text-text-muted">{MOVEMENT_LABEL[m.type] ?? m.type} · {m.quantity > 0 ? '+' : ''}{m.quantity}</span>
+              </div>
+              {m.reason && <p className="text-xs text-text-muted">{m.reason}</p>}
             </div>
           ))}
           {!movements.length && <p className="text-text-muted">Sem movimentações.</p>}
