@@ -1,9 +1,13 @@
 import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
 
+export type CommissionOrigin = 'QUEUE' | 'APPOINTMENT';
+
 export interface CommissionEntry {
   id: string;
-  queueItemId: string;
+  queueItemId: string | null;
+  appointmentId: string | null;
+  origin: CommissionOrigin;
   serviceId: string;
   serviceName: string;
   professionalId: string;
@@ -31,14 +35,14 @@ function unwrap<T>(response: unknown): T {
 }
 
 export const commissionsApi = {
-  list: async (params: { from?: string; to?: string; professionalId?: string; page?: number; limit?: number } = {}) => {
+  list: async (params: { from?: string; to?: string; professionalId?: string; origin?: CommissionOrigin; page?: number; limit?: number } = {}) => {
     const query = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => value !== undefined && query.set(key, String(value)));
     const token = authStorage.getAccessToken() || '';
     const response = await apiClient<{ success: boolean; data: CommissionEntry[] }>(`/api/commissions?${query}`, 'GET', undefined, token);
     return unwrap<CommissionEntry[]>(response);
   },
-  summary: async (params: { from?: string; to?: string; professionalId?: string } = {}) => {
+  summary: async (params: { from?: string; to?: string; professionalId?: string; origin?: CommissionOrigin } = {}) => {
     const query = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => value !== undefined && query.set(key, String(value)));
     const token = authStorage.getAccessToken() || '';

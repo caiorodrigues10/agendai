@@ -30,7 +30,7 @@ import { ApiError } from '../../../infra/apiClient';
 import { WeatherForecastWidget } from './WeatherForecastWidget';
 import { SmartSelect } from '../../../components/ui/SmartSelect';
 import { Avatar } from '../../../components/ui/Avatar';
-import { commissionsApi, type CommissionSummary } from '../../../infra/commissionsApi';
+import { commissionsApi, type CommissionOrigin, type CommissionSummary } from '../../../infra/commissionsApi';
 import { finiteNumber } from '../../../utils/weatherVisuals';
 
 interface FinancialDashboardProps {
@@ -73,6 +73,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
   const [commissionError, setCommissionError] = useState<string | null>(null);
   const [commissionUpgrade, setCommissionUpgrade] = useState(false);
   const [commissionProfessionalId, setCommissionProfessionalId] = useState('');
+  const [commissionOrigin, setCommissionOrigin] = useState<CommissionOrigin | ''>('');
 
   useEffect(() => {
     if (!owner || viewMode !== 'shop') return;
@@ -134,6 +135,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
         from: formatDate(from),
         to: formatDate(to),
         professionalId: commissionProfessionalId || undefined,
+        origin: commissionOrigin || undefined,
       })
       .then(data => {
         if (!cancelled) setCommissionSummary(data ? { ...data, byProfessional: data.byProfessional ?? [] } : null);
@@ -156,7 +158,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [owner, viewMode, period, commissionProfessionalId]);
+  }, [owner, viewMode, period, commissionProfessionalId, commissionOrigin]);
 
   const getStaffName = (id?: string) => allStaff.find(s => s.id === id)?.name || 'Desconhecido';
   const getServiceName = (id: string) =>
@@ -300,15 +302,29 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                 </h3>
                 <p className="mt-1 text-xs text-text-muted">Calculadas sobre o valor final recebido.</p>
               </div>
-              <SmartSelect
-                mode="single"
-                options={[{ value: '', label: 'Todos os profissionais' }, ...allStaff.map(member => ({ value: member.id, label: member.name, icon: <Avatar src={member.avatarUrl} name={member.name} size="xxs" /> }))]}
-                value={commissionProfessionalId}
-                onChange={value => setCommissionProfessionalId(value ?? '')}
-                searchable="auto"
-                size="sm"
-                aria-label="Filtrar comissões por profissional"
-              />
+              <div className="flex flex-wrap items-center gap-2">
+                <SmartSelect
+                  mode="single"
+                  options={[
+                    { value: '', label: 'Fila e agenda' },
+                    { value: 'QUEUE', label: 'Só fila' },
+                    { value: 'APPOINTMENT', label: 'Só agenda' },
+                  ]}
+                  value={commissionOrigin}
+                  onChange={value => setCommissionOrigin((value as CommissionOrigin | '') ?? '')}
+                  size="sm"
+                  aria-label="Filtrar comissões por origem"
+                />
+                <SmartSelect
+                  mode="single"
+                  options={[{ value: '', label: 'Todos os profissionais' }, ...allStaff.map(member => ({ value: member.id, label: member.name, icon: <Avatar src={member.avatarUrl} name={member.name} size="xxs" /> }))]}
+                  value={commissionProfessionalId}
+                  onChange={value => setCommissionProfessionalId(value ?? '')}
+                  searchable="auto"
+                  size="sm"
+                  aria-label="Filtrar comissões por profissional"
+                />
+              </div>
             </div>
 
             {commissionLoading && (
