@@ -18,6 +18,7 @@ import {
   OverviewKpis,
   OverviewPlans,
 } from './OverviewPanels';
+import { OverviewProductAdoption } from './OverviewProductAdoption';
 
 const PERIODS: { key: OverviewPeriod; label: string }[] = [
   { key: 'today', label: 'Hoje' },
@@ -219,6 +220,7 @@ export const OverviewPage: React.FC = () => {
       </div>
 
       <OverviewHealth data={data} />
+      <OverviewProductAdoption />
       <OverviewAttention attention={data.attention} />
       <OverviewFooter />
     </div>

@@ -355,6 +355,25 @@ export interface AccountDetail {
   attention: AccountAttentionItem[];
 }
 
+// ── Product adoption ──────────────────────────────────────────────────────────
+
+export interface ProductAdoption {
+  generatedAt: string;
+  catalog: {
+    shopsTotal: number;
+    shopsWithCatalog: number;
+    adoptionPct: number;
+    productsActive: number;
+    productsInactive: number;
+    categoriesTotal: number;
+    lowStock: number;
+    outOfStock: number;
+  };
+  sales30d: { units: number; revenue: number };
+  topProducts: { productId: string; name: string; units: number; revenue: number }[];
+  topCategories: { categoryId: string | null; name: string; products: number }[];
+}
+
 // ── Operations ────────────────────────────────────────────────────────────────
 
 export type OperationsStatus = 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY';
@@ -389,6 +408,12 @@ export const adminInternalApi = {
   getOverview(period: OverviewPeriod = '30d') {
     return apiClient<{ success: boolean; data: AdminOverview }>(
       `/api/admin/overview?period=${period}`, 'GET', undefined, token()
+    );
+  },
+
+  getProductAdoption() {
+    return apiClient<{ success: boolean; data: ProductAdoption }>(
+      '/api/admin/product/adoption', 'GET', undefined, token()
     );
   },
 

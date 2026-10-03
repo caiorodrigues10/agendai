@@ -5,7 +5,7 @@ import { OverviewPage } from './OverviewPage';
 import { adminInternalApi, AdminOverview } from '../../infra/adminInternalApi';
 
 vi.mock('../../infra/adminInternalApi', () => ({
-  adminInternalApi: { getOverview: vi.fn() },
+  adminInternalApi: { getOverview: vi.fn(), getProductAdoption: vi.fn() },
 }));
 
 const overview: AdminOverview = {
@@ -126,6 +126,25 @@ describe('OverviewPage', () => {
       success: true,
       data: overview,
     } as never);
+    vi.mocked(adminInternalApi.getProductAdoption).mockResolvedValue({
+      success: true,
+      data: {
+        generatedAt: new Date().toISOString(),
+        catalog: {
+          shopsTotal: 4,
+          shopsWithCatalog: 3,
+          adoptionPct: 75,
+          productsActive: 32,
+          productsInactive: 0,
+          categoriesTotal: 14,
+          lowStock: 3,
+          outOfStock: 0,
+        },
+        sales30d: { units: 0, revenue: 0 },
+        topProducts: [],
+        topCategories: [{ categoryId: null, name: 'Sem categoria', products: 31 }],
+      },
+    } as never);
   });
 
   afterEach(() => {
@@ -144,6 +163,8 @@ describe('OverviewPage', () => {
     expect(screen.getByText('Pro Anual')).toBeInTheDocument();
     expect(screen.queryByText('Nada pendente no momento.')).not.toBeInTheDocument();
     expect(screen.getByText('Cobranças vencidas')).toBeInTheDocument();
+    expect(await screen.findByText('Adoção de produtos')).toBeInTheDocument();
+    expect(adminInternalApi.getProductAdoption).toHaveBeenCalledTimes(1);
   });
 
   it('usa o período da URL e atualiza ao trocar o período', async () => {
