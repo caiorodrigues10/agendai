@@ -100,7 +100,7 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
       <aside className="hidden w-60 shrink-0 lg:block">
         <nav
           aria-label="Navegação do painel"
-          className="sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-2xl border border-border bg-surface p-3 shadow-[0_18px_44px_-32px_rgba(0,0,0,0.65)]"
+          className="sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-2xl border border-border bg-surface p-3 shadow-card"
         >
           <div className="mb-3 border-b border-border px-2 pb-3">
             <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-text-muted">
@@ -248,12 +248,18 @@ function DesktopNavigationItem({
       type="button"
       onClick={() => onNavigate(tab.id)}
       aria-current={active ? 'page' : undefined}
-      className={`group flex min-h-11 w-full items-center gap-3 rounded-xl border border-transparent px-2.5 py-2 text-left text-sm font-medium transition-colors ${
+      className={`group relative flex min-h-11 w-full items-center gap-3 rounded-xl border border-transparent px-2.5 py-2 text-left text-sm font-medium transition-colors ${
         active
           ? 'border-accent/30 bg-selection text-accent'
           : 'text-text-secondary hover:bg-bg hover:text-text-primary'
       }`}
     >
+      {active && (
+        <span
+          aria-hidden="true"
+          className="absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-accent"
+        />
+      )}
       <span
         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
           active ? 'bg-accent/15 text-accent' : 'bg-surface-2 text-text-muted group-hover:text-accent'
