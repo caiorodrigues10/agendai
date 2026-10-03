@@ -1,12 +1,25 @@
 /// <reference types="vitest/globals" />
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Header } from './Header';
 
 const subscription = vi.fn();
+const switchBack = vi.fn();
+const headerAuth = {
+  switchOrigin: null as { barbershopId: string; orgId: string } | null,
+  settings: null as { shopName?: string } | null,
+};
 
 vi.mock('../../contexts/SubscriptionContext', () => ({
   useSubscription: () => subscription(),
+}));
+
+vi.mock('../../contexts/AuthContext', () => ({
+  useAuth: () => ({ switchOrigin: headerAuth.switchOrigin, switchBack }),
+}));
+
+vi.mock('../../contexts/BarbershopContext', () => ({
+  useBarbershop: () => ({ settings: headerAuth.settings }),
 }));
 
 vi.mock('../../components/infra/ThemeToggle', () => ({
@@ -14,6 +27,12 @@ vi.mock('../../components/infra/ThemeToggle', () => ({
 }));
 
 const owner = { id: 'user-1', name: 'Caio', role: 'OWNER' as const, email: 'caio@example.com' };
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  headerAuth.switchOrigin = null;
+  headerAuth.settings = null;
+});
 
 function renderHeader() {
   return render(
@@ -60,5 +79,53 @@ describe('Header', () => {
     renderHeader();
 
     expect(screen.queryByLabelText(/Seu acesso de teste termina/)).not.toBeInTheDocument();
+  });
+
+  it('sem troca de salão não mostra o aviso do salão ativo', () => {
+    subscription.mockReturnValue({ data: null });
+    renderHeader();
+
+    expect(screen.queryByTestId('active-shop-notice')).not.toBeInTheDocument();
+  });
+
+  it('mostra o nome do salão ativo e o botão "Voltar ao salão original" quando trocou de salão', async () => {
+    subscription.mockReturnValue({ data: null });
+    headerAuth.switchOrigin = { barbershopId: 'b1', orgId: 'org1' };
+    headerAuth.settings = { shopName: 'Salao E2E B' };
+    switchBack.mockResolvedValue({ ok: true });
+
+    render(
+      <MemoryRouter>
+        <Header
+          currentUser={{ ...owner, barbershopId: 'b2' }}
+          onOpenLogin={vi.fn()}
+          onLogout={vi.fn()}
+        />
+      </MemoryRouter>,
+    );
+
+    const notice = screen.getByTestId('active-shop-notice');
+    expect(notice).toHaveTextContent('Você está no salão Salao E2E B');
+
+    const button = screen.getByRole('button', { name: 'Voltar ao salão original' });
+    fireEvent.click(button);
+    await waitFor(() => expect(switchBack).toHaveBeenCalledTimes(1));
+  });
+
+  it('não mostra o aviso quando a sessão já está no salão de origem', () => {
+    subscription.mockReturnValue({ data: null });
+    headerAuth.switchOrigin = { barbershopId: 'b1', orgId: 'org1' };
+
+    render(
+      <MemoryRouter>
+        <Header
+          currentUser={{ ...owner, barbershopId: 'b1' }}
+          onOpenLogin={vi.fn()}
+          onLogout={vi.fn()}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.queryByTestId('active-shop-notice')).not.toBeInTheDocument();
   });
 });

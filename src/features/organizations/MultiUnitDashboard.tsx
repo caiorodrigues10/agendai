@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { LuPlus as Plus, LuStore as Store, LuUnlink as Unlink } from 'react-icons/lu';
+import { LuLogIn as LogIn, LuPlus as Plus, LuStore as Store, LuUnlink as Unlink } from 'react-icons/lu';
+import { useNavigate } from 'react-router-dom';
 import { useOrganizationDashboard } from '@/hooks/useOrganizationDashboard';
 import { AvailableBarbershop, organizationsApi, OrganizationDashboardShop } from '@/infra/organizationsApi';
 import { getErrorMessage } from '@/utils/errorMessage';
+import { useAuth } from '@/contexts/AuthContext';
+import { useBarbershopFilters } from '@/contexts/BarbershopFiltersContext';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 
 const primary =
@@ -12,12 +15,37 @@ const secondary =
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
-function ShopCard({ shop, onDetach }: { shop: OrganizationDashboardShop; onDetach: () => void }) {
+function ShopCard({
+  shop,
+  isCurrent,
+  onDetach,
+  onAccess,
+}: {
+  shop: OrganizationDashboardShop;
+  isCurrent: boolean;
+  onDetach: () => void;
+  onAccess: () => Promise<void>;
+}) {
+  const [accessing, setAccessing] = useState(false);
+  const [accessError, setAccessError] = useState('');
+
+  async function access() {
+    setAccessing(true);
+    setAccessError('');
+    try {
+      await onAccess();
+    } catch (err) {
+      setAccessError(getErrorMessage(err, 'Não foi possível acessar este salão.'));
+    } finally {
+      setAccessing(false);
+    }
+  }
+
   return (
     <li data-testid="shop-card" className="rounded-xl border border-border bg-bg p-4">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="min-w-0 truncate font-semibold">{shop.name}</span>
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-1">
           <span
             className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
               shop.isOpen ? 'bg-success/15 text-success' : 'bg-surface-2 text-text-muted'
@@ -25,6 +53,19 @@ function ShopCard({ shop, onDetach }: { shop: OrganizationDashboardShop; onDetac
           >
             {shop.isOpen ? 'Aberto' : 'Fechado'}
           </span>
+          {shop.accessLevel === 'FULL' && (
+            <button
+              type="button"
+              disabled={isCurrent || accessing}
+              onClick={() => void access()}
+              aria-label={isCurrent ? `${shop.name} é o salão atual` : `Acessar ${shop.name}`}
+              title={isCurrent ? 'Você já está operando este salão' : 'Operar este salão'}
+              className={primary}
+            >
+              <LogIn size={14} />
+              {isCurrent ? 'Salão atual' : accessing ? 'Acessando…' : 'Acessar'}
+            </button>
+          )}
           <button
             type="button"
             onClick={onDetach}
@@ -36,6 +77,11 @@ function ShopCard({ shop, onDetach }: { shop: OrganizationDashboardShop; onDetac
           </button>
         </div>
       </div>
+      {accessError && (
+        <p role="alert" className="mt-2 text-xs text-danger">
+          {accessError}
+        </p>
+      )}
       <div className="mt-3 grid grid-cols-2 gap-2">
         <div className="rounded-lg bg-surface-2 p-3 text-center">
           <p className="text-[11px] text-text-muted">Na fila</p>
@@ -146,10 +192,22 @@ function AddShopControl({ orgId, onAdded }: { orgId: string; onAdded: () => void
  * reimplementar WS/poll aqui).
  */
 export function MultiUnitDashboard({ orgId }: { orgId: string }) {
-  const { shops, loading, error, refetch, connectedSockets } = useOrganizationDashboard(orgId);
+  const { shops, loading, error, refetch } = useOrganizationDashboard(orgId);
+  const { switchShop, user } = useAuth();
+  const { barbershopId } = useBarbershopFilters();
+  const navigate = useNavigate();
   const [detachTarget, setDetachTarget] = useState<OrganizationDashboardShop | null>(null);
   const [detaching, setDetaching] = useState(false);
   const [detachError, setDetachError] = useState('');
+
+  const activeShopId = barbershopId ?? user?.barbershopId ?? null;
+
+  /** Passa a operar no salão e leva o usuário para o início do painel (/app → /app/overview). */
+  async function handleAccess(shop: OrganizationDashboardShop) {
+    const result = await switchShop(orgId, shop.barbershopId);
+    if (!result.ok) throw new Error(result.message);
+    navigate('/app');
+  }
 
   async function confirmDetach() {
     if (!detachTarget) return;
@@ -198,19 +256,9 @@ export function MultiUnitDashboard({ orgId }: { orgId: string }) {
     );
   }
 
-  const allLive = connectedSockets === shops.length;
-
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <span className="inline-flex items-center gap-1.5 text-xs text-text-muted">
-          <span
-            data-testid="live-dot"
-            aria-hidden
-            className={`h-2 w-2 rounded-full ${allLive ? 'bg-success' : 'bg-text-muted/40'}`}
-          />
-          {allLive ? 'Ao vivo' : 'Atualizando…'}
-        </span>
+      <div className="flex flex-wrap items-center justify-end gap-3">
         <AddShopControl orgId={orgId} onAdded={() => void refetch()} />
       </div>
       {detachError && (
@@ -223,6 +271,8 @@ export function MultiUnitDashboard({ orgId }: { orgId: string }) {
           <ShopCard
             key={shop.barbershopId}
             shop={shop}
+            isCurrent={activeShopId === shop.barbershopId}
+            onAccess={() => handleAccess(shop)}
             onDetach={() => {
               setDetachError('');
               setDetachTarget(shop);

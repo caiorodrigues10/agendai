@@ -1,10 +1,12 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
 import { authApi, RegisterPayload, RegisterWithGooglePayload } from '../infra/authApi';
-import { authStorage } from '../infra/authStorage';
+import { authStorage, SwitchOrigin } from '../infra/authStorage';
 import { ApiError, refreshAccessToken } from '../infra/apiClient';
+import { organizationsApi } from '../infra/organizationsApi';
 import { getErrorMessage } from '../utils/errorMessage';
 import { StaffMember } from '../types';
 import { usersApi } from '../infra/usersApi';
+import { useBarbershopFilters } from './BarbershopFiltersContext';
 
 export type AuthResult = { ok: true; message?: string } | { ok: false; message: string };
 
@@ -22,6 +24,12 @@ interface AuthContextValue {
   updateUserAvatar: (avatarUrl: string | null) => void;
   updateUserProfile: (payload: { name?: string; email?: string; currentPassword?: string; newPassword?: string }) => Promise<void>;
   refreshUser: () => Promise<void>;
+  /** Troca o salão ativo da sessão (Multiunidades → "Acessar"). */
+  switchShop: (orgId: string, barbershopId: string) => Promise<AuthResult>;
+  /** Volta para o salão de origem gravado na primeira troca. */
+  switchBack: () => Promise<AuthResult>;
+  /** Sessão original gravada na primeira troca; null = nunca trocou. */
+  switchOrigin: SwitchOrigin | null;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -67,6 +75,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return stored ? normalizeUser(stored) : null;
   });
   const [loading, setLoading] = useState(true);
+  // Provider fica dentro de BarbershopFiltersProvider: dá para trocar o tenant
+  // direto daqui (limpa e recarrega dados ligados ao barbershopId).
+  const { setBarbershopId } = useBarbershopFilters();
+  const [switchOrigin, setSwitchOrigin] = useState<SwitchOrigin | null>(() => authStorage.getSwitchOrigin());
 
   useEffect(() => {
     let cancelled = false;
@@ -169,6 +181,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       avatarUrl: resp.user.avatarUrl,
     });
     sessionStorage.removeItem('agendai:access-block-info');
+    // Login = nova sessão no salão do próprio usuário: zera a origem de troca.
+    authStorage.clearSwitchOrigin();
+    setSwitchOrigin(null);
   };
 
   const login = async (email: string, password: string, recaptchaToken?: string, rememberMe = true): Promise<AuthResult> => {
@@ -297,9 +312,58 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     authStorage.setUser(me.user, authStorage.isPersistent());
   }, []);
 
+  /**
+   * Troca o salão ativo da sessão (POST /organizations/:orgId/switch-shop).
+   * Persiste o novo access token e o barbershopId em memória + storage e
+   * atualiza o tenant dos filtros: o BarbershopContext zera serviços/equipe/
+   * feed/configurações e recarrega tudo do salão novo. O refresh devolve o
+   * mesmo salão (claim no refresh token), então a troca sobrevive a reload.
+   */
+  const switchShop = useCallback(
+    async (orgId: string, barbershopId: string): Promise<AuthResult> => {
+      if (!user) return { ok: false, message: 'Sessão expirada. Faça login novamente.' };
+      try {
+        const resp = await organizationsApi.switchShop(orgId, barbershopId);
+        const nextBarbershopId = resp.user?.barbershopId ?? barbershopId;
+        const nextUser = normalizeUser({ ...user, ...resp.user, barbershopId: nextBarbershopId });
+        const rememberMe = authStorage.isPersistent();
+
+        authStorage.setTokens(resp.accessToken, undefined, rememberMe);
+        authStorage.setUser(nextUser, rememberMe);
+        setUser(nextUser);
+
+        // Primeira troca grava a origem; voltar para ela limpa o registro.
+        const origin =
+          authStorage.getSwitchOrigin() ??
+          (user.barbershopId ? { barbershopId: user.barbershopId, orgId } : null);
+        if (origin && nextBarbershopId === origin.barbershopId) {
+          authStorage.clearSwitchOrigin();
+          setSwitchOrigin(null);
+        } else if (origin) {
+          authStorage.setSwitchOrigin(origin);
+          setSwitchOrigin(origin);
+        }
+
+        setBarbershopId(nextBarbershopId);
+        return { ok: true };
+      } catch (err) {
+        return { ok: false, message: getErrorMessage(err, 'Não foi possível trocar de salão.') };
+      }
+    },
+    [user, setBarbershopId],
+  );
+
+  const switchBack = useCallback(async (): Promise<AuthResult> => {
+    const origin = authStorage.getSwitchOrigin();
+    if (!origin) {
+      return { ok: false, message: 'Não foi possível identificar o salão original.' };
+    }
+    return switchShop(origin.orgId, origin.barbershopId);
+  }, [switchShop]);
+
   const value = useMemo(
-    () => ({ user, loading, login, loginWithGoogle, loginWithSavedAccount, forgetSavedAccount, register, registerWithGoogle, logout, hasRole, updateUserAvatar, updateUserProfile, refreshUser }),
-    [user, loading, updateUserAvatar, updateUserProfile, refreshUser]
+    () => ({ user, loading, login, loginWithGoogle, loginWithSavedAccount, forgetSavedAccount, register, registerWithGoogle, logout, hasRole, updateUserAvatar, updateUserProfile, refreshUser, switchShop, switchBack, switchOrigin }),
+    [user, loading, updateUserAvatar, updateUserProfile, refreshUser, switchShop, switchBack, switchOrigin]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

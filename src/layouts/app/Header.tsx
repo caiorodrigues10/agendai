@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Logo } from '../../components/ui/Logo';
 import { Avatar } from '../../components/ui/Avatar';
 import {
   LuClock3 as Clock3,
   LuLock as Lock,
   LuLogOut as LogOut,
+  LuStore as Store,
   LuWallet as Wallet,
 } from 'react-icons/lu';
 import { StaffMember } from '../../types';
 import { ThemeToggle } from '../../components/infra/ThemeToggle';
 import { Link } from 'react-router-dom';
 import { useSubscription } from '../../contexts/SubscriptionContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { useBarbershop } from '../../contexts/BarbershopContext';
 
 interface HeaderProps {
   currentUser: StaffMember | null;
@@ -21,6 +24,10 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogout, logoUrl }) => {
   const { data: subscriptionData } = useSubscription();
+  const { switchOrigin, switchBack } = useAuth();
+  const { settings } = useBarbershop();
+  const [switchingBack, setSwitchingBack] = useState(false);
+  const [switchBackError, setSwitchBackError] = useState('');
   const trial = subscriptionData?.trial;
   const trialDays = trial?.daysRemainingInTrial;
   const isTrialActive = Boolean(trial?.isInTrial && !trial.isExpired && typeof trialDays === 'number');
@@ -31,10 +38,54 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
       ? 'border-warning/30 bg-warning/10 text-warning'
       : 'border-accent/30 bg-accent/10 text-accent';
 
+  // Sessão em outro salão (troca via Multiunidades) ≠ salão de origem.
+  const isSwitched = Boolean(
+    switchOrigin && currentUser?.barbershopId && currentUser.barbershopId !== switchOrigin.barbershopId,
+  );
+  const activeShopName = settings?.shopName?.trim() || 'outro salão';
+
+  async function handleSwitchBack() {
+    setSwitchingBack(true);
+    setSwitchBackError('');
+    try {
+      const result = await switchBack();
+      if (!result.ok) setSwitchBackError(result.message);
+    } finally {
+      setSwitchingBack(false);
+    }
+  }
+
   return (
     <header className="sticky top-0 z-50 bg-bg/95 backdrop-blur-sm border-b border-border shadow-lg shadow-black/5">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 lg:px-6">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 lg:px-6">
         <Logo size="sm" customImageUrl={logoUrl} />
+        {currentUser && isSwitched && (
+          <div
+            data-testid="active-shop-notice"
+            className="flex min-w-0 flex-1 flex-wrap items-center justify-center gap-1.5"
+          >
+            <span className="inline-flex min-w-0 items-center gap-1.5 text-[11px] text-text-secondary">
+              <Store size={13} aria-hidden="true" className="shrink-0" />
+              <span className="truncate">
+                Você está no salão{' '}
+                <strong className="font-semibold text-text-primary">{activeShopName}</strong>
+              </span>
+            </span>
+            <button
+              type="button"
+              onClick={() => void handleSwitchBack()}
+              disabled={switchingBack}
+              className="shrink-0 rounded-lg border border-border px-2 py-1 text-[11px] font-semibold text-text-secondary hover:bg-surface-2 hover:text-text-primary disabled:opacity-50"
+            >
+              {switchingBack ? 'Voltando…' : 'Voltar ao salão original'}
+            </button>
+            {switchBackError && (
+              <span role="alert" className="w-full text-center text-[11px] text-danger">
+                {switchBackError}
+              </span>
+            )}
+          </div>
+        )}
         <div className="flex items-center gap-2">
           <ThemeToggle />
           {currentUser && isTrialActive && (

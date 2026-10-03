@@ -47,6 +47,19 @@ export interface AttachedBarbershop {
   organizationId: string | null;
 }
 
+/** Resposta de POST /organizations/:orgId/switch-shop (mesmo formato do refresh). */
+export interface SwitchShopSession {
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    barbershopId?: string;
+    emailVerified?: boolean;
+  };
+  accessToken: string;
+}
+
 export const organizationsApi = {
   listMy: () =>
     apiClient<{ data: Organization[] }>('/api/organizations', 'GET', undefined, token()).then(r => unwrap<Organization[]>(r)),
@@ -86,4 +99,8 @@ export const organizationsApi = {
 
   detachBarbershop: (orgId: string, barbershopId: string) =>
     apiClient<{ data: AttachedBarbershop }>(`/api/organizations/${orgId}/barbershops/${barbershopId}`, 'DELETE', undefined, token()).then(r => unwrap<AttachedBarbershop>(r)),
+
+  /** Troca o salão ativo da sessão; devolve novo access token + usuário. */
+  switchShop: (orgId: string, barbershopId: string) =>
+    apiClient<SwitchShopSession>(`/api/organizations/${orgId}/switch-shop`, 'POST', { barbershopId }, token()),
 };

@@ -6,6 +6,7 @@ const USER_KEY = 'barber_user';
 const USER_SESSION_KEY = 'barber_user_session';
 const REMEMBER_ME_KEY = 'barber_remember_me';
 const SAVED_ACCOUNTS_KEY = 'barber_saved_accounts';
+const SWITCH_ORIGIN_KEY = 'barber_switch_origin';
 let revision = 0;
 
 export interface SavedAccount {
@@ -13,6 +14,12 @@ export interface SavedAccount {
   name: string;
   email: string;
   avatarUrl?: string;
+}
+
+/** Sessão original (salão de origem + organização usada na troca) para "Voltar". */
+export interface SwitchOrigin {
+  barbershopId: string;
+  orgId: string;
 }
 
 function getRememberMe(): boolean {
@@ -103,6 +110,24 @@ export const authStorage = {
   clearUser: () => {
     localStorage.removeItem(USER_KEY);
     sessionStorage.removeItem(USER_SESSION_KEY);
+    localStorage.removeItem(SWITCH_ORIGIN_KEY);
+  },
+  getSwitchOrigin: (): SwitchOrigin | null => {
+    try {
+      const raw = localStorage.getItem(SWITCH_ORIGIN_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      return parsed && typeof parsed.barbershopId === 'string' && typeof parsed.orgId === 'string'
+        ? parsed
+        : null;
+    } catch {
+      return null;
+    }
+  },
+  setSwitchOrigin: (origin: SwitchOrigin) => {
+    localStorage.setItem(SWITCH_ORIGIN_KEY, JSON.stringify(origin));
+  },
+  clearSwitchOrigin: () => {
+    localStorage.removeItem(SWITCH_ORIGIN_KEY);
   },
   getSavedAccounts: (): SavedAccount[] => {
     try {

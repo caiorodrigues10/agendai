@@ -1,18 +1,41 @@
 /// <reference types="vitest/globals" />
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { useNavigate } from 'react-router-dom';
 import { MultiUnitDashboard } from './MultiUnitDashboard';
 import { organizationsApi, OrganizationDashboardShop } from '@/infra/organizationsApi';
 import { useOrganizationDashboard } from '@/hooks/useOrganizationDashboard';
+import { useAuth } from '@/contexts/AuthContext';
+import { useBarbershopFilters } from '@/contexts/BarbershopFiltersContext';
 
 vi.mock('@/hooks/useOrganizationDashboard', () => ({ useOrganizationDashboard: vi.fn() }));
 vi.mock('@/infra/organizationsApi', () => ({
-  organizationsApi: { listAvailableBarbershops: vi.fn(), attachBarbershop: vi.fn(), detachBarbershop: vi.fn() },
+  organizationsApi: {
+    listAvailableBarbershops: vi.fn(),
+    attachBarbershop: vi.fn(),
+    detachBarbershop: vi.fn(),
+    switchShop: vi.fn(),
+  },
 }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: vi.fn() }));
+vi.mock('@/contexts/BarbershopFiltersContext', () => ({ useBarbershopFilters: vi.fn() }));
+vi.mock('react-router-dom', async importOriginal => {
+  const actual = await importOriginal<typeof import('react-router-dom')>();
+  return { ...actual, useNavigate: vi.fn() };
+});
 
 const hook = vi.mocked(useOrganizationDashboard);
 const listAvailable = vi.mocked(organizationsApi.listAvailableBarbershops);
 const attach = vi.mocked(organizationsApi.attachBarbershop);
 const detach = vi.mocked(organizationsApi.detachBarbershop);
+const switchShop = vi.fn();
+const navigate = vi.fn();
+
+function mockAuth(overrides: { barbershopId?: string; switchShop?: ReturnType<typeof vi.fn> } = {}) {
+  vi.mocked(useAuth).mockReturnValue({
+    switchShop: overrides.switchShop ?? switchShop,
+    user: { id: 'u1', name: 'Caio', email: 'caio@example.com', role: 'OWNER', barbershopId: overrides.barbershopId ?? 'b0' },
+  } as unknown as ReturnType<typeof useAuth>);
+}
 
 const refetch = vi.fn();
 
@@ -53,6 +76,11 @@ function mockHook(overrides: Partial<ReturnType<typeof useOrganizationDashboard>
 beforeEach(() => {
   vi.clearAllMocks();
   mockHook();
+  mockAuth();
+  vi.mocked(useBarbershopFilters).mockReturnValue({
+    barbershopId: 'b0',
+  } as unknown as ReturnType<typeof useBarbershopFilters>);
+  vi.mocked(useNavigate).mockReturnValue(navigate);
 });
 
 describe('MultiUnitDashboard', () => {
@@ -87,15 +115,56 @@ describe('MultiUnitDashboard', () => {
     expect(filial).not.toHaveTextContent('Hoje:');
   });
 
-  it('exibe indicador ao vivo quando todos os sockets estão conectados', () => {
-    mockHook({ connectedSockets: 2 });
-    const { rerender } = render(<MultiUnitDashboard orgId="org1" />);
-    expect(screen.getByTestId('live-dot')).toHaveClass('bg-success');
-    expect(screen.getByText('Ao vivo')).toBeVisible();
-
+  it('não exibe mais o indicador "Ao vivo" / "Atualizando…"', () => {
     mockHook({ connectedSockets: 1 });
-    rerender(<MultiUnitDashboard orgId="org1" />);
-    expect(screen.getByText('Atualizando…')).toBeVisible();
+    render(<MultiUnitDashboard orgId="org1" />);
+
+    expect(screen.queryByTestId('live-dot')).toBeNull();
+    expect(screen.queryByText('Ao vivo')).toBeNull();
+    expect(screen.queryByText('Atualizando…')).toBeNull();
+  });
+
+  it('mostra o botão Acessar apenas nos salões com acesso FULL', () => {
+    render(<MultiUnitDashboard orgId="org1" />);
+
+    const [central, filial] = screen.getAllByTestId('shop-card');
+    expect(within(central).getByRole('button', { name: 'Acessar Salão Central' })).toBeEnabled();
+    expect(within(filial).queryByRole('button', { name: /Acessar/ })).toBeNull();
+  });
+
+  it('no salão ativo o botão fica desabilitado e diz "Salão atual"', () => {
+    vi.mocked(useBarbershopFilters).mockReturnValue({
+      barbershopId: 'b1',
+    } as unknown as ReturnType<typeof useBarbershopFilters>);
+    render(<MultiUnitDashboard orgId="org1" />);
+
+    const [central] = screen.getAllByTestId('shop-card');
+    const button = within(central).getByRole('button', { name: 'Salão Central é o salão atual' });
+    expect(button).toBeDisabled();
+    expect(button).toHaveTextContent('Salão atual');
+    expect(switchShop).not.toHaveBeenCalled();
+  });
+
+  it('clique em Acessar troca o salão da sessão e navega para o início do painel', async () => {
+    switchShop.mockResolvedValue({ ok: true });
+    render(<MultiUnitDashboard orgId="org1" />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Acessar Salão Central' }));
+
+    await waitFor(() => expect(switchShop).toHaveBeenCalledWith('org1', 'b1'));
+    expect(navigate).toHaveBeenCalledWith('/app');
+  });
+
+  it('erro da troca aparece em português e não navega', async () => {
+    switchShop.mockResolvedValue({ ok: false, message: 'Você não tem permissão para acessar este salão.' });
+    render(<MultiUnitDashboard orgId="org1" />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Acessar Salão Central' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Você não tem permissão para acessar este salão.',
+    );
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it('mostra loading e estado de erro com refetch', async () => {
