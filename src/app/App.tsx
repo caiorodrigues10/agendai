@@ -45,6 +45,7 @@ const AuditPage = lazy(() => import('../pages/MasterAdmin/AuditPage'));
 const BillingPage = lazy(() => import('../pages/MasterAdmin/BillingPage'));
 const ReferralsPage = lazy(() => import('../pages/MasterAdmin/ReferralsPage'));
 const CrmMaintenancePage = lazy(() => import('../pages/MasterAdmin/CrmMaintenancePage'));
+const EngagementPage = lazy(() => import('../pages/MasterAdmin/EngagementPage'));
 const StaffDashboard = lazy(() => import('../pages/StaffDashboard'));
 const ClientPortalPage = lazy(() => import('../pages/ClientPortalPage'));
 const ShowcasePage = lazy(() => import('../pages/ShowcasePage'));
@@ -128,6 +129,7 @@ const App: React.FC = () => {
             <Route path="billing" element={<BillingPage />} />
             <Route path="referrals" element={<ReferralsPage />} />
             <Route path="crm" element={<CrmMaintenancePage />} />
+            <Route path="engagement" element={<EngagementPage />} />
           </Route>
           <Route path="/app/account" element={<Navigate to="/app/settings" replace />} />
           <Route
