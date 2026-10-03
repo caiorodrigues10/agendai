@@ -4,14 +4,23 @@
  * neutral-950/900/800 e emerald usados historicamente no app.
  */
 :root {
-  --ag-bg: #fbfcfa;
-  --ag-surface: #f6f8f5;
-  --ag-surface-2: #e9eee9;
-  --ag-border: #d8e5dd;
-  --ag-border-strong: #abc5b7;
-  --ag-text-primary: #16251e;
-  --ag-text-secondary: #4d6256;
-  --ag-text-muted: #617267;
+  /* Página mais escura que os cards: hierarquia por elevação, não por borda. */
+  --ag-bg: #eef2f0;
+  --ag-surface: #ffffff;
+  --ag-surface-2: #e8eeeb;
+  --ag-border: #d9e1dd;
+  --ag-border-strong: #bfcdc5;
+  --ag-text-primary: #14201b;
+  --ag-text-secondary: #4a5a53;
+  --ag-text-muted: #6b7a73;
+  /* Hover de card/linha e foco de borda (tokens de interação). */
+  --ag-hover-bg: #f6f9f8;
+  --ag-hover-border: color-mix(in srgb, var(--ag-accent) 40%, transparent);
+  /* Campos de texto: branco com borda mais escura que a do card. */
+  --ag-input-bg: #ffffff;
+  --ag-input-border: #c5d2cb;
+  /* Elevação leve das superfícies (cards/sidebar) no claro. */
+  --ag-shadow-card: 0 1px 2px rgb(16 24 20 / 0.06);
   /* Marca e ação são papéis diferentes: marca identifica; ação confirma. */
   --ag-brand: #249b76;
   --ag-brand-hover: #1c7e61;
@@ -55,6 +64,13 @@
   --ag-text-primary: #f2f5f3;
   --ag-text-secondary: #b7c2bb;
   --ag-text-muted: #8b9990;
+  /* Interação: sem fundo de hover novo (mantém hover:bg-bg já existente) e
+     borda de hover igual ao border-strong atual — visual escuro inalterado. */
+  --ag-hover-bg: transparent;
+  --ag-hover-border: var(--ag-border-strong);
+  --ag-input-bg: #0f1110;
+  --ag-input-border: #303a34;
+  --ag-shadow-card: 0 18px 44px -32px rgba(0, 0, 0, 0.65);
   --ag-brand: #2cb58a;
   --ag-brand-hover: #45c49b;
   --ag-action-primary: #2cb58a;
@@ -89,6 +105,11 @@
   --color-surface-2: var(--ag-surface-2);
   --color-border: var(--ag-border);
   --color-border-strong: var(--ag-border-strong);
+  --color-hover-bg: var(--ag-hover-bg);
+  --color-hover-border: var(--ag-hover-border);
+  --color-input-bg: var(--ag-input-bg);
+  --color-input-border: var(--ag-input-border);
+  --shadow-card: var(--ag-shadow-card);
   --color-text-primary: var(--ag-text-primary);
   --color-text-secondary: var(--ag-text-secondary);
   --color-text-muted: var(--ag-text-muted);

@@ -269,7 +269,7 @@ export function SmartSelect<T extends string = string>(props: SmartSelectProps<T
         {showSearch && (
           <div className="relative mb-2">
             <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-            <input ref={searchRef} value={query} onChange={event => setSearch(event.target.value)} onKeyDown={handleSearchKeyDown} placeholder={searchPlaceholder} className="min-h-11 w-full rounded-lg border border-border bg-bg pl-9 pr-3 text-sm text-text-primary outline-none focus:border-focus" aria-label="Buscar opções" />
+            <input ref={searchRef} value={query} onChange={event => setSearch(event.target.value)} onKeyDown={handleSearchKeyDown} placeholder={searchPlaceholder} className="min-h-11 w-full rounded-lg border border-input-border bg-input-bg pl-9 pr-3 text-sm text-text-primary outline-none focus:border-focus" aria-label="Buscar opções" />
           </div>
         )}
         <div ref={listRef} id={listId} role="listbox" aria-multiselectable={mode === 'multiple' || undefined} className="overscroll-contain">

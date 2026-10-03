@@ -18,7 +18,7 @@ function applyDocumentTheme(theme: Theme) {
   const root = document.documentElement;
   root.classList.toggle('dark', theme === 'dark');
   root.style.colorScheme = theme;
-  root.style.backgroundColor = theme === 'dark' ? '#0a0a0a' : '#f5f5f5';
+  root.style.backgroundColor = theme === 'dark' ? '#0a0a0a' : '#eef2f0';
 }
 
 /**
