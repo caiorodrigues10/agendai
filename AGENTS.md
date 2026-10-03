@@ -73,6 +73,21 @@ Detalhes e efeitos: [SCRIPTS.md](docs/agents/SCRIPTS.md).
 
 Env (nomes): ver [DOMAIN_MAP.md](docs/agents/DOMAIN_MAP.md) e `.env.example`.
 
+### E2E do painel master (`e2e/master/`)
+
+Specs com **login real** no master (sem token forjado), contra o dev server com proxy `/api` → backend `:3333`:
+
+```bash
+E2E_BASE_URL=http://127.0.0.1:3003 \
+E2E_MASTER_EMAIL=... E2E_MASTER_PASSWORD=... \
+npx playwright test e2e/master --project=desktop-chromium
+```
+
+- `E2E_BASE_URL` **obrigatório** (o `preview` `:4173` não tem proxy de `/api`).
+- `E2E_MASTER_*` = usuário criado pelo seed (`SEED_MASTER_ADMIN_EMAIL`/`SEED_MASTER_ADMIN_PASSWORD`).
+- `E2E_OWNER_*` (opcional) = OWNER de teste para `acesso-negado.spec.ts`; sem ele, o spec é pulado.
+- Sem essas envs, `playwright.config.ts` ignora `e2e/master/` (CI e `npm run test:e2e` seguem verdes); specs rodam só no projeto `desktop-chromium`.
+
 ---
 
 ## 4. Arquitetura (resumo)
