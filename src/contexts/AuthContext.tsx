@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
 import { authApi, RegisterPayload, RegisterWithGooglePayload } from '../infra/authApi';
 import { authStorage, SwitchOrigin } from '../infra/authStorage';
+import { impersonationStorage, ImpersonationStartPayload } from '../infra/impersonationStorage';
 import { ApiError, refreshAccessToken } from '../infra/apiClient';
 import { organizationsApi } from '../infra/organizationsApi';
 import { getErrorMessage } from '../utils/errorMessage';
@@ -30,6 +31,12 @@ interface AuthContextValue {
   switchBack: () => Promise<AuthResult>;
   /** Sessão original gravada na primeira troca; null = nunca trocou. */
   switchOrigin: SwitchOrigin | null;
+  /** Salão sob visão temporária (impersonation); null = sem sessão temporária. */
+  impersonationShop: { id: string; name: string } | null;
+  /** Entra na sessão somente-leitura de 30min devolvida por /admin/accounts/:id/impersonate. */
+  startImpersonation: (payload: ImpersonationStartPayload) => void;
+  /** Encerra a sessão temporária e restaura o master (nunca chama logout no backend). */
+  exitImpersonation: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -79,6 +86,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // direto daqui (limpa e recarrega dados ligados ao barbershopId).
   const { setBarbershopId } = useBarbershopFilters();
   const [switchOrigin, setSwitchOrigin] = useState<SwitchOrigin | null>(() => authStorage.getSwitchOrigin());
+  const [impersonationShop, setImpersonationShop] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -265,7 +273,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const startImpersonation = useCallback((payload: ImpersonationStartPayload) => {
+    impersonationStorage.start(payload);
+    const raw = payload.user as StaffMember | null;
+    if (raw) setUser(normalizeUser(raw));
+    setImpersonationShop(payload.shop);
+  }, []);
+
+  const exitImpersonation = useCallback(() => {
+    impersonationStorage.clear();
+    const stored = authStorage.getUser();
+    setUser(stored ? normalizeUser(stored) : null);
+    setImpersonationShop(null);
+  }, []);
+
   const logout = () => {
+    // "Sair" durante um impersonation só encerra a visão temporária:
+    // a sessão do master no storage não pode ser destruída.
+    if (impersonationStorage.isActive()) {
+      exitImpersonation();
+      return;
+    }
     const token = authStorage.getAccessToken();
     if (token) {
       // A limpeza local não depende da rede, mas o backend deve receber a
@@ -305,6 +333,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const refreshUser = useCallback(async () => {
+    // Nunca sobrescrever o usuário master persistido com dados de uma
+    // sessão temporária de impersonation.
+    if (impersonationStorage.isActive()) return;
     const currentToken = authStorage.getAccessToken();
     if (!currentToken) return;
     const me = await authApi.me(currentToken);
@@ -362,8 +393,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [switchShop]);
 
   const value = useMemo(
-    () => ({ user, loading, login, loginWithGoogle, loginWithSavedAccount, forgetSavedAccount, register, registerWithGoogle, logout, hasRole, updateUserAvatar, updateUserProfile, refreshUser, switchShop, switchBack, switchOrigin }),
-    [user, loading, updateUserAvatar, updateUserProfile, refreshUser, switchShop, switchBack, switchOrigin]
+    () => ({ user, loading, login, loginWithGoogle, loginWithSavedAccount, forgetSavedAccount, register, registerWithGoogle, logout, hasRole, updateUserAvatar, updateUserProfile, refreshUser, switchShop, switchBack, switchOrigin, impersonationShop, startImpersonation, exitImpersonation }),
+    [user, loading, updateUserAvatar, updateUserProfile, refreshUser, switchShop, switchBack, switchOrigin, impersonationShop, startImpersonation, exitImpersonation]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

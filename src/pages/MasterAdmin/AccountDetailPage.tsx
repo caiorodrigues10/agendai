@@ -12,6 +12,7 @@ import {
   LuCreditCard,
 } from 'react-icons/lu';
 import { adminInternalApi, AccountDetail } from '../../infra/adminInternalApi';
+import { AccountActionsPanel } from './AccountActionsPanel';
 
 const brl = (value: number): string =>
   value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -81,6 +82,7 @@ export const AccountDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const [data, setData] = useState<AccountDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
@@ -214,6 +216,21 @@ export const AccountDetailPage: React.FC = () => {
           {error}
         </div>
       )}
+
+      {success && (
+        <div className="rounded-lg border border-success/40 bg-success/10 px-3 py-2 text-sm text-success">
+          {success}
+        </div>
+      )}
+
+      <AccountActionsPanel
+        shop={shop}
+        subscription={subscription}
+        onDone={() => {
+          setSuccess('Ação executada com sucesso.');
+          setReloadKey((key) => key + 1);
+        }}
+      />
 
       {attention.length > 0 && (
         <div className="space-y-2">

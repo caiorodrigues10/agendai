@@ -5,7 +5,11 @@ import { AccountDetailPage } from './AccountDetailPage';
 import { adminInternalApi, AccountDetail } from '../../infra/adminInternalApi';
 
 vi.mock('../../infra/adminInternalApi', () => ({
-  adminInternalApi: { getAccounts: vi.fn(), getAccount: vi.fn() },
+  adminInternalApi: { getAccounts: vi.fn(), getAccount: vi.fn(), accountAction: vi.fn(), impersonate: vi.fn() },
+}));
+
+vi.mock('../../contexts/AuthContext', () => ({
+  useAuth: () => ({ startImpersonation: vi.fn(), exitImpersonation: vi.fn(), impersonationShop: null }),
 }));
 
 const detail: AccountDetail = {
@@ -102,6 +106,9 @@ describe('AccountDetailPage', () => {
     expect(screen.getByText('45')).toBeInTheDocument();
     expect(screen.getByText('Donos')).toBeInTheDocument();
     expect(screen.getByText('Cobranças vencidas')).toBeInTheDocument();
+    expect(screen.getByText('Ações de controle')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Suspender/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Entrar agora/ })).toBeInTheDocument();
   });
 
   it('volta para a lista de contas', async () => {

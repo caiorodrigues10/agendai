@@ -10,6 +10,7 @@ import { SchedulingProvider } from '../contexts/SchedulingContext';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { SubscriptionProvider } from '../contexts/SubscriptionContext';
 import { PwaInstallProvider } from '../contexts/PwaInstallContext';
+import { ImpersonationBanner } from '../components/infra/ImpersonationBanner';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -23,6 +24,7 @@ root.render(
       <PwaInstallProvider>
         <BarbershopFiltersProvider>
           <AuthProvider>
+            <ImpersonationBanner />
             <ThemeProvider>
               <SubscriptionProvider>
                 <BarbershopProvider>

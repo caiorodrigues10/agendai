@@ -1,3 +1,4 @@
+import { impersonationStorage } from './impersonationStorage';
 const ACCESS_TOKEN_KEY = 'barber_access_token';
 const ACCESS_TOKEN_SESSION_KEY = 'barber_access_token_session';
 const REFRESH_TOKEN_KEY = 'barber_refresh_token';
@@ -38,7 +39,12 @@ function getRefreshToken(): string | null {
 
 export const authStorage = {
   getRevision: () => revision,
-  getAccessToken: () => localStorage.getItem(ACCESS_TOKEN_KEY) ?? sessionStorage.getItem(ACCESS_TOKEN_SESSION_KEY),
+  // Durante um impersonation o token em memória tem prioridade sobre o
+  // armazenado (que continua guardando a sessão do master).
+  getAccessToken: () =>
+    impersonationStorage.get()?.accessToken ??
+    localStorage.getItem(ACCESS_TOKEN_KEY) ??
+    sessionStorage.getItem(ACCESS_TOKEN_SESSION_KEY),
   getRefreshToken,
   hasStoredSession: () => Boolean(
     localStorage.getItem(USER_KEY) ??
