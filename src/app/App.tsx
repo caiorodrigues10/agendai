@@ -39,6 +39,7 @@ const TasksPage = lazy(() => import('../pages/MasterAdmin/TasksPage'));
 const TaskDetailPage = lazy(() => import('../pages/MasterAdmin/TaskDetailPage'));
 const TeamPage = lazy(() => import('../pages/MasterAdmin/TeamPage'));
 const AccountsPage = lazy(() => import('../pages/MasterAdmin/AccountsPage'));
+const AccountDetailPage = lazy(() => import('../pages/MasterAdmin/AccountDetailPage'));
 const OperationsPage = lazy(() => import('../pages/MasterAdmin/OperationsPage'));
 const AuditPage = lazy(() => import('../pages/MasterAdmin/AuditPage'));
 const BillingPage = lazy(() => import('../pages/MasterAdmin/BillingPage'));
@@ -121,6 +122,7 @@ const App: React.FC = () => {
             <Route path="tasks/:id" element={<TaskDetailPage />} />
             <Route path="team" element={<TeamPage />} />
             <Route path="accounts" element={<AccountsPage />} />
+            <Route path="accounts/:id" element={<AccountDetailPage />} />
             <Route path="operations" element={<OperationsPage />} />
             <Route path="audit" element={<AuditPage />} />
             <Route path="billing" element={<BillingPage />} />

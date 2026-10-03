@@ -249,6 +249,112 @@ export interface AdminOverview {
   };
 }
 
+// ── Accounts ──────────────────────────────────────────────────────────────────
+
+export type AccountsStatusFilter = 'active' | 'inactive';
+export type AccountsApprovalFilter = 'PENDING' | 'APPROVED' | 'REJECTED';
+export type AccountsSort = 'recent' | 'oldest' | 'name';
+
+export interface AccountPlanInfo {
+  id: string;
+  name: string;
+  price: number;
+  billingCycle: string;
+}
+
+export interface AccountSubscription {
+  status: string;
+  startDate: string;
+  endDate: string | null;
+  plan: AccountPlanInfo;
+}
+
+export interface AccountRow {
+  id: string;
+  name: string;
+  whatsapp: string;
+  cnpj: string | null;
+  address: string | null;
+  city: string | null;
+  active: boolean;
+  approvalStatus: AccountsApprovalFilter;
+  createdAt: string;
+  counts: { users: number; appointments: number; tickets: number; queue: number };
+  subscription: AccountSubscription | null;
+}
+
+export interface AccountsListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: AccountsStatusFilter;
+  approval?: AccountsApprovalFilter;
+  sort?: AccountsSort;
+}
+
+export interface AccountsListResponse {
+  success: boolean;
+  data: AccountRow[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    summary: { total: number; active: number; inactive: number; pendingApproval: number };
+  };
+}
+
+export interface AccountAttentionItem {
+  id: string;
+  severity: 'danger' | 'warning' | 'info';
+  title: string;
+  description: string;
+  to?: string;
+}
+
+export interface AccountDetail {
+  shop: {
+    id: string;
+    name: string;
+    whatsapp: string;
+    cnpj: string | null;
+    address: string | null;
+    city: string | null;
+    active: boolean;
+    approvalStatus: AccountsApprovalFilter;
+    rejectionReason: string | null;
+    createdAt: string;
+    updatedAt: string;
+    operationMode: string;
+    businessSegment: string;
+    onboardingCompletedAt: string | null;
+    onboardingCurrentStep: string | null;
+    organizationId: string | null;
+  };
+  members: { total: number; active: number; byRole: Record<string, number> };
+  subscription:
+    | (AccountSubscription & {
+        id: string;
+        cancelDate: string | null;
+        cancelReason: string | null;
+        createdAt: string;
+      })
+    | null;
+  billing: { invoicesTotal: number; paid: number; overdue: number; pending: number; sumPaid: number };
+  usage: {
+    appointments: number;
+    appointments30d: number;
+    completed30d: number;
+    queueEntries: number;
+    tickets: number;
+    servicesActive: number;
+    productsActive: number;
+    clients: number;
+    lastAppointment: { id: string; date: string; time: string; status: string } | null;
+  };
+  attention: AccountAttentionItem[];
+}
+
 
 // ── API ───────────────────────────────────────────────────────────────────────
 
@@ -257,6 +363,27 @@ export const adminInternalApi = {
   getOverview(period: OverviewPeriod = '30d') {
     return apiClient<{ success: boolean; data: AdminOverview }>(
       `/api/admin/overview?period=${period}`, 'GET', undefined, token()
+    );
+  },
+
+  // Accounts
+  getAccounts(params: AccountsListParams = {}) {
+    const q = new URLSearchParams();
+    if (params.page) q.set('page', String(params.page));
+    if (params.limit) q.set('limit', String(params.limit));
+    if (params.search) q.set('search', params.search);
+    if (params.status) q.set('status', params.status);
+    if (params.approval) q.set('approval', params.approval);
+    if (params.sort) q.set('sort', params.sort);
+    const query = q.toString();
+    return apiClient<AccountsListResponse>(
+      `/api/admin/accounts${query ? `?${query}` : ''}`, 'GET', undefined, token()
+    );
+  },
+
+  getAccount(id: string) {
+    return apiClient<{ success: boolean; data: AccountDetail }>(
+      `/api/admin/accounts/${id}`, 'GET', undefined, token()
     );
   },
 
