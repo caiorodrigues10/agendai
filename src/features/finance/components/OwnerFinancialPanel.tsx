@@ -836,7 +836,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                     placeholder="Buscar..."
                     value={expenseFilters.search}
                     onChange={e => setExpenseFilters(f => ({ ...f, search: e.target.value }))}
-                    className="bg-bg border border-border rounded-lg px-3 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent w-40"
+                    className="bg-input-bg border border-input-border rounded-lg px-3 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent w-40"
                   />
                   <SmartSelect
                     value={expenseFilters.categoryId || null}
