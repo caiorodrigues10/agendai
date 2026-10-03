@@ -3,15 +3,21 @@ import { useSearchParams } from 'react-router-dom';
 import { LuSearch, LuLoader, LuTriangleAlert, LuShield, LuDownload, LuX } from 'react-icons/lu';
 import {
   adminAuditApi,
+  AuditFacets,
   AuditFilterValues,
   AuditLogsResponse,
   buildAuditFilterParams,
 } from '../../infra/adminAuditApi';
 import { PaginationBar } from '../../components/ui/PaginationBar';
+import { AuditAlertsPanel, AuditSessionsPanel } from './AuditAdvancedPanels';
+import { AuditDetailModal } from './AuditDetailModal';
 
 const PAGE_SIZE = 25;
 
-const AuditLogList: React.FC<{ logs: AuditLogsResponse['data'] }> = ({ logs }) => {
+const AuditLogList: React.FC<{
+  logs: AuditLogsResponse['data'];
+  onSelect: (log: AuditLogsResponse['data'][number]) => void;
+}> = ({ logs, onSelect }) => {
   if (logs.length === 0) {
     return (
       <p className="px-4 py-8 text-center text-sm text-text-muted">Nenhum registro encontrado.</p>
@@ -33,6 +39,13 @@ const AuditLogList: React.FC<{ logs: AuditLogsResponse['data'] }> = ({ logs }) =
             </div>
             {log.details && <p className="text-xs text-text-muted mt-0.5 truncate">{log.details}</p>}
           </div>
+          <button
+            type="button"
+            onClick={() => onSelect(log)}
+            className="text-xs font-bold text-accent hover:underline shrink-0"
+          >
+            Detalhes
+          </button>
           <span className="text-[10px] text-text-muted shrink-0">
             {new Date(log.createdAt).toLocaleString('pt-BR')}
           </span>
@@ -61,13 +74,37 @@ const FilterField: React.FC<{
   </label>
 );
 
+const SelectField: React.FC<{
+  label: string;
+  name: string;
+  options: { value: string; label: string }[];
+  defaultValue?: string;
+}> = ({ label, name, options, defaultValue }) => (
+  <label className="flex flex-col gap-1 text-xs font-medium text-text-muted min-w-0">
+    {label}
+    <select
+      name={name}
+      defaultValue={defaultValue}
+      className="bg-bg border border-border rounded-lg px-2 py-1.5 text-sm text-text-primary focus:outline-none focus:border-accent"
+    >
+      <option value="">Todos</option>
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  </label>
+);
+
 const AuditFilters: React.FC<{
   signature: string;
   values: AuditFilterValues;
+  facets: { users: AuditFacets['users']; shops: AuditFacets['shops'] };
   hasFilters: boolean;
   onApply: (values: AuditFilterValues) => void;
   onClear: () => void;
-}> = ({ signature, values, hasFilters, onApply, onClear }) => (
+}> = ({ signature, values, facets, hasFilters, onApply, onClear }) => (
   <form
     key={signature}
     onSubmit={(event) => {
@@ -81,11 +118,13 @@ const AuditFilters: React.FC<{
         q: read('q'),
         action: read('action'),
         resource: read('resource'),
+        userId: read('userId'),
+        shopId: read('shopId'),
         from: read('from'),
         to: read('to'),
       });
     }}
-    className="grid grid-cols-2 md:grid-cols-6 gap-3 items-end"
+    className="grid grid-cols-2 md:grid-cols-4 gap-3 items-end"
   >
     <div className="col-span-2 md:col-span-2">
       <FilterField
@@ -102,9 +141,24 @@ const AuditFilters: React.FC<{
       placeholder="ex.: products"
       defaultValue={values.resource}
     />
+    <SelectField
+      label="Usuário"
+      name="userId"
+      defaultValue={values.userId}
+      options={facets.users.map((user) => ({
+        value: user.id,
+        label: `${user.name} (${user.email})`,
+      }))}
+    />
+    <SelectField
+      label="Salão"
+      name="shopId"
+      defaultValue={values.shopId}
+      options={facets.shops.map((shop) => ({ value: shop.id, label: shop.name }))}
+    />
     <FilterField label="De" name="from" type="date" defaultValue={values.from} />
     <FilterField label="Até" name="to" type="date" defaultValue={values.to} />
-    <div className="col-span-2 md:col-span-6 flex gap-2 justify-end">
+    <div className="col-span-2 md:col-span-4 flex gap-2 justify-end">
       <button
         type="submit"
         className="px-3 py-1.5 text-xs font-bold flex items-center gap-1 border border-border rounded-lg hover:bg-surface transition-colors"
@@ -167,7 +221,8 @@ const AuditBody: React.FC<{
   page: number;
   onRetry: () => void;
   onPageChange: (next: number) => void;
-}> = ({ loading, error, response, page, onRetry, onPageChange }) => {
+  onSelect: (log: AuditLogsResponse['data'][number]) => void;
+}> = ({ loading, error, response, page, onRetry, onPageChange, onSelect }) => {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
@@ -199,7 +254,7 @@ const AuditBody: React.FC<{
         </div>
       )}
       <div className="bg-surface border border-border rounded-xl overflow-hidden divide-y divide-border/50">
-        <AuditLogList logs={response?.data ?? []} />
+        <AuditLogList logs={response?.data ?? []} onSelect={onSelect} />
       </div>
       <PaginationBar
         page={page}
@@ -210,6 +265,16 @@ const AuditBody: React.FC<{
   );
 };
 
+const readFilters = (params: URLSearchParams): AuditFilterValues => ({
+  q: params.get('q') ?? '',
+  action: params.get('action') ?? '',
+  resource: params.get('resource') ?? '',
+  userId: params.get('userId') ?? '',
+  shopId: params.get('shopId') ?? '',
+  from: params.get('from') ?? '',
+  to: params.get('to') ?? '',
+});
+
 export const AuditPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [response, setResponse] = useState<AuditLogsResponse | null>(null);
@@ -217,12 +282,12 @@ export const AuditPage: React.FC = () => {
   const [reloadKey, setReloadKey] = useState(0);
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [facets, setFacets] = useState<AuditFacets>({ resources: [], users: [], shops: [] });
+  const [selectedLog, setSelectedLog] = useState<AuditLogsResponse['data'][number] | null>(
+    null,
+  );
 
-  const q = searchParams.get('q') ?? '';
-  const action = searchParams.get('action') ?? '';
-  const resource = searchParams.get('resource') ?? '';
-  const from = searchParams.get('from') ?? '';
-  const to = searchParams.get('to') ?? '';
+  const { q, action, resource, userId, shopId, from, to } = readFilters(searchParams);
   const pageParam = Number(searchParams.get('page') ?? '1');
   const page = Number.isFinite(pageParam) && pageParam >= 1 ? Math.floor(pageParam) : 1;
 
@@ -238,10 +303,23 @@ export const AuditPage: React.FC = () => {
   useEffect(() => {
     let active = true;
     adminAuditApi
+      .getAuditFacets()
+      .then((res) => {
+        if (active) setFacets(res.data);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    adminAuditApi
       .getAuditLogs({
         page,
         limit: PAGE_SIZE,
-        ...buildAuditFilterParams({ q, action, resource, from, to }),
+        ...buildAuditFilterParams({ q, action, resource, userId, shopId, from, to }),
       })
       .then((res) => {
         if (!active) return;
@@ -255,7 +333,7 @@ export const AuditPage: React.FC = () => {
     return () => {
       active = false;
     };
-  }, [q, action, resource, from, to, page, reloadKey]);
+  }, [q, action, resource, userId, shopId, from, to, page, reloadKey]);
 
   const loading = !response && !error;
 
@@ -263,7 +341,9 @@ export const AuditPage: React.FC = () => {
     setExporting(true);
     setExportError(null);
     adminAuditApi
-      .exportAuditLogsCsv(buildAuditFilterParams({ q, action, resource, from, to }))
+      .exportAuditLogsCsv(
+        buildAuditFilterParams({ q, action, resource, userId, shopId, from, to }),
+      )
       .then(async (res) => {
         if (!res.ok) throw new Error('Falha no export');
         const blob = new Blob([await res.blob()], { type: 'text/csv;charset=utf-8' });
@@ -280,7 +360,9 @@ export const AuditPage: React.FC = () => {
       .finally(() => setExporting(false));
   };
 
-  const hasFilters = Boolean(q || action || resource || from || to);
+  const hasFilters = Object.values({ q, action, resource, userId, shopId, from, to }).some(
+    Boolean,
+  );
   const meta = response?.meta;
 
   return (
@@ -292,9 +374,15 @@ export const AuditPage: React.FC = () => {
         onExport={handleExport}
       />
 
+      <div className="grid md:grid-cols-2 gap-4">
+        <AuditAlertsPanel />
+        <AuditSessionsPanel />
+      </div>
+
       <AuditFilters
-        signature={`${q}|${action}|${resource}|${from}|${to}`}
-        values={{ q, action, resource, from, to }}
+        signature={`${q}|${action}|${resource}|${userId}|${shopId}|${from}|${to}`}
+        values={{ q, action, resource, userId, shopId, from, to }}
+        facets={{ users: facets.users, shops: facets.shops }}
         hasFilters={hasFilters}
         onApply={(values) => setParams({ ...values, page: '' })}
         onClear={() => setSearchParams(new URLSearchParams(), { replace: true })}
@@ -307,7 +395,10 @@ export const AuditPage: React.FC = () => {
         page={page}
         onRetry={() => setReloadKey((key) => key + 1)}
         onPageChange={(next) => setParams({ page: String(next) })}
+        onSelect={setSelectedLog}
       />
+
+      <AuditDetailModal log={selectedLog} onClose={() => setSelectedLog(null)} />
     </div>
   );
 };

@@ -18,6 +18,16 @@ test('auditoria filtra pela URL e exporta o CSV', async ({ page }) => {
 
   await expect(page.getByRole('heading', { name: 'Auditoria' })).toBeVisible();
 
+  await expect(page.getByText('Alertas sensíveis (24h)')).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText('Sessões (24h)')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Detalhes' }).first().click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText('Detalhes do registro')).toBeVisible();
+  await page.getByRole('button', { name: 'Fechar detalhes' }).click();
+  await expect(dialog).not.toBeVisible();
+
   await page.getByLabel('Busca', { exact: true }).fill('switch');
   await page.getByRole('button', { name: 'Filtrar' }).click();
   await expect(page).toHaveURL(/[?&]q=switch/);
