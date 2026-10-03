@@ -137,7 +137,7 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
       {visibleSections.length > 1 && (
         <nav
           aria-label="Áreas do CRM"
-          className="flex gap-1 rounded-xl border border-border bg-surface p-1"
+          className="flex gap-1 rounded-xl border border-border bg-surface p-1 shadow-card"
         >
           {visibleSections.map(s => (
             <button
@@ -148,7 +148,7 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
               className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-1.5 text-xs font-bold transition-colors sm:px-3 ${
                 section === s.id
                   ? 'bg-accent text-accent-fg'
-                  : 'text-text-muted hover:bg-bg hover:text-text-secondary'
+                  : 'text-text-secondary hover:bg-bg hover:text-text-primary'
               }`}
             >
               <span className="shrink-0 inline-flex">{s.icon}</span>

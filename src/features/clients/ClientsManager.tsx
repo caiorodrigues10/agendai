@@ -7,17 +7,37 @@ import {
   RiSearchLine,
   RiUserAddLine,
 } from 'react-icons/ri';
+import { LuChevronRight as ChevronRight } from 'react-icons/lu';
 import { SalonClient } from '../../types';
 import { clientsApi, ListMeta } from '../../infra/clientsApi';
 import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_GRID } from '../../components/ui/Field';
+import { Avatar } from '../../components/ui/Avatar';
+import { StatusBadge } from '../../components/ui/StatusBadge';
 import { ClientCreateSchema, ClientCreateFormData } from '../../schemas';
 
 function clientPhoneLabel(whatsapp: string): string {
   const digits = whatsapp.replace(/\D/g, '');
   if (digits.length >= 10 && digits.length <= 11) return maskPhone(whatsapp);
   return 'Sem WhatsApp';
+}
+
+function ClientBadges({
+  sessions,
+  packages,
+  className = '',
+}: {
+  sessions: number;
+  packages: number;
+  className?: string;
+}) {
+  return (
+    <div className={`flex flex-wrap items-center gap-1.5 ${className}`}>
+      <StatusBadge tone={sessions > 0 ? 'success' : 'neutral'}>{sessions} sessões</StatusBadge>
+      <StatusBadge tone={packages > 0 ? 'success' : 'neutral'}>{packages} pacotes</StatusBadge>
+    </div>
+  );
 }
 
 interface ClientsManagerProps {
@@ -107,12 +127,12 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-bold text-text-primary">Clientes</h3>
-          <p className="text-xs text-text-muted">Cadastro, pacotes e histórico</p>
+          <p className="text-xs text-text-secondary">Cadastro, pacotes e histórico</p>
         </div>
         <button
           type="button"
           onClick={() => setShowCreate(v => !v)}
-          className="flex items-center gap-1 rounded-lg border border-accent/50 bg-accent/10 px-3 py-1.5 text-xs font-bold text-accent"
+          className="flex items-center gap-1 rounded-lg bg-accent px-3 py-1.5 text-xs font-bold text-accent-fg transition-colors hover:bg-accent-hover"
         >
           <RiAddLine size={14} /> Cadastrar
         </button>
@@ -123,7 +143,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
       {showCreate && (
         <form
           onSubmit={handleSubmit(handleCreate)}
-          className="space-y-4 rounded-xl border border-border bg-surface p-4"
+          className="space-y-4 rounded-xl border border-border bg-surface p-4 shadow-card"
         >
           <div className={FORM_GRID}>
             <Field label="Nome" error={errors.name?.message}>
@@ -161,7 +181,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
           className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted"
         />
         <input
-          className="w-full rounded-xl border border-border bg-surface py-3 pl-10 pr-4 text-sm text-text-primary"
+          className="w-full rounded-xl border border-input-border bg-input-bg py-3 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-focus"
           placeholder="Buscar por nome ou WhatsApp"
           value={search}
           onChange={e => {
@@ -178,7 +198,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
         </div>
       ) : clients.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border py-10 text-center">
-          <p className="text-sm text-text-muted">Nenhum cliente cadastrado.</p>
+          <p className="text-sm text-text-secondary">Nenhum cliente cadastrado.</p>
           <button
             type="button"
             onClick={() => setShowCreate(true)}
@@ -189,23 +209,34 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
         </div>
       ) : (
         <>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {clients.map(c => (
               <button
                 key={c.id}
                 type="button"
                 onClick={() => onSelectClient(c.id)}
-                className={`w-full rounded-xl border bg-surface px-4 py-3 text-left transition-colors ${
+                className={`group flex w-full items-center gap-3 rounded-xl border p-4 text-left shadow-card transition-colors ${
                   selectedId === c.id
                     ? 'border-accent ring-1 ring-accent/30'
-                    : 'border-border hover:border-border-strong'
+                    : 'border-border hover:border-hover-border hover:bg-hover-bg'
                 }`}
               >
-                <p className="font-medium text-text-primary">{c.name}</p>
-                <p className="text-xs text-text-muted">
-                  {clientPhoneLabel(c.whatsapp)} · {c.remainingSessions} sessão(ões) ·{' '}
-                  {c.activePackageCount} pacote(s)
-                </p>
+                <Avatar name={c.name} size="sm" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-text-primary">{c.name}</p>
+                  <p className="truncate text-xs text-text-secondary">{clientPhoneLabel(c.whatsapp)}</p>
+                  <div className="mt-2 sm:hidden">
+                    <ClientBadges sessions={c.remainingSessions} packages={c.activePackageCount} />
+                  </div>
+                </div>
+                <div className="hidden shrink-0 sm:block">
+                  <ClientBadges sessions={c.remainingSessions} packages={c.activePackageCount} />
+                </div>
+                <ChevronRight
+                  size={16}
+                  aria-hidden="true"
+                  className="shrink-0 text-text-muted transition-colors group-hover:text-accent"
+                />
               </button>
             ))}
           </div>
