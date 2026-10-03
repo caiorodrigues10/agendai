@@ -355,6 +355,32 @@ export interface AccountDetail {
   attention: AccountAttentionItem[];
 }
 
+// ── Operations ────────────────────────────────────────────────────────────────
+
+export type OperationsStatus = 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY';
+
+export interface OperationsHealth {
+  generatedAt: string;
+  status: OperationsStatus;
+  errors: {
+    total24h: number;
+    last24h5xx: number;
+    lastHour5xx: number;
+    byStatus: { statusCode: number; count: number }[];
+    topPaths: { path: string; method: string; count: number }[];
+  };
+  cron: {
+    failures24h: number;
+    running: number;
+    recentFailures: { id: string; jobName: string; startedAt: string; error: string | null }[];
+  };
+  delivery: {
+    whatsapp: { total24h: number; failed24h: number; failedRatePct: number };
+    email: { total24h: number; failed24h: number; failedRatePct: number };
+  };
+  outbox: { pending: number; failed: number };
+}
+
 
 // ── API ───────────────────────────────────────────────────────────────────────
 
@@ -506,10 +532,10 @@ export const adminInternalApi = {
     ).then(r => r.data);
   },
 
-  // Operations (reuse existing)
+  // Operations
   getOperationsHealth() {
-    return apiClient<{ success: boolean; data: any }>(
-      '/api/admin/operations/notifications', 'GET', undefined, token()
+    return apiClient<{ success: boolean; data: OperationsHealth }>(
+      '/api/admin/operations/health', 'GET', undefined, token()
     );
   },
 };
