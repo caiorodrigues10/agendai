@@ -26,7 +26,7 @@ Código existente ≠ comprovadamente funcional em produção. Distinguir:
 | Financeiro owner | `OwnerFinancialPanel`, `FinancialDashboard` | `financialApi` | `/expenses`, `/fiado`, `/barbershop/*` |
 | Comissões | painéis de comissão (domain) | `commissionsApi` | `/api/commissions` |
 | Notificações | `OwnerNotificationsPanel`, health | `notificationsApi` | `/api/notifications` |
-| Posts / feed | `PostsManager` | `barbershopApi` feed / posts | `/api/feed`, `/api/posts` |
+| Posts / feed / perfil social | `PostsManager`, `ShopProfile`, `PublicPostPage` | `postsApi`, `barbershopApi`, `socialApi` | `/api/feed`, `/api/posts`, `/api/salons/:salonId/*`; link direto `/saloes/:salonId/posts/:postId` |
 | Indicações | `OwnerReferralsPanel` | `referralsApi` | `/api/referrals` |
 | Master admin | `MasterAdminDashboard`, `BillingTab` | `adminApi` | `/api/admin/*` |
 | Contato público | `ContactPage` | `contactApi` | `/api/contact` |

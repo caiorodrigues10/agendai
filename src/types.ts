@@ -151,6 +151,7 @@ export interface FeedPost {
   videoUrl?: string;
   createdAt: number;
   likes: number;
+  commentsCount?: number;
   authorName?: string;
   status?: 'draft' | 'scheduled' | 'published';
   scheduledFor?: number | null;

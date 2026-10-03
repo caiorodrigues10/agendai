@@ -1,0 +1,321 @@
+{
+    "status_lines": 127,
+    "log": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+    "ts": "2026-10-01T18:43:11-03:00",
+    "timestamp": "2026-10-01T18:43:11-03:00",
+    "repository": "D:\\Programação\\agendai\\agendai",
+    "task": "React frontend restructure - Stage 5a: Operação (moved 8 components from src/components/domain/ into src/features/{clients,appointments,onboarding}/ with 3 new barrels; refactored AppointmentBookingModal + BookPackageSessionsModal onto components/patterns/ModalShell; converted 3 buttons in AppointmentCalendar to ui/Button; updated consumers PublicHome/StaffDashboard/ClientProfileSheet; +5 stories + storyFixtures.ts + 13 visual snapshots; docs/restructure/08-stage5a-operation.md; docs/agents/STRUCTURE.md updated)",
+    "stage": "Stage 5 of restructuring (5a Operação COMPLETE - clients/appointments/onboarding; finance + painéis remain for 5b)",
+    "baseline": {
+        "captured": true,
+        "note": "Comparison baseline is the Etapa-4b AFTER snapshot specified by the task.",
+        "baseline_snapshot": ".opencode/snapshots/after-20261001_180643.json",
+        "baseline_snapshot_ts": "2026-10-01T18:06:43-03:00",
+        "baseline_snapshot_status_lines": 116,
+        "baseline_snapshot_log": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+        "baseline_is_same_head_as_current": true,
+        "commits_since_baseline_snapshot": [],
+        "baseline_task": "Stage 4b MarketingLayout COMPLETE (stage 4 concluded; 4c PublicLayout deferred/justified)",
+        "baseline_measured_before_itself_was_written": true
+    },
+    "git": {
+        "branch": "main",
+        "head_commit": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+        "head_short": "4d74145",
+        "is_git_repo": true,
+        "tracked_files_count": 470,
+        "status_line_count": 127,
+        "status_counts": {
+            "modified": 50,
+            "deleted": 49,
+            "untracked_lines": 28,
+            "untracked_files_expanded": 169
+        },
+        "staged_changes": "none (git diff --cached empty; no commits made - working tree only on top of HEAD 4d74145)",
+        "diff_stat": "99 files changed, 59346 insertions(+), 50541 deletions(-)",
+        "insertions": 59346,
+        "deletions": 50541,
+        "diff_files_count": 99,
+        "status_transitions_since_baseline": {
+            "newly_deleted_modified_to_deleted": [
+                "src/components/domain/AppointmentCalendar.tsx (was 17 changed lines vs HEAD at baseline; now full deletion of 582 lines)",
+                "src/components/domain/AppointmentScheduler.tsx (was 157 changed lines at baseline - parallel 'produtos/venda' work, explicitly preserved per 08 doc; now full deletion of 434 lines)"
+            ],
+            "newly_deleted_clean_to_deleted": [
+                "src/components/domain/AddCustomerForm.tsx (259 lines)",
+                "src/components/domain/ServiceCard.tsx (70 lines)",
+                "src/components/domain/AppointmentBookingModal.tsx (456 lines)",
+                "src/components/domain/BookPackageSessionsModal.tsx (245 lines)",
+                "src/components/domain/OnboardingChecklist.tsx (347 lines)",
+                "src/components/domain/ActivationChecklist.tsx (39 lines)"
+            ],
+            "newly_modified": [
+                "src/components/domain/ClientProfileSheet.tsx (clean at baseline; now 1+/2- - entire diff is the 5a import consolidation onto ../../features/appointments barrel)"
+            ],
+            "reconciliations": {
+                "modified": "51 - 2 (Calendar, Scheduler moved out) + 1 (ClientProfileSheet) = 50",
+                "deleted": "41 + 8 = 49",
+                "diff_files": "92 + 6 (previously-clean moved files now in diff) + 1 (ClientProfileSheet) = 99",
+                "untracked_entries": "24 + 3 (features/{appointments,clients,onboarding}/ dirs) + 1 (baseline snapshot json itself) = 28",
+                "untracked_expanded": "137 + 14 (3 new feature dirs) + 3 (queue stories) + 1 (docs/restructure/08-stage5a-operation.md) + 13 (visual PNGs) + 1 (baseline snapshot json) = 169"
+            }
+        },
+        "files_touched_since_baseline_timestamp": [
+            "docs/agents/STRUCTURE.md (18:36:09 - added Etapa 5a features tree lines)",
+            "graphify-out/ 5 files regenerated 18:37:14-18:37:16 (graphify update . per AGENTS.md after-major-changes rule; graph.json diff-vs-HEAD total unchanged at 81854 changed lines)",
+            "src/components/domain/ClientProfileSheet.tsx (18:10:48)",
+            "src/pages/PublicHome.tsx (18:10:47)",
+            "src/pages/StaffDashboard.tsx (18:10:48)"
+        ]
+    },
+    "file_inventory": {
+        "total_excluding_node_modules_git_dist_opencode_mimocode_graphify_cache": 732,
+        "total_strict_also_excluding_nested_src_graphify_caches": 730,
+        "methodology_note": "Same stated exclusions as baseline (node_modules, .git, dist, .opencode, .mimocode, graphify-out/cache). Baseline 698 -> 732 (+34) reconciles as: +9 net new src files + 1 docs file + 13 visual PNGs + 11 from storybook-static rebuild during stage 5a (build ran 18:31-18:32 producing 91 files; inferred baseline count 80 from 698+9+1+13+X=732). The 2 nested src/pages/**/graphify-out/cache/*.json flagged by the baseline methodology note are present and excluded consistently here.",
+        "node_modules_present": true,
+        "counts_by_directory": {
+            "src": 398,
+            "src_strict_excl_nested_graphify_caches": 396,
+            "src_ts_tsx": 373,
+            "src_pages": 63,
+            "src_pages_marketing": 18,
+            "src_components_ui": 26,
+            "src_components_patterns": 35,
+            "src_components_infra": 14,
+            "src_layouts": 7,
+            "src_features_queue": 12,
+            "src_features_clients": 3,
+            "src_features_appointments": 8,
+            "src_features_onboarding": 3,
+            "src_features_finance": 4,
+            "src_app": 2,
+            "docs": 24,
+            "docs_restructure": 10,
+            ".storybook": 4,
+            "scripts": 9,
+            "visual_regression": 61,
+            "opencode_snapshots": 7,
+            "storybook_static": 91,
+            "graphify_out_excl_cache": 90
+        },
+        "key_files": [
+            "package.json",
+            "tsconfig.json",
+            "vite.config.ts",
+            "vitest.config.ts",
+            "eslint.config.js",
+            "docs/restructure/08-stage5a-operation.md",
+            "docs/agents/STRUCTURE.md",
+            "src/features/clients/index.ts",
+            "src/features/appointments/index.ts",
+            "src/features/onboarding/index.ts",
+            "src/features/queue/index.ts",
+            "src/components/patterns/ModalShell.tsx",
+            "src/features/appointments/storyFixtures.ts"
+        ]
+    },
+    "stage5a_artifacts_on_disk": {
+        "moved_components_verification": {
+            "all_8_absent_from_domain": {
+                "AddCustomerForm.tsx": true,
+                "ServiceCard.tsx": true,
+                "AppointmentScheduler.tsx": true,
+                "AppointmentCalendar.tsx": true,
+                "AppointmentBookingModal.tsx": true,
+                "BookPackageSessionsModal.tsx": true,
+                "OnboardingChecklist.tsx": true,
+                "ActivationChecklist.tsx": true
+            },
+            "all_8_present_in_features": {
+                "src/features/clients/AddCustomerForm.tsx": true,
+                "src/features/clients/ServiceCard.tsx": true,
+                "src/features/appointments/AppointmentScheduler.tsx": true,
+                "src/features/appointments/AppointmentCalendar.tsx": true,
+                "src/features/appointments/AppointmentBookingModal.tsx": true,
+                "src/features/appointments/BookPackageSessionsModal.tsx": true,
+                "src/features/onboarding/OnboardingChecklist.tsx": true,
+                "src/features/onboarding/ActivationChecklist.tsx": true
+            }
+        },
+        "barrels": {
+            "src/features/clients/index.ts": "2 lines: exports AddCustomerForm, ServiceCard",
+            "src/features/appointments/index.ts": "4 lines: exports AppointmentScheduler, AppointmentCalendar, AppointmentBookingModal, BookPackageSessionsModal",
+            "src/features/onboarding/index.ts": "2 lines: exports OnboardingChecklist, ActivationChecklist"
+        },
+        "modal_shell_refactor": {
+            "src/components/patterns/ModalShell.tsx": "exists (35 files in components/patterns total)",
+            "users_in_scope": [
+                "src/features/appointments/AppointmentBookingModal.tsx (imports ModalShell)",
+                "src/features/appointments/BookPackageSessionsModal.tsx (imports ModalShell)"
+            ],
+            "other_users": "ui/ConfirmDialog, ui/PromptModal, features/queue/ClosedSalonJoinModal, features/queue/ReturnToQueueModal"
+        },
+        "button_conversion": {
+            "src/features/appointments/AppointmentCalendar.tsx": "imports { Button } from '../../components/ui/Button' (line 28); exactly 3 case-sensitive <Button> usages (L219 primary showBooking, L528, L537 ghost) - matches '3 buttons converted'; 15 raw <button> remain (untouched)"
+        },
+        "consumers_updated": {
+            "src/pages/PublicHome.tsx": "imports features/clients (AddCustomerForm) + features/appointments (AppointmentScheduler) + features/queue",
+            "src/pages/StaffDashboard.tsx": "imports features/clients + features/appointments + features/onboarding + features/queue + layouts/app",
+            "src/components/domain/ClientProfileSheet.tsx": "imports { BookPackageSessionsModal, AppointmentBookingModal } from '../../features/appointments'"
+        },
+        "new_stories_and_fixtures": [
+            "src/features/queue/ReturnToQueueModal.stories.tsx",
+            "src/features/queue/ClosedSalonJoinModal.stories.tsx",
+            "src/features/queue/QueueCapacityBanner.stories.tsx",
+            "src/features/appointments/AppointmentBookingModal.stories.tsx",
+            "src/features/appointments/BookPackageSessionsModal.stories.tsx",
+            "src/features/appointments/storyFixtures.ts"
+        ],
+        "visual_snapshots": {
+            "count_now": 61,
+            "count_at_baseline": 48,
+            "new_pngs_13_created_20261001_183305_183314": [
+                "agenda-appointmentbookingmodal--default.png",
+                "agenda-appointmentbookingmodal--preselected-client.png",
+                "agenda-appointmentbookingmodal--with-occupancy.png",
+                "agenda-bookpackagesessionsmodal--default.png",
+                "agenda-bookpackagesessionsmodal--last-session.png",
+                "fila-closedsalonjoinmodal--default.png",
+                "fila-closedsalonjoinmodal--submitting.png",
+                "fila-queuecapacitybanner--exceeded.png",
+                "fila-queuecapacitybanner--with-configure-action.png",
+                "fila-queuecapacitybanner--within-limit.png",
+                "fila-returntoqueuemodal--default.png",
+                "fila-returntoqueuemodal--empty-queue.png",
+                "fila-returntoqueuemodal--submitting.png"
+            ],
+            "existing_48_intact": true
+        },
+        "docs": [
+            "docs/restructure/08-stage5a-operation.md (untracked, NEW, 61 lines): Status 'concluída' (parte da 5.1; finance e painéis seguem na 5b); migration table (origem domain → destino → consumidores); barrel + import-rewrite notes; scope exception for the 6 parallel-work files preserved intact; gate table",
+            "docs/agents/STRUCTURE.md (modified, 32 lines vs HEAD): features/ tree now lists clients/ (Etapa 5a), appointments/, onboarding/, finance/ (5b) alongside queue/ pilot"
+        ],
+        "stage5a_gate_from_doc": {
+            "tsc_noEmit": "0 errors",
+            "eslint": "11 errors / 589 warnings (ceiling 11/593; -4 vs teto)",
+            "vitest": "199/199 (51 files, ceiling 197/199)",
+            "storybook_tests": "61/61 (17 files, ceiling 48) - 1 flake D-006 on 1st run, passed on re-run",
+            "visual_tests": "61/61 (13 novos + 48 intactos)",
+            "pending": "no 5a pending; next = Etapa 5b (finance + painéis)"
+        }
+    },
+    "graphify": {
+        "graph_exists": true,
+        "graph_json": "graphify-out/graph.json",
+        "graph_modified_in_this_task": true,
+        "graph_modify_status": "graphify-out/* regenerated 18:37:14-18:37:16 during stage 5a (per AGENTS.md after-major-changes rule); graph.json diff-vs-HEAD total identical to baseline at 81854 changed lines (44394+/37460- now); still shows as modified vs HEAD (carried over)"
+    },
+    "comparison": {
+        "note": "Compared against the Etapa-4b AFTER snapshot (.opencode/snapshots/after-20261001_180643.json). HEAD unchanged (4d74145) between snapshots; all deltas are working-tree changes from Stage 5a.",
+        "before": {
+            "source": ".opencode/snapshots/after-20261001_180643.json",
+            "head_commit": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+            "files_tracked": 470,
+            "uncommitted_files": 116,
+            "modified": 51,
+            "deleted": 41,
+            "untracked_entries": 24,
+            "untracked_expanded": 137,
+            "lines_added": 57035,
+            "lines_removed": 47119,
+            "diff_files": 92,
+            "inventory_total": 698,
+            "inventory_src_strict": 387,
+            "src_ts_tsx": 364,
+            "visual_snapshots": 48
+        },
+        "after": {
+            "files_tracked": 470,
+            "uncommitted_files": 127,
+            "modified": 50,
+            "deleted": 49,
+            "untracked_entries": 28,
+            "untracked_expanded": 169,
+            "lines_added": 59346,
+            "lines_removed": 50541,
+            "diff_files": 99,
+            "inventory_total": 732,
+            "inventory_src_strict": 396,
+            "src_ts_tsx": 373,
+            "visual_snapshots": 61
+        },
+        "delta": {
+            "files_tracked": "0 (470 -> 470)",
+            "uncommitted_files": "+11 (116 -> 127 status lines)",
+            "modified": "-1 (51 -> 50: -2 moved files, +1 ClientProfileSheet)",
+            "deleted": "+8 (41 -> 49: exactly the 8 moved domain components)",
+            "untracked_entries": "+4 (24 -> 28: 3 new features dirs + baseline snapshot json)",
+            "untracked_expanded": "+32 (137 -> 169: 14 feature files + 3 queue stories + 1 doc + 13 PNGs + 1 snapshot json)",
+            "lines_added": "+2311 (57035 -> 59346)",
+            "lines_removed": "+3422 (47119 -> 50541)",
+            "diff_files": "+7 (92 -> 99: +6 previously-clean moved files now deleted + 1 ClientProfileSheet newly modified)",
+            "inventory_total": "+34 (698 -> 732)",
+            "inventory_src_strict": "+9 (387 -> 396: 3 barrels + 2 appointments stories + storyFixtures + 3 queue stories)",
+            "src_ts_tsx": "+9 (364 -> 373)",
+            "visual_snapshots": "+13 (48 -> 61)"
+        },
+        "added_since_stage4b": [
+            "src/features/clients/ (NEW dir: 2 moved components + barrel = 3 files)",
+            "src/features/appointments/ (NEW dir: 4 moved components + barrel + 2 stories + storyFixtures = 8 files)",
+            "src/features/onboarding/ (NEW dir: 2 moved components + barrel = 3 files)",
+            "src/features/queue/ +3: ReturnToQueueModal.stories.tsx, ClosedSalonJoinModal.stories.tsx, QueueCapacityBanner.stories.tsx (queue components ReturnToQueueModal/ClosedSalonJoinModal/QueueCapacityBanner moved from domain in an EARLIER stage - their domain deletions were already in the baseline's 41)",
+            "docs/restructure/08-stage5a-operation.md",
+            "visual-regression/__image_snapshots__/ +13 PNGs (listed above)",
+            ".opencode/snapshots/after-20261001_180643.json (the baseline snapshot itself)",
+            "storybook-static/ rebuilt 18:31-18:32 during stage 5a gates (net file growth ~+11; includes new story chunks)"
+        ],
+        "modified_since_stage4b": [
+            "src/components/domain/ClientProfileSheet.tsx (NEW to modified set - import consolidation only)",
+            "src/pages/PublicHome.tsx (consumer updated 18:10; already modified at baseline, also carries parallel productsApi/publicProducts work)",
+            "src/pages/StaffDashboard.tsx (consumer updated 18:10; already modified at baseline)",
+            "docs/agents/STRUCTURE.md (32 lines vs HEAD, +4 changed lines since baseline; documents Etapa 5a features tree)",
+            "graphify-out/ 5 files (regenerated 18:37, unchanged stat totals vs HEAD)",
+            "docs/restructure/08-stage5a-operation.md (NEW - inside untracked docs/restructure/, so appears as untracked not modified)",
+            "NOTE: features/* are untracked, so all 5a file content inside them is invisible to git diff; only consumer/domain side shows as modified/deleted"
+        ],
+        "deleted_since_stage4b": [
+            "8 files: AddCustomerForm, ServiceCard, AppointmentScheduler, AppointmentCalendar, AppointmentBookingModal, BookPackageSessionsModal, OnboardingChecklist, ActivationChecklist (all removed from src/components/domain/)"
+        ],
+        "line_delta_attribution": {
+            "removed_+3422": "dominated by moved files going clean->deleted (+1416 full-content removals from the 6 previously-clean files) + Calendar 17->582 changed and Scheduler 157->434 changed (+~988) + consumer/STRUCTURE edits",
+            "added_+2311": "graphify graph.json insertions/deletions re-balancing (total unchanged at 81854 but split moved), STRUCTURE.md, consumer import edits; offset by Calendar/Scheduler no longer contributing their parallel-work insertions (-173)",
+            "caveat": "exact per-file decomposition vs baseline is approximated: the baseline snapshot stored only aggregate numstats, not per-file numstats"
+        },
+        "unchanged_since_stage4b": [
+            "HEAD commit (4d74145)",
+            "tracked file count (470)",
+            "branch (main)",
+            "staged changes (none)",
+            "src/pages (63), src/pages/marketing (18), src/components/ui (26), src/components/patterns (35), src/components/infra (14), src/layouts (7), src/app (2), src/features/finance (4), .storybook (4), scripts (9)"
+        ]
+    },
+    "structural_expectations": {
+        "no_new_commits_head_4d74145": "PASS - HEAD still 4d74145 (git log top = 'chore(brand): rebrand AgendAI -> Agenda Já'), git diff --cached empty, all 127 status lines working-tree only",
+        "8_domain_files_gone": "PASS - Test-Path false for all 8 in src/components/domain/ (AddCustomerForm, ServiceCard, AppointmentScheduler, AppointmentCalendar, AppointmentBookingModal, BookPackageSessionsModal, OnboardingChecklist, ActivationChecklist)",
+        "8_domain_files_present_in_features": "PASS - all 8 found: clients(2) + appointments(4) + onboarding(2)",
+        "3_barrels_exist": "PASS - src/features/clients/index.ts (2 exports), src/features/appointments/index.ts (4 exports), src/features/onboarding/index.ts (2 exports)",
+        "visual_regression_61_snapshots": "PASS - visual-regression/__image_snapshots__ contains exactly 61 PNGs (48 baseline + 13 new; new ones all created 18:33:05-18:33:14)",
+        "supporting_checks": {
+            "modal_shell_adoption": "PASS - both refactored modals import components/patterns/ModalShell",
+            "3_buttons_converted": "PASS - exactly 3 case-sensitive <Button> in AppointmentCalendar (L219/L528/L537) with ui/Button import; 15 raw <button> remain",
+            "consumers_updated": "PASS - PublicHome (clients+appointments), StaffDashboard (clients+appointments+onboarding), ClientProfileSheet (appointments)",
+            "5_new_stories_plus_fixtures": "PASS - 3 fila stories + 2 agenda stories + storyFixtures.ts all exist",
+            "docs_created_and_updated": "PASS - docs/restructure/08-stage5a-operation.md (61 lines, Status concluída, gate table) + docs/agents/STRUCTURE.md features tree lines",
+            "graphify_updated": "PASS - graphify-out regenerated 18:37 during stage per AGENTS.md rule"
+        }
+    },
+    "notes": [
+        "status_lines (127) = 50 modified + 49 deleted + 28 untracked entries from `git status --porcelain` (directories collapsed); expanded untracked files = 169. Measured before this snapshot file was written, so writing it adds one further untracked entry (7->8 snapshot jsons in the untracked-expanded view of .opencode/snapshots is NOT counted - .opencode is excluded from inventory; snapshot jsons are tracked as individual untracked lines by git, so this file adds +1 untracked entry AFTER measurement).",
+        "HEAD/staged verification: `git rev-parse --short HEAD` = 4d74145, `git rev-parse --abbrev-ref HEAD` = main, `git diff --cached --stat` empty.",
+        "Domain/features verification method: Test-Path on each of the 8 names under src/components/domain (all false) plus full recursive listing of src/features (30 files) confirming each moved component.",
+        "Button conversion counted case-sensitively (PowerShell Select-String is case-insensitive by default and initially conflated <Button with <button; final count via .NET Regex on raw text: 3 uppercase, 15 lowercase).",
+        "Visual snapshot count = directory file count (61) matches the doc gate 'test:visual 61/61 (13 novos + 48 intactos)' and 'test:storybook 61/61 (17 arq.)'.",
+        "Inventory total delta +34 fully reconciled: +9 src (3 barrels + 2 agenda stories + storyFixtures + 3 queue stories) + 1 docs (08-stage5a-operation.md) + 13 PNGs + 11 storybook-static rebuild growth (698+9+1+13+11=732). Baseline's src subcount 387 (strict) vs current 396 = +9 exact; src_ts_tsx 364->373 = +9 exact.",
+        "Untracked expanded delta +32 reconciles exactly: 14 (3 new feature dirs) + 3 (queue stories) + 1 (08 doc) + 13 (PNGs) + 1 (baseline snapshot json) = 32.",
+        "Untracked entries delta +4 = 3 new feature dirs + baseline snapshot json (after-20261001_180643.json, which the baseline could not count because it measured before writing itself).",
+        "Scope note: PublicHome also contains out-of-scope parallel work (productsApi/publicProducts public-sale feature, written pre-baseline or carried); per 08 doc section 1 the 6 parallel-work files (AppointmentScheduler, AppointmentCalendar, productsApi, schemas, types, schedulingUtils) were preserved intact during the move and their gates are covered by this stage.",
+        "Gate numbers (tsc 0, eslint 11/589, vitest 199/199, storybook+visual 61/61) are transcribed from docs/restructure/08-stage5a-operation.md gate table, not re-executed during this snapshot.",
+        "Console output for docs/*.md shows mojibake (UTF-8 read as console codepage) - display artifact only; files on disk are intact UTF-8.",
+        "Schema replicates after-20261001_180643.json (status_lines, log, ts, timestamp, repository, task, stage, baseline, git, file_inventory, graphify, comparison, notes) with stage5a_artifacts_on_disk + structural_expectations in place of stage4b_artifacts_on_disk."
+    ]
+}

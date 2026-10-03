@@ -78,7 +78,7 @@ const Swatch: FC<{ label: string; cssVar: string }> = ({ label, cssVar }) => (
 const TokensGallery: FC = () => (
   <div className="flex flex-col gap-8 p-6">
     <header className="flex flex-col gap-1">
-      <h1 className="font-display text-2xl font-bold text-text-primary">Design tokens — Agenda Já</h1>
+      <h1 className="font-display text-2xl font-bold text-text-primary">Design tokens — Agende Já</h1>
       <p className="text-sm text-text-secondary">
         Fonte de verdade: <code className="text-text-muted">src/styles/tokens.css</code> (tema claro em{' '}
         <code className="text-text-muted">:root</code>, escuro em <code className="text-text-muted">.dark</code>).

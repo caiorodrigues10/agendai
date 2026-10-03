@@ -7,7 +7,6 @@ import {
   LuCircleAlert as AlertCircle,
   LuCircleCheck as CheckCircle2,
   LuPiggyBank as PiggyBank,
-  LuCalendar as Calendar,
   LuArrowRight as ArrowRight,
   LuCircleX as XCircle,
   LuUsers as Users,
@@ -22,7 +21,6 @@ import {
   LuArrowRightLeft as ArrowRightLeft,
   LuHeartHandshake as HeartHandshake,
   LuZap as Zap,
-  LuShieldCheck as ShieldCheck,
 } from 'react-icons/lu';
 import { useSubscription } from '../../contexts/SubscriptionContext';
 import {
@@ -94,7 +92,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
   const [detail, setDetail] = useState<MySubscription | null>(data);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -568,7 +566,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                       <div className="rounded-xl bg-accent/5 border border-accent/15 px-4 py-3 flex items-center gap-2">
                         <Sparkles size={15} className="text-accent shrink-0" />
                         <p className="text-xs text-text-secondary">
-                          Tudo isso ainda espera por você na Agenda Já.
+                          Tudo isso ainda espera por você no Agende Já.
                         </p>
                       </div>
                     </div>

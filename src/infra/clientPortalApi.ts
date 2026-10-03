@@ -172,11 +172,11 @@ async function getDashboard(barbershopId: string): Promise<PortalDashboardPayloa
 }
 
 export const clientPortalApi = {
-  requestCode: (phone: string, name?: string) =>
+  requestCode: (phone: string, name?: string, barbershopId?: string) =>
     apiClient<{ success: boolean; data?: unknown }>(
       '/api/client/portal/request-otp',
       'POST',
-      { phone, name: name?.trim() || 'Cliente' }
+      { phone, name: name?.trim() || 'Cliente', ...(barbershopId ? { barbershopId } : {}) }
     ),
 
   verifyCode: async (phone: string, code: string) => {

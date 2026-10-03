@@ -12,10 +12,40 @@ const literal = node => node && ts.isStringLiteralLike(node) ? node.text : undef
 const property = (node, name) => node && ts.isObjectLiteralExpression(node)
   ? node.properties.find(p => p.name?.getText() === name)?.initializer : undefined;
 const normalize = value => value.split('?')[0].replace(/:[^/]+/g, '{}');
+const returnExpression = body => {
+  let found;
+  walk(body, node => { if (!found && ts.isReturnStatement(node) && node.expression) found = node.expression; });
+  return found;
+};
+// Helpers locais de URL (const f = (…) => `…` / function f(…) { return `…` }) — resolvíveis
+// como caminhos; qualquer outro nó continua falhando fechado em requestPath.
+function helperMap(ast) {
+  const map = new Map();
+  walk(ast, node => {
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer &&
+        (ts.isArrowFunction(node.initializer) || ts.isFunctionExpression(node.initializer))) {
+      const body = node.initializer.body;
+      const expr = ts.isBlock(body) ? returnExpression(body) : body;
+      if (expr) map.set(node.name.text, expr);
+    } else if (ts.isFunctionDeclaration(node) && node.name && node.body) {
+      const expr = returnExpression(node.body);
+      if (expr) map.set(node.name.text, expr);
+    }
+  });
+  return map;
+}
+const helperTarget = (node, helpers, seen) => {
+  if (node && ts.isCallExpression(node) && ts.isIdentifier(node.expression) &&
+      helpers.has(node.expression.text) && !seen.has(node.expression.text)) {
+    return { name: node.expression.text, expr: helpers.get(node.expression.text) };
+  }
+  return undefined;
+};
 
 // A deliberately narrow parser: unsupported route registration must fail, never disappear silently.
 export function backendRoutes(base) {
   const entry = parse(path.join(base, 'src/shared/infra/http/routes/api.ts'));
+  const entryFile = path.join(base, 'src/shared/infra/http/routes/api.ts');
   const app = parse(path.join(base, 'src/shared/infra/http/app.ts'));
   let prefix;
   walk(app, node => {
@@ -24,45 +54,97 @@ export function backendRoutes(base) {
     }
   });
   if (!prefix) throw new Error('Não foi possível resolver o prefixo de apiRoutes em app.ts');
-  const imports = new Map();
-  for (const node of entry.statements) {
-    if (!ts.isImportDeclaration(node)) continue;
-    const source = literal(node.moduleSpecifier);
-    for (const binding of node.importClause?.namedBindings?.elements || []) {
-      imports.set(binding.name.text, source);
-    }
-  }
   const routes = new Set();
-  walk(entry, node => {
-    if (!ts.isCallExpression(node) || node.arguments[0]?.getText() !== 'app') return;
-    const source = imports.get(node.expression.getText());
-    if (!source) throw new Error(`Registro desconhecido: ${node.getText()}`);
-    const file = path.resolve(source.startsWith('@/') ? path.join(base, 'src') : path.dirname(entry.fileName), source.replace(/^@\//, '')) + '.ts';
-    const ast = parse(file);
+  const visited = new Set();
+  const parseFile = new Map([[entryFile, entry]]);
+
+  const importsOf = ast => {
+    const imports = new Map();
+    for (const node of ast.statements) {
+      if (!ts.isImportDeclaration(node)) continue;
+      const source = literal(node.moduleSpecifier);
+      for (const binding of node.importClause?.namedBindings?.elements || []) {
+        imports.set(binding.name.text, source);
+      }
+    }
+    return imports;
+  };
+  const stringConstsOf = ast => {
+    const consts = new Map();
+    walk(ast, node => {
+      if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer && literal(node.initializer) !== undefined) {
+        consts.set(node.name.text, literal(node.initializer));
+      }
+    });
+    return consts;
+  };
+  const resolveUrl = (node, file, consts) => {
+    if (literal(node) !== undefined) return literal(node);
+    if (ts.isTemplateExpression(node)) {
+      let url = node.head.text;
+      for (const span of node.templateSpans) {
+        const value = literal(span.expression) ??
+          (ts.isIdentifier(span.expression) ? consts.get(span.expression.text) : undefined);
+        if (value === undefined) throw new Error(`Rota dinâmica não suportada em ${file}`);
+        url += value + span.literal.text;
+      }
+      return url;
+    }
+    throw new Error(`Rota dinâmica não suportada em ${file}`);
+  };
+  const resolveImport = (source, fromFile) => path.resolve(
+    source.startsWith('@/') ? path.join(base, 'src') : path.dirname(fromFile),
+    source.replace(/^\@\//, ''),
+  ) + '.ts';
+
+  const visit = (file, strict) => {
+    if (visited.has(file)) return 0;
+    visited.add(file);
+    const ast = parseFile.get(file) ?? parse(file);
+    const imports = importsOf(ast);
+    const consts = stringConstsOf(ast);
     let count = 0;
-    walk(ast, call => {
-      if (!ts.isCallExpression(call) || !ts.isPropertyAccessExpression(call.expression) || call.expression.expression.getText() !== 'app') return;
-      const method = call.expression.name.text;
-      if (method === 'register' || method === 'route') throw new Error(`Registro não suportado em ${file}: ${call.getText()}`);
+    let delegated = 0;
+    walk(ast, node => {
+      if (!ts.isCallExpression(node)) return;
+      const target = node.expression.getText();
+      if (ts.isIdentifier(node.expression) && node.arguments[0]?.getText() === 'app') {
+        const source = imports.get(target);
+        if (source) { delegated += visit(resolveImport(source, file), false); return; }
+        if (strict) throw new Error(`Registro desconhecido: ${node.getText()}`);
+        return;
+      }
+      if (!ts.isPropertyAccessExpression(node.expression) || node.expression.expression.getText() !== 'app') return;
+      const method = node.expression.name.text;
+      if (method === 'register' || method === 'route') throw new Error(`Registro não suportado em ${file}: ${node.getText()}`);
       if (!methods.has(method)) return;
-      const url = literal(call.arguments[0]);
-      if (!url) throw new Error(`Rota dinâmica não suportada em ${file}`);
+      const url = resolveUrl(node.arguments[0], file, consts);
       routes.add(`${method.toUpperCase()} ${normalize(prefix + url)}`);
       count++;
     });
-    if (!count) throw new Error(`Nenhuma rota extraída de ${file}`);
-  });
+    if (!count && !delegated) throw new Error(`Nenhuma rota extraída de ${file}`);
+    return count + delegated;
+  };
+
+  visit(entryFile, true);
   if (!routes.size) throw new Error('Inventário backend vazio');
   return routes;
 }
 
-export function requestPath(node, bindings = {}) {
+export function requestPath(node, bindings = {}, helpers = new Map(), seen = new Set()) {
   if (node && ts.isIdentifier(node) && bindings[node.text]) return normalize(bindings[node.text]);
   if (literal(node) !== undefined) return normalize(literal(node));
+  const target = helperTarget(node, helpers, seen);
+  if (target) return requestPath(target.expr, bindings, helpers, new Set([...seen, target.name]));
   if (!node || !ts.isTemplateExpression(node)) throw new Error(`URL não suportada: ${node?.getText()}`);
   let url = node.head.text;
   for (const span of node.templateSpans) {
     if (url.includes('?')) break;
+    const spanTarget = helperTarget(span.expression, helpers, seen);
+    if (spanTarget && (!url || url.endsWith('/'))) {
+      url += requestPath(spanTarget.expr, bindings, helpers, new Set([...seen, spanTarget.name])) + span.literal.text;
+      continue;
+    }
     const expr = span.expression.getText();
     if (!url && bindings[expr]) { url += bindings[expr] + span.literal.text; continue; }
     if (expr === 'API_BASE' && !url) { url += span.literal.text; continue; }
@@ -80,6 +162,7 @@ export function requestPath(node, bindings = {}) {
 
 export function frontendRequests(file) {
   const ast = parse(file);
+  const helpers = helperMap(ast);
   const requests = [];
   walk(ast, node => {
     if (!ts.isCallExpression(node)) return;
@@ -110,7 +193,7 @@ export function frontendRequests(file) {
       if (!variants.length) throw new Error(`Factory sem consumidores em ${file}`);
     } else variants.push({});
     for (const bindings of variants) {
-    const url = requestPath(node.arguments[0], bindings);
+    const url = requestPath(node.arguments[0], bindings, helpers);
     if (!url.startsWith('/api/')) throw new Error(`URL fora de /api em ${file}: ${url}`);
     const methodNode = name === 'apiClient' ? node.arguments[1] : property(node.arguments[1], 'method');
     const method = methodNode ? literal(methodNode) : 'GET';

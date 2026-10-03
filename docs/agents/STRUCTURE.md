@@ -48,6 +48,13 @@ agendai/
     │   │                      ← TeamManager; SupportPanel + support/* (+test); OrganizationsPanel,
     │   │                          MultiUnitDashboard (+test); OwnerReferralsPanel, ReferralTierBadge,
     │   │                          ShareReferralButton — barrels próprios (Etapa 6c)
+    │   ├── posts/             ← PostsManager, PostEditor, PostPreviewBox + objectives.ts unificado (Etapa 6d)
+    │   ├── showcase/          ← ShowcasePanel, ShowcasePublicPage, PublicLinkPanel (Etapa 6d)
+    │   ├── notifications/     ← OwnerNotificationsPanel, NotificationDeliveriesPanel, NotificationHealthPanel (Etapa 6d)
+    │   ├── subscription/      ← OwnerSubscriptionPanel (cancel → ModalShell), TrialExpiredPaywallModal (Etapa 6d)
+    │   ├── client-portal/     ← ClientPortalDashboard, ClientPortalLogin (Etapa 6d)
+    │   ├── billing/           ← BillingTab (orquestrador) + 7 seções/badges extraídos de pages/ (Etapa 7)
+    │   └── marketing/         ← PricingPersuasionCharts (preços unificados em src/marketing/planPrices.ts) (Etapa 6d)
     ├── components/
     │   ├── ui/               ← Field, SmartSelect, Toast, ConfirmDialog, …
     │   ├── patterns/         ← Card, Tabs, Tooltip, StatCard, ModalShell, states/, skeletons/
@@ -57,7 +64,7 @@ agendai/
     ├── contexts/             ← Auth, Subscription, Barbershop, Scheduling, Theme, …
     ├── hooks/                ← usePermissions
     ├── infra/                ← apiClient + *Api.ts (única camada HTTP)
-    ├── pages/                ← rotas (StaffDashboard, Login, PublicHome, MasterAdmin, marketing)
+    ├── pages/                ← rotas (StaffDashboard, Login, PublicHome, master-admin, marketing)
     ├── services/             ← geminiService (heurística local)
     ├── utils/ / lib/ / config/
     └── tests/                ← setup Vitest
@@ -90,6 +97,6 @@ agendai/
 
 ## Wrappers HTTP (`src/infra/`)
 
-`apiClient`, `authApi`, `authStorage`, `barbershopApi`, `schedulingApi`, `clientsApi`, `crmApi`, `packagesApi`, `productsApi`, `financialApi`, `commissionsApi`, `paymentsApi`, `plansApi`, `subscriptionsApi`, `adminApi`, `usersApi`, `notificationsApi`, `referralsApi`, `contactApi`, `realtimeWs`, `clientPortalApi`, `walletApi`, `catalogApi`, `pricingApi`, `purchasingApi`, `corporateApi`, `publicProductsApi`.
+`apiClient`, `authApi`, `authStorage`, `barbershopApi`, `schedulingApi`, `clientsApi`, `crmApi`, `packagesApi`, `productsApi`, `financialApi`, `commissionsApi`, `paymentsApi`, `plansApi`, `subscriptionsApi`, `adminApi`, `usersApi`, `notificationsApi`, `referralsApi`, `contactApi`, `realtimeWs`, `clientPortalApi`, `catalogApi`, `pricingApi`, `purchasingApi`, `corporateApi`, `publicProductsApi`.
 
 **Regra:** novas chamadas HTTP só via `*Api.ts` / `apiClient` — nunca `fetch` solto nas páginas.

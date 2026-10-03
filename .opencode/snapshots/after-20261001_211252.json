@@ -1,0 +1,388 @@
+{
+    "status_lines": 162,
+    "log": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+    "ts": "2026-10-01T21:12:52-03:00",
+    "timestamp": "2026-10-01T21:12:52-03:00",
+    "repository": "D:\\Programação\\agendai\\agendai",
+    "task": "React frontend restructure - Stage 5b: Operação finance + painéis §5.1 (moved 15 files from src/components/domain/: 6 into src/features/finance/components/ (CashPanel, FinancialDashboard, OwnerFinancialPanel, ProfitEnginePanel, WeatherForecastWidget, DemandAlertBanner), CategoryManager + CategoryManager.test.tsx into src/features/catalog/, 7 panels into new feature dirs with barrels (goals, loyalty, waitlist, recurring, recommendations, equipment, deposits); StaffDashboard updated to 7 new barrel imports + finance barrel; ServiceManager imports catalog barrel; OwnerFinancialPanel custom fiado modal refactored onto components/patterns/ModalShell - manual Escape effect removed; 4 new story files with 12 stories (FinancialDashboard, ProfitEnginePanel, WeatherForecastWidget, DemandAlertBanner under Financeiro/); visual snapshots 61 -> 73 (+12); docs/restructure/09-stage5b-finance.md; debts D-007/D-008 in docs/restructure/debts.md; docs/agents/STRUCTURE.md updated)",
+    "stage": "Stage 5 of restructuring (5b finance + painéis §5.1 COMPLETE; catalog services + §5.2 remain)",
+    "baseline": {
+        "captured": true,
+        "note": "Comparison baseline is the Etapa-5a AFTER snapshot specified by the task.",
+        "baseline_snapshot": ".opencode/snapshots/after-20261001_184311.json",
+        "baseline_snapshot_ts": "2026-10-01T18:43:11-03:00",
+        "baseline_snapshot_status_lines": 127,
+        "baseline_snapshot_log": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+        "baseline_is_same_head_as_current": true,
+        "commits_since_baseline_snapshot": [],
+        "baseline_task": "Stage 5a Operação COMPLETE (8 components moved to clients/appointments/onboarding with 3 barrels; ModalShell refactor; 61 visual snapshots; finance + painéis remain for 5b)",
+        "baseline_measured_before_itself_was_written": true
+    },
+    "git": {
+        "branch": "main",
+        "head_commit": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+        "head_short": "4d74145",
+        "is_git_repo": true,
+        "tracked_files_count": 470,
+        "status_line_count": 162,
+        "status_counts": {
+            "modified": 51,
+            "deleted": 64,
+            "untracked_lines": 47,
+            "untracked_files_expanded": 210
+        },
+        "staged_changes": "none (git diff --cached empty; no commits made - working tree only on top of HEAD 4d74145)",
+        "diff_stat": "115 files changed, 59363 insertions(+), 57169 deletions(-)",
+        "insertions": 59363,
+        "deletions": 57169,
+        "diff_files_count": 115,
+        "status_transitions_since_baseline": {
+            "newly_deleted_clean_to_deleted": [
+                "src/components/domain/CashPanel.tsx (384 lines)",
+                "src/components/domain/FinancialDashboard.tsx (800)",
+                "src/components/domain/OwnerFinancialPanel.tsx (1634)",
+                "src/components/domain/ProfitEnginePanel.tsx (373)",
+                "src/components/domain/WeatherForecastWidget.tsx (289)",
+                "src/components/domain/DemandAlertBanner.tsx (78)",
+                "src/components/domain/CategoryManager.tsx (92)",
+                "src/components/domain/CategoryManager.test.tsx (99)",
+                "src/components/domain/GoalsPanel.tsx (336)",
+                "src/components/domain/LoyaltyPanel.tsx (292)",
+                "src/components/domain/WaitlistPanel.tsx (392)",
+                "src/components/domain/RecurringPackagesPanel.tsx (487)",
+                "src/components/domain/RecommendationsPanel.tsx (227)",
+                "src/components/domain/EquipmentPanel.tsx (857)",
+                "src/components/domain/DepositPolicyPanel.tsx (277)"
+            ],
+            "reconciliations": {
+                "modified": "50 + 2 stage-touched (ServiceManager, features/finance/index.ts newly modified; StaffDashboard + STRUCTURE.md already modified at baseline) - 1 unknown churn = 51 (per-file baseline set was not stored, so exact +/- decomposition is unprovable; see notes)",
+                "deleted": "49 + 15 (exactly the 15 moved domain components) = 64",
+                "diff_files": "99 + 15 (moved files clean->deleted) + 1 (features/finance/index.ts newly in diff... ServiceManager/StaffDashboard/STRUCTURE already in baseline diff) = 115",
+                "untracked_entries": "28 + 8 (new collapsed dirs: features/{catalog,goals,loyalty,waitlist,recurring,recommendations,equipment,deposits}) + 10 (individual features/finance/components/* files - finance dir is partially tracked so files list individually) + 1 (the 5a baseline snapshot json itself, written after baseline measured) = 47",
+                "untracked_expanded": "169 + 27 (feature files: 15 moved + 7 new barrels + 1 catalog barrel + 4 stories) + 1 (docs/restructure/09-stage5b-finance.md) + 12 (visual PNGs) + 1 (baseline snapshot json) = 210"
+            }
+        },
+        "files_touched_since_baseline_timestamp": [
+            "src/features/catalog/ + 7 new feature dirs + src/features/finance/components/* (18:48:39-19:04:59 - the moves, barrels, stories, ModalShell refactor)",
+            "src/features/finance/index.ts (18:48:58 - barrel exports for 6 moved components)",
+            "src/pages/StaffDashboard.tsx (18:49:10 - 7 new barrel imports + finance barrel)",
+            "src/components/domain/ServiceManager.tsx (18:50:06 - catalog barrel import)",
+            "4 finance story files (18:57:13-18:58:00)",
+            "storybook-static/ rebuilt 19:00:55-19:01:25 (build artifact, 103 files)",
+            "visual-regression/__image_snapshots__/ +12 financeiro-*.png (19:11:57-19:12:01)",
+            "docs/restructure/09-stage5b-finance.md (21:02:44), docs/restructure/debts.md (21:02:49, +D-007/D-008)",
+            "docs/agents/STRUCTURE.md (21:03:04 - Etapa 5b features tree lines 36-39)",
+            "graphify-out/ regenerated 21:03:32-21:04:14 (graphify update . per AGENTS.md after-major-changes rule; graph.json diff-vs-HEAD total unchanged at 81854 changed lines)",
+            "NOTE: mtime scan of ALL files (excluding node_modules/.git/dist/.opencode/.mimocode) after 2026-10-01 18:43:11 found 123 files - every one is attributable to this stage or to build/graphify/docs artifacts. NO parallel-work file was touched inside the baseline->after window."
+        ]
+    },
+    "file_inventory": {
+        "total_excluding_node_modules_git_dist_opencode_mimocode_graphify_cache": 769,
+        "methodology_note": "Same stated exclusions as baseline (node_modules, .git, dist, .opencode, .mimocode, graphify-out/cache). Baseline 732 -> 769 (+37) reconciles EXACTLY as: +12 src net (27 new feature files - 15 removed domain files) + 12 storybook-static rebuild growth (91 -> 103) + 12 visual PNGs + 1 docs/restructure/09-stage5b-finance.md. The 2 nested src/pages/**/graphify-out/cache/*.json are excluded consistently here as in baseline.",
+        "node_modules_present": true,
+        "counts_by_directory": {
+            "src": 410,
+            "src_excl_nested_graphify_caches": 408,
+            "src_strict_excl_nested_graphify_caches": 408,
+            "src_ts_tsx": 385,
+            "src_pages": 63,
+            "src_components_ui": 26,
+            "src_components_patterns": 35,
+            "src_components_infra": 14,
+            "src_layouts": 7,
+            "src_features_queue": 12,
+            "src_features_clients": 3,
+            "src_features_appointments": 8,
+            "src_features_onboarding": 3,
+            "src_features_finance": 14,
+            "src_features_catalog": 3,
+            "src_features_goals": 2,
+            "src_features_loyalty": 2,
+            "src_features_waitlist": 2,
+            "src_features_recurring": 2,
+            "src_features_recommendations": 2,
+            "src_features_equipment": 2,
+            "src_features_deposits": 2,
+            "src_features_total": 57,
+            "src_app": 2,
+            "docs": 25,
+            "docs_restructure": 11,
+            ".storybook": 4,
+            "scripts": 9,
+            "visual_regression": 73,
+            "opencode_snapshots": 8,
+            "storybook_static": 103,
+            "graphify_out_excl_cache": 90
+        },
+        "key_files": [
+            "package.json",
+            "tsconfig.json",
+            "vite.config.ts",
+            "vitest.config.ts",
+            "eslint.config.js",
+            "docs/restructure/09-stage5b-finance.md",
+            "docs/restructure/debts.md",
+            "docs/agents/STRUCTURE.md",
+            "src/features/finance/index.ts",
+            "src/features/catalog/index.ts",
+            "src/features/goals/index.ts",
+            "src/features/loyalty/index.ts",
+            "src/features/waitlist/index.ts",
+            "src/features/recurring/index.ts",
+            "src/features/recommendations/index.ts",
+            "src/features/equipment/index.ts",
+            "src/features/deposits/index.ts",
+            "src/components/patterns/ModalShell.tsx"
+        ]
+    },
+    "stage5b_artifacts_on_disk": {
+        "moved_components_verification": {
+            "all_15_absent_from_domain": {
+                "CashPanel.tsx": true,
+                "FinancialDashboard.tsx": true,
+                "OwnerFinancialPanel.tsx": true,
+                "ProfitEnginePanel.tsx": true,
+                "WeatherForecastWidget.tsx": true,
+                "DemandAlertBanner.tsx": true,
+                "CategoryManager.tsx": true,
+                "CategoryManager.test.tsx": true,
+                "GoalsPanel.tsx": true,
+                "LoyaltyPanel.tsx": true,
+                "WaitlistPanel.tsx": true,
+                "RecurringPackagesPanel.tsx": true,
+                "RecommendationsPanel.tsx": true,
+                "EquipmentPanel.tsx": true,
+                "DepositPolicyPanel.tsx": true
+            },
+            "all_15_present_in_features": {
+                "src/features/finance/components/CashPanel.tsx": true,
+                "src/features/finance/components/FinancialDashboard.tsx": true,
+                "src/features/finance/components/OwnerFinancialPanel.tsx": true,
+                "src/features/finance/components/ProfitEnginePanel.tsx": true,
+                "src/features/finance/components/WeatherForecastWidget.tsx": true,
+                "src/features/finance/components/DemandAlertBanner.tsx": true,
+                "src/features/catalog/CategoryManager.tsx": true,
+                "src/features/catalog/CategoryManager.test.tsx": true,
+                "src/features/goals/GoalsPanel.tsx": true,
+                "src/features/loyalty/LoyaltyPanel.tsx": true,
+                "src/features/waitlist/WaitlistPanel.tsx": true,
+                "src/features/recurring/RecurringPackagesPanel.tsx": true,
+                "src/features/recommendations/RecommendationsPanel.tsx": true,
+                "src/features/equipment/EquipmentPanel.tsx": true,
+                "src/features/deposits/DepositPolicyPanel.tsx": true
+            },
+            "method": "Test-Path on each name under src/components/domain (all false) and under src/features (all true); programmatic map check all_15_moved_ok=True"
+        },
+        "barrels": {
+            "7_new_barrels_all_exist": {
+                "src/features/goals/index.ts": true,
+                "src/features/loyalty/index.ts": true,
+                "src/features/waitlist/index.ts": true,
+                "src/features/recurring/index.ts": true,
+                "src/features/recommendations/index.ts": true,
+                "src/features/equipment/index.ts": true,
+                "src/features/deposits/index.ts": true
+            },
+            "src/features/catalog/index.ts": "exists (NEW - catalog barrel for CategoryManager)",
+            "src/features/finance/index.ts": "MODIFIED 18:48:58 - now exports FinanceSummaryCard, FiadoStatusBadge, CashPanel, FinancialDashboard, OwnerFinancialPanel, ProfitEnginePanel, WeatherForecastWidget, DemandAlertBanner + constants (8 components + constants block)"
+        },
+        "consumers_updated": {
+            "src/pages/StaffDashboard.tsx": "7 new barrel imports confirmed: goals, loyalty, recommendations, deposits, waitlist, recurring, equipment + finance barrel import { CashPanel, DemandAlertBanner, FinancialDashboard, OwnerFinancialPanel, ProfitEnginePanel } (WeatherForecastWidget imported by FinancialDashboard as sibling)",
+            "src/components/domain/ServiceManager.tsx": "import { CategoryManager } from '../../features/catalog' (line 1)",
+            "features_barrels_total": "StaffDashboard imports 12 features/* barrels (queue, clients, finance, appointments, onboarding + the 7 new)"
+        },
+        "modal_shell_refactor": {
+            "src/features/finance/components/OwnerFinancialPanel.tsx": "imports { ModalShell } from '../../../components/patterns/ModalShell' (L27), renders <ModalShell> L1485-1567",
+            "manual_escape_effect_removed": "PASS - zero matches for keydown/Escape anywhere in OwnerFinancialPanel.tsx (Escape handling now inside ModalShell)"
+        },
+        "new_stories": {
+            "files": [
+                "src/features/finance/components/FinancialDashboard.stories.tsx (2 stories)",
+                "src/features/finance/components/ProfitEnginePanel.stories.tsx (3 stories)",
+                "src/features/finance/components/WeatherForecastWidget.stories.tsx (4 stories)",
+                "src/features/finance/components/DemandAlertBanner.stories.tsx (3 stories)"
+            ],
+            "story_count_total": "12 export const stories across 4 files (2+3+4+3) - matches '4 new story files with 12 stories'",
+            "titles_under_financeiro": "PNG basenames financeiro-* confirm Financeiro/ title prefix"
+        },
+        "visual_snapshots": {
+            "count_now": 73,
+            "count_at_baseline": 61,
+            "new_pngs_12_created_191157_191201": [
+                "financeiro-financialdashboard--default.png",
+                "financeiro-financialdashboard--plano-upgrade.png",
+                "financeiro-profitenginepanel--default.png",
+                "financeiro-profitenginepanel--sem-movimentos.png",
+                "financeiro-profitenginepanel--erro.png",
+                "financeiro-weatherforecastwidget--default.png",
+                "financeiro-weatherforecastwidget--compacto.png",
+                "financeiro-weatherforecastwidget--erro.png",
+                "financeiro-weatherforecastwidget--sem-dados.png",
+                "financeiro-demandalertbanner--critico.png",
+                "financeiro-demandalertbanner--compacto.png",
+                "financeiro-demandalertbanner--risco-medio.png"
+            ],
+            "existing_61_intact": "true - only 12 PNGs have mtime after baseline"
+        },
+        "docs": [
+            "docs/restructure/09-stage5b-finance.md (NEW, mtime 21:02:44): Status 'concluída' (§5.1; OwnerFinancialPanel sub-block extraction becomes D-007); migration table origem -> destino -> consumidores; ModalShell/Field/SmartSelect conversion notes; stories section; gate table (tsc 0, eslint 11/589, vitest 224/224 (60 arq.), test:storybook 73/73 (21 arq.), test:visual 73/73 (12 novos + 61 intactos), build 81/2582.26 KiB); pendências (D-007, D-008, catalog Etapa 5+, RetailCheckoutBlock, §5.2 Etapa 6)",
+            "docs/restructure/debts.md (MODIFIED 21:02:49): D-007 (line 15 - OwnerFinancialPanel 1633L sub-blocs not extracted in 5b, ~25 closure bindings per tab, no unit/visual tests; extract one tab per PR with story first; Etapa 6+) and D-008 (line 16 - pending stories: CashPanel needs AuthProvider composer + the 7 §5.1 panels without own stories; Etapas 6-7) ADDED; 8 debts total (D-001..D-008)",
+            "docs/agents/STRUCTURE.md (MODIFIED 21:03:04, 35 lines vs HEAD): features tree lines 36-39 now document finance/ (6 components + barrel, Etapa 5b), catalog/ (CategoryManager + test), and goals/loyalty/waitlist/recurring/recommendations/equipment/deposits (painéis with barrel, Etapa 5b)"
+        ],
+        "stage5b_gate_from_doc": {
+            "tsc_noEmit": "0 errors",
+            "eslint": "11 errors / 589 warnings (ceiling 11/593; same level as 5a)",
+            "vitest": "224/224 (60 arq.) - ceiling >=199; doc explicitly notes growth includes tests added in parallel, all green",
+            "storybook_tests": "73/73 (21 arq.) - ceiling >=61; 1 flake D-006 on 1st run, passed on re-run",
+            "visual_tests": "73/73 (12 novos + 61 intactos)",
+            "build": "81 chunks / 2582.26 KiB (baseline 2585.04, -2.78 KiB)",
+            "method": "Gate numbers transcribed from docs/restructure/09-stage5b-finance.md, not re-executed during this snapshot (same policy as baseline). File-count 60 independently verified on disk: 39 app-project test files (src/**/*.{test,spec}.{ts,tsx}) + 21 story files = 60."
+        }
+    },
+    "graphify": {
+        "graph_exists": true,
+        "graph_json": "graphify-out/graph.json",
+        "graph_modified_in_this_task": true,
+        "graph_modify_status": "graphify-out/* regenerated 21:03:32-21:04:14 during stage 5b (per AGENTS.md after-major-changes rule); graph.json diff-vs-HEAD total identical to baseline at 81854 changed lines; still shows as modified vs HEAD (carried over)"
+    },
+    "comparison": {
+        "note": "Compared against the Etapa-5a AFTER snapshot (.opencode/snapshots/after-20261001_184311.json). HEAD unchanged (4d74145) between snapshots; all deltas are working-tree changes. Files with mtime > baseline (123 total) are exclusively stage-5b work + build/graphify/docs artifacts; parallel products/appointments/test work present in the tree ALL predates the baseline timestamp.",
+        "before": {
+            "source": ".opencode/snapshots/after-20261001_184311.json",
+            "head_commit": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+            "files_tracked": 470,
+            "uncommitted_files": 127,
+            "modified": 50,
+            "deleted": 49,
+            "untracked_entries": 28,
+            "untracked_expanded": 169,
+            "lines_added": 59346,
+            "lines_removed": 50541,
+            "diff_files": 99,
+            "inventory_total": 732,
+            "inventory_src": 398,
+            "inventory_src_strict": 396,
+            "src_ts_tsx": 373,
+            "visual_snapshots": 61,
+            "docs_restructure": 10,
+            "storybook_static": 91
+        },
+        "after": {
+            "files_tracked": 470,
+            "uncommitted_files": 162,
+            "modified": 51,
+            "deleted": 64,
+            "untracked_entries": 47,
+            "untracked_expanded": 210,
+            "lines_added": 59363,
+            "lines_removed": 57169,
+            "diff_files": 115,
+            "inventory_total": 769,
+            "inventory_src": 410,
+            "inventory_src_strict": 408,
+            "src_ts_tsx": 385,
+            "visual_snapshots": 73,
+            "docs_restructure": 11,
+            "storybook_static": 103
+        },
+        "delta": {
+            "files_tracked": "0 (470 -> 470)",
+            "uncommitted_files": "+35 (127 -> 162 status lines)",
+            "modified": "+1 (50 -> 51)",
+            "deleted": "+15 (49 -> 64: exactly the 15 moved domain components)",
+            "untracked_entries": "+19 (28 -> 47: 8 new feature dirs + 10 individual finance component files + baseline snapshot json)",
+            "untracked_expanded": "+41 (169 -> 210: 27 feature files + 1 docs09 + 12 PNGs + baseline snapshot json)",
+            "lines_added": "+17 (59346 -> 59363)",
+            "lines_removed": "+6628 (50541 -> 57169)",
+            "diff_files": "+16 (99 -> 115)",
+            "inventory_total": "+37 (732 -> 769)",
+            "inventory_src": "+12 (398 -> 410: +27 new feature files - 15 removed domain files)",
+            "inventory_src_strict": "+12 (396 -> 408)",
+            "src_ts_tsx": "+12 (373 -> 385)",
+            "visual_snapshots": "+12 (61 -> 73)",
+            "docs_restructure": "+1 (10 -> 11: 09-stage5b-finance.md)",
+            "storybook_static": "+12 (91 -> 103: rebuild during stage gates)"
+        },
+        "added_since_stage5a": {
+            "count": "40 stage-created files + 1 baseline snapshot json",
+            "stage_created_files": [
+                "src/features/finance/components/: CashPanel.tsx, FinancialDashboard.tsx, OwnerFinancialPanel.tsx, ProfitEnginePanel.tsx, WeatherForecastWidget.tsx, DemandAlertBanner.tsx (6 moved) + FinancialDashboard.stories.tsx, ProfitEnginePanel.stories.tsx, WeatherForecastWidget.stories.tsx, DemandAlertBanner.stories.tsx (4 new stories) = 10",
+                "src/features/catalog/: CategoryManager.tsx, CategoryManager.test.tsx (2 moved) + index.ts (new barrel) = 3",
+                "src/features/goals/, loyalty/, waitlist/, recurring/, recommendations/, equipment/, deposits/: panel.tsx + index.ts each = 14 (7 moved panels + 7 new barrels)",
+                "docs/restructure/09-stage5b-finance.md = 1",
+                "visual-regression/__image_snapshots__/ +12 financeiro-*.png"
+            ],
+            "total_stage_created": 40,
+            "other": ".opencode/snapshots/after-20261001_184311.json (the baseline snapshot itself, written after baseline measured)"
+        },
+        "modified_since_stage5a": {
+            "stage_attributable_touched_after_baseline": [
+                "src/pages/StaffDashboard.tsx (18:49:10 - 7 new barrel imports + finance barrel)",
+                "src/components/domain/ServiceManager.tsx (18:50:06 - catalog barrel import)",
+                "src/features/finance/index.ts (18:48:58 - +6 lines exporting moved components)",
+                "docs/agents/STRUCTURE.md (21:03:04 - Etapa 5b tree lines; 35 lines vs HEAD at baseline 32)",
+                "docs/restructure/debts.md (+D-007/D-008; untracked dir so not in git status)",
+                "graphify-out/ 5 tracked files regenerated 21:04 (stat totals vs HEAD unchanged)"
+            ],
+            "note_on_modified_set": "Baseline modified=50 -> now 51. Exact per-file churn unprovable: baseline stored only aggregate counts, not its modified-file list. mtime evidence: only 9 status-modified files were touched after the baseline timestamp (4 stage source/docs + 5 graphify-out); the other 42 carry content written before the baseline."
+        },
+        "deleted_since_stage5a": [
+            "15 files: CashPanel, FinancialDashboard, OwnerFinancialPanel, ProfitEnginePanel, WeatherForecastWidget, DemandAlertBanner, CategoryManager.tsx, CategoryManager.test.tsx, GoalsPanel, LoyaltyPanel, WaitlistPanel, RecurringPackagesPanel, RecommendationsPanel, EquipmentPanel, DepositPolicyPanel (all removed from src/components/domain/, all present in src/features/)"
+        ],
+        "line_delta_attribution": {
+            "removed_+6628": "dominated by the 15 moved files going clean->deleted (+6617 full-content removals: sum of their HEAD line counts); remainder (+11) from net rebalancing on files that previously carried partial parallel-work diffs plus consumer/docs edits",
+            "added_+17": "STRUCTURE.md (+3), StaffDashboard/ServiceManager/finance barrel import edits, graphify graph.json split rebalancing (total unchanged at 81854); offset by any moved files' pre-existing insertions disappearing from the diff",
+            "caveat": "exact per-file decomposition vs baseline is approximated: the baseline snapshot stored only aggregate numstats, not per-file numstats"
+        },
+        "parallel_external_work_attribution": {
+            "statement": "Per task instructions, working-tree changes NOT caused by stage 5b are attributed to parallel external work (products/appointments features, new test files), not to this stage.",
+            "evidence": "mtime scan of every file with LastWriteTime > 2026-10-01 18:43:11 (baseline moment) returned 123 files, ALL stage-5b or build/graphify/docs artifacts. Therefore every parallel-work modification visible in git status was written BEFORE the 5a baseline and was already counted inside the baseline's modified=50 set.",
+            "parallel_attributed_files_in_diff": [
+                "src/infra/productsApi.ts, src/schemas.ts, src/types.ts, src/utils/schedulingUtils.ts (products/venda + scheduling parallel work, carried from baseline)",
+                "src/pages/PlansPage.tsx (+47-line test), CheckoutPage, PublicHome, LandingPage, marketing/* pages (commercial/products parallel work, carried)",
+                "src/contexts/AuthContext.tsx, ThemeContext.tsx, src/index.css, eslint.config.js, vite.config.ts, vitest.config.ts, package.json(.lock), tsconfig.json, index.html, .gitignore (tooling/theme parallel work, carried)",
+                "pre-existing new test files (patterns/Card|Tabs|Tooltip|StatCard.test.tsx, layouts/app/Header.test.tsx, etc. - mtimes 09-29/09-30, already in baseline's untracked set)",
+                "graphify-out/* pre-existing modifications (regenerated again this stage)"
+            ],
+            "test_count_note": "docs09 gate records vitest 224/224 (60 arq.) vs 5a's transcribed 199/199 (51 arq.) and explicitly attributes the growth to parallel-added tests ('crescimento inclui testes adicionados em paralelo, todos verdes'). Current on-disk file count verified: 39 app test files + 21 story files = 60. The 5a '51 files' figure cannot be reconciled to a 39+17=56 split from static data (baseline stored only the doc's aggregate), so the intermediate 212 figure in the task prompt is accepted as the stage-start parallel state; test totals were transcribed from the doc gate, not re-executed."
+        },
+        "unchanged_since_stage5a": [
+            "HEAD commit (4d74145)",
+            "tracked file count (470)",
+            "branch (main)",
+            "staged changes (none)",
+            "src/pages (63), src/components/ui (26), src/components/patterns (35), src/components/infra (14), src/layouts (7), src/app (2), .storybook (4), scripts (9), graphify-out excl cache (90)"
+        ]
+    },
+    "structural_expectations": {
+        "no_new_commits_head_4d74145": "PASS - HEAD still 4d74145 ('chore(brand): rebrand AgendAI -> Agenda Já'), git rev-parse confirms 4d74145/main, git diff --cached empty; all 162 status lines working-tree only",
+        "15_domain_files_gone": "PASS - Test-Path false for all 15 in src/components/domain/ (6 finance + 2 catalog + 7 panels); domain now has 62 tsx files",
+        "15_files_present_in_features": "PASS - all 15 found: finance/components (6), catalog (2 incl. test), goals/loyalty/waitlist/recurring/recommendations/equipment/deposits (1 each)",
+        "7_new_barrels_exist": "PASS - src/features/{goals,loyalty,waitlist,recurring,recommendations,equipment,deposits}/index.ts all exist (7/7); plus catalog barrel; finance barrel expanded to 8 components + constants",
+        "visual_regression_exactly_73_pngs": "PASS - visual-regression/__image_snapshots__ contains exactly 73 PNGs (61 baseline + 12 new financeiro-* all created 19:11:57-19:12:01)",
+        "docs_09_and_debts_exist": "PASS - docs/restructure/09-stage5b-finance.md exists (Status concluída, gate table); docs/restructure/debts.md contains D-007 (L15) and D-008 (L16), 8 debts total D-001..D-008",
+        "supporting_checks": {
+            "staff_dashboard_imports": "PASS - 7 new barrel imports (goals, loyalty, recommendations, deposits, waitlist, recurring, equipment) + finance barrel import",
+            "service_manager_catalog": "PASS - import { CategoryManager } from '../../features/catalog'",
+            "modal_shell_escape_removed": "PASS - OwnerFinancialPanel imports/renders ModalShell (L27/L1485/L1567); zero keydown/Escape matches (manual effect removed)",
+            "4_stories_12_stories": "PASS - 4 new story files, export const counts 2+3+4+3 = 12; titles under Financeiro/ (financeiro-*.png)",
+            "structure_md_updated": "PASS - lines 36-39 document Etapa 5b finance/catalog/painéis barrels",
+            "graphify_updated": "PASS - graphify-out regenerated 21:04 during stage per AGENTS.md rule"
+        }
+    },
+    "notes": [
+        "status_lines (162) = 51 modified + 64 deleted + 47 untracked entries from `git status --porcelain` (directories collapsed); expanded untracked files = 210. Measured before this snapshot file was written, so writing it adds +1 untracked entry AFTER measurement (opencode_snapshots count 8 -> 9 in the untracked-expanded view; .opencode is excluded from inventory).",
+        "HEAD/staged verification: `git rev-parse --short HEAD` = 4d74145, `git rev-parse --abbrev-ref HEAD` = main, `git diff --cached --stat` empty.",
+        "Move verification method: PowerShell map of all 15 domain->features paths; every source Test-Path=false and destination Test-Path=true (all_15_moved_ok=True).",
+        "Visual snapshot count = directory file count (73) matches docs09 gate 'test:visual 73/73 (12 novos + 61 intactos)' and 'test:storybook 73/73 (21 arq.)'; mtime split proves exactly 12 new + 61 untouched.",
+        "Inventory total delta +37 fully reconciled: +12 src (27 new feature files - 15 domain removals) + 12 storybook-static (91->103) + 12 PNGs + 1 docs09 = 37. src 398->410 (+12) and src_ts_tsx 373->385 (+12) agree.",
+        "Untracked expanded delta +41 reconciles exactly: 27 feature files (15 moved + 8 barrels + 4 stories) + 1 docs09 + 12 PNGs + 1 baseline snapshot json = 41.",
+        "Untracked entries delta +19 reconciles: 8 new feature dirs + 10 individual finance component files (finance dir partially tracked => files listed individually) + 1 baseline snapshot json = 19.",
+        "Deletions delta +6628 ≈ 6617 (exact sum of the 15 moved files' HEAD line counts) + 11 net from previously-dirty files now fully deleted / consumer edits.",
+        "Scope note: parallel products/appointments work (productsApi, PlansPage, schemas, types, schedulingUtils, marketing pages, etc.) is present in the working tree but ALL of it predates the baseline timestamp (verified by exhaustive mtime scan) - attributed as parallel external work per task instructions, not as stage-5b changes. Its content was already inside the 5a baseline's modified=50.",
+        "Gate numbers (tsc 0, eslint 11/589, vitest 224/224 (60 arq.), storybook 73/73, visual 73/73, build 81/2582.26 KiB) are transcribed from docs/restructure/09-stage5b-finance.md gate table, not re-executed during this snapshot; the 60-file count was independently verified on disk (39 app + 21 story).",
+        "Unresolved baseline artifact: 5a's doc 'vitest 51 files' cannot be reconciled with current 39 app test files + 17 story files (=56 at baseline) from stored aggregates alone; mtime evidence proves no test file changed inside the baseline->after window (only CategoryManager.test.tsx moved at 18:48:39). Test-count growth 199->224 is therefore taken on the doc's own attribution (parallel-added tests + 12 new stories).",
+        "Console output for docs/*.md shows mojibake (UTF-8 read as console codepage) - display artifact only; files on disk are intact UTF-8.",
+        "Schema replicates after-20261001_184311.json (status_lines, log, ts, timestamp, repository, task, stage, baseline, git, file_inventory, graphify, comparison, notes) with stage5b_artifacts_on_disk + structural_expectations in place of stage5a_artifacts_on_disk."
+    ]
+}

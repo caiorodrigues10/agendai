@@ -6,11 +6,9 @@ import {
   LuGift as Gift,
   LuUser as User,
   LuLoaderCircle as Loader2,
-  LuChevronRight as ChevronRight,
   LuUnlink as Unlink,
   LuPhone as Phone,
   LuLogOut as LogOut,
-  LuSmartphone as Smartphone,
 } from 'react-icons/lu';
 import { clientPortalApi, ClientIdentity, ClientSalonLink, ClientAppointment, ClientBenefit } from '../../infra/clientPortalApi';
 import { SmartSelect } from '../../components/ui/SmartSelect';

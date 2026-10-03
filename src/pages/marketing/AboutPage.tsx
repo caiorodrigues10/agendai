@@ -70,8 +70,8 @@ export const AboutPage: React.FC = () => {
 
   return (
     <MarketingLayout
-      title="Sobre a Agenda Já — A tecnologia que protege o vínculo do salão | Agenda Já"
-      description="A Agenda Já nasceu para devolver tempo ao que importa: olhar no olho, fazer o serviço certo e manter a amizade que sustenta o negócio."
+      title="Sobre o Agende Já — A tecnologia que protege o vínculo do salão | Agende Já"
+      description="O Agende Já nasceu para devolver tempo ao que importa: olhar no olho, fazer o serviço certo e manter a amizade que sustenta o negócio."
       path="/sobre"
       jsonLd={softwareApplicationLd('/sobre')}
       background={
@@ -104,7 +104,7 @@ export const AboutPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="text-xs font-bold uppercase tracking-[0.28em] text-accent/90"
               >
-                Sobre a Agenda Já
+                Sobre o Agende Já
               </motion.p>
               <motion.h1
                 initial={{ opacity: 0, y: 22 }}
@@ -123,7 +123,7 @@ export const AboutPage: React.FC = () => {
                 className="mt-8 max-w-xl text-lg font-medium leading-relaxed text-neutral-400 md:text-xl"
               >
                 Em todo salão e barbearia do Brasil existe uma verdade quieta: o cliente não volta
-                só pelo serviço. Volta pela pessoa. A Agenda Já nasceu para proteger essa relação —
+                só pelo serviço. Volta pela pessoa. O Agende Já nasceu para proteger essa relação —
                 tirando o caos do caminho.
               </motion.p>
             </div>
@@ -293,7 +293,7 @@ export const AboutPage: React.FC = () => {
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.28em] text-accent/90">
-                O que a Agenda Já faz
+                O que o Agende Já faz
               </p>
               <h2 className="mt-4 text-4xl font-black tracking-[-0.04em] text-white md:text-6xl">
                 Menos atrito.
@@ -335,7 +335,7 @@ export const AboutPage: React.FC = () => {
                     side: 'left' as const,
                   },
                   {
-                    from: 'Agenda Já',
+                    from: 'Agende Já',
                     text: 'Horário livre. Confirmado. Lembrete amanhã às 20h.',
                     side: 'right' as const,
                   },
@@ -430,7 +430,7 @@ export const AboutPage: React.FC = () => {
                   </span>
                 </h2>
                 <p className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-neutral-400">
-                  A Agenda Já não nasceu num pitch de Silicon Valley. Nasceu da observação próxima:
+                  O Agende Já não nasceu num pitch de Silicon Valley. Nasceu da observação próxima:
                   barbearias e salões onde o profissional é quase da família — e onde o celular
                   ainda era o "sistema".
                 </p>

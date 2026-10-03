@@ -1,0 +1,302 @@
+{
+    "status_lines": 96,
+    "log": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+    "ts": "2026-09-29T23:13:50-03:00",
+    "timestamp": "2026-09-29T23:13:50-03:00",
+    "repository": "D:\\Programação\\agendai\\agendai",
+    "task": "React frontend restructure - Stage 4 (partial: layouts + queue pilot)",
+    "stage": "Stage 4 of restructuring (PARTIAL: 4a/4c/4d/4e closed; 4b MarketingLayout pending)",
+    "baseline": {
+        "captured": true,
+        "note": "Comparison baseline is the newest existing snapshot (end of Stage 3), as instructed.",
+        "baseline_snapshot": ".opencode/snapshots/after-20260929_224620.json",
+        "baseline_snapshot_ts": "2026-09-29T22:46:20-03:00",
+        "baseline_snapshot_status_lines": 87,
+        "baseline_snapshot_log": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+        "baseline_is_same_head_as_current": true,
+        "commits_since_baseline_snapshot": [],
+        "older_snapshots": [
+            ".opencode/snapshots/after-20260929_071803.json (Stage 2)",
+            ".opencode/snapshots/after-20260929_002643.json (Stage 1)",
+            ".opencode/snapshots/before-20260925_122823.json"
+        ]
+    },
+    "git": {
+        "branch": "main",
+        "head_commit": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+        "is_git_repo": true,
+        "tracked_files_count": 470,
+        "status_line_count": 96,
+        "status_counts": {
+            "modified": 32,
+            "deleted": 41,
+            "untracked_lines": 23,
+            "untracked_files_expanded": 135
+        },
+        "modified_files": [
+            ".gitignore",
+            "docs/agents/PACKAGES.md",
+            "docs/agents/SCRIPTS.md",
+            "docs/agents/STRUCTURE.md",
+            "eslint.config.js",
+            "graphify-out/.graphify_labels.json",
+            "graphify-out/GRAPH_REPORT.md",
+            "graphify-out/graph.html",
+            "graphify-out/graph.json",
+            "graphify-out/manifest.json",
+            "index.html",
+            "package-lock.json",
+            "package.json",
+            "src/components/domain/OwnerFinancialPanel.tsx",
+            "src/components/domain/PostsManager.tsx",
+            "src/components/ui/Button.tsx",
+            "src/components/ui/ConfirmDialog.tsx",
+            "src/components/ui/PromptModal.tsx",
+            "src/contexts/AuthContext.tsx",
+            "src/contexts/ThemeContext.tsx",
+            "src/index.css",
+            "src/pages/AccessBlockedPage.tsx",
+            "src/pages/CheckoutPage.test.tsx",
+            "src/pages/CheckoutPage.tsx",
+            "src/pages/ForgotPasswordPage.tsx",
+            "src/pages/MasterAdmin/MasterAdminDashboard.tsx",
+            "src/pages/PublicHome.tsx",
+            "src/pages/ResetPasswordPage.tsx",
+            "src/pages/StaffDashboard.tsx",
+            "tsconfig.json",
+            "vite.config.ts",
+            "vitest.config.ts"
+        ],
+        "deleted_files": [
+            "src/App.tsx",
+            "src/index.tsx",
+            "src/components/domain/ClosedSalonJoinModal.tsx",
+            "src/components/domain/QueueCapacityBanner.tsx",
+            "src/components/domain/QueueItemCard.test.tsx",
+            "src/components/domain/QueueItemCard.tsx",
+            "src/components/domain/QueueStatusCard.tsx",
+            "src/components/domain/ReturnToQueueModal.tsx",
+            "src/components/domain/admin/AdminLayout.tsx",
+            "src/components/domain/skeletons/CalendarSkeleton.tsx",
+            "src/components/domain/skeletons/ClientsSkeleton.tsx",
+            "src/components/domain/skeletons/DashboardSkeleton.tsx",
+            "src/components/domain/skeletons/FinanceResumoSkeleton.tsx",
+            "src/components/domain/skeletons/FinancialSkeleton.tsx",
+            "src/components/domain/skeletons/PublicPageSkeleton.tsx",
+            "src/components/domain/skeletons/QueueSkeleton.tsx",
+            "src/components/domain/skeletons/TodaySkeleton.tsx",
+            "src/components/domain/skeletons/WeatherSkeleton.tsx",
+            "src/components/domain/skeletons/index.ts",
+            "src/components/pwa/PwaInstallCard.tsx",
+            "src/components/pwa/PwaUpdatePrompt.tsx",
+            "src/components/ui/CardSkeleton.tsx",
+            "src/components/ui/DataTableState.tsx",
+            "src/components/ui/FormSkeleton.tsx",
+            "src/components/ui/Header.test.tsx",
+            "src/components/ui/Header.tsx",
+            "src/components/ui/ListSkeleton.tsx",
+            "src/components/ui/SectionError.tsx",
+            "src/components/ui/Skeleton.css",
+            "src/components/ui/Skeleton.tsx",
+            "src/components/ui/StaffNavigation.test.tsx",
+            "src/components/ui/StaffNavigation.tsx",
+            "src/components/ui/TableSkeleton.tsx",
+            "src/components/ui/ThemeToggle.tsx",
+            "src/components/ui/graphify-out/.graphify_labels.json",
+            "src/components/ui/graphify-out/.graphify_root",
+            "src/components/ui/graphify-out/GRAPH_REPORT.md",
+            "src/components/ui/graphify-out/cache/stat-index.json",
+            "src/components/ui/graphify-out/graph.html",
+            "src/components/ui/graphify-out/graph.json",
+            "src/components/ui/skeletons.ts"
+        ],
+        "new_files_top_level_entries": [
+            ".opencode/snapshots/after-20260929_002643.json",
+            ".opencode/snapshots/after-20260929_071803.json",
+            ".opencode/snapshots/after-20260929_224620.json",
+            ".opencode/snapshots/before-20260925_122823.json",
+            ".storybook/",
+            "docs/restructure/",
+            "scripts/patch-storybook-compat.mjs",
+            "scripts/run-visual-tests.mjs",
+            "src/app/",
+            "src/components/infra/PwaInstallCard.tsx",
+            "src/components/infra/PwaUpdatePrompt.tsx",
+            "src/components/infra/ThemeToggle.tsx",
+            "src/components/patterns/",
+            "src/components/ui/Button.stories.tsx",
+            "src/components/ui/ConfirmDialog.stories.tsx",
+            "src/components/ui/Field.stories.tsx",
+            "src/contexts/theme/",
+            "src/features/queue/",
+            "src/layouts/",
+            "src/mocks/",
+            "src/styles/",
+            "visual-regression/",
+            "vitest.shims.d.ts"
+        ],
+        "diff_stat": "73 files changed, 56278 insertions(+), 46437 deletions(-)",
+        "insertions": 56278,
+        "deletions": 46437,
+        "diff_files_count": 73,
+        "staged_changes": "none (git diff --cached empty)",
+        "diff_stat_by_area_vs_stage3": {
+            "newly_deleted_domain_queue_files": "6 queue files moved out of components/domain (ClosedSalonJoinModal, QueueCapacityBanner, QueueItemCard + test, QueueStatusCard, ReturnToQueueModal)",
+            "domain_admin_adminlayout": "moved components/domain/admin/AdminLayout.tsx -> layouts/admin/AdminLayout.tsx (was 'modified' in Stage 3, now 'deleted')",
+            "consumers": "src/app/App.tsx (untracked, lazy path updated), src/pages/StaffDashboard.tsx 58 lines changed (AppLayout refactor + barrel import), src/pages/PublicHome.tsx 3 lines (barrel import)",
+            "modal_refactors": "PromptModal.tsx 124 lines changed (onto ModalShell); ModalShell.tsx gained borderClassName + overflow-by-slot; ReturnToQueueModal + ClosedSalonJoinModal rewritten onto ModalShell",
+            "docs": "docs/agents/STRUCTURE.md 27 lines changed; docs/restructure/07-stage4-pilots.md (new, untracked)"
+        }
+    },
+    "file_inventory": {
+        "total_files_excluding_node_modules_git_dist_graphify_cache": 697,
+        "node_modules_present": true,
+        "counts_by_directory": {
+            "src": 386,
+            "src_ts_tsx": 363,
+            "src/components/ui": 26,
+            "src/components/patterns": 35,
+            "src/components/infra": 14,
+            "src/layouts": 6,
+            "src/features/queue": 9,
+            "src/app": 2,
+            "docs": 23,
+            "docs/restructure": 9,
+            ".storybook": 4,
+            "scripts": 9,
+            "visual-regression": 48
+        },
+        "key_files": [
+            "package.json",
+            "tsconfig.json",
+            "vite.config.ts",
+            "vitest.config.ts",
+            "eslint.config.js",
+            "vitest.shims.d.ts",
+            ".storybook/main.ts",
+            ".storybook/test-runner.ts",
+            "scripts/run-visual-tests.mjs",
+            "scripts/patch-storybook-compat.mjs",
+            "docs/restructure/07-stage4-pilots.md",
+            "src/layouts/admin/AdminLayout.tsx",
+            "src/layouts/app/AppLayout.tsx",
+            "src/features/queue/index.ts"
+        ]
+    },
+    "stage4_artifacts_on_disk": {
+        "src/layouts/": [
+            "admin/AdminLayout.tsx (moved from components/domain/admin/)",
+            "app/AppLayout.tsx (extracted from StaffDashboard composition: skip-link + Header + toast slot + StaffNavigation + <main id='main-content'>; flat props)",
+            "app/Header.tsx + Header.test.tsx (Stage 3)",
+            "app/StaffNavigation.tsx + StaffNavigation.test.tsx (Stage 3)"
+        ],
+        "src/features/queue/": [
+            "QueueItemCard.tsx + QueueItemCard.test.tsx + QueueItemCard.stories.tsx",
+            "QueueStatusCard.tsx + QueueStatusCard.stories.tsx",
+            "QueueCapacityBanner.tsx",
+            "ReturnToQueueModal.tsx",
+            "ClosedSalonJoinModal.tsx",
+            "index.ts (barrel, pattern reference alongside features/finance)"
+        ],
+        "consumers_modified": [
+            "src/app/App.tsx: lazy(() => import('../layouts/admin/AdminLayout')) at line 31",
+            "src/pages/StaffDashboard.tsx: imports AppLayout from '../layouts/app/AppLayout' + 5 queue components from '../features/queue' barrel (5 -> 1 import)",
+            "src/pages/PublicHome.tsx: imports QueueItemCard, QueueStatusCard from '../features/queue' barrel (2 -> 1 import)"
+        ],
+        "modalshell_upgrades": [
+            "src/components/patterns/ModalShell.tsx: new borderClassName prop (default 'border-border', applied on dialog container line 63); overflow now per-slot via className (consumers keep own overflow classes)",
+            "src/components/ui/PromptModal.tsx: onto ModalShell, keeps className='overflow-hidden' slot",
+            "src/features/queue/ReturnToQueueModal.tsx: rewritten onto ModalShell (portal+FocusLock+Escape delegated; className='max-h-[90vh] overflow-y-auto' slot)",
+            "src/features/queue/ClosedSalonJoinModal.tsx: rewritten onto ModalShell (X/Escape standard; intentional normalizations z-90->z-110, backdrop 65%->70%, h2 text-lg -> h3 shell title; borderClassName warning/40)"
+        ],
+        "docs": [
+            "docs/restructure/07-stage4-pilots.md (new): status 'parcial concluída' - 4a/4c/4d/4e closed, 4b MarketingLayout pending; gate table; pending items",
+            "docs/agents/STRUCTURE.md (modified, 27 lines changed)"
+        ],
+        "visual_snapshots": "visual-regression/__image_snapshots__/ = 48 PNG (was 41 at Stage 3; +7: QueueItemCard 4 stories + QueueStatusCard 3 stories)",
+        "deleted_since_stage3": [
+            "src/components/domain/ queue files (6: ClosedSalonJoinModal, QueueCapacityBanner, QueueItemCard + test, QueueStatusCard, ReturnToQueueModal) -> moved to src/features/queue/",
+            "src/components/domain/admin/ dir (AdminLayout.tsx moved to src/layouts/admin/; empty dir residue remains on disk, untracked by git)"
+        ],
+        "stage4_gate_from_doc": {
+            "tsc_noEmit": "0 errors",
+            "eslint": "11 errors / 591 warnings (ceiling 11/593)",
+            "vitest": "197/197 (51 files, ceiling 190)",
+            "storybook_tests": "48/48 (12 files, ceiling 41)",
+            "visual_tests": "48/48 (7 new + 41 intact)",
+            "build": "82 chunks / 2579.51 KiB (ceiling 2580.63; -1.12 KiB from modal dedup)",
+            "pending_4b": "MarketingLayout next (12 pages; LandingPage 2233L last)"
+        }
+    },
+    "graphify": {
+        "graph_exists": true,
+        "graph_json": "graphify-out/graph.json",
+        "graph_modified_in_this_task": true,
+        "ui_graphify_residue_removed": true
+    },
+    "comparison": {
+        "note": "Compared against the Stage-3 AFTER snapshot (.opencode/snapshots/after-20260929_224620.json). HEAD is unchanged (4d74145) between the two snapshots; all deltas are working-tree changes from Stage 4 (partial).",
+        "before": {
+            "source": ".opencode/snapshots/after-20260929_224620.json",
+            "head_commit": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+            "files_tracked": 470,
+            "uncommitted_files": 87,
+            "lines_added": 54891,
+            "lines_removed": 44770
+        },
+        "after": {
+            "files_tracked": 470,
+            "uncommitted_files": 96,
+            "lines_added": 56278,
+            "lines_removed": 46437
+        },
+        "delta": {
+            "files_tracked": "0 (470 -> 470)",
+            "uncommitted_files": "+9 (87 -> 96 status lines)",
+            "status_counts": "modified 32 -> 32 (0: -domain/admin/AdminLayout -> deleted, +PublicHome -> modified), deleted 34 -> 41 (+7 domain queue/admin moves), untracked lines 21 -> 23 (+2: src/features/queue/, after-20260929_224620.json), untracked expanded 115 -> 135 (+20)",
+            "lines_added": "+1387 (54891 -> 56278)",
+            "lines_removed": "+1667 (44770 -> 46437)",
+            "diff_files": "66 -> 73 (+7: 6 newly deleted domain queue files + newly modified PublicHome.tsx)",
+            "inventory_total": "681 -> 697 (+16)"
+        },
+        "new_files_since_stage3": [
+            ".opencode/snapshots/after-20260929_224620.json (Stage-3 snapshot itself)",
+            "src/layouts/admin/AdminLayout.tsx (moved from components/domain/admin/)",
+            "src/layouts/app/AppLayout.tsx (extracted from StaffDashboard)",
+            "src/features/queue/ (9 files: 5 components moved from components/domain + QueueItemCard.test + barrel index.ts + QueueItemCard.stories + QueueStatusCard.stories)",
+            "docs/restructure/07-stage4-pilots.md",
+            "visual-regression/__image_snapshots__/ +7 PNGs (41 -> 48 total)"
+        ],
+        "modified_since_stage3": [
+            "src/app/App.tsx (untracked dir: lazy import path -> ../layouts/admin/AdminLayout)",
+            "src/pages/StaffDashboard.tsx (AppLayout refactor + queue barrel import, 58 lines changed)",
+            "src/pages/PublicHome.tsx (queue barrel import, 3 lines)",
+            "src/components/patterns/ModalShell.tsx (borderClassName prop + overflow-by-slot; inside untracked src/components/patterns/)",
+            "src/components/ui/PromptModal.tsx (124 lines, onto ModalShell)",
+            "src/features/queue/ReturnToQueueModal.tsx + ClosedSalonJoinModal.tsx (rewritten onto ModalShell)",
+            "docs/agents/STRUCTURE.md (27 lines changed)"
+        ],
+        "deleted_since_stage3": [
+            "src/components/domain/ (6 queue files -> moved to src/features/queue/)",
+            "src/components/domain/admin/AdminLayout.tsx -> moved to src/layouts/admin/"
+        ],
+        "unchanged_since_stage3": [
+            "HEAD commit (4d74145)",
+            "tracked file count (470)",
+            "branch (main)",
+            "staged changes (none)",
+            "modified file count (32; membership swapped domain/admin AdminLayout -> PublicHome)"
+        ]
+    },
+    "notes": [
+        "status_lines (96) = 32 modified + 41 deleted + 23 untracked entries from `git status --porcelain` (directories collapsed); expanded untracked files = 135. Measured before this snapshot file was written, so writing it adds one further untracked entry.",
+        "Untracked expansion delta reconciles exactly: Stage-3 115 + 9 (src/features/queue/) + 1 (Stage-3 snapshot json) + 2 (layouts: AdminLayout, AppLayout) + 1 (07-stage4-pilots.md) + 7 (visual PNGs) = 135.",
+        "Inventory total (697) uses the same exclusion rule as prior snapshots (node_modules, .git, dist, graphify-out/cache); Stage-3 total was 681, so net +16 files.",
+        "Modified count stayed at 32 only by coincidence: domain/admin/AdminLayout.tsx left the modified set (now deleted after the move) and src/pages/PublicHome.tsx joined it (barrel import).",
+        "src/components/domain/admin/ still exists on disk as an EMPTY directory (git does not track dirs); no files inside.",
+        "Stage 4 is explicitly partial per docs/restructure/07-stage4-pilots.md: item 4b (MarketingLayout) pending, 4c (PublicLayout) deferred with justification, providers untouched (Stage-2 constraint respected).",
+        "Verification performed: layouts/admin/AdminLayout.tsx and layouts/app/AppLayout.tsx exist (src/layouts = 6 files); src/features/queue = 9 files with barrel index.ts; App.tsx lazy path points at ../layouts/admin/AdminLayout; StaffDashboard imports AppLayout + features/queue barrel; PublicHome imports features/queue barrel; ModalShell has borderClassName (lines 13/30/63); ReturnToQueueModal + ClosedSalonJoinModal both import and render ModalShell; PromptModal keeps overflow-hidden on the shell className slot; visual-regression PNG count = 48; docs/restructure/07-stage4-pilots.md and docs/agents/STRUCTURE.md present.",
+        "Gate numbers (tsc 0, eslint 11/591, vitest 197/197, storybook+visual 48/48, build 82/2579.51 KiB) are transcribed from 07-stage4-pilots.md section 3, not re-executed during this snapshot.",
+        "Schema replicates after-20260929_224620.json (status_lines, log, ts, timestamp, repository, task, stage, baseline, git, file_inventory, graphify, comparison, notes) with a stage4_artifacts_on_disk section replacing stage3_artifacts_on_disk."
+    ]
+}

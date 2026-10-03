@@ -2,7 +2,8 @@ import type { RequestHandler } from 'msw';
 
 /**
  * Handlers HTTP compartilhados entre stories (MSW browser, via loader do
- * preview) e testes Node (`src/mocks/server.ts`).
+ * preview). O servidor Node antigo (`src/mocks/server.ts`) foi removido na
+ * Etapa 9 — testes mockiam por `vi.mock` ou `http` local.
  *
  * Uso na story:
  *   parameters: { msw: true }                       // worker ligado, sem handler

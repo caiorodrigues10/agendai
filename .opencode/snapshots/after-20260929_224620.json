@@ -1,0 +1,284 @@
+{
+    "status_lines": 87,
+    "log": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+    "ts": "2026-09-29T22:46:20-03:00",
+    "timestamp": "2026-09-29T22:46:20-03:00",
+    "repository": "D:\\Programação\\agendai\\agendai",
+    "task": "Restructured React frontend - Stage 3 (components: patterns, layouts, infra moves)",
+    "stage": "Stage 3 of 3 (restructuring)",
+    "baseline": {
+        "captured": true,
+        "note": "Comparison baseline is the newest existing snapshot (end of Stage 2), as instructed.",
+        "baseline_snapshot": ".opencode/snapshots/after-20260929_071803.json",
+        "baseline_snapshot_ts": "2026-09-29T07:18:03-03:00",
+        "baseline_snapshot_status_lines": 33,
+        "baseline_snapshot_log": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+        "baseline_is_same_head_as_current": true,
+        "commits_since_baseline_snapshot": [],
+        "older_snapshots": [
+            ".opencode/snapshots/after-20260929_002643.json (Stage 1)",
+            ".opencode/snapshots/before-20260925_122823.json"
+        ]
+    },
+    "git": {
+        "branch": "main",
+        "head_commit": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+        "is_git_repo": true,
+        "tracked_files_count": 470,
+        "status_line_count": 87,
+        "status_counts": {
+            "modified": 32,
+            "deleted": 34,
+            "untracked_lines": 21,
+            "untracked_files_expanded": 115
+        },
+        "modified_files": [
+            ".gitignore",
+            "docs/agents/PACKAGES.md",
+            "docs/agents/SCRIPTS.md",
+            "docs/agents/STRUCTURE.md",
+            "eslint.config.js",
+            "graphify-out/.graphify_labels.json",
+            "graphify-out/GRAPH_REPORT.md",
+            "graphify-out/graph.html",
+            "graphify-out/graph.json",
+            "graphify-out/manifest.json",
+            "index.html",
+            "package-lock.json",
+            "package.json",
+            "src/components/domain/OwnerFinancialPanel.tsx",
+            "src/components/domain/PostsManager.tsx",
+            "src/components/domain/admin/AdminLayout.tsx",
+            "src/components/ui/Button.tsx",
+            "src/components/ui/ConfirmDialog.tsx",
+            "src/components/ui/PromptModal.tsx",
+            "src/contexts/AuthContext.tsx",
+            "src/contexts/ThemeContext.tsx",
+            "src/index.css",
+            "src/pages/AccessBlockedPage.tsx",
+            "src/pages/CheckoutPage.test.tsx",
+            "src/pages/CheckoutPage.tsx",
+            "src/pages/ForgotPasswordPage.tsx",
+            "src/pages/MasterAdmin/MasterAdminDashboard.tsx",
+            "src/pages/ResetPasswordPage.tsx",
+            "src/pages/StaffDashboard.tsx",
+            "tsconfig.json",
+            "vite.config.ts",
+            "vitest.config.ts"
+        ],
+        "deleted_files": [
+            "src/App.tsx",
+            "src/index.tsx",
+            "src/components/domain/skeletons/CalendarSkeleton.tsx",
+            "src/components/domain/skeletons/ClientsSkeleton.tsx",
+            "src/components/domain/skeletons/DashboardSkeleton.tsx",
+            "src/components/domain/skeletons/FinanceResumoSkeleton.tsx",
+            "src/components/domain/skeletons/FinancialSkeleton.tsx",
+            "src/components/domain/skeletons/PublicPageSkeleton.tsx",
+            "src/components/domain/skeletons/QueueSkeleton.tsx",
+            "src/components/domain/skeletons/TodaySkeleton.tsx",
+            "src/components/domain/skeletons/WeatherSkeleton.tsx",
+            "src/components/domain/skeletons/index.ts",
+            "src/components/pwa/PwaInstallCard.tsx",
+            "src/components/pwa/PwaUpdatePrompt.tsx",
+            "src/components/ui/CardSkeleton.tsx",
+            "src/components/ui/DataTableState.tsx",
+            "src/components/ui/FormSkeleton.tsx",
+            "src/components/ui/Header.test.tsx",
+            "src/components/ui/Header.tsx",
+            "src/components/ui/ListSkeleton.tsx",
+            "src/components/ui/SectionError.tsx",
+            "src/components/ui/Skeleton.css",
+            "src/components/ui/Skeleton.tsx",
+            "src/components/ui/StaffNavigation.test.tsx",
+            "src/components/ui/StaffNavigation.tsx",
+            "src/components/ui/TableSkeleton.tsx",
+            "src/components/ui/ThemeToggle.tsx",
+            "src/components/ui/skeletons.ts",
+            "src/components/ui/graphify-out/.graphify_labels.json",
+            "src/components/ui/graphify-out/.graphify_root",
+            "src/components/ui/graphify-out/GRAPH_REPORT.md",
+            "src/components/ui/graphify-out/cache/stat-index.json",
+            "src/components/ui/graphify-out/graph.html",
+            "src/components/ui/graphify-out/graph.json"
+        ],
+        "new_files_top_level_entries": [
+            ".opencode/snapshots/after-20260929_071803.json",
+            ".storybook/",
+            "docs/restructure/",
+            "scripts/patch-storybook-compat.mjs",
+            "scripts/run-visual-tests.mjs",
+            "src/app/",
+            "src/components/infra/PwaInstallCard.tsx",
+            "src/components/infra/PwaUpdatePrompt.tsx",
+            "src/components/infra/ThemeToggle.tsx",
+            "src/components/patterns/",
+            "src/components/ui/Button.stories.tsx",
+            "src/components/ui/ConfirmDialog.stories.tsx",
+            "src/components/ui/Field.stories.tsx",
+            "src/contexts/theme/",
+            "src/layouts/",
+            "src/mocks/",
+            "src/styles/",
+            "visual-regression/",
+            "vitest.shims.d.ts"
+        ],
+        "diff_stat": "66 files changed, 54891 insertions(+), 44770 deletions(-)",
+        "insertions": 54891,
+        "deletions": 44770,
+        "diff_files_count": 66,
+        "staged_changes": "none (git diff --cached empty)",
+        "diff_stat_by_area": {
+            "deleted_tracked_components": "32 files newly deleted vs Stage 2 (moved or removed)",
+            "docs/agents": "34 insertions(+), 7 deletions(-) across PACKAGES.md, SCRIPTS.md, STRUCTURE.md",
+            "consumers_import_updates": "OwnerFinancialPanel 1/2, PostsManager 1/1, AdminLayout 1/1, AccessBlockedPage 1/1, CheckoutPage(.test) 1/1 each, ForgotPasswordPage 1/1, MasterAdminDashboard 1/1, ResetPasswordPage 1/1, StaffDashboard 3/3",
+            "modal_refactors": "ConfirmDialog.tsx 102 lines changed, PromptModal.tsx 123 lines changed (both onto patterns/ModalShell)"
+        }
+    },
+    "file_inventory": {
+        "total_files_excluding_node_modules_git_dist_graphify_cache": 681,
+        "node_modules_present": true,
+        "counts_by_directory": {
+            "src": 384,
+            "src_ts_tsx": 359,
+            "src/components/ui": 26,
+            "src/components/patterns": 35,
+            "src/components/infra": 14,
+            "src/layouts": 4,
+            "docs": 22,
+            "docs/restructure": 8,
+            ".storybook": 4,
+            "scripts": 9,
+            "visual-regression": 41
+        },
+        "key_files": [
+            "package.json",
+            "tsconfig.json",
+            "vite.config.ts",
+            "vitest.config.ts",
+            "eslint.config.js",
+            "vitest.shims.d.ts",
+            ".storybook/main.ts",
+            ".storybook/test-runner.ts",
+            "scripts/run-visual-tests.mjs",
+            "scripts/patch-storybook-compat.mjs",
+            "docs/restructure/06-stage3-components.md"
+        ]
+    },
+    "stage3_artifacts_on_disk": {
+        "src/components/patterns/": [
+            "Card.tsx + Card.test.tsx + Card.stories.tsx",
+            "Tabs.tsx + Tabs.test.tsx + Tabs.stories.tsx",
+            "Tooltip.tsx + Tooltip.test.tsx + Tooltip.stories.tsx",
+            "StatCard.tsx + StatCard.test.tsx + StatCard.stories.tsx",
+            "ModalShell.tsx",
+            "index.ts",
+            "states/ (DataTableState.tsx + stories, SectionError.tsx)",
+            "skeletons/ (9 domain skeletons moved in: Calendar, Clients, Dashboard, FinanceResumo, Financial, PublicPage, Queue, Today, Weather; plus Card/Form/List/Table skeletons, Skeleton.tsx/.css, primitives.ts, index.ts, Skeleton.stories.tsx)"
+        ],
+        "src/layouts/app/": [
+            "Header.tsx + Header.test.tsx",
+            "StaffNavigation.tsx + StaffNavigation.test.tsx"
+        ],
+        "moved_to_infra": [
+            "src/components/infra/ThemeToggle.tsx (from src/components/ui/)",
+            "src/components/infra/PwaInstallCard.tsx (from src/components/pwa/)",
+            "src/components/infra/PwaUpdatePrompt.tsx (from src/components/pwa/)"
+        ],
+        "moved_to_patterns_states": [
+            "src/components/patterns/states/DataTableState.tsx (from src/components/ui/)",
+            "src/components/patterns/states/SectionError.tsx (from src/components/ui/)"
+        ],
+        "deleted_dirs": [
+            "src/components/pwa/",
+            "src/components/domain/skeletons/",
+            "src/components/ui/skeletons.ts + ui skeleton files (Card/Form/List/Table/Skeleton.tsx/Skeleton.css)",
+            "src/components/ui/graphify-out/ residue (6 files)"
+        ],
+        "refactors": [
+            "src/components/ui/ConfirmDialog.tsx refactored onto patterns/ModalShell (import + JSX verified)",
+            "src/components/ui/PromptModal.tsx refactored onto patterns/ModalShell (import + JSX verified)",
+            "src/components/ui/Button.tsx primary token: bg-action-primary/text-action-primary-fg/hover:bg-action-primary-hover -> bg-accent/text-accent-fg/hover:bg-accent-hover",
+            "consumers' imports updated: 9 page/domain files (see diff_stat_by_area)"
+        ],
+        "docs": [
+            "docs/restructure/06-stage3-components.md (new)",
+            "docs/restructure/debts.md (untracked, updated)",
+            "docs/agents/STRUCTURE.md (modified, +24/-24 approx: 34 insertions across 3 docs)"
+        ],
+        "stories_and_tests": [
+            "New stories: ConfirmDialog.stories.tsx, Field.stories.tsx (ui), Card/Tabs/Tooltip/StatCard/Skeleton/DataTableState stories (patterns)",
+            "New tests: Card/Tabs/Tooltip/StatCard .test.tsx (patterns), Header.test.tsx + StaffNavigation.test.tsx (layouts/app)",
+            "33 new visual-regression PNG snapshots (card, datatablestate, skeleton, statcard, tabs, tooltip, confirmdialog, field)"
+        ]
+    },
+    "graphify": {
+        "graph_exists": true,
+        "graph_json": "graphify-out/graph.json",
+        "graph_modified_in_this_task": true,
+        "ui_graphify_residue_removed": true
+    },
+    "comparison": {
+        "note": "Compared against the Stage-2 AFTER snapshot (.opencode/snapshots/after-20260929_071803.json). HEAD is unchanged (4d74145) between the two snapshots; all deltas are working-tree changes from Stage 3.",
+        "before": {
+            "source": ".opencode/snapshots/after-20260929_071803.json",
+            "head_commit": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+            "files_tracked": 470,
+            "uncommitted_files": 33,
+            "lines_added": 18081,
+            "lines_removed": 7245
+        },
+        "after": {
+            "files_tracked": 470,
+            "uncommitted_files": 87,
+            "lines_added": 54891,
+            "lines_removed": 44770
+        },
+        "delta": {
+            "files_tracked": 0,
+            "uncommitted_files": "+54 (33 -> 87 status lines)",
+            "status_counts": "modified 18 -> 32 (+14), deleted 2 -> 34 (+32), untracked lines 13 -> 21 (+8), untracked expanded 36 -> 115 (+79)",
+            "lines_added": "+36810 (18081 -> 54891)",
+            "lines_removed": "+37525 (7245 -> 44770)",
+            "diff_files": "20 -> 66 (+46)",
+            "inventory_total": "619 -> 681 (+62)"
+        },
+        "new_files_since_stage2": [
+            ".opencode/snapshots/after-20260929_071803.json (Stage-2 snapshot itself)",
+            "docs/restructure/06-stage3-components.md",
+            "src/components/infra/ (3 moved files: ThemeToggle, PwaInstallCard, PwaUpdatePrompt)",
+            "src/components/patterns/ (35 files: Card, Tabs, Tooltip, StatCard, ModalShell, states/, skeletons/ with 9 domain skeletons moved in, index.ts, stories+tests)",
+            "src/components/ui/ConfirmDialog.stories.tsx",
+            "src/components/ui/Field.stories.tsx",
+            "src/layouts/app/ (4 files: Header.tsx/.test.tsx, StaffNavigation.tsx/.test.tsx)",
+            "visual-regression/__image_snapshots__/ (33 new PNGs: card, datatablestate, skeleton, statcard, tabs, tooltip, confirmdialog, field)"
+        ],
+        "modified_since_stage2": [
+            "docs/agents/STRUCTURE.md (stage-3 structure updates)",
+            "src/components/ui/Button.tsx (primary token -> accent)",
+            "src/components/ui/ConfirmDialog.tsx (refactored onto patterns/ModalShell)",
+            "src/components/ui/PromptModal.tsx (refactored onto patterns/ModalShell)",
+            "src/components/domain/OwnerFinancialPanel.tsx, PostsManager.tsx, admin/AdminLayout.tsx (import updates)",
+            "src/pages/AccessBlockedPage, CheckoutPage(+test), ForgotPasswordPage, MasterAdminDashboard, ResetPasswordPage, StaffDashboard (import updates)"
+        ],
+        "deleted_since_stage2": [
+            "src/components/domain/skeletons/ (10 files -> moved to patterns/skeletons/)",
+            "src/components/pwa/ (2 files -> moved to src/components/infra/)",
+            "src/components/ui/ (14 files: Header, StaffNavigation + tests, ThemeToggle, DataTableState, SectionError, skeletons.ts, Card/Form/List/Table skeletons, Skeleton.tsx/.css -> moved to patterns/ or layouts/ or infra/)",
+            "src/components/ui/graphify-out/ residue (6 files deleted)"
+        ],
+        "unchanged_since_stage2": [
+            "HEAD commit (4d74145)",
+            "tracked file count (470)",
+            "branch (main)",
+            "staged changes (none)"
+        ]
+    },
+    "notes": [
+        "status_lines (87) = 32 modified + 34 deleted + 21 untracked entries from `git status --porcelain` (directories collapsed); expanded untracked files = 115. Measured before this snapshot file was written, so writing it adds one further untracked entry.",
+        "Deletions dominated by graphify-out/graph.json regeneration + 32 removed tracked component files; insertions dominated by package-lock.json and graph regeneration, plus new pattern/layout/test/story source.",
+        "Verification performed: ConfirmDialog.tsx and PromptModal.tsx both import and render patterns/ModalShell; Button.tsx primary variant now uses bg-accent/text-accent-fg/hover:bg-accent-hover; all 35 patterns files, 4 layouts files, 3 infra moves, 06-stage3-components.md present on disk.",
+        "Inventory total (681) uses the same exclusion rule as prior snapshots (node_modules, .git, dist, graphify-out/cache); stage-2 total was 619, so net +62 files.",
+        "Schema replicates after-20260929_071803.json (status_lines, log, ts, timestamp, repository, task, stage, baseline, git, file_inventory, graphify, comparison, notes) with an added stage3_artifacts_on_disk section."
+    ]
+}

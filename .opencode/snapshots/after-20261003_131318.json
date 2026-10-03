@@ -1,0 +1,322 @@
+{
+    "status_lines": 78,
+    "log": "383c29c feat: add internal team profile selection",
+    "ts": "2026-10-03T13:13:18-03:00",
+    "timestamp": "2026-10-03T13:13:18-03:00",
+    "repository": "D:\\Programação\\agendai\\agendai",
+    "task": "React frontend restructure - Stage 8: permissions/routes/contracts/persistence audit (App.tsx 57 <Route> vs 02-map §1 + PrivateRoute/usePermissions/tabRegistry untouched; localStorage sweep 92 calls; documented in docs/restructure/16-stage8-permissions.md); contract checker extensions in scripts/check-api-contract.mjs (+107/-24: frontend local URL helper resolution via helperMap/returnExpression/helperTarget with cycle guard, recursive backendRoutes visit/visited/importsOf, resolveUrl with per-file string consts - all fail-closed preserved) + check-api-contract.test.mjs (+34/-0, 2 new tests, test:contract 6/6); debts D-015 (agendai:access-block-info hardcoded 5x, barber_customer_id no namespace) and D-016 (draftKey duplicated PostEditor/PostsManager); Date-freeze tsc fix in BookPackageSessionsModal.stories.tsx (TS2367: ConstructorParameters<typeof Date> is a 1-tuple so args.length===0 narrowed 1->0; now unknown[] + cast in super - in-place content edit, numstat still 18/0 vs HEAD); graphify update (2744->2761 nodes). Gates per doc16 §5: tsc 0, eslint 9/591 (teto 11/593), vitest 283/283 (67 arq), test:contract 6/6, contract:check 477 wrappers/554 rotas 0 pendências, test:storybook 73/73 (21 arq), test:visual 73/73 (0 PNGs atualizados), build 88 precache/2654.53 KiB (baseline 00 = 82/2579.63), docs:check OK. Do NOT commit anything)",
+    "stage": "Stage 5..7 COMPLETE; §6 settlement (0c panels) evaluated; Stage 8 permissions/contracts/persistence COMPLETE; Etapas 9-10 + git push pendentes",
+    "baseline": {
+        "captured": true,
+        "note": "Comparison baseline is the AFTER snapshot at end of Stage 7 explicitly specified by the task.",
+        "baseline_snapshot": ".opencode/snapshots/after-20261003_112022.json",
+        "baseline_snapshot_ts": "2026-10-03T11:20:22-03:00",
+        "baseline_snapshot_status_lines": 72,
+        "baseline_snapshot_log": "383c29c feat: add internal team profile selection",
+        "baseline_is_same_head_as_current": true,
+        "commits_since_baseline_snapshot": "NONE - HEAD is byte-identical (383c29c) at baseline and now, and `git diff --cached` is empty at both ends. True working-tree-vs-working-tree delta with NO external commit/rebase drift.",
+        "baseline_task": "Stage 7: migration matrix §5.6 master admin + gate repairs (MasterAdmin->master-admin rename, features/billing extraction, product vi.mock fixes, lint compensation, Date-freeze story)",
+        "baseline_measured_before_itself_was_written": true
+    },
+    "git": {
+        "branch": "main",
+        "head_commit": "383c29c feat: add internal team profile selection",
+        "head_short": "383c29c",
+        "head_unchanged_from_baseline": true,
+        "is_git_repo": true,
+        "tracked_files_count": 572,
+        "status_line_count": 78,
+        "status_counts": {
+            "modified": 29,
+            "deleted": 15,
+            "staged": 0,
+            "untracked_lines": 34,
+            "untracked_files_expanded": 128
+        },
+        "staged_changes": "none (git diff --cached --name-only empty; snapshot agent made NO commits/stages - nothing committed by this session)",
+        "diff_stat_vs_head": "44 files changed, 62211 insertions(+), 47711 deletions(-)",
+        "diff_vs_head_insertions": 62211,
+        "diff_vs_head_deletions": 47711,
+        "diff_vs_head_files": 44,
+        "diff_delta_vs_baseline": "+3 files / +551 insertions / -8 deletions (baseline 41 / 61660 / 47719) - reconciles EXACTLY (see diff_delta_arithmetic)",
+        "diff_delta_arithmetic": {
+            "insertions": "+551 = +141 stage-8 contract checker (107 mjs + 34 test) + +3 stage-8 debts (D-015, D-016) + +6 settlement 03-migration-matrix (NOT stage 8) + +401 graphify regeneration (60534 -> 60935). EXACT.",
+            "deletions": "-8 = +24 stage-8 contract checker + +2 settlement matrix - 34 graphify (41182 -> 41148). EXACT (net negative because graphify regen shrank more lines than the checker edits added).",
+            "files": "+3 = +2 newly-modified tracked files (scripts/check-api-contract.mjs, scripts/check-api-contract.test.mjs) + +1 (docs/restructure/03-migration-matrix.md, settlement session). EXACT: baseline M 26 + 3 = current M 29."
+        },
+        "stage8_attributable_tracked_changes": {
+            "new_modified_files_2": "scripts/check-api-contract.mjs +107/-24 (frontend helperMap/returnExpression/helperTarget + requestPath helpers/seen cycle guard; recursive backendRoutes visit/visited/importsOf/stringConstsOf/resolveUrl), scripts/check-api-contract.test.mjs +34/-0 (2 new tests: local path helpers as args+template spans; nested route delegation + const-string template URLs)",
+            "growth_in_files_already_modified_at_baseline_2": "docs/restructure/debts.md +5/-1 -> +8/-1 vs HEAD (+3: D-015 + D-016 are stage 8; D-014 is settlement-session - see unexpected_set), src/features/appointments/BookPackageSessionsModal.stories.tsx numstat UNCHANGED 18/0 vs HEAD but mtime 12:58:57 proves a post-baseline in-place rewrite of the Date-freeze block (TS2367 fix: constructor(...args: unknown[]) + super(...(args as ConstructorParameters<typeof RealDate>)) + as DateConstructor)",
+            "deletions_0": "no stage-8 deletions; the 15 src/pages/MasterAdmin/* D entries remain the uncommitted Stage-7 rename",
+            "graphify_regeneration": "graph.json 58603/40114, manifest.json 1868/788, GRAPH_REPORT.md 419/239, .graphify_labels.json 41/3, graph.html 4/4 = 60935/41148 (stage-8 graphify update at 13:05, +401/-34 vs baseline 60534/41182)"
+        },
+        "parallel_unchanged_from_baseline": "PostEditor.tsx 451/204, PostPreviewBox.tsx 17/5, ShopProfile.tsx 574/497, PublicProductCarousel.tsx 3/1 + test 7/0, BarbershopContext 2/0, barbershopApi 3/1, clientPortalApi 2/2, postsApi 12/5, PublicHome 2/5, types.ts 1/0, DOMAIN_MAP 1/1, App.tsx 14/12 - numstats BYTE-IDENTICAL to the baseline snapshot AND mtimes all <= 2026-10-02 19:20 (pre-baseline): the external posts/social work did not move during this stage",
+        "post_baseline_tracked_writes": "ONLY these tracked files have mtime > 11:22 (baseline): 03-migration-matrix.md 11:29 (settlement), check-api-contract.mjs 12:49 + check-api-contract.test.mjs 12:49 (stage 8), debts.md 12:56 (stage 8 append; may also carry settlement's D-014), BookPackageSessionsModal.stories.tsx 12:58 (stage 8 tsc fix), graphify-out/* 13:05 (stage 8 graphify update). Nothing else tracked moved.",
+        "diff_vs_baseline_head_no_renames": "427 files changed, 109455 insertions(+), 81951 deletions(-) approximation via summing both endpoints [baseline was 427/108898/81959] - HEAD identical at both ends so working-tree deltas above are the authoritative comparison",
+        "uncommitted_rename_caveat": "The MasterAdmin -> master-admin rename (15 D + ?? master-admin/ + ?? features/billing/) remains UNCOMMITTED as required ('Do NOT commit')"
+    },
+    "file_inventory": {
+        "total_excluding_node_modules_git_dist_opencode_mimocode_graphify_cache": 843,
+        "methodology_note": "Same stated exclusions as baseline (node_modules, .git, dist, .opencode, .mimocode, graphify-out/cache segment pair). Baseline 841 -> 843 (+2) reconciles EXACTLY: docs/restructure +2 (15-section6-settlement.md, 16-stage8-permissions.md) and NOTHING else - the +2 nested graphify cache stat-index.json files under src/pages (recreated by the 13:05 graphify update) sit in a graphify-out/cache segment and are excluded, exactly like the baseline's pair.",
+        "node_modules_present": true,
+        "counts_by_directory": {
+            "src": 463,
+            "src_strict_excl_nested_graphify_files": 445,
+            "src_ts_tsx": 438,
+            "src_pages": 66,
+            "src_pages_excl_graphify": 48,
+            "src_components_total": 99,
+            "src_components_ui": 26,
+            "src_components_patterns": 35,
+            "src_components_infra": 16,
+            "src_components_marketing": 3,
+            "src_components_domain_total": 19,
+            "src_components_domain_subdirs": "NONE (still flat)",
+            "src_layouts": 7,
+            "src_app": 2,
+            "src_marketing": 6,
+            "src_infra": 62,
+            "src_features_total": 158,
+            "src_features_billing": 10,
+            "src_features_appointments": 8,
+            "src_features_catalog": 7,
+            "src_features_client_portal": 3,
+            "src_features_clients": 6,
+            "src_features_crm": 6,
+            "src_features_deposits": 2,
+            "src_features_equipment": 2,
+            "src_features_finance": 14,
+            "src_features_goals": 2,
+            "src_features_loyalty": 2,
+            "src_features_marketing": 2,
+            "src_features_notifications": 4,
+            "src_features_onboarding": 3,
+            "src_features_organizations": 5,
+            "src_features_posts": 7,
+            "src_features_products": 14,
+            "src_features_queue": 12,
+            "src_features_recommendations": 2,
+            "src_features_recurring": 2,
+            "src_features_referrals": 4,
+            "src_features_settings": 14,
+            "src_features_shop": 9,
+            "src_features_showcase": 4,
+            "src_features_subscription": 3,
+            "src_features_support": 7,
+            "src_features_team": 2,
+            "src_features_waitlist": 2,
+            "docs": 33,
+            "docs_restructure": 18,
+            "e2e": 3,
+            "scripts": 9,
+            ".storybook": 4,
+            "root_files": 24,
+            "public": 18,
+            "visual_regression_png": 73,
+            "opencode_snapshots_on_disk": 14,
+            "storybook_static": 103,
+            "graphify_out_excl_cache": 94
+        },
+        "key_files": [
+            "package.json",
+            "tsconfig.json",
+            "scripts/check-api-contract.mjs",
+            "scripts/check-api-contract.test.mjs",
+            "docs/restructure/16-stage8-permissions.md",
+            "docs/restructure/15-section6-settlement.md",
+            "docs/restructure/debts.md",
+            "src/features/appointments/BookPackageSessionsModal.stories.tsx",
+            "src/app/App.tsx"
+        ]
+    },
+    "stage8_artifacts_on_disk": {
+        "permissions_routes_contract_persistence_audit": {
+            "doc": "PASS - docs/restructure/16-stage8-permissions.md (NEW, untracked, 5591 bytes, mtime 13:05): Status concluída; §1 contracts, §2 routes/permissions, §3 storage sweep, §4 debts D-015/D-016, §5 gate table, §6 next steps",
+            "routes_audit": "57 <Route> elements vs 54 of the Etapa-0 snapshot (+3 public: /queue/:id/produtos/:productId, /avaliar, /saloes/:salonId/posts/:postId - external work; NO new private route, NO role change); 38 public + 1 checkout OWNER/MASTER_ADMIN + 17 /master/* MASTER_ADMIN + 3 /app/:tab = matches 02-map §1",
+            "permissions_untouched": "PrivateRoute.tsx, src/hooks/ (5 files incl. usePermissions.ts), src/config/tabRegistry.ts, canAccessTab (StaffDashboard + StaffNavigation) all verified unmodified by the restructure",
+            "persistence_sweep": "92 localStorage/sessionStorage calls (infra 56, utils 11, contexts 9, features 8, components 4, pages 4); findings: agendai:access-block-info hardcoded 5x (AuthContext 2x, CheckoutPage 3x) vs BLOCK_INFO_STORAGE_KEY (D-015), draftKey duplicated PostEditor/PostsManager (D-016), barber_customer_id legacy without agendai: namespace (folded into D-015); decision: NO fix this stage (parallel-work files / behavioral key change) - register debts only"
+        },
+        "contract_checker_extensions": {
+            "mjs": "PASS - scripts/check-api-contract.mjs M +107/-24, mtime 12:49:19: helperMap/returnExpression/helperTarget resolving local URL helpers (const f = () => expr / function f() { return expr }) as apiClient() argument AND as template span with cycle guard; recursive backendRoutes (visit/visited, importsOf per file, strict only at root, resolveUrl with per-file string consts for `app.get(`${base}/...`)`); reason: contract gate crashed on external src/infra/socialApi.ts local helpers - extended checker instead of touching the parallel file; fail-closed preserved (dynamic URL/method still throw)",
+            "tests": "PASS - scripts/check-api-contract.test.mjs M +34/-0, mtime 12:49:24: 2 new tests (local path helpers as arguments and template spans; nested route delegations and const-string template URLs) -> npm run test:contract 6/6",
+            "gate": "PASS (transcribed from doc16): contract:check and contract:check:strict OK - 477 frontend calls in wrappers / 554 backend routes, 0 entries in api-contract-debt.json"
+        },
+        "debts_D015_D016": {
+            "pass": "PASS - docs/restructure/debts.md now +8/-1 vs HEAD (baseline +5/-1): D-015 (agendai:access-block-info hardcoded in 5 calls, BLOCK_INFO_STORAGE_KEY exported from AccessBlockedListener, barber_customer_id legacy; fix: neutral utils module + rename with read-once fallback; Etapa 9) and D-016 (draftKey(userId, barbershopId, postId) duplicated PostEditor.tsx:98 / PostsManager.tsx:74; fix: extract features/posts/draftStorage.ts; Etapa 9+) both present",
+            "caveat": "The +3 line growth over baseline decomposes as D-014 (settlement session, referenced by 15-section6-settlement.md §2) + D-015 + D-016 (stage 8). D-014 is NOT a stage-8 debt - doc16 §4 lists only D-015/D-016."
+        },
+        "story_date_freeze_tsc_fix": {
+            "pass": "PASS - src/features/appointments/BookPackageSessionsModal.stories.tsx mtime 12:58:57 (post-baseline write); diff vs HEAD still exactly +18/-0 (the freeze block) so the fix was in-place inside those lines: constructor(...args: unknown[]) + super(...(args as ConstructorParameters<typeof RealDate>)) + `as DateConstructor`; doc16 §5 records TS2367 (ConstructorParameters<typeof Date> is a 1-tuple, args.length===0 narrowed 1->0) fixed with tsc 0",
+            "only_story_touched_today": "PASS - BookPackageSessionsModal.stories.tsx is the only story with mtime 2026-10-03; other 20 story files are 2026-10-02 10:31",
+            "image_snapshots_unchanged": "PASS - exactly 73 PNGs in visual-regression/, newest mtime 2026-10-01 19:12 - 0 snapshots updated, as required"
+        },
+        "stage8_doc": "PASS - docs/restructure/16-stage8-permissions.md exists (5591 B, 13:05:08), tables for contract extensions/routes/gates, D-015/D-016 §4, gate table §5 all green (tsc 0, eslint 9/591, vitest 283/283, test:contract 6/6, contract:check 477/554, storybook 73/73, visual 73/73, build 88 precache/2654.53 KiB, docs:check OK)",
+        "graphify_update_ran": "PASS - graphify-out regenerated at 13:05:52-53: 5 tracked files, current numstats 60935/41148 (baseline 60534/41182, delta +401/-34); graph.json .nodes.Count = 2761 (baseline 2744, +17); GRAPH_REPORT L8: '2761 nodes · 6185 edges · 183 communities'; graphify-out excl cache stays 94 files; side effect: 2 nested graphify-out/cache/stat-index.json files recreated under src/pages (src 461->463, src_pages 64->66, non-graphify src unchanged 445)"
+    },
+    "graphify": {
+        "graph_exists": true,
+        "graph_json": "graphify-out/graph.json",
+        "graph_modified_in_this_task": true,
+        "graph_node_count": 2761,
+        "graph_edge_count": 6185,
+        "graph_communities": 183,
+        "graph_modify_status": "graphify-out/ regenerated at 13:05 during stage 8 - current numstats vs HEAD 383c29c: graph.json 58603/40114, manifest.json 1868/788, GRAPH_REPORT.md 419/239, .graphify_labels.json 41/3, graph.html 4/4 = 60935/41148 (baseline 60534/41182, delta +401/-34); root graphify-out excl cache unchanged at 94 files"
+    },
+    "comparison": {
+        "note": "Compared against the Stage-7 AFTER snapshot (.opencode/snapshots/after-20261003_112022.json) explicitly specified by the task. HEAD is IDENTICAL at both ends (383c29c) and nothing is staged at either end - a clean working-tree-vs-working-tree comparison. Snapshot agent committed/staged NOTHING.",
+        "before": {
+            "source": ".opencode/snapshots/after-20261003_112022.json",
+            "head_commit": "383c29c feat: add internal team profile selection",
+            "files_tracked": 572,
+            "uncommitted_files": 72,
+            "modified": 26,
+            "deleted": 15,
+            "staged": 0,
+            "untracked_entries": 31,
+            "untracked_expanded": 125,
+            "lines_added": 61660,
+            "lines_removed": 47719,
+            "diff_files": 41,
+            "inventory_total": 841,
+            "inventory_src": 461,
+            "inventory_src_strict": 445,
+            "src_ts_tsx": 438,
+            "src_pages": 64,
+            "features_total": 158,
+            "visual_snapshots": 73,
+            "docs_total": 31,
+            "docs_restructure": 16,
+            "storybook_static": 103,
+            "opencode_snapshots": 13,
+            "graphify_nodes": 2744,
+            "graphify_edges": 6162
+        },
+        "after": {
+            "head_commit": "383c29c feat: add internal team profile selection (UNCHANGED)",
+            "files_tracked": 572,
+            "uncommitted_files": 78,
+            "modified": 29,
+            "deleted": 15,
+            "staged": 0,
+            "untracked_entries": 34,
+            "untracked_expanded": 128,
+            "lines_added_vs_head": 62211,
+            "lines_removed_vs_head": 47711,
+            "diff_files_vs_head": 44,
+            "inventory_total": 843,
+            "inventory_src": 463,
+            "inventory_src_strict": 445,
+            "src_ts_tsx": 438,
+            "src_pages": 66,
+            "features_total": 158,
+            "visual_snapshots": 73,
+            "docs_total": 33,
+            "docs_restructure": 18,
+            "storybook_static": 103,
+            "opencode_snapshots": 14,
+            "graphify_nodes": 2761,
+            "graphify_edges": 6185
+        },
+        "delta": {
+            "head_commits": "0 - HEAD identical (383c29c) at baseline and now; no external commits/rebase during this stage",
+            "files_tracked": "0 (572 -> 572 - nothing committed; stage-8 work touched no new tracked files)",
+            "uncommitted_files": "+6 status lines (72 -> 78: +3 modified, +3 untracked entries; deleted unchanged at 15)",
+            "modified": "+3 (26 -> 29: scripts/check-api-contract.mjs, scripts/check-api-contract.test.mjs [stage 8] + docs/restructure/03-migration-matrix.md [settlement, NOT stage 8])",
+            "deleted": "0 (15 -> 15, still the uncommitted Stage-7 MasterAdmin rename)",
+            "staged": "0 -> 0 (nothing staged at either end)",
+            "untracked_entries": "+3 (31 -> 34: docs/restructure/15-section6-settlement.md [settlement], docs/restructure/16-stage8-permissions.md [stage 8], .opencode/snapshots/after-20261003_112022.json [the baseline itself])",
+            "untracked_expanded": "+3 (125 -> 128: same 3 files; no new parallel/social file appeared this stage)",
+            "lines_added": "+551 (61660 -> 62211) = +141 contract checker + +3 debts + +6 settlement matrix + +401 graphify - EXACT",
+            "lines_removed": "-8 (47719 -> 47711) = +24 contract checker + +2 settlement matrix - 34 graphify - EXACT",
+            "diff_files": "+3 (41 -> 44) = +2 contract checker + 1 settlement matrix - EXACT",
+            "inventory_total": "+2 (841 -> 843: +2 docs/restructure docs only; nested graphify cache pair recreated at 13:05 is excluded by methodology) - EXACT",
+            "inventory_src": "+2 (461 -> 463: +2 nested graphify-out/cache/stat-index.json files recreated by the 13:05 graphify update)",
+            "inventory_src_strict": "0 (445 -> 445: NO real source file added/removed by stage 8 - the audit/fixes/debts are edits to existing files)",
+            "src_ts_tsx": "0 (438 -> 438)",
+            "src_pages": "+2 (64 -> 66: nested graphify cache files; real pages unchanged at 48)",
+            "features_total": "0 (158 -> 158)",
+            "visual_snapshots": "0 (73 -> 73, newest PNG mtime 2026-10-01 19:12 - no snapshot updated)",
+            "docs_total": "+2 (31 -> 33: 15-section6-settlement.md, 16-stage8-permissions.md)",
+            "docs_restructure": "+2 (16 -> 18: same)",
+            "storybook_static": "0 (103 -> 103, gitignored; rebuilt during gates)",
+            "opencode_snapshots": "+1 measured (13 -> 14; writing this snapshot makes 15)",
+            "graphify_nodes": "+17 (2744 -> 2761)",
+            "graphify_edges": "+23 (6162 -> 6185)",
+            "graphify_out": "0 files (94 -> 94) but CONTENT regenerated (+401/-34)"
+        },
+        "added_since_stage7": {
+            "stage8_created_files": [
+                "docs/restructure/16-stage8-permissions.md (stage 8 audit doc)"
+            ],
+            "total_stage8_created": 1,
+            "settlement_or_external": [
+                "docs/restructure/15-section6-settlement.md (settlement §6 session, 11:28 - NOT stage 8)",
+                ".opencode/snapshots/after-20261003_112022.json (the baseline, written 11:22 by the previous snapshot)"
+            ]
+        },
+        "modified_since_stage7": {
+            "stage_8_attributable_uncommitted": [
+                "scripts/check-api-contract.mjs +107/-24 (contract checker extensions: frontend local helpers, recursive backend routes, const-string URLs)",
+                "scripts/check-api-contract.test.mjs +34/-0 (2 new tests -> test:contract 6/6)",
+                "docs/restructure/debts.md +3/-0 vs baseline (+8/-1 vs HEAD): D-015 + D-016 (stage 8; D-014 within the same write is settlement's)",
+                "src/features/appointments/BookPackageSessionsModal.stories.tsx (mtime 12:58:57; in-place TS2367 fix inside the existing +18 block, numstat unchanged 18/0)",
+                "graphify-out/ 5 tracked files regenerated at 13:05 (+401/-34, 2761 nodes)"
+            ],
+            "settlement_attributable": [
+                "docs/restructure/03-migration-matrix.md +6/-2 (mtime 11:29; 'Settlement (2026-10-03)' block in §6, ui/PaginationBar row marked adotado/ativo, StaffManagementPanel row marked decidido - links 15-section6-settlement.md)",
+                "D-014 row in docs/restructure/debts.md (states DataTableState trio adoption pending; referenced by 15-section6-settlement.md §2)"
+            ],
+            "parallel_m_unchanged": "PostEditor 451/204, PostPreviewBox 17/5, ShopProfile 574/497, PublicProductCarousel(+test) 10/1, BarbershopContext 2/0, barbershopApi 3/1, clientPortalApi 2/2, postsApi 12/5, PublicHome 2/5, types.ts 1/0, DOMAIN_MAP 1/1, App.tsx 14/12 - all BYTE-IDENTICAL numstats to baseline and mtimes <= 2026-10-02 (pre-baseline)"
+        },
+        "deleted_since_stage7": "0 files - the 15 MasterAdmin deletions were already present at baseline and remain (uncommitted rename)",
+        "parallel_external_work_attribution": {
+            "statement": "NONE of the external-session files moved during this stage. Every candidate named in the task - PublicProductCarousel(.test), BarbershopContext, ShopProfile, PostEditor, PostPreviewBox, PublicHome, types.ts, infra APIs (barbershopApi/clientPortalApi/postsApi) and App.tsx - has a byte-identical numstat vs HEAD compared with the baseline snapshot AND an mtime predating the baseline (2026-10-02 or 10:48 that morning for App.tsx). Verified two ways: (1) numstat table match, (2) a full mtime sweep of all 44 tracked changed files found only the 6 stage-8/settlement writes listed above after 11:22.",
+            "evidence": "HEAD did not move (383c29c both ends), 0 staged both ends, external numstats identical, external mtimes pre-baseline."
+        },
+        "unchanged_since_stage7": [
+            "branch (main)",
+            "HEAD (383c29c)",
+            "staged changes (none - snapshot agent committed/staged nothing)",
+            "tracked file count (572)",
+            "visual-regression PNG count (73, newest 2026-10-01 19:12)",
+            "storybook-static file count (103)",
+            "src/components total (99) / ui (26) / patterns (35) / infra (16) / marketing (3) / domain (19, still flat)",
+            "src/layouts (7), src/app (2), src/marketing (6), src/infra (62)",
+            "src non-graphify file count (445), src_ts/tsx (438), real src/pages (48)",
+            "stories count (21)",
+            "root_files (24), e2e (3), scripts (9), .storybook (4), public (18), graphify-out excl cache (94)",
+            "all src/features/* subdirectory counts (billing 10, shop 9, posts 7, ...)"
+        ]
+    },
+    "unexpected_changes": {
+        "verdict": "NO external-session SOURCE file changed; the only post-baseline changes that are NOT attributable to the Stage-8 task list are a separate settlement-§6 documentation session (11:28-11:29) plus its D-014 debt row.",
+        "external_source_files_checked": "PublicProductCarousel.tsx 3/1 (+test 7/0), BarbershopContext.tsx 2/0, ShopProfile.tsx 574/497, PostEditor.tsx 451/204, PostPreviewBox.tsx 17/5, PublicHome.tsx 2/5, types.ts 1/0, infra APIs barbershopApi 3/1 / clientPortalApi 2/2 / postsApi 12/5, App.tsx 14/12 - ALL byte-identical to baseline numstats, ALL mtimes <= 2026-10-02 19:20 (App.tsx 2026-10-03 10:48, still pre-baseline 11:22). UNCHANGED during stage 8.",
+        "unattributed_set": [
+            "docs/restructure/15-section6-settlement.md - NEW untracked, 3685 B, mtime 11:28:38 (6 min after baseline, 80 min before stage-8's first write): settlement §6 evaluation of 16 domain 0c panels + orphan ui (PaginationBar adopted, DataTableState adoption pending -> D-014, credit-card-form, MasterAdminDashboard -> D-012). NOT in the stage-8 task list - attributed to a settlement session that ran between stage 7 and stage 8.",
+            "docs/restructure/03-migration-matrix.md - became M post-baseline (mtime 11:29:24, +6/-2, was 0/0 at baseline): settlement annotations in §1 and §6 referencing 15-section6-settlement.md. NOT in the stage-8 task list.",
+            "D-014 row of docs/restructure/debts.md - the '+3' since baseline is D-014 (settlement, referenced by doc15 §2) + D-015 + D-016 (stage 8); doc16 §4 registers only D-015/D-016. debts.md's single mtime (12:56) is the stage-8 write that last touched the file, so D-014's exact insertion time cannot be proven - its content and the doc15 cross-reference place it in the settlement session."
+        ],
+        "no_new_parallel_files": "The untracked parallel/social set grew by 0 files this stage (expanded untracked 125 -> 128 = only baseline + doc15 + doc16); all 9 spot-checked parallel untracked files still carry 2026-10-02 mtimes."
+    },
+    "structural_expectations": {
+        "no_new_commits_by_this_session": "PASS - snapshot agent ran only read-only git commands (status/log/diff/numstat/ls-files/rev-parse); git diff --cached --name-only empty (0 staged). 'Do NOT commit anything' honored.",
+        "audit_and_doc_present": "PASS - docs/restructure/16-stage8-permissions.md on disk with §1-§6 (routes 57 vs 54, storage 92 calls, D-015/D-016, gate table)",
+        "contract_checker_extended": "PASS - +107/-24 in check-api-contract.mjs with helperMap/returnExpression/helperTarget and recursive visit/visited/resolveUrl; +34/-0 2 new tests; test:contract 6/6; fail-closed retained",
+        "debts_registered": "PASS - D-015 (access-block-info hardcoded 5x + barber_customer_id) and D-016 (draftKey duplicated) rows present in debts.md",
+        "story_tsc_fixed": "PASS - BookPackageSessionsModal.stories.tsx rewritten at 12:58:57 with unknown[] + cast form; doc16 records TS2367 fixed, tsc 0; numstat still 18/0; 73/73 visual without snapshot updates",
+        "external_files_untouched": "PASS - all 11 external/parallel modified files byte-identical to baseline (see parallel_external_work_attribution); stage 8 deliberately extended the checker rather than editing src/infra/socialApi.ts (doc16 §1)",
+        "gates_green_from_doc16": "PASS (transcribed) - tsc 0, eslint 9 err/591 warn (teto 11/593), vitest 283/283 (67 arq), test:contract 6/6, contract:check strict OK 477/554 0 pendências, test:storybook 73/73 (21 arq), test:visual 73/73 (0 snapshots atualizados), build 88 precache/2654.53 KiB (baseline 00 = 82/2579.63), docs:check OK"
+    },
+    "notes": [
+        "status_lines (78) = 29 modified + 15 deleted + 34 untracked entries from `git status --porcelain` (directories collapsed: src/features/billing/, src/pages/master-admin/, visual-regression/ count once each). Expanded (-uall) = 172 lines = 44 tracked + 128 untracked files. Measured before this snapshot file was written, so writing it adds +1 snapshot json AFTER measurement (opencode_snapshots 14 -> 15).",
+        "This is again a clean comparison: HEAD (383c29c), tracked count (572) and staged set (empty) are IDENTICAL at baseline and now. Line deltas close EXACTLY: +551 ins = 141 (checker) + 3 (debts) + 6 (settlement matrix) + 401 (graphify); -8 del = 24 + 2 - 34; +3 files = 2 checker + 1 matrix.",
+        "Attribution hinge: a full mtime sweep of every tracked changed file against the 11:22 baseline cut isolates exactly 6 post-baseline writes (matrix 11:29 settlement, checker x2 12:49, debts 12:56, story 12:58, graphify 13:05) + 2 post-baseline untracked files (doc15 11:28 settlement, doc16 13:05 stage 8). Everything else in the working tree is pre-baseline state carried over untouched.",
+        "The BookPackage story is the subtle one: git numstat (18/0) is unchanged vs baseline because the TS2367 fix edited lines INSIDE the already-added freeze block in place - only the mtime (12:58:57) and doc16 §5 reveal it. Recorded as stage-8 work per the task statement.",
+        "Settlement vs stage 8: doc15 + matrix edit happened at 11:28-11:29, within minutes of the baseline and ~80 min before the first stage-8 write (12:49) - a distinct session. Its D-014 debt rode along in debts.md. Flagged in unexpected_changes, NOT counted as stage 8.",
+        "src +2 is graphify cache noise, not source: 2 nested src/pages/**/graphify-out/cache/stat-index.json files were recreated by the 13:05 graphify update (baseline's stage-7 update had pruned them, 18->16 graphify files under src/pages; now back to 18). Non-graphify src stayed exactly 445.",
+        "Inventory +2 closes EXACTLY as docs/restructure +2 - the cache pair is excluded from the total by the 'graphify-out/cache segment pair' methodology, same as baseline.",
+        "Gate numbers (tsc 0, eslint 9/591, vitest 283/283, test:contract 6/6, contract:check 477/554, storybook 73/73, visual 73/73, build 88/2654.53 KiB, docs:check OK) are transcribed from docs/restructure/16-stage8-permissions.md section 5, not re-executed during this snapshot (same policy as stages 5a..7). Independent corroboration on disk: 0 of 73 visual PNGs touched after 2026-10-01, checker tests present, graphify regenerated at 13:05 with 2761 nodes.",
+        "Visual snapshots were NOT updated (requirement): newest PNG mtime is 2026-10-01 19:12.",
+        "Schema replicates after-20261003_112022.json (status_lines, log, ts, timestamp, repository, task, stage, baseline, git, file_inventory, stage8_artifacts_on_disk, graphify, comparison, unexpected_changes, structural_expectations, notes)."
+    ]
+}

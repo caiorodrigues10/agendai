@@ -1,0 +1,331 @@
+{
+    "status_lines": 93,
+    "log": "383c29c feat: add internal team profile selection",
+    "ts": "2026-10-03T14:05:53-03:00",
+    "timestamp": "2026-10-03T14:05:53-03:00",
+    "repository": "D:\\Programação\\agendai\\agendai",
+    "task": "React frontend restructure - Stage 9: cleanup (orphan exports detector scripts/check-orphan-exports.mjs [TS program+checker, 181 orphan exports / 25 dead files, informational]; 3 dead files deleted: components/infra/lazyPanel.tsx 89L, infra/walletApi.ts 68L, mocks/server.ts 12L; trims: utils/statusLabels.ts -5 consts PAYMENT/SUBSCRIPTION/APPOINTMENT/NOTIFICATION/REFUND_STATUS_LABELS -43L, utils/dateRanges.ts -3 exports DefaultPeriod/getDefaultPeriod/getPeriodRange -12L; src/index.css NO change - D-002 @source stories experiment reverted after 39/73 visual snapshots broke; D-015 step1: new utils/accessBlockedStorage.ts + import updates in AccessBlockedListener/AuthContext(2)/AccessBlockedPage/CheckoutPage(3); new test src/app/App.routes.test.ts 3 route-contract tests (56 path snapshot, 3 PrivateRoute role snapshot, roles-known invariant); docs: restructure/17-stage9-cleanup.md NEW, debts.md D-002/D-010/D-014/D-015 updates, agents/STRUCTURE.md walletApi removed from wrappers, mocks/handlers.ts comment; graphify update 2761->2776 nodes). Gates per doc17 section 8: tsc 0, eslint 9/591 (teto 11/593), vitest 286/286 (68 arq, +3 routes), test:contract 6/6, contract:check:strict OK 473/554 (477-4, walletApi) 0 pendencias, test:storybook 73/73 (21 arq), test:visual 73/73 (0 PNGs atualizados), build 88 precache/2654.41 KiB (fim etapa 7 = 2654.50, -0.12 pela limpeza), docs:check OK. Do NOT commit anything)",
+    "stage": "Stage 5..7 COMPLETE; Stage 8 permissions/contracts/persistence COMPLETE; Stage 9 cleanup COMPLETE (gates green); settlement section-6 (25 dead files) + Stage 10 final gate + git push pendentes",
+    "baseline": {
+        "captured": true,
+        "note": "Comparison baseline is the AFTER snapshot at end of Stage 8 explicitly specified by the task.",
+        "baseline_snapshot": ".opencode/snapshots/after-20261003_131318.json",
+        "baseline_snapshot_ts": "2026-10-03T13:13:18-03:00",
+        "baseline_snapshot_status_lines": 78,
+        "baseline_snapshot_log": "383c29c feat: add internal team profile selection",
+        "baseline_is_same_head_as_current": true,
+        "commits_since_baseline_snapshot": "NONE - HEAD is byte-identical (383c29c) at baseline and now, and `git diff --cached` is empty at both ends. True working-tree-vs-working-tree delta with NO external commit/rebase drift.",
+        "baseline_task": "Stage 8: permissions/routes/contracts/persistence audit (contract checker +107/-24, debts D-015/D-016, story Date-freeze tsc fix, doc16)",
+        "baseline_measured_before_itself_was_written": true
+    },
+    "git": {
+        "branch": "main",
+        "head_commit": "383c29c feat: add internal team profile selection",
+        "head_short": "383c29c",
+        "head_unchanged_from_baseline": true,
+        "is_git_repo": true,
+        "tracked_files_count": 572,
+        "status_line_count": 93,
+        "status_counts": {
+            "modified": 36,
+            "deleted": 18,
+            "staged": 0,
+            "untracked_lines": 39,
+            "untracked_files_expanded": 133
+        },
+        "staged_changes": "none (git diff --cached --name-only empty; snapshot agent made NO commits/stages - nothing committed by this session)",
+        "diff_stat_vs_head": "54 files changed, 62833 insertions(+), 48356 deletions(-)",
+        "diff_vs_head_insertions": 62833,
+        "diff_vs_head_deletions": 48356,
+        "diff_vs_head_files": 54,
+        "diff_delta_vs_baseline": "+10 files / +622 insertions / +645 deletions (baseline 44 / 62211 / 47711) - reconciles EXACTLY (see diff_delta_arithmetic)",
+        "diff_delta_arithmetic": {
+            "insertions": "+622 = +609 graphify regeneration (60935 -> 61544: graph.json +594, manifest +21, GRAPH_REPORT -5, labels -1) + +11 from the 7 newly-modified files (STRUCTURE excluded, see files) + +1 STRUCTURE.md growth (8/1 -> 9/2) + +1 debts.md growth (8/1 -> 9/2). EXACT.",
+            "deletions": "+645 = +410 graphify (41148 -> 41558) + +169 the 3 deleted files (lazyPanel 89 + walletApi 68 + server 12) + +64 from the 7 newly-modified files (statusLabels 43 + dateRanges 12 + Checkout 3 + Listener 2 + AuthContext 2 + handlers 1 + AccessBlockedPage 1) + +1 STRUCTURE + +1 debts. EXACT.",
+            "files": "+10 = +7 newly-modified tracked files + 3 newly-deleted tracked files. EXACT: baseline M 29 + 7 = 36, baseline D 15 + 3 = 18."
+        },
+        "stage9_attributable_tracked_changes": {
+            "newly_modified_files_7": "src/utils/statusLabels.ts 0/43 (mtime 13:41:05 - removed exactly 5 orphan consts: PAYMENT/SUBSCRIPTION/APPOINTMENT/NOTIFICATION/REFUND_STATUS_LABELS; FIADO_STATUS_LABELS + getStatusLabel kept), src/utils/dateRanges.ts 0/12 (13:41:32 - removed 3 orphan exports: type DefaultPeriod, getDefaultPeriod, getPeriodRange), src/mocks/handlers.ts 2/1 (13:41:59 - comment now says server.ts removed in Etapa 9), src/components/infra/AccessBlockedListener.tsx 1/2 (13:48:15 - local BLOCK_INFO_STORAGE_KEY const replaced by import from utils/accessBlockedStorage), src/contexts/AuthContext.tsx 3/2 (13:48:17 - +import, 2x removeItem literal -> BLOCK_INFO_STORAGE_KEY), src/pages/AccessBlockedPage.tsx 1/1 (13:48:16 - key import moved from AccessBlockedListener), src/pages/CheckoutPage.tsx 4/3 (13:48:18 - +import, 3x removeItem literal -> BLOCK_INFO_STORAGE_KEY)",
+            "growth_in_files_already_modified_at_baseline_2": "docs/agents/STRUCTURE.md 8/1 -> 9/2 (+1/+1 at 13:41:34: walletApi dropped from the HTTP-wrappers list; baseline 8/1 is derived - the pre-existing +7 features-block and MasterAdmin->master-admin line were already there pre-baseline) and docs/restructure/debts.md 8/1 -> 9/2 (+1/+1 at 13:58:26: D-015 row rewritten with '(passo 1 concluido na Etapa 9)' + D-002/D-010/D-014 row updates in-place)",
+            "deletions_3": "src/components/infra/lazyPanel.tsx 0/89 (0 importers, never adopted), src/infra/walletApi.ts 0/68 (0 importers, duplicated clientPortal token logic; contract wrappers 477 -> 473), src/mocks/server.ts 0/12 (0 importers; tests use vi.mock/http local) - all 3 new D entries post-baseline (baseline D was exactly the 15 MasterAdmin files)",
+            "graphify_regeneration": "graph.json 59197/40513, manifest.json 1889/799, GRAPH_REPORT.md 414/239, .graphify_labels.json 40/3, graph.html 4/4 = 61544/41558 (stage-9 graphify update at 14:00:03-04, +609/-410 vs baseline 60935/41148) - required by AGENTS.md graphify rule after major changes; not itemized in the task statement but same pattern as stage 8"
+        },
+        "parallel_unchanged_from_baseline": "PostEditor.tsx 451/204, PostPreviewBox.tsx 17/5, ShopProfile.tsx 574/497, PublicProductCarousel.tsx 3/1 + test 7/0, BarbershopContext 2/0, barbershopApi 3/1, clientPortalApi 2/2, postsApi 12/5, PublicHome 2/5, types.ts 1/0, DOMAIN_MAP 1/1, App.tsx 14/12, 02-map 1/1, 03-migration-matrix 6/2, ClientPortalDashboard 0/2, OwnerSubscriptionPanel 1/3, ProductCatalogPanel.test 3/3, ProductFormModal.test 1/1, BookPackageSessionsModal.stories 18/0, check-api-contract.mjs 107/24, check-api-contract.test.mjs 34/0 - numstats BYTE-IDENTICAL to the baseline snapshot AND mtimes all <= 2026-10-03 13:13 (all <= 2026-10-02 19:20 except the stage-8 checker/story writes): NO external-session file moved during stage 9",
+        "post_baseline_tracked_writes": "ONLY these tracked files have mtime > 13:13:18 (baseline) - 14 distinct files: statusLabels 13:41:05, dateRanges 13:41:32, STRUCTURE.md 13:41:34, handlers 13:41:59 (batch 1); AccessBlockedListener 13:48:15, AccessBlockedPage 13:48:16, AuthContext 13:48:17, CheckoutPage 13:48:18 (D-015 step-1 batch); debts.md 13:58:26; graphify-out/* 14:00:03-04 (5 files). Plus 3 post-baseline deletions (lazyPanel, walletApi, server - deleted files carry no mtime but are new D entries vs baseline's 15). NOTHING else tracked moved.",
+        "diff_vs_baseline_head_no_renames": "HEAD identical at both ends (383c29c) so working-tree deltas above are the authoritative comparison",
+        "uncommitted_rename_caveat": "The MasterAdmin -> master-admin rename (15 D + ?? master-admin/ + ?? features/billing/) remains UNCOMMITTED as required ('Do NOT commit'), now joined by the stage-9 trio of deletions (18 D total)"
+    },
+    "file_inventory": {
+        "total_excluding_node_modules_git_dist_opencode_mimocode_graphify_cache": 844,
+        "methodology_note": "Same stated exclusions as baseline (node_modules, .git, dist, .opencode, .mimocode, graphify-out/cache segment pair). Baseline 843 -> 844 (+1) reconciles EXACTLY: +4 new files (doc17, check-orphan-exports.mjs, App.routes.test.ts, accessBlockedStorage.ts) - 3 deleted (lazyPanel, walletApi, server).",
+        "node_modules_present": true,
+        "counts_by_directory": {
+            "src": 462,
+            "src_strict_excl_nested_graphify_files": 444,
+            "src_ts_tsx": 437,
+            "src_pages": 66,
+            "src_pages_excl_graphify": 48,
+            "src_components_total": 98,
+            "src_components_ui": 26,
+            "src_components_patterns": 35,
+            "src_components_infra": 15,
+            "src_components_marketing": 3,
+            "src_components_domain_total": 19,
+            "src_components_domain_subdirs": "NONE (still flat)",
+            "src_layouts": 7,
+            "src_app": 3,
+            "src_marketing": 6,
+            "src_infra": 61,
+            "src_features_total": 158,
+            "src_features_billing": 10,
+            "src_features_posts": 7,
+            "src_features_shop": 9,
+            "docs": 34,
+            "docs_restructure": 19,
+            "e2e": 3,
+            "scripts": 10,
+            ".storybook": 4,
+            "root_files": 24,
+            "public": 18,
+            "visual_regression_png": 73,
+            "opencode_snapshots_on_disk": 15,
+            "storybook_static": 103,
+            "graphify_out_excl_cache": 94
+        },
+        "inventory_deltas_vs_baseline": "src 463->462 (-1 = +2 new -3 deleted), src_strict 445->444 (-1), src_ts_tsx 438->437 (-1), src_components_total 99->98 and infra 16->15 (lazyPanel), src_infra 62->61 (walletApi), src_app 2->3 (+App.routes.test), docs 33->34 and docs_restructure 18->19 (+doc17), scripts 9->10 (+check-orphan-exports), src_pages 66->66 / real 48->48 (0), features_total 158->158 (0), visual 73->73 (0), graphify_out excl cache 94->94 (0). ALL EXACT.",
+        "key_files": [
+            "package.json",
+            "scripts/check-orphan-exports.mjs",
+            "src/app/App.routes.test.ts",
+            "src/utils/accessBlockedStorage.ts",
+            "docs/restructure/17-stage9-cleanup.md",
+            "docs/restructure/debts.md",
+            "docs/agents/STRUCTURE.md"
+        ]
+    },
+    "stage9_artifacts_on_disk": {
+        "orphan_export_detector": {
+            "pass": "PASS - scripts/check-orphan-exports.mjs NEW untracked, 5766 B, mtime 13:37:24: TypeScript program + checker (not grep); follows aliases/barrils via getAliasedSymbol, counts static/dynamic/namespace/side-effect imports + require, tests/stories count as consumers; dead file = all exports unconsumed AND zero direct importers; synthetic probe validated, false positives fixed (TS fileName uses '/', declarations[0] is node); run: node --max-old-space-size=4096 ... (informational - not in gate while settlement queue exists)",
+            "result": "181 orphan exports / 25 dead files; 5 executed (lazyPanel, walletApi, server, 5 statusLabels consts, dateRanges block); 25 deferred to settlement section-6 (16 domain/*Panel, credit-card-form D-010, master-admin/MasterAdminDashboard D-012, 7 skeletons D-014); kept by decision: ~140 infra/*Api types (documental contract), ui/patterns *Props, analytics GA functions, misc local types"
+        },
+        "routes_test": {
+            "pass": "PASS - src/app/App.routes.test.ts NEW untracked, 2746 B, mtime 13:22:50: 3 tests, static contract of App.tsx source without provider/router: (1) inline snapshot of all 56 path=\"...\" declared, (2) inline snapshot of the 3 PrivateRoute with roles (/checkout OWNER+MASTER_ADMIN, /master MASTER_ADMIN, /app/:tab OWNER+EMPLOYEE+MASTER_ADMIN), (3) invariant - every <PrivateRoute has known roles (no back-door private route). Doc17: vitest 286/286 (+3)"
+        },
+        "deletions": {
+            "pass": "PASS - 3 tracked files deleted post-baseline (D count 15 -> 18): src/components/infra/lazyPanel.tsx (89L, 0 importers, lazyPanel only self-referenced, never adopted), src/infra/walletApi.ts (68L, 0 importers, duplicated agendai_client_portal_access token logic of clientPortalApi; removed from STRUCTURE wrapper list, contract:check 477 -> 473), src/mocks/server.ts (12L, 0 importers; tests use vi.mock/http local, only browser.ts used via preview)"
+        },
+        "code_trims": {
+            "pass": "PASS - statusLabels.ts 0/43 vs HEAD (mtime 13:41:05): exactly 5 consts removed (PAYMENT, SUBSCRIPTION, APPOINTMENT, NOTIFICATION, REFUND_STATUS_LABELS); FIADO_STATUS_LABELS + getStatusLabel kept (in use). dateRanges.ts 0/12 (13:41:32): 3 exports removed (type DefaultPeriod, getDefaultPeriod, getPeriodRange); todayISO/addDaysISO/dateAtNoon kept (9 importers).",
+            "index_css_reverted": "PASS - git status --porcelain -- src/index.css is EMPTY (no change after revert): D-002 @source not './**/*.stories.tsx' experiment gave CSS 214.2 -> 162.7 KiB (-51.4) and precache -50.26 but broke 39/73 visual snapshots; reverted, numbers recorded in D-002"
+        },
+        "d015_step1": {
+            "pass": "PASS - src/utils/accessBlockedStorage.ts NEW untracked, 67 B, mtime 13:48:02 (single line: export const BLOCK_INFO_STORAGE_KEY = 'agendai:access-block-info'); import updates verified by diff: AccessBlockedListener 1/2 (local const removed -> import), AuthContext 3/2 (+import, 2 literals -> key), AccessBlockedPage 1/1 (key source moved from AccessBlockedListener), CheckoutPage 4/3 (+import, 3 literals -> key). Previously 5 hardcoded literals + const exported by a component. Rename of barber_customer_id still pending (behavioral migration -> D-015 remains open).",
+            "debts_row": "debts.md D-015 row now reads '(passo 1 concluido na Etapa 9) chave agendai:access-block-info unificada em src/utils/accessBlockedStorage...' (line 23)"
+        },
+        "docs_updates": {
+            "pass": "PASS - docs/restructure/17-stage9-cleanup.md NEW untracked 5977 B mtime 13:59:16 (sections 1 detector, 2 cleanup table, 3 25 deferred, 4 routes test, 5 barrels 28/28, 6 budget D-002 revert, 7 D-015 step1, 8 gate table, 9 next); debts.md D-002 (Etapa 9 experiment noted line 10), D-010 (updated line 18), D-014 (updated line 22), D-015 (line 23); agents/STRUCTURE.md walletApi dropped from HTTP wrapper list (13:41:34); mocks/handlers.ts comment updated (2/1)"
+        },
+        "graphify_update_ran": "PASS - graphify-out regenerated at 14:00:03-04 (right after doc17 at 13:59): 5 tracked files, current numstats vs HEAD 61544/41558 (baseline 60935/41148, delta +609/-410); graph.json .nodes.Count = 2776 (baseline 2761, +15); GRAPH_REPORT '2776 nodes / 6189 edges / 182 communities'; graphify-out excl cache stays 94 files"
+    },
+    "graphify": {
+        "graph_exists": true,
+        "graph_json": "graphify-out/graph.json",
+        "graph_modified_in_this_task": true,
+        "graph_node_count": 2776,
+        "graph_edge_count": 6189,
+        "graph_communities": 182,
+        "graph_modify_status": "graphify-out/ regenerated at 14:00 during stage 9 - current numstats vs HEAD 383c29c: graph.json 59197/40513, manifest.json 1889/799, GRAPH_REPORT.md 414/239, .graphify_labels.json 40/3, graph.html 4/4 = 61544/41558 (baseline 60935/41148, delta +609/-410); root graphify-out excl cache unchanged at 94 files; nodes 2761 -> 2776 (+15)"
+    },
+    "comparison": {
+        "note": "Compared against the Stage-8 AFTER snapshot (.opencode/snapshots/after-20261003_131318.json) explicitly specified by the task. HEAD is IDENTICAL at both ends (383c29c) and nothing is staged at either end - a clean working-tree-vs-working-tree comparison. Snapshot agent committed/staged NOTHING.",
+        "before": {
+            "source": ".opencode/snapshots/after-20261003_131318.json",
+            "head_commit": "383c29c feat: add internal team profile selection",
+            "files_tracked": 572,
+            "uncommitted_files": 78,
+            "modified": 29,
+            "deleted": 15,
+            "staged": 0,
+            "untracked_entries": 34,
+            "untracked_expanded": 128,
+            "lines_added": 62211,
+            "lines_removed": 47711,
+            "diff_files": 44,
+            "inventory_total": 843,
+            "inventory_src": 463,
+            "inventory_src_strict": 445,
+            "src_ts_tsx": 438,
+            "src_pages": 66,
+            "src_pages_real": 48,
+            "src_app": 2,
+            "src_components_total": 99,
+            "src_components_infra": 16,
+            "src_infra": 62,
+            "features_total": 158,
+            "visual_snapshots": 73,
+            "docs_total": 33,
+            "docs_restructure": 18,
+            "scripts": 9,
+            "storybook_static": 103,
+            "opencode_snapshots": 14,
+            "graphify_nodes": 2761,
+            "graphify_edges": 6185,
+            "graphify_communities": 183
+        },
+        "after": {
+            "head_commit": "383c29c feat: add internal team profile selection (UNCHANGED)",
+            "files_tracked": 572,
+            "uncommitted_files": 93,
+            "modified": 36,
+            "deleted": 18,
+            "staged": 0,
+            "untracked_entries": 39,
+            "untracked_expanded": 133,
+            "lines_added_vs_head": 62833,
+            "lines_removed_vs_head": 48356,
+            "diff_files_vs_head": 54,
+            "inventory_total": 844,
+            "inventory_src": 462,
+            "inventory_src_strict": 444,
+            "src_ts_tsx": 437,
+            "src_pages": 66,
+            "src_pages_real": 48,
+            "src_app": 3,
+            "src_components_total": 98,
+            "src_components_infra": 15,
+            "src_infra": 61,
+            "features_total": 158,
+            "visual_snapshots": 73,
+            "docs_total": 34,
+            "docs_restructure": 19,
+            "scripts": 10,
+            "storybook_static": 103,
+            "opencode_snapshots": 15,
+            "graphify_nodes": 2776,
+            "graphify_edges": 6189,
+            "graphify_communities": 182
+        },
+        "delta": {
+            "head_commits": "0 - HEAD identical (383c29c) at baseline and now; no external commits/rebase during this stage",
+            "files_tracked": "0 (572 -> 572 - nothing committed; stage-9 deletes are working-tree only)",
+            "uncommitted_files": "+15 status lines (78 -> 93: +7 modified, +3 deleted, +5 untracked entries)",
+            "modified": "+7 (29 -> 36: statusLabels, dateRanges, handlers, AccessBlockedListener, AuthContext, AccessBlockedPage, CheckoutPage - ALL stage 9)",
+            "deleted": "+3 (15 -> 18: lazyPanel, walletApi, server - ALL stage 9; the 15 MasterAdmin rename deletions carried over)",
+            "staged": "0 -> 0 (nothing staged at either end)",
+            "untracked_entries": "+5 (34 -> 39: after-20261003_131318.json [the baseline itself, written 13:15], scripts/check-orphan-exports.mjs, src/app/App.routes.test.ts, src/utils/accessBlockedStorage.ts, docs/restructure/17-stage9-cleanup.md - last 4 are stage 9)",
+            "untracked_expanded": "+5 (128 -> 133: same 5 files; NO new parallel/social file appeared this stage)",
+            "lines_added": "+622 (62211 -> 62833) = +609 graphify + +11 newly-M + +1 STRUCTURE + +1 debts - EXACT",
+            "lines_removed": "+645 (47711 -> 48356) = +410 graphify + +169 3-deletions + +64 newly-M + +1 STRUCTURE + +1 debts - EXACT",
+            "diff_files": "+10 (44 -> 54) = +7 newly-M + 3 deleted - EXACT",
+            "inventory_total": "+1 (843 -> 844: +4 new files - 3 deleted) - EXACT",
+            "inventory_src": "-1 (463 -> 462: +2 new src files - 3 deleted src files)",
+            "inventory_src_strict": "-1 (445 -> 444)",
+            "src_ts_tsx": "-1 (438 -> 437: +2 ts/tsx new - 3 tsx deleted)",
+            "src_pages": "0 (66 -> 66, real pages 48 -> 48)",
+            "src_app": "+1 (2 -> 3: App.routes.test.ts)",
+            "src_components_total": "-1 (99 -> 98) / infra -1 (16 -> 15): lazyPanel",
+            "src_infra": "-1 (62 -> 61: walletApi)",
+            "features_total": "0 (158 -> 158)",
+            "visual_snapshots": "0 (73 -> 73, newest PNG mtime 2026-10-01 19:12 - no snapshot updated)",
+            "docs_total": "+1 (33 -> 34) / docs_restructure +1 (18 -> 19): 17-stage9-cleanup.md",
+            "scripts": "+1 (9 -> 10: check-orphan-exports.mjs)",
+            "storybook_static": "0 (103 -> 103, gitignored; rebuilt during gates)",
+            "opencode_snapshots": "+1 measured (14 -> 15; writing this snapshot makes 16)",
+            "graphify_nodes": "+15 (2761 -> 2776)",
+            "graphify_edges": "+4 (6185 -> 6189)",
+            "graphify_communities": "-1 (183 -> 182)",
+            "graphify_out": "0 files (94 -> 94) but CONTENT regenerated (+609/-410)"
+        },
+        "added_since_stage8": {
+            "stage9_created_files": [
+                "scripts/check-orphan-exports.mjs (orphan export detector, 13:37)",
+                "src/app/App.routes.test.ts (3 route-contract tests, 13:22)",
+                "src/utils/accessBlockedStorage.ts (D-015 step1, 13:48)",
+                "docs/restructure/17-stage9-cleanup.md (stage-9 doc, 13:59)"
+            ],
+            "total_stage9_created": 4,
+            "other": [
+                ".opencode/snapshots/after-20261003_131318.json (the baseline, written 13:15 by the previous snapshot)"
+            ]
+        },
+        "modified_since_stage8": {
+            "stage_9_attributable_uncommitted": [
+                "src/utils/statusLabels.ts 0/43 (13:41:05: -5 orphan label consts)",
+                "src/utils/dateRanges.ts 0/12 (13:41:32: -3 orphan exports)",
+                "src/mocks/handlers.ts 2/1 (13:41:59: server.ts removal comment)",
+                "src/components/infra/AccessBlockedListener.tsx 1/2 (13:48:15: key moved to utils)",
+                "src/contexts/AuthContext.tsx 3/2 (13:48:17: 2 literals -> key import)",
+                "src/pages/AccessBlockedPage.tsx 1/1 (13:48:16: key import source moved)",
+                "src/pages/CheckoutPage.tsx 4/3 (13:48:18: 3 literals -> key import)",
+                "docs/agents/STRUCTURE.md 8/1 -> 9/2 (13:41:34: walletApi out of wrapper list)",
+                "docs/restructure/debts.md 8/1 -> 9/2 (13:58:26: D-015 step1 + D-002/D-010/D-014 updates)",
+                "graphify-out/ 5 tracked files regenerated at 14:00 (+609/-410, 2776 nodes)"
+            ],
+            "newly_deleted_stage9_3": [
+                "src/components/infra/lazyPanel.tsx (0/89)",
+                "src/infra/walletApi.ts (0/68)",
+                "src/mocks/server.ts (0/12)"
+            ]
+        },
+        "deleted_since_stage8": "3 files (lazyPanel.tsx, walletApi.ts, server.ts) - stage-9 orphan cleanup; baseline's 15 MasterAdmin rename deletions carried over unchanged",
+        "external_work_attribution": {
+            "statement": "NO external-session file changed during this stage. Every candidate named in the task - PublicProductCarousel(.test), BarbershopContext, ShopProfile, PostEditor, PostPreviewBox, PublicHome, types.ts, infra posts/barbershop/clientPortal APIs, DOMAIN_MAP.md - has a byte-identical numstat vs HEAD compared with the baseline snapshot AND an mtime predating the baseline (13:13). Verified two ways: (1) numstat table match, (2) a full mtime sweep of all 54 tracked changed files found only the 14 stage-9 writes listed above after 13:13; an mtime sweep of all 133 untracked files found only the 5 post-baseline entries (baseline snapshot + 4 stage-9 files).",
+            "evidence": "HEAD did not move (383c29c both ends), 0 staged both ends, external numstats identical, external mtimes pre-baseline.",
+            "unattributed_new_work": "NONE - zero external-session changes detected in this window."
+        },
+        "carryover_external_set_not_touched_now": [
+            "src/features/posts/PostEditor.tsx 451/204 + PostEditor.test.tsx, TemplateThumbnail.tsx (parallel posts/social work, pre-baseline)",
+            "src/features/shop/ShopProfile.tsx 574/497 + PostDetail/PostTagEditor/ProfileSections/StoryModal/useSalonSocial/ShopProfile.test (pre-baseline)",
+            "src/components/domain/PublicProductCarousel.tsx 3/1 + test 7/0 (pre-baseline)",
+            "src/contexts/BarbershopContext.tsx 2/0, src/infra/barbershopApi.ts 3/1, clientPortalApi 2/2, postsApi 12/5 (pre-baseline)",
+            "src/pages/PublicHome.tsx 2/5, src/types.ts 1/0, docs/agents/DOMAIN_MAP.md 1/1 (pre-baseline)",
+            "docs/restructure/02-map.md 1/1 + 03-migration-matrix.md 6/2 (settlement session, pre-baseline)",
+            "src/app/App.tsx 14/12 (pre-baseline; stage 9's routes test reads it but did not edit it)",
+            "scripts/check-api-contract.mjs 107/24 + test 34/0 (stage 8, pre-baseline)"
+        ],
+        "unchanged_since_stage8": [
+            "branch (main)",
+            "HEAD (383c29c)",
+            "staged changes (none - snapshot agent committed/staged nothing)",
+            "tracked file count (572)",
+            "src/index.css (NOT in git status - D-002 experiment reverted, no residual change)",
+            "visual-regression PNG count (73, newest 2026-10-01 19:12)",
+            "storybook-static file count (103)",
+            "src/components ui (26) / patterns (35) / marketing (3) / domain (19, still flat)",
+            "src/layouts (7), src/marketing (6), root_files (24), e2e (3), .storybook (4), public (18), graphify-out excl cache (94)",
+            "src real pages (48), src/pages (66), features_total (158) and all feature subdir counts",
+            "stories count (21)"
+        ]
+    },
+    "unexpected_changes": {
+        "verdict": "NONE - every post-baseline change is attributable to the Stage-9 task list (or to the required graphify update / the baseline snapshot file itself). No external-session source file or new external file appeared in this window.",
+        "external_source_files_checked": "PublicProductCarousel.tsx 3/1 (+test 7/0), BarbershopContext.tsx 2/0, ShopProfile.tsx 574/497, PostEditor.tsx 451/204, PostPreviewBox.tsx 17/5, PublicHome.tsx 2/5, types.ts 1/0, infra postsApi 12/5 / barbershopApi 3/1 / clientPortalApi 2/2, DOMAIN_MAP.md 1/1, App.tsx 14/12 - ALL byte-identical to baseline numstats, ALL mtimes <= 2026-10-03 13:13 (most <= 2026-10-02 19:20). UNCHANGED during stage 9.",
+        "unattributed_set": [
+            "graphify-out/ 5 tracked files regenerated at 14:00:03-04 (+609/-410, nodes 2761 -> 2776) - NOT itemized in the task statement, but it is the mandatory AGENTS.md 'after major changes: graphify update .' step, runs right after doc17 (13:59) and matches the stage-8 pattern (13:05 update attributed to stage 8). Counted as stage-9 work with this explicit flag.",
+            "docs/restructure/02-map.md 1/1 and 03-migration-matrix.md 6/2 remain M but did NOT move this stage (settlement/stage-7 carries, pre-baseline mtimes)."
+        ],
+        "no_new_parallel_files": "The untracked parallel/social set grew by 0 files this stage (expanded untracked 128 -> 133 = baseline + 4 stage-9 files + the baseline snapshot itself); all parallel untracked files (socialApi, shop/posts components, master-admin/, billing/) still carry 2026-10-02 mtimes."
+    },
+    "structural_expectations": {
+        "no_new_commits_by_this_session": "PASS - snapshot agent ran only read-only git commands (status/log/diff/numstat/ls-files/rev-parse); git diff --cached --name-only empty (0 staged). 'Do NOT commit anything' honored.",
+        "orphan_detector_present": "PASS - scripts/check-orphan-exports.mjs on disk (5766 B), TS-program based, 181 orphan exports / 25 dead files reported",
+        "routes_test_present": "PASS - src/app/App.routes.test.ts on disk (2746 B), 3 tests: 56-path snapshot, 3 PrivateRoute-roles snapshot, known-roles invariant; vitest 286/286",
+        "deletions_done": "PASS - lazyPanel.tsx, walletApi.ts, server.ts all gone from working tree (3 new D entries); handlers.ts comment updated; STRUCTURE.md wrapper list updated; contract wrappers 477 -> 473",
+        "trims_done": "PASS - statusLabels -5 consts (-43L), dateRanges -3 exports (-12L); index.css clean (reverted as required)",
+        "d015_step1_done": "PASS - accessBlockedStorage.ts exists (67 B) + 4 import-consumer files updated (Listener, AuthContext, AccessBlockedPage, CheckoutPage); debts D-015 marks step 1 concluded",
+        "docs_updated": "PASS - doc17 NEW (5977 B, sections 1-9, status concluida, gate table green); debts D-002/D-010/D-014/D-015 rows updated; STRUCTURE walletApi removed",
+        "external_files_untouched": "PASS - all external/parallel files byte-identical to baseline with pre-baseline mtimes (see external_work_attribution)",
+        "gates_green_from_doc17": "PASS (transcribed) - tsc 0, eslint 9 err/591 warn (teto 11/593), vitest 286/286 (68 arq, +3), test:contract 6/6, contract:check:strict OK 473/554 0 pendencias (477-4), storybook 73/73 (21 arq), visual 73/73 (0 snapshots atualizados), build 88 precache/2654.41 KiB (fim 7 = 2654.50, -0.12), docs:check OK"
+    },
+    "notes": [
+        "status_lines (93) = 36 modified + 18 deleted + 39 untracked entries from `git status --porcelain` (directories collapsed: src/features/billing/, src/pages/master-admin/, visual-regression/ count once each). Expanded (-uall) = 172 lines = 54 tracked + 133 untracked files. Measured before this snapshot file was written, so writing it adds +1 snapshot json AFTER measurement (opencode_snapshots 15 -> 16).",
+        "Clean comparison again: HEAD (383c29c), tracked count (572) and staged set (empty) are IDENTICAL at baseline and now. Line deltas close EXACTLY: +622 ins = 609 graphify + 11 newly-M + 1 STRUCTURE + 1 debts; -645 del = 410 graphify + 169 deletions + 64 newly-M + 1 + 1; +10 files = 7 newly-M + 3 deleted; status lines +15 = +7 M + 3 D + 5 untracked.",
+        "Attribution hinge: a full mtime sweep of every tracked changed file against the 13:13:18 baseline isolates exactly 14 post-baseline tracked writes (statusLabels/dateRanges/handlers 13:41, STRUCTURE 13:41, Listener/ABP/Auth/Checkout 13:48, debts 13:58, graphify x5 14:00) + 3 post-baseline deletions (deleted files have no mtime but appear as new D entries vs baseline's 15) + 5 post-baseline untracked files (baseline itself + 4 stage-9 artifacts). Everything else in the working tree is pre-baseline state carried over untouched.",
+        "STRUCTURE.md baseline numstat (8/1) is DERIVED, not transcribed: the baseline snapshot did not record per-file numstats. Derivation: pre-baseline-mtime modified files number exactly 29 (the baseline's M count) with STRUCTURE among them; solving the insertion/deletion delta equations gives 8/1 -> 9/2 (+1/+1), which the diff confirms (pre-existing +7 features block and MasterAdmin->master-admin line = 8/1; stage-9 walletApi wrapper removal = +1/+1).",
+        "statusLabels/dateRanges were NOT modified at baseline (0/0 vs HEAD), so their full 0/43 and 0/12 are stage-9 line deltas - the task's '-5 consts' and '-3 exports' match the diff exactly (43 lines of const maps, 12 lines of the DefaultPeriod block).",
+        "The D-002 budget experiment is deliberately INVISIBLE in the diff: index.css is byte-clean because the @source stories exclusion was reverted after 39/73 visual snapshots broke; doc17 section 6 records the numbers (CSS -51.4 KiB, precache -50.26) as a conditioned opportunity.",
+        "Gate numbers (tsc 0, eslint 9/591, vitest 286/286, test:contract 6/6, contract:check 473/554, storybook 73/73, visual 73/73, build 88/2654.41 KiB, docs:check OK) are transcribed from docs/restructure/17-stage9-cleanup.md section 8, not re-executed during this snapshot (same policy as stages 5a..8). Independent corroboration on disk: 0 of 73 visual PNGs touched after 2026-10-01 19:12, index.css absent from git status, contract wrapper drop visible in STRUCTURE.md/walletApi deletion, graphify regenerated at 14:00 with 2776 nodes.",
+        "Visual snapshots were NOT updated (requirement): newest PNG mtime is 2026-10-01 19:12.",
+        "Schema replicates after-20261003_131318.json (status_lines, log, ts, timestamp, repository, task, stage, baseline, git, file_inventory, stage9_artifacts_on_disk, graphify, comparison, unexpected_changes, structural_expectations, notes)."
+    ]
+}

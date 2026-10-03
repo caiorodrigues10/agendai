@@ -36,7 +36,7 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <MarketingLayout
-      title="Dashboard e relatórios — Visão de dono em tempo real | Agenda Já"
+      title="Dashboard e relatórios — Visão de dono em tempo real | Agende Já"
       description="Faturamento, ticket médio, comissão e produtividade da equipe em tempo real. Insights de movimento e financeiro no painel Pro."
       path="/dashboard"
       jsonLd={softwareApplicationLd('/dashboard')}

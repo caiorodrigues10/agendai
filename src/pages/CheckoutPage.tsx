@@ -16,6 +16,7 @@ import { plansApi, Plan, pickPlanForCheckout } from '../infra/plansApi';
 import { subscriptionsApi, SubscribePayload } from '../infra/subscriptionsApi';
 import { paymentsApi, Payment } from '../infra/paymentsApi';
 import { getErrorMessage } from '../utils/errorMessage';
+import { BLOCK_INFO_STORAGE_KEY } from '../utils/accessBlockedStorage';
 import { trialCampaign } from '../marketing/trialCampaign';
 import { useAuth } from '../contexts/AuthContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
@@ -192,7 +193,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
 
   const handleApproved = useCallback(() => {
     setSuccess(true);
-    sessionStorage.removeItem('agendai:access-block-info');
+    sessionStorage.removeItem(BLOCK_INFO_STORAGE_KEY);
     refreshSubscription();
   }, [refreshSubscription]);
 
@@ -369,7 +370,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
           setCardNumber('');
           setCardCvv('');
           setSuccess(true);
-          sessionStorage.removeItem('agendai:access-block-info');
+          sessionStorage.removeItem(BLOCK_INFO_STORAGE_KEY);
         } else {
           setError('Não foi possível cadastrar o cartão. Tente novamente.');
         }
@@ -387,7 +388,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
         setCardCvv('');
         await refreshSubscription();
         setSuccess(true);
-        sessionStorage.removeItem('agendai:access-block-info');
+        sessionStorage.removeItem(BLOCK_INFO_STORAGE_KEY);
         return;
       }
       if (status === 'rejected' || status === 'cancelled') {

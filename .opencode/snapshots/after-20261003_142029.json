@@ -1,0 +1,315 @@
+{
+    "status_lines": 95,
+    "log": "383c29c feat: add internal team profile selection",
+    "ts": "2026-10-03T14:20:29-03:00",
+    "timestamp": "2026-10-03T14:20:29-03:00",
+    "repository": "D:\\Programação\\agendai\\agendai",
+    "task": "React frontend restructure - Stage 10: final delivery evidence (docs/restructure/18-stage10-final.md NEW 3642 B mtime 14:14:44 - status concluida, gate final verde transcribed: verify:delivery OK, typecheck 0, lint 9/591 (teto 11/593), vitest 286/286 (68 arq), test:contract 6/6, contract:check+strict OK 473/554 0 pendencias, storybook 73/73 (21 arq), visual 73/73 (0 atualizados), build 88 precache/2654.41 KiB, docs:check OK, audit:frontend-structure exit 0, graphify update; scope table Etapas 0..10, open debts D-001..D-016 recap, settlement 25 dead files pending sanction, user pendencies git push/settlement/Render env; graphify update . regenerated graphify-out/ at 14:15:25-27 -> 2782 nodes/6194 edges/179 communities). NO source code changed this stage: mtime sweep > 14:05:53 finds ZERO files under src/ (0 of 462), only doc18 + graphify-out/* moved. Nothing committed or staged (git diff --cached empty, HEAD still 383c29c). Do NOT commit anything - honored, snapshot agent ran read-only git only)",
+    "stage": "Stage 5..7 COMPLETE; Stage 8 permissions/contracts/persistence COMPLETE; Stage 9 cleanup COMPLETE; Stage 10 final delivery COMPLETE (evidence doc + final gate green); settlement section-6 sanction (25 dead files) + git push pendentes",
+    "baseline": {
+        "captured": true,
+        "note": "Comparison baseline is the AFTER snapshot at end of Stage 9 explicitly specified by the task.",
+        "baseline_snapshot": ".opencode/snapshots/after-20261003_140553.json",
+        "baseline_snapshot_ts": "2026-10-03T14:05:53-03:00",
+        "baseline_snapshot_file_mtime": "2026-10-03T14:09:16-03:00 (written after its own measurement, as documented there)",
+        "baseline_snapshot_status_lines": 93,
+        "baseline_snapshot_log": "383c29c feat: add internal team profile selection",
+        "baseline_is_same_head_as_current": true,
+        "commits_since_baseline_snapshot": "NONE - HEAD is byte-identical (383c29c) at baseline and now, and `git diff --cached` is empty at both ends. True working-tree-vs-working-tree delta with NO external commit/rebase drift.",
+        "baseline_task": "Stage 9: cleanup (orphan detector, 3 deletions, statusLabels/dateRanges trims, D-015 step1, routes test, doc17, graphify 2776 nodes)",
+        "baseline_measured_before_itself_was_written": true
+    },
+    "git": {
+        "branch": "main",
+        "head_commit": "383c29c feat: add internal team profile selection",
+        "head_short": "383c29c",
+        "head_unchanged_from_baseline": true,
+        "is_git_repo": true,
+        "tracked_files_count": 572,
+        "status_line_count": 95,
+        "status_counts": {
+            "modified": 36,
+            "deleted": 18,
+            "staged": 0,
+            "untracked_lines": 41,
+            "untracked_files_expanded": 135
+        },
+        "staged_changes": "none (git diff --cached --name-only empty at baseline AND now; snapshot agent made NO commits/stages - nothing committed by this session)",
+        "diff_stat_vs_head": "54 files changed, 62749 insertions(+), 48172 deletions(-)",
+        "diff_vs_head_insertions": 62749,
+        "diff_vs_head_deletions": 48172,
+        "diff_vs_head_files": 54,
+        "diff_delta_vs_baseline": "-84 insertions / -184 deletions / 0 files (baseline 62833 / 48356 / 54) - reconciles EXACTLY (see diff_delta_arithmetic)",
+        "diff_delta_arithmetic": {
+            "files": "0 (54 -> 54): zero newly-modified, zero newly-deleted, zero dropped tracked files. M stayed 36, D stayed 18.",
+            "insertions": "-84 = graphify regeneration only: graphify-out 5 tracked files went 61544 -> 61460 ins (graph.json 59197->59125 -72, manifest 1889->1899 +10, GRAPH_REPORT 414->394 -20, labels 40->38 -2, graph.html 4->4 0 = -84). EXACT.",
+            "deletions": "-184 = graphify only: 41558 -> 41374 del (graph.json 40513->40325 -188, manifest 799->799 0, GRAPH_REPORT 239->242 +3, labels 3->4 +1, graph.html 4->4 0 = -184). EXACT.",
+            "non_graphify_invariant": "Non-graphify insertions 1289 and deletions 6798 are BYTE-IDENTICAL at both ends (62833-61544 = 1289 = 62749-61460; 48356-41558 = 6798 = 48172-41374). Every one of the 49 non-graphify changed files is numstat-identical to the Stage-9 snapshot -> ZERO source changes in Stage 10."
+        },
+        "stage10_attributable_tracked_changes": {
+            "newly_modified_files_0": "NONE - no tracked file outside graphify-out/ has an mtime > 14:05:53 (baseline ts). Full sweep of all 54 changed tracked files: only the 5 graphify-out files moved (14:15:25-27). All 36 M and 18 D entries carry Stage-8/9/pre-baseline mtimes or are the pre-existing MasterAdmin/stage-9 deletions.",
+            "graphify_regeneration": "graph.json 59125/40325, manifest.json 1899/799, GRAPH_REPORT.md 394/242, .graphify_labels.json 38/4, graph.html 4/4 = 61460/41374 (stage-10 graphify update at 14:15:25-27, right after doc18 at 14:14:44; baseline 61544/41558, delta -84/-184) - required by AGENTS.md graphify rule; listed in doc18 gate table as 'graphify update . - (2776 nos)' (see graphify.docs_node_mismatch flag)",
+            "deletions_unchanged_18": "15 MasterAdmin rename files (Stage 7, pre-baseline) + 3 Stage-9 files (lazyPanel 0/89, walletApi 0/68, server 0/12) - NO new deletions this stage"
+        },
+        "parallel_unchanged_from_baseline": "PostEditor.tsx 451/204, PostPreviewBox.tsx 17/5, ShopProfile.tsx 574/497, PublicProductCarousel.tsx 3/1 + test 7/0, BarbershopContext 2/0, barbershopApi 3/1, clientPortalApi 2/2, postsApi 12/5, PublicHome 2/5, types.ts 1/0, DOMAIN_MAP 1/1, App.tsx 14/12, 02-map 1/1, 03-migration-matrix 6/2, ClientPortalDashboard 0/2, OwnerSubscriptionPanel 1/3, ProductCatalogPanel.test 3/3, ProductFormModal.test 1/1, BookPackageSessionsModal.stories 18/0, check-api-contract.mjs 107/24, check-api-contract.test 34/0, statusLabels 0/43, dateRanges 0/12, handlers 2/1, AccessBlockedListener 1/2, AuthContext 3/2, AccessBlockedPage 1/1, CheckoutPage 4/3, STRUCTURE 9/2, debts 9/2 - ALL byte-identical numstats to the Stage-9 snapshot AND all mtimes <= 14:05:53: NO external-session file moved during Stage 10",
+        "post_baseline_tracked_writes": "ONLY these tracked files have mtime > 14:05:53 (baseline) - 5 distinct files: graphify-out/graph.json 14:15:25, .graphify_labels.json 14:15:26, GRAPH_REPORT.md 14:15:26, manifest.json 14:15:26, graph.html 14:15:27 (plus graphify-out/.graphify_root touched 14:15:26, content-identical, not in git status). ZERO files under src/ (0 of 462), ZERO other docs. NOTHING else tracked moved.",
+        "diff_vs_baseline_head_no_renames": "HEAD identical at both ends (383c29c) so working-tree deltas above are the authoritative comparison",
+        "uncommitted_rename_caveat": "The MasterAdmin -> master-admin rename (15 D + ?? master-admin/ + ?? features/billing/) plus the Stage-9 trio (18 D total) remain UNCOMMITTED as required ('Do NOT commit')"
+    },
+    "file_inventory": {
+        "total_excluding_node_modules_git_dist_opencode_mimocode_graphify_cache": 845,
+        "methodology_note": "Same stated exclusions as baseline (node_modules, .git, dist, .opencode, .mimocode, graphify-out/cache segment pair anywhere in path). Baseline 844 -> 845 (+1) reconciles EXACTLY: +1 new file (docs/restructure/18-stage10-final.md), 0 deletions this stage.",
+        "node_modules_present": true,
+        "counts_by_directory": {
+            "src": 462,
+            "src_strict_excl_nested_graphify_files": 444,
+            "src_ts_tsx": 437,
+            "src_pages": 66,
+            "src_pages_excl_graphify": 48,
+            "src_components_total": 98,
+            "src_components_ui": 26,
+            "src_components_patterns": 35,
+            "src_components_infra": 15,
+            "src_components_marketing": 3,
+            "src_components_domain_total": 19,
+            "src_components_domain_subdirs": "NONE (still flat)",
+            "src_layouts": 7,
+            "src_app": 3,
+            "src_marketing": 6,
+            "src_infra": 61,
+            "src_features_total": 158,
+            "src_features_billing": 10,
+            "src_features_posts": 7,
+            "src_features_shop": 9,
+            "docs": 35,
+            "docs_restructure": 20,
+            "e2e": 3,
+            "scripts": 10,
+            ".storybook": 4,
+            "root_files": 24,
+            "public": 18,
+            "visual_regression_png": 73,
+            "opencode_snapshots_on_disk": 16,
+            "storybook_static": 103,
+            "graphify_out_excl_cache": 94
+        },
+        "inventory_deltas_vs_baseline": "ALL EXACT: docs 34->35 and docs_restructure 19->20 (+1 = 18-stage10-final.md); opencode_snapshots_on_disk 15->16 (baseline measured 15 then wrote itself at 14:09; writing THIS snapshot makes 17); every other bucket 0: src 462->462, src_strict 444->444, ts/tsx 437->437, pages 66/48, components 98 (ui 26/pat 35/infra 15/mkt 3/domain 19), layouts 7, app 3, marketing 6, src_infra 61, features 158 (billing 10/posts 7/shop 9), e2e 3, scripts 10, .storybook 4, root_files 24, public 18, visual 73, storybook-static 103, graphify excl cache 94.",
+        "methodology_caveat_src_filter": "src unfiltered = 462 (= baseline). A cache-segment-excluding filter yields 460 because 2 PRE-EXISTING nested files (src/pages/graphify-out/cache/stat-index.json, src/pages/marketing/graphify-out/cache/stat-index.json, mtimes 2026-08-25) match the exclusion; they predate the baseline so src is unchanged either way. Baseline's src=462 was counted without dropping them - replicated here.",
+        "key_files": [
+            "docs/restructure/18-stage10-final.md",
+            "docs/restructure/debts.md",
+            "graphify-out/graph.json",
+            "graphify-out/GRAPH_REPORT.md",
+            ".opencode/snapshots/after-20261003_140553.json"
+        ]
+    },
+    "stage10_artifacts_on_disk": {
+        "final_evidence_doc": {
+            "pass": "PASS - docs/restructure/18-stage10-final.md NEW untracked, 3642 B, mtime 14:14:44 (the ONLY non-graphify file written after baseline): status concluida + HEAD 383c29c + 'nada commitado por esta entrega'; section 1 final gate table (verify:delivery OK, typecheck 0, lint 9/591, vitest 286/286 68 arq, test:contract 6/6, contract:check strict OK 473/554 0 pendencias, storybook 73/73 21 arq, visual 73/73 0 atualizados, build 88 precache/2654.41 KiB vs baseline00 82/2579.63, docs:check OK, audit:frontend-structure exit 0, graphify update), section 2 scope table Etapas 0..10 + settlement pending sanction, section 3 open debts recap (D-001..D-016), section 4 user pendencies (git push FE+backend, settlement sanction 25 mortos, Render env)"
+        },
+        "graphify_update": {
+            "pass": "PASS - graphify-out/ regenerated 14:15:25-27 (immediately after doc18): 5 tracked files' numstats changed by exactly -84 ins / -184 del vs the Stage-9 state; graph.json .nodes.Count = 2782 (baseline 2776, +6), GRAPH_REPORT '2782 nodes / 6194 edges / 179 communities'; root graphify-out excl cache stays 94 files; graphify-out/cache 111 files (gitignored, stat-index.json 14:15:27)"
+        },
+        "source_code_untouched": {
+            "pass": "PASS - full recursive mtime sweep of ALL files (excluding node_modules/.git/dist/.opencode/.mimocode/graphify-out cache) with mtime > 14:05:53 returns EXACTLY 7 entries: docs/restructure/18-stage10-final.md (14:14:44) + 6 graphify-out outputs (14:15:25-27: graph.json, .graphify_labels.json, .graphify_root, GRAPH_REPORT.md, manifest.json, graph.html). src/: 0 of 462 files touched. No test/lockfile/config/CSS changes. visual-regression PNGs: 73, newest 2026-10-01 19:12 (untouched)."
+        },
+        "no_commit_no_stage": {
+            "pass": "PASS - git log -1 still 383c29c; git diff --cached --name-only empty; git status shows 0 staged both ends. Snapshot agent ran only read-only git commands."
+        }
+    },
+    "graphify": {
+        "graph_exists": true,
+        "graph_json": "graphify-out/graph.json",
+        "graph_modified_in_this_task": true,
+        "graph_node_count": 2782,
+        "graph_edge_count": 6194,
+        "graph_communities": 179,
+        "graph_modify_status": "graphify-out/ regenerated at 14:15 during stage 10 - current numstats vs HEAD 383c29c: graph.json 59125/40325, manifest.json 1899/799, GRAPH_REPORT.md 394/242, .graphify_labels.json 38/4, graph.html 4/4 = 61460/41374 (baseline 61544/41558, delta -84/-184); root graphify-out excl cache unchanged at 94 files; nodes 2776 -> 2782 (+6), edges 6189 -> 6194 (+5), communities 182 -> 179 (-3)",
+        "docs_node_mismatch_flag": "doc18 gate table records 'graphify update . - (2776 nos)' but the final on-disk graph has 2782 nodes: doc18 was written 14:14:44 and the last graphify update ran 14:15:25-27 (after the doc), so the doc transcribes the Stage-9-era figure (2776) while the post-doc regeneration produced 2782. Minor documentation lag, attributed to the required AGENTS.md post-change graphify update running after the doc write - NOT source drift."
+    },
+    "comparison": {
+        "note": "Compared against the Stage-9 AFTER snapshot (.opencode/snapshots/after-20261003_140553.json) explicitly specified by the task. HEAD is IDENTICAL at both ends (383c29c) and nothing is staged at either end - a clean working-tree-vs-working-tree comparison. Snapshot agent committed/staged NOTHING.",
+        "before": {
+            "source": ".opencode/snapshots/after-20261003_140553.json",
+            "head_commit": "383c29c feat: add internal team profile selection",
+            "files_tracked": 572,
+            "uncommitted_files": 93,
+            "modified": 36,
+            "deleted": 18,
+            "staged": 0,
+            "untracked_entries": 39,
+            "untracked_expanded": 133,
+            "lines_added": 62833,
+            "lines_removed": 48356,
+            "diff_files": 54,
+            "graphify_numstats": "61544/41558",
+            "non_graphify_numstats": "1289/6798",
+            "inventory_total": 844,
+            "inventory_src": 462,
+            "inventory_src_strict": 444,
+            "src_ts_tsx": 437,
+            "src_pages": 66,
+            "src_pages_real": 48,
+            "src_app": 3,
+            "src_components_total": 98,
+            "src_components_infra": 15,
+            "src_infra": 61,
+            "features_total": 158,
+            "visual_snapshots": 73,
+            "docs_total": 34,
+            "docs_restructure": 19,
+            "scripts": 10,
+            "storybook_static": 103,
+            "opencode_snapshots": 15,
+            "graphify_nodes": 2776,
+            "graphify_edges": 6189,
+            "graphify_communities": 182
+        },
+        "after": {
+            "head_commit": "383c29c feat: add internal team profile selection (UNCHANGED)",
+            "files_tracked": 572,
+            "uncommitted_files": 95,
+            "modified": 36,
+            "deleted": 18,
+            "staged": 0,
+            "untracked_entries": 41,
+            "untracked_expanded": 135,
+            "lines_added_vs_head": 62749,
+            "lines_removed_vs_head": 48172,
+            "diff_files_vs_head": 54,
+            "graphify_numstats": "61460/41374",
+            "non_graphify_numstats": "1289/6798 (IDENTICAL to baseline)",
+            "inventory_total": 845,
+            "inventory_src": 462,
+            "inventory_src_strict": 444,
+            "src_ts_tsx": 437,
+            "src_pages": 66,
+            "src_pages_real": 48,
+            "src_app": 3,
+            "src_components_total": 98,
+            "src_components_infra": 15,
+            "src_infra": 61,
+            "features_total": 158,
+            "visual_snapshots": 73,
+            "docs_total": 35,
+            "docs_restructure": 20,
+            "scripts": 10,
+            "storybook_static": 103,
+            "opencode_snapshots": 16,
+            "graphify_nodes": 2782,
+            "graphify_edges": 6194,
+            "graphify_communities": 179
+        },
+        "delta": {
+            "head_commits": "0 - HEAD identical (383c29c) at baseline and now; no external commits/rebase during this stage",
+            "files_tracked": "0 (572 -> 572 - nothing committed)",
+            "uncommitted_files": "+2 status lines (93 -> 95: +0 modified, +0 deleted, +2 untracked entries)",
+            "modified": "0 (36 -> 36 - NO source or doc file newly modified)",
+            "deleted": "0 (18 -> 18 - no new deletions)",
+            "staged": "0 -> 0 (nothing staged at either end)",
+            "untracked_entries": "+2 (39 -> 41: .opencode/snapshots/after-20261003_140553.json [the baseline itself, written 14:09] + docs/restructure/18-stage10-final.md [stage 10])",
+            "untracked_expanded": "+2 (133 -> 135: same 2 files; NO new parallel/social file appeared this stage)",
+            "lines_added": "-84 (62833 -> 62749) = graphify regeneration ONLY - EXACT",
+            "lines_removed": "-184 (48356 -> 48172) = graphify regeneration ONLY - EXACT",
+            "diff_files": "0 (54 -> 54)",
+            "non_graphify_lines": "0 (1289/6798 both ends - byte-identical -> ZERO source changes)",
+            "inventory_total": "+1 (844 -> 845: doc18) - EXACT",
+            "inventory_src": "0 (462 -> 462)",
+            "inventory_src_strict": "0 (444 -> 444)",
+            "src_ts_tsx": "0 (437 -> 437)",
+            "src_pages": "0 (66 -> 66, real pages 48 -> 48)",
+            "src_app": "0 (3 -> 3)",
+            "src_components_total": "0 (98 -> 98) / infra 0 (15 -> 15)",
+            "src_infra": "0 (61 -> 61)",
+            "features_total": "0 (158 -> 158)",
+            "visual_snapshots": "0 (73 -> 73, newest PNG mtime 2026-10-01 19:12 - no snapshot updated)",
+            "docs_total": "+1 (34 -> 35) / docs_restructure +1 (19 -> 20): 18-stage10-final.md",
+            "scripts": "0 (10 -> 10)",
+            "storybook_static": "0 (103 -> 103, gitignored; rebuilt during gates)",
+            "opencode_snapshots": "+1 measured (15 -> 16; writing this snapshot makes 17)",
+            "graphify_nodes": "+6 (2776 -> 2782)",
+            "graphify_edges": "+5 (6189 -> 6194)",
+            "graphify_communities": "-3 (182 -> 179)",
+            "graphify_out": "0 files (94 -> 94) but CONTENT regenerated (-84/-184)"
+        },
+        "added_since_stage9": {
+            "stage10_created_files": [
+                "docs/restructure/18-stage10-final.md (final evidence doc, 14:14:44)"
+            ],
+            "total_stage10_created": 1,
+            "other": [
+                ".opencode/snapshots/after-20261003_140553.json (the baseline, written 14:09:16 by the previous snapshot)"
+            ]
+        },
+        "modified_since_stage9": {
+            "stage_10_attributable_uncommitted": [
+                "graphify-out/graph.json 59125/40325 (-72/-188 vs stage9, mtime 14:15:25)",
+                "graphify-out/.graphify_labels.json 38/4 (-2/+1, 14:15:26)",
+                "graphify-out/GRAPH_REPORT.md 394/242 (-20/+3, 14:15:26)",
+                "graphify-out/manifest.json 1899/799 (+10/0, 14:15:26)",
+                "graphify-out/graph.html 4/4 (0/0 content-identical, 14:15:27)"
+            ],
+            "newly_deleted_stage10_0": "NONE"
+        },
+        "deleted_since_stage9": "0 files - Stage-9's 3 deletions and the 15 MasterAdmin rename deletions carry over unchanged (18 D total)",
+        "external_work_attribution": {
+            "statement": "NO external-session file changed during this stage. Every candidate named in the task - PublicProductCarousel(.test), BarbershopContext, ShopProfile, PostEditor, PostPreviewBox, PublicHome, types.ts, infra posts/barbershop/clientPortal APIs, DOMAIN_MAP.md, App.tsx, all Stage-9 trims (statusLabels/dateRanges/handlers/AccessBlockedListener/AuthContext/AccessBlockedPage/CheckoutPage) and docs (STRUCTURE/debts/02-map/03-migration-matrix/check-api-contract) - has a byte-identical numstat vs HEAD compared with the Stage-9 snapshot AND an mtime predating the baseline (14:05:53). Verified two ways: (1) non-graphify numstat totals identical (1289/6798 both ends), (2) a full recursive mtime sweep of every file under the standard exclusions found only 7 post-baseline writes (doc18 + 6 graphify outputs) - src/ shows 0 of 462.",
+            "evidence": "HEAD did not move (383c29c both ends), 0 staged both ends, non-graphify numstats identical, all non-graphify mtimes pre-baseline.",
+            "unattributed_new_work": "NONE - zero external-session changes detected in this window."
+        },
+        "carryover_external_set_not_touched_now": [
+            "src/features/posts/PostEditor.tsx 451/204 + PostEditor.test.tsx, TemplateThumbnail.tsx (parallel posts/social work, pre-baseline)",
+            "src/features/shop/ShopProfile.tsx 574/497 + PostDetail/PostTagEditor/ProfileSections/StoryModal/useSalonSocial/ShopProfile.test (pre-baseline)",
+            "src/components/domain/PublicProductCarousel.tsx 3/1 + test 7/0 (pre-baseline)",
+            "src/contexts/BarbershopContext.tsx 2/0, src/infra/barbershopApi.ts 3/1, clientPortalApi 2/2, postsApi 12/5 (pre-baseline)",
+            "src/pages/PublicHome.tsx 2/5, src/types.ts 1/0, docs/agents/DOMAIN_MAP.md 1/1 (pre-baseline)",
+            "docs/restructure/02-map.md 1/1 + 03-migration-matrix.md 6/2 (settlement session, pre-baseline)",
+            "src/app/App.tsx 14/12, docs/agents/STRUCTURE.md 9/2, docs/restructure/debts.md 9/2 (Stage 9, pre-baseline)",
+            "scripts/check-api-contract.mjs 107/24 + test 34/0 (Stage 8, pre-baseline)",
+            "Stage-9 trims/deletions: statusLabels 0/43, dateRanges 0/12, handlers 2/1, AccessBlockedListener 1/2, AuthContext 3/2, AccessBlockedPage 1/1, CheckoutPage 4/3, lazyPanel 0/89, walletApi 0/68, server 0/12 (all pre-baseline)"
+        ],
+        "unchanged_since_stage9": [
+            "branch (main)",
+            "HEAD (383c29c)",
+            "staged changes (none - snapshot agent committed/staged nothing)",
+            "tracked file count (572)",
+            "modified count (36) and deleted count (18)",
+            "src/index.css (NOT in git status - D-002 revert intact)",
+            "visual-regression PNG count (73, newest 2026-10-01 19:12)",
+            "storybook-static file count (103)",
+            "src/components ui (26) / patterns (35) / marketing (3) / domain (19, still flat)",
+            "src/layouts (7), src/marketing (6), root_files (24), e2e (3), .storybook (4), public (18), graphify-out excl cache (94)",
+            "src real pages (48), src/pages (66), features_total (158) and all feature subdir counts",
+            "stories count (21), scripts (10)"
+        ]
+    },
+    "unexpected_changes": {
+        "verdict": "NONE - every post-baseline change is attributable to the Stage-10 task list (new doc18 + mandatory graphify update) or to the baseline snapshot file itself. No external-session source file or new external file appeared in this window.",
+        "external_source_files_checked": "PublicProductCarousel.tsx 3/1 (+test 7/0), BarbershopContext.tsx 2/0, ShopProfile.tsx 574/497, PostEditor.tsx 451/204, PostPreviewBox.tsx 17/5, PublicHome.tsx 2/5, types.ts 1/0, infra postsApi 12/5 / barbershopApi 3/1 / clientPortalApi 2/2, DOMAIN_MAP.md 1/1, App.tsx 14/12, STRUCTURE.md 9/2, debts.md 9/2, Stage-9 trims 0/43, 0/12, 2/1, 1/2, 3/2, 1/1, 4/3 - ALL byte-identical to baseline numstats, ALL mtimes <= 2026-10-03 14:05. UNCHANGED during Stage 10.",
+        "unattributed_set": [
+            "graphify-out/.graphify_root mtime touched 14:15:26 by the same regeneration (content-identical, not in git status) - attributed to the Stage-10 graphify update, not itemized separately",
+            "doc18 gate table says 'graphify update . (2776 nos)' while the final graph holds 2782 nodes - the regeneration ran 41 s AFTER the doc was written (14:14:44 doc, 14:15:25+ graph), so the doc transcribes the pre-run figure. Flagged as documentation lag inside Stage 10, NOT external work.",
+            "doc18 build row cites '88 precache / 2654,41 KiB' (baseline 00 = 82/2579,63) - transcribed from the Stage-9 gate (doc17: 88/2654.41), not re-run here; consistent with no source/CSS changes this stage."
+        ],
+        "no_new_parallel_files": "The untracked parallel/social set grew by 0 files this stage (expanded untracked 133 -> 135 = baseline + baseline snapshot itself + doc18); all parallel untracked files (socialApi, shop/posts components, master-admin/, billing/) still carry 2026-10-02 mtimes."
+    },
+    "structural_expectations": {
+        "no_new_commits_by_this_session": "PASS - snapshot agent ran only read-only git commands (status/log/diff/numstat/name-only/rev-parse/ls-files); git diff --cached --name-only empty (0 staged). 'Do NOT commit anything' honored.",
+        "final_evidence_doc_present": "PASS - docs/restructure/18-stage10-final.md on disk (3642 B, 56 lines, status concluida, gate table green, scope table Etapas 0..10, debts recap, user pendencies)",
+        "no_source_code_changed": "PASS - 0 of 462 src files have mtime > baseline; non-graphify numstats byte-identical (1289/6798); M 36 -> 36, D 18 -> 18; src/index.css still absent from git status; visual PNGs 73 untouched (newest 2026-10-01 19:12)",
+        "graphify_updated": "PASS - graphify-out regenerated 14:15 (post-doc18, AGENTS.md rule): 2782 nodes (+6), 6194 edges (+5), 179 communities (-3); tracked graphify numstats -84/-184 EXACTLY the total delta",
+        "head_still_383c29c": "PASS - git log -1 = 383c29c feat: add internal team profile selection at baseline and now; 0 staged both ends",
+        "nothing_new_outside_stage10_scope": "PASS - post-baseline writes total 7 files: doc18 + 5 tracked graphify outputs (+ .graphify_root touch) + the baseline snapshot itself (untracked, 14:09). Nothing else on disk moved.",
+        "gates_green_from_doc18": "PASS (transcribed) - verify:delivery OK (docs:check -> typecheck -> test:contract -> contract:check -> vitest), typecheck 0, lint 9 err/591 warn (teto 11/593), vitest 286/286 (68 arq), test:contract 6/6, contract:check strict OK 473/554 0 pendencias, storybook 73/73 (21 arq), visual 73/73 (0 atualizados), build 88 precache/2654.41 KiB, docs:check OK, audit:frontend-structure exit 0 (67 arq > limiar, 10 inline-intl, 3 direct-fetch pre-existentes)"
+    },
+    "notes": [
+        "status_lines (95) = 36 modified + 18 deleted + 41 untracked entries from `git status --porcelain` (directories collapsed: src/features/billing/, src/pages/master-admin/, visual-regression/ count once each). Expanded (-uall) = 189 lines = 54 tracked + 135 untracked files. Measured before this snapshot file was written, so writing it adds +1 snapshot json AFTER measurement (opencode_snapshots 16 -> 17).",
+        "Clean comparison again: HEAD (383c29c), tracked count (572), M (36), D (18) and staged set (empty) are IDENTICAL at baseline and now. Line deltas close EXACTLY: -84 ins / -184 del = the graphify-out regeneration alone; non-graphify totals 1289/6798 are byte-identical both ends -> provable zero source change.",
+        "Attribution hinge: a full recursive mtime sweep of every file under the standard exclusions against the 14:05:53 baseline isolates exactly 7 post-baseline writes - docs/restructure/18-stage10-final.md (14:14:44) and graphify-out/{graph.json 14:15:25, .graphify_labels.json/GRAPH_REPORT.md/manifest.json 14:15:26, graph.html 14:15:27, .graphify_root 14:15:26 content-identical} - plus 2 post-baseline untracked entries (baseline snapshot 14:09:16 + doc18). src/: 0 of 462 touched. Everything else in the working tree is pre-baseline state carried over untouched.",
+        "The 5 tracked graphify files' per-file numstats changed by -84 ins / -184 del in aggregate; the individual signs vary (graph.json -72/-188, manifest +10/0, GRAPH_REPORT -20/+3, labels -2/+1, graph.html 0/0) because the graph was re-extracted with doc18 added (+6 nodes incl. the new doc, +5 edges, communities reshuffled 182 -> 179).",
+        "Gate numbers are transcribed from docs/restructure/18-stage10-final.md section 1, not re-executed during this snapshot (same policy as stages 5a..9). Independent corroboration on disk: 0 of 73 visual PNGs touched after 2026-10-01 19:12, index.css absent from git status, src/ mtime sweep clean, graphify regenerated 14:15 with 2782 nodes.",
+        "Visual snapshots were NOT updated (requirement): newest PNG mtime is 2026-10-01 19:12.",
+        "Only two deviations flagged (both inside Stage 10, none external): (1) doc18's graphify row says 2776 nodes but the final graph holds 2782 - the required regeneration ran 41 s after the doc write; (2) doc18's build/audit rows transcribe Stage-9-era gate outputs rather than re-running them here - consistent with the no-source-change finding.",
+        "Schema replicates after-20261003_140553.json (status_lines, log, ts, timestamp, repository, task, stage, baseline, git, file_inventory, stage10_artifacts_on_disk [renamed from stage9_artifacts_on_disk], graphify, comparison, unexpected_changes, structural_expectations, notes)."
+    ]
+}

@@ -78,7 +78,7 @@ export const SystemStatePage: React.FC<SystemStatePageProps> = ({
     <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center px-5 py-5 sm:px-8">
       <a
         href="/"
-        aria-label="Ir para a página inicial da Agenda Já"
+        aria-label="Ir para a página inicial do Agende Já"
         className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
       >
         <Logo size="md" />

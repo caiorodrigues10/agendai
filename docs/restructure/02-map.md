@@ -21,7 +21,7 @@ Data: 2026-09-28 · Fonte: `src/App.tsx` (54 `<Route>`), `src/index.tsx`, `src/i
 | `/checkout` | CheckoutPage | nenhum | sim | `PrivateRoute [OWNER, MASTER_ADMIN]` | — |
 | `/master` (pai) | **AdminLayout** (`domain/admin/AdminLayout.tsx`) | sidebar + `<Outlet/>` | sim | `PrivateRoute [MASTER_ADMIN]` | único layout aninhado |
 | `/master` index, `/master/dashboard` | `<Navigate to="/master/work">` | — | — | — | redirect |
-| `/master/{work,tickets,tickets/new,tickets/:id,tasks,tasks/new,tasks/:id,team,accounts,operations,audit,billing,referrals,crm}` | `pages/MasterAdmin/*Page.tsx` (13) | AdminLayout | sim | MASTER_ADMIN (herdado) | Billing/Referrals/Crm são wrappers finos de `BillingTab` (80KB) / ReferralsTab / CrmBackfillPanel |
+| `/master/{work,tickets,tickets/new,tickets/:id,tasks,tasks/new,tasks/:id,team,accounts,operations,audit,billing,referrals,crm}` | `pages/master-admin/*Page.tsx` (13) | AdminLayout | sim | MASTER_ADMIN (herdado) | Billing/Referrals/Crm são wrappers finos de `BillingTab` (80KB) / ReferralsTab / CrmBackfillPanel |
 | `/app` | `<Navigate to="/app/overview">` | — | — | — | redirect |
 | `/app/account` | `<Navigate to="/app/settings">` | — | — | — | redirect |
 | `/app/:tab` | StaffDashboard (714L) | Header (topo) + StaffNavigation (base) — compostos **dentro** da página, não como Route layout | sim | `PrivateRoute [OWNER, EMPLOYEE, MASTER_ADMIN]` | **1 rota para as 23 tabs**; resolução via `config/tabRegistry.ts` |

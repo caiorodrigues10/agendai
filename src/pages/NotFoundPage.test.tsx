@@ -49,7 +49,7 @@ describe('NotFoundPage', () => {
     expect(screen.getByTestId('location')).toHaveTextContent('/endereco-que-nao-existe');
     expect(screen.getByRole('link', { name: /voltar ao início/i })).toHaveAttribute('href', '/');
     expect(screen.getByRole('link', { name: 'Entrar' })).toHaveAttribute('href', '/login');
-    expect(document.title).toBe('Página não encontrada | Agenda Já');
+    expect(document.title).toBe('Página não encontrada | Agende Já');
     expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute(
       'content',
       'noindex, nofollow'
@@ -67,12 +67,12 @@ describe('NotFoundPage', () => {
   });
 
   it('restaura os metadados ao sair da página', () => {
-    document.title = 'Agenda Já';
+    document.title = 'Agende Já';
     const { unmount } = renderUnknownRoute();
 
     unmount();
 
-    expect(document.title).toBe('Agenda Já');
+    expect(document.title).toBe('Agende Já');
     expect(document.head.querySelector('meta[name="robots"]')).not.toBeInTheDocument();
   });
 });

@@ -1,0 +1,390 @@
+{
+    "status_lines": 193,
+    "log": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+    "ts": "2026-10-01T22:39:30-03:00",
+    "timestamp": "2026-10-01T22:39:30-03:00",
+    "repository": "D:\\Programação\\agendai\\agendai",
+    "task": "React frontend restructure - Stage 6b: Catálogo/produtos §5.3 (moved 14 files from src/components/domain/: CatalogManager, ServiceManager, ServiceForm, PackageCatalog into src/features/catalog/ with barrel extended to 5 exports; ProductsHub, CatalogTemplateModal, ProductCatalogPanel, ProductFormModal, ProductReportsPanel, ProductSalesPanel, ProductStockPanel, RefundSaleModal, productMoney, productStock into new src/features/products/ with barrel (8 exports: productMoney/productStock deliberately not exported); depth fix - all ../../ui/ and ../../../ imports rewritten to ../../components/ui/ with 0 remaining; consumers updated - RetailCheckoutBlock './products/productMoney' -> '../../features/products/productMoney', StaffDashboard barrel imports (L7/L19 features/catalog, L39 features/products), ServiceManager sibling './CategoryManager'; CatalogManager adopted patterns: Field+FIELD_CONTROL (10 inputs), Tabs (L195, 3 tabpanels with aria-labelledby), ModalShell (L315, footer L490 with Salvar/Criar + Cancelar), 3 dead icon imports removed (Pencil, GripVertical, X - now 0 matches); created docs/restructure/11-stage6b-catalog-products.md (Status concluída + migration table + gate table); updated docs/agents/STRUCTURE.md catalog/products entries. NO visual/story changes in this stage - visual-regression still exactly 73 PNGs (0 touched since 5b AND 6a baselines), 0 *.stories.tsx touched; storybook-static (103 files, gitignored) rebuilt during gate rerun but count unchanged)",
+    "stage": "Stage 5 of restructuring (5b finance + §5.1 COMPLETE; 6a clients/CRM/shop §5.2 COMPLETE; 6b catálogo/produtos §5.3 COMPLETE; §5.4 conta/settings remains)",
+    "baseline": {
+        "captured": true,
+        "note": "Comparison baseline is the Etapa-6a AFTER snapshot specified by the task.",
+        "baseline_snapshot": ".opencode/snapshots/after-20261001_214356.json",
+        "baseline_snapshot_ts": "2026-10-01T21:43:56-03:00",
+        "baseline_snapshot_status_lines": 177,
+        "baseline_snapshot_log": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+        "baseline_is_same_head_as_current": true,
+        "commits_since_baseline_snapshot": [],
+        "baseline_task": "Stage 5 of restructuring (5b finance + §5.1 COMPLETE; 6a clients/CRM/shop §5.2 COMPLETE; §5.3 catálogo/produtos and §5.4 conta/settings remain)",
+        "baseline_measured_before_itself_was_written": true
+    },
+    "git": {
+        "branch": "main",
+        "head_commit": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+        "head_short": "4d74145",
+        "is_git_repo": true,
+        "tracked_files_count": 470,
+        "status_line_count": 193,
+        "status_counts": {
+            "modified": 53,
+            "deleted": 88,
+            "untracked_lines": 52,
+            "untracked_files_expanded": 241
+        },
+        "staged_changes": "none (git diff --cached empty; no commits made - working tree only on top of HEAD 4d74145)",
+        "diff_stat": "141 files changed, 64437 insertions(+), 66299 deletions(-)",
+        "insertions": 64437,
+        "deletions": 66299,
+        "diff_files_count": 141,
+        "status_transitions_since_baseline": {
+            "newly_deleted_clean_to_deleted_exactly_14_moved": [
+                "src/components/domain/CatalogManager.tsx (533 lines HEAD content, numstat 0/533)",
+                "src/components/domain/ServiceManager.tsx (136)",
+                "src/components/domain/ServiceForm.tsx (147)",
+                "src/components/domain/PackageCatalog.tsx (259)",
+                "src/components/domain/ProductsHub.tsx (110)",
+                "src/components/domain/CatalogTemplateModal.tsx (108)",
+                "src/components/domain/ProductCatalogPanel.tsx (270)",
+                "src/components/domain/ProductFormModal.tsx (524)",
+                "src/components/domain/ProductReportsPanel.tsx (198)",
+                "src/components/domain/ProductSalesPanel.tsx (148)",
+                "src/components/domain/ProductStockPanel.tsx (316)",
+                "src/components/domain/RefundSaleModal.tsx (179)",
+                "src/components/domain/productMoney.ts (37)",
+                "src/components/domain/productStock.ts (60)"
+            ],
+            "reconciliations": {
+                "status_lines": "177 + 14 (moved files clean->deleted) + 2 (untracked entries: features/products/ dir, 6a baseline snapshot json) + 0 (modified net 0) = 193 EXACT",
+                "modified": "53 -> 53 (net 0). +1 RetailCheckoutBlock (its diff vs HEAD is exactly 1/1 - the stage's productMoney import rewrite - proving it was clean at baseline). Net 0 therefore implies one baseline-modified file left the M set - unprovable from stored aggregates (no snapshot stored a per-file status list); candidates: (a) one of the 14 moved files was content-modified at baseline on lines the stage subsequently rewrote (the import/path lines - its full-content deletion renders identically in numstat and the features copy diff shows only stage edits); (b) RetailCheckoutBlock had baseline dirt on line 7 (same line the stage rewrote). graphify .graphify_root ruled out: 5 graphify files were M at baseline (6a notes) and the same 5 are M now, root clean in both.",
+                "deleted": "74 + 14 (exactly the 14 moved domain components) = 88 EXACT",
+                "diff_files": "127 + 14 = 141 EXACT (141 = 53 modified + 88 deleted; the M-set swap leaves the modified subtotal unchanged)",
+                "untracked_entries": "50 + 1 (new collapsed dir: src/features/products/) + 1 (the 6a baseline snapshot json, written after baseline measured) = 52 EXACT",
+                "untracked_expanded": "224 + 4 (moved files now inside the already-untracked features/catalog) + 11 (features/products: 10 moved files + 1 new barrel index.ts) + 1 (docs/restructure/11-stage6b-catalog-products.md) + 1 (6a baseline snapshot json) = 241 EXACT"
+            },
+            "files_touched_since_baseline_timestamp": [
+                "src/features/catalog/ 4 moved files + src/features/products/ 10 moved files (content moved)",
+                "src/features/catalog/index.ts (barrel extended to 5 exports), src/features/products/index.ts (NEW barrel, 8 exports)",
+                "src/components/domain/RetailCheckoutBlock.tsx (21:48:12 - ../../features/products/productMoney import)",
+                "src/pages/StaffDashboard.tsx (barrel imports L7/L19/L39)",
+                "docs/restructure/11-stage6b-catalog-products.md (NEW), docs/agents/STRUCTURE.md (catalog/products tree lines 38-39)",
+                "storybook-static/ 68 files 21:59-22:00 (gate rerun build-storybook; gitignored per .gitignore, count unchanged 103, no git impact)",
+                "graphify-out/ regenerated 22:01 (graphify update . per AGENTS.md after-major-changes rule; 9 files incl. 2 cache ast)",
+                "the 6a baseline snapshot json itself (written after its own measurement)",
+                "NOTE: mtime scan of ALL files (excluding node_modules/.git/dist/graphify-out/cache) after 2026-10-01 21:43:56 found exactly 98 files - every one attributable to this stage (14 moved + RCB + StaffDashboard + 2 barrels + docs11 + STRUCTURE.md), the baseline snapshot write, storybook-static rebuild (68), or graphify regeneration (9). NO visual-regression PNG and NO *.stories.tsx file was touched. NO parallel-work file was touched inside the baseline->after window."
+            ]
+        }
+    },
+    "file_inventory": {
+        "total_excluding_node_modules_git_dist_opencode_mimocode_graphify_cache": 774,
+        "methodology_note": "Same stated exclusions as baseline (node_modules, .git, dist, .opencode, .mimocode, graphify-out/cache). Baseline 772 -> 774 (+2) reconciles EXACTLY as: +1 src (new barrel features/products/index.ts; 14 moves are net-zero relocations) + 1 docs/restructure/11-stage6b-catalog-products.md. Visual PNGs (73), storybook-static (103) and all other trees unchanged. Counting quirk resolved: the 2 nested graphify cache files (src/pages/graphify-out/cache/stat-index.json, src/pages/marketing/graphify-out/cache/stat-index.json) are excluded from inventory but included in the raw 'src' key, matching baseline's dual src/src_excl keys.",
+        "node_modules_present": true,
+        "counts_by_directory": {
+            "src": 413,
+            "src_excl_nested_graphify_caches": 411,
+            "src_strict_excl_nested_graphify_caches": 411,
+            "src_ts_tsx": 388,
+            "src_pages": 63,
+            "src_components_ui": 26,
+            "src_components_patterns": 35,
+            "src_components_infra": 14,
+            "src_components_domain_total": 51,
+            "src_components_domain_top_level": 47,
+            "src_layouts": 7,
+            "src_features_total": 84,
+            "src_features_appointments": 8,
+            "src_features_catalog": 7,
+            "src_features_clients": 6,
+            "src_features_crm": 6,
+            "src_features_deposits": 2,
+            "src_features_equipment": 2,
+            "src_features_finance": 14,
+            "src_features_goals": 2,
+            "src_features_loyalty": 2,
+            "src_features_onboarding": 3,
+            "src_features_products": 11,
+            "src_features_queue": 12,
+            "src_features_recommendations": 2,
+            "src_features_recurring": 2,
+            "src_features_shop": 3,
+            "src_features_waitlist": 2,
+            "src_app": 2,
+            "docs": 27,
+            "docs_restructure": 13,
+            ".storybook": 4,
+            "scripts": 9,
+            "visual_regression": 73,
+            "opencode_snapshots": 10,
+            "storybook_static": 103,
+            "graphify_out_excl_cache": 90
+        },
+        "key_files": [
+            "package.json",
+            "tsconfig.json",
+            "vite.config.ts",
+            "vitest.config.ts",
+            "eslint.config.js",
+            "docs/restructure/11-stage6b-catalog-products.md",
+            "docs/restructure/10-stage6a-clients-crm.md",
+            "docs/restructure/debts.md",
+            "docs/agents/STRUCTURE.md",
+            "src/features/catalog/index.ts",
+            "src/features/products/index.ts"
+        ]
+    },
+    "stage6b_artifacts_on_disk": {
+        "moved_components_verification": {
+            "all_14_absent_from_domain": {
+                "CatalogManager.tsx": true,
+                "ServiceManager.tsx": true,
+                "ServiceForm.tsx": true,
+                "PackageCatalog.tsx": true,
+                "ProductsHub.tsx": true,
+                "CatalogTemplateModal.tsx": true,
+                "ProductCatalogPanel.tsx": true,
+                "ProductFormModal.tsx": true,
+                "ProductReportsPanel.tsx": true,
+                "ProductSalesPanel.tsx": true,
+                "ProductStockPanel.tsx": true,
+                "RefundSaleModal.tsx": true,
+                "productMoney.ts": true,
+                "productStock.ts": true
+            },
+            "all_14_present_exactly_once_in_features": {
+                "src/features/catalog/CatalogManager.tsx": true,
+                "src/features/catalog/ServiceManager.tsx": true,
+                "src/features/catalog/ServiceForm.tsx": true,
+                "src/features/catalog/PackageCatalog.tsx": true,
+                "src/features/products/ProductsHub.tsx": true,
+                "src/features/products/CatalogTemplateModal.tsx": true,
+                "src/features/products/ProductCatalogPanel.tsx": true,
+                "src/features/products/ProductFormModal.tsx": true,
+                "src/features/products/ProductReportsPanel.tsx": true,
+                "src/features/products/ProductSalesPanel.tsx": true,
+                "src/features/products/ProductStockPanel.tsx": true,
+                "src/features/products/RefundSaleModal.tsx": true,
+                "src/features/products/productMoney.ts": true,
+                "src/features/products/productStock.ts": true
+            },
+            "method": "Recursive search for each of the 14 names under src/components/domain (0 hits) and under src/features (exactly 1 hit each). domain top-level files 52 -> 47 (exactly -5: the 5 moved top-level .tsx); domain recursive total 65 -> 51 (exactly -14). domain subdirectories now = only 'support' (src/components/domain/products/ REMOVED - its 9 files + productMoney + productStock all gone)."
+        },
+        "barrels": {
+            "src/features/catalog/index.ts": "EXTENDED - exactly 5 exports: CategoryManager, CatalogManager, ServiceManager, ServiceForm, PackageCatalog",
+            "src/features/products/index.ts": "NEW - exactly 8 exports: ProductsHub, ProductCatalogPanel, ProductFormModal, ProductStockPanel, ProductSalesPanel, ProductReportsPanel, RefundSaleModal, CatalogTemplateModal (productMoney and productStock deliberately NOT exported - helpers imported directly by allowed consumers)",
+            "counts_verified": "catalog=5 PASS, products=8 PASS (grep '^export' on both barrels)"
+        },
+        "consumers_updated": {
+            "src/components/domain/RetailCheckoutBlock.tsx": "L7 import { productMoney } from '../../features/products/productMoney' (was './products/productMoney'); numstat 1/1 - the ONLY content change vs HEAD, proving it was clean at baseline",
+            "src/pages/StaffDashboard.tsx": "L7 import { ServiceManager } from '../features/catalog', L19 import { CatalogManager } from '../features/catalog', L39 import { ProductsHub } from '../features/products'; JSX renders <ProductsHub> L446, <ServiceManager> L475, <CatalogManager> L481",
+            "src/features/catalog/ServiceManager.tsx": "L3 sibling import './CategoryManager' (kept sibling after the move)",
+            "features/catalog + features/products internals": "sibling imports './X' within each feature dir; UI imports rewritten ../../components/ui/ (was ../../ui/ after first depth fix); 0 occurrences of '../../../' or '../../ui/' in src/features/products (and 0 '../../../' in features/catalog) - depth fix PASS",
+            "docs/agents/STRUCTURE.md": "L38 catalog/ entry (5 components), L39 products/ entry (10 components) in features tree"
+        },
+        "stale_import_scan": {
+            "pattern": "domain/(CatalogManager|ServiceManager|ServiceForm|PackageCatalog|ProductsHub) + components/domain/products + bare ./products/ module imports - a SUPERSET of the requested pattern (adds CatalogTemplateModal/Product*/RefundSaleModal/productMoney/productStock siblings)",
+            "scope": "recursive over src/**/*.{ts,tsx} incl. tests and vi.mock",
+            "hits": 0,
+            "allowed_remaining_products_refs": [
+                "src/components/domain/RetailCheckoutBlock.tsx:7 '../../features/products/productMoney' (the ALLOWED import)",
+                "src/infra/productsApi.ts URL strings '/products/' etc (API paths, not module imports)"
+            ]
+        },
+        "catalogmanager_adoption": {
+            "imports": "L16 { Field, FIELD_CONTROL }, L17 { Tabs }, L18 { ModalShell } from '../../components/patterns/...'",
+            "tabs": "<Tabs at L195 with items; 3 role=tabpanel panels (L209, L242, L272) each with aria-labelledby; Tabs pattern itself provides role=tablist/tab + aria-controls",
+            "modalshell": "ModalShell L315-L524, footer={` at L490 containing Salvar/Criar combo + Cancelar; ModalShell pattern verified to provide createPortal + FocusLock + Escape handling (closeOnEscape default true)",
+            "field": "10 <Field> usages with 10 FIELD_CONTROL assignments = 10 raw inputs (input/select/textarea) all wrapped",
+            "dead_icons_removed": "0 matches for Pencil, GripVertical, X in CatalogManager (icon block now: Plus, Trash2, Loader2, Package, Puzzle, Layers, Tag)",
+            "verification_method": "Select-String on the moved src/features/catalog/CatalogManager.tsx + pattern source files"
+        },
+        "docs": [
+            "docs/restructure/11-stage6b-catalog-products.md (NEW): Status concluída; migration table origem -> destino -> consumidores for all 14 files; depth-fix note; RetailCheckoutBlock/StaffDashboard consumer notes; gate table (tsc 0, eslint 11/587, vitest 224/224 60 arq., test:storybook 73/73 21 arq., test:visual 73/73, build 82/2584.78 KiB); pendências (§5.4 conta/settings, §5.5/§5.6, D-008 stories, D-009)",
+            "docs/agents/STRUCTURE.md (MODIFIED, 31 ins/7 del vs HEAD): L38 catalog/ (CategoryManager(+test), CatalogManager, ServiceManager, ServiceForm, PackageCatalog), L39 products/ (ProductsHub, CatalogTemplateModal, ProductCatalogPanel, ProductFormModal, ProductReportsPanel, ProductSalesPanel, ProductStockPanel, RefundSaleModal, productMoney, productStock)",
+            "docs/restructure/debts.md: NOT touched this stage (mtime predates baseline)"
+        ],
+        "visual_and_story_unchanged": {
+            "visual_png_count": 73,
+            "pngs_modified_after_5b_baseline": 0,
+            "pngs_modified_after_6a_baseline": 0,
+            "stories_touched_after_baseline": 0,
+            "storybook_static_files": 103,
+            "storybook_static_touched_after_baseline": "68 files rewritten 21:59-22:00 during the stage's gate rerun (build-storybook); gitignored (.gitignore contains storybook-static) so NO git status/diff impact; file count unchanged 103",
+            "conclusion": "PASS - exactly 73 PNGs, byte-untouched since 5b (and since the 6a baseline); no story files added or edited; storybook-static count still 103. Consistent with docs11 gate table (test:storybook 73/73, test:visual 73/73 rerun this stage - visual snapshots passed byte-identical, story count 0 changed)"
+        },
+        "stage6b_gate_from_doc": {
+            "tsc_noEmit": "0 errors",
+            "eslint": "11 errors / 587 warnings",
+            "vitest": "224/224 (60 arq.)",
+            "build": "82 chunks / 2584.78 KiB",
+            "storybook_tests": "73/73 (21 arq.)",
+            "visual_tests": "73/73",
+            "method": "Gate numbers transcribed from docs/restructure/11-stage6b-catalog-products.md, not re-executed during this snapshot (same policy as 5a/5b/6a snapshots). Independent corroboration on disk: 0 stories touched, 0 visual PNGs touched, storybook-static rebuilt at gate time."
+        }
+    },
+    "graphify": {
+        "graph_exists": true,
+        "graph_json": "graphify-out/graph.json",
+        "graph_modified_in_this_task": true,
+        "graph_modify_status": "graphify-out/* regenerated 22:01 during stage 6b (per AGENTS.md after-major-changes rule); current numstats vs HEAD: graph.json 49040/39852 (total 88892, was 89082 at 6a baseline = -190), manifest.json 1264/494 (total 1758, was 1603 = +155), GRAPH_REPORT.md 338/216 (total 554, was 568 = -14), .graphify_labels.json 30/3 (total 33, was 31 = +2), graph.html 4/4 (total 8, was 8 = 0); graphify total changed lines 91292 -> 91245 (net -47); still shows as modified vs HEAD (carried over)"
+    },
+    "comparison": {
+        "note": "Compared against the Etapa-6a AFTER snapshot (.opencode/snapshots/after-20261001_214356.json). HEAD unchanged (4d74145) between snapshots; all deltas are working-tree changes. Files with mtime > baseline timestamp (98 total) are exclusively stage-6b work + baseline-snapshot write + storybook-static gate rebuild + graphify regeneration; no parallel-product/test/build file was touched inside the window.",
+        "before": {
+            "source": ".opencode/snapshots/after-20261001_214356.json",
+            "head_commit": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+            "files_tracked": 470,
+            "uncommitted_files": 177,
+            "modified": 53,
+            "deleted": 74,
+            "untracked_entries": 50,
+            "untracked_expanded": 224,
+            "lines_added": 64215,
+            "lines_removed": 63536,
+            "diff_files": 127,
+            "inventory_total": 772,
+            "inventory_src": 412,
+            "inventory_src_strict": 410,
+            "src_ts_tsx": 387,
+            "features_total": 69,
+            "visual_snapshots": 73,
+            "docs_restructure": 12,
+            "docs_total": 26,
+            "storybook_static": 103,
+            "opencode_snapshots": 9,
+            "domain_top_level": 52,
+            "domain_total": 65
+        },
+        "after": {
+            "files_tracked": 470,
+            "uncommitted_files": 193,
+            "modified": 53,
+            "deleted": 88,
+            "untracked_entries": 52,
+            "untracked_expanded": 241,
+            "lines_added": 64437,
+            "lines_removed": 66299,
+            "diff_files": 141,
+            "inventory_total": 774,
+            "inventory_src": 413,
+            "inventory_src_strict": 411,
+            "src_ts_tsx": 388,
+            "features_total": 84,
+            "visual_snapshots": 73,
+            "docs_restructure": 13,
+            "docs_total": 27,
+            "storybook_static": 103,
+            "opencode_snapshots": 10,
+            "domain_top_level": 47,
+            "domain_total": 51
+        },
+        "delta": {
+            "files_tracked": "0 (470 -> 470)",
+            "uncommitted_files": "+16 (177 -> 193 status lines)",
+            "modified": "0 (53 -> 53: +1 RetailCheckoutBlock, -1 unidentified baseline-M file - see git.status_transitions)",
+            "deleted": "+14 (74 -> 88: exactly the 14 moved domain components)",
+            "untracked_entries": "+2 (50 -> 52: features/products/ dir + 6a baseline snapshot json)",
+            "untracked_expanded": "+17 (224 -> 241: 14 moved files + 1 new products barrel + docs11 + baseline snapshot json)",
+            "lines_added": "+222 (64215 -> 64437)",
+            "lines_removed": "+2763 (63536 -> 66299); total changed lines +2985",
+            "diff_files": "+14 (127 -> 141)",
+            "inventory_total": "+2 (772 -> 774)",
+            "inventory_src": "+1 (412 -> 413: 1 new barrel; moves are net-zero)",
+            "inventory_src_strict": "+1 (410 -> 411)",
+            "src_ts_tsx": "+1 (387 -> 388)",
+            "features_total": "+15 (69 -> 84: 14 moved files + 1 new barrel)",
+            "visual_snapshots": "0 (73 -> 73: UNCHANGED as required)",
+            "docs_restructure": "+1 (12 -> 13: 11-stage6b-catalog-products.md)",
+            "docs_total": "+1 (26 -> 27)",
+            "storybook_static": "0 (103 -> 103: rebuilt during gate rerun, count unchanged, gitignored)",
+            "opencode_snapshots": "+1 (9 -> 10; writing this snapshot makes 11 after measurement)",
+            "domain_top_level": "-5 (52 -> 47: exactly the 5 moved top-level components)",
+            "domain_total": "-14 (65 -> 51: exactly the 14 moved files; domain/products/ subdir removed)"
+        },
+        "added_since_stage6a": {
+            "count": "16 stage-created files + 1 baseline snapshot json",
+            "stage_created_files": [
+                "src/features/catalog/ 4 moved files (CatalogManager, ServiceManager, ServiceForm, PackageCatalog) - new members of the already-existing dir (its 3 pre-existing files: CategoryManager, CategoryManager.test, index.ts)",
+                "src/features/products/ 10 moved files (ProductsHub, CatalogTemplateModal, ProductCatalogPanel, ProductFormModal, ProductReportsPanel, ProductSalesPanel, ProductStockPanel, RefundSaleModal, productMoney, productStock) + index.ts (new barrel) = 11",
+                "docs/restructure/11-stage6b-catalog-products.md = 1"
+            ],
+            "total_stage_created": 16,
+            "other": ".opencode/snapshots/after-20261001_214356.json (the baseline snapshot itself, written after baseline measured)"
+        },
+        "modified_since_stage6a": {
+            "stage_attributable_touched_after_baseline": [
+                "src/components/domain/RetailCheckoutBlock.tsx (21:48:12 - ../../features/products/productMoney; diff exactly 1/1)",
+                "src/pages/StaffDashboard.tsx (barrel imports L7/L19 catalog + L39 products)",
+                "docs/agents/STRUCTURE.md (L38-39 catalog/products tree entries)",
+                "src/features/catalog/index.ts (barrel extended to 5 exports; untracked dir)",
+                "graphify-out/ 5 tracked modified files regenerated 22:01 (+2 cache ast)",
+                "storybook-static/ 68 files 21:59-22:00 (gitignored, no status impact)",
+                "docs/restructure/11-stage6b-catalog-products.md (untracked dir - NEW)"
+            ],
+            "note_on_modified_set": "Baseline modified=53 -> now 53 (net 0). Exact per-file delta unprovable: no snapshot stored its per-file status list (same caveat 5a/5b/6a recorded). mtime evidence: only 4 status-modified files were touched after the baseline timestamp (RB, StaffDashboard, STRUCTURE.md, 5 graphify files); RB shows ONLY the stage's 1-line import in its diff, proving it was clean at baseline (+1). The arithmetic (net 0) implies one baseline-modified file left the M set: strongest candidate is one of the 14 moved files that was content-modified at baseline on lines the stage later rewrote (its deletion hides identity; features-copy diffs of the 13 pure-path moves show exactly their stage edits and no residue)."
+            },
+        "deleted_since_stage6a": [
+            "14 files: CatalogManager, ServiceManager, ServiceForm, PackageCatalog, ProductsHub, CatalogTemplateModal, ProductCatalogPanel, ProductFormModal, ProductReportsPanel, ProductSalesPanel, ProductStockPanel, RefundSaleModal, productMoney, productStock (all removed from src/components/domain/, all present exactly once in src/features/{catalog,products}/, all show full-content deletions 0 insertions in numstat)"
+        ],
+        "line_delta_attribution": {
+            "total": "+2985 changed lines (+222 ins, +2763 del)",
+            "moved_files_+3025_del": "the 14 moved files going clean->deleted add exactly their HEAD contents as pure deletions, numstat-verified 0 insertions each: 533 (CatalogManager) + 259 (PackageCatalog) + 147 (ServiceForm) + 136 (ServiceManager) + 110 (ProductsHub) + 108 (CatalogTemplateModal) + 270 (ProductCatalogPanel) + 524 (ProductFormModal) + 198 (ProductReportsPanel) + 148 (ProductSalesPanel) + 316 (ProductStockPanel) + 179 (RefundSaleModal) + 60 (productStock) + 37 (productMoney) = 3025 EXACT",
+            "graphify_-47": "graphify regeneration at 22:01 swung its 5 tracked files' total changed lines 91292 -> 91245 (-47: graph.json -190, manifest +155, GRAPH_REPORT -14, labels +2, html 0); ins/del split of baseline values not stored, so split attribution is approximate",
+            "residual_+7_net": "consumer/doc edits vs HEAD that grew this stage: RetailCheckoutBlock +1/+1 (import line), StaffDashboard barrel import lines, STRUCTURE.md tree lines (31/7 current vs ~38 total at baseline - roughly flat); each also carries pre-existing baseline dirt, so only the delta counts",
+            "exact_identity": "222 ins = graphify ins swing + consumer ins; 2763 del = 3025 (moves) + graphify del swing + consumer del; net check: 3025 - 47 + 7 = 2985 = 222 + 2763 EXACT at the net level",
+            "caveat": "exact per-file decomposition vs baseline is approximated: the baseline snapshot stored only aggregate numstats, not per-file numstats"
+        },
+        "parallel_external_work_attribution": {
+            "statement": "Working-tree changes NOT caused by stage 6b are attributed to parallel external work or carried-over prior stages, not to this stage.",
+            "evidence": "mtime scan of every file with LastWriteTime > 2026-10-01 21:43:56 (baseline moment) returned 98 files, ALL stage-6b, baseline-snapshot-write, storybook-static-gate-rebuild, or graphify artifacts. Therefore every parallel-work modification visible in git status (productsApi, PlansPage, CheckoutPage, marketing pages, ThemeContext, eslint/vite/vitest configs, package*.json, etc.) was written BEFORE the 6a baseline and was already counted inside baseline's modified=53."
+        },
+        "unchanged_since_stage6a": [
+            "HEAD commit (4d74145)",
+            "tracked file count (470)",
+            "branch (main)",
+            "staged changes (none)",
+            "modified count (53, net 0)",
+            "visual-regression PNG count (73, zero files modified)",
+            "storybook-static file count (103)",
+            "no *.stories.tsx added or modified",
+            "src/pages (63), src/components/ui (26), patterns (35), infra (14), layouts (7), app (2), .storybook (4), scripts (9), graphify-out excl cache (90)",
+            "docs/restructure/debts.md (untouched; D-001..D-009 unchanged)"
+        ]
+    },
+    "structural_expectations": {
+        "no_new_commits_head_4d74145": "PASS - HEAD still 4d74145 ('chore(brand): rebrand AgendAI -> Agenda Já'), git rev-parse confirms 4d74145/main, git diff --cached empty; all 193 status lines working-tree only",
+        "14_domain_files_gone": "PASS - recursive search finds 0 of the 14 names under src/components/domain/; domain top-level 52 -> 47 (exactly -5); domain recursive 65 -> 51 (exactly -14)",
+        "14_files_present_once_in_features": "PASS - each of the 14 found exactly once under src/features: catalog (4: CatalogManager, ServiceManager, ServiceForm, PackageCatalog), products (10: ProductsHub, CatalogTemplateModal, ProductCatalogPanel, ProductFormModal, ProductReportsPanel, ProductSalesPanel, ProductStockPanel, RefundSaleModal, productMoney, productStock)",
+        "domain_products_subdir_removed": "PASS - src/components/domain/products/ no longer exists; domain subdirectories = ['support'] only; domain_total 51 = 47 top + 4 support",
+        "barrels_catalog5_products8": "PASS - catalog/index.ts exactly 5 exports (CategoryManager, CatalogManager, ServiceManager, ServiceForm, PackageCatalog); products/index.ts exactly 8 exports (ProductsHub, ProductCatalogPanel, ProductFormModal, ProductStockPanel, ProductSalesPanel, ProductReportsPanel, RefundSaleModal, CatalogTemplateModal)",
+        "visual_regression_exactly_73_pngs_unchanged": "PASS - visual-regression contains exactly 73 PNGs; 0 have mtime after EITHER baseline (5b 21:12:52 or 6a 21:43:56) - byte-identical",
+        "docs_11_exists": "PASS - docs/restructure/11-stage6b-catalog-products.md exists, Status concluída, contains migration table + gate table",
+        "catalogmanager_uses_tabs_modalshell_field": "PASS - imports L16-18 (Field+FIELD_CONTROL, Tabs, ModalShell); <Tabs L195 with 3 role=tabpanel panels (L209/242/272) each aria-labelledby; ModalShell L315-L524 with footer L490 (Salvar/Criar + Cancelar); 10 <Field> wrapping 10 FIELD_CONTROL = all 10 raw inputs; dead icons Pencil/GripVertical/X = 0 matches",
+        "no_stale_imports": "PASS - 0 matches for domain/(CatalogManager|ServiceManager|ServiceForm|PackageCatalog|ProductsHub) superset, components/domain/products, or bare './products/' module imports across src/**/*.{ts,tsx}; only allowed remnants: RetailCheckoutBlock's '../../features/products/productMoney' and productsApi URL strings",
+        "supporting_checks": {
+            "service_manager_sibling_import": "PASS - ServiceManager.tsx L3 imports './CategoryManager'",
+            "staff_dashboard_barrels": "PASS - L7/L19 from '../features/catalog' (ServiceManager, CatalogManager), L39 from '../features/products' (ProductsHub); renders <ProductsHub> L446, <ServiceManager> L475, <CatalogManager> L481",
+            "depth_fix": "PASS - 0 '../../../' and 0 '../../ui/' in src/features/products (0 '../../../' in features/catalog); UI imports now ../../components/ui/",
+            "structure_md_updated": "PASS - L38 catalog/ (5 components + CategoryManager pair), L39 products/ (10 components)",
+            "no_story_visual_changes": "PASS - 0 story files and 0 visual PNGs touched after either baseline; storybook-static count 103 (rebuild is gitignored)",
+            "graphify_updated": "PASS - graphify-out regenerated 22:01 during stage per AGENTS.md rule; graph.json total changed lines 89082 -> 88892",
+            "modalshell_and_tabs_pattern_integrity": "PASS - ModalShell.tsx verified to provide createPortal + FocusLock + Escape (closeOnEscape default true); Tabs.tsx provides role=tablist/tab + aria-controls"
+        }
+    },
+    "notes": [
+        "status_lines (193) = 53 modified + 88 deleted + 52 untracked entries from `git status --porcelain` (directories collapsed); expanded untracked files = 241. Measured before this snapshot file was written, so writing it adds +1 untracked entry AFTER measurement (after-20261001_223930.json; opencode_snapshots 10 -> 11; .opencode is excluded from inventory).",
+        "HEAD/staged verification: `git rev-parse --short HEAD` = 4d74145, `git rev-parse --abbrev-ref HEAD` = main, `git diff --cached --stat` empty.",
+        "Move verification method: recursive name search of all 14 components under src/components/domain (0 hits) and src/features (exactly 1 hit each); domain subdir listing shows only 'support' (products/ gone).",
+        "Visual snapshot count = directory file count (73) with 0 files mtime > either baseline - matches docs11 gate 'test:visual 73/73' and task requirement 'exactly 73 PNGs unchanged'.",
+        "Inventory total delta +2 fully reconciled: +1 products barrel + 1 docs11. Moves are net-zero relocations within inventory. src 412->413 and src_ts_tsx 387->388 agree (+1).",
+        "Untracked expanded delta +17 reconciles exactly: 4 (into pre-untracked features/catalog) + 11 (new features/products dir: 10 moved + barrel) + 1 docs11 + 1 baseline snapshot json = 17.",
+        "Untracked entries delta +2 reconciles: features/products/ collapsed dir + baseline snapshot json = 2.",
+        "Status-line delta +16 reconciles exactly: 14 deleted + 2 untracked entries + 0 modified net = 16.",
+        "Deletions delta +2763 and insertions delta +222 sum to +2985 total changed lines = 3025 (exact sum of the 14 moved files' HEAD contents, numstat-verified 0 insertions) - 47 (graphify regeneration swing 91292 -> 91245) + ~7 (consumer/doc residual) = 2985 EXACT at the net level.",
+        "Modified 53->53 (net 0): RetailCheckoutBlock definitively clean at baseline (diff = exactly the stage's 1-line import rewrite), so +1; one baseline-M file left the M set. .graphify_root ruled out (clean at baseline AND now - 5 graphify files M in both). Candidate: a moved file whose baseline dirt sat on lines the stage rewrote - the same class of caveat 5a/5b/6a recorded (no snapshot stores per-file status lists).",
+        "storybook-static: 68 of 103 files have mtime 21:59-22:00 (gate rerun this stage, unlike 6a where gates were not rerun); directory is in .gitignore so this produces zero git-status/diff impact and the file count stays 103. Visual PNGs untouched despite test:visual 73/73 rerun - snapshots passed byte-identical.",
+        "Gate numbers (tsc 0, eslint 11/587, vitest 224/224, build 82/2584.78 KiB, storybook 73/73, visual 73/73) are transcribed from docs/restructure/11-stage6b-catalog-products.md, not re-executed during this snapshot (same policy as prior snapshots).",
+        "features_total 84 = baseline 69 + 14 moved + 1 barrel; per-dir breakdown verified sum: appointments 8 + catalog 7 + clients 6 + crm 6 + deposits 2 + equipment 2 + finance 14 + goals 2 + loyalty 2 + onboarding 3 + products 11 + queue 12 + recommendations 2 + recurring 2 + shop 3 + waitlist 2 = 84 EXACT.",
+        "Inventory counting quirk: 2 nested graphify cache files (src/pages/graphify-out/cache/stat-index.json, src/pages/marketing/graphify-out/cache/stat-index.json) are excluded from the inventory total (methodology) but included in the raw 'src' key - mirroring baseline's dual src=412 / src_excl=410 keys (now 413/411).",
+        "Scope note: parallel products/appointments/tooling work present in git status ALL predates the baseline timestamp (verified by exhaustive mtime scan) - attributed as parallel external work per task instructions, not as stage-6b changes; its content was already inside the 6a baseline's modified=53.",
+        "Schema replicates after-20261001_214356.json (status_lines, log, ts, timestamp, repository, task, stage, baseline, git, file_inventory, graphify, comparison, notes) with stage6b_artifacts_on_disk + structural_expectations in place of stage6a_artifacts_on_disk."
+    ]
+}

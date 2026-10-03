@@ -13,7 +13,7 @@ import { useSubscription } from '../contexts/SubscriptionContext';
 import { Plan } from '../infra/plansApi';
 import { ThemeToggle } from '../components/infra/ThemeToggle';
 import { Logo } from '../components/ui/Logo';
-import { BLOCK_INFO_STORAGE_KEY } from '../components/infra/AccessBlockedListener';
+import { BLOCK_INFO_STORAGE_KEY } from '../utils/accessBlockedStorage';
 import { formatCurrencyBRL } from '../utils/formatters';
 
 interface BlockInfo {

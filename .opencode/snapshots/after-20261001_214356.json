@@ -1,0 +1,354 @@
+{
+    "status_lines": 177,
+    "log": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+    "ts": "2026-10-01T21:43:56-03:00",
+    "timestamp": "2026-10-01T21:43:56-03:00",
+    "repository": "D:\\Programação\\agendai\\agendai",
+    "task": "React frontend restructure - Stage 6a: Clientes/CRM/shop §5.2 (moved 10 files from src/components/domain/: ClientsTab, ClientsManager, ClientProfileSheet into src/features/clients/ with barrel extended to 5 exports; CrmIntelligencePanel, CrmMergePanel+test, CrmBackfillPanel+test into new src/features/crm/ with barrel (3 exports); ShopProfile, ShopFloorControls into new src/features/shop/ with barrel (2 exports); consumers updated - StaffDashboard merged barrel imports, PublicHome, SettingsManager via ../../features/shop, MasterAdminDashboard + CrmMaintenancePage via features/crm, ClientsTab sibling imports ../crm/*; vi.mock path fixed in PublicHome.test.tsx to ../features/shop; created docs/restructure/10-stage6a-clients-crm.md; added debt D-009 to docs/restructure/debts.md (ClientProfileSheet ModalShell conversion deferred - sheet vs dialog, story-first path); updated docs/agents/STRUCTURE.md clients/crm/shop entries. NO visual/story changes in this stage - visual-regression still exactly 73 PNGs, storybook gates not rerun (binary from 5b valid))",
+    "stage": "Stage 5 of restructuring (5b finance + §5.1 COMPLETE; 6a clients/CRM/shop §5.2 COMPLETE; §5.3 catálogo/produtos and §5.4 conta/settings remain)",
+    "baseline": {
+        "captured": true,
+        "note": "Comparison baseline is the Etapa-5b AFTER snapshot specified by the task.",
+        "baseline_snapshot": ".opencode/snapshots/after-20261001_211252.json",
+        "baseline_snapshot_ts": "2026-10-01T21:12:52-03:00",
+        "baseline_snapshot_status_lines": 162,
+        "baseline_snapshot_log": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+        "baseline_is_same_head_as_current": true,
+        "commits_since_baseline_snapshot": [],
+        "baseline_task": "Stage 5b Operação finance + painéis §5.1 COMPLETE (15 components moved, 8 barrels, 4 stories/12 stories, 73 visual snapshots; clients/crm/shop §5.2 remain)",
+        "baseline_measured_before_itself_was_written": true
+    },
+    "git": {
+        "branch": "main",
+        "head_commit": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+        "head_short": "4d74145",
+        "is_git_repo": true,
+        "tracked_files_count": 470,
+        "status_line_count": 177,
+        "status_counts": {
+            "modified": 53,
+            "deleted": 74,
+            "untracked_lines": 50,
+            "untracked_files_expanded": 224
+        },
+        "staged_changes": "none (git diff --cached empty; no commits made - working tree only on top of HEAD 4d74145)",
+        "diff_stat": "127 files changed, 64215 insertions(+), 63536 deletions(-)",
+        "insertions": 64215,
+        "deletions": 63536,
+        "diff_files_count": 127,
+        "status_transitions_since_baseline": {
+            "newly_deleted_clean_to_deleted_exactly_10_moved": [
+                "src/components/domain/ClientsTab.tsx (276 lines)",
+                "src/components/domain/ClientsManager.tsx (240)",
+                "src/components/domain/ClientProfileSheet.tsx (1073)",
+                "src/components/domain/CrmIntelligencePanel.tsx (899)",
+                "src/components/domain/CrmMergePanel.tsx (80)",
+                "src/components/domain/CrmMergePanel.test.tsx (50)",
+                "src/components/domain/CrmBackfillPanel.tsx (75)",
+                "src/components/domain/CrmBackfillPanel.test.tsx (54)",
+                "src/components/domain/ShopProfile.tsx (530)",
+                "src/components/domain/ShopFloorControls.tsx (213)"
+            ],
+            "reconciliations": {
+                "status_lines": "162 + 10 (moved files clean->deleted) + 2 (net new status-modified) + 3 (untracked entries: features/crm/ dir, features/shop/ dir, baseline snapshot json) = 177 EXACT",
+                "modified": "51 -> 53 (+2 net). Three consumer files have diffs containing ONLY stage-6a changes (proving they were clean at baseline): SettingsManager (1/1 shop import), CrmMaintenancePage (1/1 crm import), PublicHome.test.tsx (1/1 vi.mock fix); MasterAdminDashboard was already dirty at baseline (ThemeToggle infra move + new crm import). Net +2 requires exactly one baseline-modified file to have left the M set - unprovable from stored aggregates (neither baseline nor 5a snapshot stored a per-file status list); candidates: one of the 10 moved files was content-modified at baseline (its full-content deletion renders identically in numstat either way), or a graphify-out file (.graphify_root, rewritten 21:30 to HEAD-identical content) reverted to clean. Same per-file-list limitation was documented by the 5b snapshot.",
+                "deleted": "64 + 10 (exactly the 10 moved domain components) = 74 EXACT",
+                "diff_files": "115 + 10 (moved files clean->deleted) + 2 (newly status-modified files enter/remain in diff) = 127 EXACT (127 = 53 modified + 74 deleted)",
+                "untracked_entries": "47 + 2 (new collapsed dirs: src/features/crm/, src/features/shop/) + 1 (the 5b baseline snapshot json, written after baseline measured) = 50 EXACT",
+                "untracked_expanded": "210 + 10 (moved files now under untracked features dirs - includes the 3 new members of the already-untracked features/clients dir) + 2 (new barrels features/crm/index.ts + features/shop/index.ts) + 1 (docs/restructure/10-stage6a-clients-crm.md) + 1 (5b baseline snapshot json) = 224 EXACT"
+            },
+            "files_touched_since_baseline_timestamp": [
+                "src/features/{clients,crm,shop}/ 10 moved files (21:18:09 - content moved)",
+                "src/features/{clients,crm,shop}/index.ts barrels (21:18:33-34)",
+                "src/pages/PublicHome.tsx (21:19:14), CrmMaintenancePage + MasterAdminDashboard (21:19:15), StaffDashboard.tsx (21:19:34)",
+                "src/components/domain/SettingsManager.tsx (21:20:30 - ../../features/shop import)",
+                "src/pages/PublicHome.test.tsx (21:26:01 - vi.mock ../features/shop)",
+                "docs/restructure/10-stage6a-clients-crm.md (21:28:53), docs/restructure/debts.md (21:28:57 +D-009), docs/agents/STRUCTURE.md (21:29:12)",
+                "graphify-out/ 6 files regenerated 21:30:12-21:30:14 (graphify update . per AGENTS.md after-major-changes rule; graph.json diff-vs-HEAD total 81854 -> 89082)",
+                "the 5b baseline snapshot json itself (mtime 21:15:56, written after its own measurement)",
+                "NOTE: mtime scan of ALL files (excluding node_modules/.git/dist/graphify-out/cache) after 2026-10-01 21:12:52 found exactly 29 files - every one attributable to this stage, the baseline snapshot write, or graphify regeneration. NO storybook-static, visual-regression, or *.stories.tsx file was touched. NO parallel-work file was touched inside the baseline->after window."
+            ]
+        }
+    },
+    "file_inventory": {
+        "total_excluding_node_modules_git_dist_opencode_mimocode_graphify_cache": 772,
+        "methodology_note": "Same stated exclusions as baseline (node_modules, .git, dist, .opencode, .mimocode, graphify-out/cache). Baseline 769 -> 772 (+3) reconciles EXACTLY as: +2 src (new barrels features/crm/index.ts + features/shop/index.ts; 10 moves are net-zero relocations) + 1 docs/restructure/10-stage6a-clients-crm.md. Visual PNGs (73), storybook-static (103) and all other trees unchanged.",
+        "node_modules_present": true,
+        "counts_by_directory": {
+            "src": 412,
+            "src_excl_nested_graphify_caches": 410,
+            "src_strict_excl_nested_graphify_caches": 410,
+            "src_ts_tsx": 387,
+            "src_pages": 63,
+            "src_components_ui": 26,
+            "src_components_patterns": 35,
+            "src_components_infra": 14,
+            "src_components_domain_total": 65,
+            "src_components_domain_top_level": 52,
+            "src_layouts": 7,
+            "src_features_total": 69,
+            "src_features_clients": 6,
+            "src_features_crm": 6,
+            "src_features_shop": 3,
+            "src_features_finance": 14,
+            "src_app": 2,
+            "docs": 26,
+            "docs_restructure": 12,
+            ".storybook": 4,
+            "scripts": 9,
+            "visual_regression": 73,
+            "opencode_snapshots": 9,
+            "storybook_static": 103,
+            "graphify_out_excl_cache": 90
+        },
+        "key_files": [
+            "package.json",
+            "tsconfig.json",
+            "vite.config.ts",
+            "vitest.config.ts",
+            "eslint.config.js",
+            "docs/restructure/10-stage6a-clients-crm.md",
+            "docs/restructure/debts.md",
+            "docs/agents/STRUCTURE.md",
+            "src/features/clients/index.ts",
+            "src/features/crm/index.ts",
+            "src/features/shop/index.ts"
+        ]
+    },
+    "stage6a_artifacts_on_disk": {
+        "moved_components_verification": {
+            "all_10_absent_from_domain": {
+                "ClientsTab.tsx": true,
+                "ClientsManager.tsx": true,
+                "ClientProfileSheet.tsx": true,
+                "CrmIntelligencePanel.tsx": true,
+                "CrmMergePanel.tsx": true,
+                "CrmMergePanel.test.tsx": true,
+                "CrmBackfillPanel.tsx": true,
+                "CrmBackfillPanel.test.tsx": true,
+                "ShopProfile.tsx": true,
+                "ShopFloorControls.tsx": true
+            },
+            "all_10_present_in_features": {
+                "src/features/clients/ClientsTab.tsx": true,
+                "src/features/clients/ClientsManager.tsx": true,
+                "src/features/clients/ClientProfileSheet.tsx": true,
+                "src/features/crm/CrmIntelligencePanel.tsx": true,
+                "src/features/crm/CrmMergePanel.tsx": true,
+                "src/features/crm/CrmMergePanel.test.tsx": true,
+                "src/features/crm/CrmBackfillPanel.tsx": true,
+                "src/features/crm/CrmBackfillPanel.test.tsx": true,
+                "src/features/shop/ShopProfile.tsx": true,
+                "src/features/shop/ShopFloorControls.tsx": true
+            },
+            "method": "Test-Path on each name under src/components/domain (all false) and under src/features (all true); all_10_moved_ok=True. domain top-level files 62 -> 52 (exactly -10); domain recursive total 75 -> 65 (products/+9 and support/+4 subdirs are HEAD-tracked parallel area, untouched)."
+        },
+        "barrels": {
+            "src/features/clients/index.ts": "EXTENDED - exactly 5 exports: AddCustomerForm, ServiceCard, ClientsTab, ClientsManager, ClientProfileSheet",
+            "src/features/crm/index.ts": "NEW - exactly 3 exports: CrmIntelligencePanel, CrmMergePanel, CrmBackfillPanel",
+            "src/features/shop/index.ts": "NEW - exactly 2 exports: ShopProfile, ShopFloorControls",
+            "counts_verified": "clients=5 PASS, crm=3 PASS, shop=2 PASS (read full barrel files)"
+        },
+        "consumers_updated": {
+            "src/pages/StaffDashboard.tsx": "L5 import { AddCustomerForm, ClientsTab } from '../features/clients' (line extended, ClientsTab domain import removed); L6 NEW import { ShopFloorControls, ShopProfile } from '../features/shop' (2 domain imports removed). Net: 3 previously-separate domain import statements (ClientsTab, ShopProfile, ShopFloorControls) absorbed into 2 merged multi-symbol barrel imports; no references to moved components remain in components/domain",
+            "src/pages/PublicHome.tsx": "L4 '../features/clients' (AddCustomerForm), L5 '../features/shop' (ShopProfile)",
+            "src/components/domain/SettingsManager.tsx": "import { ShopFloorControls } from '../../features/shop' (was './ShopFloorControls')",
+            "src/pages/MasterAdmin/MasterAdminDashboard.tsx": "L62 import { CrmBackfillPanel } from '../../features/crm' (ThemeToggle infra line is pre-existing parallel change)",
+            "src/pages/MasterAdmin/CrmMaintenancePage.tsx": "L2 import { CrmBackfillPanel } from '../../features/crm'",
+            "src/pages/PublicHome.test.tsx": "vi.mock('../features/shop', ...) - mock path fixed from ../components/domain/ShopProfile",
+            "src/features/clients/ClientsTab.tsx": "sibling/dir-relative imports of the 3 crm panels: '../crm/CrmIntelligencePanel', '../crm/CrmMergePanel', '../crm/CrmBackfillPanel'"
+        },
+        "stale_import_scan": {
+            "pattern": "domain/(ClientsTab|ClientsManager|ClientProfileSheet|CrmIntelligencePanel|CrmMergePanel|CrmBackfillPanel|ShopProfile|ShopFloorControls) - a SUPERSET of the requested pattern (adds ClientsManager, CrmIntelligencePanel, full Crm prefixes)",
+            "scope": "recursive over src/**/*.{ts,tsx}",
+            "hits": 0
+        },
+        "docs": [
+            "docs/restructure/10-stage6a-clients-crm.md (NEW, mtime 21:28:53): Status concluída (movimentação + barrels + consumidores; conversão do ClientProfileSheet para ModalShell vira D-009); migration table origem -> destino -> consumidores (ClientsTab/ClientsManager/ClientProfileSheet -> clients barrel estendido; 3 crm files -> crm barrel novo; 2 shop files -> shop barrel novo); vi.mock note; D-009 rationale (sheet max-w-2d2 bottom-sheet vs centered dialog, story MSW first); gate table (tsc 0, eslint 11/589, vitest 224/224 60 arq. + PublicHome isolado, build 82/2585.14 KiB, test:storybook 73/73 sem stories novas, test:visual 73/73 binário anterior válido); pendências (D-009, §5.3 catálogo, §5.4 conta/settings, §5.5/§5.6, D-008 stories)",
+            "docs/restructure/debts.md (MODIFIED 21:28:57): D-009 ADDED at line 17 - ClientProfileSheet (1072L) overlay ad-hoc not converted to ModalShell, it is a bottom-sheet with actions header + tab nav, converter sem cobertura visual mudaria UX; path = story MSW do sheet primeiro -> variante sheet no ModalShell -> converter comparando snapshots. 9 debts total (D-001..D-009 all present, verified unique-id scan)",
+            "docs/agents/STRUCTURE.md (MODIFIED 21:29:12, 37 lines vs HEAD): features tree line 33 clients/ (AddCustomerForm, ServiceCard, ClientsTab, ClientsManager, ClientProfileSheet), line 36 crm/ (CrmIntelligencePanel, CrmMergePanel(+test), CrmBackfillPanel(+test)), line 37 shop/ (ShopProfile, ShopFloorControls)"
+        ],
+        "visual_and_story_unchanged": {
+            "visual_png_count": 73,
+            "pngs_modified_after_baseline": 0,
+            "stories_touched_after_baseline": 0,
+            "storybook_static_touched_after_baseline": 0,
+            "storybook_static_files": 103,
+            "conclusion": "PASS - exactly 73 PNGs, byte-untouched since 5b; no story files added or edited; storybook-static (103 files) not rebuilt - consistent with gates NOT rerun this stage (binary from 5b valid, per task note and docs10 gate table 73/73 transcribed)"
+        },
+        "stage6a_gate_from_doc": {
+            "tsc_noEmit": "0 errors",
+            "eslint": "11 errors / 589 warnings",
+            "vitest": "224/224 (60 arq.) + PublicHome isolado após fix de mock",
+            "build": "82 chunks / 2585.14 KiB (baseline 00: 82 / 2579.63; +5.51 KiB shared chunks)",
+            "storybook_tests": "73/73 (sem stories novas; binário anterior válido)",
+            "visual_tests": "73/73 (sem stories novas)",
+            "method": "Gate numbers transcribed from docs/restructure/10-stage6a-clients-crm.md, not re-executed during this snapshot (same policy as 5a/5b snapshots; task states storybook gates were not rerun)."
+        }
+    },
+    "graphify": {
+        "graph_exists": true,
+        "graph_json": "graphify-out/graph.json",
+        "graph_modified_in_this_task": true,
+        "graph_modify_status": "graphify-out/* regenerated 21:30:12-21:30:14 during stage 6a (per AGENTS.md after-major-changes rule); graph.json diff-vs-HEAD total grew 81854 -> 89082 changed lines (+7228, reflects the 10-file relocation); still shows as modified vs HEAD (carried over)"
+    },
+    "comparison": {
+        "note": "Compared against the Etapa-5b AFTER snapshot (.opencode/snapshots/after-20261001_211252.json). HEAD unchanged (4d74145) between snapshots; all deltas are working-tree changes. Files with mtime > baseline timestamp (29 total) are exclusively stage-6a work + baseline-snapshot write + graphify regeneration; no parallel-product/test/build file was touched inside the window.",
+        "before": {
+            "source": ".opencode/snapshots/after-20261001_211252.json",
+            "head_commit": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+            "files_tracked": 470,
+            "uncommitted_files": 162,
+            "modified": 51,
+            "deleted": 64,
+            "untracked_entries": 47,
+            "untracked_expanded": 210,
+            "lines_added": 59363,
+            "lines_removed": 57169,
+            "diff_files": 115,
+            "inventory_total": 769,
+            "inventory_src": 410,
+            "inventory_src_strict": 408,
+            "src_ts_tsx": 385,
+            "features_total": 57,
+            "visual_snapshots": 73,
+            "docs_restructure": 11,
+            "docs_total": 25,
+            "storybook_static": 103,
+            "opencode_snapshots": 8,
+            "domain_top_level": 62
+        },
+        "after": {
+            "files_tracked": 470,
+            "uncommitted_files": 177,
+            "modified": 53,
+            "deleted": 74,
+            "untracked_entries": 50,
+            "untracked_expanded": 224,
+            "lines_added": 64215,
+            "lines_removed": 63536,
+            "diff_files": 127,
+            "inventory_total": 772,
+            "inventory_src": 412,
+            "inventory_src_strict": 410,
+            "src_ts_tsx": 387,
+            "features_total": 69,
+            "visual_snapshots": 73,
+            "docs_restructure": 12,
+            "docs_total": 26,
+            "storybook_static": 103,
+            "opencode_snapshots": 9,
+            "domain_top_level": 52
+        },
+        "delta": {
+            "files_tracked": "0 (470 -> 470)",
+            "uncommitted_files": "+15 (162 -> 177 status lines)",
+            "modified": "+2 (51 -> 53)",
+            "deleted": "+10 (64 -> 74: exactly the 10 moved domain components)",
+            "untracked_entries": "+3 (47 -> 50: features/crm/, features/shop/ dirs + 5b baseline snapshot json)",
+            "untracked_expanded": "+14 (210 -> 224: 10 moved files + 2 new barrels + docs10 + baseline snapshot json)",
+            "lines_added": "+4852 (59363 -> 64215)",
+            "lines_removed": "+6367 (57169 -> 63536); total changed lines +11219",
+            "diff_files": "+12 (115 -> 127)",
+            "inventory_total": "+3 (769 -> 772)",
+            "inventory_src": "+2 (410 -> 412: 2 new barrels; moves are net-zero)",
+            "inventory_src_strict": "+2 (408 -> 410)",
+            "src_ts_tsx": "+2 (385 -> 387)",
+            "features_total": "+12 (57 -> 69: 10 moved files + 2 new barrels)",
+            "visual_snapshots": "0 (73 -> 73: UNCHANGED as required)",
+            "docs_restructure": "+1 (11 -> 12: 10-stage6a-clients-crm.md)",
+            "docs_total": "+1 (25 -> 26)",
+            "storybook_static": "0 (103 -> 103: not rebuilt, gates not rerun)",
+            "opencode_snapshots": "+1 (8 -> 9; writing this snapshot makes 10 after measurement)",
+            "domain_top_level": "-10 (62 -> 52: exactly the 10 moved files)"
+        },
+        "added_since_stage5b": {
+            "count": "13 stage-created files + 1 baseline snapshot json",
+            "stage_created_files": [
+                "src/features/clients/: ClientsTab.tsx, ClientsManager.tsx, ClientProfileSheet.tsx (3 moved)",
+                "src/features/crm/: CrmIntelligencePanel.tsx, CrmMergePanel.tsx, CrmMergePanel.test.tsx, CrmBackfillPanel.tsx, CrmBackfillPanel.test.tsx (5 moved) + index.ts (new barrel) = 6",
+                "src/features/shop/: ShopProfile.tsx, ShopFloorControls.tsx (2 moved) + index.ts (new barrel) = 3",
+                "docs/restructure/10-stage6a-clients-crm.md = 1"
+            ],
+            "total_stage_created": 13,
+            "other": ".opencode/snapshots/after-20261001_211252.json (the baseline snapshot itself, written after baseline measured)"
+        },
+        "modified_since_stage5b": {
+            "stage_attributable_touched_after_baseline": [
+                "src/pages/StaffDashboard.tsx (21:19:34 - clients barrel line extended with ClientsTab, NEW shop barrel import; 3 domain imports removed)",
+                "src/pages/PublicHome.tsx (21:19:14 - clients/shop barrel imports)",
+                "src/pages/MasterAdmin/CrmMaintenancePage.tsx (21:19:15 - features/crm import)",
+                "src/pages/MasterAdmin/MasterAdminDashboard.tsx (21:19:15 - features/crm import added alongside pre-existing ThemeToggle change)",
+                "src/components/domain/SettingsManager.tsx (21:20:30 - ../../features/shop import)",
+                "src/pages/PublicHome.test.tsx (21:26:01 - vi.mock ../features/shop)",
+                "docs/agents/STRUCTURE.md (21:29:12 - clients/crm/shop tree lines 33/36/37)",
+                "docs/restructure/debts.md (untracked dir - D-009 row)",
+                "graphify-out/ 5 tracked modified files regenerated 21:30",
+                "src/features/clients/index.ts (21:18:33 - barrel extended 2->5 exports; untracked dir)"
+            ],
+            "note_on_modified_set": "Baseline modified=51 -> now 53. Exact per-file delta unprovable: neither the 5b baseline nor the 5a snapshot stored its per-file status list (same caveat the 5b snapshot recorded). mtime evidence: only 8 status-modified files were touched after the baseline timestamp (6 consumers + STRUCTURE.md + 5 graphify files); three of them (SettingsManager, CrmMaintenancePage, PublicHome.test) show ONLY stage-6a content in their diff, proving they were clean at baseline; the arithmetic (+2 net) implies one baseline-modified file left the M set (candidate: one moved file was baseline-dirty, or graphify .graphify_root reverted to HEAD-identical content)."
+        },
+        "deleted_since_stage5b": [
+            "10 files: ClientsTab, ClientsManager, ClientProfileSheet, CrmIntelligencePanel, CrmMergePanel + test, CrmBackfillPanel + test, ShopProfile, ShopFloorControls (all removed from src/components/domain/, all present in src/features/, all show full-content deletions 0 insertions in numstat)"
+        ],
+        "line_delta_attribution": {
+            "total": "+11219 changed lines (+4852 ins, +6367 del)",
+            "moved_files_+3490_del": "the 10 moved files going clean->deleted add exactly their HEAD contents as pure deletions: 276+240+1073+899+80+50+75+54+530+213 = 3490",
+            "graphify_graph.json_+7228": "graph.json diff-vs-HEAD total grew 81854 -> 89082 (+7228) when graphify regenerated at 21:30; ins/del split of the baseline value was not stored, so split attribution is approximate",
+            "residual_~501": "consumer import edits (~7 files, a few lines each) + graphify non-json churn from the same regeneration (manifest.json 1603, GRAPH_REPORT 568, labels 31, html 8 current totals; baseline per-file values not stored)",
+            "caveat": "exact per-file decomposition vs baseline is approximated: the baseline snapshot stored only aggregate numstats, not per-file numstats"
+        },
+        "parallel_external_work_attribution": {
+            "statement": "Working-tree changes NOT caused by stage 6a are attributed to parallel external work or carried-over prior stages, not to this stage.",
+            "evidence": "mtime scan of every file with LastWriteTime > 2026-10-01 21:12:52 (baseline moment) returned 29 files, ALL stage-6a, baseline-snapshot-write, or graphify artifacts. Therefore every parallel-work modification visible in git status (productsApi, PlansPage, CheckoutPage, marketing pages, ThemeContext, eslint/vite/vitest configs, package*.json, graphify pre-existing, etc.) was written BEFORE the 5b baseline and was already counted inside baseline's modified=51.",
+            "master_admin_dashboard_note": "its diff pairs the stage-6a crm import with a pre-existing ThemeToggle ui->infra import (parallel/infra restructure, predates baseline)"
+        },
+        "unchanged_since_stage5b": [
+            "HEAD commit (4d74145)",
+            "tracked file count (470)",
+            "branch (main)",
+            "staged changes (none)",
+            "visual-regression PNG count (73, zero files modified)",
+            "storybook-static file count (103, no file modified)",
+            "no *.stories.tsx added or modified",
+            "src/pages (63), src/components/ui (26), patterns (35), infra (14), layouts (7), app (2), .storybook (4), scripts (9), graphify-out excl cache (90)"
+        ]
+    },
+    "structural_expectations": {
+        "no_new_commits_head_4d74145": "PASS - HEAD still 4d74145 ('chore(brand): rebrand AgendAI -> Agenda Já'), git rev-parse confirms 4d74145/main, git diff --cached empty; all 177 status lines working-tree only",
+        "10_domain_files_gone": "PASS - Test-Path false for all 10 in src/components/domain/ (3 clients + 5 crm + 2 shop); domain top-level count 62 -> 52 (exactly -10)",
+        "10_files_present_in_features": "PASS - all 10 found: features/clients (3), features/crm (5 incl. 2 tests), features/shop (2)",
+        "barrels_clients5_crm3_shop2": "PASS - clients/index.ts exactly 5 exports (AddCustomerForm, ServiceCard, ClientsTab, ClientsManager, ClientProfileSheet); crm/index.ts exactly 3 (CrmIntelligencePanel, CrmMergePanel, CrmBackfillPanel); shop/index.ts exactly 2 (ShopProfile, ShopFloorControls)",
+        "visual_regression_exactly_73_pngs_unchanged": "PASS - visual-regression/__image_snapshots__ contains exactly 73 PNGs; 0 have mtime after the baseline timestamp (byte-identical to 5b state)",
+        "docs_10_exists": "PASS - docs/restructure/10-stage6a-clients-crm.md exists, Status concluída, contains migration table + D-009 note + gate table",
+        "debts_D001_to_D009": "PASS - docs/restructure/debts.md contains exactly D-001..D-009 (9 unique ids); D-009 at line 17 = ClientProfileSheet ModalShell deferral with story-first path",
+        "no_stale_domain_imports": "PASS - 0 matches for domain/(ClientsTab|ClientProfileSheet|CrmMerge|CrmBackfill|ShopProfile|ShopFloorControls) anywhere in src/**/*.{ts,tsx}; scan used a superset pattern (also ClientsManager, CrmIntelligencePanel, full Crm prefixes) - still 0 hits",
+        "supporting_checks": {
+            "staff_dashboard_merged_barrel_imports": "PASS (with counting note) - StaffDashboard L5 { AddCustomerForm, ClientsTab } from '../features/clients' and L6 { ShopFloorControls, ShopProfile } from '../features/shop': 2 merged multi-symbol barrel lines absorbing 3 previously-separate domain import statements (ClientsTab, ShopProfile, ShopFloorControls) / 3 moved symbols; no moved component is imported from domain anymore",
+            "publichome_and_test": "PASS - PublicHome imports features/clients + features/shop barrels; PublicHome.test.tsx has vi.mock('../features/shop', ...)",
+            "settings_manager_shop": "PASS - import { ShopFloorControls } from '../../features/shop'",
+            "master_admin_crm": "PASS - MasterAdminDashboard L62 and CrmMaintenancePage L2 both import { CrmBackfillPanel } from '../../features/crm'",
+            "clients_tab_sibling_crm": "PASS - ClientsTab imports the 3 crm panels via ../crm/*",
+            "structure_md_updated": "PASS - line 33 clients/ (5 components), line 36 crm/, line 37 shop/ in features tree",
+            "no_story_visual_changes": "PASS - 0 story files and 0 visual PNGs touched after baseline; storybook-static not rebuilt (103 files); consistent with gates not rerun",
+            "graphify_updated": "PASS - graphify-out regenerated 21:30 during stage per AGENTS.md rule"
+        }
+    },
+    "notes": [
+        "status_lines (177) = 53 modified + 74 deleted + 50 untracked entries from `git status --porcelain` (directories collapsed); expanded untracked files = 224. Measured before this snapshot file was written, so writing it adds +1 untracked entry AFTER measurement (after-20261001_214356.json; opencode_snapshots 9 -> 10; .opencode is excluded from inventory).",
+        "HEAD/staged verification: `git rev-parse --short HEAD` = 4d74145, `git rev-parse --abbrev-ref HEAD` = main, `git diff --cached --stat` empty.",
+        "Move verification method: PowerShell map of all 10 domain->features paths; every source Test-Path=false and destination Test-Path=true (all_10_moved_ok=True).",
+        "Visual snapshot count = directory file count (73) with 0 files mtime > baseline - matches docs10 gate 'test:visual 73/73 (sem stories novas)' and task requirement 'exactly 73 PNGs unchanged'.",
+        "Inventory total delta +3 fully reconciled: +2 new barrels (crm/index.ts, shop/index.ts) + 1 docs10. Moves are net-zero relocations within inventory. src 410->412 and src_ts_tsx 385->387 agree (+2).",
+        "Untracked expanded delta +14 reconciles exactly: 10 moved files (now under untracked features/clients|crm|shop) + 2 new barrels + 1 docs10 + 1 baseline snapshot json = 14.",
+        "Untracked entries delta +3 reconciles: features/crm/ + features/shop/ collapsed dirs + baseline snapshot json = 3.",
+        "Status-line delta +15 reconciles exactly: 10 deleted + 2 net modified + 3 untracked entries = 15.",
+        "Deletions delta +6367 and insertions delta +4852 sum to +11219 total changed lines = 3490 (exact sum of the 10 moved files' HEAD contents, numstat-verified 0 insertions) + 7228 (graphify graph.json regeneration swing 81854 -> 89082) + ~501 residual (consumer import edits + graphify non-json churn from the same regeneration; baseline stored aggregates only).",
+        "StaffDashboard '3 merged barrel imports' from the task prompt resolves on disk as: 3 moved-symbol/domain-import merges (ClientsTab into the extended clients barrel line; ShopProfile + ShopFloorControls into the new shop barrel line) presented as 2 final import statements (L5, L6). Both readings are satisfied; literal new barrel import lines = 2.",
+        "Modified +2 net is arithmetically reconciled but per-file identity is not provable from stored data (neither 5a nor 5b snapshot kept a per-file status list); three consumers show pure stage-6a diffs, implying one baseline-M file left the M set (moved-file baseline dirtiness or graphify .graphify_root content-revert are the candidates).",
+        "Gate numbers (tsc 0, eslint 11/589, vitest 224/224, build 82/2585.14 KiB, storybook 73/73, visual 73/73) are transcribed from docs/restructure/10-stage6a-clients-crm.md, not re-executed during this snapshot; the task explicitly states storybook gates were not rerun and the 5b binary remains valid - independently corroborated by zero mtime changes in storybook-static/ and visual-regression/.",
+        "Console output for docs/*.md shows mojibake (UTF-8 read as console codepage) - display artifact only; files on disk are intact UTF-8.",
+        "Scope note: parallel products/appointments/tooling work present in git status ALL predates the baseline timestamp (verified by exhaustive mtime scan) - attributed as parallel external work per task instructions, not as stage-6a changes; its content was already inside the 5b baseline's modified=51.",
+        "Schema replicates after-20261001_211252.json (status_lines, log, ts, timestamp, repository, task, stage, baseline, git, file_inventory, graphify, comparison, notes) with stage6a_artifacts_on_disk + structural_expectations in place of stage5b_artifacts_on_disk."
+    ]
+}

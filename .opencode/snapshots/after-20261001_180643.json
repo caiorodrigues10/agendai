@@ -1,0 +1,246 @@
+{
+    "status_lines": 116,
+    "log": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+    "ts": "2026-10-01T18:06:43-03:00",
+    "timestamp": "2026-10-01T18:06:43-03:00",
+    "repository": "D:\\Programação\\agendai\\agendai",
+    "task": "React frontend restructure - Stage 4b: MarketingLayout (created src/layouts/marketing/MarketingLayout.tsx; refactored 12 pages to use it; updated docs)",
+    "stage": "Stage 4 of restructuring (4b MarketingLayout COMPLETE; stage 4 now reported 'concluída' in docs with 4c PublicLayout deferred/justified)",
+    "baseline": {
+        "captured": true,
+        "note": "Comparison baseline is the Stage-4-partial AFTER snapshot specified by the task.",
+        "baseline_snapshot": ".opencode/snapshots/after-20260929_231350.json",
+        "baseline_snapshot_ts": "2026-09-29T23:13:50-03:00",
+        "baseline_snapshot_status_lines": 96,
+        "baseline_snapshot_log": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+        "baseline_is_same_head_as_current": true,
+        "commits_since_baseline_snapshot": [],
+        "baseline_task": "Stage 4 (partial: 4a/4c/4d/4e closed; 4b MarketingLayout pending)"
+    },
+    "git": {
+        "branch": "main",
+        "head_commit": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+        "is_git_repo": true,
+        "tracked_files_count": 470,
+        "status_line_count": 116,
+        "status_counts": {
+            "modified": 51,
+            "deleted": 41,
+            "untracked_lines": 24,
+            "untracked_files_expanded": 137
+        },
+        "staged_changes": "none (git diff --cached empty; no commits made - working tree only on top of HEAD 4d74145)",
+        "modified_files_new_since_baseline": {
+            "stage4b_in_scope": [
+                "src/pages/marketing/AboutPage.tsx (52 lines vs HEAD)",
+                "src/pages/marketing/AiPredictivePage.tsx (35)",
+                "src/pages/marketing/CommercialIntentPage.tsx (34)",
+                "src/pages/marketing/ContactPage.tsx (32)",
+                "src/pages/marketing/DashboardPage.tsx (52)",
+                "src/pages/marketing/FeaturesPage.tsx (35)",
+                "src/pages/marketing/PrivacyPolicyPage.tsx (32)",
+                "src/pages/marketing/SchedulingPage.tsx (52)",
+                "src/pages/marketing/TermsPage.tsx (32)",
+                "src/pages/LandingPage.tsx (65)",
+                "src/pages/PlansPage.tsx (672)",
+                "src/pages/EmailVerifiedPage.tsx (11)",
+                "src/pages/PlansPage.test.tsx (47; side-effect of PlansPage refactor)"
+            ],
+            "out_of_stated_scope": [
+                "src/components/domain/AppointmentCalendar.tsx (17)",
+                "src/components/domain/AppointmentScheduler.tsx (157)",
+                "src/infra/productsApi.ts (16)",
+                "src/schemas.ts (9)",
+                "src/types.ts (8)",
+                "src/utils/schedulingUtils.ts (1)",
+                "NOTE: these 6 are NOT part of the stated 4b scope (look like parallel/separate work); present in working tree at snapshot time."
+            ],
+            "line_totals_vs_head": {
+                "stage4b_group_plus_STRUCTURE_md_14_files": "+594 / -585",
+                "out_of_scope_6_files": "+207 / -1"
+            },
+            "already_modified_at_baseline_carried_over": "same 32 entries as baseline (incl. docs/agents/STRUCTURE.md, which grew from 27 to 28 changed lines vs HEAD)"
+        },
+        "modified_files_full_list_count": 51,
+        "deleted_files_count": 41,
+        "deleted_files_unchanged_since_baseline": true,
+        "new_files_top_level_entries_added_since_baseline": [
+            ".opencode/snapshots/after-20260929_231350.json (the baseline snapshot itself)",
+            "src/layouts/marketing/MarketingLayout.tsx (inside collapsed src/layouts/ entry; NEW, 59 lines / 1484 bytes)"
+        ],
+        "diff_stat": "92 files changed, 57035 insertions(+), 47119 deletions(-)",
+        "insertions": 57035,
+        "deletions": 47119,
+        "diff_files_count": 92
+    },
+    "file_inventory": {
+        "total_excluding_node_modules_git_dist_opencode_mimocode_root_graphify_cache": 698,
+        "total_strict_also_excluding_nested_src_graphify_caches": 696,
+        "methodology_note": "Baseline reported 697 total / 386 src. Current = 698 / 389 (387 strict). Delta is exactly +1 file (MarketingLayout.tsx) under either the total rule (697->698) or the strict src rule (386->387); the +-2 spread between the two totals comes from 2 nested src/**/graphify-out/cache/*.json counted inconsistently by the baseline's total vs src sections.",
+        "node_modules_present": true,
+        "counts_by_directory": {
+            "src": 389,
+            "src_strict_excl_nested_graphify_caches": 387,
+            "src_ts_tsx": 364,
+            "src_pages": 63,
+            "src_pages_marketing": 18,
+            "src_components_ui": 26,
+            "src_components_patterns": 35,
+            "src_components_infra": 14,
+            "src_layouts": 7,
+            "src_features_queue": 9,
+            "src_app": 2,
+            "docs": 23,
+            "docs_restructure": 9,
+            ".storybook": 4,
+            "scripts": 9,
+            "visual_regression": 48,
+            "opencode_snapshots": 6
+        },
+        "key_files": [
+            "package.json",
+            "tsconfig.json",
+            "vite.config.ts",
+            "vitest.config.ts",
+            "eslint.config.js",
+            "docs/restructure/07-stage4-pilots.md",
+            "docs/agents/STRUCTURE.md",
+            "src/layouts/admin/AdminLayout.tsx",
+            "src/layouts/app/AppLayout.tsx",
+            "src/layouts/marketing/MarketingLayout.tsx",
+            "src/features/queue/index.ts"
+        ]
+    },
+    "stage4b_artifacts_on_disk": {
+        "src/layouts/marketing/MarketingLayout.tsx": {
+            "exists": true,
+            "bytes": 1484,
+            "lines": 59,
+            "last_write": "2026-10-01T17:37:46",
+            "api": "forwardRef<HTMLDivElement, MarketingLayoutProps>; exports MARKETING_WRAPPER default wrapper class; props title/description/path/noindex/image/jsonLd/wrapperClassName/background/children/afterFooter; conditional SeoHead (title && description && path); background slot between Seo and MarketingNav; displayName set"
+        },
+        "src_layouts_now": [
+            "admin/AdminLayout.tsx",
+            "app/AppLayout.tsx",
+            "app/Header.tsx + Header.test.tsx",
+            "app/StaffNavigation.tsx + StaffNavigation.test.tsx",
+            "marketing/MarketingLayout.tsx (NEW)"
+        ],
+        "adopters_verified_exactly_12": [
+            "src/pages/marketing/AboutPage.tsx",
+            "src/pages/marketing/AiPredictivePage.tsx",
+            "src/pages/marketing/CommercialIntentPage.tsx",
+            "src/pages/marketing/ContactPage.tsx",
+            "src/pages/marketing/DashboardPage.tsx",
+            "src/pages/marketing/FeaturesPage.tsx",
+            "src/pages/marketing/PrivacyPolicyPage.tsx",
+            "src/pages/marketing/SchedulingPage.tsx",
+            "src/pages/marketing/TermsPage.tsx",
+            "src/pages/LandingPage.tsx",
+            "src/pages/PlansPage.tsx",
+            "src/pages/EmailVerifiedPage.tsx"
+        ],
+        "docs": [
+            "docs/restructure/07-stage4-pilots.md (untracked): status now 'concluída - 4a/4b/4c(adiado, justificado)/4d/4e fechados'; section 4b marked 'concluído' with codemod details (0 SKIP, special cases AiPredictive/Features/Landing/Plans/EmailVerified); gate table updated",
+            "docs/agents/STRUCTURE.md (modified, 28 lines vs HEAD): lines 30 and 59 now document layouts/marketing/MarketingLayout (SeoHead + fundo + Nav + Footer; 12 páginas; forwardRef + props)"
+        ],
+        "stage4_gate_from_doc": {
+            "tsc_noEmit": "0 errors",
+            "eslint": "11 errors / 593 warnings (= ceiling, 0 slack)",
+            "vitest": "199/199 (51 files, ceiling 197)",
+            "storybook_tests": "48/48 (12 files, ceiling 41)",
+            "visual_tests": "48/48 (unchanged; no new stories in 4b)",
+            "build": "81 chunks / 2585.04 KiB (ceiling 82 / 2580.63; shared MarketingLayout-*.js chunk 10.64 KiB dedups Nav/Footer/Seo/Layout across 12 pages; entries 82->81)",
+            "build_storybook_docs_check": "pass",
+            "pending": "no 4b pending; next = Etapa 5 (operation/finance pilots)"
+        }
+    },
+    "graphify": {
+        "graph_exists": true,
+        "graph_json": "graphify-out/graph.json",
+        "graph_modified_in_this_task": false,
+        "graph_modify_status": "graphify-out/* still shows as modified vs HEAD (carried over from earlier stages); stat line counts identical to baseline snapshot - no regeneration during 4b"
+    },
+    "comparison": {
+        "note": "Compared against the Stage-4-partial AFTER snapshot (.opencode/snapshots/after-20260929_231350.json). HEAD unchanged (4d74145) between snapshots; all deltas are working-tree changes from Stage 4b (+6 out-of-scope files).",
+        "before": {
+            "source": ".opencode/snapshots/after-20260929_231350.json",
+            "head_commit": "4d74145 chore(brand): rebrand AgendAI -> Agenda Já (UI, SEO, PWA, docs)",
+            "files_tracked": 470,
+            "uncommitted_files": 96,
+            "modified": 32,
+            "deleted": 41,
+            "untracked_entries": 23,
+            "untracked_expanded": 135,
+            "lines_added": 56278,
+            "lines_removed": 46437,
+            "diff_files": 73,
+            "inventory_total": 697,
+            "inventory_src": 386
+        },
+        "after": {
+            "files_tracked": 470,
+            "uncommitted_files": 116,
+            "modified": 51,
+            "deleted": 41,
+            "untracked_entries": 24,
+            "untracked_expanded": 137,
+            "lines_added": 57035,
+            "lines_removed": 47119,
+            "diff_files": 92,
+            "inventory_total": 698,
+            "inventory_src": 389
+        },
+        "delta": {
+            "files_tracked": "0 (470 -> 470)",
+            "uncommitted_files": "+20 (96 -> 116 status lines)",
+            "modified": "+19 (32 -> 51)",
+            "deleted": "0 (41 -> 41)",
+            "untracked_entries": "+1 (23 -> 24; after-20260929_231350.json)",
+            "untracked_expanded": "+2 (135 -> 137; MarketingLayout.tsx + baseline snapshot json)",
+            "lines_added": "+757 (56278 -> 57035)",
+            "lines_removed": "+582 (46437 -> 47119)",
+            "diff_files": "+19 (73 -> 92; equals the 19 newly modified files)",
+            "inventory_total": "+1 (697 -> 698; MarketingLayout.tsx)",
+            "inventory_src": "+3 raw / +1 strict (386 -> 389; +MarketingLayout.tsx +2 nested graphify cache methodology noise)"
+        },
+        "new_files_since_stage4_partial": [
+            "src/layouts/marketing/MarketingLayout.tsx (the 4b deliverable)",
+            ".opencode/snapshots/after-20260929_231350.json (baseline snapshot itself)"
+        ],
+        "modified_since_stage4_partial": [
+            "13 stage-4b page files: 9x src/pages/marketing/*.tsx + LandingPage.tsx + PlansPage.tsx + EmailVerifiedPage.tsx + PlansPage.test.tsx",
+            "docs/agents/STRUCTURE.md (+1 line documenting MarketingLayout)",
+            "docs/restructure/07-stage4-pilots.md updated (inside untracked docs/restructure/ dir - shows as untracked, not modified)",
+            "6 out-of-scope files: AppointmentCalendar.tsx, AppointmentScheduler.tsx, productsApi.ts, schemas.ts, types.ts, schedulingUtils.ts (separate/parallel work, not in stated 4b scope)"
+        ],
+        "deleted_since_stage4_partial": "none (deleted set identical, 41 files)",
+        "unchanged_since_stage4_partial": [
+            "HEAD commit (4d74145)",
+            "tracked file count (470)",
+            "branch (main)",
+            "staged changes (none)",
+            "deleted file set (41)",
+            "visual-regression PNG count (48)",
+            "src/features/queue (9 files), src/app (2), src/components/{ui,patterns,infra} (26/35/14), docs (23), .storybook (4), scripts (9)"
+        ]
+    },
+    "structural_expectations": {
+        "no_commits_made": "PASS - HEAD still 4d74145 (same as baseline), git diff --cached empty, all 116 status lines are working-tree only",
+        "marketing_layout_created": "PASS - src/layouts/marketing/MarketingLayout.tsx exists (59 lines, forwardRef wrapper)",
+        "exactly_12_pages_refactored": "PASS - import grep finds exactly 12 consumers: 9 pages/marketing + LandingPage + PlansPage + EmailVerifiedPage",
+        "docs_updated": "PASS - docs/restructure/07-stage4-pilots.md 4b marked concluído + stage status 'concluída'; docs/agents/STRUCTURE.md documents layouts/marketing",
+        "src_layouts_grew_by_one": "PASS - 6 -> 7 files",
+        "scope_note": "PARTIAL - 6 additional modified files outside stated 4b scope are present in the working tree (AppointmentCalendar, AppointmentScheduler, productsApi, schemas, types, schedulingUtils)"
+    },
+    "notes": [
+        "status_lines (116) = 51 modified + 41 deleted + 24 untracked entries from `git status --porcelain` (directories collapsed); expanded untracked files = 137. Measured before this snapshot file was written, so writing it adds one further untracked entry.",
+        "Untracked expansion delta reconciles exactly: baseline 135 + 1 (src/layouts/marketing/MarketingLayout.tsx) + 1 (baseline snapshot json after-20260929_231350.json) = 137.",
+        "Diff line delta +757/+582 vs sum of the 20 newly touched files (+801/-586 vs HEAD): the gap is explained by docs/agents/STRUCTURE.md already contributing 27 of its 28 changed lines at baseline, plus minor drift in already-modified files; membership delta is exact (+19 files).",
+        "Verification performed: MarketingLayout.tsx exists and exports forwardRef layout with MARKETING_WRAPPER/SeoHead/background/afterFooter; importer grep across src/pages/**/*.tsx returns exactly the 12 expected files; src/layouts now admin(1)+app(5)+marketing(1)=7 files; 07-stage4-pilots.md status line reads 'concluída' and section 4b reads 'concluído'; STRUCTURE.md lines 30/59 mention MarketingLayout; git staged diff empty; HEAD=4d74145.",
+        "Gate numbers (tsc 0, eslint 11/593, vitest 199/199, storybook+visual 48/48, build 81/2585.04 KiB) are transcribed from docs/restructure/07-stage4-pilots.md section 3, not re-executed during this snapshot.",
+        "The 6 out-of-scope modified files carry +207/-1 lines and are attributed to separate/parallel work, not MarketingLayout; they are flagged in structural_expectations.scope_note.",
+        "Inventory methodology: excludes node_modules, .git, dist, .opencode (contains its own node_modules, 3667 files), .mimocode, and graphify-out/cache. Baseline's total (697) and src (386) sub-counts were internally inconsistent by 2 nested src/**/graphify-out/cache files; both readings still yield delta +1 = MarketingLayout.tsx.",
+        "Schema replicates after-20260929_231350.json (status_lines, log, ts, timestamp, repository, task, stage, baseline, git, file_inventory, graphify, comparison, notes) with stage4b_artifacts_on_disk + structural_expectations replacing stage4_artifacts_on_disk."
+    ]
+}

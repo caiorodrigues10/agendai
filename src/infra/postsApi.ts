@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient';
+import { apiClient, apiFetch } from './apiClient';
 import { authStorage } from './authStorage';
 import type { FeedPost, PostMode } from '../types';
 
@@ -15,6 +15,7 @@ function unwrap<T>(res: unknown): T {
 
 export type PostStatus = 'draft' | 'scheduled' | 'published';
 export type PostFormat = 'square' | 'portrait' | 'story';
+export type PostPhotoMode = 'none' | 'optional' | 'required';
 
 export interface PostDesignOptions {
   focalX?: number;
@@ -34,6 +35,7 @@ export interface CreatePostPayload {
   designOptions?: PostDesignOptions;
   primaryMediaId?: string | null;
   secondaryMediaId?: string | null;
+  videoUrl?: string | null;
   postMode?: PostMode;
   scheduledFor?: string | null;
   status?: 'draft';
@@ -49,6 +51,7 @@ export type UpdatePostPayload = Partial<{
   paletteKey: string;
   primaryMediaId: string | null;
   secondaryMediaId: string | null;
+  videoUrl: string | null;
   designOptions: PostDesignOptions;
 }>;
 
@@ -64,6 +67,12 @@ export interface PostTemplateDef {
   requiredMedia: number;
   formats: string[];
   previewUrl: string;
+  /** Grupo de exibição no catálogo (agenda, ofertas, …). */
+  group: string;
+  /** 'none' = sem foto; 'optional' = foto opcional (usa imagem ilustrativa se ausente); 'required' = foto obrigatória. */
+  photoMode: PostPhotoMode;
+  /** Chave da imagem ilustrativa padrão (ex.: salon/barber/beauty) quando photoMode = 'optional'. */
+  stockImageKey?: string | null;
 }
 
 export interface PostPaletteDef {
@@ -212,12 +221,10 @@ export const postsApi = {
   uploadMedia(barbershopId: string, file: File) {
     const form = new FormData();
     form.append('file', file);
-    return fetch(`/api/posts/media/${barbershopId}`, {
+    return apiFetch(`/api/posts/media/${encodeURIComponent(barbershopId)}`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token()}` },
       body: form,
-      credentials: 'include',
-    }).then(async (res) => {
+    }, token()).then(async (res) => {
       if (!res.ok) throw new Error(await res.text());
       const json = await res.json();
       return unwrap<PostMedia>(json);

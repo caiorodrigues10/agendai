@@ -283,7 +283,7 @@ const CreditCardForm = ({
           {/* FRONT */}
           <section className="cc-front">
             <div className="flex items-center justify-between mb-8 relative z-10 shrink-0">
-              <span className="text-sm font-semibold tracking-wide opacity-80">Agenda Já</span>
+              <span className="text-sm font-semibold tracking-wide opacity-80">Agende Já</span>
               <CreditCard size={28} className="opacity-70" />
             </div>
 

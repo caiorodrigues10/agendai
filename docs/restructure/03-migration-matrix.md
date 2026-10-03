@@ -21,7 +21,7 @@ Data: 2026-09-28 · Base: `01-component-inventory.md` + `02-map.md`.
 | domain/skeletons/* (8 + index.ts) | components/patterns/skeletons | barrel + OwnerFinancialPanel | ui/Skeleton | E2 | — | dup | migrar+unificar (ver acima) |
 | ui/DataTableState | components/patterns/states | 0 | nenhuma | E2 | — | **0c** | substituir — trio único loading/error/empty (Substitui SectionError e receitas inline) |
 | ui/SectionError | components/patterns/states | só DataTableState (0c) | nenhuma | E2 | — | 0c efet. | substituir (ver acima) |
-| ui/PaginationBar | components/patterns | 0 | nenhuma | E2 | — | **0c** | avaliar — manter só se adotado por tabelas da Etapa 5 |
+| ui/PaginationBar | components/patterns | 1 (ProductReservationsPanel) | nenhuma | E2 | — | ativo | mantido — adotado fora da fila 0c (settlement 2026-10-03) |
 | ui/credit-card-form | (MP checkout) | 0 | nenhuma | — | — | **0c** | avaliar — não é UI do design system; manter em features/payments se adotado |
 
 ## 2. `components/patterns/` — padrões novos a criar (Etapa 3, fecham as duplicações §5)
@@ -144,9 +144,13 @@ Data: 2026-09-28 · Base: `01-component-inventory.md` + `02-map.md`.
 
 ## 6. Painéis `0c` — fila de avaliação (nenhum import em `src/`, verificado por varredura completa)
 
+> **Settlement (2026-10-03):** varredura reconfirmou os 16 painéis `0c` + `credit-card-form`;
+> `ui/PaginationBar` foi adotado externamente e saiu da fila. Recomendações e pendências de
+> sanção em [15-section6-settlement](15-section6-settlement.md). Nada foi migrado/removido.
+
 | Componente | LOC | Destino se adotado | Stories | Testes | Estado | Ação/Exceção |
 |---|---|---|---|---|---|---|
-| StaffManagementPanel | 568 | features/team | — | — | 0c | avaliar — substitui TeamManager? decidir na Etapa 6 |
+| StaffManagementPanel | 568 | features/team | — | — | 0c | decidido: não substitui TeamManager (ver [13-stage6d](13-stage6d-growth.md)) → manter 0c |
 | SmartPricingPanel | 530 | features/pricing | — | — | 0c | avaliar |
 | VouchersPanel | 505 | features/vouchers | — | — | 0c | avaliar |
 | FormsPanel | 492 | features/forms | — | — | 0c | avaliar |
