@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   LuBriefcase, LuTicket, LuListTodo, LuUsers, LuBuilding2, LuActivity,
-  LuShield, LuCreditCard, LuGift, LuRefreshCcw, LuChevronLeft, LuMenu, LuLogOut
+  LuShield, LuCreditCard, LuGift, LuRefreshCcw, LuChevronLeft, LuMenu, LuLogOut,
+  LuLayoutDashboard
 } from 'react-icons/lu';
 import { useAuth } from '../../contexts/AuthContext';
 import { ThemeToggle } from '../../components/infra/ThemeToggle';
 
 const NAV_ITEMS = [
+  { to: '/master/overview', icon: LuLayoutDashboard, label: 'Visão geral' },
   { to: '/master/work', icon: LuBriefcase, label: 'Meu trabalho' },
   { to: '/master/tickets', icon: LuTicket, label: 'Atendimento' },
   { to: '/master/tasks', icon: LuListTodo, label: 'Tarefas' },

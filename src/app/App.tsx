@@ -31,6 +31,7 @@ const AccessBlockedPage = lazy(() => import('../pages/AccessBlockedPage'));
 const PlansPage = lazy(() => import('../pages/PlansPage'));
 const CheckoutPage = lazy(() => import('../pages/CheckoutPage'));
 const AdminLayout = lazy(() => import('../layouts/admin/AdminLayout'));
+const OverviewPage = lazy(() => import('../pages/MasterAdmin/OverviewPage'));
 const WorkSummaryPage = lazy(() => import('../pages/MasterAdmin/WorkSummaryPage'));
 const TicketsPage = lazy(() => import('../pages/MasterAdmin/TicketsPage'));
 const TicketDetailPage = lazy(() => import('../pages/MasterAdmin/TicketDetailPage'));
@@ -108,8 +109,9 @@ const App: React.FC = () => {
               </PrivateRoute>
             }
           >
-            <Route index element={<Navigate to="/master/work" replace />} />
-            <Route path="dashboard" element={<Navigate to="/master/work" replace />} />
+            <Route index element={<Navigate to="/master/overview" replace />} />
+            <Route path="dashboard" element={<Navigate to="/master/overview" replace />} />
+            <Route path="overview" element={<OverviewPage />} />
             <Route path="work" element={<WorkSummaryPage />} />
             <Route path="tickets" element={<TicketsPage />} />
             <Route path="tickets/new" element={<TicketsPage />} />

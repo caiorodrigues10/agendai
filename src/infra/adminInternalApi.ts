@@ -143,9 +143,123 @@ export interface PaginatedResponse<T> {
   meta: { total: number; page: number; limit: number; totalPages: number };
 }
 
+export type OverviewPeriod = 'today' | '7d' | '30d' | '90d' | '12m';
+
+export interface OverviewPlan {
+  planId: string;
+  name: string;
+  price: number;
+  billingCycle: string;
+  activeSubscriptions: number;
+  periodRevenue: number;
+  periodInvoices: number;
+}
+
+export interface OverviewAttentionItem {
+  id: string;
+  severity: 'danger' | 'warning' | 'info';
+  title: string;
+  description: string;
+  count: number;
+  to: string;
+}
+
+export interface AdminOverview {
+  period: {
+    key: OverviewPeriod;
+    label: string;
+    bucket: 'hour' | 'day' | 'month';
+    from: string;
+    to: string;
+    prevFrom: string;
+    prevTo: string;
+  };
+  generatedAt: string;
+  revenue: {
+    mrr: number;
+    arr: number;
+    arpa: number;
+    periodRevenue: number;
+    periodRevenuePrev: number;
+    periodRevenueDeltaPct: number | null;
+    paidInvoices: number;
+    byPlan: OverviewPlan[];
+  };
+  subscriptions: {
+    active: number;
+    trialing: number;
+    pending: number;
+    pastDue: number;
+    unpaid: number;
+    canceled: number;
+    trialingExpiring3d: number;
+    trialingExpiring7d: number;
+    newInPeriod: number;
+    newInPrevPeriod: number;
+    upgrades: number;
+    downgrades: number;
+  };
+  growth: {
+    newShops: number;
+    newShopsPrev: number;
+    newShopsDeltaPct: number | null;
+    activeShops: number;
+    pendingApprovals: number;
+    inactiveShops14d: number;
+    churnShops: number;
+    churnRevenue: number;
+    trialStarted: number;
+    trialPaid: number;
+    trialToPaidPct: number | null;
+  };
+  usage: {
+    appointmentsCreated: number;
+    completedAppointments: number;
+    gmv: number;
+    newClients: number;
+    whatsappSent: number;
+    whatsappDelivered: number;
+    emailSent: number;
+    avgRating: number | null;
+    reviews: number;
+  };
+  health: {
+    errors5xx24h: number;
+    errors5xxLastHour: number;
+    cronFailures24h: number;
+    outboxStuck: number;
+    whatsappFailed24h: number;
+    emailFailed24h: number;
+    avgDeliveryLatencyMs: number;
+  };
+  attention: OverviewAttentionItem[];
+  charts: {
+    series: string[];
+    newShops: number[];
+    revenue: number[];
+    appointmentsCreated: number[];
+    appointmentsCompleted: number[];
+    mrr: number[];
+    funnel: {
+      shopsCreated: number;
+      onboardingCompleted: number;
+      shopsWithAppointment: number;
+      paidSubscriptions: number;
+    };
+  };
+}
+
+
 // ── API ───────────────────────────────────────────────────────────────────────
 
 export const adminInternalApi = {
+  // Overview
+  getOverview(period: OverviewPeriod = '30d') {
+    return apiClient<{ success: boolean; data: AdminOverview }>(
+      `/api/admin/overview?period=${period}`, 'GET', undefined, token()
+    );
+  },
+
   // Work
   getWorkSummary() {
     return apiClient<{ success: boolean; data: WorkSummary }>(
