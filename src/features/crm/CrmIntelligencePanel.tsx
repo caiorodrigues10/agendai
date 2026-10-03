@@ -582,7 +582,7 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
                   aria-label="Buscar cliente"
                   value={search}
                   onChange={event => setSearch(event.target.value)}
-                  className="min-h-11 w-full rounded-lg border border-border bg-bg pl-9 pr-3 text-sm"
+                  className="min-h-11 w-full rounded-lg border border-input-border bg-input-bg pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-focus"
                   placeholder="Buscar cliente ou WhatsApp"
                 />
               </label>
