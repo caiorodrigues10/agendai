@@ -22,6 +22,7 @@ import {
   LuRotateCcw as RotateCcw,
   LuX as X,
   LuLandmark as Landmark,
+  LuTrendingUp as TrendingUp,
 } from 'react-icons/lu';
 import {
   adminApi,
@@ -41,6 +42,7 @@ import { getErrorMessage } from '../../utils/errorMessage';
 import { NotificationDeliveriesPanel, NotificationHealthPanel } from '../../features/notifications';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Toast } from '../../components/ui/Toast';
+import { BillingInsightsSection } from './BillingInsightsSection';
 
 // ─────────────────────────────────────────────
 // Helpers
@@ -2180,7 +2182,8 @@ type BillingSection =
   | 'subscriptions'
   | 'plans'
   | 'blocked'
-  | 'notifications';
+  | 'notifications'
+  | 'insights';
 
 const SECTION_OPTIONS: { value: BillingSection; icon: React.ReactNode; label: string }[] = [
   { value: 'summary', icon: <Landmark size={14} />, label: 'Resumo' },
@@ -2191,6 +2194,7 @@ const SECTION_OPTIONS: { value: BillingSection; icon: React.ReactNode; label: st
   { value: 'plans', icon: <Layers size={14} />, label: 'Planos' },
   { value: 'blocked', icon: <Ban size={14} />, label: 'Bloqueios' },
   { value: 'notifications', icon: <Bell size={14} />, label: 'Notificações' },
+  { value: 'insights', icon: <TrendingUp size={14} />, label: 'Análises' },
 ];
 
 export const BillingTab: React.FC = () => {
@@ -2235,6 +2239,7 @@ export const BillingTab: React.FC = () => {
       </div>
 
       {section === 'summary' && <BillingSummarySection />}
+      {section === 'insights' && <BillingInsightsSection />}
       {section === 'revenue' && <RevenueSection />}
       {section === 'payments' && <PaymentsSection shopNames={shopNames} />}
       {section === 'refunds' && <RefundsSection shopNames={shopNames} />}

@@ -1,4 +1,4 @@
-import { apiClient } from './apiClient';
+import { apiClient, apiFetch } from './apiClient';
 import { authStorage } from './authStorage';
 
 export type DashboardPeriod =
@@ -269,6 +269,42 @@ function getAuthHeader(): string {
   return token;
 }
 
+export interface BillingInsights {
+  generatedAt: string;
+  aging: {
+    buckets: { key: string; label: string; amount: number; count: number }[];
+    totalAmount: number;
+    totalCount: number;
+  };
+  cohorts: {
+    month: string;
+    subscriptions: number;
+    retained: number;
+    canceled: number;
+    retainedPct: number;
+  }[];
+  economics: {
+    mrr: number;
+    activeSubs: number;
+    arpa: number;
+    churnRatePct: number;
+    canceledIn30d: number;
+    ltv: number | null;
+  };
+  forecast: {
+    pendingDue30d: number;
+    pendingDue30dCount: number;
+    expectedValue: number;
+    confidencePct: number | null;
+  };
+}
+
+export interface BillingStatementParams {
+  status?: 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED';
+  from?: string;
+  to?: string;
+}
+
 export const adminApi = {
   getDashboard: (period: DashboardPeriod = '12m') =>
     apiClient<{ success: boolean; data: DashboardData }>(
@@ -420,6 +456,24 @@ export const adminApi = {
   },
 
   // ─── Faturamento: resumo de cobrança da plataforma ──────────────────────
+
+  getBillingInsights: () =>
+    apiClient<{ success: boolean; data: BillingInsights }>(
+      `/api/admin/billing/insights`,
+      'GET',
+      undefined,
+      getAuthHeader()
+    ),
+
+  /** Extrato de faturas em CSV (streaming no backend). */
+  exportBillingStatementCsv: (params: BillingStatementParams = {}) => {
+    const query = new URLSearchParams();
+    if (params.status) query.set('status', params.status);
+    if (params.from) query.set('from', params.from);
+    if (params.to) query.set('to', params.to);
+    const suffix = query.toString() ? `?${query.toString()}` : '';
+    return apiFetch(`/api/admin/billing/statement.csv${suffix}`, { method: 'GET' }, getAuthHeader());
+  },
 
   getBillingSummary: () =>
     apiClient<{ success: boolean; data: BillingSummary }>(

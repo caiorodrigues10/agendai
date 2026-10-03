@@ -17,6 +17,7 @@ test('operação mostra saúde de serviços e notificações', async ({ page }) 
   expect(healthResponse.status()).toBe(200);
 
   await expect(page.getByRole('heading', { name: 'Operação' })).toBeVisible();
-  await expect(page.getByText('Saúde das notificações')).toBeVisible();
+  // Painel tem título próprio (#notification-health-title) além do h2 da página.
+  await expect(page.locator('#notification-health-title')).toBeVisible();
   await expect(page.getByText(/não foi possível/i)).toHaveCount(0);
 });
