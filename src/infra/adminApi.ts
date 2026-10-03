@@ -105,6 +105,50 @@ export interface FinancialSummary {
   };
 }
 
+export interface BillingSummaryPlan {
+  planId: string;
+  name: string;
+  price: number;
+  billingCycle: string;
+  active: boolean;
+  subscriptions: number;
+  monthlyValue: number;
+}
+
+export interface BillingSummary {
+  generatedAt: string;
+  period: { from: string; to: string };
+  collected: {
+    month: number;
+    prevMonth: number;
+    deltaPct: number | null;
+    year: number;
+    invoicesMonth: number;
+  };
+  receivables: {
+    pending: number;
+    pendingCount: number;
+    overdue: number;
+    overdueCount: number;
+    dueNext7d: number;
+    dueNext7dCount: number;
+  };
+  mrr: { total: number; byPlan: BillingSummaryPlan[] };
+  renewals: {
+    endingIn7d: number;
+    endingIn7dCount: number;
+    trialingEndingIn7d: number;
+    trialingEndingIn7dCount: number;
+  };
+  churn: {
+    canceledIn30d: number;
+    canceledRevenueIn30d: number;
+    pastDue: number;
+    pastDueCount: number;
+  };
+  collectionRatePct: number | null;
+}
+
 export interface PaymentListItem {
   id: string;
   mpPaymentId: string | null;
@@ -374,6 +418,16 @@ export const adminApi = {
       getAuthHeader()
     );
   },
+
+  // ─── Faturamento: resumo de cobrança da plataforma ──────────────────────
+
+  getBillingSummary: () =>
+    apiClient<{ success: boolean; data: BillingSummary }>(
+      `/api/admin/billing/summary`,
+      'GET',
+      undefined,
+      getAuthHeader()
+    ),
 
   // ─── Faturamento: pagamentos ────────────────────────────────────────────
 
