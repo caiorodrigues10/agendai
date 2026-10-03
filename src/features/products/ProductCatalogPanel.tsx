@@ -198,7 +198,7 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
         </button>
       )}
 
-      <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar produto…" className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text-primary" />
+      <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar produto…" className="w-full rounded-xl border border-input-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-focus" />
 
       <label className="flex w-fit items-center gap-2 text-xs font-bold text-text-secondary">
         <input
