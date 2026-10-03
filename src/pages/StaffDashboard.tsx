@@ -23,7 +23,6 @@ import { useSubscription } from '../contexts/SubscriptionContext';
 import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
 import { ALL_TAB_IDS, getDefaultTab, canAccessTab, canAccessTabByMode, getPrimaryTabForMode } from '../config/tabRegistry';
 
-import { PwaInstallCard } from '../components/infra/PwaInstallCard';
 import { getErrorMessage } from '../utils/errorMessage';
 import { QueueItem } from '../types';
 import { LuLoaderCircle as Loader2 } from 'react-icons/lu';
@@ -253,7 +252,6 @@ export const StaffDashboard: React.FC = () => {
   const currentInChair = activeQueue.find(q => q.status === 'in_chair');
   const isOpen = isShopOpen();
   const queueClosed = isQueueClosed();
-  const installVideoUrl = import.meta.env.VITE_PWA_INSTALL_VIDEO_URL as string | undefined;
 
   return (
     <>
@@ -324,7 +322,6 @@ export const StaffDashboard: React.FC = () => {
                   showStaffStats
                 />
               )}
-              <PwaInstallCard variant="panel" videoUrl={installVideoUrl} />
             </div>
           )}
 
@@ -443,27 +440,35 @@ export const StaffDashboard: React.FC = () => {
             <ProductsHub onNotify={(message, type) => showToast(message, type === 'error' ? 'error' : 'success')} />
           )}
 
+          {activeTab === 'clients' && !settings && (
+            <div className="text-center py-12 bg-surface rounded-xl border border-border border-dashed">
+              <p className="text-text-muted">Carregando configurações do salão...</p>
+            </div>
+          )}
+
           {activeTab === 'clients' && settings && (
-            <ClientsTab
-              services={services}
-              staff={staff}
-              settings={settings}
-              canAnalytics={
-                hasDashboard && (isOwnerOrAdmin || hasPermission('CRM_ANALYTICS_VIEW'))
-              }
-              canCampaigns={isOwnerOrAdmin || hasPermission('CRM_CAMPAIGNS_MANAGE')}
-              canCancelSale={user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER'}
-              showUpgradeHint={
-                (user?.role === 'OWNER' || user?.role === 'MASTER_ADMIN') &&
-                !hasDashboard
-              }
-              availability={availability}
-              onBook={async d => {
-                await bookAppointment(d);
-                showToast('Agendamento confirmado');
-              }}
-              onNotify={showToast}
-            />
+            <ErrorBoundary variant="section">
+              <ClientsTab
+                services={services}
+                staff={staff}
+                settings={settings}
+                canAnalytics={
+                  hasDashboard && (isOwnerOrAdmin || hasPermission('CRM_ANALYTICS_VIEW'))
+                }
+                canCampaigns={isOwnerOrAdmin || hasPermission('CRM_CAMPAIGNS_MANAGE')}
+                canCancelSale={user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER'}
+                showUpgradeHint={
+                  (user?.role === 'OWNER' || user?.role === 'MASTER_ADMIN') &&
+                  !hasDashboard
+                }
+                availability={availability}
+                onBook={async d => {
+                  await bookAppointment(d);
+                  showToast('Agendamento confirmado');
+                }}
+                onNotify={showToast}
+              />
+            </ErrorBoundary>
           )}
 
           {activeTab === 'services' &&
@@ -493,16 +498,18 @@ export const StaffDashboard: React.FC = () => {
             )}
 
           {activeTab === 'reports' && user && (
-            <div className="space-y-6">
-              <FinancialDashboard
-                queueHistory={queue}
-                services={services}
-                currentUser={user}
-                allStaff={staff}
-                onDeleteHistoryItem={deleteHistoryItem}
-              />
-              <RecommendationsPanel />
-            </div>
+            <ErrorBoundary variant="section">
+              <div className="space-y-6">
+                <FinancialDashboard
+                  queueHistory={queue}
+                  services={services}
+                  currentUser={user}
+                  allStaff={staff}
+                  onDeleteHistoryItem={deleteHistoryItem}
+                />
+                <RecommendationsPanel />
+              </div>
+            </ErrorBoundary>
           )}
 
           {activeTab === 'finance' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
@@ -532,7 +539,9 @@ export const StaffDashboard: React.FC = () => {
           )}
 
           {activeTab === 'profit' && barbershopId && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
-            <ProfitEnginePanel barbershopId={barbershopId} />
+            <ErrorBoundary variant="section">
+              <ProfitEnginePanel barbershopId={barbershopId} />
+            </ErrorBoundary>
           )}
 
           {activeTab === 'equipment' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
@@ -540,7 +549,9 @@ export const StaffDashboard: React.FC = () => {
           )}
 
           {activeTab === 'organizations' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
-            <OrganizationsPanel />
+            <ErrorBoundary variant="section">
+              <OrganizationsPanel />
+            </ErrorBoundary>
           )}
 
           {activeTab === 'posts' && (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && (
