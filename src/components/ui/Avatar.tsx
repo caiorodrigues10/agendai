@@ -18,11 +18,11 @@ const SIZE_MAP: Record<AvatarSize, { container: string; text: string }> = {
 };
 
 const COLORS = [
-  'bg-chart-1/20 text-chart-1',
-  'bg-chart-2/20 text-chart-2',
-  'bg-chart-3/20 text-chart-3',
-  'bg-chart-4/20 text-chart-4',
-  'bg-chart-5/20 text-chart-5',
+  'bg-chart-1/20 text-text-primary',
+  'bg-chart-2/20 text-text-primary',
+  'bg-chart-3/20 text-text-primary',
+  'bg-chart-4/20 text-text-primary',
+  'bg-chart-5/20 text-text-primary',
 ];
 
 function getInitials(name: string): string {

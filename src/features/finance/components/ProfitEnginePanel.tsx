@@ -152,6 +152,7 @@ export const ProfitEnginePanel: React.FC<ProfitEnginePanelProps> = ({ barbershop
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <input
               type="month"
+              aria-label="Mês de referência"
               value={period}
               onChange={(e) => setPeriod(e.target.value)}
               className="min-h-11 rounded-xl border border-border bg-bg px-3 text-sm font-semibold text-text-primary outline-none focus:border-accent"

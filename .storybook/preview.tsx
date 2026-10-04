@@ -82,7 +82,7 @@ const preview: Preview = {
       // 'todo' - mostra violações apenas no painel
       // 'error' - falha o CI em violações a11y
       // 'off' - desliga as checagens
-      test: 'todo',
+      test: 'error',
     },
   },
 };

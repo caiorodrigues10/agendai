@@ -25,6 +25,7 @@ import { FeedPost, PostFormat, PostMode } from '../../types';
 import { PostPreviewBox } from './PostPreviewBox';
 import { TemplateThumbnail } from './TemplateThumbnail';
 import { OBJECTIVES, type PostType, type ObjectiveId } from './objectives';
+import { readDraft, writeDraft, clearDraft } from './draftStorage';
 
 type PostTone = 'promocional' | 'informativo' | 'divertido' | null;
 type EditorTab = 'content' | 'image' | 'format' | 'identity';
@@ -95,10 +96,6 @@ function downloadImage(imageUrl: string, filename: string) {
   document.body.removeChild(link);
 }
 
-function draftKey(userId: string, barbershopId: string, postId: string) {
-  return `agendai:post-draft:${userId}:${barbershopId}:${postId}`;
-}
-
 interface LocalDraftPayload {
   version: number;
   savedAt: number;
@@ -114,30 +111,6 @@ interface LocalDraftPayload {
   videoUrl: string | null;
   primaryMediaId: string | null;
   secondaryMediaId: string | null;
-}
-
-function readDraft(userId: string, barbershopId: string, postId: string): LocalDraftPayload | null {
-  try {
-    const raw = localStorage.getItem(draftKey(userId, barbershopId, postId));
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as LocalDraftPayload;
-    return parsed.version === DRAFT_VERSION ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
-function writeDraft(userId: string, barbershopId: string, postId: string, data: Omit<LocalDraftPayload, 'version' | 'savedAt'>) {
-  try {
-    localStorage.setItem(
-      draftKey(userId, barbershopId, postId),
-      JSON.stringify({ version: DRAFT_VERSION, savedAt: Date.now(), ...data })
-    );
-  } catch { /* noop */ }
-}
-
-function clearDraft(userId: string, barbershopId: string, postId: string) {
-  try { localStorage.removeItem(draftKey(userId, barbershopId, postId)); } catch { /* noop */ }
 }
 
 // ─── Props ────────────────────────────────────────────────────
@@ -173,7 +146,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   // Restaura o rascunho local ANTES do primeiro render dos estados, para que o
   // efeito de persistência nunca sobrescreva o rascunho salvo com valores vazios.
   const [initialDraft] = useState<LocalDraftPayload | null>(() =>
-    post ? null : readDraft(userId, barbershopId, 'new')
+    post ? null : readDraft<LocalDraftPayload>(userId, barbershopId, 'new', DRAFT_VERSION)
   );
   const draft = !isEditing ? initialDraft : null;
 
@@ -269,7 +242,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   }, [templates, templateFilter]);
 
   const persistDraft = useCallback(() => {
-    writeDraft(userId, barbershopId, storageKey, {
+    writeDraft<LocalDraftPayload>(userId, barbershopId, storageKey, DRAFT_VERSION, {
       objectiveId, templateKey, paletteKey, format, postMode, type, title, ctaText,
       content, videoUrl, primaryMediaId, secondaryMediaId,
     });

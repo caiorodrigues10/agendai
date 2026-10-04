@@ -11,6 +11,8 @@ interface ClosedSalonJoinModalProps {
   open: boolean;
   schedule: DaySchedule[];
   submitting?: boolean;
+  /** Índice do dia destacado (0=domingo). Padrão: dia atual — fixe em stories/testes. */
+  todayIndex?: number;
   onAddAnyway: () => void;
   onOpenSettings: () => void;
   onClose: () => void;
@@ -20,12 +22,13 @@ export const ClosedSalonJoinModal: React.FC<ClosedSalonJoinModalProps> = ({
   open,
   schedule,
   submitting = false,
+  todayIndex,
   onAddAnyway,
   onOpenSettings,
   onClose,
 }) => {
-  const todayIndex = new Date().getDay();
-  const today = schedule[todayIndex];
+  const activeIndex = todayIndex ?? new Date().getDay();
+  const today = schedule[activeIndex];
 
   return (
     <ModalShell
@@ -47,11 +50,11 @@ export const ClosedSalonJoinModal: React.FC<ClosedSalonJoinModalProps> = ({
               {schedule.map((day, index) => (
                 <div
                   key={`${day.dayName}-${index}`}
-                  className={`flex justify-between rounded px-2 py-1 ${index === todayIndex ? 'bg-warning/10 text-warning' : 'text-text-secondary'}`}
+                  className={`flex justify-between rounded px-2 py-1 ${index === activeIndex ? 'bg-warning/10 text-warning' : 'text-text-secondary'}`}
                 >
                   <span>
                     {day.dayName}
-                    {index === todayIndex ? ' (hoje)' : ''}
+                    {index === activeIndex ? ' (hoje)' : ''}
                   </span>
                   <span>{day.isOpen ? `${day.openTime} - ${day.closeTime}` : 'Fechado'}</span>
                 </div>

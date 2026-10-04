@@ -30,6 +30,8 @@
     "src",
     "./.storybook/**/*.ts",
     "./.storybook/**/*.tsx",
+    "e2e",
+    "server",
     "vitest.shims.d.ts"
   ]
 }

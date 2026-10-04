@@ -25,7 +25,6 @@ import { Toast } from '../../components/ui/Toast';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Skeleton } from '../../components/patterns/skeletons';
 import { PostEditor } from './PostEditor';
-import { type PostType, type ObjectiveId } from './objectives';
 import { PostPreviewBox } from './PostPreviewBox';
 
 type PostTone = 'promocional' | 'informativo' | 'divertido' | null;
@@ -51,55 +50,6 @@ const TONE_OPTIONS: { id: NonNullable<PostTone>; label: string }[] = [
   { id: 'informativo', label: 'Informativo' },
   { id: 'divertido', label: 'Descontraído' },
 ];
-
-// ─── Rascunho local (por usuário + salão + post) ──────────────
-
-const DRAFT_VERSION = 1;
-
-interface LocalDraft {
-  version: number;
-  savedAt: number;
-  objectiveId: ObjectiveId | null;
-  templateKey: string;
-  paletteKey: string;
-  format: PostFormat;
-  postMode: PostMode;
-  type: PostType;
-  title: string;
-  ctaText: string;
-  primaryMediaId: string | null;
-  secondaryMediaId: string | null;
-}
-
-function draftKey(userId: string, barbershopId: string, postId: string | 'new') {
-  return `agendai:post-draft:${userId}:${barbershopId}:${postId}`;
-}
-
-function readLocalDraft(userId: string, barbershopId: string, postId: string | 'new'): LocalDraft | null {
-  try {
-    const raw = localStorage.getItem(draftKey(userId, barbershopId, postId));
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as LocalDraft;
-    return parsed.version === DRAFT_VERSION ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
-function writeLocalDraft(userId: string, barbershopId: string, postId: string | 'new', data: Omit<LocalDraft, 'version' | 'savedAt'>) {
-  try {
-    localStorage.setItem(
-      draftKey(userId, barbershopId, postId),
-      JSON.stringify({ version: DRAFT_VERSION, savedAt: Date.now(), ...data })
-    );
-  } catch { /* storage full — ignore */ }
-}
-
-function clearLocalDraft(userId: string, barbershopId: string, postId: string | 'new') {
-  try {
-    localStorage.removeItem(draftKey(userId, barbershopId, postId));
-  } catch { /* noop */ }
-}
 
 // ─── Utilitários ───────────────────────────────────────────────
 

@@ -58,6 +58,24 @@ export default tseslint.config({
     react: { version: '18.3' },
   },
 }, {
+  files: ['server/**/*.js'],
+  languageOptions: {
+    globals: {
+      console: 'readonly',
+      process: 'readonly',
+      require: 'readonly',
+      module: 'readonly',
+      exports: 'readonly',
+      __dirname: 'readonly',
+      __filename: 'readonly',
+      Buffer: 'readonly',
+      setTimeout: 'readonly',
+      clearTimeout: 'readonly',
+      setInterval: 'readonly',
+      clearInterval: 'readonly',
+    },
+  },
+}, {
   files: ['src/components/ui/**/*.{ts,tsx}'],
   rules: {
     'no-restricted-imports': [

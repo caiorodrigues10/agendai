@@ -28,7 +28,7 @@ export interface ProfessionalGoal {
   endDate: string;
 }
 
-type GoalRecord = {
+interface GoalRecord {
   id: string;
   professionalId: string;
   professionalName?: string;
@@ -38,7 +38,7 @@ type GoalRecord = {
   period?: string;
   startDate: string;
   endDate: string;
-};
+}
 
 type GoalProgressRow = {
   goal?: GoalRecord;

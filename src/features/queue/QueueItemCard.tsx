@@ -100,7 +100,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
           ? 'border-l-4 border-l-accent bg-accent/10 border border-accent/30'
           : 'border-l-4 border-l-border-strong bg-surface';
       case 'completed':
-        return 'border-l-4 border-l-border-strong bg-surface opacity-60';
+        return 'border-l-4 border-l-border-strong bg-surface';
       default:
         return 'bg-surface';
     }
