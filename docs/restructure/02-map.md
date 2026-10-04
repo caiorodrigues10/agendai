@@ -90,7 +90,7 @@ Os 7 contexts envolvem **todas** as rotas globalmente (inclusive marketing/landi
 
 **Estilos globais/base em index.css:** `html`/`body`/`textarea`/`[role=button]`, bloco `prefers-reduced-motion`, `input[type=date]`+autofill, 4 regras `::-webkit-scrollbar`, `.ag-scroll`, `.no-scrollbar`, overrides de terceiros (Mercado Pago `.mp-secure-field`, reCAPTCHA `.grecaptcha-badge`, `body.recaptcha-visible`) e estilos de componente `.weather-image/.weather-effect` (L284-323) vivendo no sheet global.
 
-**`<style>` inline em TSX:** só `ui/chart.tsx` (shadcn/recharts) e `ui/credit-card-form.tsx` (MP).
+**`<style>` inline em TSX:** só `ui/chart.tsx` (shadcn/recharts). (`ui/credit-card-form.tsx` removido no settlement §6, 2026-10-03.)
 
 **Sem duplicação de sheets de token** (Skeleton/ThemedCalendar reusam `--ag-*`); riscos: tokens definidos 2× (light+dark), CSS de componente (weather) dentro do arquivo global, e diretórios `graphify-out/` dentro de `src/`.
 
@@ -99,4 +99,4 @@ Os 7 contexts envolvem **todas** as rotas globalmente (inclusive marketing/landi
 - **`React.lazy`: 36** — todos em `App.tsx` L13-48 (35 páginas incl. 9 marketing + 13 MasterAdmin + auth/públicas + `AdminLayout` + `StaffDashboard`). Zero lazy fora do App.
 - **Imports estáticos em App (sempre no bundle principal): 9** — `PrivateRoute`, `AccessBlockedListener`, `CookieConsent`, `AnalyticsListener`, `ScrollToTop`, `ReferralRefCapture`, `Loader`, `ErrorBoundary`, `PwaUpdatePrompt`.
 - **Suspense: 1** (App.tsx:60) — sem Suspense aninhado/paralelo.
-- **Lacuna-chave:** `StaffDashboard.tsx` importa estaticamente **~55 painéis domain** → payload inteiro do app-shell carrega no primeiro acesso a `/app/*`; não existe split por tab. Mesmo padrão em MasterAdmin (`MasterAdminDashboard` 75KB, `BillingTab` 80KB) e `LandingPage` (100KB).
+- **Lacuna-chave:** `StaffDashboard.tsx` importa estaticamente **~55 painéis domain** → payload inteiro do app-shell carrega no primeiro acesso a `/app/*`; não existe split por tab. Mesmo padrão em MasterAdmin (`BillingTab` 80KB; `MasterAdminDashboard` 75KB — **removido no settlement §6**) e `LandingPage` (100KB).

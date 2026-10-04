@@ -2,6 +2,12 @@
 
 Data: 2026-09-28 · Fonte: varredura completa de `src/` (contagens por grep full-text + scan de imports dinâmicos).
 
+> **Nota settlement §6 (2026-10-03):** os itens marcados abaixo como **0c** (16 painéis domain,
+> `credit-card-form`, `MasterAdminDashboard`) e `PromptModal` foram **removidos do código** após
+> sanção — junto com as 11 wrappers HTTP órfãas e 7 skeletons de `patterns/skeletons` que perderam
+> consumidor. Este inventário permanece como snapshot da Etapa 0; listas de "piores/piores sem
+> Field" (§5.2) e rankings (§5.1) citam arquivos já inexistentes.
+
 Legenda: ⚠️ = import de negócio (`contexts/`, `infra/`, `hooks/`, `config/`, `features/`) dentro de componente supostamente genérico. **0c** = zero consumidores em `src/`.
 
 ## 1. UI genérico — `src/components/ui/` (37 arquivos de código)

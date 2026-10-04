@@ -26,6 +26,12 @@ Resultado final: **181 exports órfãos / 25 arquivos mortos**.
 
 ## 3. Mortos adiados para settlement (25 — não tocar sem sanção)
 
+> **EXECUTADO (2026-10-03):** sanção do usuário ("resolva tudo") — os 25 abaixo foram removidos,
+> **mais 12 conssequências diretas (37 no total)**: `PromptModal` (perdeu `MasterAdminDashboard`) e as 11 wrappers
+> HTTP que ficaram órfãas sem os painéis (`copilot/corporate/enhancedForecast/fiscal/forms/
+>/integrations/pricing/purchasing/quality/vouchers/whatsappAi Api`). Detector pós-settlement:
+> **0 arquivos mortos**. Recuperação via git; detalhes em [15-section6-settlement](15-section6-settlement.md).
+
 | Qtd | Arquivos | Vinculado a |
 |---|---|---|
 | 16 | `components/domain/*Panel` (Copilot, Corporate, DepositIndicators, EnhancedForecast, Fiscal, Forms, Integrations, OnboardingMissions, Purchasing, Quality, Reputation, ServiceBookingSelector, SmartPricing, StaffManagement, Vouchers, WhatsAppAI) | §6 / D-012 |

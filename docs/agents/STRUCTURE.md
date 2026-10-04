@@ -77,7 +77,7 @@ agendai/
 
 ## Componentes UI compartilhados (reusar antes de criar)
 
-**`components/ui`:** `Avatar`, `chart`, `ConfirmDialog`, `ConsentCheckbox`, `credit-card-form`, `DynamicIcon`, `EmptyState`, `Field`, `Loader`, `Logo`, `PaginationBar`, `PasswordInput`, `SmartSelect`, `StatusBadge`, `ThemedCalendar`, `Toast`.
+**`components/ui`:** `Avatar`, `chart`, `ConfirmDialog`, `ConsentCheckbox`, `DynamicIcon`, `EmptyState`, `Field`, `Loader`, `Logo`, `PaginationBar`, `PasswordInput`, `SmartSelect`, `StatusBadge`, `ThemedCalendar`, `Toast`.
 
 **`components/patterns`:** `Card` (+Header/Title/Body), `ModalShell` (shell único dos modais), `Tabs`, `Tooltip`, `StatCard`, `DataTableState`/`SectionError` (trio estados), `skeletons/` (base + variantes + composições de domínio).
 
@@ -97,6 +97,6 @@ agendai/
 
 ## Wrappers HTTP (`src/infra/`)
 
-`apiClient`, `authApi`, `authStorage`, `barbershopApi`, `schedulingApi`, `clientsApi`, `crmApi`, `packagesApi`, `productsApi`, `financialApi`, `commissionsApi`, `paymentsApi`, `plansApi`, `subscriptionsApi`, `adminApi`, `usersApi`, `notificationsApi`, `referralsApi`, `contactApi`, `realtimeWs`, `clientPortalApi`, `catalogApi`, `pricingApi`, `purchasingApi`, `corporateApi`, `publicProductsApi`.
+`apiClient`, `authApi`, `authStorage`, `barbershopApi`, `schedulingApi`, `clientsApi`, `crmApi`, `packagesApi`, `productsApi`, `financialApi`, `commissionsApi`, `paymentsApi`, `plansApi`, `subscriptionsApi`, `adminApi`, `usersApi`, `notificationsApi`, `referralsApi`, `contactApi`, `realtimeWs`, `clientPortalApi`, `catalogApi`, `publicProductsApi`.
 
 **Regra:** novas chamadas HTTP só via `*Api.ts` / `apiClient` — nunca `fetch` solto nas páginas.

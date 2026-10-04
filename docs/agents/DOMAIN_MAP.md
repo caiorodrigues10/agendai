@@ -28,7 +28,7 @@ Código existente ≠ comprovadamente funcional em produção. Distinguir:
 | Notificações | `OwnerNotificationsPanel`, health | `notificationsApi` | `/api/notifications` |
 | Posts / feed / perfil social | `PostsManager`, `ShopProfile`, `PublicPostPage` | `postsApi`, `barbershopApi`, `socialApi` | `/api/feed`, `/api/posts`, `/api/salons/:salonId/*`; link direto `/saloes/:salonId/posts/:postId` |
 | Indicações | `OwnerReferralsPanel` | `referralsApi` | `/api/referrals` |
-| Master admin | `MasterAdminDashboard`, `BillingTab` | `adminApi` | `/api/admin/*` |
+| Master admin | `BillingTab` + 13 páginas de `pages/master-admin/` | `adminApi` | `/api/admin/*` |
 | Contato público | `ContactPage` | `contactApi` | `/api/contact` |
 | Realtime | polling + `realtimeWs` | `realtimeWs` | `/ws` (quando habilitado) |
 
