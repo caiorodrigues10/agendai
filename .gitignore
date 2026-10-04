@@ -38,6 +38,9 @@ dist-ssr
 graphify-out/cache/
 graphify-out/202*
 
+# OpenCode local artifacts
+.opencode/snapshots/
+
 # Playwright artifacts
 test-results/
 playwright-report/
