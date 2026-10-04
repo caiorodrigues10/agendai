@@ -21,6 +21,7 @@ test('engajamento: funil, adoção, NPS, suporte e risco de churn', async ({ pag
     timeout: 15_000,
   });
   await expect(page.getByRole('heading', { name: 'Adoção por recurso' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'NPS' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Suporte e SLA' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Risco de churn' })).toBeVisible();
 

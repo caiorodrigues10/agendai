@@ -25,7 +25,15 @@ const summary: EngagementSummary = {
     { key: 'services', label: 'Serviços ativos', shops: 8, pct: 80 },
     { key: 'catalog', label: 'Catálogo de produtos', shops: 5, pct: 50 },
   ],
-  nps: { responses: 10, promoters: 6, passives: 2, detractors: 2, score: 40 },
+  nps: {
+    windowDays: 90,
+    responses: 10,
+    promoters: 6,
+    passives: 2,
+    detractors: 2,
+    score: 40,
+    insufficient: false,
+  },
   support: {
     open: 5,
     openOver24h: 2,
@@ -87,6 +95,23 @@ describe('EngagementPage', () => {
 
     expect(await screen.findByRole('heading', { name: 'Engajamento' })).toBeInTheDocument();
     expect(adminEngagementApi.getEngagementSummary).toHaveBeenCalledTimes(2);
+  });
+
+  it('sinaliza NPS sem dados suficientes abaixo de 10 respostas', async () => {
+    vi.mocked(adminEngagementApi.getEngagementSummary).mockResolvedValue({
+      success: true,
+      data: {
+        ...summary,
+        nps: { ...summary.nps, responses: 3, score: 33, insufficient: true },
+      },
+    });
+
+    render(<EngagementPage />);
+
+    const notice = await screen.findByTestId('nps-insufficient');
+    expect(notice).toHaveTextContent('Sem dados suficientes');
+    expect(notice).toHaveTextContent('3 respostas');
+    expect(screen.getByRole('heading', { name: 'NPS' })).toBeInTheDocument();
   });
 
   it('mostra estado vazio quando não há salões em risco', async () => {

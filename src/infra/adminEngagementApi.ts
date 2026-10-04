@@ -31,11 +31,14 @@ export interface EngagementSummary {
   funnel: EngagementFunnelStep[];
   features: EngagementFeature[];
   nps: {
+    windowDays: number;
     responses: number;
     promoters: number;
     passives: number;
     detractors: number;
     score: number | null;
+    /** Abaixo de 10 respostas na janela o agregado não é exibido como confiável. */
+    insufficient: boolean;
   };
   support: {
     open: number;

@@ -91,8 +91,18 @@ const npsTone = (score: number | null): string => {
 const NpsCard: React.FC<{ nps: EngagementSummary['nps'] }> = ({ nps }) => (
   <Card
     title="NPS"
-    hint="Avaliações publicadas nos últimos 90 dias (promotores − detratore)"
+    hint={`Pesquisas NPS respondidas nos últimos ${nps.windowDays} dias (promotores − detratores)`}
   >
+    {nps.insufficient && (
+      <div
+        data-testid="nps-insufficient"
+        className="rounded-lg border border-border bg-bg px-3 py-2 text-xs text-text-muted"
+      >
+        Sem dados suficientes — mínimo de 10 respostas na janela de{' '}
+        {nps.windowDays} dias ({nps.responses}{' '}
+        {nps.responses === 1 ? 'resposta' : 'respostas'} até agora).
+      </div>
+    )}
     <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
       <Tile
         label="NPS"

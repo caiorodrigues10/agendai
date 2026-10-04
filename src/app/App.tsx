@@ -23,6 +23,7 @@ const PublicHome = lazy(() => import('../pages/PublicHome'));
 const PublicProductPage = lazy(() => import('../pages/PublicProductPage'));
 const PublicAppointmentManagePage = lazy(() => import('../pages/PublicAppointmentManagePage'));
 const PublicReviewPage = lazy(() => import('../pages/PublicReviewPage'));
+const PublicNpsPage = lazy(() => import('../pages/PublicNpsPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const ForgotPasswordPage = lazy(() => import('../pages/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('../pages/ResetPasswordPage'));
@@ -78,6 +79,7 @@ const App: React.FC = () => {
           <Route path="/queue/:id/produtos/:productId" element={<PublicProductPage />} />
           <Route path="/agendamento/gerenciar" element={<PublicAppointmentManagePage />} />
           <Route path="/avaliar" element={<PublicReviewPage />} />
+          <Route path="/nps/:surveyId" element={<PublicNpsPage />} />
           <Route path="/login" element={<LoginPage mode="login" />} />
           <Route path="/cadastro" element={<LoginPage mode="register" />} />
           <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
