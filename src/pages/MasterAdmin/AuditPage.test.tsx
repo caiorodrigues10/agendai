@@ -93,6 +93,7 @@ const response: AuditLogsResponse = {
       resourceId: 'abc',
       details: '{"fields":["active"]}',
       ipAddress: '192.168.0.1',
+      barbershopId: 'b1',
       createdAt: '2026-10-03T04:28:54.763Z',
     },
     {
@@ -146,6 +147,8 @@ describe('AuditPage', () => {
     });
 
     expect(screen.getByText('PATCH /api/products/abc')).toBeInTheDocument();
+    // Salão do log exibido como chip (nome vindo da facet de shops).
+    expect(screen.getByText('Barbearia Central', { selector: 'span' })).toBeInTheDocument();
     expect(screen.getByText('40 registro(s) · página 1 de 2')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Exportar CSV/ })).toBeEnabled();
   });

@@ -49,6 +49,7 @@ export interface AuditLog {
   resourceId: string | null;
   details: string | null;
   ipAddress: string | null;
+  barbershopId?: string | null;
   createdAt: string;
 }
 

@@ -16,8 +16,9 @@ const PAGE_SIZE = 25;
 
 const AuditLogList: React.FC<{
   logs: AuditLogsResponse['data'];
+  shops: AuditFacets['shops'];
   onSelect: (log: AuditLogsResponse['data'][number]) => void;
-}> = ({ logs, onSelect }) => {
+}> = ({ logs, shops, onSelect }) => {
   if (logs.length === 0) {
     return (
       <p className="px-4 py-8 text-center text-sm text-text-muted">Nenhum registro encontrado.</p>
@@ -33,6 +34,11 @@ const AuditLogList: React.FC<{
               <span className="text-xs font-mono text-accent font-medium">{log.action}</span>
               <span className="text-xs text-text-muted">em</span>
               <span className="text-xs font-medium">{log.resource}</span>
+              {log.barbershopId && (
+                <span className="rounded border border-border bg-bg px-1.5 py-0.5 text-[10px] font-bold text-text-secondary shrink-0">
+                  {shops.find((shop) => shop.id === log.barbershopId)?.name ?? 'Salão'}
+                </span>
+              )}
               {log.resourceId && (
                 <span className="text-xs text-text-muted font-mono truncate">{log.resourceId}</span>
               )}
@@ -218,11 +224,12 @@ const AuditBody: React.FC<{
   loading: boolean;
   error: string | null;
   response: AuditLogsResponse | null;
+  shops: AuditFacets['shops'];
   page: number;
   onRetry: () => void;
   onPageChange: (next: number) => void;
   onSelect: (log: AuditLogsResponse['data'][number]) => void;
-}> = ({ loading, error, response, page, onRetry, onPageChange, onSelect }) => {
+}> = ({ loading, error, response, shops, page, onRetry, onPageChange, onSelect }) => {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
@@ -254,7 +261,7 @@ const AuditBody: React.FC<{
         </div>
       )}
       <div className="bg-surface border border-border rounded-xl overflow-hidden divide-y divide-border/50">
-        <AuditLogList logs={response?.data ?? []} onSelect={onSelect} />
+        <AuditLogList logs={response?.data ?? []} shops={shops} onSelect={onSelect} />
       </div>
       <PaginationBar
         page={page}
@@ -392,6 +399,7 @@ export const AuditPage: React.FC = () => {
         loading={loading}
         error={error}
         response={response}
+        shops={facets.shops}
         page={page}
         onRetry={() => setReloadKey((key) => key + 1)}
         onPageChange={(next) => setParams({ page: String(next) })}
