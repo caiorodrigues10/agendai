@@ -46,7 +46,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** D-007 (OwnerFinancialPanel), D-008 (stories pendentes), D-009 (ClientProfileSheet), D-010 (checkout full-screen — `credit-card-form` já removido), D-011 (PostEditor), D-014 (states trio — skeletons órfãos já removidos).
+- **Adoção story-first:** D-007 (OwnerFinancialPanel), ~~D-008 (stories pendentes)~~ → **concluída** (2026-10-04, §5), D-009 (ClientProfileSheet), D-010 (checkout full-screen — `credit-card-form` já removido), D-011 (PostEditor), D-014 (states trio — skeletons órfãos já removidos).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - **Budget/D-002:** −50 KiB disponíveis no CSS via `@source not` após restyle de39 stories.
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -68,18 +68,19 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 ## 5. Re-execução pós-fila de dívidas (2026-10-04)
 
-Diretriz do usuário ("resolva tudo que precisa"): **D-003, D-015, D-016 e D-005 executadas**.
+Diretriz do usuário ("resolva tudo que precisa"): **D-003, D-015, D-016, D-005 e D-008 executadas**.
 
 | Check | Comando | Resultado |
 |---|---|---|
 | typecheck | `npm run typecheck` | **0 erros** (inclui `e2e/` e `server/` após D-003) |
 | lint (gate) | `npm run lint` (`eslint src`) | **0 err / 487 warn** |
 | lint full-scope | `npx eslint .` | **0 err / 489 warn** (teto 11/593) |
-| testes app+storybook | `npm test` | **318/318 (71 arquivos)** |
+| testes app+storybook | `npm test` | **334/334 (79 arquivos)** |
 | contratos | `test:contract` + `contract:check:strict` | **6/6** · **OK 404 chamadas / 555 rotas, 0 pend** |
-| storybook + a11y | `npm run test:storybook` | **73/73**, `a11y.test: 'error'` (**0 violações**) |
-| regressão visual | `test:visual -- --no-build` | **73/73** (1 snapshot atualizado: `QueueItemCard › Completed`) |
-| build prod (PWA) | `npm run build` | **88 precache / 2656,71 KiB** |
+| storybook + a11y | `npm run test:storybook` | **89/89**, `a11y.test: 'error'` (**0 violações**) |
+| regressão visual | `test:visual -- --no-build` | **89/89** (16 snapshots novos gravados; 1 atualizado: `QueueItemCard › Completed`) |
+| build prod (PWA) | `npm run build` | **88 precache / 2656,62 KiB** |
+| órfãos | `scripts/check-orphan-exports.mjs` | **0 arquivos mortos** |
 | docs / entrega | `docs:check` + `verify:delivery` | **OK** |
 
 O que cada dívida exigiu:
@@ -98,3 +99,10 @@ O que cada dívida exigiu:
   e `Tabs.stories` (tabpanels com `aria-controls`/`aria-labelledby`).
 - **D-013 (caso):** `ClosedSalonJoinModal` deixou de ler `new Date()` no render (prop `todayIndex`
   fixada na story) — era a causa dos 2 snapshots que divergiam a cada virada de semana.
+- **D-008 (sanada):** 16 stories novas em 8 painéis (`CashPanel`, `GoalsPanel`, `LoyaltyPanel`,
+  `WaitlistPanel`, `RecurringPackagesPanel`, `RecommendationsPanel`, `EquipmentPanel`,
+  `DepositPolicyPanel`) + `src/tests/storyProviders.tsx` (BarbershopFilters → Auth → Barbershop,
+  com `SeedShop` semeando `barbershopId` — sem ele todo painel fica em loading infinito).
+  Correções de a11y exigidas pelas novas stories: `aria-label` nos botões só-ícone de refresh
+  (`CashPanel`, `GoalsPanel`) e `text-text-secondary` no rótulo "Total recebido" (muted no card
+  `bg-selection` ficava em 4.3:1).

@@ -174,6 +174,7 @@ export const CashPanel: React.FC = () => {
             onClick={load}
             disabled={loading}
             className="h-10"
+            aria-label="Atualizar movimentações"
           >
             <RefreshCcw size={15} className={loading ? 'animate-spin' : ''} />
           </Button>
@@ -200,7 +201,7 @@ export const CashPanel: React.FC = () => {
             <div className="pointer-events-none absolute -right-3 -top-3 text-accent opacity-15">
               <Banknote size={64} />
             </div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
               Total recebido
             </p>
             <p className="mt-1 text-xl font-bold text-text-primary">{formatCurrencyBRL(todayTotal)}</p>

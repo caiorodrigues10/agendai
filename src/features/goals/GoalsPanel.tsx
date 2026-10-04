@@ -138,6 +138,7 @@ export const GoalsPanel: React.FC = () => {
             type="button"
             onClick={load}
             disabled={loading}
+            aria-label="Atualizar ranking de metas"
             className="flex h-10 items-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm font-medium text-text-secondary transition-colors hover:bg-bg hover:text-text-primary disabled:opacity-50"
           >
             <Target size={15} />
