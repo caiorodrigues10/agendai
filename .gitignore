@@ -35,8 +35,7 @@ dist-ssr
 !.env.example
 
 # Graphify
-graphify-out/cache/
-graphify-out/202*
+graphify-out/
 
 # OpenCode local artifacts
 .opencode/snapshots/
