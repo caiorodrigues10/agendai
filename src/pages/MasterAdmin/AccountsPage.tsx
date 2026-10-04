@@ -6,6 +6,7 @@ import {
   LuTriangleAlert,
   LuBuilding2,
   LuChevronRight,
+  LuPlus,
 } from 'react-icons/lu';
 import {
   adminInternalApi,
@@ -15,6 +16,8 @@ import {
   AccountsStatusFilter,
 } from '../../infra/adminInternalApi';
 import { PaginationBar } from '../../components/ui/PaginationBar';
+import { Button } from '../../components/ui/Button';
+import { ShopCreateWizard } from './ShopCreateWizard';
 
 const PAGE_SIZE = 20;
 
@@ -76,6 +79,7 @@ export const AccountsPage: React.FC = () => {
   const [response, setResponse] = useState<AccountsListResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   const q = searchParams.get('q') ?? '';
   const statusParam = searchParams.get('status') as AccountsStatusFilter | null;
@@ -174,6 +178,9 @@ export const AccountsPage: React.FC = () => {
             {meta.summary.pendingApproval > 0 && ` · ${meta.summary.pendingApproval} pendente(s)`}
           </span>
         )}
+        <Button type="button" size="sm" onClick={() => setWizardOpen(true)}>
+          <LuPlus size={16} /> Novo salão
+        </Button>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -310,6 +317,14 @@ export const AccountsPage: React.FC = () => {
             onPageChange={(next) => setParams({ page: next > 1 ? String(next) : null })}
           />
         </div>
+      )}
+
+      {wizardOpen && (
+        <ShopCreateWizard
+          open={wizardOpen}
+          onClose={() => setWizardOpen(false)}
+          onCreated={() => setReloadKey((key) => key + 1)}
+        />
       )}
     </div>
   );

@@ -3,7 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   LuBriefcase, LuTicket, LuListTodo, LuUsers, LuBuilding2, LuActivity,
   LuShield, LuCreditCard, LuGift, LuRefreshCcw, LuChevronLeft, LuMenu, LuLogOut,
-  LuLayoutDashboard, LuTarget
+  LuLayoutDashboard, LuTarget, LuUserCog
 } from 'react-icons/lu';
 import { useAuth } from '../../contexts/AuthContext';
 import { ThemeToggle } from '../../components/infra/ThemeToggle';
@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { to: '/master/tickets', icon: LuTicket, label: 'Atendimento' },
   { to: '/master/tasks', icon: LuListTodo, label: 'Tarefas' },
   { to: '/master/team', icon: LuUsers, label: 'Equipe' },
+  { to: '/master/users', icon: LuUserCog, label: 'Usuários' },
   { to: '/master/accounts', icon: LuBuilding2, label: 'Contas' },
   { to: '/master/operations', icon: LuActivity, label: 'Operação' },
   { to: '/master/audit', icon: LuShield, label: 'Auditoria' },

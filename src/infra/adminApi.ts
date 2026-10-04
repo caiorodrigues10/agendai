@@ -370,7 +370,7 @@ export const adminApi = {
 
   updateUser: (
     id: string,
-    body: { name?: string; email?: string; role?: string; active?: boolean }
+    body: { name?: string; email?: string; role?: string; active?: boolean; barbershopId?: string | null }
   ) =>
     apiClient<{ success: boolean; data: UserListItem }>(
       `/api/admin/users/${id}`,
