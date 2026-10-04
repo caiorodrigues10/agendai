@@ -41,6 +41,22 @@ export type RegisterWithGooglePayload = Omit<RegisterPayload, 'email' | 'passwor
   idToken: string;
 };
 
+export type SessionStatus = 'active' | 'revoked' | 'expired';
+
+export interface MySession {
+  id: string;
+  deviceLabel: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: string;
+  lastSeenAt: string;
+  expiresAt: string;
+  status: SessionStatus;
+  revokedAt: string | null;
+  revokedReason: string | null;
+  current: boolean;
+}
+
 export const authApi = {
   login: (email: string, password: string, recaptchaToken?: string, rememberMe = true) =>
     apiClient<AuthResponse>('/api/auth/login', 'POST', { email, password, recaptchaToken, rememberMe }),
@@ -65,4 +81,13 @@ export const authApi = {
     apiClient<{ message: string }>('/api/auth/forget-account', 'POST', { userId }),
   resendVerification: (token: string) =>
     apiClient<{ success: boolean; message: string }>('/api/auth/resend-verification', 'POST', {}, token),
+  mySessions: (token: string) =>
+    apiClient<{ success: boolean; data: MySession[] }>('/api/auth/sessions', 'GET', undefined, token),
+  revokeMySession: (id: string, payload: { reason?: string; confirmSelf?: boolean }, token: string) =>
+    apiClient<{ success: boolean; data: { id: string; revoked: boolean; current: boolean } }>(
+      `/api/auth/sessions/${id}`,
+      'DELETE',
+      payload,
+      token
+    ),
 };

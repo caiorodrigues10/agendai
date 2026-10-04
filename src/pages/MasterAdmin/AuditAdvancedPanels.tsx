@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { LuLoader, LuRefreshCcw, LuTriangleAlert } from 'react-icons/lu';
-import { adminAuditApi, AuditAlerts, AuditSessions } from '../../infra/adminAuditApi';
+import { adminAuditApi, AuditAlerts } from '../../infra/adminAuditApi';
+import { adminSessionsApi, AdminSession, SessionStatus } from '../../infra/adminSessionsApi';
+import { ApiError } from '../../infra/apiClient';
+import { AccountActionDialog } from './AccountActionDialog';
 
 const time = (iso: string): string =>
   new Date(iso).toLocaleString('pt-BR', {
@@ -41,16 +44,16 @@ const PanelShell: React.FC<PanelShellProps> = ({ title, hint, error, onRetry, ch
   </div>
 );
 
-const statusTone: Record<AuditSessions['sessions'][number]['status'], string> = {
-  ACTIVE: 'text-success',
-  EXPIRED: 'text-warning',
-  CLOSED: 'text-text-muted',
+const statusTone: Record<SessionStatus, string> = {
+  active: 'text-success',
+  expired: 'text-warning',
+  revoked: 'text-text-muted',
 };
 
-const statusLabel: Record<AuditSessions['sessions'][number]['status'], string> = {
-  ACTIVE: 'Ativa',
-  EXPIRED: 'Expirada',
-  CLOSED: 'Encerrada',
+const statusLabel: Record<SessionStatus, string> = {
+  active: 'Ativa',
+  expired: 'Expirada',
+  revoked: 'Encerrada',
 };
 
 /** Alertas de ações sensíveis das últimas 24h (agrupados + recentes). */
@@ -132,35 +135,58 @@ export const AuditAlertsPanel: React.FC = () => {
   );
 };
 
-/** Sessões de acesso (login/refresh/logout) das últimas 24h. */
+/** Sessões reais de acesso (`UserSession`) — listar e encerrar dispositivos. */
 export const AuditSessionsPanel: React.FC = () => {
-  const [sessions, setSessions] = useState<AuditSessions | null>(null);
+  const [sessions, setSessions] = useState<AdminSession[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [target, setTarget] = useState<AdminSession | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
-    adminAuditApi
-      .getAuditSessions()
+    adminSessionsApi
+      .list({ limit: 8 })
       .then((res) => {
         if (!active) return;
         setSessions(res.data);
         setError(null);
       })
-      .catch(() => {
-        if (active) setError('Não foi possível carregar as sessões.');
+      .catch((err: unknown) => {
+        if (!active) return;
+        const status = err instanceof ApiError ? err.statusCode : 0;
+        setError(
+          status === 403
+            ? 'Sem permissão para ver sessões (requer Gerenciar usuários).'
+            : 'Não foi possível carregar as sessões.'
+        );
       });
     return () => {
       active = false;
     };
   }, [reloadKey]);
 
-  const list = sessions?.sessions ?? [];
+  const revoke = (reason: string) => {
+    if (!target) return;
+    setBusy(true);
+    adminSessionsApi
+      .revoke(target.id, { reason, confirmSelf: target.current })
+      .then(() => {
+        setActionError(null);
+        setTarget(null);
+        setReloadKey((key) => key + 1);
+      })
+      .catch(() => setActionError('Não foi possível encerrar a sessão.'))
+      .finally(() => setBusy(false));
+  };
+
+  const list = sessions ?? [];
 
   return (
     <PanelShell
-      title="Sessões (24h)"
-      hint="Último evento por usuário + IP; ativa = movimento há <30min"
+      title="Sessões de acesso"
+      hint="Dispositivos conectados agora (dados reais) — encerrar derruba o acesso na hora"
       error={error && !sessions ? error : null}
       onRetry={() => setReloadKey((key) => key + 1)}
     >
@@ -169,23 +195,65 @@ export const AuditSessionsPanel: React.FC = () => {
           <LuLoader className="animate-spin text-accent" size={20} />
         </div>
       ) : list.length === 0 ? (
-        <p className="text-xs text-text-muted">Nenhuma sessão nas últimas 24h.</p>
+        <p className="text-xs text-text-muted">Nenhuma sessão registrada.</p>
       ) : (
-        <ul className="space-y-1.5">
-          {list.slice(0, 8).map((session) => (
-            <li key={session.key} className="flex items-center gap-2 text-xs min-w-0">
-              <span className="font-medium text-text-primary truncate">
-                {session.name ?? session.email ?? '—'}
+        <ul className="space-y-1.5" data-testid="audit-sessions-list">
+          {list.map((session) => (
+            <li key={session.id} className="flex items-center gap-2 text-xs min-w-0">
+              <span className="font-medium text-text-primary truncate">{session.userName}</span>
+              <span className="text-text-muted truncate hidden sm:inline">
+                {session.deviceLabel ?? 'Dispositivo desconhecido'}
               </span>
-              <span className="text-text-muted font-mono shrink-0">{session.ip ?? '—'}</span>
-              <span className="text-text-muted shrink-0">{session.lastEvent}</span>
-              <span className={`font-bold shrink-0 ml-auto ${statusTone[session.status]}`}>
+              <span className="text-text-muted font-mono shrink-0">{session.ipAddress ?? '—'}</span>
+              <span className="text-text-muted shrink-0">{time(session.lastSeenAt)}</span>
+              <span className={`font-bold shrink-0 ${statusTone[session.status]}`}>
                 {statusLabel[session.status]}
               </span>
+              {session.current && (
+                <span className="shrink-0 rounded bg-accent/15 px-1.5 py-0.5 font-bold text-accent">
+                  Você
+                </span>
+              )}
+              {session.status === 'active' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActionError(null);
+                    setTarget(session);
+                  }}
+                  className="ml-auto shrink-0 rounded-lg border border-border px-2 py-1 font-bold text-danger hover:bg-danger/10"
+                >
+                  Encerrar
+                </button>
+              )}
             </li>
           ))}
         </ul>
       )}
+      <AccountActionDialog
+        open={target !== null}
+        title="Encerrar sessão"
+        message={
+          target
+            ? `Encerrar a sessão de ${target.userName} em ${
+                target.deviceLabel ?? 'dispositivo desconhecido'
+              }? ${
+                target.current
+                  ? 'Esta é a sessão atual: você ficará desconectado deste navegador.'
+                  : ''
+              }`
+            : ''
+        }
+        confirmLabel="Encerrar sessão"
+        danger
+        loading={busy}
+        error={actionError}
+        onConfirm={revoke}
+        onCancel={() => {
+          setTarget(null);
+          setActionError(null);
+        }}
+      />
     </PanelShell>
   );
 };

@@ -5,7 +5,7 @@ import { ClosedSalonJoinModal, QueueCapacityBanner, QueueItemCard, QueueStatusCa
 import { AddCustomerForm, ClientsTab } from '../features/clients';
 import { ShopFloorControls, ShopProfile } from '../features/shop';
 import { CatalogManager, ServiceManager } from '../features/catalog';
-import { SettingsManager, AccountPrivacyPanel, ProfileAvatarSection, ProfileSettingsPanel } from '../features/settings';
+import { SettingsManager, AccountPrivacyPanel, DevicesPanel, ProfileAvatarSection, ProfileSettingsPanel } from '../features/settings';
 import { SupportPanel } from '../features/support';
 import { TeamManager } from '../features/team';
 import { CashPanel, DemandAlertBanner, FinancialDashboard, OwnerFinancialPanel, ProfitEnginePanel } from '../features/finance';
@@ -594,6 +594,7 @@ export const StaffDashboard: React.FC = () => {
                         onNotify={showToast}
                       />
                       <ProfileSettingsPanel onNotify={showToast} />
+                      <DevicesPanel />
                     </div>
                   }
                 />
@@ -609,6 +610,7 @@ export const StaffDashboard: React.FC = () => {
                       onNotify={showToast}
                     />
                     <ProfileSettingsPanel onNotify={showToast} />
+                    <DevicesPanel />
                   </section>
                   {user.role === 'EMPLOYEE' && (
                     <section className="space-y-4">

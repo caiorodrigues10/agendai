@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AuditPage } from './AuditPage';
 import { adminAuditApi, AuditLogsResponse } from '../../infra/adminAuditApi';
+import { adminSessionsApi } from '../../infra/adminSessionsApi';
 
 vi.mock('../../infra/adminAuditApi', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../infra/adminAuditApi')>();
@@ -13,7 +14,18 @@ vi.mock('../../infra/adminAuditApi', async (importOriginal) => {
       exportAuditLogsCsv: vi.fn(),
       getAuditFacets: vi.fn(),
       getAuditAlerts: vi.fn(),
-      getAuditSessions: vi.fn(),
+    },
+  };
+});
+
+vi.mock('../../infra/adminSessionsApi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../infra/adminSessionsApi')>();
+  return {
+    ...actual,
+    adminSessionsApi: {
+      list: vi.fn(),
+      revoke: vi.fn(),
+      revokeAllForUser: vi.fn(),
     },
   };
 });
@@ -46,21 +58,28 @@ const alerts = {
 };
 
 const sessions = {
-  generatedAt: '2026-10-03T12:00:00.000Z',
-  windowHours: 24,
-  sessions: [
+  success: true,
+  data: [
     {
-      key: 'user-1|1.1.1.1',
+      id: 's1',
       userId: 'user-1',
-      email: 'admin@agendai.local',
-      name: 'Administrador',
-      ip: '1.1.1.1',
+      userName: 'Administrador',
+      userEmail: 'admin@agendai.local',
+      userRole: 'MASTER_ADMIN',
+      barbershopId: null,
+      deviceLabel: 'Chrome em macOS',
+      ipAddress: '1.1.1.1',
       userAgent: 'chrome',
-      lastEvent: 'REFRESH',
-      lastAt: '2026-10-03T11:55:00.000Z',
-      status: 'ACTIVE' as const,
+      createdAt: '2026-10-03T11:00:00.000Z',
+      lastSeenAt: '2026-10-03T11:55:00.000Z',
+      expiresAt: '2026-10-04T11:00:00.000Z',
+      status: 'active' as const,
+      revokedAt: null,
+      revokedReason: null,
+      current: true,
     },
   ],
+  meta: { total: 1, page: 1, limit: 8, totalPages: 1 },
 };
 
 const response: AuditLogsResponse = {
@@ -103,10 +122,7 @@ describe('AuditPage', () => {
     vi.mocked(adminAuditApi.getAuditLogs).mockResolvedValue(response);
     vi.mocked(adminAuditApi.getAuditFacets).mockResolvedValue({ success: true, data: facets });
     vi.mocked(adminAuditApi.getAuditAlerts).mockResolvedValue({ success: true, data: alerts });
-    vi.mocked(adminAuditApi.getAuditSessions).mockResolvedValue({
-      success: true,
-      data: sessions,
-    });
+    vi.mocked(adminSessionsApi.list).mockResolvedValue(sessions);
   });
 
   afterEach(() => {
@@ -185,8 +201,9 @@ describe('AuditPage', () => {
     renderPage();
 
     expect(await screen.findByText('Alertas sensíveis (24h)')).toBeInTheDocument();
-    expect(screen.getByText('Sessões (24h)')).toBeInTheDocument();
+    expect(screen.getByText('Sessões de acesso')).toBeInTheDocument();
     expect(await screen.findByText('ação(ões) sensível(is)')).toBeInTheDocument();
+    expect(await screen.findByText('Chrome em macOS')).toBeInTheDocument();
     expect(screen.getByText('Ativa')).toBeInTheDocument();
   });
 

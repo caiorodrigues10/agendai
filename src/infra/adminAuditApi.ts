@@ -56,22 +56,6 @@ export interface AuditAlerts {
   }[];
 }
 
-export interface AuditSessions {
-  generatedAt: string;
-  windowHours: number;
-  sessions: {
-    key: string;
-    userId: string | null;
-    email: string | null;
-    name: string | null;
-    ip: string | null;
-    userAgent: string | null;
-    lastEvent: string;
-    lastAt: string;
-    status: 'ACTIVE' | 'CLOSED' | 'EXPIRED';
-  }[];
-}
-
 const auditQueryString = (params: AuditLogListParams): string => {
   const qs = new URLSearchParams();
   if (params.page) qs.set('page', String(params.page));
@@ -112,12 +96,6 @@ export const adminAuditApi = {
   getAuditAlerts() {
     return apiClient<{ success: boolean; data: AuditAlerts }>(
       '/api/admin/audit-logs/alerts', 'GET', undefined, token()
-    );
-  },
-
-  getAuditSessions() {
-    return apiClient<{ success: boolean; data: AuditSessions }>(
-      '/api/admin/audit-logs/sessions', 'GET', undefined, token()
     );
   },
 

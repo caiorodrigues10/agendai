@@ -1,7 +1,9 @@
 /// <reference types="vitest/globals" />
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AuditAlertsPanel, AuditSessionsPanel } from './AuditAdvancedPanels';
-import { adminAuditApi, AuditAlerts, AuditSessions } from '../../infra/adminAuditApi';
+import { adminAuditApi, AuditAlerts } from '../../infra/adminAuditApi';
+import { adminSessionsApi, AdminSession } from '../../infra/adminSessionsApi';
+import { ApiError } from '../../infra/apiClient';
 
 vi.mock('../../infra/adminAuditApi', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../infra/adminAuditApi')>();
@@ -12,7 +14,18 @@ vi.mock('../../infra/adminAuditApi', async (importOriginal) => {
       exportAuditLogsCsv: vi.fn(),
       getAuditFacets: vi.fn(),
       getAuditAlerts: vi.fn(),
-      getAuditSessions: vi.fn(),
+    },
+  };
+});
+
+vi.mock('../../infra/adminSessionsApi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../infra/adminSessionsApi')>();
+  return {
+    ...actual,
+    adminSessionsApi: {
+      list: vi.fn(),
+      revoke: vi.fn(),
+      revokeAllForUser: vi.fn(),
     },
   };
 });
@@ -41,34 +54,44 @@ const alerts: AuditAlerts = {
   ],
 };
 
-const sessions: AuditSessions = {
-  generatedAt: '2026-10-03T12:00:00.000Z',
-  windowHours: 24,
-  sessions: [
-    {
-      key: 'u1|1.1.1.1',
-      userId: 'u1',
-      email: 'admin@agendai.local',
-      name: 'Administrador',
-      ip: '1.1.1.1',
-      userAgent: 'chrome',
-      lastEvent: 'REFRESH',
-      lastAt: '2026-10-03T11:55:00.000Z',
-      status: 'ACTIVE',
-    },
-    {
-      key: 'u2|2.2.2.2',
-      userId: 'u2',
-      email: 'owner@x.com',
-      name: null,
-      ip: '2.2.2.2',
-      userAgent: 'safari',
-      lastEvent: 'LOGOUT',
-      lastAt: '2026-10-03T10:00:00.000Z',
-      status: 'CLOSED',
-    },
-  ],
-};
+const adminSessions: AdminSession[] = [
+  {
+    id: 's1',
+    userId: 'u1',
+    userName: 'Administrador',
+    userEmail: 'admin@agendai.local',
+    userRole: 'MASTER_ADMIN',
+    barbershopId: null,
+    deviceLabel: 'Chrome em macOS',
+    ipAddress: '1.1.1.1',
+    userAgent: 'ua-1',
+    createdAt: '2026-10-03T11:00:00.000Z',
+    lastSeenAt: '2026-10-03T11:55:00.000Z',
+    expiresAt: '2026-10-04T11:00:00.000Z',
+    status: 'active',
+    revokedAt: null,
+    revokedReason: null,
+    current: true,
+  },
+  {
+    id: 's2',
+    userId: 'u2',
+    userName: 'Proprietário',
+    userEmail: 'owner@x.com',
+    userRole: 'OWNER',
+    barbershopId: 'b1',
+    deviceLabel: 'Firefox em Windows',
+    ipAddress: '2.2.2.2',
+    userAgent: 'ua-2',
+    createdAt: '2026-10-02T10:00:00.000Z',
+    lastSeenAt: '2026-10-02T10:30:00.000Z',
+    expiresAt: '2026-10-03T10:00:00.000Z',
+    status: 'revoked',
+    revokedAt: '2026-10-02T11:00:00.000Z',
+    revokedReason: 'acesso indevido',
+    current: false,
+  },
+];
 
 describe('AuditAlertsPanel', () => {
   afterEach(() => vi.clearAllMocks());
@@ -104,30 +127,79 @@ describe('AuditAlertsPanel', () => {
 describe('AuditSessionsPanel', () => {
   afterEach(() => vi.clearAllMocks());
 
-  it('lista sessões com status', async () => {
-    vi.mocked(adminAuditApi.getAuditSessions).mockResolvedValue({
+  it('lista sessões reais com dispositivo, IP e status', async () => {
+    vi.mocked(adminSessionsApi.list).mockResolvedValue({
       success: true,
-      data: sessions,
+      data: adminSessions,
+      meta: { total: 2, page: 1, limit: 8, totalPages: 1 },
     });
 
     render(<AuditSessionsPanel />);
 
-    expect(await screen.findByText('Administrador')).toBeInTheDocument();
+    expect(await screen.findByText('Chrome em macOS')).toBeInTheDocument();
+    expect(screen.getByText('Firefox em Windows')).toBeInTheDocument();
     expect(screen.getByText('Ativa')).toBeInTheDocument();
     expect(screen.getByText('Encerrada')).toBeInTheDocument();
-    expect(screen.getByText('owner@x.com')).toBeInTheDocument();
+    expect(screen.getByText('Você')).toBeInTheDocument();
+    expect(screen.getByText('1.1.1.1')).toBeInTheDocument();
+  });
+
+  it('encerra uma sessão informando o motivo e recarrega a lista', async () => {
+    vi.mocked(adminSessionsApi.list).mockResolvedValue({
+      success: true,
+      data: adminSessions,
+      meta: { total: 2, page: 1, limit: 8, totalPages: 1 },
+    });
+    vi.mocked(adminSessionsApi.revoke).mockResolvedValue({
+      success: true,
+      data: { id: 's1', revoked: true },
+    });
+
+    render(<AuditSessionsPanel />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Encerrar' }));
+    const textarea = await screen.findByPlaceholderText('Por que esta ação está sendo executada?');
+    fireEvent.change(textarea, { target: { value: 'Sessão suspeita de terceiro' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Encerrar sessão' }));
+
+    await waitFor(() =>
+      expect(adminSessionsApi.revoke).toHaveBeenCalledWith('s1', {
+        reason: 'Sessão suspeita de terceiro',
+        confirmSelf: true,
+      }),
+    );
+    await waitFor(() => expect(adminSessionsApi.list).toHaveBeenCalledTimes(2));
+    expect(screen.queryByPlaceholderText('Por que esta ação está sendo executada?')).toBeNull();
   });
 
   it('mostra estado vazio quando não há sessões', async () => {
-    vi.mocked(adminAuditApi.getAuditSessions).mockResolvedValue({
+    vi.mocked(adminSessionsApi.list).mockResolvedValue({
       success: true,
-      data: { ...sessions, sessions: [] },
+      data: [],
+      meta: { total: 0, page: 1, limit: 8, totalPages: 0 },
     });
+
+    render(<AuditSessionsPanel />);
+
+    expect(await screen.findByText('Nenhuma sessão registrada.')).toBeInTheDocument();
+  });
+
+  it('mostra erro de permissão (403) e recarrega ao tentar novamente', async () => {
+    vi.mocked(adminSessionsApi.list)
+      .mockRejectedValueOnce(new ApiError('Sem permissão', 403))
+      .mockResolvedValueOnce({
+        success: true,
+        data: adminSessions,
+        meta: { total: 2, page: 1, limit: 8, totalPages: 1 },
+      });
 
     render(<AuditSessionsPanel />);
 
     expect(
-      await screen.findByText('Nenhuma sessão nas últimas 24h.'),
+      await screen.findByText('Sem permissão para ver sessões (requer Gerenciar usuários).'),
     ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Tentar novamente/ }));
+    await waitFor(() => expect(adminSessionsApi.list).toHaveBeenCalledTimes(2));
+    expect(await screen.findByText('Chrome em macOS')).toBeInTheDocument();
   });
 });

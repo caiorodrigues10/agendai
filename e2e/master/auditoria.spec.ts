@@ -19,7 +19,7 @@ test('auditoria filtra pela URL e exporta o CSV', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Auditoria' })).toBeVisible();
 
   await expect(page.getByText('Alertas sensíveis (24h)')).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByText('Sessões (24h)')).toBeVisible();
+  await expect(page.getByText('Sessões de acesso')).toBeVisible();
 
   await page.getByRole('button', { name: 'Detalhes' }).first().click();
   const dialog = page.getByRole('dialog');
