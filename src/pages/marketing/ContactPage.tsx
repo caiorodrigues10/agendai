@@ -98,7 +98,7 @@ export const ContactPage: React.FC = () => {
 
   return (
     <MarketingLayout
-      title="Contato — Fale com a equipe Agende Já | Agende Já"
+      title="Contato — Fale com a equipe Agenda Já | Agenda Já"
       description="Planos, suporte ou parceria — envie sua mensagem e receba retorno em 1 dia útil. Sem mailto, sem caixa de spam perdida."
       path="/contato"
       background={
@@ -137,7 +137,7 @@ export const ContactPage: React.FC = () => {
               transition={{ delay: 0.1 }}
               className="mt-6 max-w-xl text-lg font-medium leading-relaxed text-neutral-400"
             >
-              Planos, suporte ou parceria — a mensagem cai no painel da equipe Agende Já. Sem mailto,
+              Planos, suporte ou parceria — a mensagem cai no painel da equipe Agenda Já. Sem mailto,
               sem caixa de spam perdida.
             </motion.p>
           </div>

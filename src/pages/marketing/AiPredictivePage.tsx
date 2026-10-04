@@ -407,7 +407,7 @@ export const AiPredictivePage: React.FC = () => {
     <MarketingLayout
       ref={pageRef}
       wrapperClassName="min-h-screen bg-black text-neutral-100 selection:bg-accent/30 font-sans overflow-x-hidden"
-      title="IA Preditiva — Previsão de demanda e risco de cancelamento | Agende Já"
+      title="IA Preditiva — Previsão de demanda e risco de cancelamento | Agenda Já"
       description="Inteligência artificial que prevê quedas de demanda, risco de cancelamento e melhores horários para o salão. 30 dias de Pro grátis."
       path="/ia-preditiva"
       jsonLd={softwareApplicationLd('/ia-preditiva')}

@@ -352,7 +352,7 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     ],
     proofTitle: 'Feito para salão, não para escritório',
     proofBody:
-      'O Agende Já já cobre fila, agenda, clientes, financeiro e produtos. 30 dias de Pro completo, sem cartão. Essencial fica R$ 14/mês; Pro, R$ 20/mês.',
+      'A Agenda Já cobre fila, agenda, clientes, financeiro e produtos. 30 dias de Pro completo, sem cartão. Essencial fica R$ 14/mês; Pro, R$ 20/mês.',
     faqs: [
       {
         question: 'Precisa instalar alguma coisa?',
@@ -379,8 +379,8 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     h1: 'Sistema para manicure',
     h1Accent: 'que agenda sem WhatsApp.',
     description:
-      'O Agende Já organiza a agenda da manicure com link público, lembrete automático e controle de pacotes. A cliente marca sozinha, sem ligar.',
-    metaTitle: 'Sistema para manicure | Agende Já',
+      'A Agenda Já organiza a agenda da manicure com link público, lembrete automático e controle de pacotes. A cliente marca sozinha, sem ligar.',
+    metaTitle: 'Sistema para manicure | Agenda Já',
     metaDescription:
       'Sistema para manicure com agenda online, lembrete por WhatsApp, pacotes e fiado. 30 dias grátis sem cartão.',
     painTitle: 'Manicure perde cliente por falta de organização',
@@ -439,8 +439,8 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     h1: 'Sistema para lash designer',
     h1Accent: 'com agenda que respeita o tempo.',
     description:
-      'O Agende Já agenda extensão de cílios com duração real, lembrete automático e controle de manutenção. A cliente marca sem ligar.',
-    metaTitle: 'Sistema para lash designer | Agende Já',
+      'A Agenda Já agenda extensão de cílios com duração real, lembrete automático e controle de manutenção. A cliente marca sem ligar.',
+    metaTitle: 'Sistema para lash designer | Agenda Já',
     metaDescription:
       'Sistema para lash designer com agenda online, manutenção programada, lembrete e pacotes. 30 dias grátis.',
     painTitle: 'Lash designer perde agendamento no WhatsApp',
@@ -499,8 +499,8 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     h1: 'CRM para salão de beleza',
     h1Accent: 'que lembra quem está sumindo.',
     description:
-      'O Agende Já mostra última visita, frequência, valor total e risco de evasão de cada cliente. Você retoma o contato sem exportar planilha.',
-    metaTitle: 'CRM para salão de beleza | Agende Já',
+      'A Agenda Já mostra última visita, frequência, valor total e risco de evasão de cada cliente. Você retoma o contato sem exportar planilha.',
+    metaTitle: 'CRM para salão de beleza | Agenda Já',
     metaDescription:
       'CRM para salão de beleza: histórico do cliente, frequência, pacotes, fiado e retorno automático. 30 dias grátis.',
     painTitle: 'Salão perde cliente sem perceber',
@@ -536,7 +536,7 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     ],
     proofTitle: 'Dado que estava no WhatsApp vira decisão',
     proofBody:
-      'O CRM do Agende Já é alimentado automaticamente pela operação. 30 dias de Pro, sem cartão.',
+      'O CRM da Agenda Já é alimentado automaticamente pela operação. 30 dias de Pro, sem cartão.',
     faqs: [
       {
         question: 'Preciso cadastrar os clientes?',
@@ -559,8 +559,8 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     h1: 'Controle financeiro para salão',
     h1Accent: 'sem planilha e sem surpresa.',
     description:
-      'O Agende Já mostra entradas, despesas, fiado e lucro líquido em tempo real. Você vê o resultado do dia sem abrir planilha.',
-    metaTitle: 'Controle financeiro para salão | Agende Já',
+      'A Agenda Já mostra entradas, despesas, fiado e lucro líquido em tempo real. Você vê o resultado do dia sem abrir planilha.',
+    metaTitle: 'Controle financeiro para salão | Agenda Já',
     metaDescription:
       'Controle financeiro para salão: entradas, despesas, fiado e lucro em tempo real. 30 dias de Pro grátis, sem cartão.',
     painTitle: 'Salão não sabe quanto lucra de verdade',

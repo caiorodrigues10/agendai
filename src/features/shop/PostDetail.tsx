@@ -32,7 +32,7 @@ export async function shareUrl(url: string, title?: string): Promise<'shared' | 
   const nav = typeof navigator !== 'undefined' ? navigator : undefined;
   if (nav?.share) {
     try {
-      await nav.share({ title: title || 'Agende Já', url });
+      await nav.share({ title: title || 'Agenda Já', url });
       return 'shared';
     } catch (err) {
       if ((err as Error | null)?.name === 'AbortError') return 'cancelled';

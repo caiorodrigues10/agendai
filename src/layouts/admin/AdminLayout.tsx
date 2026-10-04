@@ -55,7 +55,7 @@ export const AdminLayout: React.FC = () => {
               <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white font-bold text-sm">
                 A
               </div>
-              <span className="font-display font-bold text-sm">Agende Já</span>
+              <span className="font-display font-bold text-sm">Agenda Já</span>
             </NavLink>
             <button
               onClick={() => setSidebarOpen(false)}

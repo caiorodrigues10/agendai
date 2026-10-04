@@ -566,7 +566,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                       <div className="rounded-xl bg-accent/5 border border-accent/15 px-4 py-3 flex items-center gap-2">
                         <Sparkles size={15} className="text-accent shrink-0" />
                         <p className="text-xs text-text-secondary">
-                          Tudo isso ainda espera por você no Agende Já.
+                          Tudo isso ainda espera por você na Agenda Já.
                         </p>
                       </div>
                     </div>

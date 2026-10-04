@@ -63,7 +63,7 @@ export const SchedulingPage: React.FC = () => {
 
   return (
     <MarketingLayout
-      title="Agendamento online 24h — Link público sem app | Agende Já"
+      title="Agendamento online 24h — Link público sem app | Agenda Já"
       description="Cliente escolhe serviço, profissional e horário pelo link. Sem WhatsApp. Sem ligação. Sem erro. Agendamento que respeita o profissional."
       path="/agendamento"
       jsonLd={softwareApplicationLd('/agendamento')}

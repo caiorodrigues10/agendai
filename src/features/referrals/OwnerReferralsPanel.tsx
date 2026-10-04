@@ -94,7 +94,7 @@ export const OwnerReferralsPanel: React.FC<OwnerReferralsPanelProps> = ({ onNoti
   const conversionRate =
     data.stats.total > 0 ? ((data.stats.converted / data.stats.total) * 100).toFixed(0) : '0';
 
-  const shareText = `Use meu link para se cadastrar no Agende Já: ${data.shareUrl}`;
+  const shareText = `Use meu link para se cadastrar na Agenda Já: ${data.shareUrl}`;
 
   const handleApplyCode = async () => {
     const code = referralCode.trim().toUpperCase();

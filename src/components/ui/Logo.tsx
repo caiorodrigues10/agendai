@@ -24,7 +24,7 @@ const sizeMap = {
 } as const;
 
 /**
- * AGENDE JÁ — Marca visual com ícone de calendário + texto.
+ * AGENDA JÁ — Marca visual com ícone de calendário + texto.
  */
 export const Logo: React.FC<LogoProps> = ({
   size = 'md',
@@ -39,7 +39,7 @@ export const Logo: React.FC<LogoProps> = ({
       <div
         className={`${s.iconOnly} overflow-hidden border border-border bg-surface shadow-sm select-none flex items-center justify-center`}
       >
-        <img src={customImageUrl} alt="Agende Já" className="w-full h-full object-contain p-0.5" />
+        <img src={customImageUrl} alt="Agenda Já" className="w-full h-full object-contain p-0.5" />
       </div>
     );
   }
@@ -48,7 +48,7 @@ export const Logo: React.FC<LogoProps> = ({
     return (
       <img
         src="/favicon.png"
-        alt="Agende Já"
+        alt="Agenda Já"
         className={`${s.iconOnly} select-none object-contain`}
       />
     );
@@ -56,8 +56,8 @@ export const Logo: React.FC<LogoProps> = ({
 
   return (
     <span className={`inline-flex select-none ${className ?? ''}`}>
-      <img src="/brand/agendai-logo.png" alt="Agende Já" className={`${s.img} object-contain dark:hidden`} />
-      <img src="/brand/agendai-logo-dark.png" alt="Agende Já" className={`${s.img} hidden object-contain dark:block`} />
+      <img src="/brand/agendai-logo.png" alt="Agenda Já" className={`${s.img} object-contain dark:hidden`} />
+      <img src="/brand/agendai-logo-dark.png" alt="Agenda Já" className={`${s.img} hidden object-contain dark:block`} />
     </span>
   );
 };
