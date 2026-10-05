@@ -44,6 +44,7 @@ import {
 import { METRIC_LABEL } from '../../utils/metricLabels';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { ModalShell } from '../../components/patterns/ModalShell';
+import { SectionError } from '../../components/patterns';
 import { BookPackageSessionsModal, AppointmentBookingModal } from '../../features/appointments';
 import { AppointmentFormData, ClientEditSchema, ClientEditFormData, ProcedureRecordSchema, ProcedureRecordFormData } from '../../schemas';
 import { AvailabilitySlot } from '../../utils/schedulingUtils';
@@ -497,9 +498,7 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
         }
         body={
           <>
-            {error && (
-              <p className="mb-3 rounded-lg bg-danger/10 p-3 text-sm text-danger">{error}</p>
-            )}
+            {error && <SectionError message={error} className="mb-3" />}
 
             {tab === 'geral' && detail && (
               <div className="space-y-4">

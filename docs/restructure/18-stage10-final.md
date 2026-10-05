@@ -46,7 +46,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15 e waitlist em §16 concluídos em 2026-10-05; restam réplicas fora dessas áreas).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16 e ficha do cliente em §17 concluídos em 2026-10-05; restam réplicas fora dessas áreas).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - ~~**Budget/D-002**~~ → **sanada** (2026-10-05, §11): `@source not` adotado — na reavaliação o delta real é −0,3 KiB CSS (6 utilities, 4 delas fantasmas de ids de fixture) e o único restyle real foi em `TokensGallery` (2 classes).
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -725,3 +725,50 @@ alheio (ver §15).
 **Próximas áreas da D-014:** clients (`ClientProfileSheet` L501), notifications (3
 sites), organizations, CRM (3 sites), master-admin, `ErrorBoundary` e páginas públicas;
 mais os 2 submits de painéis owner apontados em 16.1 (`GoalsPanel`/`LoyaltyPanel`).
+
+## 17. D-014 — ficha do cliente (2026-10-05)
+
+Sexta área da receita story-first: `ClientProfileSheet` com 1 banner de erro inline único
+(`<p className="mb-3 rounded-lg bg-danger/10 p-3 ...">`) que serve **8 catches** (load do
+detalhe, edição, procedimentos, pacotes etc.).
+
+### 17.1 O que foi feito
+
+- **1 story `Erro` nova** (MSW 500, antes da conversão): `Clientes/ClientProfileSheet.Erro`
+  falha o `GET /api/clients/:id` (load do detalhe) com `Não foi possível carregar o cliente`;
+  handlers explícitos **falha primeiro** + os 3 endpoints de suporte (crm/packages/
+  procedures — `Promise.all` do `loadDetail` precisa que só o client rejeite para a mensagem
+  ser determinística). Play: `findByText` da mensagem no portal (`document.body`).
+- **1 site convertido:** `ClientProfileSheet` L500 → `<SectionError message={error}
+  className="mb-3" />` **sem `onRetry`** — o mesmo banner serve erros de load *e* de
+  submissão; um retry recarregaria e descartaria edições em curso (o UI antigo também não
+  tinha retry).
+- **Achado de processo (threshold de 0.02):** a rodada de prova **passou 119/119** com a
+  conversão já aplicada — o banner isolado (o erro zera o conteúdo do sheet, então nada
+  abaixo dele desloca) mudou só **1,589%** dos pixels, abaixo do threshold do
+  `test-runner.ts`. Verificação alternativa: apagar o baseline, regerar (`1 written` — nova
+  UI) e comparar old/new via PIL: banner **44 → 54px**, bordas `danger` novas em
+  y475/y528, alteração **confinada a y343–557** (resto do frame idêntico). Para a próxima
+  área: quando a mudança for só um banner pequeno, o diff de prova pode ficar sub-limiar —
+  comparar baselines antes/após diretamente.
+
+### 17.2 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npx tsc -p tsconfig.json --noEmit` | **0 erros** |
+| lint (gate) | `npm run lint` (`eslint src`) | **0 err / 489 warn** |
+| lint full-scope | `npx eslint .` | **0 err / 491 warn** (teto 11/593) |
+| testes app+storybook | `npm test` | **370/370 (85 arquivos)** = 119 storybook (+1 story nova) + app |
+| contratos | `test:contract` + `contract:check:strict` | **6/6** · **OK 404 chamadas / 555 rotas** |
+| storybook + a11y | `npm run test:storybook` | **119/119 (34 arquivos)**, `a11y.test: 'error'` |
+| regressão visual | `test:visual` (prova) + regeneração pós-delete | **119/119** (`1 written` — prova sub-limiar, ver 17.1) |
+| build prod (PWA) | `npm run build` | **91 precache / 2668,92 KiB** (24,10s) |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
+| docs / entrega | `docs:check` + `verify:delivery` | **OK** |
+
+**Nota de sessão paralela:** os 6 arquivos de outra sessão seguem intocados neste commit
+(ver §15).
+
+**Próximas áreas da D-014:** notifications (3 sites), organizations, CRM (3 sites),
+master-admin, `ErrorBoundary`, páginas públicas e os submits `GoalsPanel`/`LoyaltyPanel`.
