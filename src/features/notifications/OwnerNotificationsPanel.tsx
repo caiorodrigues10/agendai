@@ -5,7 +5,6 @@ import {
   LuLoaderCircle as Loader2,
   LuMail as Mail,
   LuMessageCircle as MessageCircle,
-  LuRefreshCcw as RefreshCcw,
 } from 'react-icons/lu';
 import {
   NotificationChannel,
@@ -13,6 +12,7 @@ import {
   notificationsApi,
 } from '../../infra/notificationsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { SectionError } from '../../components/patterns';
 import { NotificationDeliveriesPanel } from './NotificationDeliveriesPanel';
 
 type OwnerNotificationTab = 'preferences' | 'deliveries';
@@ -113,14 +113,7 @@ const NotificationPreferences: React.FC<OwnerNotificationsPanelProps> = ({ onNot
   }
 
   if (error && preferences.length === 0) {
-    return (
-      <div role="alert" className="rounded-xl border border-danger/30 bg-danger/10 p-4 text-sm text-danger">
-        <p>{error}</p>
-        <button type="button" onClick={() => void loadPreferences()} className="mt-2 inline-flex min-h-10 items-center gap-2 font-bold underline">
-          <RefreshCcw size={15} /> Tentar novamente
-        </button>
-      </div>
-    );
+    return <SectionError message={error} onRetry={() => void loadPreferences()} />;
   }
 
   return (
@@ -134,11 +127,7 @@ const NotificationPreferences: React.FC<OwnerNotificationsPanelProps> = ({ onNot
         </p>
       </div>
 
-      {error && (
-        <p role="alert" className="rounded-lg bg-danger/10 p-3 text-sm text-danger">
-          {error}
-        </p>
-      )}
+      {error && <SectionError message={error} />}
 
       {preferences.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-text-muted">

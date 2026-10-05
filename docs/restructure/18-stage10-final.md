@@ -46,7 +46,75 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16 e ficha do cliente em §17 concluídos em 2026-10-05; restam réplicas fora dessas áreas).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17 e notificações em §18 concluídos em 2026-10-05; restam réplicas fora dessas áreas).
+
+## 18. D-014 — painéis de notificações (2026-10-05)
+
+Sétima área da receita story-first: os 3 painéis de notificações **não tinham nenhum
+arquivo de stories** — 7 stories criadas do zero (3 `Default` + 4 `Erro`) e **4 sites**
+convertidos.
+
+### 18.1 O que foi feito
+
+- **7 stories novas** (MSW 500 nas `Erro`, antes da conversão):
+  | Story | Endpoint que falha | Play |
+  |---|---|---|
+  | `Notificações/OwnerNotificationsPanel.Erro` | `GET /api/notifications/preferences` → `Não foi possível carregar as preferências.` | `findByText` (load, prefs vazias → card de retry) |
+  | `Notificações/OwnerNotificationsPanel.ErroSalvar` | `PATCH /api/notifications/preferences` → `Não foi possível salvar as preferências.` | switch "Confirmação de agendamento por WhatsApp" → `Salvar preferências` → `findByText` (banner inline) |
+  | `Notificações/NotificationHealthPanel.Erro` | `GET /api/admin/operations/notifications` → `Não foi possível consultar a saúde das notificações.` | `findByText` |
+  | `Notificações/NotificationDeliveriesPanel.Erro` | `GET /api/notifications/deliveries` → `Não foi possível carregar o histórico de notificações.` | `findByText` |
+- **4 sites convertidos:** `OwnerNotificationsPanel` L115 (load vazio →
+  `SectionError onRetry={loadPreferences}`) e L137 (erro de save → `SectionError`);
+  `NotificationHealthPanel` L84 (`SectionError onRetry={load}`, mensagem de fallback
+  preservada: `error || 'A API não retornou o estado da operação.'`);
+  `NotificationDeliveriesPanel` L361 (`SectionError onRetry={loadDeliveries}`).
+  **Órfãos removidos:** `RefreshCcw` (OwnerNotifications) e `AlertCircle` (Deliveries);
+  mantidos onde há outros usos (Health: ícone do card "Falhas na fila" + botão
+  "Atualizar"; Deliveries: `RefreshCcw`/`RotateCcw` dos botões).
+- **Fora de escopo documentado:** o erro por linha de entrega
+  (`NotificationDeliveriesPanel` L433, `friendlyError`) é estado do **domínio** exibido
+  junto ao registro (código do provedor, ex.: `RATE_LIMITED`) — mensagem de dados, não
+  erro de operação com retry; o feedback da nova tentativa é `sr-only` (aria-live), sem
+  div visível.
+
+### 18.2 Prova visual
+
+7 novas baselines gravadas da UI antiga (`7 written` → 126 snapshots); conversão; rodada
+de prova **com rebuild** falhou **exatamente as 4 stories `Erro`** (122 restantes, incl.
+os 3 `Default`, passaram). PIL dos 4 diffs:
+
+- `HealthPanel.Erro`: card **101 → 81px** (botão retry `min-h-10` → link compacto),
+  alteração 2,598%, nada abaixo (o card é o retorno do componente);
+- `DeliveriesPanel.Erro`: card **101 → 81px**, alteração 2,594%;
+- `OwnerNotificationsPanel.Erro`: card de retry **101 → 81px**, alteração 4,898%;
+- `OwnerNotificationsPanel.ErroSalvar`: banner **~32 → 53px** (bordas `danger`
+  y253/y306), conteúdo abaixo com shift **+10px** (3,21 → 2,39), alteração 5,105%.
+
+`-u` atualizou as **4**; re-run `test:visual -- --no-build` → **126/126, 0 atualizados**.
+
+### 18.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npx tsc -p tsconfig.json --noEmit` | **0 erros** |
+| lint (gate) | `npm run lint` (`eslint src`) | **0 err / 488 warn** |
+| lint full-scope | `npx eslint .` | **0 err / 490 warn** (teto 11/593) |
+| testes app+storybook | `npm test` | **389/389 (90 arquivos)** = 126 storybook (+7 stories novas) + app |
+| contratos | `test:contract` + `contract:check:strict` | **6/6** · **OK 404 chamadas / 555 rotas** |
+| storybook + a11y | `npm run test:storybook` | **126/126 (37 arquivos)**, `a11y.test: 'error'` |
+| regressão visual | `test:visual` (prova, rebuild) + `-- --no-build` (re-run) | **126/126, 0 atualizados** (4 atualizados na prova) |
+| build prod (PWA) | `npm run build` | **91 precache / 2669,91 KiB** (22,46s) |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
+| docs / entrega | `docs:check` + `verify:delivery` | **OK** |
+
+**Nota de sessão paralela:** no meio do lote a outra sessão criou
+`src/components/infra/TabGuard.tsx` com imports quebrados — o `tsc` do gate falhou 1×
+(`TS2307` ×3) e voltou a **0 erros** quando eles corrigiram; arquivos de teste/stories de
+eles inflam `npm test` (85→90 arquivos) e a11y (34→37 arquivos) — nenhum deles commitado
+aqui (ver §15).
+
+**Próximas áreas da D-014:** organizations, CRM (3 sites), master-admin, `ErrorBoundary`,
+páginas públicas e os submits `GoalsPanel`/`LoyaltyPanel`.
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - ~~**Budget/D-002**~~ → **sanada** (2026-10-05, §11): `@source not` adotado — na reavaliação o delta real é −0,3 KiB CSS (6 utilities, 4 delas fantasmas de ids de fixture) e o único restyle real foi em `TokensGallery` (2 classes).
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
