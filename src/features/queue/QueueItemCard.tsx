@@ -44,8 +44,8 @@ interface QueueItemCardProps {
     id: string,
     status: QueueItem['status'],
     extras?: { paymentMethod?: QueueItem['paymentMethod']; commissionSplits?: { professionalId: string; percentage: number }[]; retailSale?: import('../../infra/productsApi').RetailSalePayload; procedure?: { title: string; professionalName?: string; formula?: string; details?: string; serviceName?: string } }
-  ) => void;
-  onLeaveQueue: (id: string) => void;
+  ) => void | Promise<void>;
+  onLeaveQueue: (id: string) => void | Promise<void>;
   onReturnToQueue?: (item: QueueItem) => void;
   onAddDependent?: (item: QueueItem) => void;
   onNotify?: (message: string, type: 'success' | 'error' | 'bot') => void;
@@ -168,7 +168,11 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
     } else {
       onNotify?.('Cliente sem telefone no cadastro — chamado sem aviso no WhatsApp.', 'error');
     }
-    onStatusChange(item.id, 'in_chair');
+    try {
+      await onStatusChange(item.id, 'in_chair');
+    } catch (err) {
+      onNotify?.(getErrorMessage(err, 'Não foi possível mover o cliente.'), 'error');
+    }
   };
 
   const paymentOptions = [
@@ -195,6 +199,8 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
         procedure,
       });
       setShowPaymentPicker(false);
+    } catch (err) {
+      onNotify?.(getErrorMessage(err, 'Não foi possível finalizar o atendimento.'), 'error');
     } finally {
       setSubmittingFinalization(false);
     }
@@ -347,7 +353,11 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
                 <UserPlus size={14} /> Dependente
               </button>
               <button
-                onClick={() => onStatusChange(item.id, 'cancelled')}
+                onClick={() => {
+                  void Promise.resolve(onStatusChange(item.id, 'cancelled')).catch(err =>
+                    onNotify?.(getErrorMessage(err, 'Não foi possível cancelar.'), 'error')
+                  );
+                }}
                 className="px-3 py-1.5 text-xs text-danger hover:bg-danger/10 rounded flex items-center gap-1 transition-colors"
               >
                 <Trash2 size={14} /> Cancelar
@@ -498,8 +508,11 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
         confirmLabel="Sair da fila"
         variant="danger"
         onConfirm={() => {
-          onLeaveQueue(item.id);
-          setConfirmLeave(false);
+          void Promise.resolve(onLeaveQueue(item.id))
+            .catch(err =>
+              onNotify?.(getErrorMessage(err, 'Não foi possível sair da fila.'), 'error')
+            )
+            .finally(() => setConfirmLeave(false));
         }}
         onCancel={() => setConfirmLeave(false)}
       />
