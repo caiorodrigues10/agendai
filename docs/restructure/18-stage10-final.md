@@ -46,75 +46,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17 e notificações em §18 concluídos em 2026-10-05; restam réplicas fora dessas áreas).
-
-## 18. D-014 — painéis de notificações (2026-10-05)
-
-Sétima área da receita story-first: os 3 painéis de notificações **não tinham nenhum
-arquivo de stories** — 7 stories criadas do zero (3 `Default` + 4 `Erro`) e **4 sites**
-convertidos.
-
-### 18.1 O que foi feito
-
-- **7 stories novas** (MSW 500 nas `Erro`, antes da conversão):
-  | Story | Endpoint que falha | Play |
-  |---|---|---|
-  | `Notificações/OwnerNotificationsPanel.Erro` | `GET /api/notifications/preferences` → `Não foi possível carregar as preferências.` | `findByText` (load, prefs vazias → card de retry) |
-  | `Notificações/OwnerNotificationsPanel.ErroSalvar` | `PATCH /api/notifications/preferences` → `Não foi possível salvar as preferências.` | switch "Confirmação de agendamento por WhatsApp" → `Salvar preferências` → `findByText` (banner inline) |
-  | `Notificações/NotificationHealthPanel.Erro` | `GET /api/admin/operations/notifications` → `Não foi possível consultar a saúde das notificações.` | `findByText` |
-  | `Notificações/NotificationDeliveriesPanel.Erro` | `GET /api/notifications/deliveries` → `Não foi possível carregar o histórico de notificações.` | `findByText` |
-- **4 sites convertidos:** `OwnerNotificationsPanel` L115 (load vazio →
-  `SectionError onRetry={loadPreferences}`) e L137 (erro de save → `SectionError`);
-  `NotificationHealthPanel` L84 (`SectionError onRetry={load}`, mensagem de fallback
-  preservada: `error || 'A API não retornou o estado da operação.'`);
-  `NotificationDeliveriesPanel` L361 (`SectionError onRetry={loadDeliveries}`).
-  **Órfãos removidos:** `RefreshCcw` (OwnerNotifications) e `AlertCircle` (Deliveries);
-  mantidos onde há outros usos (Health: ícone do card "Falhas na fila" + botão
-  "Atualizar"; Deliveries: `RefreshCcw`/`RotateCcw` dos botões).
-- **Fora de escopo documentado:** o erro por linha de entrega
-  (`NotificationDeliveriesPanel` L433, `friendlyError`) é estado do **domínio** exibido
-  junto ao registro (código do provedor, ex.: `RATE_LIMITED`) — mensagem de dados, não
-  erro de operação com retry; o feedback da nova tentativa é `sr-only` (aria-live), sem
-  div visível.
-
-### 18.2 Prova visual
-
-7 novas baselines gravadas da UI antiga (`7 written` → 126 snapshots); conversão; rodada
-de prova **com rebuild** falhou **exatamente as 4 stories `Erro`** (122 restantes, incl.
-os 3 `Default`, passaram). PIL dos 4 diffs:
-
-- `HealthPanel.Erro`: card **101 → 81px** (botão retry `min-h-10` → link compacto),
-  alteração 2,598%, nada abaixo (o card é o retorno do componente);
-- `DeliveriesPanel.Erro`: card **101 → 81px**, alteração 2,594%;
-- `OwnerNotificationsPanel.Erro`: card de retry **101 → 81px**, alteração 4,898%;
-- `OwnerNotificationsPanel.ErroSalvar`: banner **~32 → 53px** (bordas `danger`
-  y253/y306), conteúdo abaixo com shift **+10px** (3,21 → 2,39), alteração 5,105%.
-
-`-u` atualizou as **4**; re-run `test:visual -- --no-build` → **126/126, 0 atualizados**.
-
-### 18.3 Evidências do gate
-
-| Check | Comando | Resultado |
-|---|---|---|
-| typecheck | `npx tsc -p tsconfig.json --noEmit` | **0 erros** |
-| lint (gate) | `npm run lint` (`eslint src`) | **0 err / 488 warn** |
-| lint full-scope | `npx eslint .` | **0 err / 490 warn** (teto 11/593) |
-| testes app+storybook | `npm test` | **389/389 (90 arquivos)** = 126 storybook (+7 stories novas) + app |
-| contratos | `test:contract` + `contract:check:strict` | **6/6** · **OK 404 chamadas / 555 rotas** |
-| storybook + a11y | `npm run test:storybook` | **126/126 (37 arquivos)**, `a11y.test: 'error'` |
-| regressão visual | `test:visual` (prova, rebuild) + `-- --no-build` (re-run) | **126/126, 0 atualizados** (4 atualizados na prova) |
-| build prod (PWA) | `npm run build` | **91 precache / 2669,91 KiB** (22,46s) |
-| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
-| docs / entrega | `docs:check` + `verify:delivery` | **OK** |
-
-**Nota de sessão paralela:** no meio do lote a outra sessão criou
-`src/components/infra/TabGuard.tsx` com imports quebrados — o `tsc` do gate falhou 1×
-(`TS2307` ×3) e voltou a **0 erros** quando eles corrigiram; arquivos de teste/stories de
-eles inflam `npm test` (85→90 arquivos) e a11y (34→37 arquivos) — nenhum deles commitado
-aqui (ver §15).
-
-**Próximas áreas da D-014:** organizations, CRM (3 sites), master-admin, `ErrorBoundary`,
-páginas públicas e os submits `GoalsPanel`/`LoyaltyPanel`.
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17, notificações em §18 e organizações em §19 concluídos em 2026-10-05; restam réplicas fora dessas áreas).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - ~~**Budget/D-002**~~ → **sanada** (2026-10-05, §11): `@source not` adotado — na reavaliação o delta real é −0,3 KiB CSS (6 utilities, 4 delas fantasmas de ids de fixture) e o único restyle real foi em `TokensGallery` (2 classes).
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -840,3 +772,150 @@ detalhe, edição, procedimentos, pacotes etc.).
 
 **Próximas áreas da D-014:** notifications (3 sites), organizations, CRM (3 sites),
 master-admin, `ErrorBoundary`, páginas públicas e os submits `GoalsPanel`/`LoyaltyPanel`.
+
+## 18. D-014 — painéis de notificações (2026-10-05)
+
+Sétima área da receita story-first: os 3 painéis de notificações **não tinham nenhum
+arquivo de stories** — 7 stories criadas do zero (3 `Default` + 4 `Erro`) e **4 sites**
+convertidos.
+
+### 18.1 O que foi feito
+
+- **7 stories novas** (MSW 500 nas `Erro`, antes da conversão):
+  | Story | Endpoint que falha | Play |
+  |---|---|---|
+  | `Notificações/OwnerNotificationsPanel.Erro` | `GET /api/notifications/preferences` → `Não foi possível carregar as preferências.` | `findByText` (load, prefs vazias → card de retry) |
+  | `Notificações/OwnerNotificationsPanel.ErroSalvar` | `PATCH /api/notifications/preferences` → `Não foi possível salvar as preferências.` | switch "Confirmação de agendamento por WhatsApp" → `Salvar preferências` → `findByText` (banner inline) |
+  | `Notificações/NotificationHealthPanel.Erro` | `GET /api/admin/operations/notifications` → `Não foi possível consultar a saúde das notificações.` | `findByText` |
+  | `Notificações/NotificationDeliveriesPanel.Erro` | `GET /api/notifications/deliveries` → `Não foi possível carregar o histórico de notificações.` | `findByText` |
+- **4 sites convertidos:** `OwnerNotificationsPanel` L115 (load vazio →
+  `SectionError onRetry={loadPreferences}`) e L137 (erro de save → `SectionError`);
+  `NotificationHealthPanel` L84 (`SectionError onRetry={load}`, mensagem de fallback
+  preservada: `error || 'A API não retornou o estado da operação.'`);
+  `NotificationDeliveriesPanel` L361 (`SectionError onRetry={loadDeliveries}`).
+  **Órfãos removidos:** `RefreshCcw` (OwnerNotifications) e `AlertCircle` (Deliveries);
+  mantidos onde há outros usos (Health: ícone do card "Falhas na fila" + botão
+  "Atualizar"; Deliveries: `RefreshCcw`/`RotateCcw` dos botões).
+- **Fora de escopo documentado:** o erro por linha de entrega
+  (`NotificationDeliveriesPanel` L433, `friendlyError`) é estado do **domínio** exibido
+  junto ao registro (código do provedor, ex.: `RATE_LIMITED`) — mensagem de dados, não
+  erro de operação com retry; o feedback da nova tentativa é `sr-only` (aria-live), sem
+  div visível.
+
+### 18.2 Prova visual
+
+7 novas baselines gravadas da UI antiga (`7 written` → 126 snapshots); conversão; rodada
+de prova **com rebuild** falhou **exatamente as 4 stories `Erro`** (122 restantes, incl.
+os 3 `Default`, passaram). PIL dos 4 diffs:
+
+- `HealthPanel.Erro`: card **101 → 81px** (botão retry `min-h-10` → link compacto),
+  alteração 2,598%, nada abaixo (o card é o retorno do componente);
+- `DeliveriesPanel.Erro`: card **101 → 81px**, alteração 2,594%;
+- `OwnerNotificationsPanel.Erro`: card de retry **101 → 81px**, alteração 4,898%;
+- `OwnerNotificationsPanel.ErroSalvar`: banner **~32 → 53px** (bordas `danger`
+  y253/y306), conteúdo abaixo com shift **+10px** (3,21 → 2,39), alteração 5,105%.
+
+`-u` atualizou as **4**; re-run `test:visual -- --no-build` → **126/126, 0 atualizados**.
+
+### 18.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npx tsc -p tsconfig.json --noEmit` | **0 erros** |
+| lint (gate) | `npm run lint` (`eslint src`) | **0 err / 488 warn** |
+| lint full-scope | `npx eslint .` | **0 err / 490 warn** (teto 11/593) |
+| testes app+storybook | `npm test` | **389/389 (90 arquivos)** = 126 storybook (+7 stories novas) + app |
+| contratos | `test:contract` + `contract:check:strict` | **6/6** · **OK 404 chamadas / 555 rotas** |
+| storybook + a11y | `npm run test:storybook` | **126/126 (37 arquivos)**, `a11y.test: 'error'` |
+| regressão visual | `test:visual` (prova, rebuild) + `-- --no-build` (re-run) | **126/126, 0 atualizados** (4 atualizados na prova) |
+| build prod (PWA) | `npm run build` | **91 precache / 2669,91 KiB** (22,46s) |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
+| docs / entrega | `docs:check` + `verify:delivery` | **OK** |
+
+**Nota de sessão paralela:** no meio do lote a outra sessão criou
+`src/components/infra/TabGuard.tsx` com imports quebrados — o `tsc` do gate falhou 1×
+(`TS2307` ×3) e voltou a **0 erros** quando eles corrigiram; arquivos de teste/stories de
+eles inflam `npm test` (85→90 arquivos) e a11y (34→37 arquivos) — nenhum deles commitado
+aqui (ver §15).
+
+**Próximas áreas da D-014:** organizations, CRM (3 sites), master-admin, `ErrorBoundary`,
+páginas públicas e os submits `GoalsPanel`/`LoyaltyPanel`.
+
+## 19. D-014 — organizações (2026-10-05)
+
+Oitava área da receita story-first: `OrganizationsPanel` e `MultiUnitDashboard` também
+**não tinham arquivo de stories** — 6 stories criadas do zero (2 `Default` + 4 `Erro`) e
+**4 sites** convertidos.
+
+### 19.1 O que foi feito
+
+- **6 stories novas** (MSW 500 nas `Erro`, antes da conversão):
+  | Story | Endpoint que falha | Play |
+  |---|---|---|
+  | `Organizações/OrganizationsPanel.Erro` | `GET /api/organizations` → `Não foi possível carregar as organizações.` | `findByText` (load falho → card de retry) |
+  | `Organizações/OrganizationsPanel.ErroExcluir` | `DELETE /api/organizations/:id` → `Não foi possível excluir a organização.` | expandir card "Grupo Aurora" → `Excluir organização` → `Excluir` no `alertdialog` → banner no topo |
+  | `Organizações/MultiUnitDashboard.Erro` | `GET /api/organizations/:id/dashboard` → `Não foi possível carregar os salões desta organização.` (mensagem crua do `ApiError`, exibida pelo hook) | `findByText` |
+  | `Organizações/MultiUnitDashboard.ErroDesanexar` | `DELETE /api/organizations/:id/barbershops/:barbershopId` → `Não foi possível desanexar o salão.` | `Desanexar Estúdio Norte` → `Desanexar` no `alertdialog` → banner entre cabeçalho e grade |
+- Ambas as stories de componente montam `MemoryRouter` + `StoryProviders withAuth`
+  (o dashboard usa `useNavigate`/`useAuth`; sem token semeador o `AuthProvider` não chama
+  `/auth/me` e o `useOrganizationDashboard` não abre WS — ele só conecta com token).
+- **4 sites convertidos:** `OrganizationsPanel` L108 (banner de erro de criar/excluir →
+  `SectionError`) e L196 (load → `SectionError onRetry={loadOrgs}`); `MultiUnitDashboard`
+  L236 (load do hook → `SectionError onRetry={refetch}`) e L264 (erro de desanexo →
+  `SectionError`). Sem órfãos: `secondary` continua no "Cancelar"/"Adicionar salão" e
+  todos os ícones seguem em uso.
+- **Fora de escopo documentado:** dois micro-erros `text-xs` **sem caixa** dentro de
+  subcomponentes compactos — `ShopCard.accessError` (falha de "Acessar", L80) e o erro do
+  painel `AddShopControl` (L154): texto inline do próprio controle, sem divisória de
+  ação; um card `SectionError` (`p-4` com borda e ícone) inflaria card/popover minúsculos.
+- **Achado de play:** `findByText('...')` casa a string **inteira** — a asserção final
+  das duas stories com diálogo falhava por causa do ponto final da mensagem; corrigido
+  para matcher regex (`findByText(/Não foi possível .../)`).
+
+### 19.2 Prova visual
+
+6 novas baselines gravadas da UI antiga (`6 written` → 132 snapshots); conversão; rodada
+de prova **com rebuild** falhou **3** das 4 stories convertidas — `OrganizationsPanel.
+ErroExcluir` passou **sub-limiar (0,16%)** (o banner antigo já media 53px; a nova versão
+mantém 53px e só ganha o ícone). Verificação alternativa (mesmo procedimento do §17):
+baseline movida para fora, `test:visual -- --no-build` a regravou (`1 written` = UI nova)
+e o PIL comparou old/new. PIL dos 4:
+
+- `MultiUnitDashboard.Erro`: card **101 → 81px**, alteração 2,864%, nada abaixo (o card é
+  o retorno do componente);
+- `MultiUnitDashboard.ErroDesanexar`: banner **93 → 101px** (borda inferior y93 → y101),
+  conteúdo abaixo com shift **+8px** (resíduo 0,173 = shift puro), alteração 4,445%;
+- `OrganizationsPanel.Erro`: card **117 → 81px** (p-5 + botão `min-h-11` → p-4 + link de
+  retry), alteração 4,489%;
+- `OrganizationsPanel.ErroExcluir` (sub-limiar, via delete+rewrite): delta confinado em
+  **y97-111** (linha do ícone novo), banner 53px → 53px, shift abaixo **0px** (resíduo
+  0,178), alteração total **0,160%**.
+
+`-u` atualizou as **3** restantes; re-run `test:visual -- --no-build` → **132/132, 0
+atualizados**.
+
+### 19.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npx tsc -p tsconfig.json --noEmit` | **0 erros** |
+| lint (gate) | `npm run lint` (`eslint src`) | **0 err / 488 warn** |
+| lint full-scope | `npx eslint .` | **0 err / 490 warn** (teto 11/593) |
+| testes app+storybook | `npm test` | **395/395 (92 arquivos)** = 132 storybook (+6 stories novas) + app |
+| contratos | `test:contract` + `contract:check:strict` | **6/6** · **OK 404 chamadas / 555 rotas** |
+| storybook + a11y | `npm run test:storybook` | **132/132 (39 arquivos)**, `a11y.test: 'error'` |
+| regressão visual | `test:visual` (prova, rebuild) + `-- --no-build` (re-run) | **132/132, 0 atualizados** (3 atualizados + 1 regravado na prova) |
+| build prod (PWA) | `npm run build` | **91 precache / 2669,29 KiB** (18,77s) |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
+| docs / entrega | `docs:check` + `verify:delivery` | **OK** |
+
+**Nota de sessão paralela:** a outra sessão segue commitando por conta própria
+(`0eadf7a`/`aaf20b4`/`9de7691` entre §17 e §19); os contadores globais variam entre
+execuções (92 arquivos de teste / 39 de stories incluem os deles) — nenhum arquivo alheio
+commitado aqui (ver §15).
+
+**Correção de ordenação:** a §18 (notificações) havia sido inserida no meio da §3 na
+etapa anterior (linha 51, antes da §4) — movida para o fim do doc junto com esta §19.
+
+**Próximas áreas da D-014:** CRM (3 sites), master-admin, `ErrorBoundary`, páginas
+públicas, `OnboardingChecklist` e os submits `GoalsPanel`/`LoyaltyPanel`.

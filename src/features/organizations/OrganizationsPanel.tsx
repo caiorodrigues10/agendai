@@ -12,6 +12,7 @@ import { OrganizationSchema, OrganizationFormData } from '@/schemas';
 import { getErrorMessage } from '@/utils/errorMessage';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR } from '../../components/ui/Field';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { SectionError } from '../../components/patterns';
 import { MultiUnitDashboard } from './MultiUnitDashboard';
 
 const primary =
@@ -105,14 +106,7 @@ export function OrganizationsPanel() {
           </button>
         )}
       </div>
-      {error && (
-        <p
-          role="alert"
-          className="rounded-xl border border-danger/30 bg-danger/10 p-4 text-sm text-danger"
-        >
-          {error}
-        </p>
-      )}
+      {error && <SectionError message={error} />}
       {showCreate && (
         <form
           onSubmit={handleSubmit(handleCreate)}
@@ -193,12 +187,7 @@ export function OrganizationsPanel() {
           Carregando organizações…
         </p>
       ) : loadError ? (
-        <div role="alert" className="rounded-xl border border-danger/30 bg-danger/10 p-5">
-          <p className="mb-3 text-sm text-danger">{loadError}</p>
-          <button type="button" onClick={() => void loadOrgs()} className={secondary}>
-            Tentar novamente
-          </button>
-        </div>
+        <SectionError message={loadError} onRetry={() => void loadOrgs()} />
       ) : orgs.length === 0 ? (
         !showCreate && (
           <div className="rounded-2xl border border-dashed border-border-strong bg-surface px-6 py-12 text-center">
