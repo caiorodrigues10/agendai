@@ -2,7 +2,6 @@ import React from 'react';
 import { ListMeta, PaymentListItem } from '../../infra/adminApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import {
-  LuCircleAlert as AlertCircle,
   LuQrCode as QrCode,
   LuExternalLink as ExternalLink,
   LuLandmark as Landmark,
@@ -29,45 +28,7 @@ export const EMPTY_META: ListMeta = { total: 0, page: 1, limit: 10, totalPages: 
 // Shared UI
 // ─────────────────────────────────────────────
 
-export const SectionError: React.FC<{ message: string; onRetry?: () => void }> = ({
-  message,
-  onRetry,
-}) => (
-  <div className="bg-danger/5 border border-danger/20 rounded-2xl p-5 flex items-center gap-3">
-    <AlertCircle size={18} className="text-danger shrink-0" />
-    <p className="text-sm text-danger flex-1">{message}</p>
-    {onRetry && (
-      <button
-        onClick={onRetry}
-        className="text-xs font-bold text-text-secondary hover:text-text-primary border border-border rounded-lg px-3 py-1.5 hover:bg-surface-2 transition-colors"
-      >
-        Tentar novamente
-      </button>
-    )}
-  </div>
-);
-
-export const TableSkeleton: React.FC<{ rows?: number; cols: number }> = ({ rows = 5, cols }) => (
-  <>
-    {Array.from({ length: rows }).map((_, i) => (
-      <tr key={i}>
-        {Array.from({ length: cols }).map((_, j) => (
-          <td key={j} className="px-6 py-4">
-            <div className="h-4 bg-surface-2 rounded animate-pulse" />
-          </td>
-        ))}
-      </tr>
-    ))}
-  </>
-);
-
-export const EmptyRow: React.FC<{ cols: number; message: string }> = ({ cols, message }) => (
-  <tr>
-    <td colSpan={cols} className="px-6 py-16 text-center text-text-muted font-medium">
-      {message}
-    </td>
-  </tr>
-);
+export { SectionError } from '../../components/patterns';
 
 export interface PaginationBarProps {
   meta: ListMeta;

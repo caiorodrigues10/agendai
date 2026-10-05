@@ -6,13 +6,12 @@ import {
   formatDate,
   EMPTY_META,
   SectionError,
-  TableSkeleton,
-  EmptyRow,
   PaginationBar,
   SubscriptionStatusBadge,
   SUBSCRIPTION_STATUS_CONFIG,
   CANCEL_REASON_LABELS,
 } from './billingShared';
+import { DataTableState } from '../../components/patterns';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Toast } from '../../components/ui/Toast';
 import { LuSearch as Search } from 'react-icons/lu';
@@ -185,6 +184,13 @@ export const SubscriptionsSection: React.FC = () => {
 
       {error ? (
         <SectionError message={error} onRetry={fetchSubs} />
+      ) : loading || subs.length === 0 ? (
+        <DataTableState
+          loading={loading}
+          isEmpty={!loading}
+          emptyTitle="Nenhuma assinatura encontrada."
+          skeletonProps={{ cols: 7 }}
+        />
       ) : (
         <div className="bg-surface border border-border rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
@@ -201,12 +207,7 @@ export const SubscriptionsSection: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/40">
-                {loading ? (
-                  <TableSkeleton cols={7} />
-                ) : subs.length === 0 ? (
-                  <EmptyRow cols={7} message="Nenhuma assinatura encontrada." />
-                ) : (
-                  subs.map(s => (
+                {subs.map(s => (
                     <tr key={s.id} className="hover:bg-surface-2/20 transition-colors">
                       <td className="px-6 py-4">
                         <div className="font-bold text-text-primary text-sm max-w-[180px] truncate">
@@ -259,8 +260,7 @@ export const SubscriptionsSection: React.FC = () => {
                         )}
                       </td>
                     </tr>
-                  ))
-                )}
+                ))}
               </tbody>
             </table>
           </div>

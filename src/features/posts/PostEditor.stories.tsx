@@ -85,7 +85,9 @@ export const Conteudo: Story = {
   args: { userId: 'usr-conteudo' },
   play: async () => {
     await enterEditor();
-    await within(document.body).findByLabelText('Título', {}, { timeout: 10000 });
+    const canvas = within(document.body);
+    await canvas.findByLabelText('Título', {}, { timeout: 10000 });
+    await canvas.findByRole('img', { name: 'Prévia do post' }, { timeout: 10000 });
   },
 };
 
@@ -94,6 +96,7 @@ export const Imagem: Story = {
   play: async () => {
     await enterEditor();
     await openTab('Imagem', 'Foto principal');
+    await within(document.body).findByRole('img', { name: 'Prévia do post' }, { timeout: 10000 });
   },
 };
 
@@ -102,6 +105,7 @@ export const Formato: Story = {
   play: async () => {
     await enterEditor();
     await openTab('Formato', 'Quadrado');
+    await within(document.body).findByRole('img', { name: 'Prévia do post' }, { timeout: 10000 });
   },
 };
 
@@ -110,5 +114,6 @@ export const Identidade: Story = {
   play: async () => {
     await enterEditor();
     await openTab('Identidade', 'Baixar PNG');
+    await within(document.body).findByRole('img', { name: 'Prévia do post' }, { timeout: 10000 });
   },
 };

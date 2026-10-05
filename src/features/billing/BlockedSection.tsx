@@ -5,10 +5,9 @@ import {
   formatDateTime,
   EMPTY_META,
   SectionError,
-  TableSkeleton,
-  EmptyRow,
   PaginationBar,
 } from './billingShared';
+import { DataTableState } from '../../components/patterns';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Toast } from '../../components/ui/Toast';
 import {
@@ -111,6 +110,13 @@ export const BlockedSection: React.FC = () => {
 
       {error ? (
         <SectionError message={error} onRetry={fetchEntities} />
+      ) : loading || entities.length === 0 ? (
+        <DataTableState
+          loading={loading}
+          isEmpty={!loading}
+          emptyTitle="Nenhum bloqueio encontrado."
+          skeletonProps={{ cols: 5 }}
+        />
       ) : (
         <div className="bg-surface border border-border rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
@@ -125,12 +131,7 @@ export const BlockedSection: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/40">
-                {loading ? (
-                  <TableSkeleton cols={5} />
-                ) : entities.length === 0 ? (
-                  <EmptyRow cols={5} message="Nenhum bloqueio encontrado." />
-                ) : (
-                  entities.map(entity => (
+                {entities.map(entity => (
                     <tr key={entity.id} className="hover:bg-surface-2/20 transition-colors">
                       <td className="px-6 py-4">
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border bg-surface-2 text-text-secondary border-border-strong mr-2">
@@ -177,8 +178,7 @@ export const BlockedSection: React.FC = () => {
                         )}
                       </td>
                     </tr>
-                  ))
-                )}
+                ))}
               </tbody>
             </table>
           </div>

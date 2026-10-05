@@ -7,14 +7,13 @@ import {
   formatDateTime,
   EMPTY_META,
   SectionError,
-  TableSkeleton,
-  EmptyRow,
   PaginationBar,
   PaymentStatusBadge,
   PaymentMethodIcon,
   PAYMENT_METHOD_LABELS,
   paymentRefLabel,
 } from './billingShared';
+import { DataTableState } from '../../components/patterns';
 import {
   LuCircleCheck as CheckCircle2,
   LuRotateCcw as RotateCcw,
@@ -167,7 +166,14 @@ export const PaymentsSection: React.FC<{ shopNames: Map<string, string> }> = ({ 
 
   if (error) return <SectionError message={error} onRetry={fetchPayments} />;
 
-  return (
+  return loading || payments.length === 0 ? (
+    <DataTableState
+      loading={loading}
+      isEmpty={!loading}
+      emptyTitle="Nenhum pagamento encontrado."
+      skeletonProps={{ cols: 7 }}
+    />
+  ) : (
     <div className="bg-surface border border-border rounded-2xl overflow-hidden">
       {refundNotice && (
         <div className="mx-4 mt-4 bg-success/10 border border-success/20 text-success text-xs rounded-xl px-4 py-2.5 flex items-center gap-2">
@@ -188,12 +194,7 @@ export const PaymentsSection: React.FC<{ shopNames: Map<string, string> }> = ({ 
             </tr>
           </thead>
           <tbody className="divide-y divide-border/40">
-            {loading ? (
-              <TableSkeleton cols={7} />
-            ) : payments.length === 0 ? (
-              <EmptyRow cols={7} message="Nenhum pagamento encontrado." />
-            ) : (
-              payments.map(p => (
+            {payments.map(p => (
                 <tr key={p.id} className="hover:bg-surface-2/20 transition-colors">
                   <td className="px-6 py-4">
                     <div className="font-bold text-text-primary text-sm max-w-[220px] truncate">
@@ -244,8 +245,7 @@ export const PaymentsSection: React.FC<{ shopNames: Map<string, string> }> = ({ 
                     )}
                   </td>
                 </tr>
-              ))
-            )}
+            ))}
           </tbody>
         </table>
       </div>

@@ -5,6 +5,7 @@ import { SmartSelect } from '../../components/ui/SmartSelect';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Toast } from '../../components/ui/Toast';
 import { brl, errorMessage, SectionError } from './billingShared';
+import { DataTableState } from '../../components/patterns';
 import {
   LuPlus as Plus,
   LuPencil as Pencil,
@@ -327,16 +328,19 @@ export const PlansSection: React.FC = () => {
         </button>
       </div>
 
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-52 bg-surface-2/40 rounded-2xl animate-pulse" />
-          ))}
-        </div>
-      ) : plans.length === 0 ? (
-        <div className="bg-surface border border-border rounded-2xl px-6 py-16 text-center text-text-muted font-medium">
-          Nenhum plano cadastrado.
-        </div>
+      {loading || plans.length === 0 ? (
+        <DataTableState
+          loading={loading}
+          isEmpty={!loading}
+          emptyTitle="Nenhum plano cadastrado."
+          skeleton={
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-52 bg-surface-2/40 rounded-2xl animate-pulse" />
+              ))}
+            </div>
+          }
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {plans.map(plan => (

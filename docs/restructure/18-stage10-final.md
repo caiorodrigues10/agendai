@@ -303,3 +303,60 @@ Verificação final: `test:visual -- --no-build` → **105/105, 0 atualizados**.
 | build prod (PWA) | `npm run build` | **89 precache / 2664,86 KiB** |
 | órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
 | docs / entrega | `docs:check` + `verify:delivery` | **OK** |
+
+---
+
+## 10. D-014 — adoção do trio states no billing (2026-10-05)
+
+Story-first do `SubscriptionsSection` + adoção de `SectionError`/`DataTableState` (E2) nas
+seções de billing, encerrando as receitas locais duplicadas de `billingShared`.
+
+### 10.1 O que foi feito
+
+- **`SubscriptionsSection.stories.tsx` (novo):** 3 stories (`Default`, `Erro`, `Vazio`) com
+  MSW de `/api/admin/subscriptions[?query]` e `/api/admin/subscriptions/economics`; seed de
+  access token no decorator (`adminApi.getAuthHeader()` lança sem token) + cleanup no
+  desmontar, como nas stories da D-010. Story `Carregando` omitida de propósito: a captura
+  aguarda `networkidle` e um fetch pendente a derruba — o estado de loading fica coberto
+  pelos baselines dos componentes (`states-datatablestate-*`, `skeletons/*`).
+- **`SectionError` → re-export do trio** em `billingShared`
+  (`export { SectionError } from '../../components/patterns'`): os 7 sites de billing usam
+  o componente do padrão (`role="alert"`, retry link, contraste neutro); a receita local
+  (card `bg-danger/5` com retry botão) saiu. `TableSkeleton`/`EmptyRow` locais removidos —
+  sem consumidores após a conversão.
+- **`DataTableState` em 6 seções:** Subscriptions (7 col), Refunds (6), Payments (7),
+  Notifications (4) e Blocked (5) — os branches `loading`/`vazio` do `tbody` viraram
+  short-circuit antes do card (`skeletonProps={{ cols }}`); Plans — pulse-grid passou a
+  `skeleton` custom + `emptyTitle`. `RevenueSection` mantido: formato KPI/card não é
+  data-table (o `SectionError` dele herdou o trio via re-export).
+- **D-014 segue aberta com escopo menor:** réplicas de estado **fora** de billing (divs
+  inline de erro em outros painéis) — próxima área, mesma receita story-first.
+
+### 10.2 Prova visual
+
+Baseline pré-adoção gravada primeiro (3 snapshots novos → 108/108); pós-adoção a rodada
+falhou **exatamente 2** — `Erro` **9,16%** (card local → card do trio) e `Vazio` **27,16%**
+(`EmptyRow` em linha → `EmptyState` tracejado) — enquanto `Default` e os 105 baselines
+antigos passaram; `-u` atualizou só os 2. Verificação final: `test:visual -- --no-build` →
+**108/108, 0 atualizados**.
+
+**Corrida latente do `PostEditor` (achado na rodada):** o preview (`/api/posts/preview`,
+com debounce) disputava o `networkidle` da captura — `Conteudo` flipou 9,08% sem mudança de
+código nenhum. Fix: os 4 plays de editor agora esperam `<img alt="Prévia do post">` (estado
+final determinístico) → 4 baselines atualizadas e estáveis; `Objectives` (gate, sem editor)
+intocada.
+
+### 10.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npm run typecheck` | **0 erros** |
+| lint (gate) | `npm run lint` (`eslint src`) | **0 err / 486 warn** |
+| lint full-scope | `npx eslint .` | **0 err / 488 warn** (teto 11/593) |
+| testes app+storybook | `npm test` | **353/353 (84 arquivos)** = 245 app + 108 storybook |
+| contratos | `test:contract` + `contract:check:strict` | **6/6** · **OK 404 chamadas / 555 rotas, 0 pend** |
+| storybook + a11y | `npm run test:storybook` | **108/108 (34 arquivos)**, `a11y.test: 'error'` (**0 violações**) |
+| regressão visual | `test:visual -- --no-build` | **108/108, 0 atualizados** (3 novos pós-`-u` + 4 baselines do PostEditor estabilizadas) |
+| build prod (PWA) | `npm run build` | **90 precache / 2666,41 KiB** (antes 89 / 2664,86 — +1 entry / +1,55 KiB) |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
+| docs / entrega | `docs:check` + `verify:delivery` | **OK** |

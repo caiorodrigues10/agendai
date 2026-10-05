@@ -3,10 +3,9 @@ import { adminApi, AdminNotificationItem } from '../../infra/adminApi';
 import {
   formatDateTime,
   SectionError,
-  TableSkeleton,
-  EmptyRow,
   PaginationBar,
 } from './billingShared';
+import { DataTableState } from '../../components/patterns';
 import { LuRefreshCcw as RefreshCcw } from 'react-icons/lu';
 
 // ─────────────────────────────────────────────
@@ -123,6 +122,13 @@ export const NotificationsSection: React.FC = () => {
 
       {error ? (
         <SectionError message={error} onRetry={fetchNotifications} />
+      ) : loading || items.length === 0 ? (
+        <DataTableState
+          loading={loading}
+          isEmpty={!loading}
+          emptyTitle="Nenhuma notificação encontrada."
+          skeletonProps={{ cols: 4 }}
+        />
       ) : (
         <div className="bg-surface border border-border rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
@@ -136,12 +142,7 @@ export const NotificationsSection: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/40">
-                {loading ? (
-                  <TableSkeleton cols={4} />
-                ) : items.length === 0 ? (
-                  <EmptyRow cols={4} message="Nenhuma notificação encontrada." />
-                ) : (
-                  items.map(n => (
+                {items.map(n => (
                     <tr
                       key={n.id}
                       className={`hover:bg-surface-2/20 transition-colors ${!n.read ? 'bg-accent/5' : ''}`}
@@ -179,8 +180,7 @@ export const NotificationsSection: React.FC = () => {
                         )}
                       </td>
                     </tr>
-                  ))
-                )}
+                ))}
               </tbody>
             </table>
           </div>

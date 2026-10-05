@@ -5,9 +5,8 @@ import {
   errorMessage,
   formatDate,
   SectionError,
-  TableSkeleton,
-  EmptyRow,
 } from './billingShared';
+import { DataTableState } from '../../components/patterns';
 import { LuRefreshCcw as RefreshCcw } from 'react-icons/lu';
 
 // ─────────────────────────────────────────────
@@ -83,26 +82,29 @@ export const RefundsSection: React.FC<{ shopNames: Map<string, string> }> = ({ s
           <RefreshCcw size={14} className={loading ? 'animate-spin' : ''} />
         </button>
       </div>
-      <div className="bg-surface border border-border rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-bg text-text-muted uppercase text-[10px] font-bold tracking-widest border-b border-border">
-              <tr>
-                <th className="px-6 py-3.5">Valor</th>
-                <th className="px-6 py-3.5 hidden md:table-cell">Motivo</th>
-                <th className="px-6 py-3.5 hidden lg:table-cell">Salão</th>
-                <th className="px-6 py-3.5">Provedor</th>
-                <th className="px-6 py-3.5">Status</th>
-                <th className="px-6 py-3.5 hidden lg:table-cell">Data</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/40">
-              {loading ? (
-                <TableSkeleton cols={6} />
-              ) : refunds.length === 0 ? (
-                <EmptyRow cols={6} message="Nenhum reembolso encontrado." />
-              ) : (
-                refunds.map(r => (
+      {loading || refunds.length === 0 ? (
+        <DataTableState
+          loading={loading}
+          isEmpty={!loading}
+          emptyTitle="Nenhum reembolso encontrado."
+          skeletonProps={{ cols: 6 }}
+        />
+      ) : (
+        <div className="bg-surface border border-border rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-bg text-text-muted uppercase text-[10px] font-bold tracking-widest border-b border-border">
+                <tr>
+                  <th className="px-6 py-3.5">Valor</th>
+                  <th className="px-6 py-3.5 hidden md:table-cell">Motivo</th>
+                  <th className="px-6 py-3.5 hidden lg:table-cell">Salão</th>
+                  <th className="px-6 py-3.5">Provedor</th>
+                  <th className="px-6 py-3.5">Status</th>
+                  <th className="px-6 py-3.5 hidden lg:table-cell">Data</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/40">
+                {refunds.map(r => (
                   <tr key={r.id} className="hover:bg-surface-2/20 transition-colors">
                     <td className="px-6 py-4">
                       <span className="font-bold text-text-primary">{brl.format(r.amount)}</span>
@@ -127,12 +129,12 @@ export const RefundsSection: React.FC<{ shopNames: Map<string, string> }> = ({ s
                       <span className="text-xs text-text-secondary">{formatDate(r.createdAt)}</span>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
