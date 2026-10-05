@@ -103,6 +103,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
   onBack,
 }) => {
   const navigate = useNavigate();
+  const embedded = variant === 'embedded';
   const planId = planIdProp ?? null;
   const billingParam = billing;
   const isTrialSetup = setupTrial;
@@ -420,27 +421,29 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-bg text-text-primary">
-      <header className="sticky top-0 z-50 bg-bg/95 backdrop-blur-sm border-b border-border">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => {
-                if (onBack) onBack();
-                else navigate(user ? '/app/subscription' : '/planos');
-              }}
-              className="p-2 rounded-lg text-text-secondary hover:text-accent transition-colors"
-              title="Voltar"
-            >
-              <ArrowLeft size={18} />
-            </button>
-            <Logo size="sm" />
+    <div className={`${embedded ? '' : 'min-h-screen '}bg-bg text-text-primary`}>
+      {!embedded && (
+        <header className="sticky top-0 z-50 bg-bg/95 backdrop-blur-sm border-b border-border">
+          <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  if (onBack) onBack();
+                  else navigate(user ? '/app/subscription' : '/planos');
+                }}
+                className="p-2 rounded-lg text-text-secondary hover:text-accent transition-colors"
+                title="Voltar"
+              >
+                <ArrowLeft size={18} />
+              </button>
+              <Logo size="sm" />
+            </div>
+            <ThemeToggle />
           </div>
-          <ThemeToggle />
-        </div>
-      </header>
+        </header>
+      )}
 
-      <main className="max-w-2xl mx-auto px-4 py-8">
+      <main className={`max-w-2xl mx-auto ${embedded ? '' : 'px-4 py-8'}`}>
         {loadingPlan && (
           <div className="flex justify-center py-20 text-accent">
             <Loader2 className="animate-spin" size={36} />
@@ -730,7 +733,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
                               >
                                 {opt.label}
                               </span>
-                              <span className="mt-0.5 block text-[11px] leading-tight text-text-muted">
+                              <span className="mt-0.5 block text-[11px] leading-tight text-text-secondary">
                                 {opt.hint}
                               </span>
                             </span>

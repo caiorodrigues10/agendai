@@ -46,7 +46,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), D-010 (checkout full-screen — `credit-card-form` já removido), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — skeletons órfãos já removidos).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — skeletons órfãos já removidos).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - **Budget/D-002:** −50 KiB disponíveis no CSS via `@source not` após restyle de39 stories.
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -245,5 +245,61 @@ threshold de 2% do `jest-image-snapshot` (`failureThreshold: 0.02` percentual,
 | storybook + a11y | `npm run test:storybook` | **102/102 (32 arquivos)**, `a11y.test: 'error'` (**0 violações**) |
 | regressão visual | `test:visual` | **102/102, 0 atualizados** |
 | build prod (PWA) | `npm run build` | **89 precache / 2664,69 KiB** |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
+| docs / entrega | `docs:check` + `verify:delivery` | **OK** |
+
+---
+
+## 9. D-010 — checkout embutido → ModalShell sheet (2026-10-05)
+
+Story-first do `OwnerSubscriptionPanel` + conversão do 2º overlay (`payOpen`) em `ModalShell variant="sheet"`, com a variante `embedded` do checkout finalmente consumida.
+
+### 9.1 O que foi feito
+
+- **`OwnerSubscriptionPanel.stories.tsx` (novo):** 3 stories (`Default`, `Cancelamento`,
+  `CheckoutAberto`) com MSW (`/api/auth/me`, `/api/subscriptions/me`, `/api/plans[/:id]`,
+  `/api/subscriptions/cancellation-context`); seed de token/usuário no decorator + cleanup
+  no desmontar (`StoryFrame`) — o test-runner usa um só contexto Playwright e o storage
+  vaza entre stories sem isso; plays clicam em `Cancelar` e `Pagar / renovar Essencial`.
+- **Conversão:** o overlay `fixed inset-0 z-[80]` virou `<ModalShell variant="sheet">`
+  (`title="Finalizar assinatura"`, `titleId="checkout-sheet-title"`) com `body` =
+  `SubscriptionCheckout variant="embedded"` e o `closeCheckout` centralizando o reset de
+  `payOpen/payPlanId/paySetupTrial` (usado por `onClose` do shell e `onBack` do checkout).
+  FocusLock, Escape, backdrop e fechar agora vêm do shell — antes o overlay não tinha
+  focus trap, nem Escape, nem bloqueio do conteúdo de fundo para o AT.
+- **`CheckoutPage` consumiu `variant="embedded"`:** antes a prop era declarada e nunca
+  usada (o overlay renderizava o full-page com header próprio). Agora: sem `min-h-screen`,
+  sem header (o sheet fornece `Fechar` → `onBack`) e `main` sem padding (o corpo do shell
+  fornece `px-4 py-4 sm:px-5`); `variant="page"` (rota `/checkout`) permanece idêntica.
+- **Duas descobertas da story, corrigidas:**
+  - **a11y/contraste:** o hint "QR Code na hora" (`text-[11px] text-text-muted`, 4.3:1 sobre
+    `bg-selection`) violava 4.5:1 → `text-text-secondary` (~7:1) em `CheckoutPage`.
+  - **Corrida de refresh (`SubscriptionContext`):** `refresh` dependia do objeto `user`
+    (identidade nova a cada `normalizeUser` do boot do AuthProvider) e o throttle de foco
+    começava em `0` — o 1º foco pós-boot disparava um 2º fetch que ligava `loading` e o
+    painel trocava para spinner **no meio do play**, desmontando o botão antes do click
+    (silencioso: o React ignora eventos em nós destacados; o handler nem era chamado).
+    Fix: deps por primitivas (`userId`/`shopId`) + semente do throttle no mount — elimina
+    também o duplo fetch redundante do app real no boot.
+
+### 9.2 Prova visual (mudança de propósito, escopo contido)
+
+Baseline pré-conversão gravada primeiro (3 snapshots novos → 105/105); pós-conversão a
+rodada falhou **exatamente 1** (`CheckoutAberto` — sheet centrada vs overlay full-screen)
+e `--updateSnapshot` atualizou só aquela — as outras **104 passaram byte-idênticas**.
+Verificação final: `test:visual -- --no-build` → **105/105, 0 atualizados**.
+
+### 9.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npm run typecheck` | **0 erros** |
+| lint (gate) | `npm run lint` (`eslint src`) | **0 err / 486 warn** (−1: warning `variant` unused resolvido pela conversão) |
+| lint full-scope | `npx eslint .` | **0 err / 488 warn** (teto 11/593) |
+| testes app+storybook | `npm test` | **350/350 (83 arquivos)** = 245 app + 105 storybook |
+| contratos | `test:contract` + `contract:check:strict` | **6/6** · **OK 404 chamadas / 555 rotas, 0 pend** |
+| storybook + a11y | `npm run test:storybook` | **105/105 (33 arquivos)**, `a11y.test: 'error'` (**0 violações**) |
+| regressão visual | `test:visual -- --no-build` | **105/105, 0 atualizados** (1 atualizado na rodada `-u` pós-conversão, só `CheckoutAberto`) |
+| build prod (PWA) | `npm run build` | **89 precache / 2664,86 KiB** |
 | órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
 | docs / entrega | `docs:check` + `verify:delivery` | **OK** |

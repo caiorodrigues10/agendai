@@ -176,6 +176,12 @@ export const OwnerSubscriptionPanel: React.FC = () => {
     setPayOpen(true);
   };
 
+  const closeCheckout = () => {
+    setPayOpen(false);
+    setPayPlanId(null);
+    setPaySetupTrial(false);
+  };
+
   const closeCancelModal = () => {
     setShowCancelModal(false);
     setCancelStep(1);
@@ -722,21 +728,22 @@ export const OwnerSubscriptionPanel: React.FC = () => {
         }
       />
 
-      {payOpen && (
-        <div className="fixed inset-0 z-[80] overflow-y-auto bg-bg">
+      <ModalShell
+        open={payOpen}
+        title="Finalizar assinatura"
+        titleId="checkout-sheet-title"
+        variant="sheet"
+        onClose={closeCheckout}
+        body={
           <SubscriptionCheckout
             planId={payPlanId}
             billing={billingYearly ? 'YEARLY' : 'MONTHLY'}
             setupTrial={paySetupTrial}
             variant="embedded"
-            onBack={() => {
-              setPayOpen(false);
-              setPayPlanId(null);
-              setPaySetupTrial(false);
-            }}
+            onBack={closeCheckout}
           />
-        </div>
-      )}
+        }
+      />
     </div>
   );
 };
