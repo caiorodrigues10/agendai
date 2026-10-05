@@ -18,6 +18,7 @@ import { Field, FIELD_CONTROL, FORM_FOOTER, FORM_GRID } from '../../components/u
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SmartSelect } from '../../components/ui/SmartSelect';
+import { SectionError } from '../../components/patterns';
 
 type HubTab = 'estoque' | 'movimentacoes' | 'necessidades';
 
@@ -453,11 +454,7 @@ export const EquipmentPanel: React.FC = () => {
         )}
       </div>
 
-      {error && (
-        <div className="rounded-xl border border-danger/30 bg-danger/10 p-3 text-sm text-danger">
-          {error}
-        </div>
-      )}
+      {error && <SectionError message={error} onRetry={loadEquipment} />}
 
       {/* Tab selector */}
       <div className="rounded-2xl border border-border bg-surface p-2 shadow-[0_18px_44px_-32px_rgba(0,0,0,0.7)]">

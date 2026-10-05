@@ -90,3 +90,16 @@ export const Default: Story = {};
 export const Vazio: Story = {
   parameters: { msw: { handlers: mswHandlers([]) } },
 };
+
+export const Erro: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.get('/api/barbershops/:id/equipment', () =>
+          HttpResponse.json({ success: false, message: 'Erro ao carregar equipamentos' }, { status: 500 })
+        ),
+        http.get('/api/barbershops/:id/equipment-dashboard', () => json(dashboard)),
+      ],
+    },
+  },
+};

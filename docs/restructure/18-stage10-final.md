@@ -46,7 +46,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10 e financeiro em §13 concluídos em 2026-10-05; restam réplicas fora dessas áreas).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13 e painéis owner em §14 concluídos em 2026-10-05; restam réplicas fora dessas áreas).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - ~~**Budget/D-002**~~ → **sanada** (2026-10-05, §11): `@source not` adotado — na reavaliação o delta real é −0,3 KiB CSS (6 utilities, 4 delas fantasmas de ids de fixture) e o único restyle real foi em `TokensGallery` (2 classes).
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -527,3 +527,63 @@ visual era só o deslocamento (ver 13.1). `-u` atualizou as **5**; re-run
 | build prod (PWA) | `npm run build` | **90 precache / 2665,61 KiB** (−0,95 KiB vs D-013) |
 | órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
 | docs / entrega | `docs:check` + `verify:delivery` | **OK** |
+
+## 14. D-014 — adoção do trio states em painéis owner (2026-10-05)
+
+Terceira área da receita story-first: os 4 painéis owner que já tinham stories e usavam a
+mesma div inline de erro (`flex items-center gap-3 rounded-xl border border-danger/30
+bg-danger/10 px-4 py-3`) passaram ao `SectionError`.
+
+### 14.1 O que foi feito
+
+- **4 stories `Erro` novas** (MSW 500 com mensagem própria, antes da conversão, para
+  gravar o baseline da UI antiga):
+  | Story | Endpoint que falha | Mensagem |
+  |---|---|---|
+  | `Metas/GoalsPanel.Erro` | `/goals/ranking` | `Erro ao carregar metas` |
+  | `Fidelidade/LoyaltyPanel.Erro` | `/loyalty/program` | `Erro ao carregar programa` |
+  | `Recomendações/RecommendationsPanel.Erro` | `/analytics/recommendations` | `Erro ao carregar recomendações` |
+  | `Equipamentos/EquipmentPanel.Erro` | `/equipment` (dashboard segue ok) | `Erro ao carregar equipamentos` |
+- **4 sites convertidos:** `GoalsPanel` (L157), `LoyaltyPanel` (L103),
+  `RecommendationsPanel` (L127) e `EquipmentPanel` (L456) — todos com
+  `onRetry` = o `load` correspondente (`load`/`loadEquipment`). `AlertCircle` ficou órfão
+  **só** em `RecommendationsPanel` (removido do import); nos demais há outro uso (modal/form).
+- **Achado de processo (armadilha `--no-build`):** a primeira rodada de prova com
+  `test:visual -- --no-build` passou **114/114** — o flag reusa o bundle anterior, que
+  ainda continha a UI antiga. A prova real exige rebuild (`npm run test:visual` sem o
+  flag); documentado aqui para as próximas áreas.
+
+### 14.2 Prova visual
+
+Com rebuild, a rodada falhou **exatamente as 4 stories novas** (110 restantes passaram).
+Como o leitor de imagens da sessão devolveu mídia errada, a inspeção dos 4 diffs foi
+**programática** (PIL, painéis `old | diff | new` de 1440px cada) e confirmou, nas 4:
+
+- topo do card **idêntico** em old/new (posição vertical preservada);
+- card antigo **45px** com **1 faixa de texto** (mensagem) → card novo **81px** com
+  **2 faixas** (mensagem em `p-4` + link "Tentar novamente") — exatamente o formato do
+  `SectionError`;
+- conteúdo abaixo deslocado **+36px** (a diferença de altura) com resíduo médio 0,8–2,3
+  (0–16,7 sem o shift) → nada além do card mudou.
+
+`-u` atualizou as **4**; re-run `test:visual -- --no-build` → **114/114, 0 atualizados**.
+
+### 14.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npm run typecheck` | **0 erros** |
+| lint (gate) | `npm run lint` (`eslint src`) | **0 err / 486 warn** |
+| lint full-scope | `npx eslint .` | **0 err / 488 warn** (teto 11/593) |
+| testes app+storybook | `npm test` | **359/359 (84 arquivos)** = 245 app + 114 storybook (+4 stories novas) |
+| contratos | `test:contract` + `contract:check:strict` | **6/6** · **OK 404 chamadas / 555 rotas** |
+| storybook + a11y | `npm run test:storybook` | **114/114 (34 arquivos)**, `a11y.test: 'error'` |
+| regressão visual | `test:visual -- --no-build` | **114/114, 0 atualizados** (4 atualizados na rodada de prova, pós-rebuild) |
+| build prod (PWA) | `npm run build` | **90 precache / 2665,07 KiB** (−0,54 KiB vs §13) |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
+| docs / entrega | `docs:check` + `verify:delivery` | **OK** |
+
+**Próximas áreas da D-014 (fora de billing/financeiro/painéis owner):** waitlist,
+clients, notifications, organizations, CRM, master-admin, modais de agendamento
+(`AppointmentBookingModal`/`BookPackageSessionsModal`), `ErrorBoundary` e páginas
+públicas — nenhuma tem story de erro hoje; receita story-first permanece a mesma.

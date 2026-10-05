@@ -62,3 +62,15 @@ export const Default: Story = {};
 export const Vazio: Story = {
   parameters: { msw: { handlers: mswHandlers([]) } },
 };
+
+export const Erro: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.get('/api/barbershops/:id/goals/ranking', () =>
+          HttpResponse.json({ success: false, message: 'Erro ao carregar metas' }, { status: 500 })
+        ),
+      ],
+    },
+  },
+};

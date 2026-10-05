@@ -14,6 +14,7 @@ import { loyaltyApi, LoyaltyProgram } from '../../infra/loyaltyApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { Field, FIELD_CONTROL, FORM_FOOTER } from '../../components/ui/Field';
+import { SectionError } from '../../components/patterns';
 
 interface LoyaltyConfig {
   visitsRequired: number;
@@ -100,12 +101,7 @@ export const LoyaltyPanel: React.FC = () => {
         </p>
       </div>
 
-      {error && (
-        <div className="flex items-center gap-3 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-          <AlertCircle size={16} />
-          <span>{error}</span>
-        </div>
-      )}
+      {error && <SectionError message={error} onRetry={load} />}
 
       <div className="rounded-2xl border border-border bg-surface p-5 shadow-[0_18px_44px_-32px_rgba(0,0,0,0.65)]">
         <div className="flex items-center justify-between">

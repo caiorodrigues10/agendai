@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  LuCircleAlert as AlertCircle,
   LuArrowUpRight as ArrowUpRight,
   LuCalendarClock as CalendarClock,
   LuPackageSearch as PackageSearch,
@@ -15,6 +14,7 @@ import { recommendationsApi, Recommendation } from '../../infra/recommendationsA
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { SectionError } from '../../components/patterns';
 
 const PRIORITY_CONFIG: Record<string, { label: string; className: string; dotClass: string }> = {
   high: {
@@ -124,12 +124,7 @@ export const RecommendationsPanel: React.FC = () => {
       </div>
 
       <div className="p-4 sm:p-6">
-        {error && (
-        <div className="flex items-center gap-3 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-          <AlertCircle size={16} />
-          <span>{error}</span>
-        </div>
-        )}
+        {error && <SectionError message={error} onRetry={load} />}
 
         {recommendations.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-bg/40 px-6 py-14 text-center">

@@ -56,3 +56,15 @@ export const Default: Story = {};
 export const Vazio: Story = {
   parameters: { msw: { handlers: mswHandlers([]) } },
 };
+
+export const Erro: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.get('/api/barbershops/:id/analytics/recommendations', () =>
+          HttpResponse.json({ success: false, message: 'Erro ao carregar recomendações' }, { status: 500 })
+        ),
+      ],
+    },
+  },
+};

@@ -41,3 +41,15 @@ export const Default: Story = {};
 export const Inativo: Story = {
   parameters: { msw: { handlers: mswHandlers({ ...program, isActive: false }) } },
 };
+
+export const Erro: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.get('/api/barbershops/:id/loyalty/program', () =>
+          HttpResponse.json({ success: false, message: 'Erro ao carregar programa' }, { status: 500 })
+        ),
+      ],
+    },
+  },
+};
