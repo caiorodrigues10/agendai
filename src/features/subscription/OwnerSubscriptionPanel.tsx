@@ -31,6 +31,7 @@ import {
 import { plansApi, Plan } from '../../infra/plansApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { SmartSelect } from '../../components/ui/SmartSelect';
+import { SectionError } from '../../components/patterns';
 import { SubscriptionCheckout } from '../../pages/CheckoutPage';
 
 const brl = (n: number) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -257,11 +258,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
         <p className="text-sm text-text-secondary mt-1">Veja seu plano atual e escolha a melhor opção para o salão.</p>
       </div>
 
-      {error && (
-        <div className="p-3 rounded-xl bg-danger/10 border border-danger/30 text-danger text-sm flex gap-2">
-          <AlertCircle size={16} className="shrink-0 mt-0.5" /> {error}
-        </div>
-      )}
+      {error && <SectionError message={error} />}
       {success && (
         <div className="p-3 rounded-xl bg-success/10 border border-success/30 text-success text-sm flex gap-2">
           <CheckCircle2 size={16} className="shrink-0 mt-0.5" /> {success}
@@ -580,11 +577,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
             </>
           ) : (
             <>
-                  {error && (
-                    <div className="p-3 rounded-xl bg-danger/10 border border-danger/30 text-danger text-sm flex gap-2 mb-4">
-                      <AlertCircle size={16} className="shrink-0 mt-0.5" /> {error}
-                    </div>
-                  )}
+                  {error && <SectionError message={error} className="mb-4" />}
 
                   <div className="space-y-2">
                     {CANCEL_REASONS.map(r => (
@@ -712,7 +705,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                     <button
                       onClick={handleConfirmCancel}
                       disabled={!cancelReason || (needsPixKey && !pixKey.trim()) || cancelling}
-                      className="flex-1 py-2.5 rounded-xl bg-danger text-white text-sm font-bold flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-40"
+                      className="flex-1 py-2.5 rounded-xl bg-danger text-danger-fg text-sm font-bold flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-40"
                     >
                       {cancelling ? (
                         <Loader2 size={15} className="animate-spin" />

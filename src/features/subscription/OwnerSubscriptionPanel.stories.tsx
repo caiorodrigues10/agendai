@@ -200,3 +200,39 @@ export const CheckoutAberto: Story = {
     await body.findByText('Plano escolhido', {}, { timeout: 10000 });
   },
 };
+
+/** Falha do cancelamento (DELETE /api/subscriptions/me → 500): banner de erro no modal. */
+export const Erro: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        ...mswHandlers,
+        http.delete('/api/subscriptions/me', () =>
+          HttpResponse.json(
+            { success: false, message: 'Não foi possível cancelar a assinatura' },
+            { status: 500 }
+          )
+        ),
+      ],
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await waitForPanel(canvas);
+    await userEvent.click(
+      await canvas.findByRole('button', { name: 'Cancelar' }, { timeout: 10000 })
+    );
+    const body = within(document.body);
+    await body.findByText('Sentimos muito em ver você ir', {}, { timeout: 10000 });
+    await userEvent.click(
+      await body.findByRole('button', { name: 'Cancelar mesmo assim' }, { timeout: 10000 })
+    );
+    const reasons = await body.findAllByRole('radio', {}, { timeout: 10000 });
+    await userEvent.click(reasons[0]);
+    await userEvent.click(
+      await body.findByRole('button', { name: 'Cancelar assinatura' }, { timeout: 10000 })
+    );
+    const shown = await body.findAllByText('Não foi possível cancelar a assinatura', {}, { timeout: 10000 });
+    if (!shown.length) throw new Error('Banner de erro do cancelamento não apareceu');
+  },
+};

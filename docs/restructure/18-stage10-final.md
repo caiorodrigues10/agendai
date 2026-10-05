@@ -46,7 +46,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13 e painéis owner em §14 concluídos em 2026-10-05; restam réplicas fora dessas áreas).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14 e assinatura/pacotes em §15 concluídos em 2026-10-05; restam réplicas fora dessas áreas).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - ~~**Budget/D-002**~~ → **sanada** (2026-10-05, §11): `@source not` adotado — na reavaliação o delta real é −0,3 KiB CSS (6 utilities, 4 delas fantasmas de ids de fixture) e o único restyle real foi em `TokensGallery` (2 classes).
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -587,3 +587,72 @@ Como o leitor de imagens da sessão devolveu mídia errada, a inspeção dos 4 d
 clients, notifications, organizations, CRM, master-admin, modais de agendamento
 (`AppointmentBookingModal`/`BookPackageSessionsModal`), `ErrorBoundary` e páginas
 públicas — nenhuma tem story de erro hoje; receita story-first permanece a mesma.
+
+## 15. D-014 — assinatura e agendamento de pacotes (2026-10-05)
+
+Quarta área da receita story-first: os 2 modais com banner inline de erro (`bg-danger/10
+border border-danger/30`, sem `role="alert"`) e nenhuma story de erro — cancelamento de
+assinatura e agendamento de sessões de pacote.
+
+### 15.1 O que foi feito
+
+- **2 stories `Erro` novas** (MSW 500, antes da conversão, para gravar o baseline da UI antiga):
+
+  | Story | Endpoint que falha | Play |
+  |---|---|---|
+  | `Assinatura/OwnerSubscriptionPanel.Erro` | `DELETE /api/subscriptions/me` → `Não foi possível cancelar a assinatura` | `Cancelar` → `Cancelar mesmo assim` → motivo → `Cancelar assinatura` → `findAllByText` (a mensagem aparece 2×: modal + banner atrás do overlay) |
+  | `Agenda/BookPackageSessionsModal.Erro` | `POST /api/client-packages/:id/book` → `Não foi possível agendar as sessões` | 1º slot (`HH:MM`) → `Confirmar 1 horário` → `findByText` |
+
+- **3 sites convertidos:** `OwnerSubscriptionPanel` L261 (banner top-level) e L580 (dentro
+  do modal de cancelamento, `className="mb-4"`) e `BookPackageSessionsModal` L126
+  (`className="mb-4"`) — `SectionError` **sem `onRetry`**: o retry natural é re-executar a
+  própria ação, cujo botão continua visível ao lado. `AlertCircle` ficou órfão **só** no
+  `BookPackageSessionsModal` (removido do import); no `OwnerSubscriptionPanel` há outro uso
+  (aviso de ciclo, L661).
+- **Achado de contraste (D-005):** o play expôs que o botão `Cancelar assinatura` usava
+  `text-white` literal sobre `bg-danger` → **2.76:1** no tema dark (`#ffffff` em `#f87171`),
+  abaixo do AA 4.5:1 (fora do alcance do axe — fica atrás do overlay —, mas violação real).
+  Corrigido para `text-danger-fg` (L715). **6 ocorrências irmãs** `bg-danger … text-white`
+  fora do escopo deste batch, registradas na D-014: `TeamManager` L323, `PaymentsSection`
+  L105, `FinancialDashboard` L345/L400, `ProductFormModal` L309, `RefundSaleModal` L170.
+
+### 15.2 Prova visual
+
+Baselines da UI antiga primeiro (2 novas stories → 116 snapshots), conversão, rodada de
+prova **com rebuild** falhou **exatamente as 2 stories esperadas** (114 restantes
+passaram). Inspeção PIL dos 2 diffs (painéis `old | diff | new`):
+
+- `BookPackageSessionsModal`: card **37 → 53px** (`px-3 py-2` → `p-4`, 1 faixa de texto
+  cada — sem retry), conteúdo abaixo com shift **+16px** e resíduo **0.000**;
+- `OwnerSubscriptionPanel`: card **45 → 53px**; o modal é centralizado verticalmente, então
+  o topo sobe 4px e a base desce 4px (recentragem ±4), conteúdo abaixo com shift **+4px** e
+  resíduo **0.000** — nada além do card mudou.
+
+`-u` atualizou as **2**; re-run `test:visual -- --no-build` → **116/116, 0 atualizados**.
+
+### 15.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npx tsc -p tsconfig.json --noEmit` | **0 erros** |
+| lint (gate) | `npm run lint` (`eslint src`) | **0 err / 489 warn** |
+| lint full-scope | `npx eslint .` | **0 err / 491 warn** (teto 11/593); os 4 arquivos deste batch isolados: **0 err / 5 warn** (preexistentes) |
+| testes app+storybook | `npm test` | **367/367 (85 arquivos)** = 116 storybook + app (1ª execução: 1 flake D-006 em `Skeleton.stories > Base` → reexec verde) |
+| contratos | `test:contract` + `contract:check:strict` | **6/6** · **OK 404 chamadas / 555 rotas** |
+| storybook + a11y | `npm run test:storybook` | **116/116 (34 arquivos)**, `a11y.test: 'error'` |
+| regressão visual | `test:visual` (prova, rebuild) + `-- --no-build` (re-run) | **116/116, 0 atualizados** (2 atualizados na prova) |
+| build prod (PWA) | `npm run build` | **91 precache / 2669,31 KiB** (41,87s) |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
+| docs / entrega | `docs:check` + `verify:delivery` | **OK** |
+
+**Nota de sessão paralela:** outro trabalho está editando 6 arquivos no mesmo worktree
+(`SchedulingContext.tsx`/`SchedulingContext.test.tsx`, `QueueItemCard.tsx`, `apiClient.ts`,
+`schedulingApi.ts`, `StaffDashboard.tsx`) — **não tocados nem commitados aqui**; por isso
+o total de warnings de lint, o nº de arquivos de teste (84→85) e o precache do build
+(90→91) variam somando o trabalho alheio. As leituras de regressão visual deste batch
+usaram o bundle do Storybook gerado durante a prova (do próprio batch).
+
+**Próximas áreas da D-014:** waitlist, clients, notifications, organizations, CRM,
+master-admin, `ErrorBoundary` e páginas públicas (`AppointmentBookingModal` segue fora de
+escopo — o único erro exibido é mensagem de domínio, "Fechado neste dia"); receita
+story-first permanece a mesma.
