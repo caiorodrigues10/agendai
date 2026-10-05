@@ -25,6 +25,7 @@ import {
 import { getErrorMessage } from '../../../utils/errorMessage';
 import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { ModalShell } from '../../../components/patterns/ModalShell';
+import { SectionError } from '../../../components/patterns';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_GRID } from '../../../components/ui/Field';
 import { SmartSelect } from '../../../components/ui/SmartSelect';
 import {
@@ -459,18 +460,7 @@ export const OwnerFinancialPanel: React.FC = () => {
           </div>
         </div>
 
-        {error && (
-          <div className="bg-danger/5 border border-danger/20 rounded-xl p-4 flex items-center gap-3">
-            <AlertCircle size={18} className="text-danger shrink-0" />
-            <p className="text-sm text-danger flex-1">{error}</p>
-            <button
-              onClick={handleRefresh}
-              className="text-xs font-bold text-text-secondary hover:text-text-primary border border-border rounded-lg px-3 py-1.5 hover:bg-surface-2 transition-colors"
-            >
-              Tentar novamente
-            </button>
-          </div>
-        )}
+        {error && <SectionError message={error} onRetry={handleRefresh} />}
 
         {tab === 'resumo' && (
           <div className="space-y-4">

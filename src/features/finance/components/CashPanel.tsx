@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  LuCircleAlert as AlertCircle,
   LuBanknote as Banknote,
   LuCreditCard as CreditCard,
   LuFilter as Filter,
@@ -20,6 +19,7 @@ import { Field, FIELD_CONTROL, FORM_FOOTER } from '../../../components/ui/Field'
 import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { SmartSelect } from '../../../components/ui/SmartSelect';
 import { Button } from '../../../components/ui/Button';
+import { SectionError } from '../../../components/patterns';
 
 type MovementType = 'SERVICE_SALE' | 'PRODUCT_SALE' | 'TIP' | 'EXPENSE' | 'OTHER';
 type PaymentMethod = 'CASH' | 'PIX' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'FIADO';
@@ -188,12 +188,7 @@ export const CashPanel: React.FC = () => {
         </div>
       </div>
 
-      {error && (
-        <div className="flex items-center gap-3 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-          <AlertCircle size={16} />
-          <span>{error}</span>
-        </div>
-      )}
+      {error && <SectionError message={error} onRetry={load} />}
 
       <div className="rounded-2xl border border-border bg-surface p-5 shadow-[0_18px_44px_-32px_rgba(0,0,0,0.65)]">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
@@ -352,12 +347,7 @@ export const CashPanel: React.FC = () => {
                 />
               </Field>
 
-              {submitError && (
-                <div className="flex items-center gap-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
-                  <AlertCircle size={14} />
-                  {submitError}
-                </div>
-              )}
+              {submitError && <SectionError message={submitError} />}
             </div>
 
             <div className={FORM_FOOTER}>

@@ -6,7 +6,6 @@ import {
   LuUsers as Users,
   LuScissors as Scissors,
   LuLoaderCircle as Loader2,
-  LuCircleAlert as AlertCircle,
   LuSettings as Settings,
   LuRefreshCw as RefreshCw,
 } from 'react-icons/lu';
@@ -20,6 +19,7 @@ import {
   type ProfitEntry,
 } from '../../../infra/profitApi';
 import { ApiError } from '../../../infra/apiClient';
+import { SectionError } from '../../../components/patterns';
 
 interface ProfitEnginePanelProps {
   barbershopId: string;
@@ -225,12 +225,7 @@ export const ProfitEnginePanel: React.FC<ProfitEnginePanelProps> = ({ barbershop
         </div>
       )}
 
-      {error && (
-          <div className="mx-5 flex items-start gap-2 rounded-xl border border-danger/30 bg-danger/10 p-3 text-sm text-danger">
-          <AlertCircle size={24} className="h-4 w-4" />
-          {error}
-        </div>
-      )}
+      {error && <SectionError message={error} onRetry={loadData} className="mx-5" />}
 
         <div className="grid gap-3 p-5 sm:grid-cols-2 xl:grid-cols-4">
           {[

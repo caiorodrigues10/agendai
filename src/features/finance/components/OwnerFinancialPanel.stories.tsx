@@ -224,3 +224,28 @@ export const Fiado: Story = {
     await canvas.findByText('Rafael Duarte', {}, { timeout: 10000 });
   },
 };
+
+export const Erro: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        ...mswHandlers,
+        http.delete('/api/expenses/:id', () =>
+          HttpResponse.json(
+            { success: false, message: 'Não foi possível excluir a despesa' },
+            { status: 500 }
+          )
+        ),
+      ],
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Despesas' }));
+    await canvas.findByText('Aluguel do salão', {}, { timeout: 10000 });
+    await userEvent.click(canvas.getAllByTitle('Excluir despesa')[0]);
+    await userEvent.click(canvas.getByTitle('Confirmar exclusão'));
+    await canvas.findByText('Não foi possível excluir a despesa', {}, { timeout: 10000 });
+    window.scrollTo(0, 0);
+  },
+};

@@ -46,7 +46,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing concluído em 2026-10-05, §10; restam réplicas fora de billing).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10 e financeiro em §13 concluídos em 2026-10-05; restam réplicas fora dessas áreas).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - ~~**Budget/D-002**~~ → **sanada** (2026-10-05, §11): `@source not` adotado — na reavaliação o delta real é −0,3 KiB CSS (6 utilities, 4 delas fantasmas de ids de fixture) e o único restyle real foi em `TokensGallery` (2 classes).
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -467,3 +467,63 @@ rodavam com a data real e passavam por acaso (limiar de 2% ou baseline gerada no
 **Política para stories novas:** qualquer story que renderize "agora" já nasce
 determinística (freeze global no preview). Ao mexer em `FROZEN_NOW`, rodar
 `test:visual -- -u` completo e regerar todos os baselines.
+
+## 13. D-014 — adoção do trio states no financeiro (2026-10-05)
+
+Segunda área da receita story-first: as réplicas de erro inline dos painéis financeiros
+viraram `SectionError` (E2), com retry/acão no componente padrão.
+
+### 13.1 O que foi feito
+
+- **`SectionError` ganhou `action?: ReactNode`:** retry e ação (ex.: "Fazer upgrade")
+  passaram a renderizar num container `flex flex-wrap gap-x-4 gap-y-2` — o botão de
+  upgrade do `FinancialDashboard` não precisa mais de `ml-auto` improvisado no wrapper.
+- **6 sites convertidos (4 componentes), todos story-first:**
+  | Componente | Site | Conversão |
+  |---|---|---|
+  | `CashPanel` | load (L191) + submit (L350) | `SectionError` com `onRetry={load}` / sem retry no submit |
+  | `ProfitEnginePanel` | load (L228) | `onRetry={loadData}`, `className="mx-5"` preservado |
+  | `OwnerFinancialPanel` | refresh (L463) | `onRetry={handleRefresh}` |
+  | `FinancialDashboard` | comissões (L337) + insights (L393) | `action={<button>Fazer upgrade</button>}` → `navigate('/planos')` |
+
+  `AlertCircle` deixou de ser importado em `CashPanel`/`ProfitEnginePanel` (órfão após a
+  conversão); nos demais continua em uso próprio. `WeatherForecastWidget` ficou **fora de
+  escopo**: o erro dele é texto muted, não réplica do card danger.
+- **2 stories novas:** `FinancialDashboard.ComissaoErro` (MSW 403 `DASHBOARD_REQUIRED`
+  via `mswHandler({ commissionFail })`) e `OwnerFinancialPanel.Erro` (play: aba Despesas →
+  excluir → confirmar → 500 `Não foi possível excluir a despesa`, com
+  `getAllByTitle('Excluir despesa')` — a tabela tem 3 linhas).
+- **Play do `OwnerFinancialPanel.Erro` rola a página ao topo** (`window.scrollTo(0,0)`)
+  após o `findByText`: o clique em "Excluir" deixava o iframe scrolado no meio do
+  formulário e o card de erro (no topo do painel) ficava **fora da captura** — a baseline
+  não provava nada sobre a mudança.
+
+### 13.2 Prova visual
+
+Receita aplicada na ordem: baselines da UI antiga primeiro (2 novas stories gravadas →
+110 snapshots), conversão, rodada de prova. O resultado foi **exatamente as 5 stories
+esperadas** falhando (110 no total):
+
+`cashpanel--erro` · `profitenginepanel--erro` · `financialdashboard--plano-upgrade` ·
+`financialdashboard--comissao-erro` · `ownerfinancialpanel--erro`
+
+Diffs inspecionados um a um: só o card de erro (paleta `danger` preservada, mensagem +
+retry/upgrade visíveis) e o shift de layout decorrente da altura nova do card — nas 4
+primeiras o card novo fica no topo do frame; na do `OwnerFinancialPanel` a diferença
+visual era só o deslocamento (ver 13.1). `-u` atualizou as **5**; re-run
+`test:visual -- --no-build` → **110/110, 0 atualizados**.
+
+### 13.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npm run typecheck` | **0 erros** |
+| lint (gate) | `npm run lint` (`eslint src`) | **0 err / 486 warn** |
+| lint full-scope | `npx eslint .` | **0 err / 488 warn** (teto 11/593) |
+| testes app+storybook | `npm test` | **355/355 (84 arquivos)** = 245 app + 110 storybook (+2 stories novas) |
+| contratos | `test:contract` + `contract:check:strict` | **6/6** · **OK 404 chamadas / 555 rotas** |
+| storybook + a11y | `npm run test:storybook` | **110/110 (34 arquivos)**, `a11y.test: 'error'` (play das 2 stories novas com `findByText`) |
+| regressão visual | `test:visual -- --no-build` | **110/110, 0 atualizados** (5 atualizados na rodada de prova) |
+| build prod (PWA) | `npm run build` | **90 precache / 2665,61 KiB** (−0,95 KiB vs D-013) |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
+| docs / entrega | `docs:check` + `verify:delivery` | **OK** |
