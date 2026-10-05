@@ -46,7 +46,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), D-010 (checkout full-screen — `credit-card-form` já removido), D-011 (PostEditor), D-014 (states trio — skeletons órfãos já removidos).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), D-010 (checkout full-screen — `credit-card-form` já removido), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — skeletons órfãos já removidos).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - **Budget/D-002:** −50 KiB disponíveis no CSS via `@source not` após restyle de39 stories.
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -195,5 +195,55 @@ Story-first + conversão do overlay ad-hoc, com prova de paridade visual.
 | storybook + a11y | `npm run test:storybook` | **97/97 (31 arquivos)**, `a11y.test: 'error'` (**0 violações**) |
 | regressão visual | `test:visual` | **97/97, 0 atualizados** |
 | build prod (PWA) | `npm run build` | **89 precache / 2665,87 KiB** |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
+| docs / entrega | `docs:check` + `verify:delivery` | **OK** |
+
+---
+
+## 8. D-011 — PostEditor: story + ações em `ui/Button` (2026-10-05)
+
+Story-first + conversão das ações de comando, com o escopo residual documentado.
+
+### 8.1 O que foi feito
+
+- **`PostEditor.stories.tsx` (novo):** 5 stories (`Objectives`, `Conteudo`, `Imagem`,
+  `Formato`, `Identidade`) com MSW (`/api/posts/templates|preview|palettes`); thumbnails e
+  preview via SVG data-URI; cada story usa `userId` próprio (`draftStorage` é por usuário -
+  rascunho não vaza entre stories); play do gate de objetivos (`Divulgar serviço`). O campo
+  `datetime-local` só aparece no modo agendado e as stories evitam esse estado (D-013).
+- **Números reais vs registro:** a dívida dizia "914L / 23 crus / já usa 23 `ui/Button`";
+  o arquivo tinha **1136L / 28 crus / 0 `ui/Button`**.
+- **9 botões convertidos para `ui/Button`** (todas as ações de comando): `Gerar sugestões`,
+  `Trocar vídeo`, `Remover`, `Enviar vídeo`, `Baixar PNG`, `Cancelar`, `Rascunho`,
+  `Publicar/Agendar`, `Enviar nova foto`. A prop `loading` não é usada aqui: `PostEditor.test`
+  consulta por nome/habilitação e o `loading` substitui os children.
+- **19 crus restantes são intencionais:** cards de seleção (objetivos, formatos, sugestões,
+  slots de mídia), chips (tom/template/filtro), swatches de paleta, tabs, radios
+  (`role="radio"` com roving tabindex), toggle `aria-pressed` do modo de publicação e os
+  closes `p-2` (mesmo chrome do `ModalShell`). A base do `ui/Button` (`rounded-xl font-bold`,
+  sem opt-out seguro por causa da ordem de classes do Tailwind) não cabe em tabs underline
+  nem em selection cards; o padrão cru `role="radio"`/`aria-pressed` é o usado em 10+ arquivos
+  (PlansPage, CheckoutPage, LoyaltyPanel…). Adotar `patterns/Tabs` no editor mudaria o papel
+  dos elementos e os `getByRole('button')` dos testes → escopo separado, se um dia for feito.
+
+### 8.2 Paridade visual
+
+Baselines das 5 stories gravadas antes da conversão; a rodada pós-conversão passou
+**102/102 snapshots, 0 atualizados** - as diferenças do footer/mídia ficaram dentro do
+threshold de 2% do `jest-image-snapshot` (`failureThreshold: 0.02` percentual,
+`.storybook/test-runner.ts`).
+
+### 8.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npm run typecheck` | **0 erros** |
+| lint (gate) | `npm run lint` (`eslint src`) | **0 err / 487 warn** |
+| lint full-scope | `npx eslint .` | **0 err / 489 warn** (teto 11/593) |
+| testes app+storybook | `npm test` | **347/347 (82 arquivos)** = 245 app + 102 storybook |
+| contratos | `test:contract` + `contract:check:strict` | **6/6** · **OK 404 chamadas / 555 rotas, 0 pend** |
+| storybook + a11y | `npm run test:storybook` | **102/102 (32 arquivos)**, `a11y.test: 'error'` (**0 violações**) |
+| regressão visual | `test:visual` | **102/102, 0 atualizados** |
+| build prod (PWA) | `npm run build` | **89 precache / 2664,69 KiB** |
 | órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
 | docs / entrega | `docs:check` + `verify:delivery` | **OK** |

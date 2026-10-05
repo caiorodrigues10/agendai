@@ -22,6 +22,7 @@ import { postsApi, type PostMedia, type PostPaletteDef, type PostTemplateDef } f
 import { barbershopApi, PostAiSuggestion } from '../../infra/barbershopApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { FeedPost, PostFormat, PostMode } from '../../types';
+import { Button } from '../../components/ui/Button';
 import { PostPreviewBox } from './PostPreviewBox';
 import { TemplateThumbnail } from './TemplateThumbnail';
 import { OBJECTIVES, type PostType, type ObjectiveId } from './objectives';
@@ -637,12 +638,12 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                       placeholder="Contexto extra (ex.: promoção só até sexta)"
                       className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-xs focus:border-accent focus:outline-none"
                     />
-                    <button type="button" onClick={() => void handleGenerate()} disabled={generatingSuggestions}
-                      className="flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-border text-xs font-bold text-text-secondary hover:border-accent/40 hover:text-accent disabled:opacity-40"
+                    <Button variant="secondary" size="sm" onClick={() => void handleGenerate()} disabled={generatingSuggestions}
+                      className="w-full gap-1.5"
                     >
                       {generatingSuggestions ? <Loader2 size={13} className="animate-spin" aria-hidden /> : <Sparkles size={13} aria-hidden />}
                       {generatingSuggestions ? 'Gerando…' : 'Gerar sugestões'}
-                    </button>
+                    </Button>
                   </div>
                 </details>
 
@@ -746,25 +747,23 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                     <div className="space-y-2">
                       <video src={videoUrl} controls className="w-full max-w-xs rounded-xl bg-black" />
                       <div className="flex gap-2">
-                        <button type="button" onClick={() => videoInputRef.current?.click()} disabled={uploadingVideo}
-                          className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-text-secondary hover:border-accent/40 disabled:opacity-40"
+                        <Button variant="secondary" size="sm" onClick={() => videoInputRef.current?.click()} disabled={uploadingVideo}
                         >
                           Trocar vídeo
-                        </button>
-                        <button type="button" onClick={() => setVideoUrl(null)} disabled={uploadingVideo}
-                          className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-danger hover:border-danger/40 disabled:opacity-40"
+                        </Button>
+                        <Button variant="danger" size="sm" onClick={() => setVideoUrl(null)} disabled={uploadingVideo}
                         >
                           Remover
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ) : (
-                    <button type="button" onClick={() => videoInputRef.current?.click()} disabled={uploadingVideo}
-                      className="flex min-h-11 w-full max-w-xs items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border text-xs font-bold text-text-secondary hover:border-accent/40 hover:text-accent disabled:opacity-40"
+                    <Button variant="secondary" onClick={() => videoInputRef.current?.click()} disabled={uploadingVideo}
+                      className="w-full max-w-xs gap-2 border-2 border-dashed"
                     >
                       {uploadingVideo ? <Loader2 size={14} className="animate-spin" aria-hidden /> : <ImagePlus size={14} aria-hidden />}
                       {uploadingVideo ? 'Enviando vídeo…' : 'Enviar vídeo (até 25 MB)'}
-                    </button>
+                    </Button>
                   )}
                   <input ref={videoInputRef} type="file" accept="video/mp4,video/webm,video/quicktime" className="hidden" onChange={e => void handleVideoUpload(e)} />
                 </div>
@@ -919,13 +918,14 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                 </div>
 
                 {/* Download */}
-                <button type="button"
+                <Button
+                  variant="secondary"
                   onClick={() => previewUrl && downloadImage(previewUrl, `post-${format}-${Date.now()}.png`)}
                   disabled={!previewUrl || previewLoading || previewStale}
-                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-border font-semibold text-text-secondary hover:border-accent/40 disabled:opacity-40"
+                  className="w-full gap-2"
                 >
                   <Download size={15} aria-hidden /> Baixar PNG
-                </button>
+                </Button>
               </div>
 
               <div className="hidden lg:block">
@@ -963,22 +963,22 @@ export const PostEditor: React.FC<PostEditorProps> = ({
             )}
           </div>
           <div className="flex items-center justify-between gap-2">
-            <button type="button" onClick={onClose} disabled={submitting || mediaBusy}
-              className="flex min-h-11 items-center gap-1.5 rounded-xl border border-border px-4 text-sm font-semibold text-text-secondary disabled:opacity-40"
+            <Button variant="secondary" onClick={onClose} disabled={submitting || mediaBusy}
+              className="gap-1.5"
             >
               Cancelar
-            </button>
+            </Button>
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => void handleSave('draft')} disabled={submitting || mediaBusy}
-                className="flex min-h-11 items-center gap-1.5 rounded-xl border border-border px-4 text-xs font-semibold text-text-secondary hover:border-text-muted disabled:opacity-40"
+              <Button variant="secondary" onClick={() => void handleSave('draft')} disabled={submitting || mediaBusy}
+                className="gap-1.5"
               >
                 {submitting ? <Loader2 size={14} className="animate-spin" aria-hidden /> : null}
                 Rascunho
-              </button>
-              <button type="button"
+              </Button>
+              <Button variant="primary"
                 onClick={() => publishMode === 'schedule' ? void handleSave('schedule') : void handleSave('publish')}
                 disabled={submitting || mediaBusy || templatesLoading || (publishMode === 'schedule' && !scheduledFor)}
-                className="flex min-h-11 items-center gap-2 rounded-xl bg-accent px-5 text-sm font-bold text-accent-fg hover:bg-accent-hover disabled:opacity-40"
+                className="gap-2 px-5"
               >
                 {submitting ? <Loader2 size={14} className="animate-spin" aria-hidden /> : (
                   publishMode === 'schedule'
@@ -986,7 +986,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                     : <Check size={14} aria-hidden />
                 )}
                 {publishMode === 'schedule' ? 'Agendar' : 'Publicar'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -1028,11 +1028,11 @@ export const PostEditor: React.FC<PostEditorProps> = ({
             </div>
             <div className="border-t border-border p-4">
               <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={e => void handleUpload(e)} />
-              <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploadingPhoto}
-                className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border text-xs font-bold text-text-secondary hover:border-accent/40 hover:text-accent"
+              <Button variant="secondary" onClick={() => fileInputRef.current?.click()} disabled={uploadingPhoto}
+                className="w-full gap-2 border-2 border-dashed text-xs"
               >
-                <ImagePlus size={15} aria-hidden /> {uploadingPhoto ? 'Enviando foto…' : 'Enviar nova foto'}
-              </button>
+                <ImagePlus size={15} aria-hidden /> {uploadingPhoto ? 'Enviando foto.' : 'Enviar nova foto'}
+              </Button>
             </div>
           </div>
           </FocusLock>
