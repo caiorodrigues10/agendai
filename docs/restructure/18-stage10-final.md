@@ -46,9 +46,9 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — skeletons órfãos já removidos).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing concluído em 2026-10-05, §10; restam réplicas fora de billing).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
-- **Budget/D-002:** −50 KiB disponíveis no CSS via `@source not` após restyle de39 stories.
+- ~~**Budget/D-002**~~ → **sanada** (2026-10-05, §11): `@source not` adotado — na reavaliação o delta real é −0,3 KiB CSS (6 utilities, 4 delas fantasmas de ids de fixture) e o único restyle real foi em `TokensGallery` (2 classes).
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
 - **D-001/D-004/D-006/D-013:** monitoramento contínuo (patches Storybook, ACL SWC, flake, data relativa — caso `ClosedSalonJoinModal` corrigido em 2026-10-04).
 
@@ -359,4 +359,55 @@ intocada.
 | regressão visual | `test:visual -- --no-build` | **108/108, 0 atualizados** (3 novos pós-`-u` + 4 baselines do PostEditor estabilizadas) |
 | build prod (PWA) | `npm run build` | **90 precache / 2666,41 KiB** (antes 89 / 2664,86 — +1 entry / +1,55 KiB) |
 | órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
+| docs / entrega | `docs:check` + `verify:delivery` | **OK** |
+
+## 11. D-002 — utilities de stories fora do bundle (2026-10-05)
+
+### 11.1 Premissa reavaliada (A/B)
+
+Reprodução do experimento da Etapa 9 no mesmo formato (Tailwind 4.1.18; dois builds
+com/sem `@source not './**/*.stories.tsx'` em `src/index.css`, diff regra-a-regra):
+
+| Build | CSS principal | precache (PWA) |
+|---|---|---|
+| sem directive (baseline) | **200,8 KiB** | **2666,41 KiB / 90 entries** |
+| com directive | **200,5 KiB** | **2666,15 KiB / 90 entries** |
+| delta | **−0,3 KiB** | **−0,26 KiB** |
+
+Os **−51,4 KiB** do registro da Etapa 9 **não se reproduzem**. O diff acusa exatamente
+**6 utilities** ausentes com o directive ligado:
+
+- `m-1`, `m-2`, `ps-1`, `pe-1` — **fantasmas**: o extractor do Tailwind lê strings cruas
+  (`id: 'm-1'`, `'ps-1'` nas fixtures do `PostEditor` e do `ProfitEnginePanel`) como
+  candidates; nenhum `className` real usa essas classes;
+- `text-brand`, `lg:grid-cols-5` — os **2 reais**, ambos só em
+  `TokensGallery.stories.tsx`.
+
+### 11.2 Restyle (2 classes em 1 story) + prova visual
+
+- `TokensGallery` L106: `lg:grid-cols-5` → `lg:grid-cols-6` (nenhum componente gera a
+  variante `lg:`×5; 6 é a vizinha gerada mais próxima — a cadeia
+  `grid-cols-2 → sm:grid-cols-3 → lg:grid-cols-6` mantém o gallery legível em todas as larguras);
+- `TokensGallery` L120: `text-brand` → `text-accent` (alias documentado no próprio gallery;
+  no dark `#2cb58a` é idêntico ao brand, no light troca `#249b76` por `#1c7e61`).
+
+Prova visual com o directive ligado: falhou **exatamente 1/108** —
+`fundações-tokens--galeria`; os 107 restantes byte-idênticos (inclusive as 3 baselines de
+billing e as 4 do PostEditor da D-014). Diff inspecionado (só o shift de grid, paleta
+preservada) → `-u` atualizou só esse baseline; re-run `test:visual -- --no-build` →
+**108/108, 0 atualizados**.
+
+### 11.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npm run typecheck` | **0 erros** |
+| lint (gate) | `npm run lint` (`eslint src`) | **0 err / 486 warn** |
+| lint full-scope | `npx eslint .` | **0 err / 488 warn** (teto 11/593) |
+| testes app+storybook | `npm test` | **353/353 (84 arquivos)**, exit 0 |
+| contratos | `test:contract` + `contract:check:strict` | **6/6** · **OK 404 chamadas / 555 rotas** |
+| storybook + a11y | `npm run test:storybook` | **108/108 (34 arquivos)**, `a11y.test: 'error'`, exit 0 |
+| regressão visual | `test:visual -- --no-build` | **108/108, 0 atualizados** (1 baseline atualizado: `fundações-tokens--galeria`) |
+| build prod (PWA) | `npm run build` | **90 precache / 2666,15 KiB** (−0,26 vs D-014), CSS principal **200,5 KiB** |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** |
 | docs / entrega | `docs:check` + `verify:delivery` | **OK** |
