@@ -3,6 +3,30 @@ import type { Preview, Decorator, StoryContext } from '@storybook/react-vite';
 import '../src/index.css';
 import { worker } from '../src/mocks/browser';
 
+/**
+ * Congela o relógio para TODAS as stories (D-013): várias renderizam data/hora
+ * derivadas de `new Date()`/`Date.now()` no render — "Chegou às HH:HH" da fila,
+ * período `YYYY-MM` do ProfitEngine, semana/mês do FinancialDashboard, data
+ * default do booking — e os baselines visuais venceriam a cada minuto/dia/mês
+ * sem isso. Mantido em 2026-10-01T12:00 (data em que os snapshots foram gerados);
+ * mover o valor exige regerar TODOS os baselines (`test:visual -- -u`).
+ */
+const FROZEN_NOW = new Date('2026-10-01T12:00:00');
+const RealDate = Date;
+const FrozenDate = class extends RealDate {
+  constructor(...args: unknown[]) {
+    if (args.length === 0) {
+      super(FROZEN_NOW.getTime());
+    } else {
+      super(...(args as ConstructorParameters<typeof RealDate>));
+    }
+  }
+  static now() {
+    return FROZEN_NOW.getTime();
+  }
+} as DateConstructor;
+globalThis.Date = FrozenDate;
+
 type ThemeName = 'light' | 'dark';
 
 /**

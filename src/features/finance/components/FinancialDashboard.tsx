@@ -782,12 +782,14 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                                 onDeleteHistoryItem(item.id);
                                 setDeleteConfirmId(null);
                               }}
+                              aria-label="Confirmar exclusão do atendimento"
                               className="p-1 bg-danger text-accent-fg rounded"
                             >
                               <Check size={12} />
                             </button>
                             <button
                               onClick={() => setDeleteConfirmId(null)}
+                              aria-label="Cancelar exclusão do atendimento"
                               className="p-1 bg-surface-2 text-text-secondary rounded"
                             >
                               <X size={12} />
@@ -796,6 +798,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                         ) : (
                           <button
                             onClick={() => setDeleteConfirmId(item.id)}
+                            aria-label={`Excluir atendimento de ${item.customerName}`}
                             className="text-text-muted hover:text-danger"
                           >
                             <Trash2 size={14} />

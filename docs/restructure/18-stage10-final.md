@@ -50,7 +50,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - ~~**Budget/D-002**~~ → **sanada** (2026-10-05, §11): `@source not` adotado — na reavaliação o delta real é −0,3 KiB CSS (6 utilities, 4 delas fantasmas de ids de fixture) e o único restyle real foi em `TokensGallery` (2 classes).
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
-- **D-001/D-004/D-006/D-013:** monitoramento contínuo (patches Storybook, ACL SWC, flake, data relativa — caso `ClosedSalonJoinModal` corrigido em 2026-10-04).
+- **D-001/D-004/D-006:** monitoramento contínuo (patches Storybook, ACL SWC, flake).
 
 ## 4. Pendências do usuário (fora do gate)
 
@@ -411,3 +411,59 @@ preservada) → `-u` atualizou só esse baseline; re-run `test:visual -- --no-bu
 | build prod (PWA) | `npm run build` | **90 precache / 2666,15 KiB** (−0,26 vs D-014), CSS principal **200,5 KiB** |
 | órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** |
 | docs / entrega | `docs:check` + `verify:delivery` | **OK** |
+
+## 12. D-013 — auditoria de datas relativas (2026-10-05)
+
+### 12.1 Auditoria
+
+Varredura: `new Date()` sem argumento em 14 arquivos de `src`; `toLocale*`/`Date.now()`
+em todas as stories. Stories que renderizam relógio/data derivados de "agora":
+
+| Story | O que depende de "agora" | Situação pré-auditoria |
+|---|---|---|
+| `QueueItemCard` (4 baselines) | "Chegou às HH:MM" ← fixture `Date.now() − 12min` | dependia do limiar de 2% (texto difere <2% dos pixels) |
+| `ReturnToQueueModal` (3) | fixtures `Date.now() − X` | idem |
+| `AppointmentBookingModal` (3) | `defaultDate ?? toLocalISO(new Date())` no Default | relógio real embutido no input |
+| `ProfitEnginePanel` (3) | `getCurrentPeriod()` → `YYYY-MM` | viraria a cada mês |
+| `FinancialDashboard` (2) | `startOfDay/Week/Month` de `filteredData` (fixture `completedAt` 28/09) | baseline de 05/10 07:08 vazia (0 registros) |
+| `ClosedSalonJoinModal` | `new Date().getDay()` | **já corrigido** na Etapa 7 (prop `todayIndex` = 4) |
+| `BookPackageSessionsModal` | data/semana/slots | **já congelado** na Etapa 7 |
+
+**Achado-chave:** o congelamento (`globalThis.Date = FrozenDate`, `2026-10-01T12:00`)
+vivia **no módulo do `BookPackageSessionsModal.stories.tsx`** — efeito colateral escondido
+num arquivo de story. Com carregamento por story, só aquela story era congelada; as demais
+rodavam com a data real e passavam por acaso (limiar de 2% ou baseline gerada no mesmo dia).
+
+### 12.2 Correção
+
+- **Relógio centralizado em `.storybook/preview.tsx`** (módulo de entrada do iframe → vale
+  para todas as stories e para o test-runner), com comentário documentando a data congelada
+  e o custo de movê-la (regenerar todos os baselines com `test:visual -- -u`);
+  `BookPackageSessionsModal.stories.tsx` ficou sem o side-effect.
+- **`FinancialDashboard`: `aria-label` nos 3 botões de ícone da coluna Ações** (lixo,
+  check, X) — com o relógio congelado as linhas do histórico entram na captura e o axe
+  passou a enxergar o botão: `button-name` era uma violação real **latente** (a baseline
+  anterior nunca renderizou linhas).
+- **Baseline `financeiro-financialdashboard--plano-upgrade` regenerado** (as 3 linhas
+  aparecem): `filteredData` L170 **muta** `now` via `setDate(...)` e o `startOfMonth` da
+  L171 passa a ser setembro → fixture 28/09 incluída; com a data real de 05/10 a janela
+  era outubro → vazia. Sob relógio congelado isso é determinístico.
+
+### 12.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npm run typecheck` | **0 erros** |
+| lint (gate) | `npm run lint` | **0 err / 486 warn** |
+| lint full-scope | `npx eslint .` | **0 err / 488 warn** (teto 11/593) |
+| testes app+storybook | `npm test` | **353/353 (84 arquivos)** |
+| contratos | `test:contract` + `contract:check:strict` | **6/6** · **OK 404 chamadas / 555 rotas** |
+| storybook + a11y | `npm run test:storybook` | **108/108 (34 arquivos)**, `a11y.test: 'error'` |
+| regressão visual | `test:visual -- --no-build` | **108/108, 0 atualizados** (1 baseline regenerado: `financialdashboard--plano-upgrade`) |
+| build prod (PWA) | `npm run build` | **90 precache / 2666,56 KiB** |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** |
+| docs / entrega | `docs:check` + `verify:delivery` | **OK** |
+
+**Política para stories novas:** qualquer story que renderize "agora" já nasce
+determinística (freeze global no preview). Ao mexer em `FROZEN_NOW`, rodar
+`test:visual -- -u` completo e regerar todos os baselines.

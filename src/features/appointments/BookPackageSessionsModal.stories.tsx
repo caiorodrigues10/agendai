@@ -5,24 +5,6 @@ import type { ClientPackage } from '../../types';
 import { BookPackageSessionsModal } from './BookPackageSessionsModal';
 import { settings, staff } from './storyFixtures';
 
-// Congela o relógio: o modal deriva data/semana/slots de `new Date()`, sem o que o
-// snapshot visual vence todo dia. Mantido em 2026-10-01 (data em que o snapshot foi gerado).
-const FROZEN_NOW = new Date('2026-10-01T12:00:00');
-const RealDate = Date;
-const FrozenDate = class extends RealDate {
-  constructor(...args: unknown[]) {
-    if (args.length === 0) {
-      super(FROZEN_NOW.getTime());
-    } else {
-      super(...(args as ConstructorParameters<typeof RealDate>));
-    }
-  }
-  static now() {
-    return FROZEN_NOW.getTime();
-  }
-} as DateConstructor;
-globalThis.Date = FrozenDate;
-
 const pkg: ClientPackage = {
   id: 'cp-1',
   barbershopId: 'shop-1',
