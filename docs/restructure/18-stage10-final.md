@@ -46,7 +46,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** D-007 (OwnerFinancialPanel), ~~D-008 (stories pendentes)~~ → **concluída** (2026-10-04, §5), D-009 (ClientProfileSheet), D-010 (checkout full-screen — `credit-card-form` já removido), D-011 (PostEditor), D-014 (states trio — skeletons órfãos já removidos).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), D-009 (ClientProfileSheet), D-010 (checkout full-screen — `credit-card-form` já removido), D-011 (PostEditor), D-014 (states trio — skeletons órfãos já removidos).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - **Budget/D-002:** −50 KiB disponíveis no CSS via `@source not` após restyle de39 stories.
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -106,3 +106,44 @@ O que cada dívida exigiu:
   Correções de a11y exigidas pelas novas stories: `aria-label` nos botões só-ícone de refresh
   (`CashPanel`, `GoalsPanel`) e `text-text-secondary` no rótulo "Total recebido" (muted no card
   `bg-selection` ficava em 4.3:1).
+
+## 6. D-007 — OwnerFinancialPanel (2026-10-05)
+
+Story-first do painel (1641L) antes de extrair as abas (regra da dívida) + **dois fixes de infra
+da regressão visual** descobertos por ela.
+
+### 6.1 O que foi feito
+
+- `OwnerFinancialPanel.stories.tsx` (novo): `Default`/`Despesas`/`Fiado` com handlers MSW
+  (`summary`/`cash`/`categories`/`expenses`/`expenses-summary`/fiado) + play clicando nas abas e
+  congelando o `date` em 2026-10-01 (D-013). Correções de a11y no painel: `title` em
+  Confirmar/Cancelar/Excluir despesa e `aria-label="Valor do pagamento"`.
+- **Fix 1 — MSW no build estático:** `public/mockServiceWorker.js` (cópia de
+  `node_modules/msw/lib/mockServiceWorker.js`). O Vitest resolve o worker via plugin
+  `@vitest/browser`, mas o build estático do Storybook não o servia → no `test:visual` **toda story
+  com `parameters.msw` capturava estado de erro**; 22 baselines foram regravados com dados reais.
+- **Fix 2 — stories em branco:** em `.storybook/test-runner.ts`,
+  `NO_ANIMATION_CSS` passou de `animation-duration:0s` → `0.01ms` (mesmo valor do
+  reduced-motion em `src/styles/base.css`). Com `0s` o Chromium trava o keyframe `from`
+  (`opacity:0`) do `fade-in … forwards` (tokens.css) e o raster fica vazio; `postVisit` também
+  espera `#storybook-root` com filho + 2 frames antes do screenshot (networkidle resolvia cedo).
+  Evidência: baseline com `animation-duration:0s` = 5853 B uniforme vs. corrigida = 95915 B.
+  28 baselines alterados ao todo (22 dados MSW + 6 fade-in); `QueueCapacityBanner › within-limit`
+  continua vazio por design (o componente não renderiza abaixo do limite).
+- `eslint.config.js`: `public/` ignorado (worker de terceiros fora do `tsconfig` — era o único
+  erro de lint do full-scope).
+
+### 6.2 Evidências do gate (números novos)
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npm run typecheck` | **0 erros** |
+| lint (gate) | `npm run lint` (`eslint src`) | **0 err / 487 warn** |
+| lint full-scope | `npx eslint .` | **0 err / 489 warn** (teto 11/593) |
+| testes app+storybook | `npm test` | **337/337 (80 arquivos)** |
+| contratos | `test:contract` + `contract:check:strict` | **6/6** · **OK 404 chamadas / 555 rotas, 0 pend** |
+| storybook + a11y | `npm run test:storybook` | **92/92 (30 arquivos)**, `a11y.test: 'error'` (**0 violações**) |
+| regressão visual | `test:visual -- --no-build` | **92/92 snapshots, 0 atualizados** (após rodada `-u` com 28 baselines corrigidos) |
+| build prod (PWA) | `npm run build` | **89 precache / 2666,17 KiB** (+1 = `mockServiceWorker.js`) |
+| docs / entrega | `docs:check` + `verify:delivery` | **OK** |
+| orfãos | `scripts/check-orphan-exports.mjs` | **0 arquivos mortos** |

@@ -1037,12 +1037,14 @@ export const OwnerFinancialPanel: React.FC = () => {
                                   <div className="flex items-center justify-center gap-2">
                                     <button
                                       onClick={() => handleDeleteExpense(item.id)}
+                                      title="Confirmar exclusão"
                                       className="p-1 bg-danger text-accent-fg rounded"
                                     >
                                       <Check size={12} />
                                     </button>
                                     <button
                                       onClick={() => setDeleteExpenseId(null)}
+                                      title="Cancelar exclusão"
                                       className="p-1 bg-surface-2 text-text-secondary rounded"
                                     >
                                       <X size={12} />
@@ -1069,6 +1071,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                                     </button>
                                     <button
                                       onClick={() => setDeleteExpenseId(item.id)}
+                                      title="Excluir despesa"
                                       className="text-text-muted hover:text-danger"
                                     >
                                       <Trash2 size={14} />
@@ -1380,6 +1383,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                                         type="number"
                                         step="0.01"
                                         min="0.01"
+                                        aria-label="Valor do pagamento"
                                         value={paymentAmount}
                                         onChange={e => setPaymentAmount(e.target.value)}
                                         className="bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary w-32 focus:outline-none focus:border-accent"

@@ -14,6 +14,7 @@ export default tseslint.config({
     'graphify-out/',
     'storybook-static/',
     'scripts/',
+    'public/',
     '*.config.js',
     '*.config.ts',
     'coverage/',
