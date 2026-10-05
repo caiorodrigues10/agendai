@@ -46,7 +46,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17, notificações em §18 e organizações em §19 concluídos em 2026-10-05; restam réplicas fora dessas áreas).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17, notificações em §18, organizações em §19 e CRM em §20 concluídos em 2026-10-05; restam réplicas fora dessas áreas).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - ~~**Budget/D-002**~~ → **sanada** (2026-10-05, §11): `@source not` adotado — na reavaliação o delta real é −0,3 KiB CSS (6 utilities, 4 delas fantasmas de ids de fixture) e o único restyle real foi em `TokensGallery` (2 classes).
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -919,3 +919,66 @@ etapa anterior (linha 51, antes da §4) — movida para o fim do doc junto com e
 
 **Próximas áreas da D-014:** CRM (3 sites), master-admin, `ErrorBoundary`, páginas
 públicas, `OnboardingChecklist` e os submits `GoalsPanel`/`LoyaltyPanel`.
+
+## 20. D-014 — CRM (2026-10-05)
+
+Nona área da receita story-first: `CrmIntelligencePanel` (o "Super CRM") **não tinha
+arquivo de stories** — 4 stories criadas do zero (1 `Default` + 3 `Erro`) e **3 sites**
+convertidos.
+
+### 20.1 O que foi feito
+
+- **4 stories novas** (MSW 500 nas `Erro`, antes da conversão; `MemoryRouter` porque o
+  painel controla as abas via `useSearchParams ?tab=`):
+  | Story | Endpoint que falha | Play |
+  |---|---|---|
+  | `CRM/CrmIntelligencePanel.ErroResumo` | `GET /api/crm/overview` → `Não foi possível carregar o resumo do CRM.` | `findByText` (aba Resumo) |
+  | `CRM/CrmIntelligencePanel.ErroClientes` | `GET /api/crm/clients` → `Não foi possível carregar os clientes.` | esperar resumo → botão `Segmentos` → `findByText` |
+  | `CRM/CrmIntelligencePanel.ErroPrevisao` | `GET /api/crm/forecast` → `Não foi possível carregar a previsão.` | esperar resumo → botão `Previsões` → `findByText` |
+- Fixture `CrmOverview` completo (kpis, byDay, byService/Category/Professional,
+  topClients, segments) — os caminhos de render são null-safe (`overview?.`, `values?.length`),
+  então as stories de erro não estouram com `overview = null`.
+- **3 sites convertidos:** os banners `p rounded-lg bg-danger/10 p-3 text-sm text-danger`
+  das três abas — `overviewError` (resumo), `clientsError` (segmentos) e `forecastError`
+  (previsões) → `<SectionError message={...} />` **sem `onRetry`** (não havia botão de
+  retry antes; o resumo se recarrega pelo `Atualizar` do cabeçalho e as outras abas se
+  recarregam por mudança de filtro/aba).
+- **Fora de escopo documentado:** os micro-erros `text-danger` **sem caixa** de
+  `CrmBackfillPanel` (L61/L70) e `CrmMergePanel` (L77) — texto inline de painéis
+  utilitários, mesma classe dos micro-erros do §19; e os erros de `loadCampaigns`/
+  `calculateAudience`/`confirmCampaign`, que saem por **toast** (`onNotify`, L323/L346/L360)
+  — sem div visível no painel.
+
+### 20.2 Prova visual
+
+4 novas baselines gravadas da UI antiga (`4 written` → 136 snapshots); conversão; rodada
+de prova **com rebuild** falhou **exatamente as 3 stories `Erro`** (133 restantes, incl.
+o `Default`, passou). PIL dos 3 diffs:
+
+- `ErroResumo`: banner **~40 → 53px**, todo o conteúdo abaixo (KPIs, gráficos) com shift
+  consistente **+10px** (resíduo 0,340), alteração 11,239%;
+- `ErroClientes`: banner **~40 → 53px** (bordas y215/y268), abaixo com shift **+10px**
+  (resíduo 0,328), alteração 3,069%;
+- `ErroPrevisao`: banner **~40 → 53px** (bordas y211/y264), abaixo com shift **+10px**
+  (resíduo 0,323), alteração 2,594%.
+
+`-u` atualizou as **3**; re-run `test:visual -- --no-build` → **136/136, 0 atualizados**.
+
+### 20.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npx tsc -p tsconfig.json --noEmit` | **0 erros** |
+| lint (gate) | `npm run lint` (`eslint src`) | **0 err / 488 warn** |
+| lint full-scope | `npx eslint .` | **0 err / 490 warn** (teto 11/593) |
+| testes app+storybook | `npm test` | **399/399 (93 arquivos)** = 136 storybook (+4 stories novas) + app |
+| contratos | `test:contract` + `contract:check:strict` | **6/6** · **OK 404 chamadas / 555 rotas** |
+| storybook + a11y | `npm run test:storybook` | **136/136 (40 arquivos)**, `a11y.test: 'error'` |
+| regressão visual | `test:visual` (prova, rebuild) + `-- --no-build` (re-run) | **136/136, 0 atualizados** (3 atualizados na prova) |
+| build prod (PWA) | `npm run build` | **91 precache / 2669,15 KiB** (21,47s) |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
+| docs / entrega | `docs:check` + `verify:delivery` | **OK** |
+
+**Próximas áreas da D-014:** master-admin, `ErrorBoundary`, páginas públicas,
+`OnboardingChecklist`, os submits `GoalsPanel`/`LoyaltyPanel`, `TeamManager` e
+`RecurringPackagesPanel`.

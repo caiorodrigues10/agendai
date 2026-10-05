@@ -29,6 +29,7 @@ import {
   CrmSegment,
 } from '../../infra/crmApi';
 import { SmartSelect } from '../../components/ui/SmartSelect';
+import { SectionError } from '../../components/patterns';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { CRM_SEGMENT_LABEL } from '../../utils/clientLabels';
 import { METRIC_LABEL, SORT_BY_LTV_LABEL } from '../../utils/metricLabels';
@@ -453,9 +454,7 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
 
         {tab === 'resumo' && (
           <div className="space-y-4 p-4">
-            {overviewError && (
-              <p className="rounded-lg bg-danger/10 p-3 text-sm text-danger">{overviewError}</p>
-            )}
+            {overviewError && <SectionError message={overviewError} />}
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
               <Kpi label="Faturamento bruto" value={kpis.grossRevenue} />
               <Kpi label="Recebido" value={kpis.receivedRevenue} />
@@ -603,9 +602,7 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
                 searchable={false}
               />
             </div>
-            {clientsError && (
-              <p className="rounded-lg bg-danger/10 p-3 text-sm text-danger">{clientsError}</p>
-            )}
+            {clientsError && <SectionError message={clientsError} />}
             {clientsLoading ? (
               <Empty>Carregando clientes…</Empty>
             ) : clients.length ? (
@@ -693,9 +690,7 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
                 </button>
               ))}
             </div>
-            {forecastError && (
-              <p className="rounded-lg bg-danger/10 p-3 text-sm text-danger">{forecastError}</p>
-            )}
+            {forecastError && <SectionError message={forecastError} />}
             {forecastLoading ? (
               <Empty>Calculando previsão…</Empty>
             ) : (
