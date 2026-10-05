@@ -341,6 +341,7 @@ export interface AccountDetail {
       })
     | null;
   billing: { invoicesTotal: number; paid: number; overdue: number; pending: number; sumPaid: number };
+  invite: { email: string; status: 'PENDING' | 'ACCEPTED' | 'EXPIRED' | 'REVOKED'; expiresAt: string; acceptedAt: string | null; createdAt: string } | null;
   usage: {
     appointments: number;
     appointments30d: number;

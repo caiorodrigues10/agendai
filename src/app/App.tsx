@@ -27,6 +27,7 @@ const PublicNpsPage = lazy(() => import('../pages/PublicNpsPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const ForgotPasswordPage = lazy(() => import('../pages/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('../pages/ResetPasswordPage'));
+const PublicOwnerInvitePage = lazy(() => import('../pages/PublicOwnerInvitePage'));
 const EmailVerifiedPage = lazy(() => import('../pages/EmailVerifiedPage'));
 const AccessBlockedPage = lazy(() => import('../pages/AccessBlockedPage'));
 const PlansPage = lazy(() => import('../pages/PlansPage'));
@@ -86,6 +87,7 @@ const App: React.FC = () => {
           <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
             <Route path="/verificar-codigo" element={<Navigate to="/esqueci-senha" replace />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/convite/:token" element={<PublicOwnerInvitePage />} />
           <Route path="/email-verificado" element={<EmailVerifiedPage />} />
           <Route path="/bloqueado" element={<AccessBlockedPage />} />
           <Route path="/planos" element={<PlansPage />} />

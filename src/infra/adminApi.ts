@@ -424,11 +424,29 @@ export const adminApi = {
     cnpj?: string | null;
     address?: string;
     active?: boolean;
+    owner?: { name: string; email: string };
+    planId?: string;
+    trialDays?: number;
   }) =>
-    apiClient<{ success: boolean; data: BarbershopListItem }>(
+    apiClient<{
+      success: boolean;
+      data: BarbershopListItem;
+      owner?: { id: string; email: string };
+      subscription?: { planId: string; status: string; trialEnd: string };
+      inviteSent?: boolean;
+    }>(
       '/api/admin/barbershops',
       'POST',
       body,
+      getAuthHeader()
+    ),
+
+  /** Reenvia o convite de dono (gera novo token). Nunca retorna o token. */
+  resendOwnerInvite: (shopId: string) =>
+    apiClient<{ success: boolean; data: { inviteSent: boolean } }>(
+      `/api/admin/barbershops/${shopId}/resend-invite`,
+      'POST',
+      {},
       getAuthHeader()
     ),
 

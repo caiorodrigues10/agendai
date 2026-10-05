@@ -75,6 +75,12 @@ export const authApi = {
     apiClient<{ message: string }>('/api/auth/forgot-password', 'POST', { email, recaptchaToken }),
   resetPassword: (token: string, newPassword: string) =>
     apiClient<{ message: string }>('/api/auth/reset-password', 'POST', { token, newPassword }),
+  /** Convite de dono de salão (página pública /convite/:token). */
+  acceptInvite: (token: string, newPassword: string) =>
+    apiClient<{ success: boolean; message: string }>('/api/auth/accept-invite', 'POST', {
+      token,
+      newPassword,
+    }),
   switchAccount: (userId: string) =>
     apiClient<AuthResponse>('/api/auth/switch-account', 'POST', { userId }),
   forgetAccount: (userId: string) =>

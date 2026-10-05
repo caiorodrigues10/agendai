@@ -3,9 +3,14 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { AccountDetailPage } from './AccountDetailPage';
 import { adminInternalApi, AccountDetail } from '../../infra/adminInternalApi';
+import { adminApi } from '../../infra/adminApi';
 
 vi.mock('../../infra/adminInternalApi', () => ({
   adminInternalApi: { getAccounts: vi.fn(), getAccount: vi.fn(), accountAction: vi.fn(), impersonate: vi.fn() },
+}));
+
+vi.mock('../../infra/adminApi', () => ({
+  adminApi: { resendOwnerInvite: vi.fn() },
 }));
 
 vi.mock('../../contexts/AuthContext', () => ({
@@ -43,6 +48,13 @@ const detail: AccountDetail = {
     plan: { id: 'plan-1', name: 'Pro', price: 20, billingCycle: 'MONTHLY' },
   },
   billing: { invoicesTotal: 4, paid: 3, overdue: 1, pending: 0, sumPaid: 60 },
+  invite: {
+    email: 'dono@barbearia.com',
+    status: 'PENDING',
+    expiresAt: '2026-10-08T12:00:00.000Z',
+    acceptedAt: null,
+    createdAt: '2026-10-05T12:00:00.000Z',
+  },
   usage: {
     appointments: 120,
     appointments30d: 45,
@@ -133,5 +145,47 @@ describe('AccountDetailPage', () => {
     await waitFor(() => {
       expect(adminInternalApi.getAccount).toHaveBeenCalledTimes(2);
     });
+  });
+
+  it('exibe o convite do dono e reenvia quando solicitado', async () => {
+    vi.mocked(adminApi.resendOwnerInvite).mockResolvedValue({
+      success: true,
+      data: { inviteSent: true },
+    } as never);
+
+    renderPage();
+
+    expect(await screen.findByText('Convite do dono')).toBeInTheDocument();
+    expect(screen.getByText('dono@barbearia.com')).toBeInTheDocument();
+    expect(screen.getByText('Pendente')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Reenviar convite/ }));
+    await waitFor(() => {
+      expect(adminApi.resendOwnerInvite).toHaveBeenCalledWith('acc-1');
+      expect(adminInternalApi.getAccount).toHaveBeenCalledTimes(2);
+    });
+    expect(await screen.findByText(/Convite reenviado/)).toBeInTheDocument();
+  });
+
+  it('oculta o reenvio quando o convite já foi aceito', async () => {
+    vi.mocked(adminInternalApi.getAccount).mockResolvedValue({
+      success: true,
+      data: {
+        ...detail,
+        invite: {
+          email: 'dono@barbearia.com',
+          status: 'ACCEPTED',
+          expiresAt: '2026-10-08T12:00:00.000Z',
+          acceptedAt: '2026-10-06T12:00:00.000Z',
+          createdAt: '2026-10-05T12:00:00.000Z',
+        },
+      },
+    } as never);
+
+    renderPage();
+
+    expect(await screen.findByText('Convite do dono')).toBeInTheDocument();
+    expect(screen.getByText('Aceito')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Reenviar convite/ })).not.toBeInTheDocument();
   });
 });

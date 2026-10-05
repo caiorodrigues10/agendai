@@ -13,6 +13,7 @@ import {
 } from 'react-icons/lu';
 import { adminInternalApi, AccountDetail } from '../../infra/adminInternalApi';
 import { AccountActionsPanel } from './AccountActionsPanel';
+import { OwnerInvitePanel } from './OwnerInvitePanel';
 
 const brl = (value: number): string =>
   value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -128,7 +129,7 @@ export const AccountDetailPage: React.FC = () => {
 
   if (!data) return null;
 
-  const { shop, members, subscription, billing, usage, attention } = data;
+  const { shop, members, subscription, billing, usage, attention, invite } = data;
 
   const stats: StatCard[] = [
     {
@@ -259,6 +260,12 @@ export const AccountDetailPage: React.FC = () => {
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
+        <OwnerInvitePanel
+          shopId={shop.id}
+          invite={invite ?? null}
+          onReload={() => setReloadKey((key) => key + 1)}
+        />
+
         <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
           <h2 className="text-sm font-bold flex items-center gap-2">
             <LuCreditCard size={16} className="text-accent" /> Assinatura
