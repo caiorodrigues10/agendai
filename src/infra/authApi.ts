@@ -96,4 +96,12 @@ export const authApi = {
       payload,
       token
     ),
+  /** Encerra todas as outras sessões, mantendo a atual ("Encerrar todos os outros dispositivos"). */
+  revokeOtherSessions: (payload: { reason?: string }, token: string) =>
+    apiClient<{ success: boolean; data: { revoked: number; currentKept: boolean } }>(
+      '/api/auth/sessions/revoke-others',
+      'POST',
+      payload,
+      token
+    ),
 };

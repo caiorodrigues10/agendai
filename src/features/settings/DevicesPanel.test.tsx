@@ -11,6 +11,7 @@ vi.mock('../../infra/authApi', async (importOriginal) => {
       ...actual.authApi,
       mySessions: vi.fn(),
       revokeMySession: vi.fn(),
+      revokeOtherSessions: vi.fn(),
     },
   };
 });
@@ -120,6 +121,67 @@ describe('DevicesPanel', () => {
 
     expect(
       await screen.findByText('Não foi possível carregar os dispositivos.'),
+    ).toBeInTheDocument();
+  });
+});
+
+describe('DevicesPanel — encerrar todos os outros', () => {
+  afterEach(() => vi.clearAllMocks());
+
+  it('oferece o atalho quando há outras sessões ativas e confirma antes de enviar', async () => {
+    vi.mocked(authApi.mySessions).mockResolvedValue({ success: true, data: sessions });
+    vi.mocked(authApi.revokeOtherSessions).mockResolvedValue({
+      success: true,
+      data: { revoked: 1, currentKept: true },
+    });
+
+    render(<DevicesPanel />);
+
+    const button = await screen.findByRole('button', {
+      name: 'Encerrar todos os outros dispositivos (1)',
+    });
+    fireEvent.click(button);
+
+    const dialog = await screen.findByRole('alertdialog');
+    expect(dialog).toHaveTextContent(/este navegador continua conectado/i);
+    expect(authApi.revokeOtherSessions).not.toHaveBeenCalled();
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Encerrar todos' }));
+
+    await waitFor(() =>
+      expect(authApi.revokeOtherSessions).toHaveBeenCalledWith({}, expect.any(String)),
+    );
+    await waitFor(() => expect(authApi.mySessions).toHaveBeenCalledTimes(2));
+  });
+
+  it('esconde o atalho quando só a sessão atual está ativa', async () => {
+    vi.mocked(authApi.mySessions).mockResolvedValue({
+      success: true,
+      data: [sessions[0]],
+    });
+
+    render(<DevicesPanel />);
+
+    expect(await screen.findByTestId('my-sessions-list')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /Encerrar todos os outros dispositivos/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('mostra erro quando a revogação em massa falha', async () => {
+    vi.mocked(authApi.mySessions).mockResolvedValue({ success: true, data: sessions });
+    vi.mocked(authApi.revokeOtherSessions).mockRejectedValue(new Error('boom'));
+
+    render(<DevicesPanel />);
+
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Encerrar todos os outros dispositivos (1)' }),
+    );
+    const dialog = await screen.findByRole('alertdialog');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Encerrar todos' }));
+
+    expect(
+      await screen.findByText('Não foi possível encerrar os outros dispositivos.'),
     ).toBeInTheDocument();
   });
 });

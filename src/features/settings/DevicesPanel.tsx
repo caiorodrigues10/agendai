@@ -29,6 +29,7 @@ export const DevicesPanel: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const [target, setTarget] = useState<MySession | null>(null);
+  const [confirmOthers, setConfirmOthers] = useState(false);
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -63,7 +64,21 @@ export const DevicesPanel: React.FC = () => {
       .finally(() => setBusy(false));
   };
 
+  const revokeOthers = () => {
+    setBusy(true);
+    authApi
+      .revokeOtherSessions({}, authStorage.getAccessToken() || '')
+      .then(() => {
+        setActionError(null);
+        setConfirmOthers(false);
+        setReloadKey((key) => key + 1);
+      })
+      .catch(() => setActionError('Não foi possível encerrar os outros dispositivos.'))
+      .finally(() => setBusy(false));
+  };
+
   const list = sessions ?? [];
+  const otherActive = list.filter((s) => s.status === 'active' && !s.current).length;
 
   return (
     <section className="space-y-3 rounded-xl border border-border bg-surface p-4">
@@ -136,6 +151,19 @@ export const DevicesPanel: React.FC = () => {
         </ul>
       )}
 
+      {otherActive > 0 && (
+        <button
+          type="button"
+          onClick={() => {
+            setActionError(null);
+            setConfirmOthers(true);
+          }}
+          className="w-full rounded-lg border border-border px-3 py-2 text-xs font-bold text-danger hover:bg-danger/10"
+        >
+          Encerrar todos os outros dispositivos ({otherActive})
+        </button>
+      )}
+
       <ConfirmDialog
         open={target !== null}
         title="Encerrar sessão"
@@ -154,6 +182,19 @@ export const DevicesPanel: React.FC = () => {
         onConfirm={revoke}
         onCancel={() => {
           setTarget(null);
+          setActionError(null);
+        }}
+      />
+      <ConfirmDialog
+        open={confirmOthers}
+        title="Encerrar outros dispositivos"
+        message={`Encerrar as ${otherActive} outras sessões ativas? Os acessos serão bloqueados na hora; este navegador continua conectado.`}
+        confirmLabel="Encerrar todos"
+        variant="danger"
+        loading={busy}
+        onConfirm={revokeOthers}
+        onCancel={() => {
+          setConfirmOthers(false);
           setActionError(null);
         }}
       />
