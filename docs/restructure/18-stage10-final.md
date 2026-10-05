@@ -46,7 +46,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14 e assinatura/pacotes em §15 concluídos em 2026-10-05; restam réplicas fora dessas áreas).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15 e waitlist em §16 concluídos em 2026-10-05; restam réplicas fora dessas áreas).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - ~~**Budget/D-002**~~ → **sanada** (2026-10-05, §11): `@source not` adotado — na reavaliação o delta real é −0,3 KiB CSS (6 utilities, 4 delas fantasmas de ids de fixture) e o único restyle real foi em `TokensGallery` (2 classes).
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -656,3 +656,72 @@ usaram o bundle do Storybook gerado durante a prova (do próprio batch).
 master-admin, `ErrorBoundary` e páginas públicas (`AppointmentBookingModal` segue fora de
 escopo — o único erro exibido é mensagem de domínio, "Fechado neste dia"); receita
 story-first permanece a mesma.
+
+## 16. D-014 — lista de espera (2026-10-05)
+
+Quinta área da receita story-first: `WaitlistPanel` com 2 sites de erro inline (carregamento
+do painel e submissão do form) e nenhuma story de erro.
+
+### 16.1 O que foi feito
+
+- **2 stories `Erro` novas** (MSW 500, antes da conversão, para gravar o baseline da UI antiga):
+
+  | Story | Endpoint que falha | Play |
+  |---|---|---|
+  | `Lista de espera/WaitlistPanel.Erro` | `GET /api/barbershops/:id/waitlist` → `Não foi possível carregar a lista de espera` | sem interação — `findByText` da mensagem (evita capturar o loader) |
+  | `Lista de espera/WaitlistPanel.ErroForm` | `PATCH /api/barbershops/:id/waitlist/:entryId` → `Não foi possível salvar a entrada` | `Editar` (1ª entrada) → modal pré-preenchido → `Salvar` → `findByText` |
+
+- **2 sites convertidos:** `WaitlistPanel` L175 (erro do `load` — o card cinza antigo
+  `bg-surface border-border` com linha inline de `AlertTriangle` + "Tentar novamente"
+  virou `SectionError` standalone **com `onRetry={load}`**, ganhando `role="alert"` e a
+  paleta `danger`) e L249 (erro de submissão do modal → `SectionError` sem retry — o
+  botão `Salvar` fica ao lado). `AlertTriangle` ficou órfão e foi removido do import.
+- **Achado de processo (MSW custom do `preview.tsx`):** o `mswLoader` roda
+  `worker.resetHandlers()` a cada story e aplica **só** os handlers daquela story —
+  `parameters.msw.handlers` do story **substitui** os do meta (não mescla); endpoints não
+  listados caem em `onUnhandledRequest: 'bypass'` (fetch sem resposta → painel sem dados).
+  Por isso `ErroForm` precisa de `[...mswHandlers(entries), http.patch(...)]` (padrão já
+  usado em `OwnerSubscriptionPanel.Erro`); `Erro` cobre com o único endpoint do meta.
+  Sem o spread, o play falhava com `Unable to find role="button" /Editar/` — documentado
+  para as próximas áreas.
+- **Réplicas encontradas fora do escopo deste batch** (registradas na D-014): os divs de
+  erro de submissão que o §14 não cobriu — `GoalsPanel` L303 e `LoyaltyPanel` L174 — e
+  `TeamManager` L161/L174, `RecurringPackagesPanel` L384 (áreas fora da fila atual).
+
+### 16.2 Prova visual
+
+Baselines da UI antiga primeiro (2 novas stories → 118 snapshots, `2 written`), conversão,
+rodada de prova **com rebuild** falhou **exatamente as 2 stories esperadas** (116
+restantes passaram). Inspeção PIL dos 2 diffs:
+
+- `WaitlistPanel.Erro`: card novo com **bordas `danger` em y0→81px** e **2 faixas**
+  (mensagem + "Tentar novamente" — antes 1 faixa só, sem borda vermelha), conteúdo abaixo
+  com shift **+28px** e resíduo **0.185**;
+- `WaitlistPanel.ErroForm`: div inline **32 → 53px** (bordas `danger` y219→272, 1 faixa),
+  modal centralizado recentra ±9–10px, conteúdo abaixo com shift **+9px** e resíduo
+  **0.334** — nada além do erro mudou.
+
+`-u` atualizou as **2**; re-run `test:visual -- --no-build` → **118/118, 0 atualizados**.
+
+### 16.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npx tsc -p tsconfig.json --noEmit` | **0 erros** |
+| lint (gate) | `npm run lint` (`eslint src`) | **0 err / 489 warn** |
+| lint full-scope | `npx eslint .` | **0 err / 491 warn** (teto 11/593) |
+| testes app+storybook | `npm test` | **369/369 (85 arquivos)** = 118 storybook (+2 stories novas) + app |
+| contratos | `test:contract` + `contract:check:strict` | **6/6** · **OK 404 chamadas / 555 rotas** |
+| storybook + a11y | `npm run test:storybook` | **118/118 (34 arquivos)**, `a11y.test: 'error'` |
+| regressão visual | `test:visual` (prova, rebuild) + `-- --no-build` (re-run) | **118/118, 0 atualizados** (2 atualizados na prova) |
+| build prod (PWA) | `npm run build` | **91 precache / 2668,97 KiB** (46,03s) |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
+| docs / entrega | `docs:check` + `verify:delivery` | **OK** |
+
+**Nota de sessão paralela:** os 6 arquivos de outra sessão seguem intocados neste commit;
+warnings de lint, nº de arquivos de teste e precache do build seguem somando o trabalho
+alheio (ver §15).
+
+**Próximas áreas da D-014:** clients (`ClientProfileSheet` L501), notifications (3
+sites), organizations, CRM (3 sites), master-admin, `ErrorBoundary` e páginas públicas;
+mais os 2 submits de painéis owner apontados em 16.1 (`GoalsPanel`/`LoyaltyPanel`).

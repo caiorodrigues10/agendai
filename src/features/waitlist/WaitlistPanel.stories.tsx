@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
+import { userEvent, within } from 'storybook/test';
 import { WaitlistPanel } from './WaitlistPanel';
 import { StoryProviders } from '../../tests/storyProviders';
 
@@ -67,4 +68,50 @@ export const Default: Story = {};
 
 export const Vazio: Story = {
   parameters: { msw: { handlers: mswHandlers([]) } },
+};
+
+export const Erro: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.get('/api/barbershops/:id/waitlist', () =>
+          HttpResponse.json(
+            { success: false, message: 'Não foi possível carregar a lista de espera' },
+            { status: 500 }
+          )
+        ),
+      ],
+    },
+  },
+  play: async () => {
+    await within(document.body).findByText(
+      'Não foi possível carregar a lista de espera',
+      {},
+      { timeout: 10000 }
+    );
+  },
+};
+
+export const ErroForm: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        ...mswHandlers(entries),
+        http.patch('/api/barbershops/:id/waitlist/:entryId', () =>
+          HttpResponse.json(
+            { success: false, message: 'Não foi possível salvar a entrada' },
+            { status: 500 }
+          )
+        ),
+      ],
+    },
+  },
+  play: async () => {
+    const body = within(document.body);
+    const edit = await body.findAllByRole('button', { name: /Editar/ }, { timeout: 10000 });
+    await userEvent.click(edit[0]);
+    const save = await body.findByRole('button', { name: 'Salvar' }, { timeout: 10000 });
+    await userEvent.click(save);
+    await body.findByText('Não foi possível salvar a entrada', {}, { timeout: 10000 });
+  },
 };
