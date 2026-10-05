@@ -32,21 +32,21 @@ export interface EmailDeliveryLog {
   createdAt: string;
 }
 
-export type EmailPreference = {
+export interface EmailPreference {
   category: 'ESSENTIAL' | 'OPERATION' | 'MARKETING';
   label: string;
   enabled: boolean;
   canDisable: boolean;
-};
+}
 
-export type SalonaEmailSettings = {
+export interface SalonaEmailSettings {
   dailyDigestEnabled: boolean;
   dailyDigestTime: string;
   timezone: string;
   urgentAppointmentWindowHours: number;
   lowStockEnabled: boolean;
   performanceSummaryFrequency: 'weekly' | 'monthly' | 'off';
-};
+}
 
 export const emailApi = {
   /** Minha preferência por categoria dentro do salão */

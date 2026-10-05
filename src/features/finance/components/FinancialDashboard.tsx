@@ -32,6 +32,7 @@ import { SmartSelect } from '../../../components/ui/SmartSelect';
 import { Avatar } from '../../../components/ui/Avatar';
 import { commissionsApi, type CommissionOrigin, type CommissionSummary } from '../../../infra/commissionsApi';
 import { finiteNumber } from '../../../utils/weatherVisuals';
+import { SectionError } from '../../../components/patterns';
 
 interface FinancialDashboardProps {
   queueHistory: QueueItem[];
@@ -333,18 +334,21 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
               </div>
             )}
             {commissionError && !commissionLoading && (
-              <div className="mt-4 flex flex-wrap items-center gap-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
-                <AlertCircle size={15} /> {commissionError}
-                {commissionUpgrade && (
-                  <button
-                    type="button"
-                    onClick={() => navigate('/planos')}
-                    className="ml-auto rounded-lg bg-danger px-3 py-1.5 text-xs font-bold text-white transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
-                  >
-                    Fazer upgrade
-                  </button>
-                )}
-              </div>
+              <SectionError
+                message={commissionError}
+                className="mt-4"
+                action={
+                  commissionUpgrade ? (
+                    <button
+                      type="button"
+                      onClick={() => navigate('/planos')}
+                      className="ml-auto rounded-lg bg-danger px-3 py-1.5 text-xs font-bold text-white transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+                    >
+                      Fazer upgrade
+                    </button>
+                  ) : null
+                }
+              />
             )}
             {!commissionLoading && !commissionError && commissionSummary && (
               <>
@@ -386,18 +390,20 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
           )}
 
           {insightsError && (
-            <div className="bg-danger/10 border border-danger/30 rounded-xl px-4 py-3 text-sm text-danger flex flex-wrap items-center gap-2">
-              <AlertCircle size={16} /> {insightsError}
-              {insightsUpgrade && (
-                <button
-                  type="button"
-                  onClick={() => navigate('/planos')}
-                  className="ml-auto rounded-lg bg-danger px-3 py-1.5 text-xs font-bold text-white transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
-                >
-                  Fazer upgrade
-                </button>
-              )}
-            </div>
+            <SectionError
+              message={insightsError}
+              action={
+                insightsUpgrade ? (
+                  <button
+                    type="button"
+                    onClick={() => navigate('/planos')}
+                    className="ml-auto rounded-lg bg-danger px-3 py-1.5 text-xs font-bold text-white transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+                  >
+                    Fazer upgrade
+                  </button>
+                ) : null
+              }
+            />
           )}
 
           {!insightsLoading && insights && (
@@ -782,12 +788,14 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                                 onDeleteHistoryItem(item.id);
                                 setDeleteConfirmId(null);
                               }}
+                              aria-label="Confirmar exclusão do atendimento"
                               className="p-1 bg-danger text-accent-fg rounded"
                             >
                               <Check size={12} />
                             </button>
                             <button
                               onClick={() => setDeleteConfirmId(null)}
+                              aria-label="Cancelar exclusão do atendimento"
                               className="p-1 bg-surface-2 text-text-secondary rounded"
                             >
                               <X size={12} />
@@ -796,6 +804,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                         ) : (
                           <button
                             onClick={() => setDeleteConfirmId(item.id)}
+                            aria-label={`Excluir atendimento de ${item.customerName}`}
                             className="text-text-muted hover:text-danger"
                           >
                             <Trash2 size={14} />

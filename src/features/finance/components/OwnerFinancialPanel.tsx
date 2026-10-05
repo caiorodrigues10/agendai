@@ -25,6 +25,7 @@ import {
 import { getErrorMessage } from '../../../utils/errorMessage';
 import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { ModalShell } from '../../../components/patterns/ModalShell';
+import { SectionError } from '../../../components/patterns';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_GRID } from '../../../components/ui/Field';
 import { SmartSelect } from '../../../components/ui/SmartSelect';
 import {
@@ -459,18 +460,7 @@ export const OwnerFinancialPanel: React.FC = () => {
           </div>
         </div>
 
-        {error && (
-          <div className="bg-danger/5 border border-danger/20 rounded-xl p-4 flex items-center gap-3">
-            <AlertCircle size={18} className="text-danger shrink-0" />
-            <p className="text-sm text-danger flex-1">{error}</p>
-            <button
-              onClick={handleRefresh}
-              className="text-xs font-bold text-text-secondary hover:text-text-primary border border-border rounded-lg px-3 py-1.5 hover:bg-surface-2 transition-colors"
-            >
-              Tentar novamente
-            </button>
-          </div>
-        )}
+        {error && <SectionError message={error} onRetry={handleRefresh} />}
 
         {tab === 'resumo' && (
           <div className="space-y-4">
@@ -1037,12 +1027,14 @@ export const OwnerFinancialPanel: React.FC = () => {
                                   <div className="flex items-center justify-center gap-2">
                                     <button
                                       onClick={() => handleDeleteExpense(item.id)}
+                                      title="Confirmar exclusão"
                                       className="p-1 bg-danger text-accent-fg rounded"
                                     >
                                       <Check size={12} />
                                     </button>
                                     <button
                                       onClick={() => setDeleteExpenseId(null)}
+                                      title="Cancelar exclusão"
                                       className="p-1 bg-surface-2 text-text-secondary rounded"
                                     >
                                       <X size={12} />
@@ -1069,6 +1061,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                                     </button>
                                     <button
                                       onClick={() => setDeleteExpenseId(item.id)}
+                                      title="Excluir despesa"
                                       className="text-text-muted hover:text-danger"
                                     >
                                       <Trash2 size={14} />
@@ -1380,6 +1373,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                                         type="number"
                                         step="0.01"
                                         min="0.01"
+                                        aria-label="Valor do pagamento"
                                         value={paymentAmount}
                                         onChange={e => setPaymentAmount(e.target.value)}
                                         className="bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary w-32 focus:outline-none focus:border-accent"

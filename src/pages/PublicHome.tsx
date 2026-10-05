@@ -5,6 +5,7 @@ import { AddCustomerForm } from '../features/clients';
 import { ShopProfile } from '../features/shop';
 import { AppointmentScheduler } from '../features/appointments';
 import { PublicProductCarousel } from '../components/domain/PublicProductCarousel';
+import { PublicPageSkeleton } from '../components/patterns/skeletons';
 import { Toast } from '../components/ui/Toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useBarbershop } from '../contexts/BarbershopContext';
@@ -128,11 +129,7 @@ export const PublicHome: React.FC = () => {
   const stillLoading = pendingUrlShop || shopLoading || schedulingLoading;
 
   if (stillLoading) {
-    return (
-      <div className="min-h-screen bg-bg flex items-center justify-center text-text-muted">
-        <Loader2 className="animate-spin" size={40} />
-      </div>
-    );
+    return <div role="status" aria-label="Carregando salão"><PublicPageSkeleton /></div>;
   }
 
   // /queue without id → landing. /queue/:id with failed load → explicit empty state.

@@ -103,7 +103,7 @@ const TokensGallery: FC = () => (
     {colorGroups.map(({ group, tokens }) => (
       <section key={group} className="flex flex-col gap-3">
         <h2 className="text-sm font-bold uppercase tracking-wide text-text-muted">{group}</h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {tokens.map(([label, cssVar]) => (
             <Swatch key={cssVar} label={label} cssVar={cssVar} />
           ))}
@@ -117,7 +117,7 @@ const TokensGallery: FC = () => (
         <span className="rounded-full bg-success/15 px-3 py-1 text-xs font-bold text-success">Concluído</span>
         <span className="rounded-full bg-warning/15 px-3 py-1 text-xs font-bold text-warning">Pendente</span>
         <span className="rounded-full bg-danger/15 px-3 py-1 text-xs font-bold text-danger">Cancelado</span>
-        <span className="rounded-full bg-selection px-3 py-1 text-xs font-bold text-brand">Selecionado</span>
+        <span className="rounded-full bg-selection px-3 py-1 text-xs font-bold text-accent">Selecionado</span>
         <span className="rounded-full bg-support/15 px-3 py-1 text-xs font-bold text-support">Suporte</span>
       </div>
     </section>

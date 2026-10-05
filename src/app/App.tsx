@@ -24,6 +24,7 @@ const PublicProductPage = lazy(() => import('../pages/PublicProductPage'));
 const PublicAppointmentManagePage = lazy(() => import('../pages/PublicAppointmentManagePage'));
 const PublicReviewPage = lazy(() => import('../pages/PublicReviewPage'));
 const PublicNpsPage = lazy(() => import('../pages/PublicNpsPage'));
+const PublicPostPage = lazy(() => import('../pages/PublicPostPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const ForgotPasswordPage = lazy(() => import('../pages/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('../pages/ResetPasswordPage'));
@@ -33,22 +34,22 @@ const AccessBlockedPage = lazy(() => import('../pages/AccessBlockedPage'));
 const PlansPage = lazy(() => import('../pages/PlansPage'));
 const CheckoutPage = lazy(() => import('../pages/CheckoutPage'));
 const AdminLayout = lazy(() => import('../layouts/admin/AdminLayout'));
-const OverviewPage = lazy(() => import('../pages/MasterAdmin/OverviewPage'));
-const WorkSummaryPage = lazy(() => import('../pages/MasterAdmin/WorkSummaryPage'));
-const TicketsPage = lazy(() => import('../pages/MasterAdmin/TicketsPage'));
-const TicketDetailPage = lazy(() => import('../pages/MasterAdmin/TicketDetailPage'));
-const TasksPage = lazy(() => import('../pages/MasterAdmin/TasksPage'));
-const TaskDetailPage = lazy(() => import('../pages/MasterAdmin/TaskDetailPage'));
-const TeamPage = lazy(() => import('../pages/MasterAdmin/TeamPage'));
-const UsersPage = lazy(() => import('../pages/MasterAdmin/UsersPage'));
-const AccountsPage = lazy(() => import('../pages/MasterAdmin/AccountsPage'));
-const AccountDetailPage = lazy(() => import('../pages/MasterAdmin/AccountDetailPage'));
-const OperationsPage = lazy(() => import('../pages/MasterAdmin/OperationsPage'));
-const AuditPage = lazy(() => import('../pages/MasterAdmin/AuditPage'));
-const BillingPage = lazy(() => import('../pages/MasterAdmin/BillingPage'));
-const ReferralsPage = lazy(() => import('../pages/MasterAdmin/ReferralsPage'));
-const CrmMaintenancePage = lazy(() => import('../pages/MasterAdmin/CrmMaintenancePage'));
-const EngagementPage = lazy(() => import('../pages/MasterAdmin/EngagementPage'));
+const OverviewPage = lazy(() => import('../pages/master-admin/OverviewPage'));
+const WorkSummaryPage = lazy(() => import('../pages/master-admin/WorkSummaryPage'));
+const TicketsPage = lazy(() => import('../pages/master-admin/TicketsPage'));
+const TicketDetailPage = lazy(() => import('../pages/master-admin/TicketDetailPage'));
+const TasksPage = lazy(() => import('../pages/master-admin/TasksPage'));
+const TaskDetailPage = lazy(() => import('../pages/master-admin/TaskDetailPage'));
+const TeamPage = lazy(() => import('../pages/master-admin/TeamPage'));
+const UsersPage = lazy(() => import('../pages/master-admin/UsersPage'));
+const AccountsPage = lazy(() => import('../pages/master-admin/AccountsPage'));
+const AccountDetailPage = lazy(() => import('../pages/master-admin/AccountDetailPage'));
+const OperationsPage = lazy(() => import('../pages/master-admin/OperationsPage'));
+const AuditPage = lazy(() => import('../pages/master-admin/AuditPage'));
+const BillingPage = lazy(() => import('../pages/master-admin/BillingPage'));
+const ReferralsPage = lazy(() => import('../pages/master-admin/ReferralsPage'));
+const CrmMaintenancePage = lazy(() => import('../pages/master-admin/CrmMaintenancePage'));
+const EngagementPage = lazy(() => import('../pages/master-admin/EngagementPage'));
 const StaffDashboard = lazy(() => import('../pages/StaffDashboard'));
 const ClientPortalPage = lazy(() => import('../pages/ClientPortalPage'));
 const ShowcasePage = lazy(() => import('../pages/ShowcasePage'));
@@ -82,6 +83,7 @@ const App: React.FC = () => {
           <Route path="/agendamento/gerenciar" element={<PublicAppointmentManagePage />} />
           <Route path="/avaliar" element={<PublicReviewPage />} />
           <Route path="/nps/:surveyId" element={<PublicNpsPage />} />
+          <Route path="/saloes/:salonId/posts/:postId" element={<PublicPostPage />} />
           <Route path="/login" element={<LoginPage mode="login" />} />
           <Route path="/cadastro" element={<LoginPage mode="register" />} />
           <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />

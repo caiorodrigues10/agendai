@@ -1,84 +1,92 @@
-/* eslint-disable jsx-a11y/media-has-caption -- mídia enviada pelo salão não possui trilha de legenda separada */
-import { BRAND_NAME_UPPER } from '../../config/brand';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import FocusLock from 'react-focus-lock';
 import { useNavigate } from 'react-router-dom';
-import { ShopSettings, FeedPost, StaffMember, Service, DaySchedule } from '../../types';
 import {
-  LuTrash2 as Trash2,
-  LuHeart as Heart,
-  LuImage as ImageIcon,
-  LuMapPin as MapPin,
-  LuScissors as Scissors,
-  LuEllipsis as MoreHorizontal,
-  LuClock as Clock,
-  LuMessageCircle as MessageCircle,
-  LuList as List,
-  LuCalendarDays as CalendarDays,
-  LuExternalLink as ExternalLink,
   LuCamera as Camera,
-  LuLoaderCircle as Loader2,
+  LuShare2 as Share2,
+  LuPlus as Plus,
   LuStar as Star,
+  LuTrash2 as Trash2,
 } from 'react-icons/lu';
+import type { ShopSettings, FeedPost, StaffMember } from '../../types';
 import { barbershopApi } from '../../infra/barbershopApi';
-import { reputationApi, PublicReviewSummary } from '../../infra/reputationApi';
+import { socialApi, type PublicSocialPost } from '../../infra/socialApi';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-
-const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+import { Toast } from '../../components/ui/Toast';
+import { PostDetail, shareUrl, buildProfileShareUrl } from './PostDetail';
+import { StoryModal } from './StoryModal';
+import { PostTagEditor } from './PostTagEditor';
+import { useSalonSocial } from './useSalonSocial';
+import {
+  ProfileAbout,
+  ProfileEmpty,
+  ProfileGrid,
+  ProfileReviews,
+  ProfileSkeleton,
+} from './ProfileSections';
 
 interface ShopProfileProps {
   settings: ShopSettings;
   posts: FeedPost[];
   currentUser: StaffMember | null;
-  onDeletePost: (id: string) => void;
-  onLikePost: (id: string) => void;
-  /** Perfil do cliente no link público vs. aba Perfil da equipe. */
+  onDeletePost: (id: string) => void | Promise<void>;
+  onLikePost: (id: string) => void | Promise<void>;
   audience?: 'public' | 'staff';
   onGoQueue?: () => void;
   onGoAppointments?: () => void;
   onNotify?: (message: string, type: 'success' | 'error') => void;
 }
+const TABS = ['Publicações', 'Vídeos', 'Marcados', 'Avaliações', 'Sobre'] as const;
+type ProfileTab = (typeof TABS)[number];
+const actionClass =
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm font-semibold hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent';
 
-function digitsOnly(phone: string): string {
-  return phone.replace(/\D/g, '');
-}
-
-function waLink(phone: string): string | null {
-  const d = digitsOnly(phone);
-  if (d.length < 10) return null;
-  const withCc = d.startsWith('55') ? d : `55${d.replace(/^0/, '')}`;
-  return `https://wa.me/${withCc}`;
-}
-
-function formatBrPhone(phone: string): string {
-  const d = digitsOnly(phone);
-  const local = d.startsWith('55') && d.length > 11 ? d.slice(2) : d;
-  if (local.length === 11) {
-    return `(${local.slice(0, 2)}) ${local.slice(2, 7)}-${local.slice(7)}`;
-  }
-  if (local.length === 10) {
-    return `(${local.slice(0, 2)}) ${local.slice(2, 6)}-${local.slice(6)}`;
-  }
-  return phone;
-}
-
-function shopInitials(name: string): string {
-  return (
-    name
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map(w => w[0])
-      .join('')
-      .toUpperCase() || 'S'
+function ProfilePostModal({
+  post,
+  onClose,
+  children,
+}: {
+  post: FeedPost;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const key = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', key);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener('keydown', key);
+    };
+  }, [onClose]);
+  return createPortal(
+    <FocusLock returnFocus>
+      <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/75 p-2 sm:p-5">
+        <button
+          type="button"
+          aria-label="Fechar publicação"
+          className="absolute inset-0 cursor-default"
+          onClick={onClose}
+        />
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={post.title || 'Publicação do salão'}
+          className="relative max-h-[94dvh] w-full max-w-xl overflow-y-auto rounded-2xl border border-border bg-surface shadow-2xl"
+        >
+          {children}
+        </div>
+      </div>
+    </FocusLock>,
+    document.body
   );
-}
-
-function todaySchedule(schedule: DaySchedule[] | undefined): DaySchedule | null {
-  if (!schedule?.length) return null;
-  return schedule[new Date().getDay()] ?? null;
 }
 
 export const ShopProfile: React.FC<ShopProfileProps> = ({
@@ -96,517 +104,586 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
   const { services, isShopOpen, getTodayScheduleDisplay } = useBarbershop();
   const { barbershopId } = useBarbershopFilters();
   const isPublic = audience === 'public';
-  const open = isShopOpen();
-  const today = todaySchedule(settings.schedule);
-  const hoursLabel = getTodayScheduleDisplay();
-  const whatsappUrl = settings.whatsapp ? waLink(settings.whatsapp) : null;
+  const ownsSalon =
+    currentUser?.role === 'MASTER_ADMIN' || currentUser?.barbershopId === barbershopId;
   const canCompose =
     !isPublic &&
-    Boolean(
-      currentUser &&
-        (currentUser.role === 'OWNER' ||
-          currentUser.role === 'EMPLOYEE' ||
-          currentUser.role === 'MASTER_ADMIN')
-    );
-
-  const canEditLogo =
-    audience === 'staff' && Boolean(currentUser && currentUser.role === 'OWNER');
-  const [logoUrl, setLogoUrl] = useState<string | undefined>(settings.logoUrl);
-  const [logoUploading, setLogoUploading] = useState(false);
-  const [logoError, setLogoError] = useState<string | null>(null);
-  const [confirmDeleteLogo, setConfirmDeleteLogo] = useState(false);
-  const [reviewSummary, setReviewSummary] = useState<PublicReviewSummary | null>(null);
-  const logoInputRef = useRef<HTMLInputElement>(null);
+    ownsSalon &&
+    Boolean(currentUser && ['OWNER', 'EMPLOYEE', 'MASTER_ADMIN'].includes(currentUser.role));
+  const canModerate = canCompose && currentUser?.role !== 'EMPLOYEE';
+  const social = useSalonSocial(barbershopId, canModerate);
+  const [tab, setTab] = useState<ProfileTab>('Publicações');
+  const [logoUrl, setLogoUrl] = useState(settings.logoUrl);
+  const [logoBusy, setLogoBusy] = useState(false);
+  const [removeLogo, setRemoveLogo] = useState(false);
+  const [deletePost, setDeletePost] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [storyIndex, setStoryIndex] = useState<number | null>(null);
+  const [selected, setSelected] = useState<FeedPost | null>(null);
+  const [detail, setDetail] = useState<PublicSocialPost | null>(null);
+  const [detailError, setDetailError] = useState(false);
+  const [detailVersion, setDetailVersion] = useState(0);
+  const [tagBusy, setTagBusy] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const notify = (message: string, type: 'success' | 'error' = 'success') => {
+    if (onNotify) onNotify(message, type);
+    else setToast({ message, type });
+  };
+  const publicPosts = useMemo(
+    () =>
+      posts.filter(
+        post => (!post.status || post.status === 'published') && post.format !== 'story'
+      ),
+    [posts]
+  );
+  const videos = publicPosts.filter(post => Boolean(post.videoUrl));
+  const [storyNow, setStoryNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setStoryNow(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const stories = social.stories.data.filter(
+    post => storyNow - (post.publishedAt ?? post.createdAt) < 24 * 60 * 60 * 1000
+  );
+  const rating = social.reviews.data;
+  const initials = settings.shopName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(word => word[0])
+    .join('')
+    .toUpperCase();
+  const phone = settings.whatsapp.replace(/\D/g, '');
+  const whatsapp =
+    phone.length >= 10
+      ? `https://wa.me/${phone.startsWith('55') && phone.length > 11 ? phone : `55${phone}`}`
+      : null;
 
   useEffect(() => {
     setLogoUrl(settings.logoUrl);
   }, [settings.logoUrl]);
-
   useEffect(() => {
-    if (!barbershopId) {
-      setReviewSummary(null);
+    setSelected(null);
+    setStoryIndex(null);
+    setTab('Publicações');
+  }, [barbershopId]);
+  useEffect(() => {
+    if (!selected || !barbershopId) {
+      setDetail(null);
       return;
     }
-    reputationApi
-      .getPublicSummary(barbershopId)
-      .then(setReviewSummary)
-      .catch(() => setReviewSummary(null));
-  }, [barbershopId]);
+    let active = true;
+    setDetail(null);
+    setDetailError(false);
+    void socialApi
+      .getPost(selected.barbershopId || barbershopId, selected.id)
+      .then(post => {
+        if (active) setDetail(post);
+      })
+      .catch(() => {
+        if (active) setDetailError(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [selected, barbershopId, detailVersion]);
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !barbershopId) return;
-
-    setLogoUploading(true);
-    setLogoError(null);
+  const go = (destination: 'queue' | 'appointments') => {
+    const handler = destination === 'queue' ? onGoQueue : onGoAppointments;
+    if (handler) handler();
+    else if (barbershopId)
+      navigate(`/queue/${encodeURIComponent(barbershopId)}?tab=${destination}`);
+  };
+  const uploadLogo = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file || !barbershopId || logoBusy) return;
+    if (
+      !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
+      file.size > 5 * 1024 * 1024
+    ) {
+      notify('Envie uma imagem JPG, PNG ou WebP de até 5 MB.', 'error');
+      return;
+    }
+    setLogoBusy(true);
     try {
-      const { logoUrl: newLogoUrl } = await barbershopApi.uploadLogoDirect(barbershopId, file);
-      setLogoUrl(newLogoUrl);
-      onNotify?.('Logo atualizada com sucesso!', 'success');
+      const result = await barbershopApi.uploadLogoDirect(barbershopId, file);
+      setLogoUrl(result.logoUrl);
+      notify('Logo atualizada.');
     } catch (err) {
-      setLogoUrl(settings.logoUrl);
-      const msg = getErrorMessage(err, 'Não foi possível enviar a logo. Tente novamente.');
-      setLogoError(msg);
-      onNotify?.(msg, 'error');
+      notify(getErrorMessage(err, 'Não foi possível atualizar a logo.'), 'error');
     } finally {
-      setLogoUploading(false);
-      e.target.value = '';
+      setLogoBusy(false);
     }
   };
-
-  const handleDeleteLogo = async () => {
-    if (!barbershopId || !logoUrl) return;
-
-    setLogoUploading(true);
-    setLogoError(null);
+  const deleteLogo = async () => {
+    if (!barbershopId || logoBusy) return;
+    setLogoBusy(true);
     try {
       await barbershopApi.deleteLogo(barbershopId);
       setLogoUrl(undefined);
-      onNotify?.('Logo removida.', 'success');
+      setRemoveLogo(false);
+      notify('Logo removida.');
     } catch (err) {
-      const msg = getErrorMessage(err, 'Erro ao remover a logo.');
-      setLogoError(msg);
-      onNotify?.(msg, 'error');
+      notify(getErrorMessage(err, 'Não foi possível remover a logo.'), 'error');
     } finally {
-      setLogoUploading(false);
-      setConfirmDeleteLogo(false);
+      setLogoBusy(false);
+    }
+  };
+  const removePost = async () => {
+    if (!deletePost || deleting) return;
+    setDeleting(true);
+    try {
+      await onDeletePost(deletePost);
+      setDeletePost(null);
+      setSelected(null);
+      notify('Publicação excluída.');
+    } catch (err) {
+      notify(getErrorMessage(err, 'Não foi possível excluir a publicação.'), 'error');
+    } finally {
+      setDeleting(false);
+    }
+  };
+  const moderate = async (id: string, approve: boolean) => {
+    if (!barbershopId || tagBusy) return;
+    setTagBusy(id);
+    try {
+      await socialApi.moderateTag(barbershopId, id, approve);
+      social.pending.reload();
+      social.tagged.reload();
+      notify(approve ? 'Marcação aprovada.' : 'Marcação recusada.');
+    } catch (err) {
+      notify(getErrorMessage(err, 'Não foi possível atualizar a marcação.'), 'error');
+    } finally {
+      setTagBusy(null);
+    }
+  };
+  const share = async () => {
+    if (!barbershopId) return;
+    try {
+      const result = await shareUrl(buildProfileShareUrl(barbershopId), settings.shopName);
+      if (result === 'copied') notify('Link do perfil copiado!');
+    } catch {
+      notify('Não foi possível compartilhar o perfil.', 'error');
     }
   };
 
-  const getPostTypeLabel = (type: string) => {
-    switch (type) {
-      case 'haircut':
-        return 'Look da Semana';
-      case 'beard':
-        return 'Barba / Acabamento';
-      case 'announcement':
-        return 'Aviso';
-      default:
-        return 'Post';
-    }
-  };
-
-  const getPostTypeStyle = (type: string) => {
-    switch (type) {
-      case 'announcement':
-        return 'bg-accent/10 text-accent border-accent/20';
-      case 'beard':
-        return 'bg-warning/10 text-warning border-warning/20';
-      case 'haircut':
-      default:
-        return 'bg-success/10 text-success border-success/20';
-    }
-  };
-
-  const listedServices: Service[] = services.slice(0, 8);
-  const extraServiceCount = Math.max(0, services.length - listedServices.length);
-
+  const tabResource =
+    tab === 'Marcados' ? social.tagged : tab === 'Avaliações' ? social.reviews : null;
   return (
-    <div className="animate-fade-in space-y-5 pb-20">
-      <div className="bg-surface rounded-2xl overflow-hidden border border-border shadow-lg relative">
-        <div className="absolute inset-x-0 top-0 h-1 bg-accent z-20" />
-        <div className="h-28 bg-gradient-to-br from-accent/25 via-surface to-surface relative overflow-hidden">
-          <div
-            className="pointer-events-none absolute -top-10 -right-8 h-40 w-40 rounded-full bg-accent/25 blur-3xl"
-            aria-hidden
-          />
-          <div
-            className="pointer-events-none absolute -bottom-12 -left-6 h-32 w-32 rounded-full bg-accent/10 blur-3xl"
-            aria-hidden
-          />
-        </div>
-
-        <div className="px-5 pb-5 -mt-12 relative text-center">
-          <div className="mx-auto mb-3 w-24 h-24">
-            {canEditLogo ? (
-              <div className="relative group w-full h-full rounded-2xl border-4 border-surface bg-bg shadow-lg overflow-hidden flex items-center justify-center">
-                {logoUploading ? (
-                  <Loader2 size={28} className="text-accent animate-spin" />
-                ) : logoUrl ? (
-                  <img
-                    src={logoUrl}
-                    alt={settings.shopName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-2xl font-black tracking-tight text-accent">
-                    {shopInitials(settings.shopName)}
-                  </span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => logoInputRef.current?.click()}
-                  disabled={logoUploading}
-                  className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
-                >
-                  <Camera size={24} className="text-white" />
-                </button>
-                <input
-                  ref={logoInputRef}
-                  type="file"
-                  accept="image/jpeg,image/jpg,image/png,image/webp"
-                  onChange={handleLogoUpload}
-                  className="hidden"
-                  disabled={logoUploading}
-                />
-              </div>
-            ) : (
-              <div className="w-full h-full rounded-2xl border-4 border-surface bg-bg shadow-lg overflow-hidden flex items-center justify-center">
-                {logoUrl ? (
-                  <img
-                    src={logoUrl}
-                    alt={settings.shopName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-2xl font-black tracking-tight text-accent">
-                    {shopInitials(settings.shopName)}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-
-          {canEditLogo && logoUrl && !logoUploading && (
-            <button
-              type="button"
-              onClick={() => setConfirmDeleteLogo(true)}
-              className="mx-auto mb-2 px-3 py-1.5 text-[11px] font-medium text-danger bg-danger/10 rounded-lg border border-danger/20 hover:bg-danger/20 transition-colors flex items-center gap-1"
+    <div className="pb-16 space-y-4" data-testid="salon-social-profile">
+      <section className="overflow-hidden rounded-2xl border border-border bg-surface">
+        <div className="p-4 sm:p-6">
+          <div className="flex items-center gap-4 sm:gap-7">
+            <div
+              className={`relative shrink-0 rounded-full p-1 ${stories.length ? 'bg-gradient-to-tr from-accent to-support' : 'bg-border'}`}
             >
-              <Trash2 size={12} /> Remover logo
-            </button>
-          )}
-          {logoError && (
-            <p className="mx-auto mb-2 text-[11px] text-danger max-w-[200px]">{logoError}</p>
-          )}
-
-          <h1 className="text-2xl font-bold text-text-primary tracking-tight">{settings.shopName}</h1>
-
-          <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
-            <span
-              className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
-                open
-                  ? 'bg-success/15 text-success border-success/30'
-                  : 'bg-surface-2 text-text-secondary border-border-strong'
-              }`}
-            >
-              {open ? 'Aberto agora' : 'Fechado'}
-            </span>
-            {hoursLabel && (
-              <span className="text-[11px] font-bold text-text-secondary flex items-center gap-1">
-                <Clock size={12} className="text-accent" />
-                {today?.isOpen ? `Hoje ${hoursLabel}` : hoursLabel}
-              </span>
-            )}
-          </div>
-
-          {settings.address && (
-            <p className="mt-3 text-sm text-text-secondary flex items-center justify-center gap-1.5">
-              <MapPin size={14} className="text-accent shrink-0" />
-              <span>{settings.address}</span>
-            </p>
-          )}
-
-          <div className="mt-4 flex flex-col sm:flex-row gap-2">
-            {isPublic && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => onGoQueue?.()}
-                  className="flex-1 px-4 py-3 rounded-xl bg-accent text-accent-fg text-sm font-bold flex items-center justify-center gap-2 hover:bg-accent-hover shadow-lg shadow-accent/20"
-                >
-                  <List size={16} /> Entrar na fila
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onGoAppointments?.()}
-                  className="flex-1 px-4 py-3 rounded-xl bg-bg border border-border text-text-primary text-sm font-bold flex items-center justify-center gap-2 hover:border-accent"
-                >
-                  <CalendarDays size={16} /> Agendar
-                </button>
-              </>
-            )}
-            {whatsappUrl && (
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`${
-                  isPublic ? 'sm:flex-none' : 'flex-1'
-                } px-4 py-3 rounded-xl bg-bg border border-border text-text-primary text-sm font-bold flex items-center justify-center gap-2 hover:border-accent`}
+              <button
+                type="button"
+                onClick={() => {
+                  if (stories.length) setStoryIndex(0);
+                }}
+                disabled={!stories.length}
+                aria-label={stories.length ? 'Ver stories do salão' : 'Logo do salão'}
+                className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-bg text-xl sm:text-3xl font-bold text-text-primary disabled:opacity-100"
               >
-                <MessageCircle size={16} className="text-accent" />
-                {isPublic ? 'WhatsApp' : formatBrPhone(settings.whatsapp)}
-              </a>
-            )}
-          </div>
-
-          {isPublic && settings.whatsapp && (
-            <p className="mt-2 text-[11px] text-text-muted">{formatBrPhone(settings.whatsapp)}</p>
-          )}
-
-          {!isPublic && barbershopId && (
-            <button
-              type="button"
-              onClick={() => navigate(`/queue/${barbershopId}`)}
-              className="mt-3 text-[11px] font-bold text-accent inline-flex items-center gap-1 hover:underline"
-            >
-              <ExternalLink size={12} /> Ver como o cliente vê
-            </button>
-          )}
-        </div>
-      </div>
-
-      {settings.schedule?.length > 0 && (
-        <div className="bg-surface rounded-2xl border border-border p-4 shadow-sm">
-          <h2 className="text-sm font-bold text-text-primary mb-3 flex items-center gap-2">
-            <Clock size={16} className="text-accent" /> Horários
-          </h2>
-          <div className="space-y-1.5">
-            {settings.schedule.map((day, index) => {
-              const isToday = index === new Date().getDay();
-              return (
-                <div
-                  key={day.dayName}
-                  className={`flex items-center justify-between text-sm rounded-lg px-2 py-1.5 ${
-                    isToday ? 'bg-accent/10' : ''
-                  }`}
+                {logoUrl ? (
+                  <img src={logoUrl} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  initials || 'S'
+                )}
+              </button>
+              {canModerate && (
+                <button
+                  type="button"
+                  aria-label="Alterar logo"
+                  disabled={logoBusy}
+                  onClick={() => fileRef.current?.click()}
+                  className="absolute -bottom-1 -right-1 flex min-h-10 min-w-10 items-center justify-center rounded-full border border-border bg-surface text-text-primary"
                 >
-                  <span
-                    className={`font-bold ${isToday ? 'text-accent' : 'text-text-secondary'}`}
+                  <Camera size={17} />
+                </button>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <h1 className="break-words text-lg sm:text-2xl font-bold tracking-tight">
+                {settings.shopName}
+              </h1>
+              <div className="mt-3 grid grid-cols-2 gap-3 sm:flex sm:gap-7">
+                <div>
+                  <strong className="text-base sm:text-lg">{publicPosts.length}</strong>
+                  <p className="text-[11px] sm:text-xs text-text-muted">publicações</p>
+                </div>
+                <div>
+                  <strong className="text-base sm:text-lg">{videos.length}</strong>
+                  <p className="text-[11px] sm:text-xs text-text-muted">vídeos</p>
+                </div>
+                {rating?.showAverage && rating.average !== null && rating.count > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setTab('Avaliações')}
+                    className="text-left col-span-2"
                   >
-                    {day.dayName}
-                    {isToday ? ' · hoje' : ''}
-                  </span>
-                  <span className={day.isOpen ? 'text-text-primary' : 'text-text-muted'}>
-                    {day.isOpen ? `${day.openTime} – ${day.closeTime}` : 'Fechado'}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {listedServices.length > 0 && (
-        <div className="bg-surface rounded-2xl border border-border p-4 shadow-sm">
-          <h2 className="text-sm font-bold text-text-primary mb-3 flex items-center gap-2">
-            <Scissors size={16} className="text-accent" /> Serviços
-          </h2>
-          <ul className="divide-y divide-border">
-            {listedServices.map(service => (
-              <li key={service.id} className="flex items-center justify-between py-2.5 gap-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-bold text-text-primary truncate">{service.name}</p>
-                  <p className="text-[11px] text-text-muted">{service.avgTimeMinutes} min</p>
-                </div>
-                <span className="text-sm font-bold text-accent shrink-0">
-                  {brl.format(service.price)}
-                </span>
-              </li>
-            ))}
-          </ul>
-          {extraServiceCount > 0 && isPublic && (
-            <button
-              type="button"
-              onClick={() => onGoAppointments?.()}
-              className="mt-2 w-full text-xs font-bold text-accent py-2"
-            >
-              Ver todos ({services.length}) na agenda
-            </button>
-          )}
-        </div>
-      )}
-
-      {reviewSummary && (reviewSummary.count > 0 || settings.googleReviewUrl) && (
-        <div className="bg-surface rounded-2xl border border-border p-4 shadow-sm">
-          <div className="mb-3 flex items-start justify-between gap-3">
-            <div>
-              <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
-                <Star size={16} className="text-warning fill-warning" /> Avaliações
-              </h2>
-              {reviewSummary.showAverage && reviewSummary.average !== null ? (
-                <p className="mt-1 text-xs text-text-secondary">
-                  Nota {reviewSummary.average.toFixed(1)} de 5 em {reviewSummary.count} avaliações verificadas.
-                </p>
-              ) : reviewSummary.count > 0 ? (
-                <p className="mt-1 text-xs text-text-muted">
-                  Depoimentos verificados de clientes atendidos.
-                </p>
-              ) : null}
-            </div>
-            {reviewSummary.showAverage && reviewSummary.average !== null && (
-              <span className="rounded-lg border border-warning/20 bg-warning/10 px-2.5 py-1 text-sm font-black text-warning">
-                {reviewSummary.average.toFixed(1)}
-              </span>
-            )}
-          </div>
-
-          {reviewSummary.reviews.length > 0 && (
-            <div className="space-y-2">
-              {reviewSummary.reviews.slice(0, 3).map(review => (
-                <div key={review.id ?? review.createdAt} className="rounded-xl border border-border bg-bg p-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs font-bold text-text-primary">
-                      {review.clientName || 'Cliente'}
-                    </span>
-                    <div className="flex">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star
-                          key={i}
-                          size={12}
-                          className={i < review.rating ? 'fill-warning text-warning' : 'text-text-muted'}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  {review.comment && (
-                    <p className="mt-2 text-xs leading-relaxed text-text-secondary">{review.comment}</p>
-                  )}
-                  {typeof review.response === 'string' && review.response && (
-                    <p className="mt-2 rounded-lg bg-surface-2 p-2 text-[11px] text-text-secondary">
-                      Resposta do salão: {review.response}
+                    <strong className="flex items-center gap-1 text-base sm:text-lg">
+                      <Star size={14} className="text-warning fill-warning" />
+                      {rating.average.toFixed(1)}
+                    </strong>
+                    <p className="text-[11px] sm:text-xs text-text-muted">
+                      {rating.count} avaliações
                     </p>
-                  )}
-                </div>
-              ))}
+                  </button>
+                )}
+              </div>
             </div>
-          )}
-
-          {settings.googleReviewUrl && (
-            <a
-              href={settings.googleReviewUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-bg px-4 py-3 text-xs font-bold text-text-primary hover:border-accent"
-            >
-              Ver avaliações no Google <ExternalLink size={14} />
-            </a>
-          )}
-        </div>
-      )}
-
-      <div className="space-y-3">
-        <h2 className="text-sm font-bold text-text-primary px-1">Publicações</h2>
-
-        {posts.length === 0 && (
-          <div className="text-center py-10 px-6 bg-surface border border-dashed border-border rounded-2xl">
-            <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
-              <ImageIcon size={20} className="text-accent" />
-            </div>
-            <p className="text-sm font-bold text-text-primary">Nenhuma publicação ainda</p>
-            <p className="text-xs text-text-muted mt-1 max-w-xs mx-auto">
-              {isPublic
-                ? 'Quando o salão postar fotos e avisos, eles aparecem aqui.'
-                : 'Publique em Posts para preencher o perfil que o cliente vê.'}
+          </div>
+          <div className="mt-4 space-y-1">
+            <p className="text-xs font-semibold text-text-secondary">
+              Beleza, cuidado e experiências
             </p>
-            {!isPublic && (
+            {settings.address && (
+              <p className="text-sm text-text-secondary">
+                {settings.address}
+                {settings.city ? ` · ${settings.city}` : ''}
+              </p>
+            )}
+            <p className="text-xs text-text-muted">
+              <span className={isShopOpen() ? 'text-success font-semibold' : ''}>
+                {isShopOpen() ? 'Aberto agora' : 'Fechado agora'}
+              </span>
+              {getTodayScheduleDisplay() ? ` · ${getTodayScheduleDisplay()}` : ''}
+            </p>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {isPublic && settings.operationMode !== 'APPOINTMENTS_ONLY' && (
+              <button
+                type="button"
+                onClick={() => go('queue')}
+                className={`${actionClass} bg-accent text-accent-fg hover:bg-accent-hover`}
+              >
+                Entrar na fila
+              </button>
+            )}
+            {isPublic && settings.operationMode !== 'QUEUE_ONLY' && (
+              <button type="button" onClick={() => go('appointments')} className={actionClass}>
+                Agendar
+              </button>
+            )}
+            {canCompose && (
               <button
                 type="button"
                 onClick={() => navigate('/app/posts')}
-                className="mt-4 px-4 py-2 rounded-xl bg-accent text-accent-fg text-xs font-bold"
+                className={`${actionClass} bg-accent text-accent-fg hover:bg-accent-hover`}
               >
-                Criar primeiro post
+                <Plus size={16} />
+                Criar publicação
               </button>
             )}
+            {whatsapp && (
+              <a href={whatsapp} target="_blank" rel="noopener noreferrer" className={actionClass}>
+                WhatsApp ↗
+              </a>
+            )}
+            <button
+              type="button"
+              aria-label="Compartilhar perfil"
+              onClick={() => void share()}
+              className={actionClass}
+            >
+              <Share2 size={16} />
+              <span className="hidden sm:inline">Compartilhar</span>
+            </button>
           </div>
-        )}
-
-        {posts.map(post => (
-          <div
-            key={post.id}
-            className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm"
-          >
-            <div className="p-4 flex items-center justify-between gap-3">
-              <span
-                className={`text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded-md border ${getPostTypeStyle(post.type)}`}
-              >
-                {getPostTypeLabel(post.type)}
-              </span>
-              {canCompose ? (
-                <button type="button" className="text-text-muted hover:text-text-primary">
-                  <MoreHorizontal size={16} />
-                </button>
-              ) : (
-                <span className="text-[10px] text-text-muted font-bold">
-                  {new Date(post.createdAt).toLocaleDateString('pt-BR')}
-                </span>
+          {canModerate && (
+            <div className="mt-2">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={event => void uploadLogo(event)}
+                className="hidden"
+              />
+              {logoBusy && (
+                <p role="status" className="text-xs text-text-muted">
+                  Atualizando logo…
+                </p>
               )}
-            </div>
-            {post.imageUrl && (
-              <img src={post.imageUrl} alt="" loading="lazy" decoding="async" width={1080} height={1080} className="w-full aspect-square object-cover bg-bg" />
-            )}
-            {post.videoUrl && !post.imageUrl && (
-              <video src={post.videoUrl} className="w-full aspect-square object-cover bg-bg" controls />
-            )}
-            <div className="p-4 pt-3">
-              {post.title && (
-                <h3 className="text-text-primary font-bold mb-1 text-base">{post.title}</h3>
-              )}
-              {post.content && (
-                <p className="text-text-secondary text-sm leading-relaxed">{post.content}</p>
-              )}
-            </div>
-            {(post.postMode || post.ctaText) && post.barbershopId && (
-              <div className="px-4 pb-3">
+              {logoUrl && (
                 <button
                   type="button"
-                  onClick={() => {
-                    if (isPublic && post.postMode === 'appointments' && onGoAppointments) {
-                      onGoAppointments();
-                      return;
-                    }
-                    if (isPublic && onGoQueue && post.postMode !== 'appointments') {
-                      onGoQueue();
-                      return;
-                    }
-                    navigate(
-                      `/queue/${post.barbershopId}${post.postMode === 'appointments' ? '?tab=appointments' : ''}`
-                    );
-                  }}
-                  className="w-full bg-accent text-accent-fg rounded-xl text-sm font-bold py-3 hover:bg-accent-hover transition-all"
+                  disabled={logoBusy}
+                  onClick={() => setRemoveLogo(true)}
+                  className="min-h-11 text-xs text-text-muted hover:text-danger"
                 >
-                  {post.ctaText || 'Agendar'}
+                  Remover logo
                 </button>
-              </div>
-            )}
-            <div className="px-4 py-3 flex items-center justify-between border-t border-border">
+              )}
+            </div>
+          )}
+        </div>
+        {social.stories.loading ? (
+          <div className="flex gap-3 px-4 pb-4 animate-pulse" aria-label="Carregando stories">
+            {[0, 1, 2].map(i => (
+              <div key={i} className="h-16 w-16 rounded-full bg-surface-2" />
+            ))}
+          </div>
+        ) : stories.length > 0 ? (
+          <div className="flex gap-4 overflow-x-auto px-4 pb-5 sm:px-6">
+            {stories.map((story, index) => (
               <button
                 type="button"
-                onClick={() => onLikePost(post.id)}
-                className="flex items-center gap-1 text-xs text-text-secondary hover:text-danger"
+                key={story.id}
+                onClick={() => setStoryIndex(index)}
+                className="w-16 shrink-0 text-center"
+                aria-label={`Ver story: ${story.title || index + 1}`}
               >
-                <Heart size={14} /> {post.likes}
+                <span className="block rounded-full bg-gradient-to-tr from-accent to-support p-0.5">
+                  <span className="flex h-[60px] w-[60px] overflow-hidden rounded-full border-2 border-surface bg-bg">
+                    {story.imageUrl ? (
+                      <img src={story.imageUrl} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <span className="m-auto text-xl text-accent">▶</span>
+                    )}
+                  </span>
+                </span>
+                <span className="mt-1 block truncate text-[10px] text-text-secondary">
+                  {story.title || 'Story'}
+                </span>
               </button>
-              {canCompose && (
-                <button
-                  type="button"
-                  onClick={() => onDeletePost(post.id)}
-                  className="flex items-center gap-1 text-xs text-text-muted hover:text-danger"
-                >
-                  <Trash2 size={14} /> Excluir
-                </button>
-              )}
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
-
-      {isPublic && (
-        <p className="text-center text-[10px] font-bold tracking-[0.25em] text-text-muted pt-1">
-          {BRAND_NAME_UPPER}
-        </p>
+        ) : social.stories.error ? (
+          <button
+            type="button"
+            onClick={social.stories.reload}
+            className="m-4 text-xs text-text-muted"
+          >
+            Stories indisponíveis · tentar novamente
+          </button>
+        ) : null}
+        <div
+          role="tablist"
+          aria-label="Conteúdo do perfil"
+          className="flex overflow-x-auto border-t border-border px-2 sm:px-4"
+        >
+          {TABS.map(item => (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === item}
+              aria-controls="salon-profile-content"
+              id={`salon-tab-${item}`}
+              key={item}
+              onClick={() => setTab(item)}
+              className={`min-h-12 shrink-0 border-t-2 px-3 sm:px-5 text-xs sm:text-sm font-semibold ${tab === item ? 'border-accent text-text-primary' : 'border-transparent text-text-muted hover:text-text-primary'}`}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+      </section>
+      <section
+        id="salon-profile-content"
+        role="tabpanel"
+        aria-labelledby={`salon-tab-${tab}`}
+        className="rounded-2xl border border-border bg-surface p-2 sm:p-4"
+      >
+        {tabResource?.loading ? (
+          <ProfileSkeleton />
+        ) : tabResource?.error ? (
+          <div className="py-10 text-center">
+            <p className="text-sm text-text-muted">Não foi possível carregar este conteúdo.</p>
+            <button type="button" onClick={tabResource.reload} className={`${actionClass} mt-3`}>
+              Tentar novamente
+            </button>
+          </div>
+        ) : (
+          <>
+            {tab === 'Publicações' &&
+              (publicPosts.length ? (
+                <ProfileGrid posts={publicPosts} onOpen={setSelected} />
+              ) : (
+                <ProfileEmpty
+                  title="O próximo post começa aqui"
+                  text={
+                    canCompose
+                      ? 'Crie uma publicação para apresentar seu salão aos clientes.'
+                      : 'As fotos e novidades do salão vão aparecer aqui.'
+                  }
+                />
+              ))}
+            {tab === 'Vídeos' &&
+              (videos.length ? (
+                <ProfileGrid posts={videos} onOpen={setSelected} />
+              ) : (
+                <ProfileEmpty
+                  title="Ainda sem vídeos"
+                  text="Conheça o salão em movimento: bastidores e novidades aparecem nesta aba."
+                />
+              ))}
+            {tab === 'Marcados' && (
+              <div className="space-y-4">
+                {canModerate && social.pending.loading && <ProfileSkeleton />}
+                {canModerate && social.pending.error && (
+                  <button type="button" onClick={social.pending.reload} className={actionClass}>
+                    Tentar carregar marcações pendentes
+                  </button>
+                )}
+                {canModerate && social.pending.data.length > 0 && (
+                  <section className="rounded-xl border border-border p-3">
+                    <h2 className="mb-3 text-sm font-bold">Aguardando sua aprovação</h2>
+                    {social.pending.data.map(tag => (
+                      <div
+                        key={tag.id}
+                        className="flex flex-wrap items-center justify-between gap-2 py-2"
+                      >
+                        <button
+                          type="button"
+                          className="text-left text-sm"
+                          onClick={() => setSelected(tag.post)}
+                        >
+                          {tag.post.shopName} · {tag.post.title || 'Publicação'}
+                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            disabled={Boolean(tagBusy)}
+                            onClick={() => void moderate(tag.id, true)}
+                            className={actionClass}
+                          >
+                            Aprovar
+                          </button>
+                          <button
+                            type="button"
+                            disabled={Boolean(tagBusy)}
+                            onClick={() => void moderate(tag.id, false)}
+                            className={actionClass}
+                          >
+                            Recusar
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </section>
+                )}
+                {social.tagged.data.length ? (
+                  <ProfileGrid
+                    posts={social.tagged.data.map(tag => tag.post)}
+                    onOpen={setSelected}
+                  />
+                ) : (
+                  <ProfileEmpty
+                    title="Marcados por outros salões"
+                    text="Publicações em que o salão foi marcado aparecem aqui após sua aprovação."
+                  />
+                )}
+              </div>
+            )}
+            {tab === 'Avaliações' && (
+              <div className="p-2">
+                <ProfileReviews summary={rating} googleUrl={settings.googleReviewUrl} />
+              </div>
+            )}
+            {tab === 'Sobre' && (
+              <div className="p-2">
+                <ProfileAbout settings={settings} services={services} />
+              </div>
+            )}
+          </>
+        )}
+      </section>
+      {selected && (
+        <ProfilePostModal post={selected} onClose={() => setSelected(null)}>
+          {detail ? (
+            <>
+              <PostDetail
+                key={detail.id}
+                salonId={detail.barbershopId || barbershopId || ''}
+                post={detail}
+                onClose={() => setSelected(null)}
+                onLike={async id => {
+                  if (detail.barbershopId === barbershopId) await onLikePost(id);
+                  else
+                    await barbershopApi.updatePost(id, { likes: 1 } as Parameters<
+                      typeof barbershopApi.updatePost
+                    >[1]);
+                }}
+              />
+              {canCompose && detail.barbershopId === barbershopId && (
+                <>
+                  <div className="border-t border-border px-4 py-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelected(null);
+                        setDeletePost(detail.id);
+                      }}
+                      className="inline-flex min-h-11 items-center gap-2 text-xs text-danger"
+                    >
+                      <Trash2 size={14} />
+                      Excluir publicação
+                    </button>
+                  </div>
+                  <PostTagEditor key={detail.id} salonId={barbershopId || ''} postId={detail.id} />
+                </>
+              )}
+            </>
+          ) : detailError ? (
+            <div className="p-8 text-center">
+              <p>Não foi possível abrir a publicação.</p>
+              <button
+                type="button"
+                className={`${actionClass} mt-3`}
+                onClick={() => setDetailVersion(v => v + 1)}
+              >
+                Tentar novamente
+              </button>
+              <button
+                type="button"
+                className={`${actionClass} mt-3 ml-2`}
+                onClick={() => setSelected(null)}
+              >
+                Fechar
+              </button>
+            </div>
+          ) : (
+            <div className="p-4">
+              <ProfileSkeleton />
+            </div>
+          )}
+        </ProfilePostModal>
+      )}
+      {storyIndex !== null && stories[storyIndex] && (
+        <StoryModal
+          stories={stories}
+          index={storyIndex}
+          shopName={settings.shopName}
+          shopLogoUrl={logoUrl}
+          onNavigate={setStoryIndex}
+          onClose={() => setStoryIndex(null)}
+        />
       )}
       <ConfirmDialog
-        open={confirmDeleteLogo}
+        open={removeLogo}
         title="Remover logo"
-        message="Remover a logo do salão?"
+        message="Remover a logo do perfil do salão?"
         confirmLabel="Remover"
         variant="danger"
-        loading={logoUploading}
-        onConfirm={() => void handleDeleteLogo()}
-        onCancel={() => setConfirmDeleteLogo(false)}
+        loading={logoBusy}
+        onConfirm={() => void deleteLogo()}
+        onCancel={() => setRemoveLogo(false)}
       />
+      <ConfirmDialog
+        open={Boolean(deletePost)}
+        title="Excluir publicação"
+        message="A publicação, seus comentários e marcações serão removidos. Continuar?"
+        confirmLabel="Excluir"
+        variant="danger"
+        loading={deleting}
+        onConfirm={() => void removePost()}
+        onCancel={() => setDeletePost(null)}
+      />
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };

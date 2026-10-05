@@ -10,6 +10,8 @@ function unwrap<T>(res: unknown): T {
 }
 
 interface BarbershopData {
+  id?: string;
+  active?: boolean;
   name?: string;
   whatsapp?: string;
   address?: string | null;
@@ -162,7 +164,7 @@ async function uploadLogoMultipart(barbershopId: string, file: File): Promise<{ 
 
 export const barbershopApi = {
   listBarbershops: () =>
-    apiClient<{ success: boolean; data: BarbershopData[] }>('/api/barbershops').then(unwrap),
+    apiClient<{ success: boolean; data: BarbershopData[] }>('/api/barbershops').then(res => unwrap<BarbershopData[]>(res)),
   getBarbershop: (id: string) =>
     apiClient<{ success: boolean; data: BarbershopData }>(`/api/barbershops/${id}`).then(res =>
       unwrap<BarbershopData>(res)

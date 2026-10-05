@@ -352,7 +352,7 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     ],
     proofTitle: 'Feito para salão, não para escritório',
     proofBody:
-      'A Agenda Já já cobre fila, agenda, clientes, financeiro e produtos. 30 dias de Pro completo, sem cartão. Essencial fica R$ 14/mês; Pro, R$ 20/mês.',
+      'A Agenda Já cobre fila, agenda, clientes, financeiro e produtos. 30 dias de Pro completo, sem cartão. Essencial fica R$ 14/mês; Pro, R$ 20/mês.',
     faqs: [
       {
         question: 'Precisa instalar alguma coisa?',

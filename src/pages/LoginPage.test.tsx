@@ -15,7 +15,7 @@ const subscriptionsMeMock = vi.hoisted(() => vi.fn());
 
 let authState: { user: StaffMember | null; loading: boolean };
 let hasStoredSessionMock = false;
-let savedAccountsMock: Array<{ id: string; name: string; email: string; avatarUrl?: string }> = [];
+let savedAccountsMock: { id: string; name: string; email: string; avatarUrl?: string }[] = [];
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');

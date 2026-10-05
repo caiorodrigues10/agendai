@@ -19,6 +19,7 @@ import { getQueueInsight } from '../services/geminiService';
 import { useBarbershop } from './BarbershopContext';
 import { AvailabilitySlot, mapAppointmentFromApi, formatDateISO } from '../utils/schedulingUtils';
 import { logger } from '../utils/logger';
+import { readClientId } from '../utils/clientIdStorage';
 
 interface SchedulingContextValue {
   loading: boolean;
@@ -74,14 +75,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [availability, setAvailability] = useState<AvailabilitySlot[]>([]);
   const [aiInsight, setAiInsight] = useState<AIInsight | null>(null);
-  const [clientId, setClientId] = useState(() => {
-    let cid = localStorage.getItem('barber_customer_id');
-    if (!cid) {
-      cid = crypto.randomUUID();
-      localStorage.setItem('barber_customer_id', cid);
-    }
-    return cid;
-  });
+  const [clientId, setClientId] = useState(readClientId);
   const [completedCount, setCompletedCount] = useState(0);
   const shouldPoll = pathname.startsWith('/app') || pathname.startsWith('/queue');
   const lastAppointmentQueryRef = useRef<{ date?: string; from?: string; to?: string } | null>(null);

@@ -55,7 +55,7 @@ type StaffServiceRaw = StaffService & {
   customPrice?: number | string | null;
 };
 
-type TimeOffRaw = {
+interface TimeOffRaw {
   id: string;
   staffId: string;
   startAt?: string;
@@ -69,7 +69,7 @@ type TimeOffRaw = {
   updatedAt?: string;
   staff?: { name?: string | null };
   approvedBy?: { id?: string; name?: string | null } | string | null;
-};
+}
 
 function asNumber(value: number | string | null | undefined): number | undefined {
   if (value == null || value === '') return undefined;

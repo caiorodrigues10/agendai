@@ -16,20 +16,20 @@ Data: 2026-09-28 · Base: `01-component-inventory.md` + `02-map.md`.
 | ui/Button | components/ui | 4 | nenhuma | E2 | ✓ (Header.test间接) | ativo | migrar+unificar — **alinhar token**: primary hoje `bg-action-primary` × de-facto `bg-accent` (22×/14 files); adotar receitas secundárias 78×/35 |
 | ui/Field + FIELD_CONTROL | components/ui | 30 | nenhuma | E2 | + | ativo | migrar — cobrir os 45 files com inputs sem Field na migração |
 | ui/Avatar, StatusBadge, Loader, Logo, DynamicIcon, ConsentCheckbox, CurrencyInput, PasswordInput, SmartSelect, Toast, ThemedCalendar, chart.tsx, floating-paths, EmptyState | components/ui | (ver inv.) | nenhuma | E2 | ✓ ConfirmDialog/SmartSelect | ativo | migrar |
-| ui/ConfirmDialog + ui/PromptModal | components/ui | múltiplos | nenhuma | E2 | ✓ ConfirmDialog | dup | migrar+unificar — shell único; **adoção obrigatória** nos 22 files de overlay ad-hoc (portal + `aria-modal` + `z-[110]`) |
+| ui/ConfirmDialog | components/ui | múltiplos | nenhuma | E2 | ✓ ConfirmDialog | dup | migrar+unificar — shell único; **adoção obrigatória** nos 22 files de overlay ad-hoc (portal + `aria-modal` + `z-[110]`). `ui/PromptModal` **removido no settlement §6** (2026-10-03): perdeu o único consumidor (`MasterAdminDashboard`) |
 | ui/Skeleton + Table/Card/List/Form + skeletons.ts | components/patterns/skeletons | 11 + composições | nenhuma | E2 | — | dup | migrar+unificar — fundir com `domain/skeletons/` (8 arquivos) em um sistema só |
-| domain/skeletons/* (8 + index.ts) | components/patterns/skeletons | barrel + OwnerFinancialPanel | ui/Skeleton | E2 | — | dup | migrar+unificar (ver acima) |
+| domain/skeletons/* (8 + index.ts) | components/patterns/skeletons | barrel + OwnerFinancialPanel | ui/Skeleton | E2 | — | dup | migrar+unificar (ver acima). **Settlement §6:** 7 órfãos (Calendar/Clients/Dashboard/Financial/Queue/Today/Weather) removidos 2026-10-03; seguem `FinanceResumo`/`PublicPage`/primitives |
 | ui/DataTableState | components/patterns/states | 0 | nenhuma | E2 | — | **0c** | substituir — trio único loading/error/empty (Substitui SectionError e receitas inline) |
 | ui/SectionError | components/patterns/states | só DataTableState (0c) | nenhuma | E2 | — | 0c efet. | substituir (ver acima) |
-| ui/PaginationBar | components/patterns | 0 | nenhuma | E2 | — | **0c** | avaliar — manter só se adotado por tabelas da Etapa 5 |
-| ui/credit-card-form | (MP checkout) | 0 | nenhuma | — | — | **0c** | avaliar — não é UI do design system; manter em features/payments se adotado |
+| ui/PaginationBar | components/patterns | 1 (ProductReservationsPanel) | nenhuma | E2 | — | ativo | mantido — adotado fora da fila 0c (settlement 2026-10-03) |
+| ui/credit-card-form | (MP checkout) | 0 | nenhuma | — | — | **removido §6** | removido no settlement (2026-10-03) — checkout real usa embed do provedor; recuperável via git |
 
 ## 2. `components/patterns/` — padrões novos a criar (Etapa 3, fecham as duplicações §5)
 
 | Padrão novo | Origem do design | Onde adotar | Stories | Testes | Estado | Ação/Exceção |
 |---|---|---|---|---|---|---|
 | Card | shell `rounded-xl border border-border bg-surface` (99×/49) | todas as áreas na migração | E2 | + | dup | criar — reuso da receita atual, visual idêntico |
-| Modal shell | ConfirmDialog/PromptModal | 22 files ad-hoc + 9 `*Modal.tsx` | E2 | ✓ | dup | criar via unificação (linha §1) |
+| Modal shell | ConfirmDialog | 22 files ad-hoc + 9 `*Modal.tsx` | E2 | ✓ | dup | criar via unificação (linha §1; PromptModal removido no settlement §6) |
 | Tabs | hand-rolled `activeTab` (110×) | CatalogManager, ClientPortalDashboard, ProductsHub, PostEditor/PostsManager, StaffDashboard | mig. | + | dup | criar — respeitar `role=tab`/`aria-selected` (hoje 4×/2 files) |
 | Tooltip | `title=` nativo + Recharts tooltip | toolbars/painéis na migração | mig. | + | dup | criar — não mexer no tooltip do Recharts |
 | StatCard | stat cards inline (99×/49) | painéis finance/dashboard na migração | mig. | + | dup | criar |
@@ -140,28 +140,36 @@ Data: 2026-09-28 · Base: `01-component-inventory.md` + `02-map.md`.
 |---|---|---|---|---|---|---|---|
 | pages/MasterAdmin/* (13 pages) | pages/master-admin | rotas /master | AdminLayout | mig. | — | ativo | mover+renomear — wrappers finos viram rotas sobre feature |
 | BillingTab (1843L), ReferralsTab, CrmMaintenancePage | pages/ + features/billing | 1 | MAIS MAIOR arquivo | mig. | — | ativo | **extrair** painéis internos (NotificationDeliveries/Health já são domain) |
-| MasterAdminDashboard (1765L) | pages/master-admin | rota | 28 botões/9 inputs | mig. | — | ativo | **extrair** sub-blocos antes/durante a migração |
+| MasterAdminDashboard (1765L) | pages/master-admin | rota | 28 botões/9 inputs | mig. | — | **removido §6** | removido no settlement (2026-10-03) — rotas `/master` usam as 13 páginas individuais; D-012 sanada |
 
 ## 6. Painéis `0c` — fila de avaliação (nenhum import em `src/`, verificado por varredura completa)
 
+> **Settlement §6 EXECUTADO (2026-10-03, após sanção do usuário):** os 16 painéis `0c` +
+> `credit-card-form` + `MasterAdminDashboard` + `PromptModal` (conssequência) foram **removidos**;
+> as 11 wrappers HTTP que ficaram órfãs (`copilot/corporate/enhancedForecast/fiscal/forms/
+> integrations/pricing/purchasing/quality/vouchers/whatsappAi Api`) também — `staffApi`,
+> `depositsApi`, `reputationApi`, `barbershopApi` ficaram por terem outros consumidores.
+> Recuperação via git. Tabela abaixo é o registro pré-remoção (todos `0c` confirmados).
+> Detalhes em [15-section6-settlement](15-section6-settlement.md).
+
 | Componente | LOC | Destino se adotado | Stories | Testes | Estado | Ação/Exceção |
 |---|---|---|---|---|---|---|
-| StaffManagementPanel | 568 | features/team | — | — | 0c | avaliar — substitui TeamManager? decidir na Etapa 6 |
-| SmartPricingPanel | 530 | features/pricing | — | — | 0c | avaliar |
-| VouchersPanel | 505 | features/vouchers | — | — | 0c | avaliar |
-| FormsPanel | 492 | features/forms | — | — | 0c | avaliar |
-| IntegrationsPanel | 641 | features/integrations | — | — | 0c | avaliar |
-| WhatsAppAIPanel | 367 | features/whatsapp | — | — | 0c | avaliar |
-| FiscalPanel | 363 | features/fiscal | — | — | 0c | avaliar |
-| QualityPanel | 314 | features/quality | — | — | 0c | avaliar |
-| CorporatePanel | 323 | features/corporate | — | — | 0c | avaliar |
-| PurchasingPanel | 268 | features/purchasing | — | — | 0c | avaliar |
-| CopilotPanel | 168 | features/copilot | — | — | 0c | avaliar |
-| DepositIndicators | 112 | features/deposits | — | — | 0c | avaliar |
-| EnhancedForecastPanel | 120 | features/finance | — | — | 0c | avaliar |
-| ServiceBookingSelector | 185 | features/appointments | — | — | 0c | avaliar |
-| ReputationPanel | 193 | features/reputation | — | — | 0c | avaliar |
-| OnboardingMissions | 55 | features/onboarding | — | — | 0c | avaliar |
+| StaffManagementPanel | 568 | features/team | — | — | removido §6 | decidido: não substitui TeamManager (ver [13-stage6d](13-stage6d-growth.md)) → removido (API `staffApi` mantida: TeamManager) |
+| SmartPricingPanel | 530 | features/pricing | — | — | removido §6 | removido (API órfã junto) |
+| VouchersPanel | 505 | features/vouchers | — | — | removido §6 | removido (API órfã junto) |
+| FormsPanel | 492 | features/forms | — | — | removido §6 | removido (API órfã junto) |
+| IntegrationsPanel | 641 | features/integrations | — | — | removido §6 | removido (API órfã junto) |
+| WhatsAppAIPanel | 367 | features/whatsapp | — | — | removido §6 | removido (API órfã junto) |
+| FiscalPanel | 363 | features/fiscal | — | — | removido §6 | removido (API órfã junto) |
+| QualityPanel | 314 | features/quality | — | — | removido §6 | removido (API órfã junto) |
+| CorporatePanel | 323 | features/corporate | — | — | removido §6 | removido (API órfã junto) |
+| PurchasingPanel | 268 | features/purchasing | — | — | removido §6 | removido (API órfã junto) |
+| CopilotPanel | 168 | features/copilot | — | — | removido §6 | removido (API órfã junto) |
+| DepositIndicators | 112 | features/deposits | — | — | removido §6 | removido (`depositsApi` mantida: DepositPolicyPanel) |
+| EnhancedForecastPanel | 120 | features/finance | — | — | removido §6 | removido (API órfã junto) |
+| ServiceBookingSelector | 185 | features/appointments | — | — | removido §6 | removido (sem API própria) |
+| ReputationPanel | 193 | features/reputation | — | — | removido §6 | removido (`reputationApi` mantida: outro consumidor) |
+| OnboardingMissions | 55 | features/onboarding | — | — | removido §6 | removido (`barbershopApi` compartilhada, mantida) |
 
 **Regra:** `0c` **não migra silenciosamente** — ou ganha consumidor/decisão explícita de produto, ou sai em PR separado (com rollback independente). Nunca aumentar o limite de órfãos.
 

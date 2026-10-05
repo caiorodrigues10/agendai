@@ -87,10 +87,12 @@ export const PublicProductCarousel: React.FC<Props> = ({ barbershopId }) => {
 
   useEffect(() => {
     let alive = true;
+    setLoading(true);
+    setProducts([]);
     publicProductsApi
       .list(barbershopId)
       .then(res => {
-        if (alive) setProducts(res.products);
+        if (alive) setProducts(Array.isArray(res.products) ? res.products : []);
       })
       .catch(err => {
         console.error('[PublicProductCarousel] falha ao carregar produtos públicos:', err);

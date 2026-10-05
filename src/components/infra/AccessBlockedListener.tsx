@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ACCESS_BLOCKED_EVENT } from '../../infra/apiClient';
-
-export const BLOCK_INFO_STORAGE_KEY = 'agendai:access-block-info';
+import { BLOCK_INFO_STORAGE_KEY } from '../../utils/accessBlockedStorage';
 
 /** Rotas onde o redirecionamento não deve acontecer (evita loop e não interrompe o pagamento). */
 const EXEMPT_PATHS = ['/bloqueado', '/planos', '/checkout', '/login', '/cadastro'];

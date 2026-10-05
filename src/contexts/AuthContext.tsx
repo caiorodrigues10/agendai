@@ -8,6 +8,7 @@ import { getErrorMessage } from '../utils/errorMessage';
 import { StaffMember } from '../types';
 import { usersApi } from '../infra/usersApi';
 import { useBarbershopFilters } from './BarbershopFiltersContext';
+import { BLOCK_INFO_STORAGE_KEY } from '../utils/accessBlockedStorage';
 
 export type AuthResult = { ok: true; message?: string } | { ok: false; message: string };
 
@@ -188,7 +189,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       email: resp.user.email,
       avatarUrl: resp.user.avatarUrl,
     });
-    sessionStorage.removeItem('agendai:access-block-info');
+    sessionStorage.removeItem(BLOCK_INFO_STORAGE_KEY);
     // Login = nova sessão no salão do próprio usuário: zera a origem de troca.
     authStorage.clearSwitchOrigin();
     setSwitchOrigin(null);
@@ -302,7 +303,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     authStorage.clearTokens();
     authStorage.clearUser();
-    sessionStorage.removeItem('agendai:access-block-info');
+    sessionStorage.removeItem(BLOCK_INFO_STORAGE_KEY);
     setUser(null);
   };
 

@@ -83,6 +83,13 @@ describe('PublicProductCarousel', () => {
     expect(screen.queryByRole('region', { name: 'Produtos para reserva' })).toBeNull();
   });
 
+  it('não derruba o perfil quando a resposta não contém uma lista de produtos', async () => {
+    mockList.mockResolvedValue({ shop });
+    renderCarousel();
+    await waitFor(() => expect(mockList).toHaveBeenCalledWith('shop-1'));
+    expect(screen.queryByRole('region', { name: 'Produtos para reserva' })).toBeNull();
+  });
+
   it('esconde a seção e registra console.error quando a API falha', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const cause = new Error('boom');

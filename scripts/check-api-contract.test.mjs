@@ -59,3 +59,37 @@ test('fails closed on unknown URL expressions and dynamic methods', t => {
     assert.throws(() => frontendRequests(path.join(root, `${index}.ts`)), /suportad|ambígua/);
   }
 });
+
+test('resolves local path helpers as arguments and template spans', t => {
+  const root = fixture(t, { 'wrapper.ts': `
+    const base = (id) => \x60/api/shops/\${encodeURIComponent(id)}\x60;
+    const postPath = (id, pid) => \x60\${base(id)}/posts/\${encodeURIComponent(pid)}\x60;
+    apiClient(postPath(id, pid));
+    apiClient(\x60\${postPath(id, pid)}/comments?page=\${page}\x60);
+    apiClient(\x60\${base(id)}/stories\x60);
+  ` });
+  assert.deepEqual(frontendRequests(path.join(root, 'wrapper.ts')).map(r => r.key),
+    ['GET /api/shops/{}/posts/{}', 'GET /api/shops/{}/posts/{}/comments', 'GET /api/shops/{}/stories']);
+});
+
+test('follows nested route delegations and const-string template URLs', t => {
+  const root = fixture(t, {
+    'src/shared/infra/http/app.ts': 'app.register(apiRoutes, { prefix: "/api" });',
+    'src/shared/infra/http/routes/api.ts': 'import { feedRoutes } from "./feed.routes"; async function apiRoutes(app) { await feedRoutes(app); }',
+    'src/shared/infra/http/routes/feed.routes.ts': [
+      'import { socialRoutes } from "@/modules/feed/social.routes";',
+      'export async function feedRoutes(app) { await socialRoutes(app); app.get("/feed", handler); }',
+    ].join('\n'),
+    'src/modules/feed/social.routes.ts': [
+      'export async function socialRoutes(app) {',
+      '  const base = "/salons/:salonId";',
+      '  app.get(`${base}/posts/:postId`, handler);',
+      '  app.post(`${base}/stories`, handler);',
+      '}',
+    ].join('\n'),
+  });
+  const routes = backendRoutes(root);
+  assert.ok(routes.has('GET /api/feed'));
+  assert.ok(routes.has('GET /api/salons/{}/posts/{}'));
+  assert.ok(routes.has('POST /api/salons/{}/stories'));
+});

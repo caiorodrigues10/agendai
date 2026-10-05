@@ -15,6 +15,7 @@ import { formatCurrencyBRL, formatDateBR } from '../../utils/formatters';
 import { Field, FIELD_CONTROL, FORM_FOOTER } from '../../components/ui/Field';
 import { formatPercentBR } from '../../utils/formatters';
 import { SmartSelect } from '../../components/ui/SmartSelect';
+import { SectionError } from '../../components/patterns';
 
 type GoalMetric = 'REVENUE' | 'APPOINTMENTS' | 'PRODUCTS_SOLD';
 
@@ -138,6 +139,7 @@ export const GoalsPanel: React.FC = () => {
             type="button"
             onClick={load}
             disabled={loading}
+            aria-label="Atualizar ranking de metas"
             className="flex h-10 items-center gap-2 rounded-xl border border-border bg-surface px-4 text-sm font-medium text-text-secondary transition-colors hover:bg-bg hover:text-text-primary disabled:opacity-50"
           >
             <Target size={15} />
@@ -153,12 +155,7 @@ export const GoalsPanel: React.FC = () => {
         </div>
       </div>
 
-      {error && (
-        <div className="flex items-center gap-3 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-          <AlertCircle size={16} />
-          <span>{error}</span>
-        </div>
-      )}
+      {error && <SectionError message={error} onRetry={load} />}
 
       {loading ? (
         <div className="flex items-center justify-center py-20">

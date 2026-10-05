@@ -238,6 +238,13 @@ export function SmartSelect<T extends string = string>(props: SmartSelectProps<T
   };
 
   const selectedLabel = mode === 'single' ? selectedOptions[0]?.label : undefined;
+  /**
+   * `role="combobox"` tem "Name From: author" (ARIA 1.2) — o texto dos filhos
+   * NÃO conta como nome acessível, então o gatilho precisa de `aria-label`
+   * explícito (axe: button-name).
+   */
+  const valueText = selectedOptions.map(option => option.label).join(', ') || placeholder;
+  const accessibleName = ariaLabel ?? label ?? valueText;
   const triggerSize = selectSize === 'sm' ? 'min-h-9 px-3 text-xs' : selectSize === 'lg' ? 'min-h-12 px-4' : 'min-h-11 px-3.5 text-sm';
 
   const popup = open && (
@@ -294,7 +301,7 @@ export function SmartSelect<T extends string = string>(props: SmartSelectProps<T
       id={id}
       type="button"
       role="combobox"
-      aria-label={ariaLabel}
+      aria-label={accessibleName}
       aria-expanded={open}
       aria-controls={listId}
       aria-haspopup="listbox"

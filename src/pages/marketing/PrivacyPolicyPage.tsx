@@ -31,7 +31,7 @@ const sections = [
     list: [
       'Sessão e autenticação — tokens de acesso para manter você logado no painel.',
       'Preferência de tema — modo claro ou escuro (agendai:theme).',
-      'Fila digital — identificador anônimo do cliente na fila pública (barber_customer_id).',
+      'Fila digital — identificador anônimo do cliente na fila pública (agendai:barber_customer_id).',
       'Indicação — código de referral na sessão, quando aplicável.',
       'Consentimento — registro de que você aceitou esta política (agendai:cookie-consent).',
     ],

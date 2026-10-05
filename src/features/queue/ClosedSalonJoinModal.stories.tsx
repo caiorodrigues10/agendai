@@ -21,6 +21,7 @@ const meta = {
   args: {
     open: true,
     schedule,
+    todayIndex: 4,
     onAddAnyway: fn(),
     onOpenSettings: fn(),
     onClose: fn(),

@@ -108,7 +108,7 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
             ? 'Cadastre a cidade do salão em Configurações para ativar a previsão climática.'
             : 'Verifique sua conexão e tente novamente. Enquanto isso, o restante do painel continua funcionando normalmente.'}
         </p>
-        {!locationMissing && <p className="mt-1 text-[11px] text-text-muted/80">{error}</p>}
+        {!locationMissing && <p className="mt-1 text-[11px] text-text-muted">{error}</p>}
         {!locationMissing && (
           <button
             type="button"
@@ -164,7 +164,7 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
       {highlights?.length > 0 && (
         <div className="space-y-1.5">
           {highlights.map((h, i) => (
-            <div key={i} className="flex items-start gap-2 text-sm text-white/60">
+            <div key={i} className="flex items-start gap-2 text-sm text-text-secondary">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
               {h}
             </div>
@@ -175,30 +175,30 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
       {insights.modelTrained && predictions.length > 0 && summary?.bestDay && summary?.worstDay && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <div className="rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Média da semana</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Média da semana</p>
           <p className={`mt-1.5 text-lg font-black ${summary.avgDropPct <= -10 ? 'text-danger' : 'text-success'}`}>
             {finiteNumber(summary.avgDropPct) > 0 ? '+' : ''}{finiteNumber(summary.avgDropPct)}%
           </p>
         </div>
         <div className="rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Dias de queda</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Dias de queda</p>
           <p className={`mt-1.5 text-lg font-black ${summary.highRiskCount > 0 ? 'text-warning' : 'text-success'}`}>
             {summary.highRiskCount}
           </p>
         </div>
         <div className="rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Melhor dia</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Melhor dia</p>
           <p className="mt-1.5 text-sm font-bold text-success">
             {formatWeatherDayLabel(summary.bestDay.date)}
           </p>
-          <p className="text-[10px] text-white/45">{summary.bestDay.condition}</p>
+          <p className="text-[10px] text-text-muted">{summary.bestDay.condition}</p>
         </div>
         <div className="rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-sm">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Pior dia</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Pior dia</p>
           <p className="mt-1.5 text-sm font-bold text-danger">
             {formatWeatherDayLabel(summary.worstDay.date)}
           </p>
-          <p className="text-[10px] text-white/45">{summary.worstDay.condition}</p>
+          <p className="text-[10px] text-text-muted">{summary.worstDay.condition}</p>
         </div>
         </div>
       )}
@@ -279,7 +279,7 @@ export const WeatherForecastWidget: React.FC<WeatherForecastWidgetProps> = ({ co
         })}
       </div>
 
-      <p className="text-[10px] text-white/30 text-right">
+      <p className="text-[10px] text-text-muted text-right">
         {insights.modelTrained
           ? `Previsão baseada em ${insights.historicalDays} dias de dados`
           : 'Previsão com dados limitados'} · Próximos 7 dias

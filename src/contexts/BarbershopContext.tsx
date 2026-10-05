@@ -109,6 +109,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
               address?: string | null;
               city?: string | null;
               logoUrl?: string | null;
+              googleReviewUrl?: string | null;
               latitude?: number | null;
               longitude?: number | null;
               operationMode?: OperationMode;
@@ -163,6 +164,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
             openState: shopData.openState,
             schedule,
             logoUrl: shopData.logoUrl ?? undefined,
+            googleReviewUrl: shopData.googleReviewUrl ?? undefined,
           });
         } else {
           setSettingsState(null);

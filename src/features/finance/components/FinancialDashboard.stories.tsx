@@ -113,7 +113,7 @@ const weatherInsights = {
 
 const json = (data: unknown) => HttpResponse.json({ success: true, data });
 
-const mswHandler = (opts: { insightsFail?: boolean } = {}) => [
+const mswHandler = (opts: { insightsFail?: boolean; commissionFail?: boolean } = {}) => [
   http.get('/api/barbershop/insights', () =>
     opts.insightsFail
       ? HttpResponse.json(
@@ -122,7 +122,14 @@ const mswHandler = (opts: { insightsFail?: boolean } = {}) => [
         )
       : json(insights)
   ),
-  http.get('/api/commissions/summary', () => json(commissions)),
+  http.get('/api/commissions/summary', () =>
+    opts.commissionFail
+      ? HttpResponse.json(
+          { success: false, code: 'DASHBOARD_REQUIRED', message: 'Relatórios disponíveis no plano Pro.' },
+          { status: 403 }
+        )
+      : json(commissions)
+  ),
   http.get('/api/barbershop/weather-insights', () => json(weatherInsights)),
 ];
 
@@ -156,4 +163,8 @@ export const Default: Story = {};
 
 export const PlanoUpgrade: Story = {
   parameters: { msw: { handlers: mswHandler({ insightsFail: true }) } },
+};
+
+export const ComissaoErro: Story = {
+  parameters: { msw: { handlers: mswHandler({ commissionFail: true }) } },
 };

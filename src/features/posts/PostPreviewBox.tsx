@@ -8,10 +8,18 @@ const FORMAT_ASPECT: Record<PostFormat, string> = {
   story: 'aspect-[9/16]',
 };
 
-const FORMAT_MAX_HEIGHT: Record<PostFormat, string> = {
-  square: 'max-h-[480px]',
-  portrait: 'max-h-[600px]',
-  story: 'max-h-[540px]',
+// Largura máxima proporcional ao aspect ratio, para que a altura máxima
+// (~480px) nunca achate o formato (especialmente 9:16).
+const FORMAT_MAX_WIDTH: Record<PostFormat, number> = {
+  square: 480,        // 1:1  → 480×480
+  portrait: 480,      // 4:5  → 480×600 até o limite de altura
+  story: 303.75,      // 9:16 → 303.75×540
+};
+
+const FORMAT_MAX_HEIGHT: Record<PostFormat, number> = {
+  square: 480,
+  portrait: 600,
+  story: 540,
 };
 
 interface PostPreviewBoxProps {
@@ -34,10 +42,14 @@ export const PostPreviewBox: React.FC<PostPreviewBoxProps> = ({
   className = '',
 }) => {
   const aspectClass = FORMAT_ASPECT[format] ?? FORMAT_ASPECT.square;
+  const maxW = FORMAT_MAX_WIDTH[format] ?? FORMAT_MAX_WIDTH.square;
   const maxH = FORMAT_MAX_HEIGHT[format] ?? FORMAT_MAX_HEIGHT.square;
 
   return (
-    <div className={`${aspectClass} ${maxH} w-full overflow-hidden rounded-2xl border border-border bg-bg ${className}`}>
+    <div
+      className={`${aspectClass} mx-auto w-full overflow-hidden rounded-2xl border border-border bg-bg ${className}`}
+      style={{ maxWidth: maxW, maxHeight: maxH }}
+    >
       {loading && !previewUrl ? (
         <div className="flex h-full items-center justify-center">
           <Loader2 size={28} className="animate-spin text-accent" aria-hidden />

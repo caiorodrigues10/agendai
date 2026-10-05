@@ -1,4 +1,7 @@
+/* eslint-disable jsx-a11y/media-has-caption -- mídia enviada pelo salão não possui trilha de legenda separada */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import FocusLock from 'react-focus-lock';
 import {
   LuLoaderCircle as Loader2,
   LuChevronRight as ChevronRight,
@@ -15,40 +18,46 @@ import {
   LuRectangleVertical as RectangleVertical,
   LuSmartphone as Smartphone,
 } from 'react-icons/lu';
-import { postsApi, type PostMedia, type PostPaletteDef } from '../../infra/postsApi';
+import { postsApi, type PostMedia, type PostPaletteDef, type PostTemplateDef } from '../../infra/postsApi';
 import { barbershopApi, PostAiSuggestion } from '../../infra/barbershopApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { FeedPost, PostFormat, PostMode } from '../../types';
+import { Button } from '../../components/ui/Button';
 import { PostPreviewBox } from './PostPreviewBox';
+import { TemplateThumbnail } from './TemplateThumbnail';
 import { OBJECTIVES, type PostType, type ObjectiveId } from './objectives';
+import { readDraft, writeDraft, clearDraft } from './draftStorage';
 
 type PostTone = 'promocional' | 'informativo' | 'divertido' | null;
 type EditorTab = 'content' | 'image' | 'format' | 'identity';
 
-const SCHEDULE_MIN_DATETIME = new Date(Date.now() + 5 * 60_000).toISOString().slice(0, 16);
+/** Agora + offset em minutos, formatado no fuso LOCAL (datetime-local não usa UTC). */
+function localDateTime(offsetMinutes = 0): string {
+  const d = new Date(Date.now() + offsetMinutes * 60_000);
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60_000);
+  return local.toISOString().slice(0, 16);
+}
 
-const TEMPLATE_GROUPS: { key: string; label: string }[] = [
-  { key: 'agenda', label: 'Agenda' },
-  { key: 'ofertas', label: 'Ofertas' },
-  { key: 'resultados', label: 'Resultados' },
-  { key: 'equipe', label: 'Equipe' },
-  { key: 'depoimentos', label: 'Depoimentos' },
-];
+const GROUP_LABELS: Record<string, string> = {
+  agenda: 'Agenda',
+  ofertas: 'Ofertas',
+  resultados: 'Resultados',
+  equipe: 'Equipe',
+  depoimentos: 'Depoimentos',
+  editorial: 'Editorial',
+  tipografia: 'Tipografia',
+};
 
-const TEMPLATE_OPTIONS: { key: string; name: string; group: string; requiredMedia: number }[] = [
-  { key: 'agenda-aberta', name: 'Agenda aberta', group: 'agenda', requiredMedia: 0 },
-  { key: 'ultimas-vagas', name: 'Últimas vagas', group: 'agenda', requiredMedia: 1 },
-  { key: 'horario-especial', name: 'Horário especial', group: 'agenda', requiredMedia: 0 },
-  { key: 'promocao-relampago', name: 'Promoção relâmpago', group: 'ofertas', requiredMedia: 1 },
-  { key: 'servico-destaque', name: 'Serviço em destaque', group: 'ofertas', requiredMedia: 1 },
-  { key: 'menu-servicos', name: 'Menu de serviços', group: 'ofertas', requiredMedia: 0 },
-  { key: 'novidade', name: 'Novidade', group: 'ofertas', requiredMedia: 1 },
-  { key: 'antes-depois', name: 'Antes e depois', group: 'resultados', requiredMedia: 2 },
-  { key: 'transformacao', name: 'Transformação', group: 'resultados', requiredMedia: 1 },
-  { key: 'editorial-minimalista', name: 'Editorial minimalista', group: 'resultados', requiredMedia: 1 },
-  { key: 'profissional-destaque', name: 'Profissional em destaque', group: 'equipe', requiredMedia: 1 },
-  { key: 'depoimento', name: 'Depoimento', group: 'depoimentos', requiredMedia: 1 },
-];
+function groupLabel(key: string) {
+  return GROUP_LABELS[key] ?? key.charAt(0).toUpperCase() + key.slice(1);
+}
+
+/** Deriva photoMode de templates antigos que ainda não expõem o campo. */
+function templatePhotoMode(t: PostTemplateDef | undefined): 'none' | 'optional' | 'required' {
+  if (!t) return 'none';
+  if (t.photoMode) return t.photoMode;
+  return t.requiredMedia > 0 ? 'required' : 'none';
+}
 
 const FORMAT_OPTIONS: { id: PostFormat; label: string; hint: string; icon: React.ReactNode }[] = [
   { id: 'square', label: 'Quadrado', hint: '1:1', icon: <RectangleHorizontal size={16} /> },
@@ -75,7 +84,9 @@ const TAB_LABELS: { id: EditorTab; label: string; num: number }[] = [
   { id: 'identity', label: 'Identidade', num: 4 },
 ];
 
-const DRAFT_VERSION = 1;
+const DRAFT_VERSION = 2;
+const CAPTION_MAX = 5000;
+const VIDEO_MAX_BYTES = 25 * 1024 * 1024;
 
 function downloadImage(imageUrl: string, filename: string) {
   const link = document.createElement('a');
@@ -84,10 +95,6 @@ function downloadImage(imageUrl: string, filename: string) {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-}
-
-function draftKey(userId: string, barbershopId: string, postId: string) {
-  return `agendai:post-draft:${userId}:${barbershopId}:${postId}`;
 }
 
 interface LocalDraftPayload {
@@ -101,32 +108,10 @@ interface LocalDraftPayload {
   type: PostType;
   title: string;
   ctaText: string;
+  content: string;
+  videoUrl: string | null;
   primaryMediaId: string | null;
   secondaryMediaId: string | null;
-}
-
-function readDraft(userId: string, barbershopId: string, postId: string): LocalDraftPayload | null {
-  try {
-    const raw = localStorage.getItem(draftKey(userId, barbershopId, postId));
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as LocalDraftPayload;
-    return parsed.version === DRAFT_VERSION ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
-function writeDraft(userId: string, barbershopId: string, postId: string, data: Omit<LocalDraftPayload, 'version' | 'savedAt'>) {
-  try {
-    localStorage.setItem(
-      draftKey(userId, barbershopId, postId),
-      JSON.stringify({ version: DRAFT_VERSION, savedAt: Date.now(), ...data })
-    );
-  } catch { /* noop */ }
-}
-
-function clearDraft(userId: string, barbershopId: string, postId: string) {
-  try { localStorage.removeItem(draftKey(userId, barbershopId, postId)); } catch { /* noop */ }
 }
 
 // ─── Props ────────────────────────────────────────────────────
@@ -159,72 +144,112 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   const isEditing = !!post;
   const storageKey = post?.id ?? 'new';
 
+  // Restaura o rascunho local ANTES do primeiro render dos estados, para que o
+  // efeito de persistência nunca sobrescreva o rascunho salvo com valores vazios.
+  const [initialDraft] = useState<LocalDraftPayload | null>(() =>
+    post ? null : readDraft<LocalDraftPayload>(userId, barbershopId, 'new', DRAFT_VERSION)
+  );
+  const draft = !isEditing ? initialDraft : null;
+
   const [tab, setTab] = useState<EditorTab>('content');
-  const [objectiveId, setObjectiveId] = useState<ObjectiveId | null>(null);
-  const [templateKey, setTemplateKey] = useState(post?.templateKey ?? 'agenda-aberta');
-  const [paletteKey, setPaletteKey] = useState(post?.paletteKey ?? 'brand');
-  const [format, setFormat] = useState<PostFormat>(post?.format ?? 'square');
-  const [postMode, setPostMode] = useState<PostMode>(post?.postMode ?? 'both');
-  const [type, setType] = useState<PostType>(post?.type ?? 'haircut');
-  const [title, setTitle] = useState(post?.title ?? '');
-  const [ctaText, setCtaText] = useState(post?.ctaText ?? '');
-  const [primaryMediaId, setPrimaryMediaId] = useState<string | null>(post?.primaryMediaId ?? null);
-  const [secondaryMediaId, setSecondaryMediaId] = useState<string | null>(post?.secondaryMediaId ?? null);
+  const [objectiveId, setObjectiveId] = useState<ObjectiveId | null>(draft?.objectiveId ?? null);
+  const [templateKey, setTemplateKey] = useState(draft?.templateKey ?? post?.templateKey ?? 'agenda-aberta');
+  const [paletteKey, setPaletteKey] = useState(draft?.paletteKey ?? post?.paletteKey ?? 'brand');
+  const [format, setFormat] = useState<PostFormat>(draft?.format ?? post?.format ?? 'square');
+  const [postMode, setPostMode] = useState<PostMode>(draft?.postMode ?? post?.postMode ?? 'both');
+  const [type, setType] = useState<PostType>(draft?.type ?? post?.type ?? 'haircut');
+  const [title, setTitle] = useState(draft?.title ?? post?.title ?? '');
+  const [ctaText, setCtaText] = useState(draft?.ctaText ?? post?.ctaText ?? '');
+  const [content, setContent] = useState(draft?.content ?? post?.content ?? '');
+  const [videoUrl, setVideoUrl] = useState<string | null>(draft?.videoUrl ?? post?.videoUrl ?? null);
+  const [primaryMediaId, setPrimaryMediaId] = useState<string | null>(draft?.primaryMediaId ?? post?.primaryMediaId ?? null);
+  const [secondaryMediaId, setSecondaryMediaId] = useState<string | null>(draft?.secondaryMediaId ?? post?.secondaryMediaId ?? null);
+
+  const [templates, setTemplates] = useState<PostTemplateDef[]>([]);
+  const [templatesLoading, setTemplatesLoading] = useState(true);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const [tone, setTone] = useState<PostTone>(null);
   const [extra, setExtra] = useState('');
   const [suggestions, setSuggestions] = useState<PostAiSuggestion[]>([]);
   const [generatingSuggestions, setGeneratingSuggestions] = useState(false);
 
-  const [scheduledFor, setScheduledFor] = useState(() => {
-    const d = new Date(Date.now() + 3 * 60 * 60 * 1000);
-    return d.toISOString().slice(0, 16);
-  });
+  const [scheduledFor, setScheduledFor] = useState(() => localDateTime(3 * 60));
+  const scheduleMin = useMemo(() => localDateTime(5), []);
   const [publishMode, setPublishMode] = useState<'now' | 'schedule'>('now');
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(post?.imageUrl ?? null);
   const [previewStale, setPreviewStale] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const mediaBusy = uploadingPhoto || uploadingVideo;
 
   const [showMediaPicker, setShowMediaPicker] = useState<'primary' | 'secondary' | null>(null);
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
-  const [templateFilter, setTemplateFilter] = useState<string>('all');
+  const [templateFilter, setTemplateFilter] = useState<'all' | 'with-photo' | 'no-photo'>('all');
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || submitting || mediaBusy) return;
+      event.preventDefault();
+      if (showMediaPicker) setShowMediaPicker(null);
+      else if (showTemplatePicker) setShowTemplatePicker(false);
+      else onClose();
+    };
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [onClose, showMediaPicker, showTemplatePicker, submitting, mediaBusy]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previewSeqRef = useRef(0);
   const liveRef = useRef<{ templateKey: string; paletteKey: string; format: PostFormat; title: string; ctaText: string; primaryMediaId: string | null; secondaryMediaId: string | null; postMode: PostMode; type: PostType }>({
     templateKey, paletteKey, format, title, ctaText, primaryMediaId, secondaryMediaId, postMode, type,
   });
 
-  const selectedTemplate = useMemo(() => TEMPLATE_OPTIONS.find(t => t.key === templateKey), [templateKey]);
-  const filteredTemplates = useMemo(() =>
-    templateFilter === 'all' ? TEMPLATE_OPTIONS : TEMPLATE_OPTIONS.filter(t => t.group === templateFilter),
-    [templateFilter]
-  );
+  // Catálogo de modelos: postsApi.templates() é a fonte única.
+  useEffect(() => {
+    let cancelled = false;
+    setTemplatesLoading(true);
+    postsApi.templates()
+      .then(list => { if (!cancelled) setTemplates(list); })
+      .catch(() => { if (!cancelled) showToast('Não foi possível carregar os modelos.', 'error'); })
+      .finally(() => { if (!cancelled) setTemplatesLoading(false); });
+    return () => { cancelled = true; };
+  }, [showToast]);
+
+  const selectedTemplate = useMemo(() => templates.find(t => t.key === templateKey), [templates, templateKey]);
+  const selectedPhotoMode = templatePhotoMode(selectedTemplate);
+
+  const templateGroups = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const t of templates) {
+      const g = t.group ?? 'outros';
+      if (!seen.has(g)) seen.set(g, groupLabel(g));
+    }
+    return Array.from(seen, ([key, label]) => ({ key, label }));
+  }, [templates]);
+
+  const filteredTemplates = useMemo(() => {
+    if (templateFilter === 'all') return templates;
+    return templates.filter(t =>
+      templateFilter === 'with-photo' ? templatePhotoMode(t) !== 'none' : templatePhotoMode(t) === 'none'
+    );
+  }, [templates, templateFilter]);
 
   const persistDraft = useCallback(() => {
-    writeDraft(userId, barbershopId, storageKey, {
-      objectiveId, templateKey, paletteKey, format, postMode, type, title, ctaText, primaryMediaId, secondaryMediaId,
+    writeDraft<LocalDraftPayload>(userId, barbershopId, storageKey, DRAFT_VERSION, {
+      objectiveId, templateKey, paletteKey, format, postMode, type, title, ctaText,
+      content, videoUrl, primaryMediaId, secondaryMediaId,
     });
-  }, [userId, barbershopId, storageKey, objectiveId, templateKey, paletteKey, format, postMode, type, title, ctaText, primaryMediaId, secondaryMediaId]);
+  }, [userId, barbershopId, storageKey, objectiveId, templateKey, paletteKey, format, postMode, type, title, ctaText, content, videoUrl, primaryMediaId, secondaryMediaId]);
 
   useEffect(() => { persistDraft(); }, [persistDraft]);
-
-  useEffect(() => {
-    if (isEditing) return;
-    const saved = readDraft(userId, barbershopId, 'new');
-    if (!saved) return;
-    setObjectiveId(saved.objectiveId);
-    setTemplateKey(saved.templateKey);
-    setPaletteKey(saved.paletteKey);
-    setFormat(saved.format);
-    setPostMode(saved.postMode);
-    setType(saved.type);
-    setTitle(saved.title);
-    setCtaText(saved.ctaText);
-    setPrimaryMediaId(saved.primaryMediaId);
-    setSecondaryMediaId(saved.secondaryMediaId);
-  }, [isEditing, userId, barbershopId]);
 
   const triggerPreview = useCallback(() => {
     if (!barbershopId) return;
@@ -232,6 +257,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       const snap = liveRef.current;
+      const seq = ++previewSeqRef.current;
       setPreviewLoading(true);
       try {
         const url = await postsApi.preview(barbershopId, {
@@ -246,23 +272,30 @@ export const PostEditor: React.FC<PostEditorProps> = ({
           secondaryMediaId: snap.secondaryMediaId,
         });
         const cur = liveRef.current;
+        // Ignora respostas fora de ordem e qualquer mudança de estado posterior,
+        // incluindo postMode/type.
         if (
-          cur.templateKey === snap.templateKey &&
-          cur.paletteKey === snap.paletteKey &&
-          cur.format === snap.format &&
-          cur.title === snap.title &&
-          cur.ctaText === snap.ctaText &&
-          cur.primaryMediaId === snap.primaryMediaId &&
-          cur.secondaryMediaId === snap.secondaryMediaId
+          seq !== previewSeqRef.current ||
+          cur.templateKey !== snap.templateKey ||
+          cur.paletteKey !== snap.paletteKey ||
+          cur.format !== snap.format ||
+          cur.title !== snap.title ||
+          cur.ctaText !== snap.ctaText ||
+          cur.primaryMediaId !== snap.primaryMediaId ||
+          cur.secondaryMediaId !== snap.secondaryMediaId ||
+          cur.postMode !== snap.postMode ||
+          cur.type !== snap.type
         ) {
-          setPreviewUrl(url);
-          setPreviewStale(false);
+          return;
         }
+        setPreviewUrl(url);
+        setPreviewStale(false);
       } catch {
+        if (seq !== previewSeqRef.current) return;
         showToast('Não foi possível gerar a prévia.', 'error');
         setPreviewStale(true);
       } finally {
-        setPreviewLoading(false);
+        if (seq === previewSeqRef.current) setPreviewLoading(false);
       }
     }, 500);
   }, [barbershopId, showToast]);
@@ -272,7 +305,11 @@ export const PostEditor: React.FC<PostEditorProps> = ({
     triggerPreview();
   }, [templateKey, paletteKey, format, title, ctaText, primaryMediaId, secondaryMediaId, postMode, type, triggerPreview]);
 
-  useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current); }, []);
+  useEffect(() => () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    // Invalida qualquer preview em voo ao desmontar.
+    previewSeqRef.current += 1;
+  }, []);
 
   const pickObjective = (id: ObjectiveId) => {
     const obj = OBJECTIVES.find(o => o.id === id);
@@ -303,9 +340,11 @@ export const PostEditor: React.FC<PostEditorProps> = ({
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file || !barbershopId) return;
-    if (!file.type.startsWith('image/')) { showToast('Envie uma imagem (JPG, PNG ou WebP).', 'error'); return; }
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { showToast('Envie uma imagem (JPG, PNG ou WebP).', 'error'); return; }
     if (file.size > 5 * 1024 * 1024) { showToast('Imagem deve ter no máximo 5 MB.', 'error'); return; }
+    setUploadingPhoto(true);
     try {
       const media = await postsApi.uploadMedia(barbershopId, file);
       onMediaUploaded(media);
@@ -314,11 +353,47 @@ export const PostEditor: React.FC<PostEditorProps> = ({
       showToast('Imagem adicionada à biblioteca.');
     } catch (err) {
       showToast(getErrorMessage(err, 'Não foi possível enviar a imagem.'), 'error');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !barbershopId) return;
+    if (!['video/mp4', 'video/webm', 'video/quicktime'].includes(file.type)) { showToast('Envie um vídeo (MP4, WebM ou MOV).', 'error'); return; }
+    if (file.size > VIDEO_MAX_BYTES) { showToast('Vídeo deve ter no máximo 25 MB.', 'error'); return; }
+    setUploadingVideo(true);
+    try {
+      const { videoUrl: url } = await barbershopApi.uploadPostVideo(barbershopId, file);
+      setVideoUrl(url);
+      showToast('Vídeo anexado ao post.');
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Não foi possível enviar o vídeo.'), 'error');
+    } finally {
+      setUploadingVideo(false);
     }
   };
 
   const handleSave = async (action: 'draft' | 'publish' | 'schedule') => {
-    if (!barbershopId) return;
+    if (!barbershopId || submitting || mediaBusy) return;
+    if (action !== 'draft' && (!selectedTemplate || templatesLoading)) {
+      showToast('Aguarde o carregamento e selecione um modelo.', 'error');
+      return;
+    }
+    if (action !== 'draft' && selectedTemplate && (
+      (selectedTemplate.requiredMedia >= 1 && !primaryMediaId) ||
+      (selectedTemplate.requiredMedia >= 2 && !secondaryMediaId)
+    )) {
+      showToast('Adicione as fotos exigidas pelo modelo antes de publicar.', 'error');
+      setTab('image');
+      return;
+    }
+    if (action === 'schedule' && (!scheduledFor || !Number.isFinite(new Date(scheduledFor).getTime()) || new Date(scheduledFor).getTime() < Date.now() + 5 * 60_000)) {
+      showToast('Escolha um horário com pelo menos 5 minutos de antecedência.', 'error');
+      return;
+    }
     setSubmitting(true);
     try {
       let targetId = post?.id;
@@ -327,16 +402,20 @@ export const PostEditor: React.FC<PostEditorProps> = ({
         await postsApi.update(targetId!, {
           title: title || undefined,
           ctaText: ctaText || undefined,
+          content,
           postMode, templateKey, format, paletteKey,
           primaryMediaId, secondaryMediaId,
+          videoUrl,
         });
       } else {
         const created = await postsApi.create({
           barbershopId, type, postMode,
           title: title || undefined,
           ctaText: ctaText || undefined,
+          content: content.trim() ? content : undefined,
           templateKey, format, paletteKey,
           primaryMediaId, secondaryMediaId,
+          videoUrl,
           status: 'draft',
         });
         targetId = created.id;
@@ -371,7 +450,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
 
   if (!objectiveId && !isEditing) {
     return (
-      <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 sm:items-center p-0 sm:p-4">
+      <EditorDialog>
         <div className="flex h-full w-full max-w-4xl flex-col overflow-hidden bg-surface sm:h-auto sm:max-h-[92vh] sm:rounded-2xl sm:border sm:border-border">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <h3 className="font-bold text-text-primary">Criar post</h3>
@@ -399,19 +478,19 @@ export const PostEditor: React.FC<PostEditorProps> = ({
             </div>
           </div>
         </div>
-      </div>
+      </EditorDialog>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 sm:items-center p-0 sm:p-4">
+    <EditorDialog>
       <div className="flex h-full w-full max-w-5xl flex-col overflow-hidden bg-surface sm:h-auto sm:max-h-[92vh] sm:rounded-2xl sm:border sm:border-border">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <h3 className="font-bold text-text-primary">
             {isEditing ? 'Editar post' : 'Criar post'}
           </h3>
-          <button type="button" onClick={onClose} className="rounded-lg p-2 text-text-muted hover:text-text-primary" aria-label="Fechar">
+          <button type="button" onClick={onClose} disabled={submitting || mediaBusy} className="rounded-lg p-2 text-text-muted hover:text-text-primary disabled:opacity-40" aria-label="Fechar">
             ✕
           </button>
         </div>
@@ -436,6 +515,12 @@ export const PostEditor: React.FC<PostEditorProps> = ({
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto">
+          <details className="border-b border-border p-4 lg:hidden">
+            <summary className="cursor-pointer text-sm font-semibold text-accent">Ver prévia do post</summary>
+            <div className="mt-4">
+              <PostPreviewBox format={format} previewUrl={previewUrl} loading={previewLoading} stale={previewStale} />
+            </div>
+          </details>
           {/* Tab: Conteúdo */}
           {tab === 'content' && (
             <div className="grid gap-4 p-4 lg:grid-cols-[1fr_360px]">
@@ -468,20 +553,56 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                   />
                 </div>
 
+                {/* Legenda */}
+                <div>
+                  <div className="mb-1 flex items-center justify-between">
+                    <label htmlFor="post-content" className="text-xs font-bold text-text-secondary">Legenda</label>
+                    <span className="text-[10px] text-text-muted">{content.length}/{CAPTION_MAX}</span>
+                  </div>
+                  <textarea
+                    id="post-content"
+                    rows={4}
+                    maxLength={CAPTION_MAX}
+                    value={content}
+                    onChange={e => setContent(e.target.value)}
+                    placeholder="Texto que acompanha o post (opcional)"
+                    className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm focus:border-accent focus:outline-none"
+                  />
+                </div>
+
                 {/* Modo + Tipo */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label htmlFor="post-mode" className="mb-1 block text-xs font-bold text-text-secondary">Destino do CTA</label>
-                    <select
-                      id="post-mode"
-                      value={postMode}
-                      onChange={e => setPostMode(e.target.value as PostMode)}
-                      className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm focus:border-accent focus:outline-none"
-                    >
+                    <span id="post-mode-label" className="mb-1 block text-xs font-bold text-text-secondary">Destino do CTA</span>
+                    <div role="radiogroup" aria-labelledby="post-mode-label" className="flex overflow-hidden rounded-xl border border-border">
                       {MODE_OPTIONS.map(m => (
-                        <option key={m.id} value={m.id}>{m.label}</option>
+                        <button
+                          key={m.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={postMode === m.id}
+                          tabIndex={postMode === m.id ? 0 : -1}
+                          onKeyDown={event => {
+                            const index = MODE_OPTIONS.findIndex(option => option.id === m.id);
+                            const direction = ['ArrowRight', 'ArrowDown'].includes(event.key) ? 1 : ['ArrowLeft', 'ArrowUp'].includes(event.key) ? -1 : 0;
+                            if (!direction) return;
+                            event.preventDefault();
+                            const next = (index + direction + MODE_OPTIONS.length) % MODE_OPTIONS.length;
+                            setPostMode(MODE_OPTIONS[next].id);
+                            const radios = event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="radio"]');
+                            radios?.[next].focus();
+                          }}
+                          onClick={() => setPostMode(m.id)}
+                          className={`min-h-10 flex-1 px-2 text-xs font-bold transition ${
+                            postMode === m.id
+                              ? 'bg-accent text-accent-fg'
+                              : 'bg-bg text-text-secondary hover:bg-surface'
+                          }`}
+                        >
+                          {m.label}
+                        </button>
                       ))}
-                    </select>
+                    </div>
                   </div>
                   <div>
                     <label htmlFor="post-template" className="mb-1 block text-xs font-bold text-text-secondary">Modelo</label>
@@ -517,12 +638,12 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                       placeholder="Contexto extra (ex.: promoção só até sexta)"
                       className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-xs focus:border-accent focus:outline-none"
                     />
-                    <button type="button" onClick={() => void handleGenerate()} disabled={generatingSuggestions}
-                      className="flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-border text-xs font-bold text-text-secondary hover:border-accent/40 hover:text-accent disabled:opacity-40"
+                    <Button variant="secondary" size="sm" onClick={() => void handleGenerate()} disabled={generatingSuggestions}
+                      className="w-full gap-1.5"
                     >
                       {generatingSuggestions ? <Loader2 size={13} className="animate-spin" aria-hidden /> : <Sparkles size={13} aria-hidden />}
                       {generatingSuggestions ? 'Gerando…' : 'Gerar sugestões'}
-                    </button>
+                    </Button>
                   </div>
                 </details>
 
@@ -561,41 +682,91 @@ export const PostEditor: React.FC<PostEditorProps> = ({
             <div className="grid gap-4 p-4 lg:grid-cols-[1fr_360px]">
               <div className="space-y-4">
                 <p className="text-xs font-bold text-text-secondary">Gerenciar fotos do post</p>
-                <div className="flex flex-wrap gap-3">
-                  {(['primary', 'secondary'] as const).map(slot => {
-                    const mediaId = slot === 'primary' ? primaryMediaId : secondaryMediaId;
-                    const media = mediaLibrary.find(m => m.id === mediaId);
-                    const required = (selectedTemplate?.requiredMedia ?? 0) >= (slot === 'primary' ? 1 : 2);
-                    return (
-                      <button key={slot} type="button"
-                        onClick={() => setShowMediaPicker(slot)}
-                        className={`relative flex h-36 w-40 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed ${
-                          media ? 'border-accent bg-accent/5' : required ? 'border-warning bg-warning/5' : 'border-border bg-bg'
-                        } p-2 text-center transition hover:border-accent/50`}
-                      >
-                        {media ? (
-                          <>
-                            <img src={media.url} alt="" className="h-20 w-full rounded object-cover" />
-                            <span className="text-[10px] font-semibold text-accent">Trocar foto</span>
-                          </>
-                        ) : (
-                          <>
-                            <ImagePlus size={22} className="text-text-muted" aria-hidden />
-                            <span className="text-[10px] text-text-muted">
-                              {slot === 'primary' ? 'Foto principal' : 'Foto secundária'}
-                            </span>
-                            {required && <span className="text-[10px] font-bold text-warning">Requerida</span>}
-                          </>
-                        )}
-                      </button>
-                    );
-                  })}
+                {selectedPhotoMode !== 'none' && (
+                  <div className="flex flex-wrap gap-3">
+                    {(['primary', 'secondary'] as const).map(slot => {
+                      if (slot === 'secondary' && (selectedTemplate?.requiredMedia ?? 0) < 2) return null;
+                      const mediaId = slot === 'primary' ? primaryMediaId : secondaryMediaId;
+                      const media = mediaLibrary.find(m => m.id === mediaId);
+                      const required = selectedPhotoMode === 'required' && (selectedTemplate?.requiredMedia ?? 0) >= (slot === 'primary' ? 1 : 2);
+                      return (
+                        <button key={slot} type="button"
+                          onClick={() => setShowMediaPicker(slot)}
+                          className={`relative flex h-36 w-40 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed ${
+                            media ? 'border-accent bg-accent/5' : required ? 'border-warning bg-warning/5' : 'border-border bg-bg'
+                          } p-2 text-center transition hover:border-accent/50`}
+                        >
+                          {media ? (
+                            <>
+                              <img src={media.url} alt="" className="h-20 w-full rounded object-cover" />
+                              <span className="text-[10px] font-semibold text-accent">Trocar foto</span>
+                            </>
+                          ) : (
+                            <>
+                              <ImagePlus size={22} className="text-text-muted" aria-hidden />
+                              <span className="text-[10px] text-text-muted">
+                                {slot === 'primary' ? 'Foto principal' : 'Foto secundária'}
+                              </span>
+                              {required
+                                ? <span className="text-[10px] font-bold text-warning">Requerida</span>
+                                : <span className="text-[10px] text-text-muted">Opcional</span>}
+                            </>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                {selectedPhotoMode === 'none' && (
+                  <p className="text-[10px] text-text-muted">Este modelo não usa foto — nenhum envio é necessário.</p>
+                )}
+                {selectedPhotoMode === 'required' && (
+                  <p className="text-[10px] text-text-muted">
+                    Este modelo requer {(selectedTemplate?.requiredMedia ?? 1)} foto(s) do seu salão.
+                  </p>
+                )}
+                {selectedPhotoMode === 'optional' && (
+                  selectedTemplate?.stockImageKey ? (
+                    <p className="text-[10px] leading-relaxed text-text-muted">
+                      Foto opcional: envie uma imagem do seu salão ou deixe em branco para usarmos uma
+                      imagem ilustrativa gerada automaticamente. A imagem ilustrativa é apenas decorativa
+                      e <strong>não representa resultados do seu salão</strong>.
+                    </p>
+                  ) : (
+                    <p className="text-[10px] leading-relaxed text-text-muted">
+                      Este modelo funciona com tipografia, sem foto. Se preferir, você pode enviar uma
+                      imagem do seu salão para compor a arte.
+                    </p>
+                  )
+                )}
+
+                {/* Vídeo */}
+                <div className="space-y-2 border-t border-border pt-4">
+                  <p className="text-xs font-bold text-text-secondary">Vídeo (opcional)</p>
+                  {videoUrl ? (
+                    <div className="space-y-2">
+                      <video src={videoUrl} controls className="w-full max-w-xs rounded-xl bg-black" />
+                      <div className="flex gap-2">
+                        <Button variant="secondary" size="sm" onClick={() => videoInputRef.current?.click()} disabled={uploadingVideo}
+                        >
+                          Trocar vídeo
+                        </Button>
+                        <Button variant="danger" size="sm" onClick={() => setVideoUrl(null)} disabled={uploadingVideo}
+                        >
+                          Remover
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button variant="secondary" onClick={() => videoInputRef.current?.click()} disabled={uploadingVideo}
+                      className="w-full max-w-xs gap-2 border-2 border-dashed"
+                    >
+                      {uploadingVideo ? <Loader2 size={14} className="animate-spin" aria-hidden /> : <ImagePlus size={14} aria-hidden />}
+                      {uploadingVideo ? 'Enviando vídeo…' : 'Enviar vídeo (até 25 MB)'}
+                    </Button>
+                  )}
+                  <input ref={videoInputRef} type="file" accept="video/mp4,video/webm,video/quicktime" className="hidden" onChange={e => void handleVideoUpload(e)} />
                 </div>
-                <p className="text-[10px] text-text-muted">
-                  {selectedTemplate?.requiredMedia === 0
-                    ? 'Este modelo não requer fotos.'
-                    : `Este modelo requer ${selectedTemplate?.requiredMedia} foto(s).`}
-                </p>
               </div>
 
               <div className="hidden lg:block">
@@ -665,33 +836,39 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                 {/* Modelo */}
                 <div>
                   <p className="mb-2 text-xs font-bold text-text-secondary">Modelo</p>
-                  <div className="space-y-1.5">
-                    {TEMPLATE_GROUPS.map(group => {
-                      const templates = TEMPLATE_OPTIONS.filter(t => t.group === group.key);
-                      if (templates.length === 0) return null;
-                      return (
-                        <div key={group.key}>
-                          <p className="mb-1 text-[10px] font-bold uppercase text-text-muted">{group.label}</p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {templates.map(t => (
-                              <button
-                                key={t.key}
-                                type="button"
-                                onClick={() => setTemplateKey(t.key)}
-                                className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition ${
-                                  templateKey === t.key
-                                    ? 'bg-accent text-accent-fg'
-                                    : 'bg-surface text-text-secondary hover:bg-bg'
-                                }`}
-                              >
-                                {t.name}
-                              </button>
-                            ))}
+                  {templatesLoading ? (
+                    <div className="flex items-center gap-2 text-xs text-text-muted">
+                      <Loader2 size={13} className="animate-spin" aria-hidden /> Carregando modelos…
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {templateGroups.map(group => {
+                        const items = templates.filter(t => (t.group ?? 'outros') === group.key);
+                        if (items.length === 0) return null;
+                        return (
+                          <div key={group.key}>
+                            <p className="mb-1 text-[10px] font-bold uppercase text-text-muted">{group.label}</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {items.map(t => (
+                                <button
+                                  key={t.key}
+                                  type="button"
+                                  onClick={() => setTemplateKey(t.key)}
+                                  className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition ${
+                                    templateKey === t.key
+                                      ? 'bg-accent text-accent-fg'
+                                      : 'bg-surface text-text-secondary hover:bg-bg'
+                                  }`}
+                                >
+                                  {t.name}
+                                </button>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -741,13 +918,14 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                 </div>
 
                 {/* Download */}
-                <button type="button"
+                <Button
+                  variant="secondary"
                   onClick={() => previewUrl && downloadImage(previewUrl, `post-${format}-${Date.now()}.png`)}
-                  disabled={!previewUrl}
-                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-border font-semibold text-text-secondary hover:border-accent/40 disabled:opacity-40"
+                  disabled={!previewUrl || previewLoading || previewStale}
+                  className="w-full gap-2"
                 >
                   <Download size={15} aria-hidden /> Baixar PNG
-                </button>
+                </Button>
               </div>
 
               <div className="hidden lg:block">
@@ -766,35 +944,41 @@ export const PostEditor: React.FC<PostEditorProps> = ({
 
         {/* Footer — actions */}
         <div className="border-t border-border bg-surface px-4 py-3">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <div className="flex gap-1 rounded-xl border border-border p-1" aria-label="Quando publicar">
+              {(['now', 'schedule'] as const).map(mode => (
+                <button key={mode} type="button" aria-pressed={publishMode === mode} onClick={() => setPublishMode(mode)} disabled={submitting || mediaBusy}
+                  className={`min-h-9 rounded-lg px-3 text-xs font-semibold ${publishMode === mode ? 'bg-accent/15 text-accent' : 'text-text-secondary'}`}>
+                  {mode === 'now' ? 'Publicar agora' : 'Agendar publicação'}
+                </button>
+              ))}
+            </div>
+            {publishMode === 'schedule' && (
+              <label className="flex min-w-0 items-center gap-2 text-xs text-text-secondary">
+                <Clock3 size={14} aria-hidden /> <span className="sr-only">Data e horário da publicação</span>
+                <input type="datetime-local" min={scheduleMin} value={scheduledFor} disabled={submitting || mediaBusy}
+                  onChange={e => setScheduledFor(e.target.value)}
+                  className="min-w-0 rounded-xl border border-border bg-bg px-2.5 py-2 text-xs focus:border-accent focus:outline-none" />
+              </label>
+            )}
+          </div>
           <div className="flex items-center justify-between gap-2">
-            <button type="button" onClick={onClose} disabled={submitting}
-              className="flex min-h-11 items-center gap-1.5 rounded-xl border border-border px-4 text-sm font-semibold text-text-secondary disabled:opacity-40"
+            <Button variant="secondary" onClick={onClose} disabled={submitting || mediaBusy}
+              className="gap-1.5"
             >
               Cancelar
-            </button>
+            </Button>
             <div className="flex items-center gap-2">
-              {/* Agendamento inline */}
-              <div className="hidden sm:flex items-center gap-1.5">
-                <Clock3 size={13} className="text-text-muted" aria-hidden />
-                <input
-                  type="datetime-local"
-                  min={SCHEDULE_MIN_DATETIME}
-                  value={scheduledFor}
-                  onChange={e => { setScheduledFor(e.target.value); if (e.target.value) setPublishMode('schedule'); }}
-                  onFocus={() => setPublishMode('schedule')}
-                  className="w-44 rounded-xl border border-border bg-bg px-2.5 py-2 text-xs focus:border-accent focus:outline-none"
-                />
-              </div>
-              <button type="button" onClick={() => void handleSave('draft')} disabled={submitting}
-                className="flex min-h-11 items-center gap-1.5 rounded-xl border border-border px-4 text-xs font-semibold text-text-secondary hover:border-text-muted disabled:opacity-40"
+              <Button variant="secondary" onClick={() => void handleSave('draft')} disabled={submitting || mediaBusy}
+                className="gap-1.5"
               >
                 {submitting ? <Loader2 size={14} className="animate-spin" aria-hidden /> : null}
                 Rascunho
-              </button>
-              <button type="button"
+              </Button>
+              <Button variant="primary"
                 onClick={() => publishMode === 'schedule' ? void handleSave('schedule') : void handleSave('publish')}
-                disabled={submitting || (publishMode === 'schedule' && !scheduledFor)}
-                className="flex min-h-11 items-center gap-2 rounded-xl bg-accent px-5 text-sm font-bold text-accent-fg hover:bg-accent-hover disabled:opacity-40"
+                disabled={submitting || mediaBusy || templatesLoading || (publishMode === 'schedule' && !scheduledFor)}
+                className="gap-2 px-5"
               >
                 {submitting ? <Loader2 size={14} className="animate-spin" aria-hidden /> : (
                   publishMode === 'schedule'
@@ -802,7 +986,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                     : <Check size={14} aria-hidden />
                 )}
                 {publishMode === 'schedule' ? 'Agendar' : 'Publicar'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -811,17 +995,18 @@ export const PostEditor: React.FC<PostEditorProps> = ({
       {/* Media Picker Overlay */}
       {showMediaPicker && (
         <div className="absolute inset-0 z-[110] flex items-end justify-center bg-black/80 sm:items-center sm:p-4">
+          <FocusLock returnFocus className="w-full max-w-lg">
           <div className="w-full max-w-lg rounded-2xl bg-surface border border-border">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <h4 className="text-sm font-bold text-text-primary">Escolher foto</h4>
-              <button type="button" onClick={() => setShowMediaPicker(null)} className="rounded-lg p-1 text-text-muted hover:bg-bg" aria-label="Fechar">
+              <button type="button" onClick={() => setShowMediaPicker(null)} disabled={uploadingPhoto} className="rounded-lg p-1 text-text-muted hover:bg-bg" aria-label="Fechar">
                 ✕
               </button>
             </div>
             <div className="max-h-80 overflow-y-auto p-4">
               <div className="grid grid-cols-3 gap-2">
                 {mediaLibrary.map(m => (
-                  <button key={m.id} type="button"
+                  <button key={m.id} type="button" disabled={uploadingPhoto}
                     onClick={() => {
                       if (showMediaPicker === 'primary') setPrimaryMediaId(m.id);
                       else setSecondaryMediaId(m.id);
@@ -843,19 +1028,21 @@ export const PostEditor: React.FC<PostEditorProps> = ({
             </div>
             <div className="border-t border-border p-4">
               <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={e => void handleUpload(e)} />
-              <button type="button" onClick={() => fileInputRef.current?.click()}
-                className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border text-xs font-bold text-text-secondary hover:border-accent/40 hover:text-accent"
+              <Button variant="secondary" onClick={() => fileInputRef.current?.click()} disabled={uploadingPhoto}
+                className="w-full gap-2 border-2 border-dashed text-xs"
               >
-                <ImagePlus size={15} aria-hidden /> Enviar nova foto
-              </button>
+                <ImagePlus size={15} aria-hidden /> {uploadingPhoto ? 'Enviando foto.' : 'Enviar nova foto'}
+              </Button>
             </div>
           </div>
+          </FocusLock>
         </div>
       )}
 
       {/* Template Picker Overlay */}
       {showTemplatePicker && (
         <div className="absolute inset-0 z-[110] flex items-end justify-center bg-black/80 sm:items-center sm:p-4">
+          <FocusLock returnFocus className="w-full max-w-lg">
           <div className="w-full max-w-lg rounded-2xl bg-surface border border-border">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <h4 className="text-sm font-bold text-text-primary">Escolher modelo</h4>
@@ -864,53 +1051,86 @@ export const PostEditor: React.FC<PostEditorProps> = ({
               </button>
             </div>
             <div className="flex gap-1.5 border-b border-border px-4 pt-3 pb-2 overflow-x-auto">
-              <button
-                type="button"
-                onClick={() => setTemplateFilter('all')}
-                className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                  templateFilter === 'all' ? 'bg-accent text-accent-fg' : 'text-text-muted hover:bg-bg'
-                }`}
-              >
-                Todos
-              </button>
-              {TEMPLATE_GROUPS.map(g => (
+              {([
+                { id: 'all', label: 'Todos' },
+                { id: 'with-photo', label: 'Com foto' },
+                { id: 'no-photo', label: 'Sem foto' },
+              ] as const).map(f => (
                 <button
-                  key={g.key}
+                  key={f.id}
                   type="button"
-                  onClick={() => setTemplateFilter(g.key)}
+                  onClick={() => setTemplateFilter(f.id)}
                   className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                    templateFilter === g.key ? 'bg-accent text-accent-fg' : 'text-text-muted hover:bg-bg'
+                    templateFilter === f.id ? 'bg-accent text-accent-fg' : 'text-text-muted hover:bg-bg'
                   }`}
                 >
-                  {g.label}
+                  {f.label}
                 </button>
               ))}
             </div>
-            <div className="max-h-80 overflow-y-auto p-4 space-y-1.5">
-              {filteredTemplates.map(t => (
-                <button
-                  key={t.key}
-                  type="button"
-                  onClick={() => handleSelectTemplate(t.key)}
-                  className={`w-full rounded-xl border p-3 text-left transition ${
-                    templateKey === t.key
-                      ? 'border-accent bg-accent/10'
-                      : 'border-border hover:border-accent/40'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-text-primary">{t.name}</span>
-                    {templateKey === t.key && <Check size={14} className="text-accent" aria-hidden />}
-                  </div>
-                  <span className="text-[10px] text-text-muted">
-                    {t.requiredMedia === 0 ? 'Sem foto' : `${t.requiredMedia} foto(s)`}
-                  </span>
-                </button>
-              ))}
+            <div className="max-h-96 overflow-y-auto p-4">
+              {templatesLoading ? (
+                <div className="flex items-center justify-center gap-2 py-10 text-xs text-text-muted">
+                  <Loader2 size={14} className="animate-spin" aria-hidden /> Carregando modelos…
+                </div>
+              ) : filteredTemplates.length === 0 ? (
+                <p className="py-8 text-center text-xs text-text-muted">Nenhum modelo neste filtro.</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-2.5">
+                  {filteredTemplates.map(t => {
+                    const photoMode = templatePhotoMode(t);
+                    return (
+                      <div
+                        key={t.key}
+                        className={`overflow-hidden rounded-xl border text-left transition ${
+                          templateKey === t.key
+                            ? 'border-accent bg-accent/10'
+                            : 'border-border hover:border-accent/40'
+                        }`}
+                      >
+                        <div className="relative">
+                          <TemplateThumbnail
+                            barbershopId={barbershopId}
+                            templateKey={t.key}
+                            format={format}
+                            paletteKey={paletteKey}
+                            alt={`Prévia do modelo ${t.name}`}
+                          />
+                          <button type="button" onClick={() => handleSelectTemplate(t.key)} aria-label={`Selecionar modelo ${t.name}`} className="absolute inset-0 z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent" />
+                          {templateKey === t.key && (
+                            <span className="pointer-events-none absolute right-1.5 top-1.5 z-10 rounded-full bg-accent p-1 text-accent-fg">
+                              <Check size={11} aria-hidden />
+                            </span>
+                          )}
+                        </div>
+                        <button type="button" onClick={() => handleSelectTemplate(t.key)} className="w-full space-y-0.5 p-2.5 text-left">
+                          <p className="text-xs font-bold text-text-primary">{t.name}</p>
+                          {t.description && <p className="text-[10px] leading-snug text-text-muted">{t.description}</p>}
+                          <span className="inline-block rounded bg-bg px-1.5 py-0.5 text-[9px] font-bold uppercase text-text-muted">
+                            {photoMode === 'none' ? 'Sem foto' : photoMode === 'required' ? `Requer ${t.requiredMedia} foto(s)` : 'Foto opcional'}
+                          </span>
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
+          </FocusLock>
         </div>
       )}
-    </div>
+    </EditorDialog>
   );
 };
+
+function EditorDialog({ children }: { children: React.ReactNode }) {
+  return createPortal(
+    <FocusLock returnFocus>
+      <div role="dialog" aria-modal="true" aria-label="Editor de publicação" className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 sm:items-center p-0 sm:p-4">
+        {children}
+      </div>
+    </FocusLock>,
+    document.body
+  );
+}

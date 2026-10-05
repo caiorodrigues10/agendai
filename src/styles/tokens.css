@@ -41,7 +41,9 @@
   --ag-selection: rgba(36, 155, 118, 0.14);
   /* Foco distinto do estado ativo para preservar a navegação por teclado. */
   --ag-focus: #249b76;
-  --ag-danger: #dc2626;
+  /* Danger: #b91c1c garante ≥4.5:1 em badges bg-danger/15 (D-005). */
+  --ag-danger: #b91c1c;
+  --ag-danger-fg: #ffffff;
   --ag-success: #107836;
   --ag-warning: #b45309;
   /* shadcn/recharts — séries alinhadas ao tema */
@@ -84,7 +86,9 @@
   --ag-action-secondary: #303a34;
   --ag-selection: rgba(44, 181, 138, 0.16);
   --ag-focus: #2cb58a;
-  --ag-danger: #f16161;
+  /* Danger claro #f87171 (≥4.5:1 em bg-danger/15); fg escuro no botão (D-005). */
+  --ag-danger: #f87171;
+  --ag-danger-fg: #0f1110;
   --ag-success: #22c55e;
   --ag-warning: #f59e0b;
   --chart-1: #2cb58a;
@@ -127,6 +131,7 @@
   --color-selection: var(--ag-selection);
   --color-focus: var(--ag-focus);
   --color-danger: var(--ag-danger);
+  --color-danger-fg: var(--ag-danger-fg);
   --color-success: var(--ag-success);
   --color-warning: var(--ag-warning);
   --color-chart-1: var(--chart-1);

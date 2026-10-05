@@ -6,7 +6,6 @@ import {
   LuPencilLine as Edit3,
   LuSend as Send,
   LuCalendar as Calendar,
-  LuTriangleAlert as AlertTriangle,
 } from 'react-icons/lu';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { waitlistApi, WaitlistEntry } from '../../infra/waitlistApi';
@@ -15,6 +14,7 @@ import { formatDateBR } from '../../utils/formatters';
 import { Field, FIELD_CONTROL, FORM_FOOTER, FORM_GRID } from '../../components/ui/Field';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { SectionError } from '../../components/patterns';
 
 const STATUS_STYLES: Record<string, string> = {
   WAITING: 'bg-support/10 text-support border-support/30',
@@ -173,15 +173,7 @@ export const WaitlistPanel: React.FC = () => {
   }
 
   if (error) {
-    return (
-      <div className="bg-surface rounded-xl border border-border p-4">
-        <div className="flex items-center gap-2 text-danger text-sm">
-          <AlertTriangle size={16} />
-          <span>{error}</span>
-          <button onClick={load} className="ml-auto text-accent text-xs underline">Tentar novamente</button>
-        </div>
-      </div>
-    );
+    return <SectionError message={error} onRetry={load} />;
   }
 
   return (
@@ -254,9 +246,7 @@ export const WaitlistPanel: React.FC = () => {
               <button onClick={() => setModalOpen(false)} className="text-text-muted hover:text-text-primary">✕</button>
             </div>
 
-            {submitError && (
-              <div className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">{submitError}</div>
-            )}
+            {submitError && <SectionError message={submitError} />}
 
             <Field label="Nome do cliente">
               <input

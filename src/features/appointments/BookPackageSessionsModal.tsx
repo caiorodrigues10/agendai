@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  LuCircleAlert as AlertCircle,
   LuCircleCheck as CheckCircle,
   LuClock as Clock,
 } from 'react-icons/lu';
 import { ClientPackage, ShopSettings, StaffMember } from '../../types';
 import { Avatar } from '../../components/ui/Avatar';
 import { ModalShell } from '../../components/patterns/ModalShell';
+import { SectionError } from '../../components/patterns';
 import { schedulingApi } from '../../infra/schedulingApi';
 import { packagesApi } from '../../infra/packagesApi';
 import { getErrorMessage } from '../../utils/errorMessage';
@@ -123,11 +123,7 @@ export const BookPackageSessionsModal: React.FC<BookPackageSessionsModalProps> =
       className="max-h-[min(88dvh,calc(100dvh-2.5rem))] overflow-y-auto"
       body={
         <>
-          {error && (
-            <p className="mb-4 text-sm text-danger bg-danger/10 border border-danger/30 rounded-xl px-3 py-2 flex gap-2">
-              <AlertCircle size={16} className="shrink-0" /> {error}
-            </p>
-          )}
+          {error && <SectionError message={error} className="mb-4" />}
 
           <div className="flex flex-wrap gap-2">
             <button

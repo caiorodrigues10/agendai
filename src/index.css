@@ -1,8 +1,11 @@
-@import 'tailwindcss';
+﻿@import 'tailwindcss';
 @import './styles/tokens.css';
 @import './styles/base.css';
 @import './styles/vendors.css';
 @import './styles/features/weather.css';
+
+/* Utilities usados só por stories ficam fora do bundle (D-002). */
+@source not './**/*.stories.tsx';
 
 /*
  * Variante manual de dark mode (Tailwind v4).
@@ -10,3 +13,4 @@
  * anti-flash em index.html antes do primeiro paint).
  */
 @custom-variant dark (&:where(.dark, .dark *));
+

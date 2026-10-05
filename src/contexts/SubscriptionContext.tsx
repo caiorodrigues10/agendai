@@ -58,9 +58,21 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
   const [loading, setLoading] = useState(false);
   const lastFocusRefreshAt = useRef(0);
 
+  // Semear no mount: sem isto, o primeiro `focus` (comum logo após o boot)
+  // dispara um refresh redundante que pisca o loading no meio da interação.
+  useEffect(() => {
+    lastFocusRefreshAt.current = Date.now();
+  }, []);
+
+  // Chaves primitivas: `normalizeUser` do boot do AuthProvider gera um objeto
+  // novo com os mesmos dados — sem isto, `refresh` reexecuta a cada boot e o
+  // painel pisca em spinner (loading=true) no meio da UI.
+  const userId = user?.id;
+  const shopId = user?.barbershopId;
+
   const refresh = useCallback(async () => {
     // MASTER_ADMIN não tem barbearia — isento de assinatura
-    if (!user || !user.barbershopId) {
+    if (!userId || !shopId) {
       setData(null);
       setBlockInfo(null);
       return;
@@ -79,7 +91,7 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [userId, shopId]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
