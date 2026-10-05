@@ -46,7 +46,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), D-009 (ClientProfileSheet), D-010 (checkout full-screen — `credit-card-form` já removido), D-011 (PostEditor), D-014 (states trio — skeletons órfãos já removidos).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), D-010 (checkout full-screen — `credit-card-form` já removido), D-011 (PostEditor), D-014 (states trio — skeletons órfãos já removidos).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - **Budget/D-002:** −50 KiB disponíveis no CSS via `@source not` após restyle de39 stories.
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -147,3 +147,53 @@ da regressão visual** descobertos por ela.
 | build prod (PWA) | `npm run build` | **89 precache / 2666,17 KiB** (+1 = `mockServiceWorker.js`) |
 | docs / entrega | `docs:check` + `verify:delivery` | **OK** |
 | orfãos | `scripts/check-orphan-exports.mjs` | **0 arquivos mortos** |
+
+## 7. D-009 — ClientProfileSheet → ModalShell (2026-10-05)
+
+Story-first + conversão do overlay ad-hoc, com prova de paridade visual.
+
+### 7.1 O que foi feito
+
+- `ClientProfileSheet.stories.tsx` (novo): 5 stories (`Default`, `Pacotes`, `Histórico`,
+  `Financeiro`, `SemAnalitico`) com MSW (`/api/clients/:id`, `/api/crm/clients/:id`,
+  `/api/service-packages`, `/api/clients/:id/procedures`); fixtures reutilizam
+  `features/appointments/storyFixtures`. O sheet usa `createPortal(document.body)`, então os
+  plays consultam `within(document.body)`.
+- **ModalShell ganhou a variante `sheet`:** `variant?: 'dialog' | 'sheet'` — bottom-sheet
+  `max-w-2xl`/`max-h-[92dvh]`, header fixo com `border-b`, corpo rolável `ag-scroll`, wrapper
+  `p-0 sm:p-4`, fechar `p-2` + `X` 18; mais os slots `actions` (ao lado do fechar), `ariaLabel`
+  (nome acessível estável via `aria-label` enquanto o título carrega) e `bodyClassName`.
+  O caminho `dialog` permanece idêntico (ConfirmDialog, BookPackageSessionsModal,
+  AppointmentBookingModal e demais consumidores).
+- **ClientProfileSheet convertido:** backdrop/header/abas agora são props do shell (`title` =
+  skeleton ou nome+chip+telefone, `children` = nav de abas, `actions` = WhatsApp + Agendar,
+  `body` = painéis). FocusLock e Escape passaram a vir do shell — removidos `previousFocusRef`
+  e o listener manual (o scroll-lock do body ficou no componente); `z-[100]` → `z-[110]`
+  (ConfirmDialog e os modais de agendamento, renderizados depois no mesmo portal, continuam
+  acima).
+- **a11y descoberto pela nova story:** `role="combobox"` tem *Name From: author* (ARIA 1.2) — o
+  texto do gatilho do `SmartSelect` não conta como nome acessível e o `button-name` do axe
+  falhava (o componente nunca tinha story, então nunca foi testado). Fix:
+  `aria-label={ariaLabel ?? label ?? valueText}` no gatilho — com `label`, o nome vira
+  exatamente o rótulo (compatível com `getByRole('combobox', { name })` dos testes); sem
+  `label`, vira placeholder/valor selecionado.
+
+### 7.2 Paridade visual (a conversão não mudou pixels)
+
+`test:visual` antes (overlay ad-hoc) → depois (ModalShell `sheet`): **97/97 snapshots,
+0 atualizados** — as 5 stories do sheet passaram byte a byte.
+
+### 7.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npm run typecheck` | **0 erros** |
+| lint (gate) | `npm run lint` (`eslint src`) | **0 err / 487 warn** |
+| lint full-scope | `npx eslint .` | **0 err / 489 warn** (teto 11/593) |
+| testes app+storybook | `npm test` | **342/342 (81 arquivos)** |
+| contratos | `test:contract` + `contract:check:strict` | **6/6** · **OK 404 chamadas / 555 rotas, 0 pend** |
+| storybook + a11y | `npm run test:storybook` | **97/97 (31 arquivos)**, `a11y.test: 'error'` (**0 violações**) |
+| regressão visual | `test:visual` | **97/97, 0 atualizados** |
+| build prod (PWA) | `npm run build` | **89 precache / 2665,87 KiB** |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** (0 arquivos mortos) |
+| docs / entrega | `docs:check` + `verify:delivery` | **OK** |

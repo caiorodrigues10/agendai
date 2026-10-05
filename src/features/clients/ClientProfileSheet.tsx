@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,7 +14,6 @@ import {
 } from 'react-icons/ri';
 import {
   LuMessageCircle as MessageCircle,
-  LuX as X,
   LuScissors as Scissors,
   LuFlaskConical as FlaskConical,
   LuClock as Clock,
@@ -44,6 +43,7 @@ import {
 } from '../../utils/clientLabels';
 import { METRIC_LABEL } from '../../utils/metricLabels';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { ModalShell } from '../../components/patterns/ModalShell';
 import { BookPackageSessionsModal, AppointmentBookingModal } from '../../features/appointments';
 import { AppointmentFormData, ClientEditSchema, ClientEditFormData, ProcedureRecordSchema, ProcedureRecordFormData } from '../../schemas';
 import { AvailabilitySlot } from '../../utils/schedulingUtils';
@@ -104,7 +104,7 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
   const [crmProfile, setCrmProfile] = useState<CrmClientProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const titleId = useId();
 
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -201,18 +201,15 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
       .catch(() => setCatalog([]));
   }, []);
 
+  // Escape/foco ficam por conta do ModalShell (FocusLock + keydown); aqui só
+  // travamos o scroll do body enquanto o sheet está aberto.
   useEffect(() => {
     if (!clientId) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
     return () => {
-      document.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
     };
-  }, [clientId, onClose]);
+  }, [clientId]);
 
   const refresh = async () => {
     await loadDetail();
@@ -417,114 +414,89 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
     ? (CRM_SEGMENT_LABEL[crmProfile.segment] ?? crmProfile.segment)
     : null;
 
-  // Save focus when opening
-  useEffect(() => {
-    if (clientId && !previousFocusRef.current) {
-      previousFocusRef.current = document.activeElement as HTMLElement;
-    }
-  }, [clientId]);
-
   if (!clientId) return null;
 
   return createPortal(
     <>
-      <div
-        className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 sm:items-center sm:p-4"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Perfil do cliente"
-      >
-        <button type="button" aria-label="Fechar" onClick={() => {
+      <ModalShell
+        open
+        variant="sheet"
+        titleId={titleId}
+        ariaLabel="Perfil do cliente"
+        onClose={() => {
           document.body.style.overflow = '';
-          previousFocusRef.current?.focus();
-          previousFocusRef.current = null;
           onClose();
-        }} className="absolute inset-0" />
-        <div className="relative flex max-h-[92dvh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl border border-border bg-surface shadow-2xl sm:rounded-2xl">
-          <header className="shrink-0 border-b border-border px-4 py-4 sm:px-5">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                {loading && !detail ? (
-                  <div className="space-y-3 animate-pulse">
-                    <div className="h-6 w-32 rounded bg-bg" />
-                    <div className="h-4 w-48 rounded bg-bg" />
-                    <div className="h-4 w-24 rounded bg-bg" />
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="truncate text-lg font-bold text-text-primary">
-                        {detail?.name ?? 'Cliente'}
-                      </h3>
-                      {segmentLabel && (
-                        <span className="rounded-md border border-accent/30 bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase text-accent">
-                          {segmentLabel}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-text-muted">
-                      {detail ? clientPhoneLabel(detail.whatsapp) : ''}
-                    </p>
-                  </>
-                )}
-              </div>
-              <div className="flex shrink-0 items-center gap-1">
-                {whatsappUrl && (
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-lg border border-border text-accent hover:border-accent/50 hover:bg-accent/10"
-                    aria-label="Chamar no WhatsApp"
-                  >
-                    <MessageCircle size={18} />
-                  </a>
-                )}
-                {onBook && detail && (
-                  <button
-                    type="button"
-                    onClick={() => setShowBooking(true)}
-                    className="inline-flex items-center gap-1 rounded-lg bg-accent px-3 py-2 text-xs font-bold text-accent-fg"
-                  >
-                    <RiCalendarScheduleLine size={14} />
-                    Agendar
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => {
-                    document.body.style.overflow = '';
-                    previousFocusRef.current?.focus();
-                    previousFocusRef.current = null;
-                    onClose();
-                  }}
-                  className="rounded-lg p-2 text-text-muted hover:bg-bg"
-                  aria-label="Fechar perfil"
-                >
-                  <X size={18} />
-                </button>
-              </div>
+        }}
+        title={
+          loading && !detail ? (
+            <div className="space-y-3 animate-pulse">
+              <div className="h-6 w-32 rounded bg-bg" />
+              <div className="h-4 w-48 rounded bg-bg" />
+              <div className="h-4 w-24 rounded bg-bg" />
             </div>
-
-            <nav aria-label="Seções do perfil" className="mt-3 flex gap-1 overflow-x-auto">
-              {tabs.map(([id, label]) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => setTab(id)}
-                  className={`min-h-9 whitespace-nowrap rounded-lg px-3 text-xs font-bold transition-colors ${
-                    tab === id
-                      ? 'bg-accent/15 text-accent'
-                      : 'text-text-muted hover:bg-bg hover:text-text-secondary'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </nav>
-          </header>
-
-          <div className="flex-1 overflow-y-auto ag-scroll px-4 py-4 sm:px-5">
+          ) : (
+            <>
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="truncate text-lg font-bold text-text-primary">
+                  {detail?.name ?? 'Cliente'}
+                </h3>
+                {segmentLabel && (
+                  <span className="rounded-md border border-accent/30 bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase text-accent">
+                    {segmentLabel}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-text-muted">
+                {detail ? clientPhoneLabel(detail.whatsapp) : ''}
+              </p>
+            </>
+          )
+        }
+        actions={
+          <>
+            {whatsappUrl && (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-lg border border-border text-accent hover:border-accent/50 hover:bg-accent/10"
+                aria-label="Chamar no WhatsApp"
+              >
+                <MessageCircle size={18} />
+              </a>
+            )}
+            {onBook && detail && (
+              <button
+                type="button"
+                onClick={() => setShowBooking(true)}
+                className="inline-flex items-center gap-1 rounded-lg bg-accent px-3 py-2 text-xs font-bold text-accent-fg"
+              >
+                <RiCalendarScheduleLine size={14} />
+                Agendar
+              </button>
+            )}
+          </>
+        }
+        children={
+          <nav aria-label="Seções do perfil" className="mt-3 flex gap-1 overflow-x-auto">
+            {tabs.map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setTab(id)}
+                className={`min-h-9 whitespace-nowrap rounded-lg px-3 text-xs font-bold transition-colors ${
+                  tab === id
+                    ? 'bg-accent/15 text-accent'
+                    : 'text-text-muted hover:bg-bg hover:text-text-secondary'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </nav>
+        }
+        body={
+          <>
             {error && (
               <p className="mb-3 rounded-lg bg-danger/10 p-3 text-sm text-danger">{error}</p>
             )}
@@ -997,9 +969,9 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                 </div>
               </div>
             )}
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <ConfirmDialog
         open={confirm?.type === 'delete'}
