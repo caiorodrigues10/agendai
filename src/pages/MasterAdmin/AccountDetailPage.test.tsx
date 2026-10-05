@@ -82,12 +82,13 @@ const detail: AccountDetail = {
   ],
 };
 
-function renderPage(id = 'acc-1') {
+function renderPage(id = 'acc-1', state?: unknown) {
   return render(
-    <MemoryRouter initialEntries={[`/master/accounts/${id}`]}>
+    <MemoryRouter initialEntries={[{ pathname: `/master/accounts/${id}`, state }]}>
       <Routes>
         <Route path="/master/accounts/:id" element={<AccountDetailPage />} />
         <Route path="/master/accounts" element={<div>lista-contas</div>} />
+        <Route path="/master/shops" element={<div>lista-com-filtro</div>} />
       </Routes>
     </MemoryRouter>,
   );
@@ -130,6 +131,15 @@ describe('AccountDetailPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /Voltar para contas/ }));
 
     expect(await screen.findByText('lista-contas')).toBeInTheDocument();
+  });
+
+  it('volta para a rota de origem quando state.from é informado', async () => {
+    renderPage('acc-1', { from: '/master/shops' });
+
+    await screen.findByRole('heading', { name: 'Barbearia Central' });
+    fireEvent.click(screen.getByRole('button', { name: /Voltar para contas/ }));
+
+    expect(await screen.findByText('lista-com-filtro')).toBeInTheDocument();
   });
 
   it('mostra estado de erro com opção de tentar novamente', async () => {

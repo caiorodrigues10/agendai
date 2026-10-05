@@ -1,6 +1,6 @@
 /// <reference types="vitest/globals" />
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { ShopCreateWizard } from './ShopCreateWizard';
 import { adminApi, BarbershopListItem } from '../../infra/adminApi';
 import { plansApi, Plan } from '../../infra/plansApi';
@@ -46,6 +46,18 @@ const createdShop: BarbershopListItem = {
   _count: { users: 0, appointments: 0, queue: 0 },
 };
 
+function DetailWithState() {
+  const location = useLocation();
+  return (
+    <div>
+      detalhe-conta
+      <span data-testid="state-from">
+        {String((location.state as { from?: string } | null)?.from ?? '')}
+      </span>
+    </div>
+  );
+}
+
 function setup() {
   const onClose = vi.fn();
   const onCreated = vi.fn();
@@ -56,7 +68,7 @@ function setup() {
           path="/master"
           element={<ShopCreateWizard open onClose={onClose} onCreated={onCreated} />}
         />
-        <Route path="/master/accounts/:id" element={<div>detalhe-conta</div>} />
+        <Route path="/master/accounts/:id" element={<DetailWithState />} />
       </Routes>
     </MemoryRouter>,
   );
@@ -284,6 +296,8 @@ describe('ShopCreateWizard — criação e convite', () => {
 
     fireEvent.click(within(dialog).getByRole('button', { name: 'Ver detalhes' }));
     expect(await screen.findByText('detalhe-conta')).toBeInTheDocument();
+    // state.from preserva a rota de origem p/ o botão "Voltar" do detalhe
+    expect(screen.getByTestId('state-from')).toHaveTextContent('/master');
   });
 
   it('permite voltar etapa e exibe erro da API', async () => {

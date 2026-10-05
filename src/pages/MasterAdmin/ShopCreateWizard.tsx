@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LuCheck, LuLoader } from 'react-icons/lu';
@@ -38,6 +38,7 @@ export interface ShopCreateWizardProps {
 
 export const ShopCreateWizard: React.FC<ShopCreateWizardProps> = ({ open, onClose, onCreated }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [step, setStep] = useState(0);
   const [created, setCreated] = useState<CreatedState | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -144,7 +145,11 @@ export const ShopCreateWizard: React.FC<ShopCreateWizardProps> = ({ open, onClos
             <Button
               type="button"
               className="flex-1"
-              onClick={() => navigate(`/master/accounts/${created.shop.id}`)}
+              onClick={() =>
+                navigate(`/master/accounts/${created.shop.id}`, {
+                  state: { from: location.pathname + location.search },
+                })
+              }
             >
               Ver detalhes
             </Button>

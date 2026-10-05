@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   LuLoader,
   LuTriangleAlert,
@@ -81,6 +81,9 @@ const Stat: React.FC<StatCard> = ({ label, value, sub, icon }) => (
 export const AccountDetailPage: React.FC = () => {
   const { id = '' } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  /** Rota de origem (ex.: lista de contas com filtros) enviada por `state.from`. */
+  const backTo = (location.state as { from?: string } | null)?.from ?? '/master/accounts';
   const [data, setData] = useState<AccountDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -174,7 +177,7 @@ export const AccountDetailPage: React.FC = () => {
     <div className="space-y-6">
       <button
         type="button"
-        onClick={() => navigate('/master/accounts')}
+        onClick={() => navigate(backTo)}
         className="inline-flex items-center gap-1 text-sm text-accent hover:underline"
       >
         <LuArrowLeft size={14} /> Voltar para contas
