@@ -76,9 +76,11 @@ export function usePermissions() {
   const { user } = useAuth();
 
   const isOwnerOrAdmin = user?.role === 'OWNER' || user?.role === 'MASTER_ADMIN';
+  // EMPLOYEE sem o campo carregado cai em [] — negação silenciosa é proposital
+  // (fail-closed); OWNER/MASTER_ADMIN têm o conjunto completo implícito.
   const permissions: EmployeePermission[] = isOwnerOrAdmin
     ? ALL_PERMISSIONS
-    : (user as any)?.permissions ?? [];
+    : ((user?.permissions ?? []) as EmployeePermission[]);
 
   function hasPermission(perm: EmployeePermission): boolean {
     return permissions.includes(perm);

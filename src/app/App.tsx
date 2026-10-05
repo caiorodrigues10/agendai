@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { PrivateRoute } from '../components/infra/PrivateRoute';
+import { TabGuard } from '../components/infra/TabGuard';
 import { AccessBlockedListener } from '../components/infra/AccessBlockedListener';
 import { CookieConsent } from '../components/infra/CookieConsent';
 import { AnalyticsListener } from '../components/infra/AnalyticsListener';
@@ -132,7 +133,9 @@ const App: React.FC = () => {
             path="/app/:tab"
             element={
               <PrivateRoute roles={['OWNER', 'EMPLOYEE', 'MASTER_ADMIN']}>
-                <StaffDashboard />
+                <TabGuard>
+                  <StaffDashboard />
+                </TabGuard>
               </PrivateRoute>
             }
           />
