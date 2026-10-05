@@ -9,6 +9,7 @@ import {
 } from 'react-icons/lu';
 import { NotificationOperationsHealth, notificationsApi } from '../../infra/notificationsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { SectionError } from '../../components/patterns';
 
 function formatDateTime(value?: string | null): string {
   if (!value) return 'Sem informação';
@@ -83,15 +84,10 @@ export const NotificationHealthPanel: React.FC = () => {
 
   if (error || !health) {
     return (
-      <div role="alert" className="flex items-start gap-3 rounded-xl border border-danger/30 bg-danger/10 p-4 text-danger">
-        <AlertCircle size={18} className="mt-0.5 shrink-0" />
-        <div>
-          <p className="text-sm">{error || 'A API não retornou o estado da operação.'}</p>
-          <button type="button" onClick={() => void load()} className="mt-2 inline-flex min-h-10 items-center gap-2 text-sm font-bold underline">
-            <RefreshCcw size={15} /> Tentar novamente
-          </button>
-        </div>
-      </div>
+      <SectionError
+        message={error || 'A API não retornou o estado da operação.'}
+        onRetry={() => void load()}
+      />
     );
   }
 

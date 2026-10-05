@@ -1,6 +1,5 @@
 import React, { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  LuCircleAlert as AlertCircle,
   LuChevronLeft as ChevronLeft,
   LuChevronRight as ChevronRight,
   LuMail as Mail,
@@ -10,6 +9,7 @@ import {
 } from 'react-icons/lu';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { SmartSelect } from '../../components/ui/SmartSelect';
+import { SectionError } from '../../components/patterns';
 import {
   ListNotificationDeliveriesParams,
   NotificationChannel,
@@ -359,15 +359,7 @@ export const NotificationDeliveriesPanel: React.FC<NotificationDeliveriesPanelPr
       </p>
 
       {error ? (
-        <div role="alert" className="flex items-start gap-3 rounded-xl border border-danger/30 bg-danger/10 p-4 text-danger">
-          <AlertCircle size={18} className="mt-0.5 shrink-0" />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm">{error}</p>
-            <button type="button" onClick={() => void loadDeliveries()} className="mt-2 min-h-10 text-sm font-bold underline">
-              Tentar novamente
-            </button>
-          </div>
-        </div>
+        <SectionError message={error} onRetry={() => void loadDeliveries()} />
       ) : loading ? (
         <div role="status" className="rounded-xl border border-border bg-surface p-6 text-center text-sm text-text-muted">
           Carregando entregas...

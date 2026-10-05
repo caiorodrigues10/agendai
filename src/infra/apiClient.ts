@@ -5,7 +5,12 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 export interface ApiRequestOptions {
   headers?: Record<string, string>;
   retried?: boolean;
+  signal?: AbortSignal;
 }
+
+const isAbortError = (err: unknown): boolean =>
+  (err instanceof DOMException && err.name === 'AbortError') ||
+  (err instanceof Error && err.name === 'AbortError');
 
 /**
  * Em produção (Render Static Site), o frontend é servido em um domínio diferente do backend.
@@ -236,8 +241,10 @@ export const apiClient = async <T>(
       headers,
       body: hasJsonBody ? JSON.stringify(sanitize(body)) : undefined,
       credentials: 'include',
+      signal: options.signal,
     });
   } catch (err) {
+    if (isAbortError(err)) throw err;
     throw new ApiError(
       'Não foi possível conectar ao servidor. Verifique se a API está no ar e tente de novo.',
       0,
@@ -332,6 +339,7 @@ export const apiFetch = async (
     }
     return response;
   } catch (err) {
+    if (isAbortError(err)) throw err;
     throw new ApiError(
       'Não foi possível conectar ao servidor. Verifique se a API está no ar e tente de novo.',
       0,

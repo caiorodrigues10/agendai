@@ -227,3 +227,25 @@ export const Financeiro: Story = {
 export const SemAnalitico: Story = {
   args: { canAnalytics: false },
 };
+
+/** Falha do `loadDetail` (GET /api/clients/:id → 500): banner de erro no corpo do sheet. */
+export const Erro: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.get('/api/clients/:id', () =>
+          HttpResponse.json(
+            { success: false, message: 'Não foi possível carregar o cliente' },
+            { status: 500 }
+          )
+        ),
+        http.get('/api/crm/clients/:id', () => HttpResponse.json({ data: crmProfile })),
+        http.get('/api/service-packages', () => json(catalog)),
+        http.get('/api/clients/:id/procedures', () => json(procedures)),
+      ],
+    },
+  },
+  play: async () => {
+    await sheet().findByText('Não foi possível carregar o cliente', {}, { timeout: 10000 });
+  },
+};

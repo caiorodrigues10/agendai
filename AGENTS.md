@@ -51,6 +51,7 @@ Inventários:
 | [SCRIPTS.md](docs/agents/SCRIPTS.md) | Scripts npm |
 | [BUSINESS_RULES.md](docs/agents/BUSINESS_RULES.md) | Invariantes na UI |
 | [ARCHITECTURE.md](docs/agents/ARCHITECTURE.md) | Organização + SOLID |
+| [PERMISSIONS_MATRIX.md](docs/agents/PERMISSIONS_MATRIX.md) | Papéis × permissões × telas × operações (front × API) |
 | [GRAPHIFY.md](docs/agents/GRAPHIFY.md) | Procedimento Graphify / subagentes |
 
 ---

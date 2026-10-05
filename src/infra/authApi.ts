@@ -9,6 +9,8 @@ export interface AuthUser {
   emailVerified?: boolean;
   active?: boolean;
   createdAt?: string;
+  /** Permissões de funcionário (EMPLOYEE). OWNER/MASTER_ADMIN: indefinido (acesso total implícito). */
+  permissions?: string[];
 }
 
 export interface AuthResponse {

@@ -34,6 +34,12 @@ export interface TabDef {
   modes?: OperationMode[];
   /** Optional capability required (future use) */
   requires?: string;
+  /**
+   * Permissões que habilitam a tab para EMPLOYEE (OWNER/MASTER_ADMIN passam
+   * pelo papel, como sempre). Deve espelhar a permissão exigida pela rota do
+   * backend — a autoridade é sempre a API (requirePermission).
+   */
+  permissions?: string[];
 }
 
 export interface TabGroup {
@@ -65,23 +71,25 @@ export const TAB_GROUPS: TabGroup[] = [
         id: 'reports',
         label: 'Relatórios',
         icon: RiBarChartBoxLine,
-        roles: ['OWNER', 'MASTER_ADMIN'],
+        roles: ['OWNER', 'MASTER_ADMIN', 'EMPLOYEE'],
+        permissions: ['REPORTS_VIEW'],
       },
       {
         id: 'finance',
         label: 'Financeiro',
         icon: RiBankCardLine,
-        roles: ['OWNER', 'MASTER_ADMIN'],
+        roles: ['OWNER', 'MASTER_ADMIN', 'EMPLOYEE'],
+        permissions: ['FINANCE_VIEW', 'FINANCE_MANAGE'],
       },
-      { id: 'profit', label: 'Rentabilidade', icon: RiBarChartBoxLine, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'equipment', label: 'Estoque', icon: RiStore2Line, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'profit', label: 'Rentabilidade', icon: RiBarChartBoxLine, roles: ['OWNER', 'MASTER_ADMIN', 'EMPLOYEE'], permissions: ['REPORTS_VIEW'] },
+      { id: 'equipment', label: 'Estoque', icon: RiStore2Line, roles: ['OWNER', 'MASTER_ADMIN', 'EMPLOYEE'], permissions: ['INVENTORY_MANAGE', 'PRODUCTS_MANAGE'] },
     ],
   },
   {
     id: 'crescimento',
     label: 'Divulgação',
     tabs: [
-      { id: 'posts', label: 'Posts', icon: RiMegaphoneLine, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'posts', label: 'Posts', icon: RiMegaphoneLine, roles: ['OWNER', 'MASTER_ADMIN', 'EMPLOYEE'], permissions: ['MARKETING_MANAGE'] },
       { id: 'showcase', label: 'Showcase', icon: RiImageLine, roles: ['OWNER', 'MASTER_ADMIN'] },
       { id: 'link', label: 'Link Público', icon: RiLinkM, roles: ['OWNER', 'MASTER_ADMIN'] },
       { id: 'referrals', label: 'Indicações', icon: RiGiftLine, roles: ['OWNER', 'MASTER_ADMIN'] },
@@ -112,18 +120,24 @@ export function canAccessTab(
   userRole?: string,
   extras?: { hasDashboard?: boolean; permissions?: string[] }
 ): boolean {
+  const privileged = userRole === 'OWNER' || userRole === 'MASTER_ADMIN';
   for (const group of TAB_GROUPS) {
     const tab = group.tabs.find(t => t.id === tabId);
     if (!tab) continue;
     if (tabId === 'products') {
-      const privileged = userRole === 'OWNER' || userRole === 'MASTER_ADMIN';
       const permitted = extras?.permissions?.some(perm =>
         ['RETAIL_SELL', 'PRODUCTS_VIEW', 'PRODUCTS_MANAGE', 'INVENTORY_MANAGE'].includes(perm)
       );
       return Boolean(extras?.hasDashboard && (privileged || permitted));
     }
     if (!tab.roles) return true;
-    return tab.roles.includes(userRole as TabRole);
+    if (!tab.roles.includes(userRole as TabRole)) return false;
+    // Tabs com `permissions` exigem a permissão para EMPLOYEE
+    // (OWNER/MASTER_ADMIN passam pelo papel, como no backend).
+    if (tab.permissions && !privileged) {
+      return Boolean(extras?.permissions?.some(perm => tab.permissions!.includes(perm)));
+    }
+    return true;
   }
   return false;
 }
@@ -140,10 +154,14 @@ export function canAccessTabByMode(tabId: string, mode?: OperationMode): boolean
 }
 
 /** Returns the first tab the user can access for the given mode */
-export function getDefaultTab(userRole?: string, mode?: OperationMode): string {
+export function getDefaultTab(
+  userRole?: string,
+  mode?: OperationMode,
+  extras?: { hasDashboard?: boolean; permissions?: string[] }
+): string {
   for (const group of TAB_GROUPS) {
     for (const tab of group.tabs) {
-      if (tab.roles && !tab.roles.includes(userRole as TabRole)) continue;
+      if (!canAccessTab(tab.id, userRole, extras)) continue;
       if (tab.modes && !tab.modes.includes(mode ?? 'HYBRID')) continue;
       return tab.id;
     }

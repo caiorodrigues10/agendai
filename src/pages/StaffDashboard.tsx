@@ -24,8 +24,12 @@ import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
 import { ALL_TAB_IDS, getDefaultTab, canAccessTab, canAccessTabByMode, getPrimaryTabForMode } from '../config/tabRegistry';
 
 import { getErrorMessage } from '../utils/errorMessage';
+import { ApiError } from '../infra/apiClient';
+import { ListSkeleton } from '../components/patterns/skeletons';
+import { SectionError } from '../components/patterns/states/SectionError';
+import { EmptyState } from '../components/ui/EmptyState';
 import { QueueItem } from '../types';
-import { LuLoaderCircle as Loader2 } from 'react-icons/lu';
+import { LuRefreshCw as RefreshCw } from 'react-icons/lu';
 import { supportsQueue, supportsAppointments } from '../utils/operationMode';
 import { todayISO } from '../utils/dateRanges';
 import { usePermissions } from '../hooks/usePermissions';
@@ -64,12 +68,17 @@ export const StaffDashboard: React.FC = () => {
     updateTeam,
     isShopOpen,
     isQueueClosed,
-    loading: shopLoading,
   } = useBarbershop();
   const { barbershopId } = useBarbershopFilters();
   const {
     queue,
+    queueState,
+    queueError,
+    queueStale,
     appointments,
+    appointmentsState,
+    appointmentsError,
+    appointmentsStale,
     availability,
     aiInsight,
     completedCount,
@@ -82,7 +91,7 @@ export const StaffDashboard: React.FC = () => {
     checkInAppointment,
     deleteHistoryItem,
     clientId,
-    loading: schedulingLoading,
+    refreshQueue,
     refreshAppointments,
     loadAvailability,
   } = useScheduling();
@@ -178,6 +187,24 @@ export const StaffDashboard: React.FC = () => {
     setToast({ message: msg, type });
   };
 
+  // Ações destrutivas: aguarda o mutador; falha de rede não confirma nada.
+  const runDestructive = async (
+    action: () => Promise<unknown>,
+    successMessage: string,
+    successType: 'success' | 'bot' = 'success'
+  ) => {
+    try {
+      await action();
+      showToast(successMessage, successType);
+    } catch (err) {
+      if (err instanceof ApiError && err.code === 'NETWORK_ERROR') {
+        showToast('Sem conexão. Nada foi alterado.', 'error');
+        return;
+      }
+      showToast(getErrorMessage(err, 'Ação não concluída.'), 'error');
+    }
+  };
+
   const handleJoinQueue = async (name: string, whatsapp: string, serviceId: string) => {
     if (!isShopOpen()) {
       setPendingJoin({ name, whatsapp, serviceId });
@@ -238,14 +265,6 @@ export const StaffDashboard: React.FC = () => {
     },
     [refreshAppointments, loadAvailability]
   );
-
-  if (shopLoading || schedulingLoading) {
-    return (
-      <div className="min-h-screen bg-bg flex items-center justify-center text-accent">
-        <Loader2 className="animate-spin" size={40} />
-      </div>
-    );
-  }
 
   const activeQueue = queue.filter(q => q.status !== 'completed' && q.status !== 'cancelled');
   const peopleWaiting = activeQueue.filter(q => q.status === 'waiting').length;
@@ -364,11 +383,20 @@ export const StaffDashboard: React.FC = () => {
                 </Button>
               </div>
 
+              {queueStale && (
+                <StaleBanner onRefresh={() => void refreshQueue()} />
+              )}
+
               <div className="space-y-4">
-                {activeQueue.length === 0 ? (
-                  <div className="text-center py-10 bg-surface rounded-xl border border-border border-dashed">
-                    <p className="text-text-muted">Nenhum cliente na fila.</p>
-                  </div>
+                {queueState === 'loading' && activeQueue.length === 0 ? (
+                  <ListSkeleton rows={4} hasIcon />
+                ) : queueState === 'error' && activeQueue.length === 0 ? (
+                  <SectionError
+                    message={queueError ?? 'Não foi possível carregar a fila.'}
+                    onRetry={() => void refreshQueue()}
+                  />
+                ) : queueState === 'ready' && activeQueue.length === 0 ? (
+                  <EmptyState title="Nenhum cliente na fila." />
                 ) : (
                   activeQueue.map((item, index) => (
                     <QueueItemCard
@@ -391,8 +419,7 @@ export const StaffDashboard: React.FC = () => {
                       onAddDependent={setDependentResponsible}
                       onNotify={showToast}
                       onLeaveQueue={id => {
-                        leaveQueue(id);
-                        showToast('Cliente removido.', 'bot');
+                        void runDestructive(() => leaveQueue(id), 'Cliente removido.', 'bot');
                       }}
                     />
                   ))
@@ -402,32 +429,44 @@ export const StaffDashboard: React.FC = () => {
           )}
 
           {activeTab === 'appointments' && settings && (
-            <AppointmentCalendar
-              appointments={appointments}
-              services={services}
-              staff={staff}
-              settings={settings}
-              currentUserId={user?.id}
-              currentUserRole={user?.role}
-              occupancy={availability}
-              onBook={async d => {
-                await bookAppointment(d);
-                showToast('Agendado com sucesso!');
-              }}
-              onCancel={id => {
-                cancelAppointment(id);
-                showToast('Cancelado');
-              }}
-              onCheckIn={appt => {
-                checkInAppointment(appt);
-                showToast('Check-in realizado!');
-              }}
-              onNoShow={async id => {
-                await markAppointmentNoShow(id);
-                showToast('Cliente marcado como não compareceu');
-              }}
-              onDateChange={handleDateChange}
-            />
+            <>
+              {appointmentsStale && (
+                <StaleBanner onRefresh={() => void refreshAppointments()} />
+              )}
+              {appointmentsState === 'loading' && appointments.length === 0 ? (
+                <ListSkeleton rows={5} hasIcon />
+              ) : appointmentsState === 'error' && appointments.length === 0 ? (
+                <SectionError
+                  message={appointmentsError ?? 'Não foi possível carregar a agenda.'}
+                  onRetry={() => void refreshAppointments()}
+                />
+              ) : (
+                <AppointmentCalendar
+                  appointments={appointments}
+                  services={services}
+                  staff={staff}
+                  settings={settings}
+                  currentUserId={user?.id}
+                  currentUserRole={user?.role}
+                  occupancy={availability}
+                  onBook={async d => {
+                    await bookAppointment(d);
+                    showToast('Agendado com sucesso!');
+                  }}
+                  onCancel={id => {
+                    void runDestructive(() => cancelAppointment(id), 'Cancelado');
+                  }}
+                  onCheckIn={appt => {
+                    void runDestructive(() => checkInAppointment(appt), 'Check-in realizado!');
+                  }}
+                  onNoShow={async id => {
+                    await markAppointmentNoShow(id);
+                    showToast('Cliente marcado como não compareceu');
+                  }}
+                  onDateChange={handleDateChange}
+                />
+              )}
+            </>
           )}
 
           {activeTab === 'appointments' && !settings && (
@@ -684,6 +723,19 @@ export const StaffDashboard: React.FC = () => {
     </>
   );
 };
+
+const StaleBanner: React.FC<{ onRefresh: () => void }> = ({ onRefresh }) => (
+  <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-text-primary">
+    <span>Dados podem estar desatualizados.</span>
+    <button
+      type="button"
+      onClick={onRefresh}
+      className="inline-flex items-center gap-1 text-sm font-medium text-text-primary underline-offset-4 hover:underline"
+    >
+      <RefreshCw size={14} aria-hidden="true" /> Atualizar
+    </button>
+  </div>
+);
 
 const LowStockBanner: React.FC = () => {
   const [count, setCount] = useState(0);

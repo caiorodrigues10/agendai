@@ -7,6 +7,7 @@ import { getErrorMessage } from '@/utils/errorMessage';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBarbershopFilters } from '@/contexts/BarbershopFiltersContext';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { SectionError } from '../../components/patterns';
 
 const primary =
   'inline-flex min-h-9 items-center justify-center gap-1.5 rounded-xl bg-accent px-3 py-1.5 text-xs font-semibold text-accent-fg hover:bg-accent-hover disabled:opacity-50';
@@ -234,14 +235,7 @@ export function MultiUnitDashboard({ orgId }: { orgId: string }) {
   }
 
   if (error) {
-    return (
-      <div role="alert" className="rounded-xl border border-danger/30 bg-danger/10 p-4">
-        <p className="mb-3 text-sm text-danger">{error}</p>
-        <button type="button" onClick={() => void refetch()} className={secondary}>
-          Tentar novamente
-        </button>
-      </div>
-    );
+    return <SectionError message={error} onRetry={() => void refetch()} />;
   }
 
   if (shops.length === 0) {
@@ -261,11 +255,7 @@ export function MultiUnitDashboard({ orgId }: { orgId: string }) {
       <div className="flex flex-wrap items-center justify-end gap-3">
         <AddShopControl orgId={orgId} onAdded={() => void refetch()} />
       </div>
-      {detachError && (
-        <p role="alert" className="rounded-xl border border-danger/30 bg-danger/10 p-3 text-sm text-danger">
-          {detachError}
-        </p>
-      )}
+      {detachError && <SectionError message={detachError} />}
       <ul className="grid gap-3 sm:grid-cols-2">
         {shops.map(shop => (
           <ShopCard

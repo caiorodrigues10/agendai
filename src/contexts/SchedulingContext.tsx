@@ -20,12 +20,25 @@ import { useBarbershop } from './BarbershopContext';
 import { AvailabilitySlot, mapAppointmentFromApi, formatDateISO } from '../utils/schedulingUtils';
 import { logger } from '../utils/logger';
 import { readClientId } from '../utils/clientIdStorage';
+import { getErrorMessage } from '../utils/errorMessage';
+
+export type ResourceStatus = 'idle' | 'loading' | 'ready' | 'error';
 
 interface SchedulingContextValue {
   loading: boolean;
   queue: QueueItem[];
+  queueState: ResourceStatus;
+  queueError: string | null;
+  queueStale: boolean;
   appointments: Appointment[];
+  appointmentsState: ResourceStatus;
+  appointmentsError: string | null;
+  appointmentsStale: boolean;
+  appointmentsTruncated: boolean;
   availability: AvailabilitySlot[];
+  availabilityState: ResourceStatus;
+  availabilityError: string | null;
+  availabilityStale: boolean;
   aiInsight: AIInsight | null;
   clientId: string;
   completedCount: number;
@@ -39,7 +52,19 @@ interface SchedulingContextValue {
   updateQueueStatus: (
     id: string,
     status: QueueItem['status'],
-    extras?: { insertAt?: number; paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado'; commissionSplits?: { professionalId: string; percentage: number }[]; retailSale?: import('../infra/productsApi').RetailSalePayload }
+    extras?: {
+      insertAt?: number;
+      paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado';
+      commissionSplits?: { professionalId: string; percentage: number }[];
+      retailSale?: import('../infra/productsApi').RetailSalePayload;
+      procedure?: {
+        title: string;
+        formula?: string;
+        details?: string;
+        serviceName?: string;
+        professionalName?: string;
+      };
+    }
   ) => Promise<void>;
   deleteHistoryItem: (id: string) => Promise<void>;
   bookAppointment: (data: any) => Promise<void>;
@@ -47,6 +72,7 @@ interface SchedulingContextValue {
   cancelAppointment: (id: string) => Promise<void>;
   markAppointmentNoShow: (id: string) => Promise<void>;
   checkInAppointment: (appt: Appointment) => Promise<void>;
+  refreshQueue: () => Promise<void>;
   refreshAppointments: (date?: string) => Promise<void>;
   loadAvailability: (date: string, staffId?: string) => Promise<void>;
 }
@@ -56,6 +82,16 @@ const SchedulingContext = createContext<SchedulingContextValue | undefined>(unde
 /** Fallback de polling quando o WebSocket está desconectado (ms). */
 const POLLING_INTERVAL_MS = 60_000;
 const WS_RECONNECT_MAX_MS = 30_000;
+/** Paginação da agenda: 100 por página, cap de 10 páginas (1000 registros). */
+const APPOINTMENTS_PAGE_SIZE = 100;
+const APPOINTMENTS_MAX_PAGES = 10;
+
+function isAbortError(error: unknown): boolean {
+  return (
+    (error instanceof DOMException && error.name === 'AbortError') ||
+    (error instanceof Error && error.name === 'AbortError')
+  );
+}
 
 function sameSnapshot(a: unknown, b: unknown): boolean {
   try {
@@ -72,8 +108,15 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   const { services, settings } = useBarbershop();
   const [loading, setLoading] = useState(true);
   const [queue, setQueue] = useState<QueueItem[]>([]);
+  const [queueState, setQueueState] = useState<ResourceStatus>('idle');
+  const [queueError, setQueueError] = useState<string | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [appointmentsState, setAppointmentsState] = useState<ResourceStatus>('idle');
+  const [appointmentsError, setAppointmentsError] = useState<string | null>(null);
+  const [appointmentsTruncated, setAppointmentsTruncated] = useState(false);
   const [availability, setAvailability] = useState<AvailabilitySlot[]>([]);
+  const [availabilityState, setAvailabilityState] = useState<ResourceStatus>('idle');
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
   const [aiInsight, setAiInsight] = useState<AIInsight | null>(null);
   const [clientId, setClientId] = useState(readClientId);
   const [completedCount, setCompletedCount] = useState(0);
@@ -81,14 +124,77 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   const lastAppointmentQueryRef = useRef<{ date?: string; from?: string; to?: string } | null>(null);
   const wsConnectedRef = useRef(false);
 
+  // Corrida/cancelamento: cada ciclo incrementa o requestId e aborta o fetch anterior.
+  // Respostas antigas são descartadas (não setam estado) e aborts são ignorados.
+  const queueRequestIdRef = useRef(0);
+  const queueAbortRef = useRef<AbortController | null>(null);
+  const appointmentsRequestIdRef = useRef(0);
+  const appointmentsAbortRef = useRef<AbortController | null>(null);
+  const availabilityRequestIdRef = useRef(0);
+  const availabilityAbortRef = useRef<AbortController | null>(null);
+
+  // Has-data refs p/ calcular stale sem depender dos arrays nas callbacks.
+  const queueHasDataRef = useRef(false);
+  const appointmentsHasDataRef = useRef(false);
+  const availabilityHasDataRef = useRef(false);
+  useEffect(() => {
+    queueHasDataRef.current = queue.length > 0;
+  }, [queue]);
+  useEffect(() => {
+    appointmentsHasDataRef.current = appointments.length > 0;
+  }, [appointments]);
+  useEffect(() => {
+    availabilityHasDataRef.current = availability.length > 0;
+  }, [availability]);
+
+  // Troca de salão: aborta fetches em voo, descarta a última consulta da agenda
+  // e reseta os recursos (o efeito principal recarrega tudo em seguida).
+  useEffect(() => {
+    lastAppointmentQueryRef.current = null;
+    queueAbortRef.current?.abort();
+    appointmentsAbortRef.current?.abort();
+    availabilityAbortRef.current?.abort();
+    queueRequestIdRef.current += 1;
+    appointmentsRequestIdRef.current += 1;
+    availabilityRequestIdRef.current += 1;
+    setQueue([]);
+    setQueueState('idle');
+    setQueueError(null);
+    setAppointments([]);
+    setAppointmentsState('idle');
+    setAppointmentsError(null);
+    setAppointmentsTruncated(false);
+    setAvailability([]);
+    setAvailabilityState('idle');
+    setAvailabilityError(null);
+  }, [barbershopId]);
+
   const loadAvailability = useCallback(
-    async (date: string, staffId?: string) => {
+    async (date: string, staffId?: string, options?: { silent?: boolean }) => {
       if (!barbershopId) return;
+      const requestId = ++availabilityRequestIdRef.current;
+      availabilityAbortRef.current?.abort();
+      const controller = new AbortController();
+      availabilityAbortRef.current = controller;
+      if (!options?.silent) {
+        setAvailabilityState('loading');
+        setAvailabilityError(null);
+      }
       try {
-        const slots = await schedulingApi.getAvailability(barbershopId, date, staffId);
+        const slots = await schedulingApi.getAvailability(barbershopId, date, staffId, controller.signal);
+        if (requestId !== availabilityRequestIdRef.current) return;
         setAvailability(Array.isArray(slots) ? slots : []);
-      } catch {
-        setAvailability([]);
+        setAvailabilityState('ready');
+        setAvailabilityError(null);
+      } catch (error) {
+        if (requestId !== availabilityRequestIdRef.current || isAbortError(error)) return;
+        if (options?.silent) return; // polling: mantém dados anteriores (stale via estado)
+        logger.error('Falha ao carregar disponibilidade', error);
+        setAvailabilityState('error');
+        setAvailabilityError(
+          getErrorMessage(error, 'Não foi possível carregar os horários.')
+        );
+        // Regra de ouro: nunca zera os dados — o stale é derivado de hasData + erro.
       }
     },
     [barbershopId]
@@ -97,13 +203,37 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   const refreshQueue = useCallback(
     async (options?: { silent?: boolean }) => {
       if (!barbershopId) return;
+      const requestId = ++queueRequestIdRef.current;
+      queueAbortRef.current?.abort();
+      const controller = new AbortController();
+      queueAbortRef.current = controller;
+      if (!options?.silent) {
+        setQueueState('loading');
+        setQueueError(null);
+      }
       try {
-        const queueData = (await schedulingApi.listQueue(barbershopId, clientId)) as QueueItem[];
+        const queueData = (await schedulingApi.listQueue(
+          barbershopId,
+          clientId,
+          controller.signal
+        )) as QueueItem[];
+        if (requestId !== queueRequestIdRef.current) return;
         setQueue(prev => (sameSnapshot(prev, queueData) ? prev : queueData));
+        setQueueState('ready');
+        setQueueError(null);
       } catch (error) {
-        if (options?.silent) return; // polling: mantém dados anteriores
+        if (requestId !== queueRequestIdRef.current || isAbortError(error)) return;
+        if (options?.silent) {
+          // Fetch silencioso (WS/poll) falho: marca erro sem apagar conteúdo.
+          if (queueHasDataRef.current) {
+            setQueueState('error');
+            setQueueError(getErrorMessage(error, 'Falha ao atualizar a fila.'));
+          }
+          return;
+        }
         logger.error('Falha ao carregar fila', error);
-        setQueue([]);
+        setQueueState('error');
+        setQueueError(getErrorMessage(error, 'Não foi possível carregar a fila.'));
       }
     },
     [barbershopId, clientId]
@@ -113,19 +243,25 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     async (date?: string, options?: { silent?: boolean; reuseLast?: boolean }) => {
       if (!barbershopId) return;
       if (!authStorage.getAccessToken()) return;
+      const requestId = ++appointmentsRequestIdRef.current;
+      appointmentsAbortRef.current?.abort();
+      const controller = new AbortController();
+      appointmentsAbortRef.current = controller;
+      if (!options?.silent) {
+        setAppointmentsState('loading');
+        setAppointmentsError(null);
+      }
       try {
         let params: {
           barbershopId: string;
           date?: string;
           from?: string;
           to?: string;
-          limit: number;
         } = {
           barbershopId,
-          limit: 100,
         };
         if (options?.reuseLast && lastAppointmentQueryRef.current) {
-          params = { barbershopId, limit: 100, ...lastAppointmentQueryRef.current };
+          params = { barbershopId, ...lastAppointmentQueryRef.current };
         } else if (date) {
           params.date = date;
           lastAppointmentQueryRef.current = { date };
@@ -139,13 +275,45 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
           params.to = to;
           lastAppointmentQueryRef.current = { from, to };
         }
-        params.limit = 100;
-        const data = await schedulingApi.listAppointments(params);
-        const mapped = (data ?? []).map(mapAppointmentFromApi);
+        // Busca TODAS as páginas do intervalo (cap de segurança para intervalos gigantes).
+        const items: unknown[] = [];
+        let totalPages = 1;
+        for (let page = 1; page <= APPOINTMENTS_MAX_PAGES; page += 1) {
+          const result = await schedulingApi.listAppointments(
+            { ...params, page, limit: APPOINTMENTS_PAGE_SIZE },
+            controller.signal
+          );
+          if (requestId !== appointmentsRequestIdRef.current) return;
+          items.push(...result.items);
+          totalPages = result.meta.totalPages || 1;
+          if (page >= totalPages) break;
+        }
+        if (totalPages > APPOINTMENTS_MAX_PAGES) {
+          console.warn(
+            `Agenda truncada: ${totalPages} páginas excedem o limite de ${APPOINTMENTS_MAX_PAGES * APPOINTMENTS_PAGE_SIZE} registros.`
+          );
+          setAppointmentsTruncated(true);
+        } else {
+          setAppointmentsTruncated(false);
+        }
+        const mapped = items.map(mapAppointmentFromApi);
         setAppointments(prev => (sameSnapshot(prev, mapped) ? prev : mapped));
-      } catch {
-        if (options?.silent) return; // polling: mantém dados anteriores
-        setAppointments([]);
+        setAppointmentsState('ready');
+        setAppointmentsError(null);
+      } catch (error) {
+        if (requestId !== appointmentsRequestIdRef.current || isAbortError(error)) return;
+        if (options?.silent) {
+          if (appointmentsHasDataRef.current) {
+            setAppointmentsState('error');
+            setAppointmentsError(getErrorMessage(error, 'Falha ao atualizar a agenda.'));
+          }
+          return;
+        }
+        logger.error('Falha ao carregar agenda', error);
+        setAppointmentsState('error');
+        setAppointmentsError(
+          getErrorMessage(error, 'Não foi possível carregar a agenda.')
+        );
       }
     },
     [barbershopId]
@@ -361,6 +529,13 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       paymentMethod?: 'pix' | 'credit_card' | 'debit_card' | 'fiado';
       commissionSplits?: { professionalId: string; percentage: number }[];
       retailSale?: import('../infra/productsApi').RetailSalePayload;
+      procedure?: {
+        title: string;
+        formula?: string;
+        details?: string;
+        serviceName?: string;
+        professionalName?: string;
+      };
     }
   ) => {
     const target = queue.find(item => item.id === id);
@@ -373,6 +548,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       payload.paymentMethod = extras?.paymentMethod;
       payload.commissionSplits = extras?.commissionSplits;
       payload.retailSale = extras?.retailSale;
+      payload.procedure = extras?.procedure;
     }
     if (status === 'waiting' && extras?.insertAt != null) {
       payload.insertAt = extras.insertAt;
@@ -456,8 +632,19 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     () => ({
       loading,
       queue,
+      // stale: havia dados e o último fetch falhou (erro visível ou atualização silenciosa).
+      queueState,
+      queueError,
+      queueStale: queue.length > 0 && queueState === 'error',
       appointments,
+      appointmentsState,
+      appointmentsError,
+      appointmentsStale: appointments.length > 0 && appointmentsState === 'error',
+      appointmentsTruncated,
       availability,
+      availabilityState,
+      availabilityError,
+      availabilityStale: availability.length > 0 && availabilityState === 'error',
       aiInsight,
       clientId,
       completedCount,
@@ -469,6 +656,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       cancelAppointment,
       markAppointmentNoShow,
       checkInAppointment,
+      refreshQueue,
       refreshAppointments,
       loadAvailability,
       bookAppointmentPublic,
@@ -476,11 +664,19 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     [
       loading,
       queue,
+      queueState,
+      queueError,
       appointments,
+      appointmentsState,
+      appointmentsError,
+      appointmentsTruncated,
       availability,
+      availabilityState,
+      availabilityError,
       aiInsight,
       clientId,
       completedCount,
+      refreshQueue,
       refreshAppointments,
       loadAvailability,
       bookAppointmentPublic,

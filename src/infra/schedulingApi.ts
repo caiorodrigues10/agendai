@@ -19,6 +19,18 @@ export interface ListAppointmentsParams {
   limit?: number;
 }
 
+export interface ListAppointmentsMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface ListAppointmentsResult {
+  items: unknown[];
+  meta: ListAppointmentsMeta;
+}
+
 interface JoinQueuePayload {
   customerName: string;
   whatsapp: string;
@@ -36,10 +48,17 @@ export interface QueueUpdatePayload {
   insertAt?: number;
   commissionSplits?: { professionalId: string; percentage: number }[];
   retailSale?: import('./productsApi').RetailSalePayload;
+  procedure?: {
+    title: string;
+    formula?: string;
+    details?: string;
+    serviceName?: string;
+    professionalName?: string;
+  };
 }
 
 export const schedulingApi = {
-  listQueue: async (barbershopId?: string, sessionId?: string) => {
+  listQueue: async (barbershopId?: string, sessionId?: string, signal?: AbortSignal) => {
     // status=all: o FinancialDashboard precisa do histórico (completed);
     // a exibição da fila filtra activeQueue no cliente.
     const qs = buildQuery({ barbershopId, sessionId, status: 'all' });
@@ -50,7 +69,8 @@ export const schedulingApi = {
       `/api/queue${qs}`,
       'GET',
       undefined,
-      token
+      token,
+      { signal }
     );
     const data = unwrap<QueueItem[]>(res);
     return Array.isArray(data) ? data : [];
@@ -92,20 +112,44 @@ export const schedulingApi = {
     );
     return unwrap<{ completedCount: number }>(res);
   },
-  listAppointments: (params: ListAppointmentsParams = {}) => {
+  listAppointments: (params: ListAppointmentsParams = {}, signal?: AbortSignal) => {
     const token = authStorage.getAccessToken() || '';
-    if (!token) return Promise.resolve([]);
-    return apiClient<{ success: boolean; data: unknown[] }>(
+    const limit = params.limit ?? 100;
+    const emptyMeta: ListAppointmentsMeta = { total: 0, page: 1, limit, totalPages: 1 };
+    if (!token) return Promise.resolve({ items: [], meta: emptyMeta });
+    return apiClient<{
+      success: boolean;
+      data: unknown[];
+      meta?: Partial<ListAppointmentsMeta>;
+    }>(
       `/api/appointments${buildQuery(params as Record<string, string | undefined>)}`,
       'GET',
       undefined,
-      token
-    ).then(res => unwrap<unknown[]>(res));
+      token,
+      { signal }
+    ).then(res => {
+      const items = unwrap<unknown[]>(res);
+      const list = Array.isArray(items) ? items : [];
+      const meta = res && typeof res === 'object' ? res.meta : undefined;
+      return {
+        items: list,
+        meta: {
+          total: typeof meta?.total === 'number' ? meta.total : list.length,
+          page: typeof meta?.page === 'number' ? meta.page : (params.page ?? 1),
+          limit: typeof meta?.limit === 'number' ? meta.limit : limit,
+          totalPages: typeof meta?.totalPages === 'number' ? meta.totalPages : 1,
+        },
+      };
+    });
   },
-  getAvailability: (barbershopId: string, date: string, staffId?: string) => {
+  getAvailability: (barbershopId: string, date: string, staffId?: string, signal?: AbortSignal) => {
     const qs = buildQuery({ barbershopId, date, staffId });
     return apiClient<{ success: boolean; data: AvailabilitySlot[] }>(
-      `/api/appointments/availability${qs}`
+      `/api/appointments/availability${qs}`,
+      'GET',
+      undefined,
+      undefined,
+      { signal }
     ).then(res => unwrap<AvailabilitySlot[]>(res));
   },
   getAppointmentSlots: (
