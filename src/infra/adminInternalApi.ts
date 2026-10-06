@@ -382,6 +382,8 @@ export type OperationsStatus = 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY';
 export interface OperationsHealth {
   generatedAt: string;
   status: OperationsStatus;
+  /** Motivos que levaram o status geral a sair de HEALTHY. */
+  statusReasons?: { source: string; status: OperationsStatus; message: string }[];
   errors: {
     total24h: number;
     last24h5xx: number;

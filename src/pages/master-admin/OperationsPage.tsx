@@ -62,12 +62,22 @@ const OpsCard: React.FC<{ label: string; value: string; hint?: string; danger?: 
 
 const StatusBanner: React.FC<{ health: OperationsHealth }> = ({ health }) => {
   const meta = STATUS_META[health.status];
+  const reasons = health.statusReasons ?? [];
   return (
     <div className={`flex items-start gap-3 rounded-xl border px-4 py-3 ${meta.tone}`}>
       <span className="mt-0.5">{meta.icon}</span>
       <div>
         <p className="text-sm font-bold">{meta.label}</p>
         <p className="text-xs opacity-80">{meta.description}</p>
+        {reasons.length > 0 && (
+          <ul className="mt-1.5 space-y-0.5">
+            {reasons.map((reason) => (
+              <li key={reason.source} className="text-xs opacity-80">
+                • {reason.message}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
