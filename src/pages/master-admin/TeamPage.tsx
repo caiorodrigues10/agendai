@@ -1,10 +1,28 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
   LuLoader, LuTriangleAlert, LuMail, LuShield, LuShieldOff, LuRefreshCcw, LuSend, LuX
 } from 'react-icons/lu';
 import { adminInternalApi, TeamMember, Invitation, InternalProfile } from '../../infra/adminInternalApi';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Toast } from '../../components/ui/Toast';
+import { Button } from '../../components/ui/Button';
+import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR } from '../../components/ui/Field';
+
+const INVITE_PROFILES = ['ADMIN', 'SUPPORT', 'FINANCE', 'COMMERCIAL', 'READ_ONLY'] as const;
+
+export const inviteFormSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, 'Informe o e-mail.')
+    .email('Informe um e-mail válido.'),
+  profile: z.enum(INVITE_PROFILES),
+});
+
+export type InviteFormData = z.infer<typeof inviteFormSchema>;
 
 const profileOptions: { value: InternalProfile; label: string; hint: string }[] = [
   { value: 'ADMIN', label: 'Admin', hint: 'Acesso total' },
@@ -19,13 +37,23 @@ export const TeamPage: React.FC = () => {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteProfile, setInviteProfile] = useState<InternalProfile>('ADMIN');
-  const [inviting, setInviting] = useState(false);
   const [search, setSearch] = useState('');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'bot' } | null>(null);
   const [confirm, setConfirm] = useState<{ type: 'deactivate' | 'reactivate' | 'revoke'; id: string; name?: string } | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<InviteFormData>({
+    resolver: zodResolver(inviteFormSchema),
+    defaultValues: { email: '', profile: 'ADMIN' },
+  });
+  const inviteProfile = watch('profile');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -43,18 +71,14 @@ export const TeamPage: React.FC = () => {
 
   useEffect(() => { void load(); }, [load]);
 
-  const handleInvite = async () => {
-    if (!inviteEmail.trim()) return;
-    setInviting(true);
+  const handleInvite = async (data: InviteFormData) => {
     try {
-      await adminInternalApi.inviteTeamMember(inviteEmail.trim(), inviteProfile);
-      setInviteEmail('');
+      await adminInternalApi.inviteTeamMember(data.email, data.profile);
+      reset({ email: '', profile: 'ADMIN' });
       load();
       setToast({ message: 'Convite enviado.', type: 'success' });
     } catch (err: any) {
       setToast({ message: err?.message ?? 'Erro ao enviar convite.', type: 'error' });
-    } finally {
-      setInviting(false);
     }
   };
 
@@ -147,19 +171,23 @@ export const TeamPage: React.FC = () => {
       {/* Invite form */}
       <div className="bg-surface border border-border rounded-xl p-4">
         <h2 className="text-sm font-bold mb-3">Convidar funcionário interno</h2>
-        <div className="grid gap-3">
-          <input
-            type="email" placeholder="E-mail do convidado" value={inviteEmail}
-            onChange={(e) => setInviteEmail(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
-            className="w-full px-3 py-2 bg-bg border border-border rounded-lg text-sm focus:outline-none focus:border-accent"
-          />
-          <div className="grid gap-2 sm:grid-cols-5">
+        <form onSubmit={handleSubmit(handleInvite)} noValidate className="grid gap-3">
+          <Field label="E-mail do convidado" error={errors.email?.message}>
+            <input
+              type="email"
+              autoComplete="off"
+              placeholder="E-mail do convidado"
+              className={errors.email ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+              {...register('email')}
+            />
+          </Field>
+          <div className="grid gap-2 sm:grid-cols-5" role="group" aria-label="Perfil do convidado">
             {profileOptions.map((profile) => (
               <button
                 key={profile.value}
                 type="button"
-                onClick={() => setInviteProfile(profile.value)}
+                aria-pressed={inviteProfile === profile.value}
+                onClick={() => setValue('profile', profile.value, { shouldValidate: true })}
                 className={`rounded-lg border px-3 py-2 text-left transition ${
                   inviteProfile === profile.value
                     ? 'border-accent bg-accent/10 text-text-primary'
@@ -172,14 +200,11 @@ export const TeamPage: React.FC = () => {
             ))}
           </div>
           <div className="flex justify-end">
-            <button
-              onClick={handleInvite} disabled={!inviteEmail.trim() || inviting}
-              className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium disabled:opacity-40 hover:bg-accent-hover"
-            >
+            <Button type="submit" loading={isSubmitting} className="flex items-center gap-2">
               <LuSend size={14} /> Enviar convite
-            </button>
+            </Button>
           </div>
-        </div>
+        </form>
       </div>
 
       {/* Members */}
