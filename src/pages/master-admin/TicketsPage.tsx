@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   LuSearch, LuPlus, LuFilter, LuLoader, LuTriangleAlert, LuArrowRight, LuX
 } from 'react-icons/lu';
 import { adminInternalApi, Ticket, PaginatedResponse } from '../../infra/adminInternalApi';
+import { Toast } from '../../components/ui/Toast';
+import { TicketFormDialog } from './TicketFormDialog';
 
 const PRIORITY_COLORS: Record<string, string> = {
   URGENT: 'text-danger bg-danger/10',
@@ -30,6 +32,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 export const TicketsPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [meta, setMeta] = useState({ total: 0, page: 1, limit: 25, totalPages: 0 });
@@ -37,12 +40,14 @@ export const TicketsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState(searchParams.get('search') ?? '');
   const [showFilters, setShowFilters] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const page = Number(searchParams.get('page') ?? 1);
   const status = searchParams.get('status') ?? '';
   const priority = searchParams.get('priority') ?? '';
   const unassigned = searchParams.get('unassigned') ?? '';
   const channel = searchParams.get('channel') ?? '';
+  const isNew = location.pathname === '/master/tickets/new';
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -181,6 +186,18 @@ export const TicketsPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      <TicketFormDialog
+        open={isNew}
+        onClose={() => navigate('/master/tickets')}
+        onSaved={() => {
+          setToast({ message: 'Chamado criado.', type: 'success' });
+          navigate('/master/tickets');
+          void load();
+        }}
+        onError={(message) => setToast({ message, type: 'error' })}
+      />
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };
