@@ -163,7 +163,7 @@ const PublicNpsPage: React.FC = () => {
                     onClick={() => pickScore(value)}
                     className={`h-9 w-9 rounded-lg border text-xs font-bold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-focus ${
                       score === value
-                        ? 'border-accent bg-accent text-white'
+                        ? 'border-accent bg-accent text-accent-fg'
                         : 'border-border bg-bg text-text-secondary hover:border-accent'
                     }`}
                   >

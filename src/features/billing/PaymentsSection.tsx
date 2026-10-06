@@ -102,7 +102,7 @@ const RefundModal: React.FC<RefundModalProps> = ({ payment, onClose, onSubmit, b
           <button
             onClick={() => onSubmit(reason.trim())}
             disabled={!valid || busy}
-            className="flex-1 px-4 py-2.5 bg-danger text-white rounded-xl text-sm font-bold hover:bg-danger transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 bg-danger text-danger-fg rounded-xl text-sm font-bold hover:bg-danger transition-all disabled:opacity-40 flex items-center justify-center gap-2"
           >
             {busy ? <RefreshCcw size={14} className="animate-spin" /> : <RotateCcw size={14} />}
             Confirmar reembolso

@@ -115,7 +115,7 @@ const QueueSimulation = () => {
               <div className="flex items-center gap-2.5">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                    active === i ? 'bg-accent text-white' : 'bg-white/10 text-neutral-400'
+                    active === i ? 'bg-accent text-accent-fg' : 'bg-white/10 text-neutral-400'
                   }`}
                 >
                   {client.position}
@@ -493,7 +493,7 @@ export const FeaturesPage: React.FC = () => {
             >
               <button
                 onClick={() => navigate('/cadastro')}
-                className="bg-accent text-white px-8 py-4 rounded-2xl font-bold text-sm hover:bg-accent transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
+                className="bg-accent text-accent-fg px-8 py-4 rounded-2xl font-bold text-sm hover:bg-accent transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
               >
                 Começar grátis
                 <ArrowRight size={24} className="w-4 h-4" />
@@ -614,7 +614,7 @@ export const FeaturesPage: React.FC = () => {
                     <div
                       key={time}
                       className={`p-2 rounded-lg text-center text-[10px] font-bold ${
-                        i === 1 ? 'bg-accent text-white' : 'bg-white/5 text-neutral-400'
+                        i === 1 ? 'bg-accent text-accent-fg' : 'bg-white/5 text-neutral-400'
                       }`}
                     >
                       {time}
@@ -631,7 +631,7 @@ export const FeaturesPage: React.FC = () => {
                     </div>
                   ))}
                 </div>
-                <div className="p-3 rounded-xl bg-accent text-white text-center text-xs font-bold">
+                <div className="p-3 rounded-xl bg-accent text-accent-fg text-center text-xs font-bold">
                   Confirmar agendamento
                 </div>
               </div>

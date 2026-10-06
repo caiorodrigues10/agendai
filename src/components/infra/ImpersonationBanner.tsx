@@ -54,7 +54,7 @@ export const ImpersonationBanner: React.FC = () => {
   return (
     <div
       role="status"
-      className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-danger px-4 py-2 text-center text-xs font-bold text-white sm:text-sm"
+      className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-danger px-4 py-2 text-center text-xs font-bold text-danger-fg sm:text-sm"
     >
       <span className="inline-flex items-center gap-1.5">
         <LuShieldAlert size={16} aria-hidden />

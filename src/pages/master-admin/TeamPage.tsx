@@ -174,7 +174,7 @@ export const TeamPage: React.FC = () => {
           <div className="flex justify-end">
             <button
               onClick={handleInvite} disabled={!inviteEmail.trim() || inviting}
-              className="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium disabled:opacity-40 hover:bg-accent-hover"
+              className="flex items-center gap-2 px-4 py-2 bg-accent text-accent-fg rounded-lg text-sm font-medium disabled:opacity-40 hover:bg-accent-hover"
             >
               <LuSend size={14} /> Enviar convite
             </button>

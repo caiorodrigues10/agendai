@@ -306,7 +306,7 @@ export const ProductFormModal: React.FC<Props> = ({
                     <button
                       type="button"
                       onClick={handleRemoveImage}
-                      className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-danger text-white"
+                      className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-danger text-danger-fg"
                     >
                       <X size={12} />
                     </button>

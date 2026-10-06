@@ -56,7 +56,7 @@ export const AdminLayout: React.FC = () => {
           {/* Brand */}
           <div className="flex items-center justify-between h-14 px-4 border-b border-border">
             <NavLink to="/master/work" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white font-bold text-sm">
+              <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-accent-fg font-bold text-sm">
                 A
               </div>
               <span className="font-display font-bold text-sm">Agenda Já</span>

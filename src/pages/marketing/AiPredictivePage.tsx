@@ -448,7 +448,7 @@ export const AiPredictivePage: React.FC = () => {
             <div className="hero-cta flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 opacity-0">
               <button
                 onClick={() => navigate('/planos')}
-                className="bg-accent text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-accent transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
+                className="bg-accent text-accent-fg px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-accent transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
               >
                 Ver planos
                 <ArrowRight size={24} className="w-4 h-4" />
@@ -871,7 +871,7 @@ export const AiPredictivePage: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={() => navigate('/planos')}
-              className="bg-accent text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-accent transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
+              className="bg-accent text-accent-fg px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest hover:bg-accent transition-all flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
             >
               Ver planos
               <ArrowRight size={24} className="w-4 h-4" />

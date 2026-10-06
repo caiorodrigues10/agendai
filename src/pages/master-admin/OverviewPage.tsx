@@ -88,7 +88,7 @@ const PeriodSelector: React.FC<{
         aria-pressed={current === option.key}
         onClick={() => onChange(option.key)}
         className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-focus ${
-          current === option.key ? 'bg-accent text-white' : 'text-text-secondary hover:bg-hover-bg'
+          current === option.key ? 'bg-accent text-accent-fg' : 'text-text-secondary hover:bg-hover-bg'
         }`}
       >
         {option.label}

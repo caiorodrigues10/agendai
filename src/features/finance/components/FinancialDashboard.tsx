@@ -342,7 +342,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                     <button
                       type="button"
                       onClick={() => navigate('/planos')}
-                      className="ml-auto rounded-lg bg-danger px-3 py-1.5 text-xs font-bold text-white transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+                      className="ml-auto rounded-lg bg-danger px-3 py-1.5 text-xs font-bold text-danger-fg transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
                     >
                       Fazer upgrade
                     </button>
@@ -397,7 +397,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                   <button
                     type="button"
                     onClick={() => navigate('/planos')}
-                    className="ml-auto rounded-lg bg-danger px-3 py-1.5 text-xs font-bold text-white transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+                    className="ml-auto rounded-lg bg-danger px-3 py-1.5 text-xs font-bold text-danger-fg transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
                   >
                     Fazer upgrade
                   </button>

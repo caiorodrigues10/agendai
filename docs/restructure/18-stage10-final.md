@@ -46,7 +46,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17, notificações em §18, organizações em §19, CRM em §20, submits de Goals/Loyalty em §21, master-admin (primeiras páginas do diretório) em §22, ErrorBoundary + páginas públicas em §23, painéis de onboarding/equipe/indicações/recorrência/equipamentos em §24 e catálogo/posts/suporte em §25 concluídos em 2026-10-05/06; restam réplicas fora dessas áreas).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17, notificações em §18, organizações em §19, CRM em §20, submits de Goals/Loyalty em §21, master-admin (primeiras páginas do diretório) em §22, ErrorBoundary + páginas públicas em §23, painéis de onboarding/equipe/indicações/recorrência/equipamentos em §24, catálogo/posts/suporte em §25 e contraste `bg-accent`/`bg-danger` × `text-white` (19 sites) em §26 concluídos em 2026-10-05/06; sem réplicas de erro de div inline pendentes na lista da D-014).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - ~~**Budget/D-002**~~ → **sanada** (2026-10-05, §11): `@source not` adotado — na reavaliação o delta real é −0,3 KiB CSS (6 utilities, 4 delas fantasmas de ids de fixture) e o único restyle real foi em `TokensGallery` (2 classes).
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -1464,3 +1464,57 @@ paralela no worktree).
 `PublicNpsPage`, `AdminLayout`, `PaymentsSection`, `FinancialDashboard` ×2,
 `ProductFormModal`, `RefundSaleModal` — `TeamManager` L323 já feito no §24); verificar
 `ImpersonationBanner`.
+
+## 26. D-014 — contraste `bg-accent`/`bg-danger` × `text-white` (2026-10-06)
+
+**19 sites / 14 arquivos** sem receita visual (nenhuma story cobre esses nós) — correção
+puro-token, validada por gates + suíte visual completa como prova de não-regressão.
+Inventário de réplicas de erro de div inline da D-014 **fechou no §25**.
+
+### 26.1 O que foi feito
+
+| Padrão | Sites | Tokens de referência |
+|---|---|---|
+| `bg-accent … text-white` → `text-accent-fg` (13) | `marketing/AiPredictivePage` L451/L874 (CTA), `marketing/FeaturesPage` L118/L496/L617/L634 (tabs/CTA/pill), `layouts/admin/AdminLayout` L59 (logo), `master-admin/AccountsPage` L212, `OverviewPage` L91, `TasksPage` L66, `TeamPage` L177, `TicketsPage` L80, `PublicNpsPage` L166 | `Button.tsx:14` (`bg-accent text-accent-fg`); `--color-accent-fg` = `--ag-accent-fg` (theme-aware, `tokens.css:122`) |
+| `bg-danger … text-white` → `text-danger-fg` (6) | `infra/ImpersonationBanner` L57, `billing/PaymentsSection` L105, `finance/FinancialDashboard` L345/L400, `products/ProductFormModal` L309, `products/RefundSaleModal` L170 (`TeamManager` L323 já no §24) | `--color-danger-fg` = `#ffffff` no tema escuro mas **`#0f1110` no claro** (`tokens.css:91`) — `text-white` fixo não acompanha o tema |
+
+- Substituição **por linha-alvo** (script com `assert` de linha e de contagem única de
+  `text-white`) — seguro contra homônimos em arquivos grandes (ex.: `FeaturesPage:1036`
+  `bg-black text-white` **não** tocado; `LandingPage`/`PlansPage` sobre imagem/fundo próprio
+  fora de escopo).
+- **Achado de caminho:** o merge `MasterAdmin rename` (355fd4f) moveu alvos da lista do §22 —
+  `AiPredictivePage`/`FeaturesPage` → `pages/marketing/`, `AdminLayout` → `layouts/admin/`;
+  recipe: **re-grepar os arquivos antes de reaproveitar âncoras de batches anteriores**.
+
+### 26.2 Prova de não-regressão (sem receita visual)
+
+Nenhuma story renderiza esses 19 nós → sem baseline nova possível; em vez disso,
+**suíte visual completa com rebuild**: `npm run test:visual` → **193/193 pass,
+193 snapshots pass, 0 falhas, 0 atualizações** — as páginas alteradas ou não entram no
+viewport de alguma story ou renderizam pixel-idêntico (accent-fg resolve-se branco no
+tema escuro padrão).
+
+### 26.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npm run typecheck` | **0 erros** |
+| lint | `npm run lint` (`eslint src`) | **0 err / 484 warn** (teto 11/593) |
+| testes app | `npx vitest run --project app` | **365/365 (74 arquivos)** |
+| contratos (testes) | `npm run test:contract` | **6/6** |
+| contrato frontend↔backend | `npm run contract:check` | **VERMELHO — 1 chamada** (`adminAccountActionsApi.ts:40 POST /api/admin/accounts/{}/{}`). Caiu de **24 → 1**: a sessão paralela registrou as rotas faltantes no backend (commit `7e496b7`, 2026-10-06 12:11); `scripts/api-contract-debt.json` segue **vazio**; decisão do usuário (documentar o vermelho, não adicionar exceções) mantida |
+| storybook + a11y | `npm run test:storybook` | **193/193 (64 arquivos)**, `a11y.test: 'error'` |
+| regressão visual | `test:visual` (com build) | **193/193, 0 atualizados, EXIT=0** |
+| build prod (PWA) | `npm run build` | **105 precache / 2800,28 KiB** (32,82s) |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** |
+| docs | `docs:check` | **OK (frontend)** |
+| gate delivery | `npm run verify:delivery` | **falha em `contract:check` (1 chamada)** (docs/typecheck/test:contract verdes antes) |
+
+**Nota sobre `contract:check` vermelho:** mesma nota dos §21–§25, agora com **1** chamada
+(restante do vermelho de 24); nenhuma chamada nova introduzida por este batch; `git add`
+seletivo (nenhum arquivo da sessão paralela no worktree).
+
+**D-014 — situação após o batch 14:** inventário de réplicas de erro **fechado** (§25) e
+lote de contraste **fechado** (§26); restam apenas os itens fora de escopo documentados
+(`AppointmentBookingModal`, erros de domínio por toast, validação de campo, fallbacks
+Tier-2, `PaginationBar`/badges) e a frente contínua de painéis `bg-danger/10` inline.

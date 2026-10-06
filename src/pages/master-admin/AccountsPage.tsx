@@ -209,7 +209,7 @@ export const AccountsPage: React.FC = () => {
               onClick={() => setParams({ status: option.key || null, page: null })}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                 (status ?? '') === option.key
-                  ? 'bg-accent text-white'
+                  ? 'bg-accent text-accent-fg'
                   : 'text-text-secondary hover:bg-hover-bg'
               }`}
             >

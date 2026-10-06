@@ -77,7 +77,7 @@ export const TicketsPage: React.FC = () => {
         <h1 className="text-xl font-bold">Atendimento</h1>
         <button
           onClick={() => navigate('/master/tickets/new')}
-          className="flex items-center gap-2 px-3 py-1.5 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent-hover"
+          className="flex items-center gap-2 px-3 py-1.5 bg-accent text-accent-fg rounded-lg text-sm font-medium hover:bg-accent-hover"
         >
           <LuPlus size={16} /> Novo chamado
         </button>
