@@ -490,8 +490,8 @@ export const adminApi = {
     if (params.status) query.set('status', params.status);
     if (params.from) query.set('from', params.from);
     if (params.to) query.set('to', params.to);
-    const suffix = query.toString() ? `?${query.toString()}` : '';
-    return apiFetch(`/api/admin/billing/statement.csv${suffix}`, { method: 'GET' }, getAuthHeader());
+    const qs = query.toString() ? `?${query.toString()}` : '';
+    return apiFetch(`/api/admin/billing/statement.csv${qs}`, { method: 'GET' }, getAuthHeader());
   },
 
   getBillingSummary: () =>

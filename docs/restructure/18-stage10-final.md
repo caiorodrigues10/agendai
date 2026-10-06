@@ -46,7 +46,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17, notificações em §18, organizações em §19 e CRM em §20 concluídos em 2026-10-05; restam réplicas fora dessas áreas).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17, notificações em §18, organizações em §19, CRM em §20 e submits de Goals/Loyalty em §21 concluídos em 2026-10-05; restam réplicas fora dessas áreas).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - ~~**Budget/D-002**~~ → **sanada** (2026-10-05, §11): `@source not` adotado — na reavaliação o delta real é −0,3 KiB CSS (6 utilities, 4 delas fantasmas de ids de fixture) e o único restyle real foi em `TokensGallery` (2 classes).
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -982,3 +982,85 @@ o `Default`, passou). PIL dos 3 diffs:
 **Próximas áreas da D-014:** master-admin, `ErrorBoundary`, páginas públicas,
 `OnboardingChecklist`, os submits `GoalsPanel`/`LoyaltyPanel`, `TeamManager` e
 `RecurringPackagesPanel`.
+## 21. D-014 — submits de Goals e Loyalty (2026-10-05)
+
+Décima área da receita story-first: os dois painéis já tinham stories (painéis do §14),
+mas **sem cobertura do submit que falha** — 2 stories `ErroSalvar` criadas e **2 sites**
+de banner convertidos.
+
+### 21.1 O que foi feito
+
+- **2 stories novas** (MSW 500 no POST do submit, antes da conversão):
+  | Story | Endpoint que falha | Play |
+  |---|---|---|
+  | `Metas/GoalsPanel.ErroSalvar` | `POST /api/barbershops/:id/goals` → `Não foi possível criar a meta.` | abrir modal → selecionar `Ana Souza` (SmartSelect) → target `5000` → datas `05/10`–`31/10` → esperar submit habilitado → clicar → `findByText` |
+  | `Fidelidade/LoyaltyPanel.ErroSalvar` | `POST /api/barbershops/:id/loyalty/program` → `Não foi possível salvar a configuração de fidelidade.` | `Configuração` → `Salvar` → `findByText` |
+- **2 sites convertidos:** `GoalsPanel` (banner `px-3 py-2 text-xs` dentro do modal,
+  L302) → `<SectionError message={submitError} />` (pai `space-y-4` dispensa margem);
+  `LoyaltyPanel` (L173) → `<SectionError message={saveError} className="mt-4" />`.
+  `AlertCircle` órfão removido dos imports de ambos (`Check`/`X`/`Loader2` seguem em uso).
+- **Fix de a11y exposto pela nova story:** botão `X` de fechar do modal de `GoalsPanel`
+  era `button` só com ícone → axe `button-name`; ganhou `aria-label="Fechar"` (a story
+  `ErroSalvar` falhava no a11y até o fix).
+- **Fix de gate de contrato absorvido do merge paralelo:** `adminApi.ts` usava
+  `` `/api/admin/billing/statement.csv${suffix}` `` — o extractor de rotas
+  (`check-api-contract.mjs`) só aceita sufixo de query com nomes `qs|query|…` e quebrava
+  com `Interpolação ambígua`; renomeado `suffix` → `qs` (convenção já usada no resto de
+  `src/infra`).
+- **Achado de play (importante):** clicar na opção do `SmartSelect` com `userEvent.click`
+  é **race** — o popup (`FloatingUI`) pode reposicionar entre `pointerdown`/`pointerup` e o
+  click coordenado cai no ancestral, perdendo a seleção **silenciosamente** (submit fica
+  `disabled` → guarda `!form.professionalId` retorna sem banner → screenshot sem erro).
+  Alternativa determinística: `fireEvent.click(option)` direto no elemento + `waitFor`
+  do texto do trigger (`Ana Souza`); o submit só é clicado após
+  `waitFor(expect(...).not.toBeDisabled())`. Datas via `fireEvent.change` em
+  `input[type=date]` seguem confiáveis (precedente `OwnerFinancialPanel`).
+
+### 21.2 Prova visual
+
+2 baselines gravadas da UI antiga (`2 written` → 138 snapshots); conversão; rodada de
+prova **com rebuild** falhou **exatamente as 2 stories novas** (136 restantes passou).
+PIL dos 2 diffs:
+
+- `GoalsPanel.ErroSalvar` (4,114%): banner vermelho y604–638 (34px) → `SectionError`
+  y594–648 (54px) — o modal é centralizado e cresceu +20px (topo −10, base +10);
+  conteúdo abaixo com shift **+10px** (resíduo 2,502 vs 3,091 sem shift); **margens 0**
+  (nada fora do modal alterado);
+- `LoyaltyPanel.ErroSalvar` (18,315%): banner y452–486 (34px) → y452–506 (54px), topo
+  idêntico; conteúdo abaixo com shift puro **+20px** (resíduo 4,893 vs 8,061), flagged
+  acima do banner **0,000**.
+
+`-u` atualizou as **2**; re-run `test:visual -- --no-build` → **138/138, 0 atualizados**.
+
+### 21.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npx tsc -p tsconfig.json --noEmit` | **0 erros** |
+| lint | `npm run lint` (`eslint src`) | **0 err / 484 warn** (teto 11/593) |
+| testes app+storybook | `npm test` | **503/503 (114 arquivos)** |
+| contratos (testes) | `npm run test:contract` | **6/6** |
+| contrato frontend↔backend | `npm run contract:check` | **VERMELHO — 24 chamadas sem rota backend** (preexistente, ver nota) |
+| storybook + a11y | `npm run test:storybook` | **138/138 (40 arquivos)**, `a11y.test: 'error'` |
+| regressão visual | `test:visual` (prova, rebuild) + `-- --no-build` (re-run) | **138/138, 0 atualizados** (2 atualizados na prova) |
+| build prod (PWA) | `npm run build` | **106 precache / 2804,48 KiB** (20,53s) |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** |
+| docs | `docs:check` | **OK (frontend)** |
+
+**Nota sobre `contract:check` vermelho (fora do escopo deste batch):** as 24 chamadas
+(`/auth/sessions`, `/nps/*`, `/admin/billing/*`, `/admin/engagement/summary`,
+`/admin/accounts`, `/admin/overview`, `adminSessionsApi`, `adminAccountActionsApi`,
+`adminAuditApi` facets/alerts/export …) vêm **inteiramente dos commits da sessão
+paralela de 03–05/10 (`f08b563`, `ff50637`, `1656ade`, `aaf20b4`)** — não existiam na
+árvore quando os gates do §19/§20 rodaram (pré-rebase) e estão vermelhos em `origin/main`
+independentemente deste batch. `scripts/api-contract-debt.json` está vazio com a regra
+"não adicionar exceções para fazer a checagem passar", então **não** foram adicionadas
+dívidas; decisão registrada com o usuário: **commitar o batch documentando o vermelho
+preexistente** e deixar o alinhamento wrapper↔rota para os lotes seguintes da sessão
+paralela (frontend/backend authz+billing). O crash do checker
+(`statement.csv${suffix}`) já foi corrigido aqui (`qs`).
+
+**Próximas áreas da D-014:** master-admin (6 sites boxados em `src/pages/master-admin/`),
+`ErrorBoundary`, páginas públicas, `OnboardingChecklist`, `TeamManager`,
+`RecurringPackagesPanel`, `CategoryManager`, `PostDetail`/`PostTagEditor` e
+`SupportReport*`.

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
+import { userEvent, within } from 'storybook/test';
 import { LoyaltyPanel } from './LoyaltyPanel';
 import { StoryProviders } from '../../tests/storyProviders';
 
@@ -51,5 +52,34 @@ export const Erro: Story = {
         ),
       ],
     },
+  },
+};
+
+/** Falha da submissão (POST program → 500): banner após "Salvar". */
+export const ErroSalvar: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        ...mswHandlers(program),
+        http.post('/api/barbershops/:id/loyalty/program', () =>
+          HttpResponse.json(
+            { success: false, message: 'Não foi possível salvar a configuração de fidelidade.' },
+            { status: 500 }
+          )
+        ),
+      ],
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText('Configuração', {}, { timeout: 10000 });
+    await userEvent.click(
+      await canvas.findByRole('button', { name: 'Salvar' }, { timeout: 10000 })
+    );
+    await canvas.findByText(
+      /Não foi possível salvar a configuração de fidelidade/,
+      {},
+      { timeout: 10000 }
+    );
   },
 };

@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  LuCircleAlert as AlertCircle,
   LuCheck as Check,
   LuGift as Gift,
   LuInfo as Info,
@@ -170,12 +169,7 @@ export const LoyaltyPanel: React.FC = () => {
           </Field>
         </div>
 
-        {saveError && (
-          <div className="mt-4 flex items-center gap-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
-            <AlertCircle size={14} />
-            {saveError}
-          </div>
-        )}
+        {saveError && <SectionError message={saveError} className="mt-4" />}
 
         {saved && (
           <div className="mt-4 flex items-center gap-2 rounded-lg border border-success/30 bg-success/10 px-3 py-2 text-xs text-success">

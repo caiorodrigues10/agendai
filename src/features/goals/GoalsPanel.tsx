@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  LuCircleAlert as AlertCircle,
   LuLoaderCircle as Loader2,
   LuPlus as Plus,
   LuTarget as Target,
@@ -240,6 +239,7 @@ export const GoalsPanel: React.FC = () => {
               <h3 className="text-lg font-semibold text-text-primary">Criar meta</h3>
               <button
                 type="button"
+                aria-label="Fechar"
                 onClick={() => setModalOpen(false)}
                 className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-text-secondary transition-colors hover:bg-bg hover:text-text-primary"
               >
@@ -299,12 +299,7 @@ export const GoalsPanel: React.FC = () => {
                 </Field>
               </div>
 
-              {submitError && (
-                <div className="flex items-center gap-2 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
-                  <AlertCircle size={14} />
-                  {submitError}
-                </div>
-              )}
+              {submitError && <SectionError message={submitError} />}
             </div>
 
             <div className={FORM_FOOTER}>
