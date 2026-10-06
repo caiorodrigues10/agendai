@@ -84,7 +84,7 @@ const StatusBanner: React.FC<{ health: OperationsHealth }> = ({ health }) => {
 };
 
 const Panel: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-  <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
+  <div className="bg-surface border border-border rounded-xl p-4 space-y-3 min-w-0">
     <h2 className="text-sm font-bold">{title}</h2>
     {children}
   </div>

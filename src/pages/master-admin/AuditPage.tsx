@@ -31,11 +31,13 @@ const AuditLogList: React.FC<{
           <div className="w-2 h-2 rounded-full bg-accent mt-2 shrink-0" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono text-accent font-medium">{log.action}</span>
+              <span className="text-xs font-mono text-accent font-medium min-w-0 truncate">
+                {log.action}
+              </span>
               <span className="text-xs text-text-muted">em</span>
               <span className="text-xs font-medium">{log.resource}</span>
               {log.barbershopId && (
-                <span className="rounded border border-border bg-bg px-1.5 py-0.5 text-[10px] font-bold text-text-secondary shrink-0">
+                <span className="rounded border border-border bg-bg px-1.5 py-0.5 text-[10px] font-bold text-text-secondary min-w-0 truncate">
                   {shops.find((shop) => shop.id === log.barbershopId)?.name ?? 'Salão'}
                 </span>
               )}
