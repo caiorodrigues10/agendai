@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  LuCircleAlert as AlertCircle,
   LuGift as Gift,
   LuRefreshCcw as RefreshCcw,
   LuTrendingUp as TrendingUp,
@@ -9,6 +8,7 @@ import {
 } from 'react-icons/lu';
 import { adminApi, ReferralPlatformStats } from '../../infra/adminApi';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { SectionError } from '../../components/patterns';
 
 export const ReferralsTab: React.FC = () => {
   const [data, setData] = useState<ReferralPlatformStats | null>(null);
@@ -46,21 +46,7 @@ export const ReferralsTab: React.FC = () => {
   }
 
   if (error && !data) {
-    return (
-      <div className="p-4 rounded-xl border border-danger/30 bg-danger/10 text-danger text-sm flex gap-2 items-start">
-        <AlertCircle size={16} className="shrink-0 mt-0.5" />
-        <div className="flex-1">
-          {error}
-          <button
-            type="button"
-            onClick={() => void fetchStats()}
-            className="mt-2 text-xs font-bold underline"
-          >
-            Tentar de novo
-          </button>
-        </div>
-      </div>
-    );
+    return <SectionError message={error} onRetry={() => void fetchStats()} />;
   }
 
   if (!data) return null;

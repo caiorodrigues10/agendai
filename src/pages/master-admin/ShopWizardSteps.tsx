@@ -2,6 +2,7 @@ import React from 'react';
 import { z } from 'zod';
 import type { UseFormGetValues, UseFormRegister } from 'react-hook-form';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR } from '../../components/ui/Field';
+import { SectionError } from '../../components/patterns';
 import type { Plan } from '../../infra/plansApi';
 
 export const shopSchema = z.object({
@@ -223,11 +224,7 @@ export const WizardFormBody: React.FC<WizardFormBodyProps> = ({
   planName,
 }) => (
   <form id="shop-wizard-form" onSubmit={onSubmit} noValidate className="space-y-4">
-    {submitError && (
-      <p role="alert" className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
-        {submitError}
-      </p>
-    )}
+    {submitError && <SectionError message={submitError} />}
     {step === 0 && <ShopStep errors={errors} register={register} getValues={getValues} />}
     {step === 1 && (
       <AddressStep

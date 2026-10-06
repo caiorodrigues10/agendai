@@ -23,7 +23,7 @@ interface PanelShellProps {
 const PanelShell: React.FC<PanelShellProps> = ({ title, hint, error, onRetry, children }) => (
   <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
     <div>
-      <h3 className="text-sm font-bold text-text-primary">{title}</h3>
+      <h2 className="text-sm font-bold text-text-primary">{title}</h2>
       <p className="text-xs text-text-muted mt-0.5">{hint}</p>
     </div>
     {error ? (

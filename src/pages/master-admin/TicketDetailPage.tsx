@@ -4,6 +4,7 @@ import {
   LuArrowLeft, LuLoader, LuTriangleAlert, LuSend, LuClock, LuUser, LuTag, LuMessageSquare
 } from 'react-icons/lu';
 import { adminInternalApi, Ticket } from '../../infra/adminInternalApi';
+import { SectionError } from '../../components/patterns';
 import { useAuth } from '../../contexts/AuthContext';
 
 const PRIORITY_COLORS: Record<string, string> = {
@@ -133,7 +134,7 @@ export const TicketDetailPage: React.FC = () => {
     <div className="space-y-6 max-w-4xl">
       {/* Header */}
       <div className="flex items-start gap-4">
-        <button onClick={() => navigate('/master/tickets')} className="mt-1 p-1 rounded hover:bg-surface-2">
+        <button type="button" onClick={() => navigate('/master/tickets')} aria-label="Voltar" className="mt-1 p-1 rounded hover:bg-surface-2">
           <LuArrowLeft size={18} />
         </button>
         <div className="flex-1">
@@ -163,7 +164,7 @@ export const TicketDetailPage: React.FC = () => {
       {/* Action bar */}
       <div className="flex flex-wrap gap-2">
         {!ticket.assignedTo?.id && ticket.status === 'OPEN' && (
-          <button onClick={handleAssign} className="px-3 py-1.5 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent-hover">
+          <button onClick={handleAssign} className="px-3 py-1.5 bg-accent text-accent-fg rounded-lg text-sm font-medium hover:bg-accent-hover">
             Assumir chamado
           </button>
         )}
@@ -194,9 +195,7 @@ export const TicketDetailPage: React.FC = () => {
         )}
       </div>
 
-      {actionError && (
-        <p className="text-sm text-danger bg-danger/10 px-3 py-2 rounded-lg">{actionError}</p>
-      )}
+      {actionError && <SectionError message={actionError} />}
 
       {/* Description */}
       <div className="bg-surface border border-border rounded-xl p-4">
@@ -251,8 +250,9 @@ export const TicketDetailPage: React.FC = () => {
           />
           <button
             onClick={handleAddComment}
+            aria-label="Enviar comentário"
             disabled={!commentText.trim() || submitting}
-            className="px-3 py-2 bg-accent text-white rounded-lg text-sm disabled:opacity-40"
+            className="px-3 py-2 bg-accent text-accent-fg rounded-lg text-sm disabled:opacity-40"
           >
             <LuSend size={14} />
           </button>

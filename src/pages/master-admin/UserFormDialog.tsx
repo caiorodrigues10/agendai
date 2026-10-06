@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ModalShell } from '../../components/patterns/ModalShell';
+import { SectionError } from '../../components/patterns';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_FOOTER } from '../../components/ui/Field';
 import { Button } from '../../components/ui/Button';
 import { adminApi, BarbershopListItem, UserListItem } from '../../infra/adminApi';
@@ -134,11 +135,7 @@ export const UserFormDialog: React.FC<UserFormDialogProps> = ({
       onClose={handleClose}
       body={
         <form id="user-form" onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-          {submitError && (
-            <p role="alert" className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
-              {submitError}
-            </p>
-          )}
+          {submitError && <SectionError message={submitError} />}
           <Field label="Nome" error={errors.name?.message}>
             <input
               type="text"

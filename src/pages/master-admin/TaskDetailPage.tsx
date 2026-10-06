@@ -4,6 +4,7 @@ import {
   LuArrowLeft, LuLoader, LuTriangleAlert, LuSend, LuClock, LuCalendar, LuMessageSquare, LuLink2
 } from 'react-icons/lu';
 import { adminInternalApi, Task } from '../../infra/adminInternalApi';
+import { SectionError } from '../../components/patterns';
 
 const PRIORITY_COLORS: Record<string, string> = {
   URGENT: 'text-danger bg-danger/10', HIGH: 'text-warning bg-warning/10',
@@ -94,7 +95,7 @@ export const TaskDetailPage: React.FC = () => {
     <div className="space-y-6 max-w-4xl">
       {/* Header */}
       <div className="flex items-start gap-4">
-        <button onClick={() => navigate('/master/tasks')} className="mt-1 p-1 rounded hover:bg-surface-2">
+        <button type="button" onClick={() => navigate('/master/tasks')} aria-label="Voltar" className="mt-1 p-1 rounded hover:bg-surface-2">
           <LuArrowLeft size={18} />
         </button>
         <div className="flex-1">
@@ -116,7 +117,7 @@ export const TaskDetailPage: React.FC = () => {
       {/* Actions */}
       <div className="flex flex-wrap gap-2">
         {task.status === 'TODO' && (
-          <button onClick={() => handleStatusChange('IN_PROGRESS')} className="px-3 py-1.5 bg-accent text-white rounded-lg text-sm font-medium hover:bg-accent-hover">
+          <button onClick={() => handleStatusChange('IN_PROGRESS')} className="px-3 py-1.5 bg-accent text-accent-fg rounded-lg text-sm font-medium hover:bg-accent-hover">
             Iniciar
           </button>
         )}
@@ -142,7 +143,7 @@ export const TaskDetailPage: React.FC = () => {
         )}
       </div>
 
-      {actionError && <p className="text-sm text-danger bg-danger/10 px-3 py-2 rounded-lg">{actionError}</p>}
+      {actionError && <SectionError message={actionError} />}
 
       {/* Description */}
       {task.description && (
@@ -205,8 +206,8 @@ export const TaskDetailPage: React.FC = () => {
             onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
             className="flex-1 px-3 py-2 bg-bg border border-border rounded-lg text-sm focus:outline-none focus:border-accent"
           />
-          <button onClick={handleAddComment} disabled={!commentText.trim() || submitting}
-            className="px-3 py-2 bg-accent text-white rounded-lg text-sm disabled:opacity-40">
+          <button onClick={handleAddComment} aria-label="Enviar comentário" disabled={!commentText.trim() || submitting}
+            className="px-3 py-2 bg-accent text-accent-fg rounded-lg text-sm disabled:opacity-40">
               <LuSend size={14} />
           </button>
         </div>

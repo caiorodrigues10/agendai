@@ -46,7 +46,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17, notificações em §18, organizações em §19, CRM em §20 e submits de Goals/Loyalty em §21 concluídos em 2026-10-05; restam réplicas fora dessas áreas).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17, notificações em §18, organizações em §19, CRM em §20, submits de Goals/Loyalty em §21 e master-admin (primeiras páginas do diretório) em §22 concluídos em 2026-10-05/06; restam réplicas fora dessas áreas).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - ~~**Budget/D-002**~~ → **sanada** (2026-10-05, §11): `@source not` adotado — na reavaliação o delta real é −0,3 KiB CSS (6 utilities, 4 delas fantasmas de ids de fixture) e o único restyle real foi em `TokensGallery` (2 classes).
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -1064,3 +1064,109 @@ paralela (frontend/backend authz+billing). O crash do checker
 `ErrorBoundary`, páginas públicas, `OnboardingChecklist`, `TeamManager`,
 `RecurringPackagesPanel`, `CategoryManager`, `PostDetail`/`PostTagEditor` e
 `SupportReport*`.
+
+## 22. D-014 — master-admin (6 sites boxados) (2026-10-06)
+
+Décima primeira área da receita story-first e **primeira cobertura de stories das páginas
+de `src/pages/master-admin/`** (até aqui 0 stories nesse diretório): 6 sites de banner
+boxados, **12 stories criadas do zero** e 4 correções de a11y expostas pelas novas
+stories. Pesquisa e escrita dos stories delegadas a subagentes (`explore`/`general`),
+conforme diretriz do usuário ("use subagentes").
+
+### 22.1 O que foi feito
+
+- **12 stories novas** (6 arquivos, MSW por story — handlers de sucesso nos `Default`,
+  500 nos `Erro*`; envelope conferido arquivo a arquivo nos wrappers de `src/infra`):
+  | Arquivo (title `MasterAdmin/…`) | Stories | Play |
+  |---|---|---|
+  | `ShopWizardSteps` | `Default`, `ErroSalvar` | fluxo completo do wizard (controles nativos, sem SmartSelect — 4 campos digitados, plano pré-selecionado do `GET /api/plans`) → `POST /api/admin/barbershops` 500 → `Não foi possível criar o salão.` |
+  | `UserFormDialog` | `Default`, `ErroSalvar` | Nome/E-mail/Senha → `Criar usuário` com `POST /api/admin/users` 500 → `Não foi possível criar o usuário.` |
+  | `AuditPage` | `Default`, `ErroExportar` | página carrega (facets/logs/alerts/sessions) → `Exportar CSV` com `GET /api/admin/audit-logs/export` 500 → banner (mensagem fixa do componente, L366) |
+  | `ReferralsTab` | `Default`, `Erro` | mount com `GET /api/admin/referrals` 500 → `Não foi possível carregar indicações.` (branch inteiro + botão de retry) |
+  | `TaskDetailPage` | `Default`, `ErroAcao` | fixture do task → `Iniciar` com `PATCH /api/admin/tasks/:id` 500 → `Erro ao atualizar status.` |
+  | `TicketDetailPage` | `Default`, `ErroAcao` | fixture do ticket (`assignedTo` preenchido esconde `Assumir chamado`) → `Iniciar atendimento` com `PATCH /api/admin/tickets/:id` 500 → `Erro ao atualizar status.` |
+  Harness: `MemoryRouter` + `Routes/:id` nas páginas de detalhe; `TicketDetailPage`
+  também com `StoryProviders withAuth` + seed de `authStorage` + `GET /api/auth/me`
+  (usa `useAuth`); `ShopCreateWizard` com `MemoryRouter` (`useNavigate`).
+- **6 sites convertidos:**
+  | Site | Antes | Depois |
+  |---|---|---|
+  | `ShopWizardSteps.tsx` L226 | `<p role="alert" bg-danger/10 px-3 py-2>` | `<SectionError message={submitError} />` (form `space-y-4`) |
+  | `UserFormDialog.tsx` L137 | idem | `<SectionError message={submitError} />` (form `space-y-4`) |
+  | `AuditPage.tsx` L214 | `div border-danger/40` + `LuTriangleAlert` | `<SectionError message={exportError} />` **sem retry** (não havia botão antes; `LuTriangleAlert` segue em uso em loading/vazio) |
+  | `ReferralsTab.tsx` L48 | div inteira + `AlertCircle` + `Tentar de novo` | `return <SectionError message={error} onRetry={fetchStats} />` (`AlertCircle` órfão removido; label vira `Tentar novamente`) |
+  | `TaskDetailPage.tsx` L145 | `<p bg-danger/10 px-3 py-2>` | `<SectionError message={actionError} />` (container `space-y-6`) |
+  | `TicketDetailPage.tsx` L197 | idem | `<SectionError message={actionError} />` (container `space-y-6`) |
+- **4 correções de a11y expostas pelas novas stories** (gate `a11y.test: 'error'` — o
+  axe nunca tinha visto essas páginas por não terem stories):
+  1. `AuditAdvancedPanels.tsx` `PanelShell`: `<h3>` logo após o `<h1>` da página → axe
+     `heading-order`; virou `<h2>` (nenhum teste asserta nível de heading).
+  2. `TaskDetailPage`/`TicketDetailPage`: botão de voltar (só `LuArrowLeft`) →
+     `aria-label="Voltar"` (`button-name` ×2).
+  3. Mesmos arquivos: botão de enviar comentário (só `LuSend`, inclusive `disabled`) →
+     `aria-label="Enviar comentário"` (`button-name` ×2).
+  4. **Contraste** (`color-contrast` 2,59 < 4,5): botões crus `bg-accent text-white`
+     (`Iniciar`, `Assumir chamado`, enviar) — no tema escuro `--ag-accent: #2cb58a`
+     exige `text-accent-fg` (`#0f1110`, o mesmo do `Button` primary); corrigidos nos 2
+     detalhes. **Restam 12 ocorrências `bg-accent text-white` fora do escopo**
+     (`AiPredictivePage` ×2, `FeaturesPage` ×4, `AccountsPage`, `OverviewPage`,
+     `TasksPage`, `TeamPage`, `TicketsPage`, `PublicNpsPage`) — registradas na D-014.
+- **Achados de processo:**
+  - `test:visual -- --no-build` usa o **build anterior** — mudança em play/story exige
+    rebuild (o play antigo de `ReferralsTab` procurava `Tentar de novo` pós-conversão e
+    só falhou no re-run sem rebuild);
+  - o filtro do `vitest --project storybook` é por **caminho** (`master-admin`), não pelo
+    title (`MasterAdmin`);
+  - flake 1×: na rodada de baseline o `GoalsPanel.ErroSalvar` (§21) falhou 10,569% sem
+    alteração de código; passou em todas as rodadas seguintes (monitorar).
+
+### 22.2 Prova visual
+
+Baseline **com build**: **12 written** → 150 snapshots. Conversão; rodada de prova **com
+rebuild** falhou **exatamente as 6 stories `Erro*`** (144 restantes passou):
+
+- `TaskDetailPage.ErroAcao` 17,469% · `TicketDetailPage.ErroAcao` 14,683% ·
+  `AuditPage.ErroExportar` 14,303% · `UserFormDialog.ErroSalvar` 5,191% ·
+  `ShopWizardSteps.ErroSalvar` 3,241% · `ReferralsTab.Erro` 2,832% — todas acima do
+  threshold 0,02.
+
+PIL (composite old|diff|new 1440×900): bandas confinadas ao banner + shift do conteúdo
+abaixo; resíduo abaixo da última banda ≈ 0 em todas:
+
+- `AuditPage` (banner no header): shift **+16px** (resíduo 0,357 vs 6,389 sem shift),
+  nada muda abaixo de y763;
+- `ReferralsTab` (branch inteiro): mudança só em y21–81, abaixo **0,000**;
+- `TaskDetail`/`TicketDetail`: shift **+18px** (resíduo 0,224 vs 6,872/5,738), coluna
+  x0–895, abaixo **0,000**;
+- `ShopWizard`/`UserFormDialog` (modal): bandas confinadas a x496–943, shift **+9px**,
+  resíduo abaixo 0,011/0,019.
+
+`-u` atualizou as **6** (junto com o fix do play de `ReferralsTab` → `Tentar
+novamente`); rebuild + re-run → **150/150**; `-- --no-build` → **150/150**.
+
+### 22.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npm run typecheck` | **0 erros** |
+| lint | `npm run lint` (`eslint src`) | **0 err / 484 warn** (teto 11/593) |
+| testes app+storybook | `npm test` | **515/515 (120 arquivos)** |
+| contratos (testes) | `npm run test:contract` | **6/6** |
+| contrato frontend↔backend | `npm run contract:check` | **VERMELHO — 24 chamadas sem rota backend** (preexistente, mesma nota do §21; `verify:delivery` falha **só** nesse check) |
+| storybook + a11y | `npm run test:storybook` | **150/150 (46 arquivos)**, `a11y.test: 'error'` |
+| regressão visual | `test:visual` (baseline + prova rebuild + `-u` + re-run) + `-- --no-build` | **150/150, 0 atualizados** (12 written na baseline, 6 atualizados na prova) |
+| build prod (PWA) | `npm run build` | **106 precache / 2804,57 KiB** (19,00s) |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** |
+| docs | `docs:check` | **OK (frontend)** |
+
+**Nota sobre `contract:check` vermelho (fora do escopo deste batch):** mesma situação do
+§21 — as 24 chamadas vêm dos commits da sessão paralela (`adminSessionsApi` list/revoke,
+`authApi` sessions/accept-invite, `npsApi`, `adminAuditApi` facets/alerts/export,
+`adminAccountActionsApi`, `adminApi` billing/resend-invite, `adminInternalApi`
+overview/accounts/operations/health …); `api-contract-debt.json` segue vazio com a regra
+"não adicionar exceções"; decisão do usuário: **commitar documentando o vermelho**.
+
+**Próximas áreas da D-014:** `ErrorBoundary`, páginas públicas, `OnboardingChecklist`,
+`TeamManager`, `RecurringPackagesPanel`, `CategoryManager`, `PostDetail`/`PostTagEditor`,
+`SupportReport*`; nas páginas master-admin restantes, as 12 ocorrências
+`bg-accent text-white` (contraste no tema escuro) listadas na §22.1.

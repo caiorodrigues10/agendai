@@ -9,6 +9,7 @@ import {
   buildAuditFilterParams,
 } from '../../infra/adminAuditApi';
 import { PaginationBar } from '../../components/ui/PaginationBar';
+import { SectionError } from '../../components/patterns';
 import { AuditAlertsPanel, AuditSessionsPanel } from './AuditAdvancedPanels';
 import { AuditDetailModal } from './AuditDetailModal';
 
@@ -211,12 +212,7 @@ const AuditHeader: React.FC<{
         <LuDownload size={14} /> {exporting ? 'Exportando...' : 'Exportar CSV'}
       </button>
     </div>
-    {exportError && (
-      <div className="flex items-center gap-2 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
-        <LuTriangleAlert size={16} />
-        {exportError}
-      </div>
-    )}
+    {exportError && <SectionError message={exportError} />}
   </>
 );
 
