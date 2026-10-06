@@ -24,6 +24,13 @@ describe('TeamPage — convite de funcionário interno', () => {
     inviteTeamMember.mockResolvedValue({ success: true, data: {} as Invitation });
   });
 
+  it('dá nome acessível ao botão só-ícone de atualizar a lista', async () => {
+    render(<TeamPage />);
+    await screen.findByRole('heading', { name: 'Equipe Agenda Já' });
+
+    expect(screen.getByRole('button', { name: 'Atualizar' })).toBeInTheDocument();
+  });
+
   it('valida o e-mail com zod antes de chamar a API', async () => {
     render(<TeamPage />);
     await screen.findByRole('heading', { name: 'Equipe Agenda Já' });
