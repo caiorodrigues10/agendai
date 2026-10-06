@@ -7,6 +7,7 @@ import {
   LuArrowRight as ArrowRight,
   LuSkipForward as SkipForward,
 } from 'react-icons/lu';
+import { SectionError } from '../../components/patterns';
 import { barbershopApi } from '../../infra/barbershopApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 
@@ -254,11 +255,7 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
         </div>
       </section>
 
-      {error && (
-        <div role="alert" className="rounded-xl border border-danger/40 bg-danger/10 p-3 text-sm text-danger">
-          {error}
-        </div>
-      )}
+      {error && <SectionError message={error} />}
 
       {/* ─── ACTIVE STEP (highlighted) ─── */}
       {activeStep && (

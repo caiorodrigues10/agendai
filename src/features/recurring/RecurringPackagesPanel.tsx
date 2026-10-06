@@ -18,6 +18,7 @@ import { Field, FIELD_CONTROL, FORM_FOOTER, FORM_GRID } from '../../components/u
 import { SmartSelect } from '../../components/ui/SmartSelect';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { SectionError } from '../../components/patterns';
 
 type Tab = 'plans' | 'memberships';
 
@@ -381,7 +382,7 @@ export const RecurringPackagesPanel: React.FC = () => {
               <button onClick={() => setPlanModalOpen(false)} className="text-text-muted hover:text-text-primary">✕</button>
             </div>
 
-            {planSubmitError && <div className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">{planSubmitError}</div>}
+            {planSubmitError && <SectionError message={planSubmitError} />}
 
             <Field label="Nome do modelo">
               <input className={FIELD_CONTROL} value={planForm.name} onChange={e => setPlanForm(f => ({ ...f, name: e.target.value }))} />

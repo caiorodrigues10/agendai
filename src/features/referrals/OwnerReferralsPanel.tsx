@@ -10,6 +10,7 @@ import {
   LuCircleX as XCircle,
 } from 'react-icons/lu';
 import { referralsApi, ReferralDashboard } from '../../infra/referralsApi';
+import { SectionError } from '../../components/patterns';
 import { ReferralTierBadge } from './ReferralTierBadge';
 import { ShareReferralButton } from './ShareReferralButton';
 import { getErrorMessage } from '../../utils/errorMessage';
@@ -72,21 +73,7 @@ export const OwnerReferralsPanel: React.FC<OwnerReferralsPanelProps> = ({ onNoti
   }
 
   if (error && !data) {
-    return (
-      <div className="p-4 rounded-xl border border-danger/30 bg-danger/10 text-danger text-sm flex gap-2 items-start">
-        <AlertCircle size={16} className="shrink-0 mt-0.5" />
-        <div className="flex-1">
-          {error}
-          <button
-            type="button"
-            onClick={() => void load()}
-            className="mt-2 text-xs font-bold underline"
-          >
-            Tentar de novo
-          </button>
-        </div>
-      </div>
-    );
+    return <SectionError message={error} onRetry={() => void load()} />;
   }
 
   if (!data) return null;

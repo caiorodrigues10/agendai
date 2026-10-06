@@ -703,9 +703,7 @@ export const EquipmentPanel: React.FC = () => {
               {editingEquip ? 'Editar equipamento' : 'Novo equipamento'}
             </h3>
             <form onSubmit={handleEquipSubmit} className="space-y-3">
-              {equipSubmitError && (
-                <div className="rounded-md bg-danger/10 p-2 text-sm text-danger">{equipSubmitError}</div>
-              )}
+                {equipSubmitError && <SectionError message={equipSubmitError} />}
               <Field label="Nome">
                 <input type="text" value={equipForm.name} onChange={(e) => setEquipForm(p => ({ ...p, name: e.target.value }))} className={FIELD_CONTROL} required maxLength={150} />
               </Field>
@@ -768,9 +766,7 @@ export const EquipmentPanel: React.FC = () => {
           <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
             <h3 className="mb-4 text-lg font-semibold text-text-primary">Nova movimentacao</h3>
             <form onSubmit={handleMovSubmit} className="space-y-3">
-              {movSubmitError && (
-                <div className="rounded-md bg-danger/10 p-2 text-sm text-danger">{movSubmitError}</div>
-              )}
+                {movSubmitError && <SectionError message={movSubmitError} />}
               <Field label="Equipamento">
                 <SmartSelect value={movForm.equipmentId} onChange={(v) => setMovForm(p => ({ ...p, equipmentId: v ?? '' }))} options={equipSelectOptions} placeholder="Buscar equipamento" searchable required />
               </Field>
@@ -803,9 +799,7 @@ export const EquipmentPanel: React.FC = () => {
           <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
             <h3 className="mb-4 text-lg font-semibold text-text-primary">Nova necessidade</h3>
             <form onSubmit={handleNeedSubmit} className="space-y-3">
-              {needSubmitError && (
-                <div className="rounded-md bg-danger/10 p-2 text-sm text-danger">{needSubmitError}</div>
-              )}
+                {needSubmitError && <SectionError message={needSubmitError} />}
               <Field label="Nome">
                 <input type="text" value={needForm.name} onChange={(e) => setNeedForm(p => ({ ...p, name: e.target.value }))} className={FIELD_CONTROL} required maxLength={150} />
               </Field>

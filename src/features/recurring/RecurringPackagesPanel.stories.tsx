@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { http, HttpResponse } from 'msw';
+import { fireEvent, userEvent, within } from 'storybook/test';
 import { RecurringPackagesPanel } from './RecurringPackagesPanel';
 import { StoryProviders } from '../../tests/storyProviders';
 
@@ -69,4 +70,46 @@ export const Default: Story = {};
 
 export const Vazio: Story = {
   parameters: { msw: { handlers: mswHandlers({ plans: [], memberships: [] }) } },
+};
+
+/**
+ * Falha da criação de modelo (POST /api/barbershops/:id/recurring-package-plans
+ * → 500): abre o modal "Criar modelo", preenche nome e preço e submete — o
+ * banner `bg-danger/10` (RecurringPackagesPanel.tsx:384) fica visível com o
+ * modal aberto.
+ */
+export const ErroPlano: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        ...mswHandlers({ plans, memberships }),
+        http.post('/api/barbershops/:id/recurring-package-plans', () =>
+          HttpResponse.json(
+            { success: false, message: 'Não foi possível salvar o modelo.' },
+            { status: 500 }
+          )
+        ),
+      ],
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText('Pacotes recorrentes', {}, { timeout: 10000 });
+    await userEvent.click(
+      await canvas.findByRole('button', { name: 'Criar modelo' }, { timeout: 10000 })
+    );
+    await canvas.findByRole('heading', { name: 'Criar modelo' }, { timeout: 10000 });
+    fireEvent.change(
+      await canvas.findByLabelText('Nome do modelo', {}, { timeout: 10000 }),
+      { target: { value: 'Clube Teste' } }
+    );
+    fireEvent.change(await canvas.findByLabelText('Preço (R$)', {}, { timeout: 10000 }), {
+      target: { value: '99.90' },
+    });
+    await userEvent.click(
+      await canvas.findByRole('button', { name: 'Criar' }, { timeout: 10000 })
+    );
+    await canvas.findByText(/Não foi possível salvar o modelo/, {}, { timeout: 10000 });
+    await canvas.findByRole('heading', { name: 'Criar modelo' }, { timeout: 10000 });
+  },
 };

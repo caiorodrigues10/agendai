@@ -46,7 +46,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17, notificações em §18, organizações em §19, CRM em §20, submits de Goals/Loyalty em §21, master-admin (primeiras páginas do diretório) em §22 e ErrorBoundary + páginas públicas em §23 concluídos em 2026-10-05/06; restam réplicas fora dessas áreas).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17, notificações em §18, organizações em §19, CRM em §20, submits de Goals/Loyalty em §21, master-admin (primeiras páginas do diretório) em §22, ErrorBoundary + páginas públicas em §23 e painéis de onboarding/equipe/indicações/recorrência/equipamentos em §24 concluídos em 2026-10-05/06; restam réplicas fora dessas áreas).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - ~~**Budget/D-002**~~ → **sanada** (2026-10-05, §11): `@source not` adotado — na reavaliação o delta real é −0,3 KiB CSS (6 utilities, 4 delas fantasmas de ids de fixture) e o único restyle real foi em `TokensGallery` (2 classes).
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -1293,3 +1293,89 @@ os componentes editados por este batch).
 `PostDetail` L502, `PostTagEditor` L80, `SupportReportDetail` L237,
 `SupportReportForm` L193; e os 13× `bg-accent text-white` + 6× `bg-danger text-white`
 listados na §22.1/restantes (batch 14, sem stories que os cubram).
+
+## 24. D-014 — painéis de features (onboarding/equipe/indicações/recorrência/equipamentos) (2026-10-06)
+
+Décima terceira área da receita story-first: **5 painéis de `src/features/`**, **12 stories
+novas** (7 em arquivos novos + 5 estendendo 2 arquivos existentes), **9 edições de conversão**
+(8 sites → `SectionError` + 1 fix de contraste) e 4 fixes de a11y. Pesquisa e escrita dos
+stories delegadas a 2 subagentes `general` (receita do usuário).
+
+### 24.1 O que foi feito
+
+- **12 stories novas** (MSW 500 por story `Erro*`):
+  | Arquivo (title) | Stories novas | Play / MSW |
+  |---|---|---|
+  | `onboarding/OnboardingChecklist` (arquivo novo) | `Default`, `Erro`, `ErroConfirmacao` | `Erro`: `GET /api/barbershops/:id/onboarding` 500 → mount falha → banner L257 (`/Não foi possível carregar sua configuração inicial/`); `ErroConfirmacao`: `POST …/onboarding/steps` 500 → clica "Já configurei" → `/Conclua a configuração indicada/` (espera 1500 ms — framer-motion) |
+  | `team/TeamManager` (arquivo novo) | `Default`, `ErroForm`, `ErroLista` | harness `render` + `StoryProviders withBarbershop` + seed `authStorage` (wiring real do `StaffDashboard`); `ErroForm`: form "Novo Membro" → `POST /api/users` 500 → `/Não foi possível cadastrar/` (banner L174); `ErroLista`: "Excluir membro" → `DELETE /api/users/:id` 500 → modal fecha → banner L160 `/Não foi possível remover/` |
+  | `referrals/OwnerReferralsPanel` (arquivo novo) | `Default`, `Erro` | `GET /api/referrals/me` 500 → early-return + botão retry |
+  | `equipment/EquipmentPanel` (existente) | `ErroEquip`, `ErroMov`, `ErroNeed` | modal aberto + POST 500 (`/equipment`, `/equipment-movements`, `/equipment-needs`) → banner L707/L772/L807 visível; `Erro` de load já existia (§14) |
+  | `recurring/RecurringPackagesPanel` (existente) | `ErroPlano` | modal "Criar modelo" + `POST …/recurring-package-plans` 500 → banner L384 |
+  Handlers do meta espalhados nos stories novos (`...mswHandlers()` — achado §16).
+- **9 edições de conversão:**
+  | Site | Antes | Depois |
+  |---|---|---|
+  | `OnboardingChecklist.tsx:257` | `<div role="alert" bg-danger/10 p-3 text-danger>` | `{error && <SectionError message={error} />}` (guard mantém narrowing `string \| null`) |
+  | `TeamManager.tsx:161` | banner `text-xs` com `RiAlertLine` (lista, `!isAdding`) | `<SectionError message={formError} className="mb-3" />` |
+  | `TeamManager.tsx:174` | idem (dentro do form "Novo Membro") | idem |
+  | `TeamManager.tsx:323` | botão confirmar exclusão `bg-danger text-white` (2,59:1) | `text-danger-fg` (fix de contraste do §22/§15 — fora das telas das stories: o modal fecha no erro; atestado por código/tsc) |
+  | `RecurringPackagesPanel.tsx:384` | `<div bg-danger/10 text-danger>` inline no modal | `<SectionError message={planSubmitError} />` |
+  | `OwnerReferralsPanel.tsx:74-90` | early-return com `AlertCircle` + botão "Tentar de novo" | `return <SectionError message={error} onRetry={() => void load()} />` (`AlertCircle` segue em uso em L253; **play atualizado** para `Tentar novamente` — achado §22) |
+  | `EquipmentPanel.tsx:707/772/807` | 3× `<div bg-danger/10 p-2 text-danger>` | 3× `<SectionError message={…} />` (import já existia) |
+  `RiAlertLine` ficou órfão no TeamManager → removido do import.
+- **4 fixes de a11y** expostos pelas novas stories (axe `test: 'error'`), todos sem impacto
+  visual: `TeamManager` L258 `role="button"`→`role="group"` (axe `nested-interactive`
+  serious — linha do dono continha botão de avatar focável) + `aria-label` em L322
+  "Confirmar exclusão", L329 "Cancelar exclusão", L339 "Excluir membro" (`button-name` ×3).
+- **Achados de processo:**
+  1. **Não rodar `vitest --project app` e `test:storybook` em paralelo** — 2 timeouts
+     falsos de 15 s (ContactPage com `settleMotion` e GoalsPanel "Missing
+     Context/Providers") sob contenção de CPU; re-run isolado → 182/182.
+  2. Só 1 das 2 stories de erro do `OnboardingChecklist` falhou na prova: o `Erro`
+     (mount) ficou **sub-threshold** (<2%) — mesmo JSX convertido, footprint menor na
+     página esvaziada; asserções do play (mensagem) + PIL do irmão cobrem a mudança.
+  3. Sem testes unitários assertando o markup antigo (grep `*.test.*` negativo para os 5
+     componentes).
+
+### 24.2 Prova visual
+
+Baseline **com build**: **12 written** → 182 snapshots (**0 flakes**). Conversão; prova
+**com rebuild** falhou **exatamente as 8** stories correspondentes aos 8 sites convertidos:
+
+- `TeamManager.ErroForm` 27,315% · `EquipmentPanel.ErroEquip` 10,445% ·
+  `TeamManager.ErroLista` 9,114% · `EquipmentPanel.ErroNeed` 4,286% ·
+  `RecurringPackagesPanel.ErroPlano` 3,876% · `EquipmentPanel.ErroMov` 2,883% ·
+  `OwnerReferralsPanel.Erro` 2,832% · `OnboardingChecklist.ErroConfirmacao` 2,558%
+  — todas acima do threshold 0,02.
+
+PIL (composite old|diff|new 1440×900): bandas confinadas ao banner/modal + reflow do
+conteúdo seguinte; **resíduo abaixo da última banda 0,000 em 7 diffs** (0,022 no maior) e
+melhor shift vertical +8..+20 px (err 0,14–1,96 vs 0,83–9,42 sem shift) — ex.: `ErroForm`
++20 px (resíduo 0,000), `ErroEquip` +18 px, `Recurring`/`Equipment` modais +9 px.
+
+`-u` atualizou as **8**; re-run `-- --no-build` → **182/182, 0 atualizados, EXIT=0**.
+
+### 24.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npm run typecheck` | **0 erros** |
+| lint | `npm run lint` (`eslint src`) | **0 err / 484 warn** (teto 11/593; 2 `unused eslint-disable` preexistentes em arquivos não tocados) |
+| testes app | `npx vitest run --project app` | **365/365 (74 arquivos)** |
+| contratos (testes) | `npm run test:contract` | **6/6** |
+| contrato frontend↔backend | `npm run contract:check` | **VERMELHO — 24 chamadas sem rota backend** (preexistente, mesma nota do §21/§22/§23; nenhuma chamada nova neste batch) |
+| storybook + a11y | `npm run test:storybook` | **182/182 (59 arquivos)**, `a11y.test: 'error'` |
+| regressão visual | `test:visual` (baseline + prova rebuild + `-u` + re-run `-- --no-build`) | **182/182, 0 atualizados, EXIT=0** |
+| build prod (PWA) | `npm run build` | **105 precache / 2800,37 KiB** (47,86s) |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** |
+| docs | `docs:check` | **OK (frontend)** |
+| gate delivery | `npm run verify:delivery` | **falha em `contract:check`** (docs/typecheck/test:contract verdes antes) |
+
+**Nota sobre `contract:check` vermelho (fora do escopo deste batch):** idêntica ao §21–§23
+— 24 chamadas da sessão paralela; `api-contract-debt.json` segue vazio; decisão do
+usuário: commitar documentando o vermelho. `git add` seletivo (nenhum arquivo da sessão
+paralela no worktree neste batch).
+
+**Próximas áreas da D-014:** `CategoryManager` L68/L80, `PostDetail` L502, `PostTagEditor`
+L80, `SupportReportDetail` L237, `SupportReportForm` L193 (batch 13); e os 13×
+`bg-accent text-white` + 6× `bg-danger text-white` sem stories que os cubram (batch 14).

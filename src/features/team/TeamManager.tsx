@@ -10,7 +10,6 @@ import {
   RiDeleteBin6Line,
   RiCloseLine,
   RiCheckLine,
-  RiAlertLine,
   RiCameraLine,
   RiLoader4Line,
   RiShieldLine,
@@ -21,6 +20,7 @@ import { getErrorMessage } from '../../utils/errorMessage';
 import { ALL_PERMISSIONS, PERMISSION_LABELS } from '../../hooks/usePermissions';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_FOOTER, FORM_GRID } from '../../components/ui/Field';
 import { Button } from '../../components/ui/Button';
+import { SectionError } from '../../components/patterns';
 
 interface TeamManagerProps {
   staff: StaffMember[];
@@ -157,11 +157,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
         </Button>
       </div>
 
-      {formError && !isAdding && (
-        <div className="mb-3 flex items-center gap-1 rounded-lg border border-danger/20 bg-danger/10 px-3 py-2 text-xs text-danger">
-          <RiAlertLine size={12} /> {formError}
-        </div>
-      )}
+      {formError && !isAdding && <SectionError message={formError} className="mb-3" />}
 
       {isAdding && (
         <form
@@ -170,11 +166,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
           className="mb-4 rounded-xl border border-border bg-surface p-4 animate-fade-in-down"
         >
           <h4 className="mb-3 text-sm font-bold text-text-primary">Novo Membro</h4>
-          {formError && (
-            <div className="mb-3 flex items-center gap-1 rounded-lg border border-danger/20 bg-danger/10 px-3 py-2 text-xs text-danger">
-              <RiAlertLine size={12} /> {formError}
-            </div>
-          )}
+          {formError && <SectionError message={formError} className="mb-3" />}
           <div className="space-y-4">
             <Field label="Nome" error={errors.name?.message}>
               <input
@@ -255,7 +247,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
                 className={`flex items-center justify-between gap-3 p-3 ${
                   !isEmployee ? 'cursor-pointer hover:bg-bg/50' : ''
                 }`}
-                role={!isEmployee ? 'button' : undefined}
+                role={!isEmployee ? 'group' : undefined}
                 tabIndex={!isEmployee ? 0 : undefined}
                 onClick={!isEmployee ? toggleOwnerRow : undefined}
                 onKeyDown={
@@ -319,12 +311,14 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
                       {deleteConfirmId === member.id ? (
                         <div className="flex items-center gap-1">
                           <button
+                            aria-label="Confirmar exclusão"
                             onClick={() => confirmDelete(member.id)}
-                            className="rounded-lg bg-danger p-2 text-white shadow-lg shadow-danger/20"
+                            className="rounded-lg bg-danger p-2 text-danger-fg shadow-lg shadow-danger/20"
                           >
                             <RiCheckLine size={14} />
                           </button>
                           <button
+                            aria-label="Cancelar exclusão"
                             onClick={() => setDeleteConfirmId(null)}
                             className="rounded-lg bg-surface-2 p-2 text-text-secondary"
                           >
@@ -334,6 +328,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
                       ) : (
                         <button
                           type="button"
+                          aria-label="Excluir membro"
                           onClick={() => setDeleteConfirmId(member.id)}
                           className="flex items-center justify-center rounded-xl border border-border bg-bg p-2 text-text-muted transition-all hover:border-danger/30 hover:bg-danger/10 hover:text-danger min-h-10 min-w-10"
                         >
