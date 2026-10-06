@@ -124,9 +124,10 @@ export const AdminLayout: React.FC = () => {
           >
             <LuMenu size={18} />
           </button>
-          <h1 className="text-sm font-medium text-text-secondary">
+          {/* Rótulo fixo do layout: o h1 de cada tela fica no conteúdo (Outlet). */}
+          <p className="text-sm font-medium text-text-secondary">
             Painel Interno
-          </h1>
+          </p>
         </header>
 
         {/* Content */}
