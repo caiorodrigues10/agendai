@@ -24,9 +24,12 @@ export default defineConfig({
     serviceWorkers: 'block',
   },
   webServer: process.env.E2E_BASE_URL ? undefined : {
-    command: 'npm run preview -- --host 127.0.0.1 --port 4173',
+    // `vite preview` serve o `dist/`: sem um build antes, o e2e roda contra um
+    // artefato velho (ou o servidor nem sobe quando `dist/` não existe).
+    command: 'npm run build && npm run preview -- --host 127.0.0.1 --port 4173',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
   },
   projects: [
     { name: 'desktop-chromium', use: { ...devices['Desktop Chrome'] } },
