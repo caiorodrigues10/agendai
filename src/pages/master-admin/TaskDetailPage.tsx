@@ -94,7 +94,11 @@ export const TaskDetailPage: React.FC = () => {
     <div className="space-y-6 max-w-4xl">
       {/* Header */}
       <div className="flex items-start gap-4">
-        <button onClick={() => navigate('/master/tasks')} className="mt-1 p-1 rounded hover:bg-surface-2">
+        <button
+          onClick={() => navigate('/master/tasks')}
+          aria-label="Voltar para a lista"
+          className="mt-1 p-1 rounded hover:bg-surface-2"
+        >
           <LuArrowLeft size={18} />
         </button>
         <div className="flex-1">
@@ -206,6 +210,7 @@ export const TaskDetailPage: React.FC = () => {
             className="flex-1 px-3 py-2 bg-bg border border-border rounded-lg text-sm focus:outline-none focus:border-accent"
           />
           <button onClick={handleAddComment} disabled={!commentText.trim() || submitting}
+            aria-label="Enviar comentário"
             className="px-3 py-2 bg-accent text-white rounded-lg text-sm disabled:opacity-40">
               <LuSend size={14} />
           </button>
