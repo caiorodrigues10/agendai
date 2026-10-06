@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  LuCircleAlert as AlertCircle,
   LuArrowRight as ArrowRight,
   LuCheck as Check,
   LuCircleCheck as CheckCircle2,
@@ -13,6 +12,7 @@ import { plansApi, Plan } from '../infra/plansApi';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useAuth } from '../contexts/AuthContext';
 import { MarketingLayout } from '../layouts/marketing/MarketingLayout';
+import { SectionError } from '../components/patterns/states/SectionError';
 import { PricingPersuasionCharts } from '../features/marketing';
 import { softwareApplicationLd } from '../marketing/softwareApplicationLd';
 import { getErrorMessage } from '../utils/errorMessage';
@@ -81,7 +81,7 @@ function FeatureList({
           key={row.label}
           aria-label={`${row.included ? 'Inclui' : 'Não inclui'} ${row.label}`}
           className={`flex items-start gap-2.5 text-sm ${
-            row.included ? 'text-neutral-200' : 'text-neutral-500'
+            row.included ? 'text-neutral-200' : 'text-text-muted'
           }`}
         >
           <span className="mt-0.5 shrink-0" aria-hidden>
@@ -273,11 +273,7 @@ export const PlansPage: React.FC = () => {
               </div>
             </motion.div>
 
-            {error && (
-              <div className="mx-auto mt-8 flex max-w-md items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
-                <AlertCircle size={16} /> {error}
-              </div>
-            )}
+            {error && <SectionError message={error} className="mx-auto mt-8 max-w-md" />}
 
             {loading ? (
               <div className="flex justify-center py-20 text-accent">
@@ -315,7 +311,7 @@ export const PlansPage: React.FC = () => {
                   >
                     {trialCta}
                   </button>
-                  <p className="mt-2 text-center text-[11px] text-neutral-500">
+                  <p className="mt-2 text-center text-[11px] text-text-muted">
                     Sem cartão, sem cobrança automática
                   </p>
                   <FeatureList rows={trialRows} />
@@ -332,7 +328,7 @@ export const PlansPage: React.FC = () => {
                       Essencial
                     </h2>
                     {essentialCurrent && (
-                      <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-accent-light">
+                      <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-accent">
                         Atual
                       </span>
                     )}
@@ -342,7 +338,7 @@ export const PlansPage: React.FC = () => {
                   </p>
                   <div className="mt-5">
                     {essentialPrice.struck != null && (
-                      <p className="text-sm font-semibold text-neutral-500 line-through">
+                      <p className="text-sm font-semibold text-text-muted line-through">
                         {formatCurrencyBRL(essentialPrice.struck)}
                       </p>
                     )}
@@ -370,14 +366,14 @@ export const PlansPage: React.FC = () => {
                     disabled={!essentialPlan || essentialCurrent}
                     className={`mt-5 w-full rounded-2xl border py-3.5 text-sm font-black transition ${
                       !essentialPlan || essentialCurrent
-                        ? 'cursor-not-allowed border-white/10 bg-white/5 text-neutral-500'
+                        ? 'cursor-not-allowed border-white/10 bg-white/5 text-text-muted'
                         : 'border-white/20 bg-transparent text-white hover:bg-white/10'
                     }`}
                   >
                     {essentialPlan ? paidCta('Essencial', essentialCurrent) : 'Indisponível'}
                   </button>
                   {!essentialCurrent && (
-                    <p className="mt-2 text-center text-[11px] text-neutral-500">
+                    <p className="mt-2 text-center text-[11px] text-text-muted">
                       {trialCampaign.afterTrialThenEssential}
                     </p>
                   )}
@@ -404,7 +400,7 @@ export const PlansPage: React.FC = () => {
                         </span>
                       )}
                       {proCurrent && (
-                        <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-accent-light">
+                        <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-accent">
                           Atual
                         </span>
                       )}
@@ -415,7 +411,7 @@ export const PlansPage: React.FC = () => {
                   </p>
                   <div className="mt-5">
                     {proPrice.struck != null && (
-                      <p className="text-sm font-semibold text-neutral-500 line-through">
+                      <p className="text-sm font-semibold text-text-muted line-through">
                         {formatCurrencyBRL(proPrice.struck)}
                       </p>
                     )}
@@ -440,7 +436,7 @@ export const PlansPage: React.FC = () => {
                     disabled={!proPlan || proCurrent}
                     className={`mt-5 w-full rounded-2xl py-3.5 text-sm font-black transition ${
                       !proPlan || proCurrent
-                        ? 'cursor-not-allowed bg-white/10 text-neutral-500'
+                        ? 'cursor-not-allowed bg-white/10 text-text-muted'
                         : 'bg-accent text-black hover:-translate-y-0.5 hover:bg-accent-light'
                     }`}
                   >
@@ -456,7 +452,7 @@ export const PlansPage: React.FC = () => {
               </div>
             )}
 
-            <p className="mx-auto mt-8 max-w-3xl text-center text-xs leading-relaxed text-neutral-500">
+            <p className="mx-auto mt-8 max-w-3xl text-center text-xs leading-relaxed text-text-muted">
               O teste de 30 dias de Pro começa no cadastro, sem cartão. A cobrança só é criada
               quando você contrata Essencial ou Pro. No anual, você paga 10 meses e usa 12.
             </p>
@@ -465,7 +461,7 @@ export const PlansPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => navigate('/app/subscription')}
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-accent/50 bg-accent/10 px-6 py-3 text-sm font-black text-accent-light hover:bg-accent/20"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-accent/50 bg-accent/10 px-6 py-3 text-sm font-black text-accent hover:bg-accent/20"
                 >
                   Gerenciar plano no painel
                   <ArrowRight size={16} />
@@ -494,10 +490,10 @@ export const PlansPage: React.FC = () => {
 
             <div className="overflow-hidden rounded-4xl border border-white/10 bg-surface">
               <div className="overflow-x-auto">
-                <div className="grid grid-cols-[1.5fr_0.75fr_0.75fr] border-b border-white/8 px-5 py-4 text-[10px] font-black uppercase tracking-wider text-neutral-500 md:px-8 md:text-xs">
+                <div className="grid grid-cols-[1.5fr_0.75fr_0.75fr] border-b border-white/8 px-5 py-4 text-[10px] font-black uppercase tracking-wider text-text-muted md:px-8 md:text-xs">
                   <span>Recurso</span>
                   <span className="text-center">Essencial</span>
-                  <span className="text-center text-accent-light">Pro</span>
+                  <span className="text-center text-accent">Pro</span>
                 </div>
                 {matrix.map(row => (
                   <div

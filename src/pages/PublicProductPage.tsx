@@ -23,6 +23,7 @@ import { maskPhone, normalizePhoneBR } from '../utils/documentUtils';
 import { getErrorMessage } from '../utils/errorMessage';
 import { productMoney } from '../features/products/productMoney';
 import { FIELD_CONTROL, FIELD_CONTROL_ERROR, Field } from '../components/ui/Field';
+import { SectionError } from '../components/patterns/states/SectionError';
 import { StatusBadge } from '../components/ui/StatusBadge';
 
 const MAX_QUANTITY = 10;
@@ -222,11 +223,7 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
         </p>
       )}
 
-      {submitError && (
-        <p className="rounded-xl border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger">
-          {submitError}
-        </p>
-      )}
+      {submitError && <SectionError message={submitError} />}
 
       <button
         type="submit"

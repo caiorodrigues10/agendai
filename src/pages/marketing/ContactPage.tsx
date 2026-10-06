@@ -19,6 +19,7 @@ import {
   LuPhone as Phone,
 } from 'react-icons/lu';
 import { MarketingLayout } from '../../layouts/marketing/MarketingLayout';
+import { SectionError } from '../../components/patterns/states/SectionError';
 import { contactApi, type ContactTopic } from '../../infra/contactApi';
 import { maskPhone } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
@@ -46,7 +47,7 @@ const ContactSchema = z.object({
 type ContactFormData = z.infer<typeof ContactSchema>;
 
 const fieldClass = (hasError: boolean) =>
-  `w-full rounded-2xl border bg-black/40 px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-neutral-600 focus:ring-1 focus:ring-accent/40 ${
+  `w-full rounded-2xl border bg-black/40 px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-text-muted focus:ring-1 focus:ring-accent/40 ${
     hasError
       ? 'border-red-500/40 focus:border-red-500'
       : 'border-white/10 hover:border-white/20 focus:border-accent/50'
@@ -149,10 +150,10 @@ export const ContactPage: React.FC = () => {
           >
             <div className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-accent/20 blur-3xl" />
             <div className="relative flex items-start justify-between gap-4">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-accent/20 bg-accent/10 text-accent-light">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-accent/20 bg-accent/10 text-accent">
                 <Headphones size={24} className="h-5 w-5" />
               </div>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-accent-light">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-accent">
                 <span className="h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_10px_currentColor]" /> Online
               </span>
             </div>
@@ -179,17 +180,17 @@ export const ContactPage: React.FC = () => {
               className="group relative overflow-hidden rounded-4xl border border-white/10 bg-surface p-6 transition hover:border-accent/25"
             >
               <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-accent/10 blur-2xl transition group-hover:bg-accent/20" />
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-500">
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-text-muted">
                 Canal direto
               </p>
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
-                className="mt-3 inline-flex items-center gap-2 text-lg font-bold text-white transition hover:text-accent-light"
+                className="mt-3 inline-flex items-center gap-2 text-lg font-bold text-white transition hover:text-accent"
               >
                 <Mail size={24} className="h-5 w-5 text-accent" />
                 {CONTACT_EMAIL}
               </a>
-              <p className="mt-3 text-sm font-medium text-neutral-500">
+              <p className="mt-3 text-sm font-medium text-text-muted">
                 Prefere e-mail clássico? Também funciona.
               </p>
             </motion.div>
@@ -201,14 +202,14 @@ export const ContactPage: React.FC = () => {
               transition={{ delay: 0.05 }}
               className="rounded-4xl border border-white/10 bg-surface p-6"
             >
-              <div className="flex items-center gap-2 text-accent-light">
+              <div className="flex items-center gap-2 text-accent">
                 <Clock size={24} className="h-4 w-4" />
                 <span className="text-xs font-black uppercase tracking-wider">Horário</span>
               </div>
               <p className="mt-3 text-base font-semibold text-white">
                 Seg–sex · 9h às 18h (Brasília)
               </p>
-              <p className="mt-2 text-sm text-neutral-500">
+              <p className="mt-2 text-sm text-text-muted">
                 Mensagens fora do horário entram na fila e respondemos no próximo dia útil.
               </p>
             </motion.div>
@@ -220,14 +221,14 @@ export const ContactPage: React.FC = () => {
               transition={{ delay: 0.08 }}
               className="relative overflow-hidden rounded-4xl border border-accent/25 bg-gradient-to-br from-accent/15 via-accent/5 to-transparent p-6"
             >
-              <p className="text-sm font-bold text-accent-light">{trialCampaign.eyebrow}?</p>
+              <p className="text-sm font-bold text-accent">{trialCampaign.eyebrow}?</p>
               <p className="mt-2 text-sm font-medium leading-relaxed text-neutral-300">
                 {trialCampaign.body} {trialCampaign.afterTrial}
               </p>
               <button
                 type="button"
                 onClick={() => navigate('/planos')}
-                className="group mt-4 inline-flex items-center gap-2 text-sm font-black text-white transition hover:text-accent-light"
+                className="group mt-4 inline-flex items-center gap-2 text-sm font-black text-white transition hover:text-accent"
               >
                 Ver planos
                 <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -246,18 +247,18 @@ export const ContactPage: React.FC = () => {
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-accent">Abra uma conversa</p>
                 <h2 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">Como podemos ajudar?</h2>
-                <p className="mt-2 max-w-lg text-sm leading-relaxed text-neutral-500">Escolha um assunto e conte os detalhes. Isso ajuda a gente a responder mais rápido.</p>
+                <p className="mt-2 max-w-lg text-sm leading-relaxed text-text-muted">Escolha um assunto e conte os detalhes. Isso ajuda a gente a responder mais rápido.</p>
               </div>
               <div className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-neutral-400 sm:flex">
                 <MessageSquare size={24} className="h-5 w-5" />
               </div>
             </div>
             {status === 'success' && (
-              <div className="mb-8 flex items-start gap-3 rounded-2xl border border-accent/30 bg-accent/10 p-4 text-sm font-medium text-accent-light">
+              <div className="mb-8 flex items-start gap-3 rounded-2xl border border-accent/30 bg-accent/10 p-4 text-sm font-medium text-accent">
                 <CheckCircle2 size={24} className="mt-0.5 h-5 w-5 shrink-0" />
                 <div>
-                  <p className="font-bold text-accent-light">Mensagem recebida.</p>
-                  <p className="mt-1 text-accent-light/80">
+                  <p className="font-bold text-accent">Mensagem recebida.</p>
+                  <p className="mt-1 text-accent/80">
                     Nossa equipe já foi notificada. Retorno em até 1 dia útil.
                   </p>
                 </div>
@@ -265,15 +266,12 @@ export const ContactPage: React.FC = () => {
             )}
 
             {status === 'error' && serverError && (
-              <div className="mb-8 flex items-start gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm font-medium text-red-300">
-                <AlertCircle size={24} className="mt-0.5 h-5 w-5 shrink-0" />
-                {serverError}
-              </div>
+              <SectionError message={serverError} className="mb-8" />
             )}
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
               <div>
-                <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-neutral-500">
+                <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-text-muted">
                   Assunto
                 </p>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -291,11 +289,11 @@ export const ContactPage: React.FC = () => {
                             : 'border-white/8 bg-black/30 text-neutral-400 hover:border-white/15 hover:text-neutral-200'
                         }`}
                       >
-                        <span className={`mb-2 flex h-8 w-8 items-center justify-center rounded-xl transition ${active ? 'bg-accent/15 text-accent-light' : 'bg-white/[0.05] text-neutral-500 group-hover:text-neutral-300'}`}>
+                        <span className={`mb-2 flex h-8 w-8 items-center justify-center rounded-xl transition ${active ? 'bg-accent/15 text-accent' : 'bg-white/[0.05] text-text-muted group-hover:text-neutral-300'}`}>
                           <TopicIcon className="h-4 w-4" />
                         </span>
                         <span className="block text-sm font-bold">{item.label}</span>
-                        <span className="mt-0.5 block text-[10px] font-medium opacity-70">
+                        <span className="mt-0.5 block text-[10px] font-medium text-text-muted">
                           {item.hint}
                         </span>
                       </button>
@@ -314,7 +312,7 @@ export const ContactPage: React.FC = () => {
                 <div>
                   <label
                     htmlFor="contact-name"
-                    className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500"
+                    className="mb-2 block text-xs font-bold uppercase tracking-wider text-text-muted"
                   >
                     Nome
                   </label>
@@ -335,7 +333,7 @@ export const ContactPage: React.FC = () => {
                 <div>
                   <label
                     htmlFor="contact-email"
-                    className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500"
+                    className="mb-2 block text-xs font-bold uppercase tracking-wider text-text-muted"
                   >
                     E-mail
                   </label>
@@ -359,13 +357,13 @@ export const ContactPage: React.FC = () => {
               <div>
                 <label
                   htmlFor="contact-phone"
-                  className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500"
+                  className="mb-2 block text-xs font-bold uppercase tracking-wider text-text-muted"
                 >
                   WhatsApp{' '}
-                  <span className="normal-case tracking-normal text-neutral-600">(opcional)</span>
+                  <span className="normal-case tracking-normal text-text-muted">(opcional)</span>
                 </label>
                 <div className="relative">
-                  <Phone size={24} className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
+                  <Phone size={24} className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
                   <input
                     id="contact-phone"
                     className={`${fieldClass(!!errors.phone)} pl-11`}
@@ -385,12 +383,12 @@ export const ContactPage: React.FC = () => {
               <div>
                 <label
                   htmlFor="contact-message"
-                  className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-500"
+                  className="mb-2 block text-xs font-bold uppercase tracking-wider text-text-muted"
                 >
                   Mensagem
                 </label>
                 <div className="relative">
-                  <MessageSquare size={24} className="pointer-events-none absolute left-4 top-4 h-4 w-4 text-neutral-500" />
+                  <MessageSquare size={24} className="pointer-events-none absolute left-4 top-4 h-4 w-4 text-text-muted" />
                   <textarea
                     id="contact-message"
                     rows={6}
@@ -408,7 +406,7 @@ export const ContactPage: React.FC = () => {
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs font-medium text-neutral-500">
+                <p className="text-xs font-medium text-text-muted">
                   Seus dados só são usados para responder este contato.
                 </p>
                 <button

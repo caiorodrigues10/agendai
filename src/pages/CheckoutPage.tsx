@@ -4,7 +4,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   LuArrowLeft as ArrowLeft,
   LuLoaderCircle as Loader2,
-  LuCircleAlert as AlertCircle,
   LuQrCode as QrCode,
   LuCreditCard as CreditCard,
   LuCopy as Copy,
@@ -12,6 +11,7 @@ import {
   LuClock as Clock,
   LuPartyPopper as PartyPopper,
 } from 'react-icons/lu';
+import { SectionError } from '../components/patterns/states/SectionError';
 import { plansApi, Plan, pickPlanForCheckout } from '../infra/plansApi';
 import { subscriptionsApi, SubscribePayload } from '../infra/subscriptionsApi';
 import { paymentsApi, Payment } from '../infra/paymentsApi';
@@ -508,11 +508,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
               </div>
             )}
 
-            {error && (
-              <div className="mb-6 p-4 bg-danger/10 border border-danger/30 rounded-xl flex items-start gap-2 text-danger text-sm">
-                <AlertCircle size={16} className="mt-0.5 shrink-0" /> {error}
-              </div>
-            )}
+            {error && <SectionError message={error} className="mb-6" />}
 
             {/* Tela do QR Code PIX gerado (Mercado Pago ou Asaas) */}
             {pixPayment?.pixQrCode && !pixExpired && (

@@ -46,7 +46,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17, notificações em §18, organizações em §19, CRM em §20, submits de Goals/Loyalty em §21 e master-admin (primeiras páginas do diretório) em §22 concluídos em 2026-10-05/06; restam réplicas fora dessas áreas).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17, notificações em §18, organizações em §19, CRM em §20, submits de Goals/Loyalty em §21, master-admin (primeiras páginas do diretório) em §22 e ErrorBoundary + páginas públicas em §23 concluídos em 2026-10-05/06; restam réplicas fora dessas áreas).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - ~~**Budget/D-002**~~ → **sanada** (2026-10-05, §11): `@source not` adotado — na reavaliação o delta real é −0,3 KiB CSS (6 utilities, 4 delas fantasmas de ids de fixture) e o único restyle real foi em `TokensGallery` (2 classes).
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -1170,3 +1170,126 @@ overview/accounts/operations/health …); `api-contract-debt.json` segue vazio c
 `TeamManager`, `RecurringPackagesPanel`, `CategoryManager`, `PostDetail`/`PostTagEditor`,
 `SupportReport*`; nas páginas master-admin restantes, as 12 ocorrências
 `bg-accent text-white` (contraste no tema escuro) listadas na §22.1.
+
+## 23. D-014 — ErrorBoundary + páginas públicas (2026-10-06)
+
+Décima segunda área da receita story-first: **10 arquivos de stories / 20 stories criados
+do zero** (4 subagentes `general`, conforme diretriz "use subagentes"), **11 sites
+convertidos** para `SectionError` (1 deles sem story — código morto removido), 3 fixes de
+contraste e 2 achados de processo que afetam a estabilidade do gate visual/a11y.
+
+### 23.1 O que foi feito
+
+- **10 arquivos de stories (20 stories)** — MSW 500 por story `Erro*` (sucesso nos
+  `Default`):
+  | Arquivo (title) | Stories | Harness / observação |
+  |---|---|---|
+  | `infra/ErrorBoundary.stories.tsx` (`Infra/ErrorBoundary`) | `Default`, `SecaoErro` | variação `section` do próprio ErrorBoundary |
+  | `ResetPasswordPage` (`Públicas/…`) | `Default`, `Erro` | token inválido via MSW |
+  | `PublicOwnerInvitePage` (`Públicas/…`) | `Default`, `Erro` | idem |
+  | `PublicNpsPage` (`Públicas/…`) | `Default`, `ErroEnvio` | submit → 500 |
+  | `PublicReviewPage` (`Públicas/…`) | `Default`, `ErroEnvio` | hash token via meta `loaders` (`history.replaceState(…'#token=token-avalide')`) |
+  | `PublicProductPage` (`Públicas/…`) | `Default`, `ErroReserva` | reserva → 500 |
+  | `PublicAppointmentManagePage` (`Públicas/…`) | `Default`, `Erro` | `Erro` sem hash (branch de token ausente); `Default` com loader `#token=manage-token-demo` + session/slots |
+  | `PlansPage` (`Públicas/…`) | `Default`, `Erro` | carregamento de planos → 500 |
+  | `marketing/ContactPage` (`Marketing/…`) | `Default`, `Erro` | `POST /api/contact` 500 |
+  | `CheckoutPage` (`Assinatura/…`) | `Default`, `Erro` | auth seeding obrigatório; `Erro` por validação client-side (`CPF inválido. Confira o número.`), sem chamada |
+- **11 conversões → `SectionError`:**
+  | Site | Antes | Depois |
+  |---|---|---|
+  | `ErrorBoundary.tsx` (variante section) | box próprio | `<SectionError message="Não foi possível carregar esta seção" onRetry={reset}>` (testes da seção verdes) |
+  | `ForgotPasswordPage.tsx` | banner + state `error` nunca renderizado | **código morto removido** (banner, `setError(null)`, import `AlertCircle`) — sem story por não existir estado visível |
+  | `ResetPasswordPage.tsx:147` | `<p role="alert" bg-danger/10 …>` | `<SectionError message={error} className="w-full mb-4" />` (AlertCircle segue — L70) |
+  | `PublicOwnerInvitePage.tsx:58` | idem | `<SectionError message={error} className="w-full mb-4" />` (AlertCircle órfão removido) |
+  | `PublicNpsPage.tsx:206` | idem | `<SectionError message={error} />` |
+  | `PublicReviewPage.tsx:164` | idem | `<SectionError message={error} />` (AlertCircle segue — L74) |
+  | `PublicProductPage.tsx:225` | idem | `<SectionError message={submitError} />` |
+  | `PublicAppointmentManagePage.tsx` | idem | `<SectionError message={error} className="mb-4" />` |
+  | `PlansPage.tsx:276` | paleta vermelha crua | `<SectionError message={error} className="mx-auto mt-8 max-w-md" />` |
+  | `ContactPage.tsx:267` | idem | `<SectionError message={serverError} className="mb-8" />` (AlertCircle segue — 4 usos) |
+  | `CheckoutPage.tsx:511` | idem | `<SectionError message={error} className="mb-6" />` (import órfão removido) |
+- **3 fixes de contraste** (axe `color-contrast` das novas stories):
+  - `PlansPage.tsx`: `text-neutral-500`→`text-text-muted` ×9, `text-accent-light`→`text-accent` ×4;
+  - `ContactPage.tsx`: `text-neutral-500`→muted ×13, `text-neutral-600`→muted ×2,
+    `text-accent-light`→`text-accent` ×10, hint L298 `opacity-70`→`text-text-muted` (4,21 < 4,5);
+  - `MarketingFooter.tsx`: `text-neutral-500/600`→`text-text-muted` ×4 (h3, breadcrumb, `.max-w-sm`, linha inferior).
+- **Achados de processo:**
+  1. **Race axe × framer-motion:** o axe do `addon-a11y` roda no `afterEach` **sem**
+     `waitForAnimations()` (só o painel manual espera) e amostra contrastes com o
+     `initial opacity 0→1` ainda correndo (blends falsos, ex. 1,06). Corrigido com o
+     helper `settleMotion()` (1500 ms) no fim dos plays de `PlansPage`/`ContactPage` —
+     únicas páginas com motion entre as 10 (as demais 8 verificadas sem `motion.*`;
+     `MotionGlobalConfig` do framer 12.38.0 não expõe `skipAnimations`; o
+     `waitForAnimations` de `storybook/preview-api` só cobre WAAPI/CSS).
+  2. **Classes fantasma `text-accent-light`/`bg-accent-light`:** não existem no `@theme`
+     (Tailwind v4, tokens em `tokens.css`) → sem-op/inherit; substituídas por
+     `text-accent` onde flagradas (`hover:bg-accent-light` permanece, fora de escopo).
+  3. **Flake do play do Checkout:** `role="button" name /Pagar/` falhou 1× no run completo
+     e passa isolado (instrumentação temporária de `console.log` adicionada, verificada,
+     removida); não recorreu nos runs seguintes.
+  4. **Race de scroll na captura visual:** o screenshot do `postVisit` é **viewport-only**
+     (1440×900) e plays que digitam/clicam disparam o auto-scroll do Playwright
+     (`focus`/`scrollIntoViewIfNeeded`, sensível ao timing de carregamento das fontes) —
+     `marketing-contactpage--erro` saiu com 48,8% de diff num run (scrollTop ≠ 0) e 4,4%
+     noutro. Fix determinístico no `.storybook/test-runner.ts`: `blur` +
+     `window.scrollTo(0,0)` imediatamente antes do screenshot; o `-u` seguinte reancorou
+     `marketing-contactpage--erro` **e** `assinatura-checkoutpage--erro` (baselines com
+     scrollTop ≠ 0 — mesma classe de flake conhecida do `GoalsPanel.ErroSalvar`).
+  5. **Prova com 6 conversões sub-threshold:** Nps/Review/Product/Manage/Plans/Checkout
+     mudaram **abaixo do threshold 0,02** na prova (banner in-place, mesmo footprint da
+     página) — mudanças atestadas pela prova PIL + 170/170 dos testes de story + revisão
+     do diff de código; só as 4 restantes falharam acima do threshold (23.2).
+
+### 23.2 Prova visual
+
+Baseline **com build**: **20 written** → 170 snapshots (1 flake na baseline:
+`GoalsPanel.ErroSalvar` 10,569%, §21 — não recorreu). Conversão; rodada de prova **com
+rebuild** falhou **exatamente as 4** stories `Erro*` de conversão visível:
+
+- `PublicResetPasswordPage.Erro` 6,700% · `PublicOwnerInvitePage.Erro` 6,655% ·
+  `ErrorBoundary.SecaoErro` 5,942% · `ContactPage.Erro` 4,405% — todas acima de 0,02
+  (as outras 6 conversões < 2%, ver 23.1/5).
+
+PIL (composite old|diff|new 1440×900), diffs lidos visualmente:
+
+- `ErrorBoundary`: troca confinada a y0–131, resíduo abaixo **0,000** (box antigo →
+  SectionError compacto, resto idêntico);
+- `ContactPage`: bandas x516–1384 y69–786 (banner + micro-reflow ~1px), d=0 fora;
+- `ResetPassword`/`PublicOwnerInvite`: shift **+16px** (banner `p-3 text-xs` →
+  SectionError `p-4 text-sm`, mensagens de 2 linhas), resíduo 0,096/0,006 — conteúdo
+  preservado, card/rodapé idênticos.
+
+`-u` atualizou as **4**; o re-run expôs o race de scroll (23.1/4) → fix do `postVisit` +
+`-u` reancorou `marketing-contactpage--erro` e `assinatura-checkoutpage--erro` →
+re-run `--no-build` → **170/170, 0 atualizados, EXIT=0** (estável).
+
+### 23.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npm run typecheck` | **0 erros** |
+| lint | `npm run lint` (`eslint src`) | **0 err / 484 warn** (teto 11/593) |
+| testes app | `npx vitest run --project app` | **365/365 (74 arquivos)** |
+| contratos (testes) | `npm run test:contract` | **6/6** |
+| contrato frontend↔backend | `npm run contract:check` | **VERMELHO — 24 chamadas sem rota backend** (preexistente, mesma nota do §21/§22; `verify:delivery` falha **só** nesse check) |
+| storybook + a11y | `npm run test:storybook` | **170/170 (56 arquivos)**, `a11y.test: 'error'` |
+| regressão visual | `test:visual` (baseline + prova rebuild + `-u` ×2 + re-run `-- --no-build`) | **170/170, 0 atualizados, EXIT=0** |
+| build prod (PWA) | `npm run build` | **105 precache / 2801,64 KiB** (25,87s) |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** |
+| docs | `docs:check` | **OK (frontend)** |
+| gate delivery | `npm run verify:delivery` | **falha em `contract:check`** (docs/typecheck/test:contract verdes antes) |
+
+**Nota sobre `contract:check` vermelho (fora do escopo deste batch):** mesma situação do
+§21/§22 — as 24 chamadas vêm dos commits da sessão paralela (`adminSessionsApi`,
+`authApi`, `npsApi`, `adminAuditApi`, `adminAccountActionsApi`, `adminApi` billing,
+`adminInternalApi` …); `api-contract-debt.json` segue vazio com a regra "não adicionar
+exceções"; decisão do usuário: **commitar documentando o vermelho**. Sessão paralela
+também ativa no worktree — `git add` seletivo (somente os 10 arquivos de stories novos e
+os componentes editados por este batch).
+
+**Próximas áreas da D-014:** `OnboardingChecklist` L257, `TeamManager` L161/L174
+(+ L323 `bg-danger text-white`→`text-danger-fg`), `RecurringPackagesPanel` L384,
+`OwnerReferralsPanel` L76, `EquipmentPanel` L707/772/807; `CategoryManager` L68/L80,
+`PostDetail` L502, `PostTagEditor` L80, `SupportReportDetail` L237,
+`SupportReportForm` L193; e os 13× `bg-accent text-white` + 6× `bg-danger text-white`
+listados na §22.1/restantes (batch 14, sem stories que os cubram).

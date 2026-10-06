@@ -36,7 +36,7 @@ function FooterColumn({
 }) {
   return (
     <div>
-      <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-neutral-500">
+      <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-text-muted">
         {title}
       </h3>
       <ul className="mt-5 space-y-3">
@@ -73,7 +73,7 @@ export const MarketingFooter: React.FC = () => {
       <div className="mx-auto max-w-375">
         <div className="border-b border-white/10 pb-12 md:pb-14">
           <nav
-            className="mb-10 text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-600"
+            className="mb-10 text-[11px] font-medium uppercase tracking-[0.16em] text-text-muted"
             aria-label="Breadcrumb"
           >
             <ol className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
@@ -104,7 +104,7 @@ export const MarketingFooter: React.FC = () => {
                 <p className="max-w-[22ch] text-[clamp(1.35rem,2.4vw,1.75rem)] font-semibold leading-[1.2] tracking-[-0.035em] text-white">
                   Fila, agenda e caixa no ritmo do seu salão.
                 </p>
-                <p className="max-w-sm text-[13px] font-light leading-relaxed text-neutral-500 md:text-sm">
+                <p className="max-w-sm text-[13px] font-light leading-relaxed text-text-muted md:text-sm">
                   Para salões de beleza, barbearias e studios — atendimento feminino, masculino ou
                   unissex.
                 </p>
@@ -124,7 +124,7 @@ export const MarketingFooter: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 pt-7 text-[11px] font-medium leading-relaxed text-neutral-600 md:flex-row md:items-center md:justify-between md:text-[12px]">
+        <div className="flex flex-col gap-4 pt-7 text-[11px] font-medium leading-relaxed text-text-muted md:flex-row md:items-center md:justify-between md:text-[12px]">
           <p>Copyright © {year} {BRAND_NAME}. Todos os direitos reservados.</p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <span>Brasil</span>

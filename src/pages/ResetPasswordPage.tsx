@@ -4,6 +4,7 @@ import { authApi } from '../infra/authApi';
 import { Logo } from '../components/ui/Logo';
 import { ThemeToggle } from '../components/infra/ThemeToggle';
 import { PasswordInput } from '../components/ui/PasswordInput';
+import { SectionError } from '../components/patterns/states/SectionError';
 import {
   LuArrowRight as ArrowRight,
   LuLockKeyhole as LockKeyhole,
@@ -144,12 +145,7 @@ export const ResetPasswordPage: React.FC = () => {
             </div>
           </div>
 
-          {error && (
-            <div className="w-full mb-4 p-3 bg-danger/10 border border-danger/30 rounded-lg flex items-center gap-2 text-danger text-xs font-medium">
-              <AlertCircle size={14} className="shrink-0" />
-              {error}
-            </div>
-          )}
+          {error && <SectionError message={error} className="w-full mb-4" />}
 
           <form onSubmit={handleSubmit} className="w-full space-y-6">
             <div className="space-y-4">

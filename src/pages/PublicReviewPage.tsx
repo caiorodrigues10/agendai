@@ -7,6 +7,7 @@ import {
   LuStar as Star,
 } from 'react-icons/lu';
 import { Button } from '../components/ui/Button';
+import { SectionError } from '../components/patterns/states/SectionError';
 import { reputationApi, PublicReviewContext } from '../infra/reputationApi';
 import { getErrorMessage } from '../utils/errorMessage';
 
@@ -161,11 +162,7 @@ const PublicReviewPage: React.FC = () => {
               </span>
             </label>
 
-            {error && (
-              <p className="rounded-xl border border-danger/30 bg-danger/10 p-3 text-sm text-danger">
-                {error}
-              </p>
-            )}
+            {error && <SectionError message={error} />}
 
             <Button
               type="button"

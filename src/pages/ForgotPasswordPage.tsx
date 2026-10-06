@@ -7,7 +7,6 @@ import { ThemeToggle } from '../components/infra/ThemeToggle';
 import {
   LuArrowRight as ArrowRight,
   LuLockKeyhole as LockKeyhole,
-  LuCircleAlert as AlertCircle,
   LuMail as Mail,
   LuLoaderCircle as Loader2,
   LuCircleCheck as CheckCircle,
@@ -27,7 +26,6 @@ export const ForgotPasswordPage: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -36,7 +34,6 @@ export const ForgotPasswordPage: React.FC = () => {
     e.preventDefault();
     if (!isValidEmail) return;
     setSubmitting(true);
-    setError(null);
     try {
       const token = await getRecaptchaToken('forgot_password');
       await authApi.forgotPassword(email.trim(), token);
@@ -110,13 +107,6 @@ export const ForgotPasswordPage: React.FC = () => {
               </span>
             </div>
           </div>
-
-          {error && (
-            <div className="w-full mb-4 p-3 bg-danger/10 border border-danger/30 rounded-lg flex items-center gap-2 text-danger text-xs font-medium">
-              <AlertCircle size={14} className="shrink-0" />
-              {error}
-            </div>
-          )}
 
           <form onSubmit={handleEmailSubmit} className="w-full space-y-6">
               <div className="space-y-4">

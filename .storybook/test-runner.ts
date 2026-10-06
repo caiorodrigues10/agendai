@@ -62,6 +62,15 @@ const config: TestRunnerConfig = {
       () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
     );
     await page.addStyleTag({ content: NO_ANIMATION_CSS });
+    // Captura é viewport-only (1440x900): plays que digitam/clicam acionam o
+    // auto-scroll do Playwright (focus/scrollIntoViewIfNeeded, sensível ao
+    // timing de carregamento das fontes) e a captura saía com scrollTop>0
+    // (ex.: Marketing/ContactPage Erro 48.8% num run e 4.4% noutro). Ancora
+    // deterministicamente em scrollTop=0 + sem elemento focado.
+    await page.evaluate(() => {
+      (document.activeElement as HTMLElement | null)?.blur?.();
+      window.scrollTo(0, 0);
+    });
     const image = await page.screenshot();
     expect(image).toMatchImageSnapshot({
       customSnapshotsDir,

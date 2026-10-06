@@ -9,6 +9,7 @@ import {
   LuLoaderCircle as Loader2,
 } from 'react-icons/lu';
 import { Button } from '../components/ui/Button';
+import { SectionError } from '../components/patterns/states/SectionError';
 import { npsApi, NpsSurveyPublic } from '../infra/npsApi';
 import { getErrorMessage } from '../utils/errorMessage';
 
@@ -203,11 +204,7 @@ const PublicNpsPage: React.FC = () => {
               <p className="text-xs text-danger">{errors.lgpdAccepted.message}</p>
             )}
 
-            {error && (
-              <p className="rounded-xl border border-danger/30 bg-danger/10 p-3 text-sm text-danger">
-                {error}
-              </p>
-            )}
+            {error && <SectionError message={error} />}
 
             <Button type="submit" className="w-full" loading={submitting}>
               Enviar resposta
