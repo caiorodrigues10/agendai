@@ -18,7 +18,22 @@ test('usuários: lista, valida criação e cria + exclui um usuário', async ({ 
 
   await expect(page.getByRole('heading', { name: 'Usuários' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Usuários' })).toBeVisible();
-  await expect(page.getByTestId('users-page').getByText('admin@agendai.local')).toBeVisible({ timeout: 15_000 });
+
+  // A lista já passa de uma página (contas de teste acumuladas), então o
+  // usuário do seed é buscado em vez de depender da paginação.
+  const search = page.getByLabel('Buscar usuários');
+  await search.fill('admin@agendai.local');
+  await search.press('Enter');
+  await expect(page.getByTestId('users-page').getByText('admin@agendai.local')).toBeVisible({
+    timeout: 15_000,
+  });
+
+  // Limpa a busca para os próximos passos verem a lista completa.
+  await search.fill('');
+  await search.press('Enter');
+  await expect(page.getByTestId('users-page').getByText('admin@admin.com')).toBeVisible({
+    timeout: 15_000,
+  });
 
   // Criação: validação bloqueia formulário vazio.
   await page.getByRole('button', { name: /Novo usuário/ }).click();
