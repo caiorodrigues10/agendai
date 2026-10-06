@@ -51,7 +51,7 @@ import { EquipmentPanel } from '../features/equipment';
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout, updateUserAvatar } = useAuth();
+  const { user, logout, updateUserAvatar, impersonationShop } = useAuth();
   const { hasPermission, isOwnerOrAdmin } = usePermissions();
   const { hasDashboard, accessState, loading: subscriptionLoading } = useSubscription();
   const {
@@ -279,8 +279,12 @@ export const StaffDashboard: React.FC = () => {
         logoUrl={settings?.logoUrl}
         onLogin={() => navigate('/login')}
         onLogout={() => {
+          // Durante a visão temporária, "Sair" só encerra o impersonation e a
+          // sessão do master continua viva: voltar para a conta inspecionada
+          // em vez da landing pública.
+          const shopId = impersonationShop?.id;
           logout();
-          navigate('/');
+          navigate(shopId ? `/master/accounts/${shopId}` : '/');
         }}
         toast={
           toast ? <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} /> : undefined

@@ -75,3 +75,35 @@ test('ações de controle: suspende, reativa e entra em visão temporária', asy
   await expect(page.getByRole('status')).toHaveCount(0);
   await expect(page.getByText('Ações de controle')).toBeVisible();
 });
+
+test('sair pela header durante a visão temporária volta ao painel do master', async ({ page }) => {
+  await loginAsMaster(page);
+  await page.goto('/master/accounts');
+
+  const rows = page.locator('button').filter({ hasText: 'criada em' });
+  await expect(rows.first()).toBeVisible({ timeout: 15_000 });
+  await rows.first().click();
+  await expect(page).toHaveURL(/\/master\/accounts\/[0-9a-f-]{36}/);
+  const accountUrl = page.url();
+
+  await page.getByRole('button', { name: /Entrar agora/ }).click();
+  const dialog = page.getByRole('alertdialog');
+  await dialog.getByPlaceholder(/Por que esta ação/).fill('sair pela header via e2e');
+  const [impersonateResponse] = await Promise.all([
+    page.waitForResponse((res) => res.url().includes('/impersonate')),
+    dialog.getByRole('button', { name: 'Entrar agora' }).click(),
+  ]);
+  expect(impersonateResponse.status()).toBe(200);
+
+  await page.waitForURL(/\/app\/overview/, { timeout: 15_000 });
+  await expect(page.getByRole('status')).toContainText('Visão temporária somente-leitura');
+
+  // "Sair" encerra só a visão temporária: a sessão do master continua viva,
+  // então o destino é o painel do master (e não a landing pública).
+  await page.getByRole('button', { name: 'Sair' }).click();
+  await page.waitForURL(new RegExp(accountUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), {
+    timeout: 15_000,
+  });
+  await expect(page.getByRole('status')).toHaveCount(0);
+  await expect(page.getByText('Ações de controle')).toBeVisible();
+});
