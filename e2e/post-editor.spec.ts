@@ -3,14 +3,14 @@ import { mkdtempSync, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { POST_TEMPLATES } from '../../agendai-back-end/src/modules/posts/services/postTemplates';
+import { POST_TEMPLATES } from '../../backend/src/modules/posts/services/postTemplates';
 
 // This harness mounts the real editor without adding a public/dev route to the app.
 // API fixtures contain no production tokens, customer data or network writes.
 let output: string;
 test.skip(process.env.POST_EDITOR_QA !== '1', 'Harness isolado: usar POST_EDITOR_QA=1 com E2E_BASE_URL apontando para Vite dev.');
 test.beforeAll(() => {
-  const backend = path.resolve('../agendai-back-end');
+  const backend = path.resolve('../backend');
   output = mkdtempSync(path.join(tmpdir(), 'agendai-editor-e2e-'));
   execFileSync(process.execPath, [path.join(backend, 'node_modules/tsx/dist/cli.mjs'), 'scripts/preview-post-editorial.ts', output], { cwd: backend, timeout: 55_000 });
 });

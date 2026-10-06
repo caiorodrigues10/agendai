@@ -4,7 +4,14 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const backend = path.resolve(process.env.API_CONTRACT_BACKEND || path.join(root, '../agendai-back-end'));
+const backend = path.resolve(process.env.API_CONTRACT_BACKEND || path.join(root, '../backend'));
+const backendEntry = path.join(backend, 'src/shared/infra/http/routes/api.ts');
+if (!fs.existsSync(backendEntry)) {
+  throw new Error(
+    `Backend não encontrado em "${backend}" (esperado ${backendEntry}). ` +
+      'Defina API_CONTRACT_BACKEND com o caminho da pasta do backend.',
+  );
+}
 const methods = new Set(['get', 'post', 'put', 'patch', 'delete', 'head', 'options']);
 const parse = file => ts.createSourceFile(file, fs.readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true);
 function walk(node, visit) { visit(node); ts.forEachChild(node, child => walk(child, visit)); }
@@ -160,6 +167,45 @@ export function requestPath(node, bindings = {}, helpers = new Map(), seen = new
   return normalize(url);
 }
 
+/**
+ * Segmento final dinâmico com tipo union declarado no próprio arquivo
+ * (ex.: ações de conta `suspend | approve | …`). Emite uma chamada por literal
+ * para que TODAS casem com rotas registradas — nada é aceito por prefixo.
+ * Retorna [] quando o padrão não se aplica (comportamento anterior preservado).
+ */
+function dynamicSegmentVariants(node, ast, url) {
+  if (!url.endsWith('{}')) return [];
+  const arg = node.arguments[0];
+  if (!arg || !ts.isTemplateExpression(arg) || !arg.templateSpans.length) return [];
+  const last = arg.templateSpans[arg.templateSpans.length - 1];
+  if (!ts.isIdentifier(last.expression)) return [];
+
+  let owner = node.parent;
+  while (owner && !ts.isFunctionDeclaration(owner) && !ts.isFunctionExpression(owner) &&
+         !ts.isArrowFunction(owner) && !ts.isMethodDeclaration(owner)) {
+    owner = owner.parent;
+  }
+  const param = owner?.parameters?.find(p => p.name.getText() === last.expression.text);
+  const annotation = param?.type;
+  if (!annotation || !ts.isTypeReferenceNode(annotation) || !ts.isIdentifier(annotation.typeName)) return [];
+
+  let literals;
+  walk(ast, candidate => {
+    if (literals) return;
+    if (ts.isTypeAliasDeclaration(candidate) && candidate.name.text === annotation.typeName.text &&
+        ts.isUnionTypeNode(candidate.type)) {
+      const values = candidate.type.types.map(member =>
+        literal(ts.isLiteralTypeNode(member) ? member.literal : member),
+      );
+      if (values.length && values.every(Boolean)) literals = values;
+    }
+  });
+  if (!literals) return [];
+
+  const prefix = url.slice(0, url.lastIndexOf('{}'));
+  return literals.map(value => `${prefix}${value}`);
+}
+
 export function frontendRequests(file) {
   const ast = parse(file);
   const helpers = helperMap(ast);
@@ -198,7 +244,10 @@ export function frontendRequests(file) {
     const methodNode = name === 'apiClient' ? node.arguments[1] : property(node.arguments[1], 'method');
     const method = methodNode ? literal(methodNode) : 'GET';
     if (!method || !methods.has(method.toLowerCase())) throw new Error(`Método não suportado em ${file}`);
-    requests.push({ key: `${method.toUpperCase()} ${url}`, line: ast.getLineAndCharacterOfPosition(node.getStart()).line + 1 });
+    const line = ast.getLineAndCharacterOfPosition(node.getStart()).line + 1;
+    const keys = dynamicSegmentVariants(node, ast, url).map(variant => `${method.toUpperCase()} ${variant}`);
+    if (!keys.length) keys.push(`${method.toUpperCase()} ${url}`);
+    for (const key of keys) requests.push({ key, line });
     }
   });
   return requests;

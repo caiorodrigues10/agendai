@@ -1,5 +1,6 @@
 import { apiClient, apiFetch } from './apiClient';
 import { authStorage } from './authStorage';
+import { buildQuery } from '../utils/query';
 
 export type DashboardPeriod =
   'day' | 'week' | '1m' | '3m' | '6m' | '12m' | '1y' | '2y' | '3y' | '5y';
@@ -485,14 +486,12 @@ export const adminApi = {
     ),
 
   /** Extrato de faturas em CSV (streaming no backend). */
-  exportBillingStatementCsv: (params: BillingStatementParams = {}) => {
-    const query = new URLSearchParams();
-    if (params.status) query.set('status', params.status);
-    if (params.from) query.set('from', params.from);
-    if (params.to) query.set('to', params.to);
-    const suffix = query.toString() ? `?${query.toString()}` : '';
-    return apiFetch(`/api/admin/billing/statement.csv${suffix}`, { method: 'GET' }, getAuthHeader());
-  },
+  exportBillingStatementCsv: (params: BillingStatementParams = {}) =>
+    apiFetch(
+      `/api/admin/billing/statement.csv${buildQuery({ status: params.status, from: params.from, to: params.to })}`,
+      { method: 'GET' },
+      getAuthHeader()
+    ),
 
   getBillingSummary: () =>
     apiClient<{ success: boolean; data: BillingSummary }>(
