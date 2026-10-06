@@ -46,7 +46,7 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17, notificações em §18, organizações em §19, CRM em §20, submits de Goals/Loyalty em §21, master-admin (primeiras páginas do diretório) em §22, ErrorBoundary + páginas públicas em §23 e painéis de onboarding/equipe/indicações/recorrência/equipamentos em §24 concluídos em 2026-10-05/06; restam réplicas fora dessas áreas).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17, notificações em §18, organizações em §19, CRM em §20, submits de Goals/Loyalty em §21, master-admin (primeiras páginas do diretório) em §22, ErrorBoundary + páginas públicas em §23, painéis de onboarding/equipe/indicações/recorrência/equipamentos em §24 e catálogo/posts/suporte em §25 concluídos em 2026-10-05/06; restam réplicas fora dessas áreas).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - ~~**Budget/D-002**~~ → **sanada** (2026-10-05, §11): `@source not` adotado — na reavaliação o delta real é −0,3 KiB CSS (6 utilities, 4 delas fantasmas de ids de fixture) e o único restyle real foi em `TokensGallery` (2 classes).
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -1379,3 +1379,88 @@ paralela no worktree neste batch).
 **Próximas áreas da D-014:** `CategoryManager` L68/L80, `PostDetail` L502, `PostTagEditor`
 L80, `SupportReportDetail` L237, `SupportReportForm` L193 (batch 13); e os 13×
 `bg-accent text-white` + 6× `bg-danger text-white` sem stories que os cubram (batch 14).
+
+## 25. D-014 — catálogo/posts/suporte (2026-10-06)
+
+Décima quarta área da receita story-first: **5 componentes / 6 sites** convertidos,
+**11 stories novas** em 5 arquivos criados do zero (2 subagentes `general`). Com este
+batch **não restam mais réplicas de div inline de erro** na lista da D-014 (só os casos
+fora de escopo documentados).
+
+### 25.1 O que foi feito
+
+- **11 stories novas** (MSW 500 por story `Erro*`):
+  | Arquivo (title) | Stories | Play / MSW |
+  |---|---|---|
+  | `catalog/CategoryManager` (novo) | `Default`, `Erro`, `ErroSalvar` | harness `render` + `useCategories('service')` + `StoryProviders withAuth` + seed `authStorage`; `Erro`: `GET /api/service-categories` 500 → banner L68 (`/Não foi possível carregar as categorias/` + `Tentar novamente`); `ErroSalvar`: form "Nova categoria" + `POST` 500 → banner L80 |
+  | `shop/PostTagEditor` (novo) | `Default`, `Erro` | args `salonId/postId`; `POST /api/salons/:id/posts/:id/tags` 500 → `/Não foi possível solicitar a marcação/` |
+  | `support/SupportReportForm` (novo) | `Default`, `Erro` | args `onCreated` (assert `toHaveBeenCalled`); `POST /api/support/reports` 500 → `/Não foi possível enviar o relatório/` |
+  | `shop/PostDetail` (novo) | `Default`, `Erro` | viewer seed determinístico de `authStorage` (staff) no **corpo do decorator** antes do mount; `POST …/comments` 500 → digita + `Enviar comentário` → banner L502 `/Não foi possível publicar o comentário/` |
+  | `support/SupportReportDetail` (novo) | `Default`, `Erro` | modal **props-based** (`reportId`+`onClose`, portal → `within(document.body)`; exemplar `ClientProfileSheet`); `POST …/reports/:id/comments` 500 → banner L237 `/Não foi possível enviar o comentário/` |
+  Handlers de sucesso do meta espalhados nos `Erro*` (achado §16).
+- **6 edições de conversão → `SectionError`:**
+  | Site | Antes | Depois |
+  |---|---|---|
+  | `CategoryManager.tsx:68` (ternário do load) | `<div role="alert">{state.error} <button>Tentar novamente</button></div>` | `<SectionError message={state.error} onRetry={() => void state.reload()} />` |
+  | `CategoryManager.tsx:80` | `<p role="alert" text-danger>{error}</p>` | `<SectionError message={error} />` |
+  | `shop/PostDetail.tsx:502` | `<p role="alert" text-xs text-danger>{formError}</p>` | `<SectionError message={formError} />` |
+  | `shop/PostTagEditor.tsx:80` | idem | `<SectionError message={error} />` |
+  | `support/SupportReportDetail.tsx:237` | idem | `<SectionError message={commentError} />` |
+  | `support/SupportReportForm.tsx:193` | `<p role="alert" text-sm text-danger>{submitError}</p>` | `<SectionError message={submitError} />` |
+- **2 lint warnings novos sanados** nos fixtures (`no-empty-function`): `onLike: async () =>
+  undefined` e `onClose: () => undefined` — lint volta a **0 err / 484 warn**.
+- **Achados de processo:**
+  1. **Precedência do MSW (crítico):** o worker casa o **primeiro** handler do array —
+     `[...mswHandlers(), handlerDeFalha]` deixa o handler de sucesso sombrear o 500 (2
+     stories falharam na 1ª validação); o 500 precisa vir **antes/sozinho** (casos de
+     path/método distintos não conflitam).
+  2. `SupportReportDetail` é modal props-based (não rota) — espelhar rota seria harness
+     errado; `PostDetail` exige viewer pronto no **1º render** (seed no corpo do decorator;
+     seed em `useEffect` chega tarde e esconde o form).
+  3. `getErrorMessage` mapeia 500 sem `message` legível p/ "Erro interno do servidor…" —
+     o body do MSW precisa devolver a mensagem exata (padrão Organizations/Goals).
+
+### 25.2 Prova visual
+
+Baseline **com build**: **11 written** → 193 snapshots (**0 flakes**). Conversão; prova
+**com rebuild** falhou **exatamente as 6** stories dos 6 sites convertidos:
+
+- `CategoryManager.ErroSalvar` 16,962% · `SupportReportForm.Erro` 13,402% ·
+  `CategoryManager.Erro` 10,646% · `SupportReportDetail.Erro` 9,923% ·
+  `PostDetail.Erro` 7,131% · `PostTagEditor.Erro` 5,741% — todas acima de 0,02.
+
+PIL (composite old|diff|new 1440×900): **resíduo abaixo da última banda 0,000 em 5 diffs**
+(0,027 no modal do `SupportReportDetail`, reflow da conversa inteira) e melhor shift
+vertical **+19..+82 px** (err 0,09–5,07 vs 1,62–53,52 sem shift) — ex.: `CategoryManager.Erro`
++82 px (o `SectionError` com botão é muito mais alto que a div de 1 linha), `PostTagEditor`
++54 px com err 0,091.
+
+`-u` atualizou as **6**; re-run `-- --no-build` → **193/193, 0 atualizados, EXIT=0**.
+
+### 25.3 Evidências do gate
+
+| Check | Comando | Resultado |
+|---|---|---|
+| typecheck | `npm run typecheck` | **0 erros** |
+| lint | `npm run lint` (`eslint src`) | **0 err / 484 warn** (teto 11/593) |
+| testes app | `npx vitest run --project app` | **365/365 (74 arquivos)** |
+| contratos (testes) | `npm run test:contract` | **6/6** |
+| contrato frontend↔backend | `npm run contract:check` | **VERMELHO — 24 chamadas sem rota backend** (preexistente, mesma nota do §21–§24; nenhuma chamada nova) |
+| storybook + a11y | `npm run test:storybook` | **193/193 (64 arquivos)**, `a11y.test: 'error'` |
+| regressão visual | `test:visual` (baseline + prova rebuild + `-u` + re-run `-- --no-build`) | **193/193, 0 atualizados, EXIT=0** |
+| build prod (PWA) | `npm run build` | **105 precache / 2800,21 KiB** (33,12s) |
+| órfãos | `scripts/check-orphan-exports.mjs` | **exit 0** |
+| docs | `docs:check` | **OK (frontend)** |
+| gate delivery | `npm run verify:delivery` | **falha em `contract:check`** (docs/typecheck/test:contract verdes antes) |
+
+**Nota sobre `contract:check` vermelho (fora do escopo deste batch):** idêntica ao §21–§24
+— 24 chamadas da sessão paralela; `api-contract-debt.json` segue vazio; decisão do
+usuário: commitar documentando o vermelho. `git add` seletivo (nenhum arquivo da sessão
+paralela no worktree).
+
+**Próxima área da D-014 (batch 14):** 13× `bg-accent text-white` + 6×
+`bg-danger text-white` em páginas sem stories que os cubram (`AiPredictivePage` ×2,
+`FeaturesPage` ×4, `AccountsPage`, `OverviewPage`, `TasksPage`, `TeamPage`, `TicketsPage`,
+`PublicNpsPage`, `AdminLayout`, `PaymentsSection`, `FinancialDashboard` ×2,
+`ProductFormModal`, `RefundSaleModal` — `TeamManager` L323 já feito no §24); verificar
+`ImpersonationBanner`.

@@ -15,6 +15,7 @@ import { socialApi, type PostComment, type PublicSocialPost } from '../../infra/
 import { clientPortalApi } from '../../infra/clientPortalApi';
 import { authStorage } from '../../infra/authStorage';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { SectionError } from '../../components/patterns';
 import { ApiError } from '../../infra/apiClient';
 import { Link } from 'react-router-dom';
 
@@ -499,7 +500,7 @@ export const PostDetail: React.FC<PostDetailProps> = ({
         ) : (
           <InlineClientLogin salonId={salonId} onSuccess={identityId => { setViewerId(identityId ?? null); setCanComment(true); }} />
         )}
-        {formError && <p role="alert" className="text-xs text-danger">{formError}</p>}
+        {formError && <SectionError message={formError} />}
       </div>
     </div>
   );

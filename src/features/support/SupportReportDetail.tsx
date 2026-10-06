@@ -15,6 +15,7 @@ import {
   SupportReportDetail as SupportReportDetailData,
 } from '../../infra/supportApi';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { SectionError } from '../../components/patterns';
 import { FIELD_CONTROL } from '../../components/ui/Field';
 import {
   SUPPORT_CATEGORY_LABELS,
@@ -234,11 +235,7 @@ export const SupportReportDetail: React.FC<SupportReportDetailProps> = ({ report
               placeholder="Escreva uma mensagem..."
               className={`${FIELD_CONTROL} min-h-[64px] resize-y`}
             />
-            {commentError && (
-              <p role="alert" className="text-xs text-danger">
-                {commentError}
-              </p>
-            )}
+            {commentError && <SectionError message={commentError} />}
             <button
               type="button"
               onClick={() => void sendComment()}

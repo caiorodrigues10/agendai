@@ -7,6 +7,7 @@ import { CategorySchema, CategoryFormData } from '../../schemas';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { Field, FIELD_CONTROL } from '../../components/ui/Field';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { SectionError } from '../../components/patterns';
 import { RiAddLine, RiArrowDownSLine, RiDeleteBin6Line, RiFolder3Line, RiPencilLine } from 'react-icons/ri';
 
 interface Props {
@@ -66,7 +67,7 @@ export function CategoryManager({ title, linkedLabel, state, onChanged }: Props)
     </button>
     {expanded && <div className="space-y-4 border-t border-border px-4 py-4 sm:px-5">
       {state.loading ? <p role="status" className="text-sm text-text-muted">Carregando categorias…</p> : state.error ?
-        <div role="alert" className="text-sm text-danger">{state.error} <button type="button" className={button} onClick={() => void state.reload()}>Tentar novamente</button></div> : <>
+        <SectionError message={state.error} onRetry={() => void state.reload()} /> : <>
           {!state.categories.length && <div className="rounded-xl border border-dashed border-border bg-bg px-4 py-7 text-center"><p className="text-sm font-medium text-text-primary">Nenhuma categoria cadastrada.</p><p className="mt-1 text-xs text-text-muted">Crie uma categoria para organizar seus registros.</p></div>}
           <ul className="space-y-2">{state.categories.map(category => <li key={category.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-bg px-3 py-2.5 sm:px-4">
             <span className="flex min-w-0 flex-1 items-center gap-3 break-words text-sm font-medium text-text-primary"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-2"><span aria-hidden="true" className="h-3 w-3 rounded-full bg-text-muted" style={category.color ? { backgroundColor: category.color } : undefined} /></span>{category.name}</span>
@@ -77,7 +78,7 @@ export function CategoryManager({ title, linkedLabel, state, onChanged }: Props)
           </li>)}</ul>
           {state.canCreate && !editing && <button type="button" className={button} onClick={() => start('new')}><RiAddLine size={18} aria-hidden="true" /> Nova categoria</button>}
         </>}
-      {error && <p role="alert" className="text-sm text-danger">{error}</p>}
+      {error && <SectionError message={error} />}
       {editing && <form onSubmit={handleSubmit(save)} className="space-y-3 border-t border-border pt-3">
         <fieldset disabled={busy} className="flex flex-wrap items-start gap-3">
           <Field label="Nome da categoria" error={errors.name?.message} className="min-w-0 flex-1"><input autoFocus className={FIELD_CONTROL} {...register('name')} /></Field>

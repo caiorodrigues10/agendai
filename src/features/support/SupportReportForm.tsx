@@ -17,6 +17,7 @@ import {
 import { SupportReportSchema, SupportReportFormData } from '../../schemas';
 import { supportApi, SupportReport, SupportPriority } from '../../infra/supportApi';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { SectionError } from '../../components/patterns';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR } from '../../components/ui/Field';
 import {
   SUPPORT_FORM_CATEGORIES,
@@ -189,11 +190,7 @@ export const SupportReportForm: React.FC<SupportReportFormProps> = ({ onCreated 
           </p>
         )}
 
-        {submitError && (
-          <p role="alert" className="text-sm text-danger">
-            {submitError}
-          </p>
-        )}
+        {submitError && <SectionError message={submitError} />}
 
         <button
           type="submit"

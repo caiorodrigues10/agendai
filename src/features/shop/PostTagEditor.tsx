@@ -3,6 +3,7 @@ import { barbershopApi } from '../../infra/barbershopApi';
 import { socialApi } from '../../infra/socialApi';
 import { SmartSelect, type SelectOption } from '../../components/ui/SmartSelect';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { SectionError } from '../../components/patterns';
 
 export function PostTagEditor({ salonId, postId }: { salonId: string; postId: string }) {
   const [options, setOptions] = useState<SelectOption[]>([]);
@@ -77,11 +78,7 @@ export function PostTagEditor({ salonId, postId }: { salonId: string; postId: st
           {message}
         </p>
       )}
-      {error && (
-        <p role="alert" className="text-xs text-danger">
-          {error}
-        </p>
-      )}
+      {error && <SectionError message={error} />}
     </section>
   );
 }
