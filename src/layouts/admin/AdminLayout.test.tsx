@@ -1,5 +1,5 @@
 /// <reference types="vitest/globals" />
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { AdminLayout } from './AdminLayout';
 
@@ -36,5 +36,26 @@ describe('AdminLayout', () => {
     expect(label).toBeVisible();
     expect(label.closest('h1')).toBeNull();
     expect(label.closest('h2')).toBeNull();
+  });
+
+  it('nomeia os botões só-ícone de abrir e fechar o menu lateral', () => {
+    renderLayout();
+
+    const open = screen.getByRole('button', { name: 'Abrir menu' });
+    fireEvent.click(open);
+
+    // Botão de fechar no topo da sidebar + fundo clicável.
+    expect(screen.getAllByRole('button', { name: 'Fechar menu' })).toHaveLength(2);
+  });
+
+  it('fecha o menu lateral pelo teclado (Escape)', () => {
+    renderLayout();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Abrir menu' }));
+    expect(screen.getAllByRole('button', { name: 'Fechar menu' })).toHaveLength(2);
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    expect(screen.getAllByRole('button', { name: 'Fechar menu' })).toHaveLength(1);
   });
 });
