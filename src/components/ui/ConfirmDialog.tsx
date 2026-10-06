@@ -48,8 +48,8 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           type="button"
           onClick={onConfirm}
           disabled={loading}
-          className={`flex-1 min-h-11 rounded-xl font-bold text-accent-fg disabled:opacity-50 ${
-            variant === 'danger' ? 'bg-danger hover:bg-danger/90' : 'bg-accent hover:bg-accent-hover'
+          className={`flex-1 min-h-11 rounded-xl font-bold disabled:opacity-50 ${
+            variant === 'danger' ? 'bg-danger text-danger-fg hover:bg-danger/90' : 'bg-accent text-accent-fg hover:bg-accent-hover'
           }`}
         >
           {loading ? 'Aguarde…' : confirmLabel}

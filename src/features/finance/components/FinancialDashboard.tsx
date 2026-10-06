@@ -789,7 +789,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                                 setDeleteConfirmId(null);
                               }}
                               aria-label="Confirmar exclusão do atendimento"
-                              className="p-1 bg-danger text-accent-fg rounded"
+                              className="p-1 bg-danger text-danger-fg rounded"
                             >
                               <Check size={12} />
                             </button>

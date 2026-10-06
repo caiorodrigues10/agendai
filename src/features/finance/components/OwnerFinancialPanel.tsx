@@ -1028,7 +1028,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                                     <button
                                       onClick={() => handleDeleteExpense(item.id)}
                                       title="Confirmar exclusão"
-                                      className="p-1 bg-danger text-accent-fg rounded"
+                                      className="p-1 bg-danger text-danger-fg rounded"
                                     >
                                       <Check size={12} />
                                     </button>

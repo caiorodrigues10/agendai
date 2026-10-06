@@ -46,7 +46,9 @@ Não fazem parte do gate: `test:e2e` (Playwright exige servidor local), prettier
 
 - ~~**Gate/D-003**~~ → **sanada** (2026-10-04, §5): lint 0 erros (também em `server/`/`e2e/`).
 - ~~**Cobertura/D-005**~~ → **sanada** (2026-10-04, §5): a11y em `test: 'error'`, 73/73 sem violações.
-- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17, notificações em §18, organizações em §19, CRM em §20, submits de Goals/Loyalty em §21, master-admin (primeiras páginas do diretório) em §22, ErrorBoundary + páginas públicas em §23, painéis de onboarding/equipe/indicações/recorrência/equipamentos em §24, catálogo/posts/suporte em §25 e contraste `bg-accent`/`bg-danger` × `text-white` (19 sites) em §26 concluídos em 2026-10-05/06; sem réplicas de erro de div inline pendentes na lista da D-014).
+- **Adoção story-first:** ~~**D-007 (OwnerFinancialPanel)**~~ → **sanada** (2026-10-05, §6), ~~**D-008 (stories pendentes)**~~ → **concluída** (2026-10-04, §5), ~~**D-009 (ClientProfileSheet → ModalShell)**~~ → **sanada** (2026-10-05, §7), ~~**D-010 (checkout full-screen)**~~ → **sanada** (2026-10-05, §9), ~~**D-011 (PostEditor → ui/Button)**~~ → **sanada** (2026-10-05, §8), D-014 (states trio — billing em §10, financeiro em §13, painéis owner em §14, assinatura/pacotes em §15, waitlist em §16, ficha do cliente em §17, notificações em §18, organizações em §19, CRM em §20, submits de Goals/Loyalty em §21, master-admin (primeiras páginas do diretório) em §22, ErrorBoundary + páginas públicas em §23, painéis de onboarding/equipe/indicações/recorrência/equipamentos em §24, catálogo/posts/suporte em §25 e contraste `bg-accent`/`bg-danger` × `text-white` (19 sites) em §26 + resíduos
+accent-fg/danger (4 sites) em §27 concluídos em 2026-10-05/06; sem réplicas de erro de
+div inline pendentes na lista da D-014).
 - ~~Settlement (sanção)~~ → **executado** (0 arquivos mortos; ver [15](15-section6-settlement.md)).
 - ~~**Budget/D-002**~~ → **sanada** (2026-10-05, §11): `@source not` adotado — na reavaliação o delta real é −0,3 KiB CSS (6 utilities, 4 delas fantasmas de ids de fixture) e o único restyle real foi em `TokensGallery` (2 classes).
 - ~~**Persistência/D-015**~~ → **passo 2 concluído** (2026-10-04): `utils/clientIdStorage.ts` com migração read-once + testes; ~~**D-016**~~ → **concluída**: `features/posts/draftStorage.ts` compartilhado.
@@ -1518,3 +1520,40 @@ seletivo (nenhum arquivo da sessão paralela no worktree).
 lote de contraste **fechado** (§26); restam apenas os itens fora de escopo documentados
 (`AppointmentBookingModal`, erros de domínio por toast, validação de campo, fallbacks
 Tier-2, `PaginationBar`/badges) e a frente contínua de painéis `bg-danger/10` inline.
+
+## 27. D-014 — resíduos de contraste accent-fg × danger (2026-10-06)
+
+Sweep final com grep recursivo **correto** (grep tool — `Select-String -Path "src\**\*.tsx"`
+do PowerShell 5.1 trata `**` como `*`, o que limitou os scans anteriores à profundidade 1;
+achado de processo documentado).
+
+### 27.1 O que foi feito (4 sites / 4 arquivos)
+
+- `src/components/ui/ConfirmDialog.tsx:51-53` — `text-accent-fg` estava no trecho comum e
+  vazava para o braço `bg-danger`; movido para os braços: `bg-danger text-danger-fg …` /
+  `bg-accent text-accent-fg …`.
+- `src/pages/master-admin/AccountActionDialog.tsx:133-135` — idem (`danger` braço agora com
+  `text-danger-fg`).
+- `src/features/finance/components/OwnerFinancialPanel.tsx:1031` — botão "Confirmar exclusão":
+  `p-1 bg-danger text-accent-fg rounded` → `text-danger-fg`.
+- `src/features/finance/components/FinancialDashboard.tsx:792` — idem.
+
+Não-sites revisados e mantidos: `TeamManager:277/279` (`text-white` sobre overlay
+`bg-black/50`), `ContactPage:288` (`bg-accent/12` tint sobre superfície marketing
+sempre-escura), `FeaturesPage:1036` (`bg-black text-white hover:text-black`, inversão
+deliberada), hero/marketing dark surfaces (`text-white` sobre fundo own, tema-independente)
+— todos legítimos.
+
+### 27.2 Prova e evesidências
+
+Suíte visual completa **com build**: **193/193 pass, 193 snapshots pass, 0 falhas, 0
+atualizações**. Gates: tsc 0 · lint **0 err / 484 warn** · app **365/365** · contratos
+(testes) **6/6** · contract:check **VERMELHO — 1 chamada**
+(`adminAccountActionsApi.ts:40 POST /api/admin/accounts/{}/{}`, mesma do §26, preexistente;
+debt json vazio) · storybook+a11y **193/193 (64 arq)** · build **105 precache / 2800,39 KiB
+(31,16s)** · órfãos exit 0 · docs OK · `verify:delivery` falha em `contract:check`
+(documentado).
+
+**D-014 — situação após o batch 15:** frente de contraste accent/danger **fechada**;
+painéis `bg-danger/10` inline restantes são usos legítimos (badges de status, hovers,
+SectionError, tokens) — nenhuma réplica de erro.
