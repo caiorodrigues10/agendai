@@ -146,7 +146,7 @@ export const PublicOwnerInvitePage: React.FC = () => {
 
   if (!token || token.length < 32) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center p-4 relative">
+      <div className="min-h-dvh bg-bg flex items-center justify-center p-4 relative">
         <div className="absolute top-4 right-4">
           <ThemeToggle />
         </div>
@@ -173,7 +173,7 @@ export const PublicOwnerInvitePage: React.FC = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center p-4 relative">
+      <div className="min-h-dvh bg-bg flex items-center justify-center p-4 relative">
         <div className="absolute top-4 right-4">
           <ThemeToggle />
         </div>
@@ -207,7 +207,7 @@ export const PublicOwnerInvitePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center p-4 relative">
+    <div className="min-h-dvh bg-bg flex items-center justify-center p-4 relative">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>

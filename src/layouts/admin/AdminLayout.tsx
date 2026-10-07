@@ -45,7 +45,7 @@ export const AdminLayout: React.FC = () => {
   }, [sidebarOpen]);
 
   return (
-    <div className="flex h-screen bg-bg text-text-primary overflow-hidden">
+    <div className="flex h-dvh bg-bg text-text-primary overflow-hidden">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <button

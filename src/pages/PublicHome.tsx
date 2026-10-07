@@ -136,7 +136,7 @@ export const PublicHome: React.FC = () => {
   if (!barbershopId || !settings) {
     if (id) {
       return (
-        <div className="min-h-screen bg-bg text-text-primary flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <div className="min-h-dvh bg-bg text-text-primary flex flex-col items-center justify-center gap-4 px-6 text-center">
           <Store className="text-text-muted" size={40} />
           <div>
             <h1 className="text-lg font-bold">Salão não encontrado</h1>
@@ -173,7 +173,7 @@ export const PublicHome: React.FC = () => {
       : null;
 
   return (
-    <div className="min-h-screen pb-[max(5rem,env(safe-area-inset-bottom))] bg-bg text-text-primary">
+    <div className="min-h-dvh pb-[max(5rem,env(safe-area-inset-bottom))] bg-bg text-text-primary">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       <main className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 pt-6">

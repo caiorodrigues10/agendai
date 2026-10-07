@@ -45,7 +45,7 @@ const PublicPostPage: React.FC = () => {
   }, [load]);
 
   return (
-    <div className="min-h-screen bg-bg text-text-primary">
+    <div className="min-h-dvh bg-bg text-text-primary">
       <div className="mx-auto w-full max-w-xl px-3 py-6">
         <div className="mb-4 flex items-center justify-between">
           <Link

@@ -93,7 +93,7 @@ const PublicNpsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-bg text-text-muted flex items-center justify-center">
+      <main className="min-h-dvh bg-bg text-text-muted flex items-center justify-center">
         <Loader2 className="animate-spin" size={28} />
       </main>
     );
@@ -101,7 +101,7 @@ const PublicNpsPage: React.FC = () => {
 
   if (error && !survey) {
     return (
-      <main className="min-h-screen bg-bg text-text-primary px-4 py-10 flex items-center justify-center">
+      <main className="min-h-dvh bg-bg text-text-primary px-4 py-10 flex items-center justify-center">
         <section className="w-full max-w-md rounded-2xl border border-danger/30 bg-surface p-6 text-center">
           <AlertCircle className="mx-auto text-danger" size={34} />
           <h1 className="mt-4 text-xl font-bold">Pesquisa indisponível</h1>
@@ -112,7 +112,7 @@ const PublicNpsPage: React.FC = () => {
   }
 
   return (
-    <main className="min-h-screen bg-bg text-text-primary px-4 py-10">
+    <main className="min-h-dvh bg-bg text-text-primary px-4 py-10">
       <section className="mx-auto w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl">
         <div className="text-center">
           <p className="text-xs font-bold uppercase tracking-wider text-text-muted">
