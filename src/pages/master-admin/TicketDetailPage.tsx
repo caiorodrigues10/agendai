@@ -143,14 +143,14 @@ export const TicketDetailPage: React.FC = () => {
         <div className="flex-1">
           <div className="flex items-center gap-3">
             <span className="font-mono text-sm text-text-muted">{ticket.protocol}</span>
-            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${PRIORITY_COLORS[ticket.priority]}`}>
+            <span className={`px-2 py-0.5 rounded text-2xs font-bold ${PRIORITY_COLORS[ticket.priority]}`}>
               {ticket.priority}
             </span>
-            <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${STATUS_COLORS[ticket.status]}`}>
+            <span className={`px-2 py-0.5 rounded text-2xs font-medium ${STATUS_COLORS[ticket.status]}`}>
               {STATUS_LABELS[ticket.status]}
             </span>
             {ticket.channel === 'IN_APP' && (
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold text-support bg-support/10">
+              <span className="px-2 py-0.5 rounded text-2xs font-bold text-support bg-support/10">
                 Relatório do usuário
               </span>
             )}
@@ -230,7 +230,7 @@ export const TicketDetailPage: React.FC = () => {
             (ticket.comments ?? []).map((c) => (
               <div key={c.id} className="px-4 py-3">
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-accent text-[10px] font-bold">
+                  <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-accent text-2xs font-bold">
                     {c.author.name.charAt(0).toUpperCase()}
                   </div>
                   <span className="text-xs font-medium">{c.author.name}</span>
@@ -291,7 +291,7 @@ export const TicketDetailPage: React.FC = () => {
 
 const MetaItem: React.FC<{ label: string; value: string }> = ({ label, value }) => (
   <div className="bg-surface border border-border rounded-xl p-3">
-    <p className="text-[10px] text-text-muted uppercase tracking-wider mb-1">{label}</p>
+    <p className="text-2xs text-text-muted uppercase tracking-wider mb-1">{label}</p>
     <p className="text-sm font-medium">{value}</p>
   </div>
 );

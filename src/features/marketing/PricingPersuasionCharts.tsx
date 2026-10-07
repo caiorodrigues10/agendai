@@ -179,7 +179,7 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                className="text-[10px]"
+                className="text-2xs"
               />
               <YAxis hide />
               <ChartTooltip
@@ -198,7 +198,7 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
           </ChartContainer>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className={`rounded-xl border px-4 py-3 ${shell}`}>
-              <p className={`text-[10px] font-bold uppercase tracking-wider ${faint}`}>
+              <p className={`text-2xs font-bold uppercase tracking-wider ${faint}`}>
                 Economia Essencial
               </p>
               <p className={`text-xl font-black ${isDark ? 'text-accent' : 'text-accent'}`}>
@@ -206,7 +206,7 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
               </p>
             </div>
             <div className={`rounded-xl border px-4 py-3 ${shell}`}>
-              <p className={`text-[10px] font-bold uppercase tracking-wider ${faint}`}>
+              <p className={`text-2xs font-bold uppercase tracking-wider ${faint}`}>
                 Economia Pro
               </p>
               <p className={`text-xl font-black ${isDark ? 'text-accent' : 'text-accent'}`}>
@@ -276,7 +276,7 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
                 tickLine={false}
                 axisLine={false}
                 width={88}
-                className="text-[11px]"
+                className="text-2xs"
               />
               <ChartTooltip content={<ChartTooltipContent />} />
               <Bar

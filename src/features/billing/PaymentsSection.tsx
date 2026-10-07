@@ -72,7 +72,7 @@ const RefundModal: React.FC<RefundModalProps> = ({ payment, onClose, onSubmit, b
           </div>
         )}
 
-        <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+        <label className="block text-2xs font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
           Motivo do reembolso
         </label>
         <textarea
@@ -83,7 +83,7 @@ const RefundModal: React.FC<RefundModalProps> = ({ payment, onClose, onSubmit, b
           placeholder="Ex: cobrança indevida, solicitação do cliente..."
           className="w-full bg-bg border border-border text-text-primary rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-focus transition-all resize-none"
         />
-        <p className="text-[10px] text-text-muted text-right mt-1">{reason.length}/500</p>
+        <p className="text-2xs text-text-muted text-right mt-1">{reason.length}/500</p>
 
         <div className="rounded-xl bg-warning/10 border border-warning/20 px-4 py-3 flex gap-2 mt-3">
           <AlertCircle size={15} className="text-warning shrink-0 mt-0.5" />
@@ -182,7 +182,7 @@ export const PaymentsSection: React.FC<{ shopNames: Map<string, string> }> = ({ 
       )}
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="bg-bg text-text-muted uppercase text-[10px] font-bold tracking-widest border-b border-border">
+          <thead className="bg-bg text-text-muted uppercase text-2xs font-bold tracking-widest border-b border-border">
             <tr>
               <th className="px-6 py-3.5">Descrição</th>
               <th className="px-6 py-3.5 hidden md:table-cell">Salão</th>
@@ -200,7 +200,7 @@ export const PaymentsSection: React.FC<{ shopNames: Map<string, string> }> = ({ 
                     <div className="font-bold text-text-primary text-sm max-w-[220px] truncate">
                       {p.description || '—'}
                     </div>
-                    <div className="text-[10px] text-text-muted font-mono">
+                    <div className="text-2xs text-text-muted font-mono">
                       {paymentRefLabel(p)}
                     </div>
                   </td>
@@ -235,13 +235,13 @@ export const PaymentsSection: React.FC<{ shopNames: Map<string, string> }> = ({ 
                           setRefundError(null);
                           setRefundTarget(p);
                         }}
-                        className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-warning border border-warning/20 hover:bg-warning/10 rounded-lg px-2.5 py-1.5 transition-all"
+                        className="inline-flex items-center gap-1.5 text-2xs font-bold uppercase tracking-wider text-warning border border-warning/20 hover:bg-warning/10 rounded-lg px-2.5 py-1.5 transition-all"
                       >
                         <RotateCcw size={11} />
                         Reembolsar
                       </button>
                     ) : (
-                      <span className="text-[10px] text-text-muted">—</span>
+                      <span className="text-2xs text-text-muted">—</span>
                     )}
                   </td>
                 </tr>

@@ -174,14 +174,14 @@ export const OwnerReferralsPanel: React.FC<OwnerReferralsPanelProps> = ({ onNoti
       </section>
 
       <div className="rounded-2xl border border-border bg-surface p-4 space-y-3">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+        <p className="text-2xs font-bold uppercase tracking-wider text-text-secondary">
           Seu link de indicação
         </p>
         <code className="block text-xs sm:text-sm bg-bg border border-border rounded-xl px-3 py-2.5 text-text-primary truncate">
           {data.shareUrl}
         </code>
         <ShareReferralButton shareUrl={data.shareUrl} shareText={shareText} />
-        <p className="text-[11px] text-text-muted">
+        <p className="text-2xs text-text-muted">
           Código: <strong className="text-text-secondary">{data.code}</strong> · +{data.rewardDays}{' '}
           dias por conversão
         </p>
@@ -200,7 +200,7 @@ export const OwnerReferralsPanel: React.FC<OwnerReferralsPanelProps> = ({ onNoti
           >
             <s.icon size={14} className="mx-auto text-accent mb-1" />
             <p className="text-lg font-black text-text-primary">{s.value}</p>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mt-0.5">
+            <p className="text-2xs font-bold uppercase tracking-wider text-text-muted mt-0.5">
               {s.label}
             </p>
           </div>
@@ -229,14 +229,14 @@ export const OwnerReferralsPanel: React.FC<OwnerReferralsPanelProps> = ({ onNoti
               <li key={r.id} className="px-4 py-3 flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-text-primary truncate">{r.shopName}</p>
-                  <p className="text-[11px] text-text-muted">
+                  <p className="text-2xs text-text-muted">
                     {new Date(r.createdAt).toLocaleDateString('pt-BR')}
                     {r.status === 'REWARDED' ? ` · +${r.rewardDays} dias` : ''}
                     {r.status === 'REJECTED' ? ` · -${r.rewardDays} dias` : ''}
                   </p>
                 </div>
                 <span
-                  className={`shrink-0 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${
+                  className={`shrink-0 text-2xs font-bold uppercase tracking-wider px-2 py-1 rounded-full ${
                     STATUS_STYLES[r.status] ?? 'bg-surface-2 text-text-muted'
                   }`}
                 >

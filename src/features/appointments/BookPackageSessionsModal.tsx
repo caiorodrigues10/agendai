@@ -163,7 +163,7 @@ export const BookPackageSessionsModal: React.FC<BookPackageSessionsModalProps> =
           />
 
           <div>
-            <label className="text-[11px] text-text-secondary font-bold uppercase tracking-wider flex items-center gap-1.5 mb-2">
+            <label className="text-2xs text-text-secondary font-bold uppercase tracking-wider flex items-center gap-1.5 mb-2">
               <Clock size={12} /> Horários de{' '}
               {new Date(date + 'T12:00:00').toLocaleDateString('pt-BR')}
             </label>

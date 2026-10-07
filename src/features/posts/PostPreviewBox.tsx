@@ -67,7 +67,7 @@ export const PostPreviewBox: React.FC<PostPreviewBoxProps> = ({
             className="h-full w-full object-contain"
           />
           {stale && (
-            <span className="absolute right-2 top-2 rounded-full bg-warning/20 px-2 py-0.5 text-[10px] font-bold text-warning">
+            <span className="absolute right-2 top-2 rounded-full bg-warning/20 px-2 py-0.5 text-2xs font-bold text-warning">
               Desatualizada
             </span>
           )}

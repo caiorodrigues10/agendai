@@ -691,7 +691,7 @@ export const LandingPage: React.FC = () => {
             <div className="relative z-20 max-w-3xl">
               <p
                 data-hero-badge
-                className="mb-5 text-[11px] font-medium uppercase tracking-[0.28em] text-emerald-400/90 sm:mb-6"
+                className="mb-5 text-2xs font-medium uppercase tracking-[0.28em] text-emerald-400/90 sm:mb-6"
               >
                 Fila · agenda · financeiro
               </p>
@@ -744,7 +744,7 @@ export const LandingPage: React.FC = () => {
                     </span>
                     <ArrowRight size={24} className="h-5 w-5 shrink-0 text-emerald-400 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-emerald-300" />
                   </span>
-                  <span className="mt-3 block text-[11px] font-medium tracking-[0.04em] text-neutral-500">
+                  <span className="mt-3 block text-2xs font-medium tracking-[0.04em] text-neutral-500">
                     {trialCampaign.heroSubline}
                   </span>
                 </button>
@@ -818,10 +818,10 @@ export const LandingPage: React.FC = () => {
                       </div>
                       <div>
                         <p className="text-sm font-bold text-white">Visão de hoje</p>
-                        <p className="text-[10px] text-neutral-500">Studio Aurora · sexta-feira</p>
+                        <p className="text-2xs text-neutral-500">Studio Aurora · sexta-feira</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/[0.07] px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-emerald-300">
+                    <div className="flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/[0.07] px-3 py-1.5 text-2xs font-black uppercase tracking-wider text-emerald-300">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                       Aberto
                     </div>
@@ -841,7 +841,7 @@ export const LandingPage: React.FC = () => {
                             : 'border-white/6 bg-white/2.5'
                         }`}
                       >
-                        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-neutral-500">
+                        <p className="text-2xs font-bold uppercase tracking-[0.16em] text-neutral-500">
                           {item.label}
                         </p>
                         <p className="mt-2 text-2xl font-black tracking-tight text-white">
@@ -856,7 +856,7 @@ export const LandingPage: React.FC = () => {
                       <div className="mb-4 flex items-center justify-between">
                         <div>
                           <p className="text-xs font-bold text-white">Fila em tempo real</p>
-                          <p className="mt-1 text-[9px] text-neutral-500">Atualizada agora</p>
+                          <p className="mt-1 text-2xs text-neutral-500">Atualizada agora</p>
                         </div>
                         <ChevronRight size={24} className="h-4 w-4 text-neutral-600" />
                       </div>
@@ -867,7 +867,7 @@ export const LandingPage: React.FC = () => {
                             className="flex items-center gap-3 rounded-xl border border-white/4 bg-white/2.5 p-2.5"
                           >
                             <div
-                              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[9px] font-black ${
+                              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-2xs font-black ${
                                 index === 0
                                   ? 'bg-emerald-400 text-black'
                                   : 'bg-white/[0.07] text-neutral-300'
@@ -876,14 +876,14 @@ export const LandingPage: React.FC = () => {
                               {customer.initials}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-[10px] font-bold text-neutral-200">
+                              <p className="truncate text-2xs font-bold text-neutral-200">
                                 {customer.name}
                               </p>
-                              <p className="truncate text-[8px] text-neutral-600">
+                              <p className="truncate text-2xs text-neutral-600">
                                 {customer.service}
                               </p>
                             </div>
-                            <span className="text-[9px] font-bold text-emerald-400">
+                            <span className="text-2xs font-bold text-emerald-400">
                               {customer.wait}
                             </span>
                           </div>
@@ -895,7 +895,7 @@ export const LandingPage: React.FC = () => {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-xs font-bold text-white">Movimento</p>
-                          <p className="mt-1 text-[9px] text-neutral-500">Atendimentos por hora</p>
+                          <p className="mt-1 text-2xs text-neutral-500">Atendimentos por hora</p>
                         </div>
                         <BarChart3 size={24} className="h-4 w-4 text-emerald-400" />
                       </div>
@@ -913,7 +913,7 @@ export const LandingPage: React.FC = () => {
                           />
                         ))}
                       </div>
-                      <div className="mt-3 flex justify-between text-[7px] uppercase tracking-widest text-neutral-700">
+                      <div className="mt-3 flex justify-between text-2xs uppercase tracking-widest text-neutral-700">
                         <span>09h</span>
                         <span>13h</span>
                         <span>18h</span>
@@ -935,8 +935,8 @@ export const LandingPage: React.FC = () => {
                     <Bell size={24} className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-white">Nova entrada</p>
-                    <p className="text-[9px] text-neutral-500">Cliente entrou na fila</p>
+                    <p className="text-2xs font-bold text-white">Nova entrada</p>
+                    <p className="text-2xs text-neutral-500">Cliente entrou na fila</p>
                   </div>
                 </div>
               </div>
@@ -949,20 +949,20 @@ export const LandingPage: React.FC = () => {
                 className="absolute -bottom-7 right-2 hidden w-56 rounded-2xl border border-emerald-400/15 bg-[#111512]/90 p-4 shadow-2xl backdrop-blur-2xl sm:block lg:-right-10"
               >
                 <div className="mb-3 flex items-center justify-between">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400">
+                  <span className="text-2xs font-black uppercase tracking-widest text-emerald-400">
                     Próximo horário
                   </span>
                   <Calendar size={24} className="h-4 w-4 text-emerald-400" />
                 </div>
                 <p className="text-sm font-bold text-white">14:30 · Corte + escova</p>
-                <p className="mt-1 text-[9px] text-neutral-500">com Marina Oliveira</p>
+                <p className="mt-1 text-2xs text-neutral-500">com Marina Oliveira</p>
               </div>
             </div>
           </div>
 
           <button
             onClick={event => scrollToSection(event, 'produto')}
-            className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 text-[8px] font-bold uppercase tracking-[0.28em] text-neutral-600 transition hover:text-neutral-400 md:flex"
+            className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 text-2xs font-bold uppercase tracking-[0.28em] text-neutral-600 transition hover:text-neutral-400 md:flex"
             aria-label="Ir para a próxima seção"
           >
             Explore
@@ -997,7 +997,7 @@ export const LandingPage: React.FC = () => {
         <section id="produto" className="relative scroll-mt-20 px-5 py-20 sm:px-8 sm:py-28 md:py-40">
           <div className="mx-auto min-w-0 max-w-375">
             <div data-reveal className="mb-12 min-w-0 max-w-3xl sm:mb-16">
-              <span className="text-[10px] font-black uppercase tracking-[0.28em] text-emerald-400">
+              <span className="text-2xs font-black uppercase tracking-[0.28em] text-emerald-400">
                 Da chegada ao resultado
               </span>
               <h2 className="mt-4 text-4xl font-black tracking-[-0.05em] text-white sm:mt-5 sm:text-5xl md:text-7xl">
@@ -1069,7 +1069,7 @@ export const LandingPage: React.FC = () => {
                           Corte + escova · cadeira 1
                         </p>
                       </div>
-                      <span className="rounded-full bg-emerald-400 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-black">
+                      <span className="rounded-full bg-emerald-400 px-2.5 py-1 text-2xs font-black uppercase tracking-wider text-black">
                         Na cadeira
                       </span>
                     </div>
@@ -1139,7 +1139,7 @@ export const LandingPage: React.FC = () => {
                               : 'border-white/6 bg-white/3'
                           }`}
                         >
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+                          <p className="text-2xs font-bold uppercase tracking-wider text-neutral-500">
                             {item.day}
                           </p>
                           <p
@@ -1153,7 +1153,7 @@ export const LandingPage: React.FC = () => {
                       ))}
                     </div>
 
-                    <p className="mb-2.5 mt-5 text-[11px] font-medium uppercase tracking-[0.18em] text-neutral-500">
+                    <p className="mb-2.5 mt-5 text-2xs font-medium uppercase tracking-[0.18em] text-neutral-500">
                       Horários livres
                     </p>
                     <div className="grid grid-cols-4 gap-2">
@@ -1190,7 +1190,7 @@ export const LandingPage: React.FC = () => {
                           60 min · R$ 85 · lembrete
                         </p>
                       </div>
-                      <span className="rounded-full bg-emerald-400 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-black">
+                      <span className="rounded-full bg-emerald-400 px-2.5 py-1 text-2xs font-black uppercase tracking-wider text-black">
                         Ok
                       </span>
                     </div>
@@ -1354,7 +1354,7 @@ export const LandingPage: React.FC = () => {
                           <p className="text-xs text-neutral-500">{row.meta}</p>
                         </div>
                         <span
-                          className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${
+                          className={`rounded-full px-2.5 py-1 text-2xs font-black uppercase tracking-wider ${
                             row.active
                               ? 'bg-black/30 text-amber-200'
                               : 'bg-white/6 text-neutral-400'
@@ -1406,7 +1406,7 @@ export const LandingPage: React.FC = () => {
                             Dono
                           </p>
                         </div>
-                        <span className="rounded-full bg-emerald-400/15 px-2 py-1 text-[10px] font-black text-emerald-300">
+                        <span className="rounded-full bg-emerald-400/15 px-2 py-1 text-2xs font-black text-emerald-300">
                           Online
                         </span>
                       </div>
@@ -1442,7 +1442,7 @@ export const LandingPage: React.FC = () => {
                             Funcionário
                           </p>
                         </div>
-                        <span className="rounded-full bg-white/8 px-2 py-1 text-[10px] font-black text-neutral-400">
+                        <span className="rounded-full bg-white/8 px-2 py-1 text-2xs font-black text-neutral-400">
                           Na fila
                         </span>
                       </div>
@@ -1479,7 +1479,7 @@ export const LandingPage: React.FC = () => {
                       <p className="text-xs font-black uppercase tracking-wider text-neutral-500">
                         Agora no painel
                       </p>
-                      <span className="text-[10px] font-bold text-emerald-300">ao vivo</span>
+                      <span className="text-2xs font-bold text-emerald-300">ao vivo</span>
                     </div>
                     <div className="space-y-2">
                       {[
@@ -1509,7 +1509,7 @@ export const LandingPage: React.FC = () => {
                             {' · '}
                             {row.action}
                           </p>
-                          <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-neutral-600">
+                          <span className="shrink-0 text-2xs font-bold uppercase tracking-wider text-neutral-600">
                             {row.time}
                           </span>
                         </div>
@@ -1588,7 +1588,7 @@ export const LandingPage: React.FC = () => {
                             </div>
                             <div className="min-w-0">
                               <p
-                                className={`text-[10px] font-medium uppercase tracking-[0.2em] ${accent.meta}`}
+                                className={`text-2xs font-medium uppercase tracking-[0.2em] ${accent.meta}`}
                               >
                                 {step.meta}
                               </p>
@@ -1629,7 +1629,7 @@ export const LandingPage: React.FC = () => {
 
             <div className="relative z-10 grid min-w-0 gap-10 p-5 sm:gap-14 sm:p-8 md:p-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:p-24">
               <div className="min-w-0">
-                <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-emerald-800/70">
+                <p className="text-2xs font-medium uppercase tracking-[0.28em] text-emerald-800/70">
                   Dados com contexto
                 </p>
                 <h2 className="mt-5 text-4xl font-black leading-[1.08] tracking-[-0.045em] sm:mt-8 sm:text-5xl md:text-6xl xl:text-7xl">
@@ -1661,7 +1661,7 @@ export const LandingPage: React.FC = () => {
                 <div className="min-w-0 rounded-4xl border border-emerald-950/10 bg-white/75 p-4 shadow-[0_30px_80px_rgba(6,78,59,0.12)] backdrop-blur-xl sm:p-6 md:p-9">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
                     <div>
-                      <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-emerald-800/65">
+                      <p className="text-2xs font-medium uppercase tracking-[0.22em] text-emerald-800/65">
                         Movimento semanal
                       </p>
                       <p className="mt-2 text-3xl font-black tracking-tight sm:text-4xl md:text-5xl">
@@ -1673,7 +1673,7 @@ export const LandingPage: React.FC = () => {
                     </div>
                     <p className="shrink-0 pb-1 text-left text-sm font-semibold tabular-nums text-emerald-700 sm:text-right">
                       +12%
-                      <span className="mt-0.5 block text-[10px] font-medium uppercase tracking-[0.16em] text-emerald-950/45">
+                      <span className="mt-0.5 block text-2xs font-medium uppercase tracking-[0.16em] text-emerald-950/45">
                         vs. semana
                       </span>
                     </p>
@@ -1800,7 +1800,7 @@ export const LandingPage: React.FC = () => {
                   }`}
                 >
                   {fact.featured && (
-                    <span className="mb-4 inline-flex w-fit rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-300">
+                    <span className="mb-4 inline-flex w-fit rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1 text-2xs font-black uppercase tracking-wider text-emerald-300">
                       Mais pedido
                     </span>
                   )}
@@ -1903,7 +1903,7 @@ export const LandingPage: React.FC = () => {
 
                       {d.risk === 'high' && (
                         <div className="absolute right-3 top-3 z-10">
-                          <span className="rounded-full bg-red-400 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-red-950 shadow-lg shadow-red-950/20">
+                          <span className="rounded-full bg-red-400 px-2 py-0.5 text-2xs font-black uppercase tracking-wider text-red-950 shadow-lg shadow-red-950/20">
                             Alerta
                           </span>
                         </div>
@@ -1913,7 +1913,7 @@ export const LandingPage: React.FC = () => {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm font-black text-white">{d.day}</p>
-                            <p className="mt-0.5 text-[11px] font-semibold text-white/60">{d.date}</p>
+                            <p className="mt-0.5 text-2xs font-semibold text-white/60">{d.date}</p>
                           </div>
                           <span className={`h-2.5 w-2.5 rounded-full ${visual.glow} shadow-lg`} />
                         </div>
@@ -1927,7 +1927,7 @@ export const LandingPage: React.FC = () => {
 
                           <div className="mt-4 space-y-3 rounded-xl border border-white/10 bg-black/28 p-3 backdrop-blur-sm">
                             <div>
-                              <div className="mb-1 flex justify-between text-[10px]">
+                              <div className="mb-1 flex justify-between text-2xs">
                                 <span className="font-semibold text-white/55">Chuva</span>
                                 <span className="font-bold text-sky-100">{d.precip}%</span>
                               </div>
@@ -1940,7 +1940,7 @@ export const LandingPage: React.FC = () => {
                             </div>
 
                             <div>
-                              <div className="mb-1 flex justify-between text-[10px]">
+                              <div className="mb-1 flex justify-between text-2xs">
                                 <span className="font-semibold text-white/55">Demanda</span>
                                 <span className={`font-black ${
                                   d.risk === 'high'
@@ -1967,7 +1967,7 @@ export const LandingPage: React.FC = () => {
                             </div>
                           </div>
 
-                          <p className={`mt-3 text-[10px] font-black uppercase tracking-wider ${
+                          <p className={`mt-3 text-2xs font-black uppercase tracking-wider ${
                             d.risk === 'high'
                               ? 'text-red-300'
                               : d.risk === 'medium'
@@ -2056,7 +2056,7 @@ export const LandingPage: React.FC = () => {
 
             <p
               data-reveal
-              className="mx-auto mb-10 max-w-xl text-center text-[11px] font-medium uppercase tracking-[0.24em] text-emerald-400/85"
+              className="mx-auto mb-10 max-w-xl text-center text-2xs font-medium uppercase tracking-[0.24em] text-emerald-400/85"
             >
               {trialCampaign.eyebrow}
             </p>
@@ -2079,7 +2079,7 @@ export const LandingPage: React.FC = () => {
                       Essencial
                     </h3>
                   </div>
-                  <span className="rounded-full border border-white/10 bg-white/4 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                  <span className="rounded-full border border-white/10 bg-white/4 px-3 py-1 text-2xs font-bold uppercase tracking-wider text-neutral-400">
                     R$ 14
                   </span>
                 </div>
@@ -2147,7 +2147,7 @@ export const LandingPage: React.FC = () => {
                     </p>
                     <h3 className="mt-2 text-3xl font-black tracking-tight text-white">Pro</h3>
                   </div>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-black">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400 px-3 py-1.5 text-2xs font-black uppercase tracking-wider text-black">
                     <Zap size={24} className="h-3 w-3" />
                     Recomendado
                   </span>

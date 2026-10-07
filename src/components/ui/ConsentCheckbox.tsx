@@ -61,8 +61,8 @@ export const ConsentCheckbox: React.FC<ConsentCheckboxProps> = ({
             {checked && <Check size={isCompact ? 10 : 12} className="text-current" />}
           </div>
         </div>
-        <div className={`flex-1 min-w-0 ${isCompact ? 'text-[11px] leading-none' : 'text-sm leading-relaxed'}`}>
-          <span className={`text-text-primary ${isCompact ? 'text-[11px]' : 'font-medium'}`}>
+        <div className={`flex-1 min-w-0 ${isCompact ? 'text-2xs leading-none' : 'text-sm leading-relaxed'}`}>
+          <span className={`text-text-primary ${isCompact ? 'text-2xs' : 'font-medium'}`}>
             {label}
             {required && (
               <span className="text-danger ml-1" aria-hidden="true">
@@ -70,13 +70,13 @@ export const ConsentCheckbox: React.FC<ConsentCheckboxProps> = ({
               </span>
             )}
           </span>
-          {helpText && <p className="mt-1 text-[11px] text-text-muted">{helpText}</p>}
+          {helpText && <p className="mt-1 text-2xs text-text-muted">{helpText}</p>}
           {helpLink && (
             <a
               href={helpLink.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-1 inline-flex items-center gap-1 text-[11px] text-accent hover:underline"
+              className="mt-1 inline-flex items-center gap-1 text-2xs text-accent hover:underline"
             >
               {helpLink.label}
               <HelpCircle size={10} />
@@ -85,7 +85,7 @@ export const ConsentCheckbox: React.FC<ConsentCheckboxProps> = ({
         </div>
       </label>
       {error && (
-        <p className="mt-1.5 ml-8 flex items-center gap-1.5 text-[11px] text-danger">
+        <p className="mt-1.5 ml-8 flex items-center gap-1.5 text-2xs text-danger">
           <AlertCircle size={11} />
           {error}
         </p>

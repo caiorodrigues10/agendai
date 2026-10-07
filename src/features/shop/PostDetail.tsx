@@ -154,7 +154,7 @@ const InlineClientLogin: React.FC<{ salonId: string; onSuccess: (identityId?: st
         </>
       ) : (
         <>
-          <p className="text-[11px] text-text-muted">
+          <p className="text-2xs text-text-muted">
             Enviamos um código para <strong>{phone}</strong>.
           </p>
           <input
@@ -347,7 +347,7 @@ export const PostDetail: React.FC<PostDetailProps> = ({
         </div>
         <div className="min-w-0 flex-1">
           <Link to={`/queue/${encodeURIComponent(salonId)}?tab=profile`} className="text-sm font-bold text-text-primary truncate hover:underline">{post.shopName}</Link>
-          <p className="text-[11px] text-text-muted">{formatDate(post.createdAt)}</p>
+          <p className="text-2xs text-text-muted">{formatDate(post.createdAt)}</p>
         </div>
         {onClose && (
           <button
@@ -443,7 +443,7 @@ export const PostDetail: React.FC<PostDetailProps> = ({
               <div className="min-w-0 flex-1">
                 <p className="text-xs">
                   <span className="font-bold text-text-primary">{comment.authorName}</span>{' '}
-                  <span className="text-[10px] text-text-muted">{formatDate(comment.createdAt)}</span>
+                  <span className="text-2xs text-text-muted">{formatDate(comment.createdAt)}</span>
                 </p>
                 <p className="break-words text-sm text-text-secondary leading-relaxed">{comment.content}</p>
               </div>

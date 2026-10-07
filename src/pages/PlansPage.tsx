@@ -267,7 +267,7 @@ export const PlansPage: React.FC = () => {
                 >
                   Anual
                 </button>
-                <span className="rounded-full bg-accent px-3 py-2 text-[10px] font-black uppercase tracking-wider text-black">
+                <span className="rounded-full bg-accent px-3 py-2 text-2xs font-black uppercase tracking-wider text-black">
                   2 meses grátis
                 </span>
               </div>
@@ -294,7 +294,7 @@ export const PlansPage: React.FC = () => {
                     <h2 className="text-sm font-black uppercase tracking-[0.18em] text-white">
                       Teste grátis
                     </h2>
-                    <span className="rounded-full border border-white/15 bg-white/8 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-neutral-200">
+                    <span className="rounded-full border border-white/15 bg-white/8 px-2.5 py-1 text-2xs font-black uppercase tracking-wider text-neutral-200">
                       30 dias
                     </span>
                   </div>
@@ -315,7 +315,7 @@ export const PlansPage: React.FC = () => {
                   >
                     {trialCta}
                   </button>
-                  <p className="mt-2 text-center text-[11px] text-neutral-500">
+                  <p className="mt-2 text-center text-2xs text-neutral-500">
                     Sem cartão, sem cobrança automática
                   </p>
                   <FeatureList rows={trialRows} />
@@ -332,7 +332,7 @@ export const PlansPage: React.FC = () => {
                       Essencial
                     </h2>
                     {essentialCurrent && (
-                      <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-accent-light">
+                      <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-2xs font-bold uppercase tracking-wider text-accent-light">
                         Atual
                       </span>
                     )}
@@ -377,7 +377,7 @@ export const PlansPage: React.FC = () => {
                     {essentialPlan ? paidCta('Essencial', essentialCurrent) : 'Indisponível'}
                   </button>
                   {!essentialCurrent && (
-                    <p className="mt-2 text-center text-[11px] text-neutral-500">
+                    <p className="mt-2 text-center text-2xs text-neutral-500">
                       {trialCampaign.afterTrialThenEssential}
                     </p>
                   )}
@@ -390,7 +390,7 @@ export const PlansPage: React.FC = () => {
                   transition={{ delay: 0.1 }}
                   className="relative z-10 flex flex-col rounded-[1.75rem] border border-accent/50 bg-linear-to-b from-accent/25 to-[#07140f] p-6 shadow-[0_0_80px_rgba(52,211,153,0.16)] md:p-7 lg:scale-[1.02]"
                 >
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-1 text-[10px] font-black uppercase tracking-widest text-black">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-1 text-2xs font-black uppercase tracking-widest text-black">
                     Mais escolhido
                   </div>
                   <div className="flex items-start justify-between gap-3">
@@ -399,12 +399,12 @@ export const PlansPage: React.FC = () => {
                     </h2>
                     <div className="flex flex-wrap justify-end gap-1.5">
                       {isYearly && (
-                        <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-black">
+                        <span className="rounded-full bg-white px-2.5 py-1 text-2xs font-black uppercase tracking-wider text-black">
                           2 meses grátis
                         </span>
                       )}
                       {proCurrent && (
-                        <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-accent-light">
+                        <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-2xs font-bold uppercase tracking-wider text-accent-light">
                           Atual
                         </span>
                       )}
@@ -447,7 +447,7 @@ export const PlansPage: React.FC = () => {
                     {proPlan ? paidCta('Pro', proCurrent) : 'Indisponível'}
                   </button>
                   {!proCurrent && (
-                    <p className="mt-2 text-center text-[11px] text-neutral-400">
+                    <p className="mt-2 text-center text-2xs text-neutral-400">
                       {trialCampaign.afterTrialThenPro}
                     </p>
                   )}
@@ -494,7 +494,7 @@ export const PlansPage: React.FC = () => {
 
             <div className="overflow-hidden rounded-4xl border border-white/10 bg-surface">
               <div className="overflow-x-auto">
-                <div className="grid grid-cols-[1.5fr_0.75fr_0.75fr] border-b border-white/8 px-5 py-4 text-[10px] font-black uppercase tracking-wider text-neutral-500 md:px-8 md:text-xs">
+                <div className="grid grid-cols-[1.5fr_0.75fr_0.75fr] border-b border-white/8 px-5 py-4 text-2xs font-black uppercase tracking-wider text-neutral-500 md:px-8 md:text-xs">
                   <span>Recurso</span>
                   <span className="text-center">Essencial</span>
                   <span className="text-center text-accent-light">Pro</span>

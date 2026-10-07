@@ -66,14 +66,14 @@ const OwnerInviteForm: React.FC<OwnerInviteFormProps> = ({ token, onSuccess }) =
       )}
       <form onSubmit={handleSubmit} className="w-full space-y-6">
         <div className="space-y-4">
-          <p className="text-[11px] text-text-muted text-center leading-relaxed">
+          <p className="text-2xs text-text-muted text-center leading-relaxed">
             Defina a senha de acesso ao painel do seu salão.
           </p>
 
           <div className="space-y-1">
             <label
               htmlFor="invite-new-password"
-              className="text-[10px] font-bold uppercase tracking-wider text-accent"
+              className="text-2xs font-bold uppercase tracking-wider text-accent"
             >
               Nova senha
             </label>
@@ -92,7 +92,7 @@ const OwnerInviteForm: React.FC<OwnerInviteFormProps> = ({ token, onSuccess }) =
           <div className="space-y-1">
             <label
               htmlFor="invite-confirm-password"
-              className="text-[10px] font-bold uppercase tracking-wider text-accent"
+              className="text-2xs font-bold uppercase tracking-wider text-accent"
             >
               Confirmar nova senha
             </label>
@@ -131,7 +131,7 @@ const OwnerInviteForm: React.FC<OwnerInviteFormProps> = ({ token, onSuccess }) =
       <button
         type="button"
         onClick={() => navigate('/login')}
-        className="mt-4 text-[11px] text-text-muted hover:text-accent transition-colors"
+        className="mt-4 text-2xs text-text-muted hover:text-accent transition-colors"
       >
         Ir para o login
       </button>
@@ -182,7 +182,7 @@ export const PublicOwnerInvitePage: React.FC = () => {
             <Logo size="md" />
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg border border-border">
               <KeyRound size={10} className="text-text-muted" />
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
+              <span className="text-2xs font-bold text-text-muted uppercase tracking-widest">
                 Convite aceito
               </span>
             </div>
@@ -223,7 +223,7 @@ export const PublicOwnerInvitePage: React.FC = () => {
             </button>
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg border border-border">
               <KeyRound size={10} className="text-text-muted" />
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
+              <span className="text-2xs font-bold text-text-muted uppercase tracking-widest">
                 Aceitar convite
               </span>
             </div>

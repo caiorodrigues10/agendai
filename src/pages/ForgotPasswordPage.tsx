@@ -59,7 +59,7 @@ export const ForgotPasswordPage: React.FC = () => {
             <Logo size="md" />
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg border border-border">
               <LockKeyhole size={10} className="text-text-muted" />
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
+              <span className="text-2xs font-bold text-text-muted uppercase tracking-widest">
                 E-mail enviado
               </span>
             </div>
@@ -105,7 +105,7 @@ export const ForgotPasswordPage: React.FC = () => {
             </button>
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg border border-border">
               <LockKeyhole size={10} className="text-text-muted" />
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
+              <span className="text-2xs font-bold text-text-muted uppercase tracking-widest">
                 Recuperar senha
               </span>
             </div>
@@ -120,13 +120,13 @@ export const ForgotPasswordPage: React.FC = () => {
 
           <form onSubmit={handleEmailSubmit} className="w-full space-y-6">
               <div className="space-y-4">
-                <p className="text-[11px] text-text-muted text-center leading-relaxed">
+                <p className="text-2xs text-text-muted text-center leading-relaxed">
                   Informe o e-mail associado à sua conta para recuperar sua senha.
                 </p>
                 <div className="space-y-1">
                   <label
                     htmlFor="forgot-password-email"
-                    className="text-[10px] font-bold uppercase tracking-wider text-accent"
+                    className="text-2xs font-bold uppercase tracking-wider text-accent"
                   >
                     E-mail
                   </label>
@@ -163,7 +163,7 @@ export const ForgotPasswordPage: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate('/login')}
-            className="mt-4 inline-flex min-h-11 items-center text-[11px] text-text-muted hover:text-accent transition-colors lg:min-h-0"
+            className="mt-4 inline-flex min-h-11 items-center text-2xs text-text-muted hover:text-accent transition-colors lg:min-h-0"
           >
             Voltar ao login
           </button>

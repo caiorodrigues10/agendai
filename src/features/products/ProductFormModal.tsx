@@ -318,7 +318,7 @@ export const ProductFormModal: React.FC<Props> = ({
                     className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border text-text-muted hover:border-accent/40 hover:text-accent transition-colors cursor-pointer"
                   >
                     <Upload size={18} />
-                    <span className="text-[10px] font-medium">Adicionar</span>
+                    <span className="text-2xs font-medium">Adicionar</span>
                   </button>
                 )}
                 <input

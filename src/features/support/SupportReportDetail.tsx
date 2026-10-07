@@ -48,13 +48,13 @@ const ReportBody: React.FC<{ detail: SupportReportDetailData }> = ({ detail }) =
           (detail.comments ?? []).map(comment => (
             <div key={comment.id} className="px-4 py-3">
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-accent text-[10px] font-bold">
+                <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-accent text-2xs font-bold">
                   {comment.author.name.charAt(0).toUpperCase()}
                 </div>
                 <span className="text-xs font-medium text-text-primary">
                   {comment.author.name}
                 </span>
-                <span className="text-[11px] text-text-muted">
+                <span className="text-2xs text-text-muted">
                   {new Date(comment.createdAt).toLocaleString('pt-BR')}
                 </span>
               </div>
@@ -80,7 +80,7 @@ const HeaderInfo: React.FC<{
       </span>
       {detail && (
         <span
-          className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+          className={`px-2 py-0.5 rounded text-2xs font-medium ${
             SUPPORT_STATUS_COLORS[detail.status] ?? ''
           }`}
         >
@@ -88,12 +88,12 @@ const HeaderInfo: React.FC<{
         </span>
       )}
       {detail && (
-        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-surface-2 text-text-secondary">
+        <span className="px-2 py-0.5 rounded text-2xs font-bold bg-surface-2 text-text-secondary">
           {SUPPORT_CATEGORY_LABELS[detail.category] ?? detail.category}
         </span>
       )}
       {detail && (
-        <span className="px-2 py-0.5 rounded text-[10px] font-medium text-accent bg-accent/10">
+        <span className="px-2 py-0.5 rounded text-2xs font-medium text-accent bg-accent/10">
           {SUPPORT_PRIORITY_LABELS[detail.priority] ?? detail.priority}
         </span>
       )}

@@ -104,7 +104,7 @@ export const SupportReportForm: React.FC<SupportReportFormProps> = ({ onCreated 
                     <Icon size={14} aria-hidden="true" />
                     {option.label}
                   </span>
-                  <span className="mt-0.5 block text-[11px] leading-tight text-text-muted">
+                  <span className="mt-0.5 block text-2xs leading-tight text-text-muted">
                     {option.description}
                   </span>
                 </label>
@@ -175,12 +175,12 @@ export const SupportReportForm: React.FC<SupportReportFormProps> = ({ onCreated 
             <p className="text-xs text-danger" role={errors.description ? 'alert' : undefined}>
               {errors.description?.message}
             </p>
-            <span className="shrink-0 text-[11px] text-text-muted">{description.length}/4000</span>
+            <span className="shrink-0 text-2xs text-text-muted">{description.length}/4000</span>
           </div>
         </div>
 
         {pagePath && (
-          <p className="text-[11px] text-text-muted flex items-start gap-1.5">
+          <p className="text-2xs text-text-muted flex items-start gap-1.5">
             <LuMapPin size={12} className="mt-0.5 shrink-0" aria-hidden="true" />
             <span>
               Página atual (<code className="font-mono">{pagePath}</code>) anexada ao relatório

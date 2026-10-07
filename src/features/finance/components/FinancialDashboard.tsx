@@ -354,15 +354,15 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
               <>
                 <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                   <div className="rounded-lg bg-bg p-3">
-                    <p className="text-[10px] font-bold uppercase text-text-muted">Total bruto</p>
+                    <p className="text-2xs font-bold uppercase text-text-muted">Total bruto</p>
                     <p className="mt-1 text-lg font-bold text-text-primary">{brl(commissionSummary.grossTotal)}</p>
                   </div>
                   <div className="rounded-lg bg-bg p-3">
-                    <p className="text-[10px] font-bold uppercase text-text-muted">Comissões</p>
+                    <p className="text-2xs font-bold uppercase text-text-muted">Comissões</p>
                     <p className="mt-1 text-lg font-bold text-text-primary">{brl(commissionSummary.commissionTotal)}</p>
                   </div>
                   <div className="col-span-2 rounded-lg bg-bg p-3 sm:col-span-1">
-                    <p className="text-[10px] font-bold uppercase text-text-muted">Profissionais</p>
+                    <p className="text-2xs font-bold uppercase text-text-muted">Profissionais</p>
                     <p className="mt-1 text-lg font-bold text-text-primary">{commissionSummary.byProfessional.length}</p>
                   </div>
                 </div>
@@ -490,7 +490,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                     <div className="absolute -right-2 -top-2 text-border opacity-20">
                       <card.icon size={56} />
                     </div>
-                    <p className="text-[10px] text-text-muted uppercase font-bold mb-1">
+                    <p className="text-2xs text-text-muted uppercase font-bold mb-1">
                       {card.label}
                     </p>
                     <h3 className={`text-lg font-bold truncate ${card.tone}`}>{card.value}</h3>
@@ -501,15 +501,15 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
               {(kpis!.openFiado > 0 || kpis!.expenses > 0) && (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                   <div className="bg-surface border border-border rounded-xl px-4 py-3">
-                    <p className="text-[10px] uppercase text-text-muted font-bold">Despesas</p>
+                    <p className="text-2xs uppercase text-text-muted font-bold">Despesas</p>
                     <p className="font-bold text-text-primary">{brl(kpis!.expenses)}</p>
                   </div>
                   <div className="bg-surface border border-border rounded-xl px-4 py-3">
-                    <p className="text-[10px] uppercase text-text-muted font-bold">Fiado aberto</p>
+                    <p className="text-2xs uppercase text-text-muted font-bold">Fiado aberto</p>
                     <p className="font-bold text-text-primary">{brl(kpis!.openFiado)}</p>
                   </div>
                   <div className="bg-surface border border-border rounded-xl px-4 py-3">
-                    <p className="text-[10px] uppercase text-text-muted font-bold">Fiado vencido</p>
+                    <p className="text-2xs uppercase text-text-muted font-bold">Fiado vencido</p>
                     <p className="font-bold text-warning">{brl(kpis!.overdueFiado)}</p>
                   </div>
                 </div>
@@ -531,7 +531,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                         tickLine={false}
                         axisLine={false}
                         tickMargin={8}
-                        className="text-[10px]"
+                        className="text-2xs"
                       />
                       <YAxis hide allowDecimals={false} />
                       <ChartTooltip content={<ChartTooltipContent />} />
@@ -560,7 +560,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                         tickLine={false}
                         axisLine={false}
                         interval={1}
-                        className="text-[9px]"
+                        className="text-2xs"
                       />
                       <YAxis hide allowDecimals={false} />
                       <ChartTooltip content={<ChartTooltipContent />} />
@@ -593,7 +593,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                           width={90}
                           tickLine={false}
                           axisLine={false}
-                          className="text-[10px]"
+                          className="text-2xs"
                         />
                         <ChartTooltip
                           content={<ChartTooltipContent formatter={v => brl(Number(v))} />}
@@ -628,7 +628,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                           width={90}
                           tickLine={false}
                           axisLine={false}
-                          className="text-[10px]"
+                          className="text-2xs"
                         />
                         <ChartTooltip
                           content={<ChartTooltipContent formatter={v => brl(Number(v))} />}
@@ -665,7 +665,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                         </div>
                         <div className="text-right shrink-0">
                           <p className="text-xs font-bold text-warning">{c.daysSince} dias</p>
-                          <p className="text-[10px] text-text-muted">{c.visits} visita(s)</p>
+                          <p className="text-2xs text-text-muted">{c.visits} visita(s)</p>
                         </div>
                       </div>
                     ))}
@@ -721,7 +721,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  className="text-[10px]"
+                  className="text-2xs"
                 />
                 <YAxis hide allowDecimals={false} />
                 <ChartTooltip content={<ChartTooltipContent />} />
@@ -753,7 +753,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
           ) : (
             <div className="overflow-x-auto">
             <table className="min-w-[860px] w-full text-left border-collapse">
-              <thead className="bg-bg text-text-muted text-[10px] uppercase tracking-wider sticky top-0">
+              <thead className="bg-bg text-text-muted text-2xs uppercase tracking-wider sticky top-0">
                 <tr>
                   <th className="p-3 font-medium">Data/Hora</th>
                   <th className="p-3 font-medium">Cliente</th>

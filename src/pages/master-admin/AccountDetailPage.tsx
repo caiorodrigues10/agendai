@@ -193,14 +193,14 @@ export const AccountDetailPage: React.FC = () => {
           </p>
           <div className="flex items-center gap-2 mt-2">
             <span
-              className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+              className={`px-2 py-0.5 rounded text-2xs font-medium ${
                 shop.active ? 'text-success bg-success/10' : 'text-danger bg-danger/10'
               }`}
             >
               {shop.active ? 'Ativa' : 'Inativa'}
             </span>
             <span
-              className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+              className={`px-2 py-0.5 rounded text-2xs font-medium ${
                 shop.approvalStatus === 'APPROVED'
                   ? 'text-success bg-success/10'
                   : shop.approvalStatus === 'PENDING'

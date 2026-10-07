@@ -71,11 +71,11 @@ function ReservationRow({
           <p className="truncate text-xs text-text-secondary">
             {reservation.customerName} · {reservation.whatsapp}
           </p>
-          <p className="mt-0.5 text-[11px] text-text-muted">
+          <p className="mt-0.5 text-2xs text-text-muted">
             {productMoney.format(reservation.unitPrice * reservation.quantity)} · reservado em{' '}
             {new Date(reservation.createdAt).toLocaleString('pt-BR')}
           </p>
-          <p className="text-[11px] text-text-muted">
+          <p className="text-2xs text-text-muted">
             Retirada até {new Date(reservation.expiresAt).toLocaleString('pt-BR')}
           </p>
         </div>

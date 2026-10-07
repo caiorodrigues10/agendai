@@ -209,7 +209,7 @@ const TicketRow: React.FC<{ ticket: Ticket; onOpen: () => void }> = ({ ticket: t
     onClick={onOpen}
     className="w-full text-left flex items-center gap-4 p-4 hover:bg-surface-2 transition-colors"
   >
-    <span className={`px-2 py-0.5 rounded text-[10px] font-bold shrink-0 ${PRIORITY_COLORS[t.priority] ?? ''}`}>
+    <span className={`px-2 py-0.5 rounded text-2xs font-bold shrink-0 ${PRIORITY_COLORS[t.priority] ?? ''}`}>
       {t.priority}
     </span>
     <div className="flex-1 min-w-0">
@@ -217,13 +217,13 @@ const TicketRow: React.FC<{ ticket: Ticket; onOpen: () => void }> = ({ ticket: t
         <span className="text-sm font-mono text-text-muted">{t.protocol}</span>
         <span className="text-sm font-medium truncate">{t.title}</span>
         {t.channel === 'IN_APP' && (
-          <span className="px-2 py-0.5 rounded text-[10px] font-bold text-support bg-support/10 shrink-0">
+          <span className="px-2 py-0.5 rounded text-2xs font-bold text-support bg-support/10 shrink-0">
             App
           </span>
         )}
       </div>
       <div className="flex items-center gap-3 mt-1">
-        <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${STATUS_COLORS[t.status] ?? ''}`}>
+        <span className={`px-2 py-0.5 rounded text-2xs font-medium ${STATUS_COLORS[t.status] ?? ''}`}>
           {STATUS_LABELS[t.status] ?? t.status}
         </span>
         {t.createdBy?.name && <span className="text-xs text-text-muted">{t.createdBy.name}</span>}

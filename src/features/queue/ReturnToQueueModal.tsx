@@ -56,7 +56,7 @@ export const ReturnToQueueModal: React.FC<ReturnToQueueModalProps> = ({
         <>
           {waiting.length > 0 && (
             <div className="mb-4 rounded-xl border border-border bg-bg p-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-2">
+              <p className="text-2xs font-bold uppercase tracking-wider text-text-muted mb-2">
                 Ordem atual da espera
               </p>
               <ol className="space-y-1.5">
@@ -72,7 +72,7 @@ export const ReturnToQueueModal: React.FC<ReturnToQueueModalProps> = ({
           )}
 
           <fieldset className="space-y-2">
-            <legend className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-2">
+            <legend className="text-2xs font-bold uppercase tracking-wider text-text-muted mb-2">
               Inserir
             </legend>
             {slots.map(slot => (

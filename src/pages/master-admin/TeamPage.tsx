@@ -195,7 +195,7 @@ export const TeamPage: React.FC = () => {
                 }`}
               >
                 <span className="block text-xs font-bold">{profile.label}</span>
-                <span className="block text-[11px] text-text-muted">{profile.hint}</span>
+                <span className="block text-2xs text-text-muted">{profile.hint}</span>
               </button>
             ))}
           </div>
@@ -229,7 +229,7 @@ export const TeamPage: React.FC = () => {
                   <span>{m._count.ticketsAssigned} chamados</span>
                   <span>{m._count.tasksAssigned} tarefas</span>
                 </div>
-                <div className={`px-2 py-0.5 rounded text-[10px] font-medium ${m.active ? 'text-success bg-success/10' : 'text-danger bg-danger/10'}`}>
+                <div className={`px-2 py-0.5 rounded text-2xs font-medium ${m.active ? 'text-success bg-success/10' : 'text-danger bg-danger/10'}`}>
                   {m.active ? 'Ativo' : 'Inativo'}
                 </div>
                 {m.active ? (

@@ -293,7 +293,7 @@ export const ShowcasePanel: React.FC = () => {
                 </p>
               </div>
 
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+              <span className={`rounded-full px-2 py-0.5 text-2xs font-bold ${
                 entry.status === 'PUBLISHED' ? 'bg-success/15 text-success' :
                 entry.status === 'DRAFT' ? 'bg-warning/15 text-warning' :
                 'bg-surface-2 text-text-muted'

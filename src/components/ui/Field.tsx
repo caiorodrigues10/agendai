@@ -26,7 +26,7 @@ export const Field: React.FC<FieldProps> = ({ label, hint, error, className, chi
   <label className={className ?? 'block'}>
     <span className="mb-1.5 block text-sm font-medium text-text-secondary">{label}</span>
     {children}
-    {hint ? <p className="mt-1 text-[11px] text-text-muted">{hint}</p> : null}
+    {hint ? <p className="mt-1 text-2xs text-text-muted">{hint}</p> : null}
     {error ? <p className="mt-1 text-xs text-danger">{error}</p> : null}
   </label>
 );

@@ -76,7 +76,7 @@ export const MarketingNav: React.FC = () => {
               key={link.id}
               type="button"
               onClick={() => goToSection(link.id)}
-              className="relative cursor-pointer text-[11px] font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
+              className="relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
             >
               {link.label}
             </button>
@@ -86,7 +86,7 @@ export const MarketingNav: React.FC = () => {
             <Link
               key={link.to}
               to={link.to}
-              className="text-[11px] font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
+              className="text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
             >
               {link.label}
             </Link>

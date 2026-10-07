@@ -26,7 +26,7 @@ const Card: React.FC<CardProps> = ({ title, hint, children }) => (
 
 const Tile: React.FC<{ label: string; value: string; tone?: string }> = ({ label, value, tone }) => (
   <div className="bg-bg border border-border rounded-lg p-3">
-    <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">{label}</p>
+    <p className="text-2xs font-bold uppercase tracking-widest text-text-muted">{label}</p>
     <p className={`text-lg font-bold mt-1 ${tone ?? 'text-text-primary'}`}>{value}</p>
   </div>
 );

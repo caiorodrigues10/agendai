@@ -64,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
             data-testid="active-shop-notice"
             className="flex min-w-0 flex-1 flex-wrap items-center justify-center gap-1.5"
           >
-            <span className="inline-flex min-w-0 items-center gap-1.5 text-[11px] text-text-secondary">
+            <span className="inline-flex min-w-0 items-center gap-1.5 text-2xs text-text-secondary">
               <Store size={13} aria-hidden="true" className="shrink-0" />
               <span className="truncate">
                 Você está no salão{' '}
@@ -75,12 +75,12 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
               type="button"
               onClick={() => void handleSwitchBack()}
               disabled={switchingBack}
-              className="shrink-0 rounded-lg border border-border px-2 py-1 text-[11px] font-semibold text-text-secondary hover:bg-surface-2 hover:text-text-primary disabled:opacity-50"
+              className="shrink-0 rounded-lg border border-border px-2 py-1 text-2xs font-semibold text-text-secondary hover:bg-surface-2 hover:text-text-primary disabled:opacity-50"
             >
               {switchingBack ? 'Voltando…' : 'Voltar ao salão original'}
             </button>
             {switchBackError && (
-              <span role="alert" className="w-full text-center text-[11px] text-danger">
+              <span role="alert" className="w-full text-center text-2xs text-danger">
                 {switchBackError}
               </span>
             )}
@@ -91,7 +91,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
           {currentUser && isTrialActive && (
             <span
               aria-label={`Seu acesso de teste termina em ${trialDays} ${trialDays === 1 ? 'dia' : 'dias'}.`}
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[11px] font-bold sm:px-2.5 ${trialTone}`}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-2xs font-bold sm:px-2.5 ${trialTone}`}
             >
               <Clock3 size={13} aria-hidden="true" />
               <span className="sm:hidden">{trialDays}d</span>
@@ -103,7 +103,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
               {currentUser.role === 'OWNER' && (
                 <Link
                   to="/app/subscription"
-                  className="px-2.5 py-1.5 rounded-md text-[11px] font-bold bg-accent text-accent-fg hover:bg-accent-hover flex items-center gap-1"
+                  className="px-2.5 py-1.5 rounded-md text-2xs font-bold bg-accent text-accent-fg hover:bg-accent-hover flex items-center gap-1"
                 >
                   <Wallet size={12} /> Plano
                 </Link>

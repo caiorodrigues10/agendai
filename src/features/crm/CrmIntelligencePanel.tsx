@@ -147,7 +147,7 @@ function ClientCard({
           <p className="font-semibold text-text-primary">{client.name}</p>
           <p className="text-xs text-text-muted">{client.whatsapp || 'Sem WhatsApp'}</p>
         </div>
-        <span className="shrink-0 rounded-md border border-accent/30 bg-accent/10 px-2 py-0.5 text-[10px] font-bold text-accent">
+        <span className="shrink-0 rounded-md border border-accent/30 bg-accent/10 px-2 py-0.5 text-2xs font-bold text-accent">
           {segment}
         </span>
       </div>

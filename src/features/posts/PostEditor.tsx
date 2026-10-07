@@ -557,7 +557,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                 <div>
                   <div className="mb-1 flex items-center justify-between">
                     <label htmlFor="post-content" className="text-xs font-bold text-text-secondary">Legenda</label>
-                    <span className="text-[10px] text-text-muted">{content.length}/{CAPTION_MAX}</span>
+                    <span className="text-2xs text-text-muted">{content.length}/{CAPTION_MAX}</span>
                   </div>
                   <textarea
                     id="post-content"
@@ -699,17 +699,17 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                           {media ? (
                             <>
                               <img src={media.url} alt="" className="h-20 w-full rounded object-cover" />
-                              <span className="text-[10px] font-semibold text-accent">Trocar foto</span>
+                              <span className="text-2xs font-semibold text-accent">Trocar foto</span>
                             </>
                           ) : (
                             <>
                               <ImagePlus size={22} className="text-text-muted" aria-hidden />
-                              <span className="text-[10px] text-text-muted">
+                              <span className="text-2xs text-text-muted">
                                 {slot === 'primary' ? 'Foto principal' : 'Foto secundária'}
                               </span>
                               {required
-                                ? <span className="text-[10px] font-bold text-warning">Requerida</span>
-                                : <span className="text-[10px] text-text-muted">Opcional</span>}
+                                ? <span className="text-2xs font-bold text-warning">Requerida</span>
+                                : <span className="text-2xs text-text-muted">Opcional</span>}
                             </>
                           )}
                         </button>
@@ -718,22 +718,22 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                   </div>
                 )}
                 {selectedPhotoMode === 'none' && (
-                  <p className="text-[10px] text-text-muted">Este modelo não usa foto — nenhum envio é necessário.</p>
+                  <p className="text-2xs text-text-muted">Este modelo não usa foto — nenhum envio é necessário.</p>
                 )}
                 {selectedPhotoMode === 'required' && (
-                  <p className="text-[10px] text-text-muted">
+                  <p className="text-2xs text-text-muted">
                     Este modelo requer {(selectedTemplate?.requiredMedia ?? 1)} foto(s) do seu salão.
                   </p>
                 )}
                 {selectedPhotoMode === 'optional' && (
                   selectedTemplate?.stockImageKey ? (
-                    <p className="text-[10px] leading-relaxed text-text-muted">
+                    <p className="text-2xs leading-relaxed text-text-muted">
                       Foto opcional: envie uma imagem do seu salão ou deixe em branco para usarmos uma
                       imagem ilustrativa gerada automaticamente. A imagem ilustrativa é apenas decorativa
                       e <strong>não representa resultados do seu salão</strong>.
                     </p>
                   ) : (
-                    <p className="text-[10px] leading-relaxed text-text-muted">
+                    <p className="text-2xs leading-relaxed text-text-muted">
                       Este modelo funciona com tipografia, sem foto. Se preferir, você pode enviar uma
                       imagem do seu salão para compor a arte.
                     </p>
@@ -803,7 +803,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                       >
                         {f.icon}
                         <span className="text-xs font-bold">{f.label}</span>
-                        <span className="text-[10px] text-text-muted">{f.hint}</span>
+                        <span className="text-2xs text-text-muted">{f.hint}</span>
                       </button>
                     ))}
                   </div>
@@ -847,14 +847,14 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                         if (items.length === 0) return null;
                         return (
                           <div key={group.key}>
-                            <p className="mb-1 text-[10px] font-bold uppercase text-text-muted">{group.label}</p>
+                            <p className="mb-1 text-2xs font-bold uppercase text-text-muted">{group.label}</p>
                             <div className="flex flex-wrap gap-1.5">
                               {items.map(t => (
                                 <button
                                   key={t.key}
                                   type="button"
                                   onClick={() => setTemplateKey(t.key)}
-                                  className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition ${
+                                  className={`rounded-lg px-2.5 py-1.5 text-2xs font-semibold transition ${
                                     templateKey === t.key
                                       ? 'bg-accent text-accent-fg'
                                       : 'bg-surface text-text-secondary hover:bg-bg'
@@ -1105,8 +1105,8 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                         </div>
                         <button type="button" onClick={() => handleSelectTemplate(t.key)} className="w-full space-y-0.5 p-2.5 text-left">
                           <p className="text-xs font-bold text-text-primary">{t.name}</p>
-                          {t.description && <p className="text-[10px] leading-snug text-text-muted">{t.description}</p>}
-                          <span className="inline-block rounded bg-bg px-1.5 py-0.5 text-[9px] font-bold uppercase text-text-muted">
+                          {t.description && <p className="text-2xs leading-snug text-text-muted">{t.description}</p>}
+                          <span className="inline-block rounded bg-bg px-1.5 py-0.5 text-2xs font-bold uppercase text-text-muted">
                             {photoMode === 'none' ? 'Sem foto' : photoMode === 'required' ? `Requer ${t.requiredMedia} foto(s)` : 'Foto opcional'}
                           </span>
                         </button>

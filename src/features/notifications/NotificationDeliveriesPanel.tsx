@@ -397,7 +397,7 @@ export const NotificationDeliveriesPanel: React.FC<NotificationDeliveriesPanelPr
                       )}
                     </div>
                   </div>
-                  <span className={`self-start rounded-full border px-2.5 py-1 text-[11px] font-bold ${STATUS_STYLES[delivery.status]}`}>
+                  <span className={`self-start rounded-full border px-2.5 py-1 text-2xs font-bold ${STATUS_STYLES[delivery.status]}`}>
                     {STATUS_LABELS[delivery.status] ?? delivery.status}
                   </span>
                 </div>

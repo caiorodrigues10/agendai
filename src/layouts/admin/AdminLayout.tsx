@@ -112,7 +112,7 @@ export const AdminLayout: React.FC = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium truncate">{user?.name}</p>
-                <p className="text-[10px] text-text-muted truncate">{user?.email}</p>
+                <p className="text-2xs text-text-muted truncate">{user?.email}</p>
               </div>
             </div>
             <div className="flex items-center gap-1">

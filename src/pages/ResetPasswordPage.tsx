@@ -95,7 +95,7 @@ export const ResetPasswordPage: React.FC = () => {
             <Logo size="md" />
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg border border-border">
               <LockKeyhole size={10} className="text-text-muted" />
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
+              <span className="text-2xs font-bold text-text-muted uppercase tracking-widest">
                 Senha redefinida
               </span>
             </div>
@@ -138,7 +138,7 @@ export const ResetPasswordPage: React.FC = () => {
             </button>
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg border border-border">
               <LockKeyhole size={10} className="text-text-muted" />
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
+              <span className="text-2xs font-bold text-text-muted uppercase tracking-widest">
                 Redefinir senha
               </span>
             </div>
@@ -153,14 +153,14 @@ export const ResetPasswordPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="w-full space-y-6">
             <div className="space-y-4">
-              <p className="text-[11px] text-text-muted text-center leading-relaxed">
+              <p className="text-2xs text-text-muted text-center leading-relaxed">
                 Crie uma nova senha segura para sua conta.
               </p>
 
               <div className="space-y-1">
                 <label
                   htmlFor="reset-new-password"
-                  className="text-[10px] font-bold uppercase tracking-wider text-accent"
+                  className="text-2xs font-bold uppercase tracking-wider text-accent"
                 >
                   Nova senha
                 </label>
@@ -179,7 +179,7 @@ export const ResetPasswordPage: React.FC = () => {
               <div className="space-y-1">
                 <label
                   htmlFor="reset-confirm-password"
-                  className="text-[10px] font-bold uppercase tracking-wider text-accent"
+                  className="text-2xs font-bold uppercase tracking-wider text-accent"
                 >
                   Confirmar nova senha
                 </label>
@@ -218,7 +218,7 @@ export const ResetPasswordPage: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate('/esqueci-senha')}
-            className="mt-4 text-[11px] text-text-muted hover:text-accent transition-colors"
+            className="mt-4 text-2xs text-text-muted hover:text-accent transition-colors"
           >
             Solicitar um novo link
           </button>

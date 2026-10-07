@@ -58,7 +58,7 @@ const PredictionPhone = () => {
           <div className="text-xs font-bold text-white tracking-wide">IA PREDITIVA</div>
           <div className="flex items-center gap-1.5">
             <Activity size={24} className="w-3 h-3 text-accent" />
-            <span className="text-[10px] text-accent font-bold">Ativo</span>
+            <span className="text-2xs text-accent font-bold">Ativo</span>
           </div>
         </div>
         {predictions.map((p, i) => (
@@ -72,7 +72,7 @@ const PredictionPhone = () => {
             <div className="flex items-center justify-between mb-2">
               <div className="text-xs font-semibold text-white">{p.client}</div>
               <div
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                className={`text-2xs font-bold px-2 py-0.5 rounded-full ${
                   p.color === 'red'
                     ? 'bg-red-500/20 text-red-400'
                     : p.color === 'amber'
@@ -83,12 +83,12 @@ const PredictionPhone = () => {
                 {p.risk}
               </div>
             </div>
-            <div className="text-[10px] text-neutral-500">{p.reason}</div>
+            <div className="text-2xs text-neutral-500">{p.reason}</div>
             {active === i && (
               <div className="mt-2 pt-2 border-t border-white/5">
                 <div className="flex items-center gap-1.5">
                   <Lightbulb size={24} className="w-3 h-3 text-amber-400" />
-                  <span className="text-[10px] text-neutral-300">
+                  <span className="text-2xs text-neutral-300">
                     {p.color === 'red'
                       ? 'Enviar WhatsApp reengajamento'
                       : p.color === 'amber'
@@ -103,11 +103,11 @@ const PredictionPhone = () => {
         <div className="mt-2 p-3 rounded-xl bg-accent/5 border border-accent/20">
           <div className="flex items-center gap-2 mb-1">
             <TrendingDown size={24} className="w-3 h-3 text-accent" />
-            <span className="text-[10px] font-bold text-accent uppercase tracking-wider">
+            <span className="text-2xs font-bold text-accent uppercase tracking-wider">
               Previsão da semana
             </span>
           </div>
-          <div className="text-[10px] text-neutral-400">
+          <div className="text-2xs text-neutral-400">
             2 cancelamentos prováveis · 1 cliente pode voltar
           </div>
         </div>
@@ -133,8 +133,8 @@ const WaitTimePhone = () => {
         {bars.map(bar => (
           <div key={bar.client} className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] text-neutral-300 font-semibold">{bar.client}</span>
-              <span className="text-[10px] text-accent font-bold">{bar.min} min</span>
+              <span className="text-2xs text-neutral-300 font-semibold">{bar.client}</span>
+              <span className="text-2xs text-accent font-bold">{bar.min} min</span>
             </div>
             <div className="h-2 bg-white/5 rounded-full overflow-hidden">
               <div
@@ -145,11 +145,11 @@ const WaitTimePhone = () => {
           </div>
         ))}
         <div className="mt-4 p-3 rounded-xl bg-teal-500/5 border border-teal-500/20">
-          <div className="text-[10px] font-bold text-teal-400 uppercase tracking-wider mb-1">
+          <div className="text-2xs font-bold text-teal-400 uppercase tracking-wider mb-1">
             Precisão
           </div>
           <div className="text-2xl font-black text-white">92%</div>
-          <div className="text-[10px] text-neutral-500">baseado no histórico real</div>
+          <div className="text-2xs text-neutral-500">baseado no histórico real</div>
         </div>
       </div>
     </PhoneMockup>
@@ -174,7 +174,7 @@ const RevenuePhone = () => {
           <div key={i} className="p-3 rounded-xl bg-white/5 border border-white/5">
             <div className="flex items-center gap-2 mb-1">
               <insight.icon className={`w-3 h-3 text-${insight.color}-400`} />
-              <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+              <span className="text-2xs font-bold text-neutral-500 uppercase tracking-wider">
                 Insight #{i + 1}
               </span>
             </div>
@@ -182,10 +182,10 @@ const RevenuePhone = () => {
           </div>
         ))}
         <div className="p-3 rounded-xl bg-violet-500/5 border border-violet-500/20">
-          <div className="text-[10px] font-bold text-violet-400 uppercase tracking-wider mb-1">
+          <div className="text-2xs font-bold text-violet-400 uppercase tracking-wider mb-1">
             Ação sugerida
           </div>
-          <div className="text-[10px] text-neutral-300">
+          <div className="text-2xs text-neutral-300">
             Criar promoção de barba nas terças-feiras (dia mais fraco)
           </div>
         </div>
@@ -215,21 +215,21 @@ const EngagementPhone = () => {
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={`p-2.5 rounded-xl text-[10px] max-w-[85%] ${
+            className={`p-2.5 rounded-xl text-2xs max-w-[85%] ${
               msg.from === 'bot'
                 ? 'bg-violet-500/10 border border-violet-500/20 text-neutral-300 mr-auto'
                 : 'bg-blue-500/20 border border-blue-500/20 text-white ml-auto'
             }`}
           >
             <div>{msg.msg}</div>
-            <div className="text-[9px] text-neutral-600 mt-1">{msg.time}</div>
+            <div className="text-2xs text-neutral-600 mt-1">{msg.time}</div>
           </div>
         ))}
         <div className="mt-2 p-3 rounded-xl bg-violet-500/5 border border-violet-500/20">
-          <div className="text-[10px] font-bold text-violet-400 uppercase tracking-wider mb-1">
+          <div className="text-2xs font-bold text-violet-400 uppercase tracking-wider mb-1">
             Horário otimizado
           </div>
-          <div className="text-[10px] text-neutral-400">
+          <div className="text-2xs text-neutral-400">
             Enviado às 19:00 (horário que Lucas costuma responder)
           </div>
         </div>
@@ -425,10 +425,10 @@ export const AiPredictivePage: React.FC = () => {
       <section className="relative pt-40 pb-20 md:pt-52 md:pb-28 px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 relative z-10">
           <div className="flex-1 text-center lg:text-left">
-            <div className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-accent/20 bg-accent/5 text-accent text-[10px] font-black uppercase tracking-[0.3em] mb-8 opacity-0">
+            <div className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-accent/20 bg-accent/5 text-accent text-2xs font-black uppercase tracking-[0.3em] mb-8 opacity-0">
               <Sparkles size={24} className="w-3.5 h-3.5" />
               IA Preditiva
-              <span className="px-1.5 py-0.5 rounded bg-accent/20 text-accent-light text-[8px] font-bold uppercase tracking-wider">
+              <span className="px-1.5 py-0.5 rounded bg-accent/20 text-accent-light text-2xs font-bold uppercase tracking-wider">
                 Novo
               </span>
             </div>
@@ -471,7 +471,7 @@ export const AiPredictivePage: React.FC = () => {
       <section className="feature-block py-24 md:py-36 px-6 relative z-10">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
           <div className="feature-text flex-1">
-            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/20 bg-accent/5 text-accent text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
+            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/20 bg-accent/5 text-accent text-2xs font-black uppercase tracking-[0.2em] mb-6 opacity-0">
               <Gauge size={24} className="w-3.5 h-3.5" />
               Previsão de Espera
             </div>
@@ -514,7 +514,7 @@ export const AiPredictivePage: React.FC = () => {
             <PredictionPhone />
           </div>
           <div className="feature-text flex-1">
-            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
+            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-400 text-2xs font-black uppercase tracking-[0.2em] mb-6 opacity-0">
               <AlertTriangle size={24} className="w-3.5 h-3.5" />
               Alerta de Cancelamento
             </div>
@@ -551,7 +551,7 @@ export const AiPredictivePage: React.FC = () => {
       <section className="feature-block py-24 md:py-36 px-6 relative z-10">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
           <div className="feature-text flex-1">
-            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-violet-500/20 bg-violet-500/5 text-violet-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
+            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-violet-500/20 bg-violet-500/5 text-violet-400 text-2xs font-black uppercase tracking-[0.2em] mb-6 opacity-0">
               <Bot size={24} className="w-3.5 h-3.5" />
               Reengajamento Automático
             </div>
@@ -596,7 +596,7 @@ export const AiPredictivePage: React.FC = () => {
             <RevenuePhone />
           </div>
           <div className="feature-text flex-1">
-            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/20 bg-cyan-500/5 text-cyan-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
+            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/20 bg-cyan-500/5 text-cyan-400 text-2xs font-black uppercase tracking-[0.2em] mb-6 opacity-0">
               <LineChart size={24} className="w-3.5 h-3.5" />
               Insights de Faturamento
             </div>
@@ -808,7 +808,7 @@ export const AiPredictivePage: React.FC = () => {
                     )}
                     {stat.visual === 'bar' && (
                       <div className="w-full">
-                        <div className="mb-2 flex justify-between text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+                        <div className="mb-2 flex justify-between text-2xs font-bold uppercase tracking-wider text-neutral-500">
                           <span>Antes</span>
                           <span>Com IA</span>
                         </div>

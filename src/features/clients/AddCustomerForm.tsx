@@ -113,7 +113,7 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
                 {isStaffMode ? <UserCheck size={22} /> : <MessageCircle size={20} />}
               </div>
               <div>
-                <div className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-border bg-bg px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
+                <div className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-border bg-bg px-2.5 py-1 text-2xs font-bold uppercase tracking-[0.18em] text-text-muted">
                   {isStaffMode ? 'Ação rápida da equipe' : 'Fluxo da fila'}
                 </div>
                 <h2 className="text-[1.45rem] font-black tracking-tight text-text-primary">
@@ -193,7 +193,7 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
           <div>
             <div className="mb-3 flex items-center justify-between gap-3">
               <label className="block text-sm font-semibold text-text-secondary">Serviço</label>
-              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-bg px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-text-muted">
+              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-bg px-2.5 py-1 text-2xs font-bold uppercase tracking-[0.16em] text-text-muted">
                 <Scissors size={11} />
                 Escolha 1
               </span>

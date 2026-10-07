@@ -506,7 +506,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-text-muted uppercase font-bold tracking-wider">Caixa do dia</p>
                       {canCreate && (
-                        <span className="text-[10px] text-accent font-bold">Registrar movimentação</span>
+                        <span className="text-2xs text-accent font-bold">Registrar movimentação</span>
                       )}
                     </div>
                     {cashLoading ? (
@@ -517,11 +517,11 @@ export const OwnerFinancialPanel: React.FC = () => {
                     ) : cashSummary ? (
                       <div className="grid grid-cols-2 gap-3">
                         <div className="rounded-lg bg-bg/60 p-3">
-                          <p className="text-[10px] font-bold uppercase text-text-muted">Saldo do dia</p>
+                          <p className="text-2xs font-bold uppercase text-text-muted">Saldo do dia</p>
                           <p className="text-lg font-bold text-text-primary">{formatCurrencyBRL(cashSummary.total ?? 0)}</p>
                         </div>
                         <div className="rounded-lg bg-bg/60 p-3">
-                          <p className="text-[10px] font-bold uppercase text-text-muted">Movimentações</p>
+                          <p className="text-2xs font-bold uppercase text-text-muted">Movimentações</p>
                           <p className="text-lg font-bold text-text-primary">{Object.values(cashSummary.byMethod ?? {}).reduce((s, m) => s + (m.count ?? 0), 0)}</p>
                         </div>
                       </div>
@@ -970,7 +970,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="min-w-[920px] w-full text-left border-collapse">
-                      <thead className="bg-bg text-text-muted text-[10px] uppercase tracking-wider sticky top-0">
+                      <thead className="bg-bg text-text-muted text-2xs uppercase tracking-wider sticky top-0">
                         <tr>
                           <th className="p-3 font-medium">Data ref.</th>
                           <th className="p-3 font-medium">Título</th>
@@ -993,7 +993,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                               <td className="p-3">
                                 <div className="font-medium text-text-primary">{item.title}</div>
                                 {item.supplierName && (
-                                  <div className="text-text-muted text-[10px]">
+                                  <div className="text-text-muted text-2xs">
                                     {item.supplierName}
                                   </div>
                                 )}
@@ -1010,11 +1010,11 @@ export const OwnerFinancialPanel: React.FC = () => {
                               </td>
                               <td className="p-3 hidden lg:table-cell">
                                 {item.paidAt ? (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-bold uppercase bg-success/10 text-success border border-success/20">
                                     Pago
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-warning/10 text-warning border border-warning/20">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-bold uppercase bg-warning/10 text-warning border border-warning/20">
                                     Pendente
                                   </span>
                                 )}
@@ -1301,7 +1301,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="min-w-[980px] w-full text-left border-collapse">
-                      <thead className="bg-bg text-text-muted text-[10px] uppercase tracking-wider sticky top-0">
+                      <thead className="bg-bg text-text-muted text-2xs uppercase tracking-wider sticky top-0">
                         <tr>
                           <th className="p-3 font-medium">Cliente</th>
                           <th className="p-3 font-medium">Descrição</th>
@@ -1340,13 +1340,13 @@ export const OwnerFinancialPanel: React.FC = () => {
                                   <div className="flex justify-center gap-1.5">
                                     <button
                                       onClick={() => openChargeForm(item)}
-                                      className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-warning/10 text-warning border border-warning/20 rounded-lg hover:bg-warning/20 transition-colors"
+                                      className="px-2 py-1 text-2xs font-bold uppercase tracking-wider bg-warning/10 text-warning border border-warning/20 rounded-lg hover:bg-warning/20 transition-colors"
                                     >
                                       Cobrar
                                     </button>
                                     <button
                                       onClick={() => openPaymentForm(item)}
-                                      className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-accent/10 text-accent border border-accent/20 rounded-lg hover:bg-accent/20 transition-colors"
+                                      className="px-2 py-1 text-2xs font-bold uppercase tracking-wider bg-accent/10 text-accent border border-accent/20 rounded-lg hover:bg-accent/20 transition-colors"
                                     >
                                       Pagamento
                                     </button>
@@ -1366,7 +1366,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                                 <td colSpan={7} className="p-3">
                                   <div className="flex flex-wrap items-end gap-3">
                                     <div>
-                                      <label className="text-[10px] text-text-muted uppercase font-bold block mb-1">
+                                      <label className="text-2xs text-text-muted uppercase font-bold block mb-1">
                                         Valor do pagamento
                                       </label>
                                       <input
@@ -1380,7 +1380,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                                       />
                                     </div>
                                     <div>
-                                      <label className="text-[10px] text-text-muted uppercase font-bold block mb-1">
+                                      <label className="text-2xs text-text-muted uppercase font-bold block mb-1">
                                         Forma de pagamento
                                       </label>
                                       <SmartSelect
@@ -1394,7 +1394,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                                       />
                                     </div>
                                     <div className="flex-1 min-w-[160px]">
-                                      <label className="text-[10px] text-text-muted uppercase font-bold block mb-1">
+                                      <label className="text-2xs text-text-muted uppercase font-bold block mb-1">
                                         Observação (opcional)
                                       </label>
                                       <input
@@ -1437,7 +1437,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                                     </p>
                                     <div className="flex flex-wrap items-end gap-3">
                                       <div className="flex-1 min-w-[180px]">
-                                        <label className="text-[10px] text-text-muted uppercase font-bold block mb-1">
+                                        <label className="text-2xs text-text-muted uppercase font-bold block mb-1">
                                           Chave PIX
                                         </label>
                                         <input
@@ -1449,7 +1449,7 @@ export const OwnerFinancialPanel: React.FC = () => {
                                         />
                                       </div>
                                       <div className="flex-1 min-w-[220px]">
-                                        <label className="text-[10px] text-text-muted uppercase font-bold block mb-1">
+                                        <label className="text-2xs text-text-muted uppercase font-bold block mb-1">
                                           Link para cartão
                                         </label>
                                         <input

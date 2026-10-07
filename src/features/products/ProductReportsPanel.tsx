@@ -125,7 +125,7 @@ export const ProductReportsPanel: React.FC<Props> = ({ loadError, onNotify, onGo
               >
                 <p className="text-xs text-text-muted">{band.title}</p>
                 <p className="font-bold text-text-primary">{attention[band.key].length}</p>
-                <p className="mt-1 text-[11px] text-text-secondary">{band.hint}</p>
+                <p className="mt-1 text-2xs text-text-secondary">{band.hint}</p>
               </button>
             ))}
           </div>

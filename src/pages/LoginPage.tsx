@@ -84,7 +84,7 @@ const Field: React.FC<FieldProps> = ({ label, icon: Icon, error, optional, child
     : generatedId;
   return (
     <div className="space-y-1">
-      <label htmlFor={childId} className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+      <label htmlFor={childId} className="text-2xs font-bold uppercase tracking-wider text-text-secondary">
         {label}
         {optional && <span className="text-text-muted font-normal normal-case"> (opcional)</span>}
       </label>
@@ -105,7 +105,7 @@ const Field: React.FC<FieldProps> = ({ label, icon: Icon, error, optional, child
           : children}
       </div>
       {error && (
-        <span className="text-[10px] font-medium text-danger flex items-center gap-1">
+        <span className="text-2xs font-medium text-danger flex items-center gap-1">
           <AlertCircle size={10} /> {error}
         </span>
       )}
@@ -186,7 +186,7 @@ const BrandPanel: React.FC = () => (
             className="rounded-2xl border border-white/10 bg-white/6 backdrop-blur-xl p-5 shadow-2xl shadow-black/40"
           >
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-text-secondary flex items-center gap-2">
+              <span className="text-2xs font-bold uppercase tracking-widest text-text-secondary flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-60" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
@@ -198,15 +198,15 @@ const BrandPanel: React.FC = () => (
             <div className="space-y-3">
               {QUEUE_MOCK.map((item, i) => (
                 <div key={item.name} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-tertiary/10 border border-tertiary/20 flex items-center justify-center text-[11px] font-bold text-tertiary">
+                  <div className="w-8 h-8 rounded-full bg-tertiary/10 border border-tertiary/20 flex items-center justify-center text-2xs font-bold text-tertiary">
                     {item.name.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-neutral-100 truncate">{item.name}</p>
-                    <p className="text-[10px] text-neutral-500 truncate">{item.service}</p>
+                    <p className="text-2xs text-neutral-500 truncate">{item.service}</p>
                   </div>
                   <span
-                    className={`text-[10px] font-bold px-2 py-1 rounded-full shrink-0 ${
+                    className={`text-2xs font-bold px-2 py-1 rounded-full shrink-0 ${
                       i === 0 ? 'bg-accent/15 text-accent' : 'bg-white/5 text-text-muted'
                     }`}
                   >
@@ -229,7 +229,7 @@ const BrandPanel: React.FC = () => (
               </div>
               <div>
                 <p className="text-xs font-black text-white leading-none">+32%</p>
-                <p className="text-[9px] text-neutral-400 mt-0.5">agendamentos</p>
+                <p className="text-2xs text-neutral-400 mt-0.5">agendamentos</p>
               </div>
             </div>
           </motion.div>
@@ -237,7 +237,7 @@ const BrandPanel: React.FC = () => (
       </div>
 
       <div className="space-y-5">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-text-muted text-[11px] font-medium">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-text-muted text-2xs font-medium">
           <span className="flex items-center gap-1.5">
             <CalendarCheck size={13} className="text-tertiary" />
             Agenda inteligente
@@ -813,7 +813,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
               </button>
               {registerVerificationEmail ? (
                 <>
-                  <span className="mt-5 inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-accent">
+                  <span className="mt-5 inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-3 py-1.5 text-2xs font-bold uppercase tracking-[0.16em] text-accent">
                     <Mail size={12} /> Confirmação de e-mail
                   </span>
                   <h1 className="mt-4 text-center text-2xl font-black tracking-tight text-text-primary sm:text-3xl">
@@ -827,7 +827,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                 </>
               ) : tab === 'register' ? (
                 <>
-                  <span className="mt-5 inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-accent">
+                  <span className="mt-5 inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-3 py-1.5 text-2xs font-bold uppercase tracking-[0.16em] text-accent">
                     <Sparkles size={12} /> 30 dias grátis no Pro
                   </span>
                   <h1 className="mt-4 text-center text-2xl font-black tracking-tight text-text-primary sm:text-3xl">
@@ -878,7 +878,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                         <div className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-black transition-all ${active || complete ? 'border-accent bg-accent text-accent-fg shadow-[0_0_20px_color-mix(in_srgb,var(--ag-accent)_28%,transparent)]' : 'border-border bg-bg text-text-muted'}`}>
                           {complete ? <Check size={14} /> : item.step}
                         </div>
-                        <span className={`text-[10px] font-bold uppercase tracking-wider ${active ? 'text-text-primary' : 'text-text-muted'}`}>{item.label}</span>
+                        <span className={`text-2xs font-bold uppercase tracking-wider ${active ? 'text-text-primary' : 'text-text-muted'}`}>{item.label}</span>
                       </div>
                     );
                   })}
@@ -887,7 +887,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
             )}
 
             {tab === 'register' && !registerVerificationEmail && pendingReferral && (
-              <p className="w-full mb-3 text-[11px] text-center text-accent bg-accent/10 border border-accent/20 rounded-lg px-3 py-2">
+              <p className="w-full mb-3 text-2xs text-center text-accent bg-accent/10 border border-accent/20 rounded-lg px-3 py-2">
                 Indicação ativa · código{' '}
                 <strong className="tracking-wider">{pendingReferral}</strong>
               </p>
@@ -951,7 +951,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                   transition={{ duration: 0.2 }}
                   className="w-full space-y-3"
                 >
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                  <p className="text-2xs font-bold uppercase tracking-wider text-text-secondary">
                     Contas salvas
                   </p>
                   <AnimatePresence>
@@ -982,7 +982,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                           <Avatar name={account.name} src={account.avatarUrl} size="sm" />
                           <div className="flex-1 text-left min-w-0">
                             <p className="text-[12px] font-semibold text-text-primary truncate">{account.name}</p>
-                            <p className="text-[10px] text-text-muted truncate">{account.email}</p>
+                            <p className="text-2xs text-text-muted truncate">{account.email}</p>
                           </div>
                           {switchingAccountId === account.id ? (
                             <Loader2 size={14} className="animate-spin text-text-muted shrink-0" />
@@ -1004,7 +1004,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                   <button
                     type="button"
                     onClick={() => setShowManualLoginForm(true)}
-                    className="w-full text-[11px] text-text-muted hover:text-accent transition-colors py-2"
+                    className="w-full text-2xs text-text-muted hover:text-accent transition-colors py-2"
                   >
                     + Usar outra conta
                   </button>
@@ -1034,7 +1034,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                   </Field>
 
                   <div className="space-y-1">
-                    <label htmlFor="login-password" className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                    <label htmlFor="login-password" className="text-2xs font-bold uppercase tracking-wider text-text-secondary">
                       Senha
                     </label>
                     <PasswordInput
@@ -1058,7 +1058,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                     <button
                       type="button"
                       onClick={() => navigate('/esqueci-senha')}
-                      className="inline-flex min-h-11 items-center text-[11px] text-text-muted hover:text-accent transition-colors shrink-0"
+                      className="inline-flex min-h-11 items-center text-2xs text-text-muted hover:text-accent transition-colors shrink-0"
                     >
                       Esqueci minha senha
                     </button>
@@ -1104,7 +1104,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                         {['Sem cartão', 'Acesso Pro', 'Cancele quando quiser'].map(item => (
                           <div key={item} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-border bg-bg/55 px-2 text-center">
                             <Check size={13} className="text-accent" />
-                            <span className="text-[9px] font-semibold leading-tight text-text-secondary sm:text-[10px]">{item}</span>
+                            <span className="text-2xs font-semibold leading-tight text-text-secondary sm:text-2xs">{item}</span>
                           </div>
                         ))}
                       </div>
@@ -1162,7 +1162,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
 
                       {!googleRegisterMode ? (
                         <div className="space-y-1">
-                          <label htmlFor="register-password" className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                          <label htmlFor="register-password" className="text-2xs font-bold uppercase tracking-wider text-text-secondary">
                             Senha
                           </label>
                           <PasswordInput
@@ -1182,7 +1182,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                           />
                         </div>
                       ) : (
-                        <p className="text-[11px] text-text-muted bg-bg/60 border border-border rounded-lg px-3 py-2">
+                        <p className="text-2xs text-text-muted bg-bg/60 border border-border rounded-lg px-3 py-2">
                           Continuando com Google — a senha será gerada automaticamente.
                         </p>
                       )}
@@ -1197,7 +1197,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                     </>
                   ) : (
                     <>
-                      <p className="text-[11px] text-text-muted text-center leading-relaxed pb-1">
+                      <p className="text-2xs text-text-muted text-center leading-relaxed pb-1">
                         Quase lá — conte um pouco sobre o salão.
                       </p>
 
@@ -1290,10 +1290,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
 
                       <div className="space-y-2 pt-2 border-t border-border">
                         <div className="flex items-center justify-between">
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                          <p className="text-2xs font-bold uppercase tracking-wider text-text-secondary">
                             Horário de funcionamento
                           </p>
-                          <span className="text-[10px] text-text-muted">
+                          <span className="text-2xs text-text-muted">
                             Aberto {Object.values(scheduleDays).filter(d => d.isOpen).length} dias por semana
                           </span>
                         </div>
@@ -1311,7 +1311,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                                 return next;
                               });
                             }}
-                            className="text-[10px] px-2 py-1 rounded-md border border-border bg-bg text-text-secondary hover:border-accent/40 transition-colors cursor-pointer"
+                            className="text-2xs px-2 py-1 rounded-md border border-border bg-bg text-text-secondary hover:border-accent/40 transition-colors cursor-pointer"
                           >
                             Seg a Sex
                           </button>
@@ -1327,7 +1327,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                                 return next;
                               });
                             }}
-                            className="text-[10px] px-2 py-1 rounded-md border border-border bg-bg text-text-secondary hover:border-accent/40 transition-colors cursor-pointer"
+                            className="text-2xs px-2 py-1 rounded-md border border-border bg-bg text-text-secondary hover:border-accent/40 transition-colors cursor-pointer"
                           >
                             Todos os dias
                           </button>
@@ -1369,7 +1369,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                                     />
                                   </button>
                                   <span
-                                    className={`text-[11px] font-bold w-8 shrink-0 ${
+                                    className={`text-2xs font-bold w-8 shrink-0 ${
                                       day.isOpen ? 'text-text-primary' : 'text-text-muted'
                                     }`}
                                   >
@@ -1394,9 +1394,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                                               [i]: { ...prev[i], openTime: e.target.value },
                                             }))
                                           }
-                                          className="flex-1 min-w-0 bg-bg border border-border rounded-md px-2 py-1 text-text-primary text-[11px] outline-none focus:ring-1 focus:ring-accent"
+                                          className="flex-1 min-w-0 bg-bg border border-border rounded-md px-2 py-1 text-text-primary text-2xs outline-none focus:ring-1 focus:ring-accent"
                                         />
-                                        <span className="text-[10px] text-text-muted">até</span>
+                                        <span className="text-2xs text-text-muted">até</span>
                                         <input
                                           type="time"
                                           value={day.closeTime}
@@ -1406,7 +1406,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                                               [i]: { ...prev[i], closeTime: e.target.value },
                                             }))
                                           }
-                                          className="flex-1 min-w-0 bg-bg border border-border rounded-md px-2 py-1 text-text-primary text-[11px] outline-none focus:ring-1 focus:ring-accent"
+                                          className="flex-1 min-w-0 bg-bg border border-border rounded-md px-2 py-1 text-text-primary text-2xs outline-none focus:ring-1 focus:ring-accent"
                                         />
                                       </motion.div>
                                     ) : (
@@ -1414,7 +1414,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                                         key="closed"
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
-                                        className="flex-1 text-[11px] text-text-muted italic"
+                                        className="flex-1 text-2xs text-text-muted italic"
                                       >
                                         Fechado
                                       </motion.span>
@@ -1426,12 +1426,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                           )}
                         </div>
                         {!Object.values(scheduleDays).some(d => d.isOpen) && (
-                          <p className="text-[11px] text-danger">Selecione pelo menos 1 dia</p>
+                          <p className="text-2xs text-danger">Selecione pelo menos 1 dia</p>
                         )}
                       </div>
 
                       <div className="space-y-3 pt-2 border-t border-border">
-                        <p className="text-[11px] text-text-muted text-center">
+                        <p className="text-2xs text-text-muted text-center">
                           Ao criar sua conta, você concorda com nossos termos e políticas.
                         </p>
                         <ConsentCheckbox
@@ -1501,7 +1501,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
               <div className="w-full mt-4">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex-1 h-px bg-border" />
-                  <span className="text-[10px] text-text-muted uppercase">ou</span>
+                  <span className="text-2xs text-text-muted uppercase">ou</span>
                   <div className="flex-1 h-px bg-border" />
                 </div>
                 <button
@@ -1536,7 +1536,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                   Cadastrar com Google
                 </button>
                 {googleRegisterError && (
-                  <p className="text-[11px] text-center text-danger mt-2">{googleRegisterError}</p>
+                  <p className="text-2xs text-center text-danger mt-2">{googleRegisterError}</p>
                 )}
                 {googleRegisterMode && (
                   <button
@@ -1545,7 +1545,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                       resetGoogleRegisterMode();
                       setRegisterFieldsUnlocked(false);
                     }}
-                    className="w-full mt-2 text-[11px] text-text-muted hover:text-accent transition-colors py-1"
+                    className="w-full mt-2 text-2xs text-text-muted hover:text-accent transition-colors py-1"
                   >
                     Usar e-mail e senha
                   </button>
@@ -1557,7 +1557,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
               <div className="w-full mt-4">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex-1 h-px bg-border" />
-                  <span className="text-[10px] text-text-muted uppercase">ou</span>
+                  <span className="text-2xs text-text-muted uppercase">ou</span>
                   <div className="flex-1 h-px bg-border" />
                 </div>
                 <button
@@ -1592,12 +1592,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                   Entrar com Google
                 </button>
                 {googleError && (
-                  <p className="text-[11px] text-center text-danger mt-2">{googleError}</p>
+                  <p className="text-2xs text-center text-danger mt-2">{googleError}</p>
                 )}
               </div>
             )}
 
-            <div className="mt-6 flex items-center gap-2 rounded-full border border-border/80 bg-bg/50 px-3 py-1.5 text-[10px] text-text-muted">
+            <div className="mt-6 flex items-center gap-2 rounded-full border border-border/80 bg-bg/50 px-3 py-1.5 text-2xs text-text-muted">
               <ShieldCheck size={12} className="text-accent" />
               Ambiente seguro e dados protegidos
             </div>

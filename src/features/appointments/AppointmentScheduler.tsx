@@ -479,7 +479,7 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
                           {formatCurrency(product.salePrice)}
                         </p>
                         {product.description && (
-                          <p className="mt-1 line-clamp-2 text-[11px] text-text-muted">
+                          <p className="mt-1 line-clamp-2 text-2xs text-text-muted">
                             {product.description}
                           </p>
                         )}

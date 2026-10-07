@@ -123,7 +123,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
             </div>
           )}
           <div>
-            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+            <label className="block text-2xs font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
               Nome
             </label>
             <input
@@ -137,7 +137,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+            <label className="block text-2xs font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
               Descrição
             </label>
             <input
@@ -150,7 +150,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              <label className="block text-2xs font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
                 Preço ({form.billingCycle === 'YEARLY' ? 'anual' : 'mensal'}) (R$)
               </label>
               <input
@@ -164,7 +164,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              <label className="block text-2xs font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
                 Ciclo
               </label>
               <SmartSelect
@@ -177,7 +177,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+            <label className="block text-2xs font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
               Máx. funcionários (0 = ilimitado)
             </label>
             <input
@@ -191,7 +191,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+              <label className="block text-2xs font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
                 Tier
               </label>
               <SmartSelect
@@ -222,7 +222,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
+            <label className="block text-2xs font-bold text-text-muted uppercase tracking-widest mb-1.5 ml-1">
               Features (uma por linha)
             </label>
             <textarea
@@ -362,7 +362,7 @@ export const PlansSection: React.FC = () => {
                   )}
                 </div>
                 <span
-                  className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${
+                  className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-bold uppercase tracking-widest border ${
                     plan.active
                       ? 'bg-success/10 text-success border-success/20'
                       : 'bg-surface-2 text-text-muted border-border-strong'
@@ -379,7 +379,7 @@ export const PlansSection: React.FC = () => {
                   /{plan.billingCycle === 'YEARLY' ? 'ano' : 'mês'}
                 </span>
               </div>
-              <p className="text-[10px] text-text-muted uppercase tracking-widest font-semibold">
+              <p className="text-2xs text-text-muted uppercase tracking-widest font-semibold">
                 {plan.maxEmployees === 0
                   ? 'Funcionários ilimitados'
                   : `Até ${plan.maxEmployees} funcionário${plan.maxEmployees !== 1 ? 's' : ''}`}

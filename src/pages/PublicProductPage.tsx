@@ -236,7 +236,7 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
         {submitting ? 'Reservando...' : 'Reservar produto'}
       </button>
 
-      <p className="text-center text-[11px] leading-relaxed text-text-muted">
+      <p className="text-center text-2xs leading-relaxed text-text-muted">
         A reserva é gratuita e não é um pagamento. O pagamento é feito na retirada. Informe seu nome ao chegar.
       </p>
     </form>

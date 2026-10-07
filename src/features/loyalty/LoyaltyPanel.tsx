@@ -241,13 +241,13 @@ export const LoyaltyPanel: React.FC = () => {
           </div>
           <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="rounded-xl border border-border bg-bg p-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Tipo</p>
+              <p className="text-2xs font-bold uppercase tracking-wider text-text-muted">Tipo</p>
               <p className="mt-0.5 text-sm font-medium text-text-primary">
                 {program.type.toUpperCase() === 'VISITS' ? 'Por visitas' : program.type}
               </p>
             </div>
             <div className="rounded-xl border border-border bg-bg p-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+              <p className="text-2xs font-bold uppercase tracking-wider text-text-muted">
                 Status
               </p>
               <div className="mt-1.5 grid grid-cols-2 gap-1 rounded-lg bg-surface-2 p-1">
@@ -276,7 +276,7 @@ export const LoyaltyPanel: React.FC = () => {
                   Inativo
                 </button>
               </div>
-              <p className="mt-1.5 text-[11px] text-text-muted">
+              <p className="mt-1.5 text-2xs text-text-muted">
                 {isActive ? 'Clientes acumulando visitas' : 'Contagem de visitas pausada'}
               </p>
             </div>

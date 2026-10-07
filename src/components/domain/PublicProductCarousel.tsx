@@ -51,9 +51,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ barbershopId, product, varian
 
       <p className="truncate text-sm font-bold text-text-primary">{product.name}</p>
       {variant === 'grid' && product.description && (
-        <p className="truncate text-[11px] text-text-secondary">{product.description}</p>
+        <p className="truncate text-2xs text-text-secondary">{product.description}</p>
       )}
-      <p className="truncate text-[11px] text-text-muted">
+      <p className="truncate text-2xs text-text-muted">
         {product.category ?? product.unitLabel}
       </p>
 
@@ -69,7 +69,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ barbershopId, product, varian
           Esgotado
         </StatusBadge>
       ) : (
-        <p className="mt-0.5 text-[11px] text-text-secondary">{availabilityLabel(product)}</p>
+        <p className="mt-0.5 text-2xs text-text-secondary">{availabilityLabel(product)}</p>
       )}
     </button>
   );

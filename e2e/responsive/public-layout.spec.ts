@@ -216,4 +216,17 @@ test.describe('Layout público responsivo (auditoria R1–R12)', () => {
     const broken = data.filter((s) => !s.ok).map((s) => ({ route: s.route, width: s.width, items: [s.error] }));
     expect(describeFailures(broken)).toBe('');
   });
+
+  test('R2 — nenhum texto de conteúdo mede menos que 12px em mobile', async ({ page }) => {
+    const data = await collect(page);
+    const failures = data
+      .filter((s) => s.ok && s.metrics && s.metrics.tiny.bad.length > 0)
+      .map((s) => ({
+        route: s.route,
+        width: s.width,
+        items: s.metrics!.tiny.bad.map((t) => ({ text: t.text, size: t.size, cls: t.cls })),
+      }));
+
+    expect(describeFailures(failures)).toBe('');
+  });
 });

@@ -486,7 +486,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
                   Plano escolhido
                 </p>
                 <h1 className="text-lg font-bold">{plan.name}</h1>
-                <p className="mt-1 text-[11px] text-text-secondary leading-relaxed max-w-sm">
+                <p className="mt-1 text-2xs text-text-secondary leading-relaxed max-w-sm">
                   {trialCampaign.checkoutHint}
                 </p>
               </div>
@@ -537,7 +537,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
                 )}
 
                 <div className="flex items-center gap-2 bg-bg border border-border rounded-xl p-2 mb-4">
-                  <code className="flex-1 text-[10px] text-text-secondary truncate text-left">
+                  <code className="flex-1 text-2xs text-text-secondary truncate text-left">
                     {pixPayment.pixQrCode.qrCode}
                   </code>
                   <button
@@ -733,7 +733,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
                               >
                                 {opt.label}
                               </span>
-                              <span className="mt-0.5 block text-[11px] leading-tight text-text-secondary">
+                              <span className="mt-0.5 block text-2xs leading-tight text-text-secondary">
                                 {opt.hint}
                               </span>
                             </span>

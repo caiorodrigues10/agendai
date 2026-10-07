@@ -122,14 +122,14 @@ export const ClientPortalDashboard: React.FC = () => {
       {activeTab === 'home' && (
         <div className="space-y-4">
           <div className="rounded-2xl border border-border bg-surface p-5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-text-muted">Bem-vindo</p>
+            <p className="text-2xs font-bold uppercase tracking-[0.22em] text-text-muted">Bem-vindo</p>
             <h3 className="mt-1 text-lg font-bold text-text-primary">{identity?.name || 'Cliente'}</h3>
             <p className="mt-1 text-sm text-text-secondary">{identity?.phone}</p>
           </div>
 
           {nextAppointment && (
             <div className="rounded-2xl border border-accent/30 bg-selection p-4">
-              <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-tertiary">Próximo agendamento</p>
+              <p className="text-2xs font-bold uppercase tracking-[0.22em] text-tertiary">Próximo agendamento</p>
               <h4 className="mt-1 font-bold text-text-primary">{nextAppointment.serviceName}</h4>
               <p className="mt-1 text-sm text-text-secondary">
                 {nextAppointment.barbershopName} · {nextAppointment.date} às {nextAppointment.time}
@@ -206,7 +206,7 @@ export const ClientPortalDashboard: React.FC = () => {
                   <p className="text-sm font-bold text-text-primary">{appt.serviceName}</p>
                   <p className="mt-0.5 text-xs text-text-secondary">{appt.barbershopName}</p>
                 </div>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                <span className={`rounded-full px-2 py-0.5 text-2xs font-bold ${
                   appt.status === 'CONFIRMED' ? 'bg-success/15 text-success' :
                   appt.status === 'PENDING' ? 'bg-warning/15 text-warning' :
                   'bg-surface-2 text-text-muted'
@@ -260,7 +260,7 @@ export const ClientPortalDashboard: React.FC = () => {
       {activeTab === 'account' && (
         <div className="space-y-4">
           <div className="rounded-2xl border border-border bg-surface p-5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-text-muted">Dados da conta</p>
+            <p className="text-2xs font-bold uppercase tracking-[0.22em] text-text-muted">Dados da conta</p>
             <div className="mt-3 space-y-2">
               <div className="flex items-center gap-2 text-sm text-text-primary">
                 <User size={14} className="text-text-muted" />
@@ -270,7 +270,7 @@ export const ClientPortalDashboard: React.FC = () => {
                 <Phone size={14} className="text-text-muted" />
                 {identity?.phone}
                 {identity?.phoneVerified && (
-                  <span className="rounded-full bg-success/15 px-1.5 py-0.5 text-[10px] font-bold text-success">Verificado</span>
+                  <span className="rounded-full bg-success/15 px-1.5 py-0.5 text-2xs font-bold text-success">Verificado</span>
                 )}
               </div>
             </div>

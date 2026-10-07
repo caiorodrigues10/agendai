@@ -82,7 +82,7 @@ export const QueueStatusCard: React.FC<QueueStatusCardProps> = ({
       <div className="relative pl-5 pr-5 pt-5 pb-5 sm:pl-6">
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-1">
+            <p className="text-2xs font-bold uppercase tracking-widest text-text-muted mb-1">
               Fila ao vivo
             </p>
             <h2 className="text-xl font-bold text-text-primary tracking-tight truncate">
@@ -94,7 +94,7 @@ export const QueueStatusCard: React.FC<QueueStatusCardProps> = ({
             </p>
           </div>
           <span
-            className={`shrink-0 text-[10px] sm:text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wide border ${tone.badge}`}
+            className={`shrink-0 text-2xs sm:text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wide border ${tone.badge}`}
           >
             {busyCopy(isOpen, insight?.busyLevel)}
           </span>
@@ -103,19 +103,19 @@ export const QueueStatusCard: React.FC<QueueStatusCardProps> = ({
         {showStaffStats ? (
           <div className="grid grid-cols-3 gap-2 mb-4">
             <div className="rounded-xl bg-bg border border-border px-3 py-3">
-              <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-bold text-text-muted mb-1">
+              <div className="flex items-center gap-1.5 text-2xs uppercase tracking-wider font-bold text-text-muted mb-1">
                 <Clock size={12} /> Espera
               </div>
               <p className="text-lg font-bold text-text-primary leading-none">{wait}</p>
             </div>
             <div className="rounded-xl bg-bg border border-border px-3 py-3">
-              <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-bold text-text-muted mb-1">
+              <div className="flex items-center gap-1.5 text-2xs uppercase tracking-wider font-bold text-text-muted mb-1">
                 <Users size={12} /> Fila
               </div>
               <p className="text-lg font-bold text-text-primary leading-none">{peopleWaiting}</p>
             </div>
             <div className="rounded-xl bg-bg border border-border px-3 py-3">
-              <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-bold text-text-muted mb-1">
+              <div className="flex items-center gap-1.5 text-2xs uppercase tracking-wider font-bold text-text-muted mb-1">
                 {inChairName ? <Scissors size={12} /> : <CheckCircle2 size={12} />}
                 {inChairName ? 'Cadeira' : 'Hoje'}
               </div>
@@ -132,7 +132,7 @@ export const QueueStatusCard: React.FC<QueueStatusCardProps> = ({
                 {wait}
               </span>
             </div>
-            <p className="mt-1.5 text-[10px] font-bold uppercase tracking-widest text-text-muted">
+            <p className="mt-1.5 text-2xs font-bold uppercase tracking-widest text-text-muted">
               Tempo estimado de espera
             </p>
           </div>

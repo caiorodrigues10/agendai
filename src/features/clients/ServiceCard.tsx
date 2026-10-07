@@ -39,7 +39,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, selected, onS
         </h3>
         <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-text-muted">
           <span
-            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] ${
+            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-2xs ${
               selected ? 'border-accent/20 bg-accent/10 text-accent' : 'border-border bg-bg'
             }`}
           >

@@ -314,7 +314,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
                     <button
                       type="button"
                       onClick={() => handleDayChange(index, 'isOpen', !day.isOpen)}
-                      className={`px-2 py-1 text-[10px] rounded-full font-bold ${
+                      className={`px-2 py-1 text-2xs rounded-full font-bold ${
                         day.isOpen ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'
                       }`}
                     >

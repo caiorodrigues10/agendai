@@ -286,7 +286,7 @@ export const PublicHome: React.FC = () => {
                 <span className="block text-3xl font-bold text-text-primary mb-1">
                   {peopleWaiting}
                 </span>
-                <span className="text-[10px] text-text-muted uppercase tracking-widest font-bold">
+                <span className="text-2xs text-text-muted uppercase tracking-widest font-bold">
                   Na Fila
                 </span>
               </div>
@@ -294,7 +294,7 @@ export const PublicHome: React.FC = () => {
                 <span className="block text-3xl font-bold text-tertiary mb-1">
                   {currentInChair ? '1' : '0'}
                 </span>
-                <span className="text-[10px] text-text-muted uppercase tracking-widest font-bold">
+                <span className="text-2xs text-text-muted uppercase tracking-widest font-bold">
                   Em Atendimento
                 </span>
               </div>
@@ -339,7 +339,7 @@ export const PublicHome: React.FC = () => {
                     <DynamicIcon name="UserPlus" size={16} className="text-tertiary" />
                     Adicionar dependente
                   </span>
-                  <span className="text-[11px] font-medium text-text-muted">
+                  <span className="text-2xs font-medium text-text-muted">
                     Filho, parceiro ou quem veio junto — sem entrar de novo
                   </span>
                 </button>

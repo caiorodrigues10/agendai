@@ -10,8 +10,8 @@ interface AvatarProps {
 }
 
 const SIZE_MAP: Record<AvatarSize, { container: string; text: string }> = {
-  xxs: { container: 'w-6 h-6', text: 'text-[8px]' },
-  xs: { container: 'w-8 h-8', text: 'text-[10px]' },
+  xxs: { container: 'w-6 h-6', text: 'text-2xs' },
+  xs: { container: 'w-8 h-8', text: 'text-2xs' },
   sm: { container: 'w-10 h-10', text: 'text-xs' },
   md: { container: 'w-14 h-14', text: 'text-sm' },
   lg: { container: 'w-24 h-24', text: 'text-xl' },
