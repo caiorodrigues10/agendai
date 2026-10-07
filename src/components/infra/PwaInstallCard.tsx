@@ -55,7 +55,7 @@ export const PwaInstallCard: React.FC<PwaInstallCardProps> = ({
                 controls
                 playsInline
                 preload="metadata"
-                poster="/screenshots/queue-real.png"
+                poster="/screenshots/queue-real.webp"
                 src={videoUrl}
               >
                 Seu navegador não reproduz este vídeo.

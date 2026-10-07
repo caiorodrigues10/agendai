@@ -44,7 +44,7 @@ export default defineConfig(() => {
 				injectRegister: null,
 				includeAssets: [
 					'favicon.png',
-					'brand/*.png',
+					'brand/*.webp',
 					'icons/*.png',
 				],
 				manifest: {
@@ -89,16 +89,16 @@ export default defineConfig(() => {
 					],
 					screenshots: [
 						{
-							src: '/screenshots/queue-real.png',
+							src: '/screenshots/queue-real.webp',
 							sizes: '1400x900',
-							type: 'image/png',
+							type: 'image/webp',
 							form_factor: 'wide',
 							label: 'Fila digital do salão',
 						},
 						{
-							src: '/screenshots/appointments-real.png',
+							src: '/screenshots/appointments-real.webp',
 							sizes: '1400x1001',
-							type: 'image/png',
+							type: 'image/webp',
 							form_factor: 'wide',
 							label: 'Agenda do salão',
 						},
