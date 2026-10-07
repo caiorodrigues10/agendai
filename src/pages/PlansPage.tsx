@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { lazy, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -12,13 +12,20 @@ import { plansApi, Plan } from '../infra/plansApi';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useAuth } from '../contexts/AuthContext';
 import { MarketingLayout } from '../layouts/marketing/MarketingLayout';
-import { PricingPersuasionCharts } from '../features/marketing';
 import { softwareApplicationLd } from '../marketing/softwareApplicationLd';
 import { getErrorMessage } from '../utils/errorMessage';
 import { trialCampaign } from '../marketing/trialCampaign';
 import { isPaidSubscription, staffHomePath } from '../utils/subscriptionPaywall';
 import { formatCurrencyBRL } from '../utils/formatters';
 import { ESSENTIAL_MONTHLY, PRO_MONTHLY, ESSENTIAL_YEARLY, PRO_YEARLY } from '../marketing/planPrices';
+
+// Gráficos de persuasão (recharts) fora do caminho crítico: o LCP da rota era
+// adiado pela execução do bundle do gráfico antes do primeiro render do hero.
+const PricingPersuasionCharts = lazy(() =>
+  import('../features/marketing/PricingPersuasionCharts').then(module => ({
+    default: module.PricingPersuasionCharts,
+  }))
+);
 
 const matrix = [
   { label: 'Fila digital + agenda online', essential: true, pro: true },
@@ -222,29 +229,15 @@ export const PlansPage: React.FC = () => {
         <section id="precos" className="px-6 pb-16 pt-32 md:px-10 md:pb-20 md:pt-40 xl:px-12">
           <div className="mx-auto max-w-6xl">
             <div className="mx-auto max-w-2xl text-center">
-              <motion.h1
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl md:text-6xl"
-              >
+              <h1 className="text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl md:text-6xl">
                 Teste grátis ou escolha o plano
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 }}
-                className="mx-auto mt-4 max-w-xl text-base font-medium leading-relaxed text-neutral-400 md:text-lg"
-              >
+              </h1>
+              <p className="mx-auto mt-4 max-w-xl text-base font-medium leading-relaxed text-neutral-400 md:text-lg">
                 {trialCampaign.body} {trialCampaign.afterTrial}
-              </motion.p>
+              </p>
             </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="mt-8 flex justify-center"
-            >
+            <div className="mt-8 flex justify-center">
               <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1">
                 <button
                   type="button"
@@ -270,7 +263,7 @@ export const PlansPage: React.FC = () => {
                   2 meses grátis
                 </span>
               </div>
-            </motion.div>
+            </div>
 
             {error && (
               <div className="mx-auto mt-8 flex max-w-md items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
@@ -475,7 +468,9 @@ export const PlansPage: React.FC = () => {
 
         <section className="border-y border-white/8 bg-white/1.5 px-6 py-20 md:px-10 md:py-28 xl:px-12">
           <div className="mx-auto max-w-6xl">
-            <PricingPersuasionCharts variant="dark" />
+            <React.Suspense fallback={null}>
+              <PricingPersuasionCharts variant="dark" />
+            </React.Suspense>
           </div>
         </section>
 

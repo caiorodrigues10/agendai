@@ -62,7 +62,7 @@ vi.mock('../components/marketing/MarketingFooter', () => ({
   MarketingFooter: () => <footer data-testid="marketing-footer">footer</footer>,
 }));
 
-vi.mock('../features/marketing', () => ({
+vi.mock('../features/marketing/PricingPersuasionCharts', () => ({
   PricingPersuasionCharts: () => <div data-testid="pricing-charts" />,
 }));
 
@@ -85,7 +85,7 @@ describe('PlansPage', () => {
     expect(screen.getByRole('heading', { name: /^pro$/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /começar teste grátis/i })).toBeInTheDocument();
     expect(screen.getByText(/mais escolhido/i)).toBeInTheDocument();
-    expect(screen.getByTestId('pricing-charts')).toBeInTheDocument();
+    expect(await screen.findByTestId('pricing-charts')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /essencial opera\. pro enxerga/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /objeções que a gente já ouviu/i })).toBeInTheDocument();
   });

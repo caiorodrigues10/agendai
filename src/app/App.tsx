@@ -11,6 +11,7 @@ import { ReferralRefCapture } from '../components/infra/ReferralRefCapture';
 import { Loader } from '../components/ui/Loader';
 import { ErrorBoundary } from '../components/infra/ErrorBoundary';
 import { PwaUpdatePrompt } from '../components/infra/PwaUpdatePrompt';
+import { QueueIndexRoute } from './QueueIndexRoute';
 
 const LandingPage = lazy(() => import('../pages/LandingPage'));
 const FeaturesPage = lazy(() => import('../pages/marketing/FeaturesPage'));
@@ -79,7 +80,7 @@ const App: React.FC = () => {
           <Route path="/contato" element={<ContactPage />} />
           <Route path="/privacidade" element={<PrivacyPolicyPage />} />
           <Route path="/termos" element={<TermsPage />} />
-          <Route path="/queue" element={<PublicHome />} />
+          <Route path="/queue" element={<QueueIndexRoute />} />
           <Route path="/queue/:id" element={<PublicHome />} />
           <Route path="/queue/:id/produtos/:productId" element={<PublicProductPage />} />
           <Route path="/agendamento/gerenciar" element={<PublicAppointmentManagePage />} />

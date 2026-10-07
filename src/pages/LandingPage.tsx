@@ -1,8 +1,6 @@
 import { BRAND_NAME } from '../config/brand';
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
   LuArrowRight as ArrowRight,
   LuChartColumn as BarChart3,
@@ -22,11 +20,8 @@ import { FloatingPathsBackground } from '../components/ui/floating-paths';
 import { trialCampaign } from '../marketing/trialCampaign';
 import { softwareApplicationLd } from '../marketing/softwareApplicationLd';
 import { getWeatherVisual } from '../utils/weatherVisuals';
-import { registerScrollTrigger } from '../components/infra/scrollTriggerRuntime';
+import { registerScrollTrigger, refreshScrollTrigger } from '../components/infra/scrollTriggerRuntime';
 import { prefersReducedMotion } from '../utils/reducedMotion';
-
-gsap.registerPlugin(ScrollTrigger);
-registerScrollTrigger(ScrollTrigger);
 
 const marqueeItems = [
   'Fila digital',
@@ -146,7 +141,7 @@ export const LandingPage: React.FC = () => {
       const el = document.getElementById(id);
       if (!el) return false;
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      ScrollTrigger.refresh();
+      refreshScrollTrigger();
       return true;
     };
 
@@ -164,269 +159,228 @@ export const LandingPage: React.FC = () => {
     const page = pageRef.current;
     if (!page) return;
 
-    const media = gsap.matchMedia();
-    const context = gsap.context(() => {
-      media.add('(prefers-reduced-motion: no-preference)', () => {
-        const heroTimeline = gsap.timeline({
-          defaults: { ease: 'power3.out' },
-        });
+    let cancelled = false;
+    let cleanup: (() => void) | undefined;
 
-        heroTimeline
-          .from('[data-hero-badge]', {
-            autoAlpha: 0,
-            y: 16,
-            duration: 0.55,
-          })
-          .from(
-            '[data-hero-line]',
-            {
-              autoAlpha: 0,
-              yPercent: 115,
-              duration: 0.9,
-              stagger: 0.1,
-            },
-            '-=0.25'
-          )
-          .from(
-            '[data-hero-copy]',
-            {
-              autoAlpha: 0,
-              y: 22,
-              duration: 0.7,
-            },
-            '-=0.5'
-          )
-          .from(
-            '[data-hero-action]',
-            {
-              autoAlpha: 0,
-              y: 18,
-              duration: 0.6,
-              stagger: 0.08,
-            },
-            '-=0.45'
-          )
-          .from(
-            '[data-hero-scene]',
-            {
-              autoAlpha: 0,
-              x: 45,
-              rotateY: -7,
-              scale: 0.96,
-              duration: 1.1,
-            },
-            '-=0.85'
-          )
-          .from(
-            '[data-hero-card]',
-            {
-              autoAlpha: 0,
-              scale: 0.86,
-              y: 24,
-              duration: 0.65,
-              stagger: 0.12,
-            },
-            '-=0.5'
-          );
+    void (async () => {
+      const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+        import('gsap'),
+        import('gsap/ScrollTrigger'),
+      ]);
+      if (cancelled) return;
+      gsap.registerPlugin(ScrollTrigger);
+      registerScrollTrigger(ScrollTrigger);
 
-        gsap.from('[data-hero-bar]', {
-          scaleY: 0,
-          transformOrigin: 'bottom',
-          duration: 0.9,
-          stagger: 0.05,
-          delay: 1.15,
-          ease: 'back.out(1.5)',
-        });
+      const media = gsap.matchMedia();
+      const context = gsap.context(() => {
+        media.add('(prefers-reduced-motion: no-preference)', () => {
+          const heroTimeline = gsap.timeline({
+            defaults: { ease: 'power3.out' },
+          });
 
-        gsap.to('[data-ambient="one"]', {
-          x: 45,
-          y: 25,
-          scale: 1.15,
-          duration: 7,
-          repeat: -1,
-          yoyo: true,
-          ease: 'sine.inOut',
-        });
+          heroTimeline
+            .fromTo('[data-hero-badge]', { y: 16 }, { y: 0, duration: 0.55 })
+            .fromTo(
+              '[data-hero-copy]',
+              {
+                y: 22,
+              },
+              { y: 0, duration: 0.7 },
+              '-=0.25'
+            )
+            .fromTo(
+              '[data-hero-action]',
+              {
+                y: 18,
+              },
+              { y: 0, duration: 0.6, stagger: 0.08 },
+              '-=0.45'
+            )
+            .from(
+              '[data-hero-scene]',
+              {
+                autoAlpha: 0,
+                x: 45,
+                rotateY: -7,
+                scale: 0.96,
+                duration: 1.1,
+              },
+              '-=0.85'
+            )
+            .from(
+              '[data-hero-card]',
+              {
+                autoAlpha: 0,
+                scale: 0.86,
+                y: 24,
+                duration: 0.65,
+                stagger: 0.12,
+              },
+              '-=0.5'
+            );
 
-        gsap.to('[data-ambient="two"]', {
-          x: -35,
-          y: -30,
-          scale: 1.2,
-          duration: 9,
-          repeat: -1,
-          yoyo: true,
-          ease: 'sine.inOut',
-        });
+          gsap.from('[data-hero-bar]', {
+            scaleY: 0,
+            transformOrigin: 'bottom',
+            duration: 0.9,
+            stagger: 0.05,
+            delay: 1.15,
+            ease: 'back.out(1.5)',
+          });
 
-        gsap.to('[data-float="one"]', {
-          y: -12,
-          rotate: -1.5,
-          duration: 3.4,
-          repeat: -1,
-          yoyo: true,
-          ease: 'sine.inOut',
-        });
-
-        gsap.to('[data-float="two"]', {
-          y: 10,
-          rotate: 1.5,
-          duration: 4.1,
-          repeat: -1,
-          yoyo: true,
-          ease: 'sine.inOut',
-        });
-
-        const marquee = page.querySelector<HTMLElement>('[data-marquee-track]');
-        if (marquee) {
-          gsap.to(marquee, {
-            xPercent: -50,
-            duration: 26,
+          gsap.to('[data-ambient="one"]', {
+            x: 45,
+            y: 25,
+            scale: 1.15,
+            duration: 7,
             repeat: -1,
-            ease: 'none',
+            yoyo: true,
+            ease: 'sine.inOut',
           });
-        }
 
-        gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach(element => {
-          gsap.fromTo(
-            element,
-            { autoAlpha: 0, y: 52 },
-            {
-              autoAlpha: 1,
-              y: 0,
-              duration: 0.85,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: element,
-                start: 'top 86%',
-                once: true,
-              },
-            }
-          );
-        });
-
-        gsap.utils.toArray<HTMLElement>('[data-stagger-group]').forEach(group => {
-          const items = group.querySelectorAll('[data-stagger-item]');
-          gsap.fromTo(
-            items,
-            { autoAlpha: 0, y: 46, scale: 0.97 },
-            {
-              autoAlpha: 1,
-              y: 0,
-              scale: 1,
-              duration: 0.72,
-              stagger: 0.11,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: group,
-                start: 'top 78%',
-                once: true,
-              },
-            }
-          );
-        });
-
-        gsap.utils.toArray<HTMLElement>('[data-count]').forEach(element => {
-          const target = Number(element.dataset.count ?? 0);
-          const prefix = element.dataset.prefix ?? '';
-          const suffix = element.dataset.suffix ?? '';
-          const state = { value: 0 };
-
-          gsap.to(state, {
-            value: target,
-            duration: 1.4,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: element,
-              start: 'top 90%',
-              once: true,
-            },
-            onUpdate: () => {
-              element.textContent = `${prefix}${Math.round(state.value)}${suffix}`;
-            },
+          gsap.to('[data-ambient="two"]', {
+            x: -35,
+            y: -30,
+            scale: 1.2,
+            duration: 9,
+            repeat: -1,
+            yoyo: true,
+            ease: 'sine.inOut',
           });
-        });
 
-        const insightLine = page.querySelector<SVGPathElement>('[data-insight-line]');
-        if (insightLine) {
-          const length = insightLine.getTotalLength();
-          gsap.fromTo(
-            insightLine,
-            {
-              strokeDasharray: length,
-              strokeDashoffset: length,
-            },
-            {
-              strokeDashoffset: 0,
-              duration: 2,
-              ease: 'power2.inOut',
-              scrollTrigger: {
-                trigger: insightLine,
-                start: 'top 82%',
-                once: true,
-              },
-            }
-          );
-        }
+          gsap.to('[data-float="one"]', {
+            y: -12,
+            rotate: -1.5,
+            duration: 3.4,
+            repeat: -1,
+            yoyo: true,
+            ease: 'sine.inOut',
+          });
 
-        const bookingCard = page.querySelector<HTMLElement>('[data-booking-card]');
-        if (bookingCard) {
-          const bookingDays = bookingCard.querySelectorAll('[data-booking-day]');
-          const bookingSlots = bookingCard.querySelectorAll('[data-booking-slot]');
-          const bookingConfirm = bookingCard.querySelector('[data-booking-confirm]');
+          gsap.to('[data-float="two"]', {
+            y: 10,
+            rotate: 1.5,
+            duration: 4.1,
+            repeat: -1,
+            yoyo: true,
+            ease: 'sine.inOut',
+          });
 
-          gsap.set(
-            [
-              ...Array.from(bookingDays),
-              ...Array.from(bookingSlots),
-              ...(bookingConfirm ? [bookingConfirm] : []),
-            ],
-            { autoAlpha: 0 }
-          );
+          const marquee = page.querySelector<HTMLElement>('[data-marquee-track]');
+          if (marquee) {
+            gsap.to(marquee, {
+              xPercent: -50,
+              duration: 26,
+              repeat: -1,
+              ease: 'none',
+            });
+          }
 
-          gsap.fromTo(
-            bookingDays,
-            { autoAlpha: 0, y: 14 },
-            {
-              autoAlpha: 1,
-              y: 0,
-              duration: 0.45,
-              stagger: 0.06,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: bookingCard,
-                start: 'top 78%',
-                once: true,
-              },
-            }
-          );
-
-          gsap.fromTo(
-            bookingSlots,
-            { autoAlpha: 0, scale: 0.88 },
-            {
-              autoAlpha: 1,
-              scale: 1,
-              duration: 0.4,
-              stagger: 0.05,
-              delay: 0.18,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: bookingCard,
-                start: 'top 78%',
-                once: true,
-              },
-            }
-          );
-
-          if (bookingConfirm) {
+          gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach(element => {
             gsap.fromTo(
-              bookingConfirm,
-              { autoAlpha: 0, y: 18 },
+              element,
+              { autoAlpha: 0, y: 52 },
               {
                 autoAlpha: 1,
                 y: 0,
-                duration: 0.55,
-                delay: 0.42,
+                duration: 0.85,
+                ease: 'power3.out',
+                scrollTrigger: {
+                  trigger: element,
+                  start: 'top 86%',
+                  once: true,
+                },
+              }
+            );
+          });
+
+          gsap.utils.toArray<HTMLElement>('[data-stagger-group]').forEach(group => {
+            const items = group.querySelectorAll('[data-stagger-item]');
+            gsap.fromTo(
+              items,
+              { autoAlpha: 0, y: 46, scale: 0.97 },
+              {
+                autoAlpha: 1,
+                y: 0,
+                scale: 1,
+                duration: 0.72,
+                stagger: 0.11,
+                ease: 'power3.out',
+                scrollTrigger: {
+                  trigger: group,
+                  start: 'top 78%',
+                  once: true,
+                },
+              }
+            );
+          });
+
+          gsap.utils.toArray<HTMLElement>('[data-count]').forEach(element => {
+            const target = Number(element.dataset.count ?? 0);
+            const prefix = element.dataset.prefix ?? '';
+            const suffix = element.dataset.suffix ?? '';
+            const state = { value: 0 };
+
+            gsap.to(state, {
+              value: target,
+              duration: 1.4,
+              ease: 'power2.out',
+              scrollTrigger: {
+                trigger: element,
+                start: 'top 90%',
+                once: true,
+              },
+              onUpdate: () => {
+                element.textContent = `${prefix}${Math.round(state.value)}${suffix}`;
+              },
+            });
+          });
+
+          const insightLine = page.querySelector<SVGPathElement>('[data-insight-line]');
+          if (insightLine) {
+            const length = insightLine.getTotalLength();
+            gsap.fromTo(
+              insightLine,
+              {
+                strokeDasharray: length,
+                strokeDashoffset: length,
+              },
+              {
+                strokeDashoffset: 0,
+                duration: 2,
+                ease: 'power2.inOut',
+                scrollTrigger: {
+                  trigger: insightLine,
+                  start: 'top 82%',
+                  once: true,
+                },
+              }
+            );
+          }
+
+          const bookingCard = page.querySelector<HTMLElement>('[data-booking-card]');
+          if (bookingCard) {
+            const bookingDays = bookingCard.querySelectorAll('[data-booking-day]');
+            const bookingSlots = bookingCard.querySelectorAll('[data-booking-slot]');
+            const bookingConfirm = bookingCard.querySelector('[data-booking-confirm]');
+
+            gsap.set(
+              [
+                ...Array.from(bookingDays),
+                ...Array.from(bookingSlots),
+                ...(bookingConfirm ? [bookingConfirm] : []),
+              ],
+              { autoAlpha: 0 }
+            );
+
+            gsap.fromTo(
+              bookingDays,
+              { autoAlpha: 0, y: 14 },
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration: 0.45,
+                stagger: 0.06,
                 ease: 'power3.out',
                 scrollTrigger: {
                   trigger: bookingCard,
@@ -435,218 +389,260 @@ export const LandingPage: React.FC = () => {
                 },
               }
             );
-          }
-        }
 
-        const queueCard = page.querySelector<HTMLElement>('[data-queue-card]');
-        if (queueCard) {
-          const queueRows = queueCard.querySelectorAll('[data-queue-row]');
-          gsap.set(queueRows, { autoAlpha: 0, x: 18 });
-          gsap.fromTo(
-            queueRows,
-            { autoAlpha: 0, x: 18 },
-            {
-              autoAlpha: 1,
-              x: 0,
-              duration: 0.5,
-              stagger: 0.1,
-              ease: 'power3.out',
+            gsap.fromTo(
+              bookingSlots,
+              { autoAlpha: 0, scale: 0.88 },
+              {
+                autoAlpha: 1,
+                scale: 1,
+                duration: 0.4,
+                stagger: 0.05,
+                delay: 0.18,
+                ease: 'power3.out',
+                scrollTrigger: {
+                  trigger: bookingCard,
+                  start: 'top 78%',
+                  once: true,
+                },
+              }
+            );
+
+            if (bookingConfirm) {
+              gsap.fromTo(
+                bookingConfirm,
+                { autoAlpha: 0, y: 18 },
+                {
+                  autoAlpha: 1,
+                  y: 0,
+                  duration: 0.55,
+                  delay: 0.42,
+                  ease: 'power3.out',
+                  scrollTrigger: {
+                    trigger: bookingCard,
+                    start: 'top 78%',
+                    once: true,
+                  },
+                }
+              );
+            }
+          }
+
+          const queueCard = page.querySelector<HTMLElement>('[data-queue-card]');
+          if (queueCard) {
+            const queueRows = queueCard.querySelectorAll('[data-queue-row]');
+            gsap.set(queueRows, { autoAlpha: 0, x: 18 });
+            gsap.fromTo(
+              queueRows,
+              { autoAlpha: 0, x: 18 },
+              {
+                autoAlpha: 1,
+                x: 0,
+                duration: 0.5,
+                stagger: 0.1,
+                ease: 'power3.out',
+                scrollTrigger: {
+                  trigger: queueCard,
+                  start: 'top 78%',
+                  once: true,
+                },
+              }
+            );
+          }
+
+          const rolesCard = page.querySelector<HTMLElement>('[data-roles-card]');
+          if (rolesCard) {
+            const rolePanels = rolesCard.querySelectorAll('[data-role-panel]');
+            gsap.set(rolePanels, { autoAlpha: 0, y: 20 });
+            gsap.fromTo(
+              rolePanels,
+              { autoAlpha: 0, y: 20 },
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration: 0.55,
+                stagger: 0.12,
+                ease: 'power3.out',
+                scrollTrigger: {
+                  trigger: rolesCard,
+                  start: 'top 78%',
+                  once: true,
+                },
+              }
+            );
+          }
+
+          const scene = page.querySelector<HTMLElement>('[data-hero-scene]');
+          const canUsePointerParallax = window.matchMedia('(pointer: fine)').matches;
+
+          if (scene && canUsePointerParallax) {
+            const layers = Array.from(scene.querySelectorAll<HTMLElement>('[data-parallax]'));
+            const moveX = layers.map(layer =>
+              gsap.quickTo(layer, 'x', { duration: 0.6, ease: 'power3.out' })
+            );
+
+            const handlePointerMove = (event: PointerEvent) => {
+              const bounds = scene.getBoundingClientRect();
+              const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+
+              layers.forEach((layer, index) => {
+                const depth = Number(layer.dataset.depth ?? 1);
+                moveX[index](x * 22 * depth);
+              });
+            };
+
+            const resetPointer = () => {
+              moveX.forEach(move => move(0));
+            };
+
+            scene.addEventListener('pointermove', handlePointerMove);
+            scene.addEventListener('pointerleave', resetPointer);
+
+            return () => {
+              scene.removeEventListener('pointermove', handlePointerMove);
+              scene.removeEventListener('pointerleave', resetPointer);
+            };
+          }
+
+          return undefined;
+        });
+
+        media.add('(prefers-reduced-motion: no-preference)', () => {
+          const stack = page.querySelector<HTMLElement>('[data-stack]');
+          const stackItems = gsap.utils.toArray<HTMLElement>('[data-stack-item]');
+          const progressFill = page.querySelector<HTMLElement>('[data-stack-progress]');
+
+          if (stack && progressFill) {
+            gsap.fromTo(
+              progressFill,
+              { scaleY: 0 },
+              {
+                scaleY: 1,
+                ease: 'none',
+                scrollTrigger: {
+                  trigger: stack,
+                  start: 'top 70%',
+                  end: 'bottom 45%',
+                  scrub: 0.4,
+                },
+              }
+            );
+          }
+
+          stackItems.forEach((item, index) => {
+            const card = item.querySelector<HTMLElement>('[data-stack-card]');
+            const num = item.querySelector<HTMLElement>('[data-stack-num]');
+            const dot = item.querySelector<HTMLElement>('[data-stack-dot]');
+            if (!card) return;
+
+            const tl = gsap.timeline({
               scrollTrigger: {
-                trigger: queueCard,
-                start: 'top 78%',
+                trigger: item,
+                start: 'top 85%',
                 once: true,
               },
-            }
-          );
-        }
+            });
 
-        const rolesCard = page.querySelector<HTMLElement>('[data-roles-card]');
-        if (rolesCard) {
-          const rolePanels = rolesCard.querySelectorAll('[data-role-panel]');
-          gsap.set(rolePanels, { autoAlpha: 0, y: 20 });
-          gsap.fromTo(
-            rolePanels,
-            { autoAlpha: 0, y: 20 },
-            {
+            tl.fromTo(
+              card,
+              { autoAlpha: 0, y: 36, x: index % 2 === 0 ? -18 : 18 },
+              {
+                autoAlpha: 1,
+                y: 0,
+                x: 0,
+                duration: 0.7,
+                ease: 'power3.out',
+              }
+            ).fromTo(
+              num,
+              { autoAlpha: 0, y: 12 },
+              { autoAlpha: 1, y: 0, duration: 0.45, ease: 'power2.out' },
+              '-=0.4'
+            );
+
+            if (dot) {
+              tl.fromTo(
+                dot,
+                { scale: 0.4, autoAlpha: 0 },
+                { scale: 1, autoAlpha: 1, duration: 0.35, ease: 'back.out(1.6)' },
+                '-=0.55'
+              );
+            }
+          });
+        });
+
+        media.add('(prefers-reduced-motion: reduce)', () => {
+          gsap.set(
+            '[data-hero-badge], [data-hero-line], [data-hero-copy], [data-hero-action], [data-hero-scene], [data-hero-card], [data-reveal], [data-stagger-item], [data-stack-card], [data-stack-num], [data-stack-progress], [data-stack-dot]',
+            { autoAlpha: 1, clearProps: 'transform' }
+          );
+        });
+
+        const stickyCta = page.querySelector<HTMLElement>('[data-sticky-cta]');
+        const stickyAnchor = page.querySelector<HTMLElement>('[data-sticky-cta-anchor]');
+        const stickyEnd = page.querySelector<HTMLElement>('[data-sticky-cta-end]');
+
+        if (stickyCta && stickyAnchor) {
+          const stickyButton = stickyCta.querySelector<HTMLButtonElement>('button');
+          const reducedMotion = prefersReducedMotion();
+          gsap.set(stickyCta, { autoAlpha: 0, y: reducedMotion ? 0 : 56, pointerEvents: 'none' });
+          stickyCta.setAttribute('aria-hidden', 'true');
+          stickyButton?.setAttribute('tabindex', '-1');
+
+          const showSticky = () => {
+            stickyCta.setAttribute('aria-hidden', 'false');
+            stickyButton?.removeAttribute('tabindex');
+            gsap.to(stickyCta, {
               autoAlpha: 1,
               y: 0,
-              duration: 0.55,
-              stagger: 0.12,
+              duration: reducedMotion ? 0 : 0.45,
               ease: 'power3.out',
-              scrollTrigger: {
-                trigger: rolesCard,
-                start: 'top 78%',
-                once: true,
+              overwrite: 'auto',
+              onStart: () => {
+                stickyCta.style.pointerEvents = 'auto';
               },
-            }
-          );
-        }
-
-        const scene = page.querySelector<HTMLElement>('[data-hero-scene]');
-        const canUsePointerParallax = window.matchMedia('(pointer: fine)').matches;
-
-        if (scene && canUsePointerParallax) {
-          const layers = Array.from(scene.querySelectorAll<HTMLElement>('[data-parallax]'));
-          const moveX = layers.map(layer =>
-            gsap.quickTo(layer, 'x', { duration: 0.6, ease: 'power3.out' })
-          );
-
-          const handlePointerMove = (event: PointerEvent) => {
-            const bounds = scene.getBoundingClientRect();
-            const x = (event.clientX - bounds.left) / bounds.width - 0.5;
-
-            layers.forEach((layer, index) => {
-              const depth = Number(layer.dataset.depth ?? 1);
-              moveX[index](x * 22 * depth);
             });
           };
 
-          const resetPointer = () => {
-            moveX.forEach(move => move(0));
-          };
-
-          scene.addEventListener('pointermove', handlePointerMove);
-          scene.addEventListener('pointerleave', resetPointer);
-
-          return () => {
-            scene.removeEventListener('pointermove', handlePointerMove);
-            scene.removeEventListener('pointerleave', resetPointer);
-          };
-        }
-
-        return undefined;
-      });
-
-      media.add('(prefers-reduced-motion: no-preference)', () => {
-        const stack = page.querySelector<HTMLElement>('[data-stack]');
-        const stackItems = gsap.utils.toArray<HTMLElement>('[data-stack-item]');
-        const progressFill = page.querySelector<HTMLElement>('[data-stack-progress]');
-
-        if (stack && progressFill) {
-          gsap.fromTo(
-            progressFill,
-            { scaleY: 0 },
-            {
-              scaleY: 1,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: stack,
-                start: 'top 70%',
-                end: 'bottom 45%',
-                scrub: 0.4,
+          const hideSticky = () => {
+            gsap.to(stickyCta, {
+              autoAlpha: 0,
+              y: reducedMotion ? 0 : 40,
+              duration: reducedMotion ? 0 : 0.3,
+              ease: 'power2.in',
+              overwrite: 'auto',
+              onComplete: () => {
+                stickyCta.style.pointerEvents = 'none';
+                stickyCta.setAttribute('aria-hidden', 'true');
+                stickyButton?.setAttribute('tabindex', '-1');
               },
-            }
-          );
+            });
+          };
+
+          ScrollTrigger.create({
+            trigger: stickyAnchor,
+            start: 'bottom top+=72',
+            endTrigger: stickyEnd ?? undefined,
+            end: stickyEnd ? 'top 85%' : 'max',
+            onEnter: showSticky,
+            onLeave: hideSticky,
+            onEnterBack: showSticky,
+            onLeaveBack: hideSticky,
+          });
         }
+      }, page);
 
-        stackItems.forEach((item, index) => {
-          const card = item.querySelector<HTMLElement>('[data-stack-card]');
-          const num = item.querySelector<HTMLElement>('[data-stack-num]');
-          const dot = item.querySelector<HTMLElement>('[data-stack-dot]');
-          if (!card) return;
+      requestAnimationFrame(() => ScrollTrigger.refresh());
 
-          const tl = gsap.timeline({
-            scrollTrigger: {
-              trigger: item,
-              start: 'top 85%',
-              once: true,
-            },
-          });
-
-          tl.fromTo(
-            card,
-            { autoAlpha: 0, y: 36, x: index % 2 === 0 ? -18 : 18 },
-            {
-              autoAlpha: 1,
-              y: 0,
-              x: 0,
-              duration: 0.7,
-              ease: 'power3.out',
-            }
-          ).fromTo(
-            num,
-            { autoAlpha: 0, y: 12 },
-            { autoAlpha: 1, y: 0, duration: 0.45, ease: 'power2.out' },
-            '-=0.4'
-          );
-
-          if (dot) {
-            tl.fromTo(
-              dot,
-              { scale: 0.4, autoAlpha: 0 },
-              { scale: 1, autoAlpha: 1, duration: 0.35, ease: 'back.out(1.6)' },
-              '-=0.55'
-            );
-          }
-        });
-      });
-
-      media.add('(prefers-reduced-motion: reduce)', () => {
-        gsap.set(
-          '[data-hero-badge], [data-hero-line], [data-hero-copy], [data-hero-action], [data-hero-scene], [data-hero-card], [data-reveal], [data-stagger-item], [data-stack-card], [data-stack-num], [data-stack-progress], [data-stack-dot]',
-          { autoAlpha: 1, clearProps: 'transform' }
-        );
-      });
-
-      const stickyCta = page.querySelector<HTMLElement>('[data-sticky-cta]');
-      const stickyAnchor = page.querySelector<HTMLElement>('[data-sticky-cta-anchor]');
-      const stickyEnd = page.querySelector<HTMLElement>('[data-sticky-cta-end]');
-
-      if (stickyCta && stickyAnchor) {
-        const stickyButton = stickyCta.querySelector<HTMLButtonElement>('button');
-        const reducedMotion = prefersReducedMotion();
-        gsap.set(stickyCta, { autoAlpha: 0, y: reducedMotion ? 0 : 56, pointerEvents: 'none' });
-        stickyCta.setAttribute('aria-hidden', 'true');
-        stickyButton?.setAttribute('tabindex', '-1');
-
-        const showSticky = () => {
-          stickyCta.setAttribute('aria-hidden', 'false');
-          stickyButton?.removeAttribute('tabindex');
-          gsap.to(stickyCta, {
-            autoAlpha: 1,
-            y: 0,
-            duration: reducedMotion ? 0 : 0.45,
-            ease: 'power3.out',
-            overwrite: 'auto',
-            onStart: () => {
-              stickyCta.style.pointerEvents = 'auto';
-            },
-          });
-        };
-
-        const hideSticky = () => {
-          gsap.to(stickyCta, {
-            autoAlpha: 0,
-            y: reducedMotion ? 0 : 40,
-            duration: reducedMotion ? 0 : 0.3,
-            ease: 'power2.in',
-            overwrite: 'auto',
-            onComplete: () => {
-              stickyCta.style.pointerEvents = 'none';
-              stickyCta.setAttribute('aria-hidden', 'true');
-              stickyButton?.setAttribute('tabindex', '-1');
-            },
-          });
-        };
-
-        ScrollTrigger.create({
-          trigger: stickyAnchor,
-          start: 'bottom top+=72',
-          endTrigger: stickyEnd ?? undefined,
-          end: stickyEnd ? 'top 85%' : 'max',
-          onEnter: showSticky,
-          onLeave: hideSticky,
-          onEnterBack: showSticky,
-          onLeaveBack: hideSticky,
-        });
-      }
-    }, page);
-
-    requestAnimationFrame(() => ScrollTrigger.refresh());
+      cleanup = () => {
+        media.revert();
+        context.revert();
+      };
+    })();
 
     return () => {
-      media.revert();
-      context.revert();
+      cancelled = true;
+      cleanup?.();
     };
   }, []);
 
@@ -693,6 +689,7 @@ export const LandingPage: React.FC = () => {
             <div className="relative z-20 max-w-3xl">
               <p
                 data-hero-badge
+                style={{ transform: 'translateY(16px)' }}
                 className="mb-5 text-2xs font-medium uppercase tracking-[0.28em] text-emerald-400/90 sm:mb-6"
               >
                 Fila · agenda · financeiro
@@ -721,6 +718,7 @@ export const LandingPage: React.FC = () => {
 
               <p
                 data-hero-copy
+                style={{ transform: 'translateY(22px)' }}
                 className="mt-6 max-w-2xl text-base font-light leading-relaxed text-neutral-400 sm:mt-7 sm:text-lg xl:text-xl"
               >
                 Fila pública com estimativa de espera, agendamento online e financeiro no mesmo
@@ -729,6 +727,7 @@ export const LandingPage: React.FC = () => {
 
               <div
                 data-hero-action
+                style={{ transform: 'translateY(18px)' }}
                 className="mt-8 flex flex-col gap-5 sm:mt-10 sm:flex-row sm:items-end sm:gap-10"
               >
                 <button
@@ -760,7 +759,11 @@ export const LandingPage: React.FC = () => {
                 </button>
               </div>
 
-              <div data-hero-action className="mt-8 max-w-2xl border-t border-white/10 pt-5 sm:mt-10 sm:pt-6">
+              <div
+                data-hero-action
+                style={{ transform: 'translateY(18px)' }}
+                className="mt-8 max-w-2xl border-t border-white/10 pt-5 sm:mt-10 sm:pt-6"
+              >
                 <div className="grid gap-5 sm:grid-cols-3 sm:gap-0">
                   {[
                     {
