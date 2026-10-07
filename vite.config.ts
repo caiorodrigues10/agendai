@@ -42,12 +42,9 @@ export default defineConfig(() => {
 			...(process.env.STORYBOOK ? [] : [VitePWA({
 				registerType: 'prompt',
 				injectRegister: null,
-				includeAssets: [
-					'favicon.png',
-					'brand/*.webp',
-					'icons/*.png',
-					'fonts/*.woff2',
-				],
+				// Arquivos do `public/` entram pela `globPatterns` do workbox abaixo
+				// (manifest e demais assets são adicionados pelo próprio plugin).
+				includeAssets: undefined,
 				manifest: {
 					id: '/',
 					name: `${BRAND_NAME} — Gestão para salões, barbearias e studios`,
@@ -125,10 +122,54 @@ export default defineConfig(() => {
 					skipWaiting: false,
 					navigateFallback: '/index.html',
 					navigateFallbackDenylist: [/^\/api\//, /^\/robots\.txt$/, /^\/sitemap\.xml$/],
+					// Shell + fechamento estático de TODAS as rotas públicas (/, /planos,
+					// /login, /cadastro, /queue, marketing e conteúdos públicos) — o
+					// pre-cache é o que garante que essas telas abram offline na
+					// primeira visita. O restante (painel autenticado, etc.) entra no
+					// cache de runtime após a primeira visita. Mantenha a lista em dia
+					// com `npm run build && node scripts/precache-report.mjs --limit=3185427`
+					// e com o e2e `e2e/pwa-offline.spec.ts`.
+					globPatterns: [
+						'index.html',
+						'favicon.png',
+						'brand/*.webp',
+						'fonts/dm-sans-normal-latin.woff2',
+						'fonts/dm-sans-italic-latin.woff2',
+						'fonts/syne-normal-latin.woff2',
+						'weather/*.jpg',
+						'assets/index-*.{js,css}',
+						'assets/ScrollTrigger-*.js',
+						'assets/{LandingPage,MarketingLayout,PlansPage,LoginPage,PublicHome,ShopProfile,SmartSelect,Combination,PostDetail,schemas,utils,Toast,ModalShell,ConfirmDialog,StatusBadge,PasswordInput,clientPortalApi,documentUtils,notificationsApi,reputationApi,publicProductsApi,plansApi,recaptcha,reducedMotion,softwareApplicationLd,subscriptionPaywall,trialCampaign,weatherVisuals,formatters,brand,Avatar,Button,Card,chart}-*.js',
+						// Páginas públicas carregadas por lazy(): sem elas no precache a
+						// rota cai no ErrorBoundary offline (evidência do P1).
+						'assets/{FeaturesPage,AiPredictivePage,SchedulingPage,AboutPage,ContactPage,PrivacyPolicyPage,TermsPage,ForgotPasswordPage,NotFoundPage,CommercialIntentPage,PricingPersuasionCharts,BarChart,ThemeToggle}-*.js',
+						'assets/ShopProfile-*.css',
+					],
 					runtimeCaching: [
 						{
 							urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
 							handler: 'NetworkOnly',
+						},
+						{
+							// Chunks fora do precache (painel, gráficos do /planos etc.)
+							// ficam disponíveis offline depois da primeira visita.
+							urlPattern: ({ url }) => url.pathname.startsWith('/assets/'),
+							handler: 'StaleWhileRevalidate',
+							options: {
+								cacheName: 'agendai-runtime-assets',
+								cacheableResponse: { statuses: [0, 200] },
+								expiration: { maxEntries: 160, maxAgeSeconds: 60 * 60 * 24 * 30 },
+							},
+						},
+						{
+							// Fontes fora do precache (latín-ext, grego) caem aqui.
+							urlPattern: ({ url }) => url.pathname.startsWith('/fonts/'),
+							handler: 'StaleWhileRevalidate',
+							options: {
+								cacheName: 'agendai-runtime-fonts',
+								cacheableResponse: { statuses: [0, 200] },
+								expiration: { maxEntries: 16, maxAgeSeconds: 60 * 60 * 24 * 365 },
+							},
 						},
 						{
 							urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
