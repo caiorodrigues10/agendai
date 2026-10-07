@@ -155,7 +155,7 @@ export const PublicOwnerInvitePage: React.FC = () => {
             <Logo size="md" />
             <KeyRound size={32} className="text-danger mx-auto" />
           </div>
-          <h2 className="text-lg font-bold text-text-primary mb-2">Link inválido</h2>
+          <h1 className="text-lg font-bold text-text-primary mb-2">Link inválido</h1>
           <p className="text-sm text-text-muted leading-relaxed mb-6">
             Este link de convite é inválido. Peça ao administrador para reenviar o convite.
           </p>
@@ -190,7 +190,7 @@ export const PublicOwnerInvitePage: React.FC = () => {
           <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
             <CheckCircle size={24} className="text-success" />
           </div>
-          <h2 className="text-lg font-bold text-text-primary mb-2">Senha definida com sucesso!</h2>
+          <h1 className="text-lg font-bold text-text-primary mb-2">Senha definida com sucesso!</h1>
           <p className="text-sm text-text-muted leading-relaxed mb-6">
             Agora você já pode entrar no painel com seu e-mail e a nova senha.
           </p>
@@ -223,9 +223,9 @@ export const PublicOwnerInvitePage: React.FC = () => {
             </button>
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg border border-border">
               <KeyRound size={10} className="text-text-muted" />
-              <span className="text-2xs font-bold text-text-muted uppercase tracking-widest">
+              <h1 className="text-2xs font-bold text-text-muted uppercase tracking-widest">
                 Aceitar convite
-              </span>
+              </h1>
             </div>
           </div>
 

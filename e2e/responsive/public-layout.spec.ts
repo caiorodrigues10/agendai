@@ -291,6 +291,15 @@ test.describe('Layout público responsivo (auditoria R1–R12)', () => {
     expect(describeFailures(failures)).toBe('');
   });
 
+  test('R5 — toda rota pública tem exatamente um <h1> no DOM', async ({ page }) => {
+    const data = await collect(page);
+    const failures = data
+      .filter((s) => s.ok && s.metrics && s.metrics.h1.length !== 1)
+      .map((s) => ({ route: s.route, width: s.width, items: s.metrics!.h1 }));
+
+    expect(describeFailures(failures)).toBe('');
+  });
+
   test('R3 — CLS de /planos fica em 0,1 ou menos com a API fora', async ({ page }) => {
     const cls = await measurePlanosCls(page, 'off');
     expect(cls).toBeLessThanOrEqual(CLS_MAX);
