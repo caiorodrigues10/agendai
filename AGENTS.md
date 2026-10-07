@@ -88,6 +88,8 @@ npx playwright test e2e/master --project=desktop-chromium
 - `E2E_MASTER_*` = usuário criado pelo seed (`SEED_MASTER_ADMIN_EMAIL`/`SEED_MASTER_ADMIN_PASSWORD`).
 - `E2E_OWNER_*` (opcional) = OWNER de teste para `acesso-negado.spec.ts`; sem ele, o spec é pulado.
 - Sem essas envs, `playwright.config.ts` ignora `e2e/master/` (CI e `npm run test:e2e` seguem verdes); specs rodam só no projeto `desktop-chromium`.
+- Backend local: `LOGIN_RATE_LIMIT_MAX` (ex.: `60`) no `.env` do backend. O access token vive só em memória, então **cada load renova a sessão** e a suíte inteira faz ~40 chamadas de auth por minuto (o limite padrão é 10; em produção a env é ignorada).
+- Sessão reaproveitada entre specs: `e2e/master/helpers.ts` grava cookie HTTP-only + `localStorage` em cache temporário **ao fim de cada teste** (fixture automática) e valida o cache contra o backend antes de reusá-lo; cache inválido cai para login normal.
 
 ---
 

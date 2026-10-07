@@ -69,23 +69,25 @@ vi.mock('../infra/subscriptionsApi', () => ({
   subscriptionsApi: { me: subscriptionsMeMock },
 }));
 
+function resetLoginPageMocks() {
+  authState = { user: null, loading: false };
+  hasStoredSessionMock = false;
+  savedAccountsMock = [];
+  loginMock.mockReset();
+  registerMock.mockReset();
+  registerWithGoogleMock.mockReset();
+  loginWithGoogleMock.mockReset();
+  loginWithSavedAccountMock.mockReset();
+  forgetSavedAccountMock.mockReset();
+  navigateMock.mockReset();
+  subscriptionsMeMock.mockReset();
+  subscriptionsMeMock.mockRejectedValue(new Error('offline'));
+  resendVerificationMock.mockReset();
+  resendVerificationMock.mockResolvedValue({ success: true, message: 'ok' });
+}
+
 describe('LoginPage (usabilidade)', () => {
-  beforeEach(() => {
-    authState = { user: null, loading: false };
-    hasStoredSessionMock = false;
-    savedAccountsMock = [];
-    loginMock.mockReset();
-    registerMock.mockReset();
-    registerWithGoogleMock.mockReset();
-    loginWithGoogleMock.mockReset();
-    loginWithSavedAccountMock.mockReset();
-    forgetSavedAccountMock.mockReset();
-    navigateMock.mockReset();
-    subscriptionsMeMock.mockReset();
-    subscriptionsMeMock.mockRejectedValue(new Error('offline'));
-    resendVerificationMock.mockReset();
-    resendVerificationMock.mockResolvedValue({ success: true, message: 'ok' });
-  });
+  beforeEach(resetLoginPageMocks);
 
   it('renderiza formulário de login com e-mail e senha', () => {
     renderWithProviders(<LoginPage />, { route: '/login' });
@@ -287,5 +289,45 @@ describe('LoginPage (segurança do deep link)', () => {
       expect(navigateMock).toHaveBeenCalled();
     });
     expect(navigateMock).not.toHaveBeenCalledWith('/\\evil.com', { replace: true });
+  });
+});
+
+describe('LoginPage (sessão persistente)', () => {
+  beforeEach(resetLoginPageMocks);
+
+  it('"manter conectado" ligado por padrão e controla a persistência enviada ao login', async () => {
+    loginMock.mockResolvedValue({ ok: true });
+    renderWithProviders(<LoginPage />, { route: '/login' });
+
+    fireEvent.change(screen.getByPlaceholderText(/seu@email\.com/i), {
+      target: { value: 'caio@example.com' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: 'senhaForte123' } });
+
+    expect(screen.getByLabelText(/manter conectado/i)).toBeChecked();
+
+    fireEvent.click(screen.getAllByRole('button', { name: /entrar/i })[0]);
+    await waitFor(() => expect(loginMock).toHaveBeenCalledTimes(1));
+    expect(loginMock.mock.calls[0][3]).toBe(true);
+
+    fireEvent.click(screen.getByLabelText(/manter conectado/i));
+    expect(screen.getByLabelText(/manter conectado/i)).not.toBeChecked();
+
+    fireEvent.click(screen.getAllByRole('button', { name: /entrar/i })[0]);
+    await waitFor(() => expect(loginMock).toHaveBeenCalledTimes(2));
+    expect(loginMock.mock.calls[1][3]).toBe(false);
+  });
+
+  it('clique na conta salva troca de sessão sem pedir senha', async () => {
+    savedAccountsMock = [{ id: 'user-9', name: 'Caio', email: 'caio@example.com' }];
+    loginWithSavedAccountMock.mockResolvedValue({ ok: true });
+
+    renderWithProviders(<LoginPage />, { route: '/login' });
+
+    await waitFor(() => expect(screen.getByText(/contas salvas/i)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /caio@example\.com/i }));
+
+    await waitFor(() => expect(loginWithSavedAccountMock).toHaveBeenCalledWith('user-9'));
+    expect(loginMock).not.toHaveBeenCalled();
   });
 });

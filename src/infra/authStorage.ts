@@ -10,6 +10,21 @@ const SAVED_ACCOUNTS_KEY = 'barber_saved_accounts';
 const SWITCH_ORIGIN_KEY = 'barber_switch_origin';
 let revision = 0;
 
+/**
+ * Access token vive só em memória (S5): localStorage/sessionStorage nunca
+ * recebem tokens. O refresh token é cookie HTTP-only do backend (`refresh_token`,
+ * path /api/auth) — invisível para o JS.
+ */
+let accessTokenInMemory: string | null = null;
+
+/** Migração: remove as chaves de token gravadas por versões antigas. */
+function purgeLegacyTokenKeys() {
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  sessionStorage.removeItem(ACCESS_TOKEN_SESSION_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+  sessionStorage.removeItem(REFRESH_TOKEN_SESSION_KEY);
+}
+
 export interface SavedAccount {
   id: string;
   name: string;
@@ -26,12 +41,13 @@ export interface SwitchOrigin {
 function getRememberMe(): boolean {
   const preference = localStorage.getItem(REMEMBER_ME_KEY);
   if (preference !== null) return preference === 'true';
-  return Boolean(localStorage.getItem(USER_KEY) || localStorage.getItem(ACCESS_TOKEN_KEY) || localStorage.getItem(REFRESH_TOKEN_KEY));
+  return Boolean(localStorage.getItem(USER_KEY) || sessionStorage.getItem(USER_SESSION_KEY));
 }
 
 /**
- * Retorna o refresh token do armazenamento.
- * Verifica localStorage primeiro (manter conectado), depois sessionStorage.
+ * Refresh token legado em storage (versões antigas do app). Serve só para a
+ * primeira renovação após o upgrade — o backend rotaciona, grava o cookie e
+ * `setTokens` limpa essas chaves. Depois disso sempre `null`.
  */
 function getRefreshToken(): string | null {
   return localStorage.getItem(REFRESH_TOKEN_KEY) ?? sessionStorage.getItem(REFRESH_TOKEN_SESSION_KEY);
@@ -39,62 +55,50 @@ function getRefreshToken(): string | null {
 
 export const authStorage = {
   getRevision: () => revision,
-  // Durante um impersonation o token em memória tem prioridade sobre o
-  // armazenado (que continua guardando a sessão do master).
+  // Durante um impersonation o token de impersonation tem prioridade sobre o
+  // token da sessão atual (ambos só em memória).
   getAccessToken: () =>
-    impersonationStorage.get()?.accessToken ??
-    localStorage.getItem(ACCESS_TOKEN_KEY) ??
-    sessionStorage.getItem(ACCESS_TOKEN_SESSION_KEY),
+    impersonationStorage.get()?.accessToken ?? accessTokenInMemory,
   getRefreshToken,
   hasStoredSession: () => Boolean(
-    localStorage.getItem(USER_KEY) ??
-      sessionStorage.getItem(USER_SESSION_KEY) ??
-      localStorage.getItem(ACCESS_TOKEN_KEY) ??
-      sessionStorage.getItem(ACCESS_TOKEN_SESSION_KEY) ??
+    accessTokenInMemory ||
+      localStorage.getItem(USER_KEY) ||
+      sessionStorage.getItem(USER_SESSION_KEY) ||
       getRefreshToken()
   ),
   isPersistent: getRememberMe,
   /** Preferência explícita do usuário (independente do storage de tokens). */
   getRememberMe,
   setRememberMe: (value: boolean) => localStorage.setItem(REMEMBER_ME_KEY, String(value)),
-  setAccessToken: (token: string, rememberMe = true) => {
-    if (rememberMe) {
-      localStorage.setItem(ACCESS_TOKEN_KEY, token);
-      sessionStorage.removeItem(ACCESS_TOKEN_SESSION_KEY);
-    } else {
-      sessionStorage.setItem(ACCESS_TOKEN_SESSION_KEY, token);
-      localStorage.removeItem(ACCESS_TOKEN_KEY);
-    }
+  setAccessToken: (token: string, _rememberMe = true) => {
+    accessTokenInMemory = token;
+    // Migração: qualquer token novo vem de resposta autenticada, então as
+    // chaves antigas em storage deixam de ter uso.
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    sessionStorage.removeItem(ACCESS_TOKEN_SESSION_KEY);
   },
   clearAccessToken: () => {
+    accessTokenInMemory = null;
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     sessionStorage.removeItem(ACCESS_TOKEN_SESSION_KEY);
   },
   /**
-   * Armazena os tokens.
-   * @param rememberMe  true → refresh em localStorage (persiste entre sessões).
-   *                    false/undefined → refresh em sessionStorage (apaga ao fechar o browser).
+   * Guarda a sessão: access token em memória; refresh token fica no cookie
+   * HTTP-only definido pelo backend. `refreshToken` é ignorado se vier no
+   * corpo (compatibilidade com versões antigas) e as chaves legadas são
+   * removidas aqui.
    */
-  setTokens: (accessToken: string, refreshToken?: string, rememberMe = true) => {
+  setTokens: (accessToken: string, _refreshToken?: string, rememberMe = true) => {
     if (rememberMe) localStorage.setItem(REMEMBER_ME_KEY, 'true');
     else localStorage.setItem(REMEMBER_ME_KEY, 'false');
     authStorage.setAccessToken(accessToken, rememberMe);
-    if (refreshToken) {
-      if (rememberMe) {
-        localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
-        sessionStorage.removeItem(REFRESH_TOKEN_SESSION_KEY);
-      } else {
-        sessionStorage.setItem(REFRESH_TOKEN_SESSION_KEY, refreshToken);
-        localStorage.removeItem(REFRESH_TOKEN_KEY);
-      }
-    }
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    sessionStorage.removeItem(REFRESH_TOKEN_SESSION_KEY);
   },
   clearTokens: () => {
     revision++;
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    sessionStorage.removeItem(ACCESS_TOKEN_SESSION_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
-    sessionStorage.removeItem(REFRESH_TOKEN_SESSION_KEY);
+    accessTokenInMemory = null;
+    purgeLegacyTokenKeys();
     localStorage.removeItem(REMEMBER_ME_KEY);
   },
   getUser: () => {

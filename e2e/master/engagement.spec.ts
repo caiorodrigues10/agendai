@@ -1,5 +1,5 @@
-import { expect, test } from '@playwright/test';
-import { acceptCookies, loginAsMaster, MASTER_SKIP, masterConfigured } from './helpers';
+import { expect } from '@playwright/test';
+import { acceptCookies, loginAsMaster, MASTER_SKIP, masterConfigured, test } from './helpers';
 
 test.skip(!masterConfigured, MASTER_SKIP);
 
