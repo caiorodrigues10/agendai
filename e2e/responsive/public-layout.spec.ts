@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 
 /**
@@ -311,6 +313,19 @@ test.describe('Layout público responsivo (auditoria R1–R12)', () => {
       }));
 
     expect(describeFailures(failures)).toBe('');
+  });
+
+  test('R7 — nenhum chunk JS de dist ultrapassa 500KB', async () => {
+    const dir = path.resolve('dist/assets');
+    test.skip(!fs.existsSync(dir), 'dist indisponível (preview reutilizado sem build)');
+
+    const big = fs
+      .readdirSync(dir)
+      .filter((f) => f.endsWith('.js'))
+      .map((f) => ({ chunk: f, bytes: fs.statSync(path.join(dir, f)).size }))
+      .filter((f) => f.bytes > 500_000);
+
+    expect(big).toEqual([]);
   });
 
   test('R3 — CLS de /planos fica em 0,1 ou menos com a API fora', async ({ page }) => {
