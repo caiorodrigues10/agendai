@@ -1041,7 +1041,7 @@ export const FeaturesPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/queue')}
-                className="group inline-flex items-center justify-center gap-2 px-2 py-3 text-sm font-bold text-neutral-600 transition hover:text-black sm:justify-start sm:px-3"
+                className="group inline-flex min-h-12 items-center justify-center gap-2 px-2 py-3 text-sm font-bold text-neutral-600 transition hover:text-black sm:justify-start sm:px-3 lg:min-h-0"
               >
                 Ver demonstração
                 <ChevronRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

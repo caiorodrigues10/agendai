@@ -184,7 +184,7 @@ export const ContactPage: React.FC = () => {
               </p>
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
-                className="mt-3 inline-flex items-center gap-2 text-lg font-bold text-white transition hover:text-accent-light"
+                className="mt-3 inline-flex min-h-11 items-center gap-2 text-lg font-bold text-white transition hover:text-accent-light lg:min-h-0"
               >
                 <Mail size={24} className="h-5 w-5 text-accent" />
                 {CONTACT_EMAIL}
@@ -227,7 +227,7 @@ export const ContactPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/planos')}
-                className="group mt-4 inline-flex items-center gap-2 text-sm font-black text-white transition hover:text-accent-light"
+                className="group mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-black text-white transition hover:text-accent-light lg:min-h-0"
               >
                 Ver planos
                 <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-1" />

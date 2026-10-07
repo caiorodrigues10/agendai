@@ -807,7 +807,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
               <button
                 type="button"
                 onClick={handleLogoClick}
-                className="cursor-pointer transition-transform hover:scale-105"
+                className="min-h-11 cursor-pointer transition-transform hover:scale-105 lg:min-h-0"
               >
                 <Logo size="md" />
               </button>

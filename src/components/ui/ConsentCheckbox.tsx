@@ -35,7 +35,7 @@ export const ConsentCheckbox: React.FC<ConsentCheckboxProps> = ({
   return (
     <div className={className}>
       <label
-        className={`flex ${isCompact ? 'items-center' : 'items-start'} ${isCompact ? 'gap-2' : 'gap-3'} cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`flex min-h-11 lg:min-h-0 ${isCompact ? 'items-center' : 'items-start'} ${isCompact ? 'gap-2' : 'gap-3'} cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <div className={`relative flex-shrink-0 ${isCompact ? '' : 'mt-0.5'}`}>
           <input

@@ -133,7 +133,7 @@ export const ResetPasswordPage: React.FC = () => {
         />
         <div className="p-8 flex flex-col items-center">
           <div className="mb-6 flex flex-col items-center gap-4">
-            <button type="button" onClick={() => navigate('/login')} className="cursor-pointer">
+            <button type="button" onClick={() => navigate('/login')} className="min-h-11 cursor-pointer lg:min-h-0">
               <Logo size="md" />
             </button>
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg border border-border">

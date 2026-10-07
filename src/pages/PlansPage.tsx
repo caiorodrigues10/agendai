@@ -251,7 +251,7 @@ export const PlansPage: React.FC = () => {
                   type="button"
                   aria-pressed={!isYearly}
                   onClick={() => setIsYearly(false)}
-                  className={`rounded-full px-5 py-2.5 text-sm font-bold transition ${
+                  className={`flex min-h-11 items-center rounded-full px-5 py-2.5 text-sm font-bold transition lg:min-h-0 ${
                     !isYearly ? 'bg-white text-black' : 'text-neutral-400 hover:text-white'
                   }`}
                 >
@@ -261,7 +261,7 @@ export const PlansPage: React.FC = () => {
                   type="button"
                   aria-pressed={isYearly}
                   onClick={() => setIsYearly(true)}
-                  className={`rounded-full px-5 py-2.5 text-sm font-bold transition ${
+                  className={`flex min-h-11 items-center rounded-full px-5 py-2.5 text-sm font-bold transition lg:min-h-0 ${
                     isYearly ? 'bg-white text-black' : 'text-neutral-400 hover:text-white'
                   }`}
                 >

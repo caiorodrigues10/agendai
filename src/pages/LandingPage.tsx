@@ -751,7 +751,7 @@ export const LandingPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={event => scrollToSection(event, 'produto')}
-                  className="group inline-flex items-center gap-1.5 pb-1 text-sm font-medium text-neutral-500 transition hover:text-neutral-200"
+                  className="group inline-flex min-h-12 items-center gap-1.5 pb-1 text-sm font-medium text-neutral-500 transition hover:text-neutral-200 lg:min-h-0"
                 >
                   Ver o produto
                   <ChevronRight size={24} className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />

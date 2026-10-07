@@ -45,14 +45,14 @@ function FooterColumn({
             {link.to ? (
               <Link
                 to={link.to}
-                className="text-[13px] font-medium leading-snug text-neutral-400 transition-colors hover:text-white"
+                className="-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading-snug text-neutral-400 transition-colors hover:text-white lg:mx-0 lg:inline lg:min-h-0 lg:px-0"
               >
                 {link.label}
               </Link>
             ) : (
               <a
                 href={link.href}
-                className="text-[13px] font-medium leading-snug text-neutral-400 transition-colors hover:text-white"
+                className="-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading-snug text-neutral-400 transition-colors hover:text-white lg:mx-0 lg:inline lg:min-h-0 lg:px-0"
               >
                 {link.label}
               </a>
@@ -78,7 +78,10 @@ export const MarketingFooter: React.FC = () => {
           >
             <ol className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
               <li>
-                <Link to="/" className="transition-colors hover:text-neutral-300">
+                <Link
+                  to="/"
+                  className="-my-[15px] inline-flex min-h-11 items-center transition-colors hover:text-neutral-300 lg:my-0 lg:inline lg:min-h-0"
+                >
                   {BRAND_NAME}
                 </Link>
               </li>
@@ -135,16 +138,28 @@ export const MarketingFooter: React.FC = () => {
             <span className="hidden text-neutral-700 sm:inline" aria-hidden>
               |
             </span>
-            <Link to="/contato" className="transition-colors hover:text-white">
+            <Link
+              to="/contato"
+              className="-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-white lg:mx-0 lg:min-h-0 lg:px-0"
+            >
               Contato
             </Link>
-            <Link to="/privacidade" className="transition-colors hover:text-white">
+            <Link
+              to="/privacidade"
+              className="-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-white lg:mx-0 lg:min-h-0 lg:px-0"
+            >
               Privacidade
             </Link>
-            <Link to="/termos" className="transition-colors hover:text-white">
+            <Link
+              to="/termos"
+              className="-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-white lg:mx-0 lg:min-h-0 lg:px-0"
+            >
               Termos
             </Link>
-            <Link to="/planos" className="transition-colors hover:text-white">
+            <Link
+              to="/planos"
+              className="-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-white lg:mx-0 lg:min-h-0 lg:px-0"
+            >
               Planos
             </Link>
           </div>

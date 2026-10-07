@@ -100,7 +100,7 @@ export const ForgotPasswordPage: React.FC = () => {
         />
         <div className="p-8 flex flex-col items-center">
           <div className="mb-6 flex flex-col items-center gap-4">
-            <button type="button" onClick={() => navigate('/login')} className="cursor-pointer">
+            <button type="button" onClick={() => navigate('/login')} className="min-h-11 cursor-pointer lg:min-h-0">
               <Logo size="md" />
             </button>
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg border border-border">
@@ -163,7 +163,7 @@ export const ForgotPasswordPage: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate('/login')}
-            className="mt-4 text-[11px] text-text-muted hover:text-accent transition-colors"
+            className="mt-4 inline-flex min-h-11 items-center text-[11px] text-text-muted hover:text-accent transition-colors lg:min-h-0"
           >
             Voltar ao login
           </button>
