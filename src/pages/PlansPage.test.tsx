@@ -1,5 +1,5 @@
 /// <reference types="vitest/globals" />
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PlansPage } from './PlansPage';
 import { renderWithProviders } from '../tests/testUtils';
@@ -74,7 +74,12 @@ describe('PlansPage', () => {
   it('mostra teste, essencial e pro com o selo do plano popular', async () => {
     renderWithProviders(<PlansPage />, { route: '/planos' });
     expect(screen.getByTestId('marketing-nav')).toBeInTheDocument();
-    expect(await screen.findByRole('heading', { name: /^essencial$/i })).toBeInTheDocument();
+    // Os `motion.*` remontam os nós a cada commit no jsdom (comportamento pré-existente
+    // do framer-motion no teste; no build de produção não há remontagem). Reler o DOM
+    // na validação evita segurar um nó já destacado quando o loading dos planos vira.
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: /^essencial$/i })).toBeInTheDocument()
+    );
     expect(document.querySelector('h1')?.textContent).toMatch(/teste grátis ou escolha o plano/i);
     expect(screen.getByRole('heading', { name: /^teste grátis$/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /^pro$/i })).toBeInTheDocument();
@@ -104,14 +109,14 @@ describe('PlansPage', () => {
 
   it('marca no essencial o que o plano não inclui', async () => {
     renderWithProviders(<PlansPage />, { route: '/planos' });
-    const essential = (await screen.findByRole('heading', { name: /^essencial$/i })).closest(
-      'article'
-    );
-    expect(essential).not.toBeNull();
-    expect(
-      within(essential as HTMLElement).getByRole('listitem', {
-        name: /não inclui dashboard e relatórios/i,
-      })
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      const essential = screen.getByRole('heading', { name: /^essencial$/i }).closest('article');
+      expect(essential).not.toBeNull();
+      expect(
+        within(essential as HTMLElement).getByRole('listitem', {
+          name: /não inclui dashboard e relatórios/i,
+        })
+      ).toBeInTheDocument();
+    });
   });
 });

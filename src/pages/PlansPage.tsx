@@ -6,7 +6,6 @@ import {
   LuArrowRight as ArrowRight,
   LuCheck as Check,
   LuCircleCheck as CheckCircle2,
-  LuLoaderCircle as Loader2,
   LuX as X,
 } from 'react-icons/lu';
 import { plansApi, Plan } from '../infra/plansApi';
@@ -279,12 +278,12 @@ export const PlansPage: React.FC = () => {
               </div>
             )}
 
-            {loading ? (
-              <div className="flex justify-center py-20 text-accent">
-                <Loader2 className="animate-spin" size={36} />
-              </div>
-            ) : (
-              <div className="mt-10 grid grid-cols-1 items-stretch gap-5 lg:grid-cols-3 lg:items-end lg:gap-4 lg:py-4">
+            {/* Cards sempre montados: esconder atrás de spinner trocava ~200px por
+                ~2000px e era a maior fonte de CLS da página (auditoria R3). */}
+            <div
+              className="mt-10 grid grid-cols-1 items-stretch gap-5 lg:grid-cols-3 lg:items-end lg:gap-4 lg:py-4"
+              aria-busy={loading}
+            >
                 <motion.article
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -454,7 +453,6 @@ export const PlansPage: React.FC = () => {
                   <FeatureList rows={proRows} accent />
                 </motion.article>
               </div>
-            )}
 
             <p className="mx-auto mt-8 max-w-3xl text-center text-xs leading-relaxed text-neutral-500">
               O teste de 30 dias de Pro começa no cadastro, sem cartão. A cobrança só é criada

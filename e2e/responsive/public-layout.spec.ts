@@ -193,6 +193,67 @@ async function collect(page: Page): Promise<Snapshot[]> {
   return results;
 }
 
+/**
+ * R3 — CLS de /planos medido como no `measure:responsive`: mesma rede 4G lenta,
+ * mesmo throttling de CPU 4x e mesma soma de `layout-shift` sem input recente.
+ * Sem throttle o spinner trocava de lugar antes da primeira pintura e o teste
+ * passaria mesmo com a regressão no lugar.
+ */
+const CLS_MAX = 0.1;
+const SLOW_4G = {
+  latency: 150,
+  downloadThroughput: (1.6 * 1024 * 1024) / 8,
+  uploadThroughput: (0.75 * 1024 * 1024) / 8,
+};
+
+async function measurePlanosCls(page: Page, api: 'off' | 'real'): Promise<number> {
+  await page.setViewportSize({ width: 375, height: 812 });
+  if (api === 'off') {
+    await page.route('**/api/**', (route) => route.abort());
+  }
+  await page.addInitScript(() => {
+    const w = window as unknown as { __cls?: number[] };
+    w.__cls = [];
+    try {
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          const shift = entry as PerformanceEntry & { hadRecentInput?: boolean; value?: number };
+          if (shift.hadRecentInput) continue;
+          w.__cls?.push(Number((shift.value ?? 0).toFixed(4)));
+        }
+      }).observe({ type: 'layout-shift', buffered: true });
+    } catch {
+      /* navegador sem layout-shift */
+    }
+  });
+
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Network.enable');
+  await cdp.send('Network.emulateNetworkConditions', { offline: false, ...SLOW_4G });
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+
+  await page.goto('/planos', { waitUntil: 'load', timeout: 45_000 });
+  await page.waitForTimeout(4000);
+
+  const cls = await page.evaluate(() => {
+    const w = window as unknown as { __cls?: number[] };
+    return (w.__cls ?? []).reduce((sum, value) => sum + value, 0);
+  });
+
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 });
+  await cdp.send('Network.emulateNetworkConditions', {
+    offline: false,
+    latency: 0,
+    downloadThroughput: -1,
+    uploadThroughput: -1,
+  });
+  await cdp.detach();
+  if (api === 'off') {
+    await page.unroute('**/api/**');
+  }
+  return cls;
+}
+
 function describeFailures<T>(items: Array<{ route: string; width: number; items: T[] }>): string {
   return items
     .map((group) => `${group.route}@${group.width}: ${JSON.stringify(group.items)}`)
@@ -228,5 +289,21 @@ test.describe('Layout público responsivo (auditoria R1–R12)', () => {
       }));
 
     expect(describeFailures(failures)).toBe('');
+  });
+
+  test('R3 — CLS de /planos fica em 0,1 ou menos com a API fora', async ({ page }) => {
+    const cls = await measurePlanosCls(page, 'off');
+    expect(cls).toBeLessThanOrEqual(CLS_MAX);
+  });
+
+  test('R3 — CLS de /planos fica em 0,1 ou menos com a API real', async ({ page }) => {
+    const probe = await page.request.get('/api/plans').catch(() => null);
+    const realApi =
+      Boolean(probe && probe.ok()) &&
+      String(probe?.headers()['content-type'] || '').includes('json');
+    test.skip(!realApi, 'API real indisponível nesta base (preview sem proxy de /api)');
+
+    const cls = await measurePlanosCls(page, 'real');
+    expect(cls).toBeLessThanOrEqual(CLS_MAX);
   });
 });
