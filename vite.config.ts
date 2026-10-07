@@ -22,6 +22,20 @@ export default defineConfig(() => {
 				'2669-201-33-79-229.ngrok-free.app',
 			],
 		},
+		// `vite preview` serve o build. Só o script de medição (e quem quiser)
+		// liga o proxy de /api — sem isso o preview responde 404 em /api e o
+		// e2e que roda sem backend não muda de comportamento.
+		preview: process.env.MEASURE_API_PROXY
+			? {
+					port: Number(process.env.MEASURE_PORT || 4173),
+					proxy: {
+						'/api': {
+							target: 'http://127.0.0.1:3333',
+							ws: true,
+						},
+					},
+				}
+			: undefined,
 		plugins: [
 			react(),
 			// No Storybook (env STORYBOOK) o app não é servido como PWA.
