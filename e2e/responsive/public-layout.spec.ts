@@ -328,6 +328,42 @@ test.describe('Layout público responsivo (auditoria R1–R12)', () => {
     expect(big).toEqual([]);
   });
 
+  test('R8 — DM Sans e Syne vêm do próprio domínio (sem Google Fonts)', async ({ page }) => {
+    const externas: string[] = [];
+    const locais: string[] = [];
+    page.on('request', req => {
+      const url = req.url();
+      if (url.includes('fonts.googleapis.com') || url.includes('fonts.gstatic.com')) {
+        externas.push(url);
+      }
+      if (/\/fonts\/[^/]+\.woff2$/.test(new URL(url).pathname)) locais.push(url);
+    });
+
+    await page.goto('/', { waitUntil: 'load' });
+    await page.waitForSelector('h1');
+    // Syne só é usado no painel autenticado, então em `/` ele não entra sozinho:
+    // carrega explicitamente para provar que o arquivo local resolve.
+    const fontes = await page.evaluate(async () => {
+      await document.fonts.ready;
+      await document.fonts.load('16px "DM Sans"');
+      await document.fonts.load('16px "Syne"');
+      return {
+        dmSans: document.fonts.check('16px "DM Sans"'),
+        syne: document.fonts.check('16px "Syne"'),
+      };
+    });
+
+    expect(externas).toEqual([]);
+    expect(locais.length).toBeGreaterThan(0);
+    expect(
+      await page.evaluate(() =>
+        Array.from(document.querySelectorAll('link[href*="fonts.googleapis.com"]')).length,
+      ),
+    ).toBe(0);
+    expect(fontes.dmSans).toBe(true);
+    expect(fontes.syne).toBe(true);
+  });
+
   test('R3 — CLS de /planos fica em 0,1 ou menos com a API fora', async ({ page }) => {
     const cls = await measurePlanosCls(page, 'off');
     expect(cls).toBeLessThanOrEqual(CLS_MAX);

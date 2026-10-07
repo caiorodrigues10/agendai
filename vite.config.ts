@@ -46,6 +46,7 @@ export default defineConfig(() => {
 					'favicon.png',
 					'brand/*.webp',
 					'icons/*.png',
+					'fonts/*.woff2',
 				],
 				manifest: {
 					id: '/',
