@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { MotionConfig } from 'framer-motion';
 import { PrivateRoute } from '../components/infra/PrivateRoute';
 import { TabGuard } from '../components/infra/TabGuard';
 import { AccessBlockedListener } from '../components/infra/AccessBlockedListener';
@@ -59,7 +60,7 @@ const CommercialIntentPage = lazy(() => import('../pages/marketing/CommercialInt
 
 const App: React.FC = () => {
   return (
-    <>
+    <MotionConfig reducedMotion="user">
       <ScrollToTop />
       <ReferralRefCapture />
       <AccessBlockedListener />
@@ -159,7 +160,7 @@ const App: React.FC = () => {
         </Routes>
       </Suspense>
       </ErrorBoundary>
-    </>
+    </MotionConfig>
   );
 };
 

@@ -23,6 +23,7 @@ import { trialCampaign } from '../marketing/trialCampaign';
 import { softwareApplicationLd } from '../marketing/softwareApplicationLd';
 import { getWeatherVisual } from '../utils/weatherVisuals';
 import { registerScrollTrigger } from '../components/infra/scrollTriggerRuntime';
+import { prefersReducedMotion } from '../utils/reducedMotion';
 
 gsap.registerPlugin(ScrollTrigger);
 registerScrollTrigger(ScrollTrigger);
@@ -593,7 +594,8 @@ export const LandingPage: React.FC = () => {
 
       if (stickyCta && stickyAnchor) {
         const stickyButton = stickyCta.querySelector<HTMLButtonElement>('button');
-        gsap.set(stickyCta, { autoAlpha: 0, y: 56, pointerEvents: 'none' });
+        const reducedMotion = prefersReducedMotion();
+        gsap.set(stickyCta, { autoAlpha: 0, y: reducedMotion ? 0 : 56, pointerEvents: 'none' });
         stickyCta.setAttribute('aria-hidden', 'true');
         stickyButton?.setAttribute('tabindex', '-1');
 
@@ -603,7 +605,7 @@ export const LandingPage: React.FC = () => {
           gsap.to(stickyCta, {
             autoAlpha: 1,
             y: 0,
-            duration: 0.45,
+            duration: reducedMotion ? 0 : 0.45,
             ease: 'power3.out',
             overwrite: 'auto',
             onStart: () => {
@@ -615,8 +617,8 @@ export const LandingPage: React.FC = () => {
         const hideSticky = () => {
           gsap.to(stickyCta, {
             autoAlpha: 0,
-            y: 40,
-            duration: 0.3,
+            y: reducedMotion ? 0 : 40,
+            duration: reducedMotion ? 0 : 0.3,
             ease: 'power2.in',
             overwrite: 'auto',
             onComplete: () => {

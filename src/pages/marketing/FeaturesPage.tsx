@@ -29,6 +29,7 @@ import { MarketingLayout } from '../../layouts/marketing/MarketingLayout';
 import { trialCampaign } from '../../marketing/trialCampaign';
 import { softwareApplicationLd } from '../../marketing/softwareApplicationLd';
 import { registerScrollTrigger } from '../../components/infra/scrollTriggerRuntime';
+import { prefersReducedMotion } from '../../utils/reducedMotion';
 
 gsap.registerPlugin(ScrollTrigger);
 registerScrollTrigger(ScrollTrigger);
@@ -45,6 +46,10 @@ const PainSolution = ({
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!ref.current) return;
+    if (prefersReducedMotion()) {
+      gsap.set(ref.current, { opacity: 1 });
+      return;
+    }
     gsap.fromTo(
       ref.current,
       { opacity: 0, x: -30 },
@@ -162,6 +167,7 @@ const DashboardMini = () => {
 
   useEffect(() => {
     if (!chartRef.current) return;
+    if (prefersReducedMotion()) return;
     const barEls = chartRef.current.querySelectorAll('.chart-bar');
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -239,6 +245,10 @@ export const FeaturesPage: React.FC = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      if (prefersReducedMotion()) {
+        gsap.set('.opacity-0', { opacity: 1 });
+        return;
+      }
       // Hero entrance
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
       tl.fromTo('.hero-badge', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 })

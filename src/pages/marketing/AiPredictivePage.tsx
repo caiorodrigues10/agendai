@@ -25,6 +25,7 @@ import {
 import { MarketingLayout } from '../../layouts/marketing/MarketingLayout';
 import { softwareApplicationLd } from '../../marketing/softwareApplicationLd';
 import { registerScrollTrigger } from '../../components/infra/scrollTriggerRuntime';
+import { prefersReducedMotion } from '../../utils/reducedMotion';
 
 gsap.registerPlugin(ScrollTrigger);
 registerScrollTrigger(ScrollTrigger);
@@ -244,6 +245,10 @@ export const AiPredictivePage: React.FC = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      if (prefersReducedMotion()) {
+        gsap.set('.opacity-0', { opacity: 1 });
+        return;
+      }
       // Hero entrance
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
       tl.fromTo(
