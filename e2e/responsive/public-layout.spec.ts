@@ -364,6 +364,15 @@ test.describe('Layout público responsivo (auditoria R1–R12)', () => {
     expect(fontes.syne).toBe(true);
   });
 
+  test('R9 — nenhuma rota pública apresenta estouro horizontal', async ({ page }) => {
+    const data = await collect(page);
+    const failures = data
+      .filter((s) => s.ok && s.metrics && s.metrics.overflowPx > 0)
+      .map((s) => ({ route: s.route, width: s.width, items: [`${s.metrics!.overflowPx}px`] }));
+
+    expect(describeFailures(failures)).toBe('');
+  });
+
   test('R3 — CLS de /planos fica em 0,1 ou menos com a API fora', async ({ page }) => {
     const cls = await measurePlanosCls(page, 'off');
     expect(cls).toBeLessThanOrEqual(CLS_MAX);
