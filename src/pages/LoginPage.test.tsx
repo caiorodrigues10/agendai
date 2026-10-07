@@ -163,6 +163,28 @@ describe('LoginPage (usabilidade)', () => {
     expect(navigateMock).not.toHaveBeenCalledWith('/master/tickets', { replace: true });
   });
 
+  it('recusa deep link externo construído com barra invertida (open redirect)', async () => {
+    authState = {
+      loading: false,
+      user: {
+        id: 'owner-1',
+        name: 'Caio',
+        email: 'caio@example.com',
+        role: 'OWNER',
+      } as StaffMember,
+    };
+
+    renderWithProviders(<LoginPage />, {
+      route: '/login',
+      entryState: { from: { pathname: '/\\evil.com' } },
+    });
+
+    await waitFor(() => {
+      expect(navigateMock).toHaveBeenCalled();
+    });
+    expect(navigateMock).not.toHaveBeenCalledWith('/\\evil.com', { replace: true });
+  });
+
   it('aguarda restauracao antes de mostrar contas salvas', () => {
     authState = { user: null, loading: true };
     savedAccountsMock = [{ id: 'user-1', name: 'Caio', email: 'caio@example.com' }];
