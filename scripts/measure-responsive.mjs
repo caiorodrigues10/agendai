@@ -19,11 +19,16 @@
  *   npm run measure:responsive -- --label=x --routes=/,/login --widths=375
  *   npm run measure:responsive -- --label=x --base=http://127.0.0.1:4173 --no-build
  *   npm run measure:responsive -- --label=lcp-antes --lcp --runs=3
+ *   npm run measure:responsive -- --label=x --lcp --lcp-widths=375,1440 --routes=/login
+ *   npm run measure:responsive -- --label=x --screens --shots=/,/login --shot-widths=375,768
  *
  * Performance: cada rota é medida `--runs` vezes (padrão 5) com throttling
  * idêntico e o valor reportado é a MEDIANA entre as execuções (nunca a
  * melhor). `--lcp` roda o diagnóstico de LCP (elemento, divisão do tempo,
- * caminho crítico, dependência de JS) nas rotas-chave.
+ * caminho crítico, dependência de JS) nas rotas-chave, em `--lcp-widths`
+ * (padrão 375). O passe desktop (1440) cobre as rotas-chave E qualquer
+ * rota `/queue...` passada em `--routes` (fila pública medida nos dois
+ * viewports). `--shots`/`--shot-widths` sobrescrevem as capturas padrão.
  */
 import { chromium } from 'playwright';
 import { spawn, spawnSync } from 'node:child_process';
@@ -84,6 +89,9 @@ function parseArgs(argv) {
     port: PREVIEW_PORT,
     routes: PUBLIC_ROUTES,
     widths: WIDTHS,
+    lcpWidths: [375],
+    shots: SHOT_ROUTES,
+    shotWidths: SHOT_WIDTHS,
   };
   for (const raw of argv) {
     if (raw === '--layout') args.layout = true;
@@ -98,6 +106,9 @@ function parseArgs(argv) {
     else if (raw.startsWith('--port=')) args.port = Number(raw.slice(7));
     else if (raw.startsWith('--routes=')) args.routes = raw.slice(9).split(',');
     else if (raw.startsWith('--widths=')) args.widths = raw.slice(9).split(',').map(Number);
+    else if (raw.startsWith('--lcp-widths=')) args.lcpWidths = raw.slice(13).split(',').map(Number);
+    else if (raw.startsWith('--shots=')) args.shots = raw.slice(8).split(',');
+    else if (raw.startsWith('--shot-widths=')) args.shotWidths = raw.slice(14).split(',').map(Number);
     else {
       console.error(`argumento desconhecido: ${raw}`);
       process.exit(2);
@@ -565,20 +576,22 @@ async function perfPass(browser, { base, routes, apiMode, out, suffix, runs }) {
       results.push(await runGroup({ width: 375, height: 667, mobile: true, route, scenario }));
     }
   }
-  // desktop 1440 só nas rotas-chave (mesma rede, sem throttling de CPU extra)
+  // desktop 1440 nas rotas-chave + rotas /queue (fila pública é medida nos
+  // dois viewports — item B da rodada LCP)
+  const desktopRoutes = [...new Set([...KEY_ROUTES, ...routes.filter((r) => r.startsWith('/queue'))])];
   for (const scenario of scenarios) {
-    for (const route of KEY_ROUTES) {
+    for (const route of desktopRoutes) {
       results.push(await runGroup({ width: 1440, height: 900, mobile: false, route, scenario }));
     }
   }
   out[`perf${suffix}`] = results;
 }
 
-async function screensPass(browser, { base, dir }) {
+async function screensPass(browser, { base, dir, shots, shotWidths }) {
   const outDir = path.join(dir, 'screenshots');
   fs.mkdirSync(outDir, { recursive: true });
-  for (const width of SHOT_WIDTHS) {
-    for (const route of SHOT_ROUTES) {
+  for (const width of shotWidths) {
+    for (const route of shots) {
       const context = await newContext(browser, { width, height: width < 500 ? 812 : 1024, mobile: width < 500 });
       const page = await context.newPage();
       try {
@@ -696,41 +709,44 @@ function analyzeLcpRun(run, route) {
   };
 }
 
-async function lcpPass(browser, { base, routes, apiMode, runs, out }) {
+async function lcpPass(browser, { base, routes, apiMode, runs, widths, out }) {
   const results = [];
   const scenarios = [];
   if (apiMode === 'off' || apiMode === 'both') scenarios.push('off');
   if (apiMode === 'real' || apiMode === 'both') scenarios.push('real');
 
   for (const scenario of scenarios) {
-    for (const route of routes) {
-      const execucoes = [];
-      for (let i = 0; i < runs; i++) {
-        const context = await newContext(browser, { width: 375, height: 667, mobile: true, api: scenario, init: INIT_LCP });
-        const page = await context.newPage();
-        const cdp = await context.newCDPSession(page);
-        try {
-          await cdp.send('Network.enable');
-          await cdp.send('Network.emulateNetworkConditions', { offline: false, ...SLOW_4G });
-          await cdp.send('Emulation.setCPUThrottlingRate', { rate: CPU_RATE });
-          await page.goto(`${base}${route}`, { waitUntil: 'load', timeout: 90_000 });
-          await page.waitForTimeout(5000); // animações/lazy assentam; LCP final
-          const raw = await page.evaluate(() => window.__lcp);
-          execucoes.push(analyzeLcpRun(raw, route));
-        } catch (err) {
-          execucoes.push({ route, erro: String(err).slice(0, 200) });
-        } finally {
-          await context.close();
+    for (const width of widths) {
+      const mobile = width <= 768;
+      for (const route of routes) {
+        const execucoes = [];
+        for (let i = 0; i < runs; i++) {
+          const context = await newContext(browser, { width, height: mobile ? 667 : 900, mobile, api: scenario, init: INIT_LCP });
+          const page = await context.newPage();
+          const cdp = await context.newCDPSession(page);
+          try {
+            await cdp.send('Network.enable');
+            await cdp.send('Network.emulateNetworkConditions', { offline: false, ...SLOW_4G });
+            await cdp.send('Emulation.setCPUThrottlingRate', { rate: CPU_RATE });
+            await page.goto(`${base}${route}`, { waitUntil: 'load', timeout: 90_000 });
+            await page.waitForTimeout(5000); // animações/lazy assentam; LCP final
+            const raw = await page.evaluate(() => window.__lcp);
+            execucoes.push(analyzeLcpRun(raw, route));
+          } catch (err) {
+            execucoes.push({ route, erro: String(err).slice(0, 200) });
+          } finally {
+            await context.close();
+          }
+          const atual = execucoes[execucoes.length - 1];
+          console.log(
+            `[lcp ${scenario} ${width}] ${route} exec ${i + 1}/${runs}: ${atual.erro ? `ERRO ${atual.erro}` : `LCP=${atual.lcpMs}ms FCP=${atual.fcp}ms el=<${atual.elemento ? atual.elemento.tag : '?'}> "${(atual.elemento ? atual.elemento.text : '').slice(0, 48)}" criadoEm=${atual.elemento ? atual.elemento.fs : '?'}ms`}`,
+          );
         }
-        const atual = execucoes[execucoes.length - 1];
-        console.log(
-          `[lcp ${scenario} 375] ${route} exec ${i + 1}/${runs}: ${atual.erro ? `ERRO ${atual.erro}` : `LCP=${atual.lcpMs}ms FCP=${atual.fcp}ms el=<${atual.elemento ? atual.elemento.tag : '?'}> "${(atual.elemento ? atual.elemento.text : '').slice(0, 48)}" criadoEm=${atual.elemento ? atual.elemento.fs : '?'}ms`}`,
-        );
+        results.push({ route, width, api: scenario, runs: execucoes });
       }
-      results.push({ route, api: scenario, runs: execucoes });
     }
   }
-  out.lcp = { runsPerRoute: runs, scenarios, routes, execucoes: results };
+  out.lcp = { runsPerRoute: runs, scenarios, routes, widths, execucoes: results };
   return out.lcp;
 }
 
@@ -914,10 +930,10 @@ async function main() {
 
   const browser = await chromium.launch();
   try {
-    if (args.lcp) await lcpPass(browser, { base, routes: lcpRoutes, apiMode, runs: args.runs, out });
+    if (args.lcp) await lcpPass(browser, { base, routes: lcpRoutes, apiMode, runs: args.runs, widths: args.lcpWidths, out });
     if (args.layout) await layoutPass(browser, { base, routes: args.routes, widths: args.widths, out });
     if (args.perf) await perfPass(browser, { base, routes: args.routes, apiMode, out, suffix: '', runs: args.runs });
-    if (args.screens) await screensPass(browser, { base, dir });
+    if (args.screens) await screensPass(browser, { base, dir, shots: args.shots, shotWidths: args.shotWidths });
   } finally {
     await browser.close();
     if (preview) preview.kill('SIGTERM');
@@ -926,16 +942,20 @@ async function main() {
   if (out.layout) out.summary = summarize(out.layout);
   if (out.perf) out.perfSummary = summarizePerf(out.perf);
 
-  fs.writeFileSync(path.join(dir, 'metrics.json'), JSON.stringify(out, null, 2));
-  fs.writeFileSync(path.join(dir, 'summary.md'), renderSummary(out));
+  // só grava metrics/summary se houve passe de métrica (um --screens puro
+  // não sobrescreve o metrics.json de uma corrida anterior do mesmo label)
+  if (out.layout || out.perf || out.lcp) {
+    fs.writeFileSync(path.join(dir, 'metrics.json'), JSON.stringify(out, null, 2));
+    fs.writeFileSync(path.join(dir, 'summary.md'), renderSummary(out));
+    console.log(`\n[salvo] ${path.relative(ROOT, path.join(dir, 'metrics.json'))}`);
+    console.log(renderSummary(out));
+  }
   if (out.lcp) {
     fs.writeFileSync(path.join(dir, 'lcp.json'), JSON.stringify(out.lcp, null, 2));
     fs.writeFileSync(path.join(dir, 'lcp.md'), renderLcp(out.lcp));
     console.log(`\n[salvo] ${path.relative(ROOT, path.join(dir, 'lcp.md'))}`);
     console.log(renderLcp(out.lcp));
   }
-  console.log(`\n[salvo] ${path.relative(ROOT, path.join(dir, 'metrics.json'))}`);
-  console.log(renderSummary(out));
 }
 
 function renderSummary(out) {

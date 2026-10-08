@@ -53,5 +53,6 @@ visual-regression/**/*-diff.png
 visual-regression/**/*-failure-diff.png
 
 # Saída bruta da auditoria responsiva (npm run measure:responsive)
-scripts/measurements/**/metrics.json
+# .md (relatórios legíveis) versionados; JSON/PNG brutos ficam locais.
+scripts/measurements/**/*.json
 scripts/measurements/**/*.png
