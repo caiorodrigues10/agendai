@@ -85,9 +85,9 @@ export const QueueStatusCard: React.FC<QueueStatusCardProps> = ({
             <p className="text-2xs font-bold uppercase tracking-widest text-text-muted mb-1">
               Fila ao vivo
             </p>
-            <h2 className="text-xl font-bold text-text-primary tracking-tight truncate">
+            <h1 className="text-xl font-bold text-text-primary tracking-tight truncate">
               {shopName || 'Salão'}
-            </h2>
+            </h1>
             <p className="mt-1 flex items-center gap-1.5 text-xs text-text-secondary">
               <Store size={13} className="text-text-secondary shrink-0" />
               {queueClosed && isOpen ? 'Fila encerrada por hoje' : isOpen ? 'Aberto agora' : 'Fechado agora'}

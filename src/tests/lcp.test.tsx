@@ -59,8 +59,9 @@ describe('L2 — LCP das rotas públicas (contrato de código)', () => {
   it('/queue (sem :id) decide o redirecionamento antes do chunk do PublicHome', () => {
     const appSrc = read('app/App.tsx');
     expect(appSrc).toContain('<Route path="/queue" element={<QueueIndexRoute />} />');
-    // A rota /queue/:id continua apontando direto para o PublicHome.
-    expect(appSrc).toContain('<Route path="/queue/:id" element={<PublicHome />} />');
+    // /queue/:id passa pelo wrapper eager: seta o tenant da URL antes do chunk
+    // do PublicHome montar (Item B — API parte junto com o early request map).
+    expect(appSrc).toContain('<Route path="/queue/:id" element={<PublicShopRoute />} />');
 
     const src = read('app/QueueIndexRoute.tsx');
     expect(src).toContain('Navigate to="/"');

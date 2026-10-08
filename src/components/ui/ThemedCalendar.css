@@ -71,10 +71,25 @@
 }
 
 .rdp-root .rdp-day_button {
+  position: relative;
   border-radius: 0.65rem;
   font-size: 0.8125rem;
   font-weight: 600;
   margin-inline: auto;
+}
+
+/* Área de toque ≥44px sem mudar o visual (botão continua 36px). */
+.rdp-root .rdp-day_button::after,
+.rdp-root .rdp-button_previous::after,
+.rdp-root .rdp-button_next::after {
+  content: '';
+  position: absolute;
+  inset: -0.25rem;
+}
+
+.rdp-root .rdp-button_previous,
+.rdp-root .rdp-button_next {
+  position: relative;
 }
 
 .rdp-root .rdp-day_button:hover:not([disabled]):not(.rdp-selected .rdp-day_button) {

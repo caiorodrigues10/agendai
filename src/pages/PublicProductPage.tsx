@@ -197,7 +197,7 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
             onClick={() =>
               setValue('quantity', Math.max(1, quantity - 1), { shouldValidate: true })
             }
-            className={`${FIELD_CONTROL} flex w-12 items-center justify-center px-0 disabled:opacity-50`}
+            className={`${FIELD_CONTROL} relative flex w-12 items-center justify-center px-0 after:absolute after:-inset-y-0.5 after:inset-x-0 after:content-[''] disabled:opacity-50`}
           >
             <Minus size={16} aria-hidden />
           </button>
@@ -209,7 +209,7 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
             onClick={() =>
               setValue('quantity', Math.min(maxQuantity, quantity + 1), { shouldValidate: true })
             }
-            className={`${FIELD_CONTROL} flex w-12 items-center justify-center px-0 disabled:opacity-50`}
+            className={`${FIELD_CONTROL} relative flex w-12 items-center justify-center px-0 after:absolute after:-inset-y-0.5 after:inset-x-0 after:content-[''] disabled:opacity-50`}
           >
             <Plus size={16} aria-hidden />
           </button>
@@ -326,8 +326,12 @@ export const PublicProductPage: React.FC = () => {
   }, [shop]);
 
   if (loading) {
+    // `key` em todas as raízes: o React troca o nó em vez de reutilizar o div
+    // e reaplicar as classes (loading full-width → erro max-w-md dava um
+    // layout-shift de 0,34 em 1440 px). O visual final de cada estado é o
+    // mesmo de antes.
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-bg text-text-muted">
+      <div key="loading" className="flex min-h-dvh items-center justify-center bg-bg text-text-muted">
         <Loader2 className="animate-spin" size={40} aria-label="Carregando produto" />
       </div>
     );
@@ -335,7 +339,7 @@ export const PublicProductPage: React.FC = () => {
 
   if (loadError || !product || !shop) {
     return (
-      <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-4 px-6 text-center bg-bg text-text-primary">
+      <div key="error" className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-4 px-6 text-center bg-bg text-text-primary">
         <Package className="mx-auto text-text-muted" size={40} aria-hidden />
         <div>
           <h1 className="text-lg font-bold">{loadError ?? 'Produto não encontrado'}</h1>
@@ -346,7 +350,7 @@ export const PublicProductPage: React.FC = () => {
         <button
           type="button"
           onClick={backToShop}
-          className="rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-accent-fg"
+          className="rounded-xl bg-accent px-4 py-2.5 min-h-11 inline-flex items-center text-sm font-bold text-accent-fg"
         >
           Voltar ao salão
         </button>
@@ -356,7 +360,7 @@ export const PublicProductPage: React.FC = () => {
 
   if (reservation) {
     return (
-      <div className="min-h-dvh bg-bg text-text-primary">
+      <div key="reservation" className="min-h-dvh bg-bg text-text-primary">
         <SuccessScreen
           shop={shop}
           reservation={reservation}
@@ -370,12 +374,12 @@ export const PublicProductPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-dvh bg-bg text-text-primary">
+    <div key="content" className="min-h-dvh bg-bg text-text-primary">
       <main className="mx-auto max-w-md px-4 pt-6">
         <button
           type="button"
           onClick={backToShop}
-          className="mb-4 inline-flex items-center gap-1.5 text-sm font-bold text-text-secondary transition-colors hover:text-accent"
+          className="relative mb-4 inline-flex items-center gap-1.5 text-sm font-bold text-text-secondary transition-colors hover:text-accent after:absolute after:-inset-y-3 after:inset-x-0 after:content-['']"
         >
           <ArrowLeft size={16} aria-hidden />
           Voltar ao salão

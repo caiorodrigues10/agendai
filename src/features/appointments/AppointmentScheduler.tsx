@@ -200,7 +200,7 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
         <div className="w-20 h-20 bg-success/10 text-success rounded-full flex items-center justify-center mx-auto mb-6">
           <CheckCircle size={40} />
         </div>
-        <h2 className="text-2xl font-bold text-text-primary mb-2">Agendamento Confirmado!</h2>
+        <h1 className="text-2xl font-bold text-text-primary mb-2">Agendamento Confirmado!</h1>
         <p className="text-text-secondary mb-6">
           Te esperamos dia{' '}
           <span className="text-text-primary font-bold">
@@ -273,9 +273,9 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           {/* SEÇÃO 1: SERVIÇOS */}
           <div className="space-y-4 animate-fade-in">
-            <h3 className="text-lg font-bold text-text-primary mb-2 flex items-center gap-2">
+            <h1 className="text-lg font-bold text-text-primary mb-2 flex items-center gap-2">
               <CheckCircle size={18} className="text-accent" /> Selecione o Serviço
-            </h3>
+            </h1>
             <div className="grid grid-cols-1 gap-3">
               {services.map(service => (
                 <div
@@ -408,7 +408,7 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
                         key={slot}
                         type="button"
                         onClick={() => setValue('time', slot, { shouldValidate: true })}
-                        className={`py-2 rounded-lg text-xs font-bold transition-all border ${
+                        className={`relative py-2 rounded-lg text-xs font-bold transition-all border after:absolute after:-inset-y-1.5 after:inset-x-0 after:content-[''] ${
                           time === slot
                             ? 'bg-accent text-accent-fg border-accent'
                             : 'bg-bg text-text-secondary border-border hover:border-border-strong hover:bg-surface'

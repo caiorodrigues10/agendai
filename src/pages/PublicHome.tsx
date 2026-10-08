@@ -1,12 +1,18 @@
-import React, { useCallback, useState } from 'react';
+import React, { Suspense, useCallback, useState } from 'react';
 import { useNavigate, useParams, useSearchParams, Navigate } from 'react-router-dom';
 import { QueueItemCard, QueueStatusCard } from '../features/queue';
-import { AddCustomerForm } from '../features/clients';
-import { ShopProfile } from '../features/shop';
-import { AppointmentScheduler } from '../features/appointments';
+// Import direto do módulo (sem barrel): a barrel {features/clients} puxava
+// ClientsTab → CrmIntelligencePanel → ui/chart (77,9 kB) para o chunk da fila.
+import { AddCustomerForm } from '../features/clients/AddCustomerForm';
+import { AppointmentScheduler } from '../features/appointments/AppointmentScheduler';
 import { PublicProductCarousel } from '../components/domain/PublicProductCarousel';
 import { PublicPageSkeleton } from '../components/patterns/skeletons';
 import { Toast } from '../components/ui/Toast';
+
+// Perfil não é crítico (aba não padrão): sai do closure inicial da rota.
+const ShopProfile = React.lazy(() =>
+  import('../features/shop/ShopProfile').then(m => ({ default: m.ShopProfile })),
+);
 import { useAuth } from '../contexts/AuthContext';
 import { useBarbershop } from '../contexts/BarbershopContext';
 import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
@@ -147,7 +153,7 @@ export const PublicHome: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="px-4 py-2 rounded-xl bg-accent text-accent-fg text-sm font-bold"
+            className="min-h-11 inline-flex items-center px-4 py-2 rounded-xl bg-accent text-accent-fg text-sm font-bold"
           >
             Voltar ao início
           </button>
@@ -182,7 +188,7 @@ export const PublicHome: React.FC = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 z-10 relative
+              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 z-10 relative after:absolute after:-inset-y-1.5 after:inset-x-0 after:content-['']
                         ${activeTab === tab ? 'text-accent' : 'text-text-muted'}
                     `}
             >
@@ -216,16 +222,18 @@ export const PublicHome: React.FC = () => {
         </div>
 
         {activeTab === 'profile' && (
-          <ShopProfile
-            settings={settings}
-            posts={feed}
-            currentUser={user}
-            audience="public"
-            onGoQueue={() => setActiveTab('queue')}
-            onGoAppointments={() => setActiveTab('appointments')}
-            onDeletePost={deletePost}
-            onLikePost={likePost}
-          />
+          <Suspense fallback={<PublicPageSkeleton />}>
+            <ShopProfile
+              settings={settings}
+              posts={feed}
+              currentUser={user}
+              audience="public"
+              onGoQueue={() => setActiveTab('queue')}
+              onGoAppointments={() => setActiveTab('appointments')}
+              onDeletePost={deletePost}
+              onLikePost={likePost}
+            />
+          </Suspense>
         )}
 
         {activeTab === 'appointments' && (

@@ -12,6 +12,7 @@ import { Loader } from '../components/ui/Loader';
 import { ErrorBoundary } from '../components/infra/ErrorBoundary';
 import { PwaUpdatePrompt } from '../components/infra/PwaUpdatePrompt';
 import { QueueIndexRoute } from './QueueIndexRoute';
+import { PublicShopRoute } from './PublicShopRoute';
 
 const LandingPage = lazy(() => import('../pages/LandingPage'));
 const FeaturesPage = lazy(() => import('../pages/marketing/FeaturesPage'));
@@ -22,7 +23,7 @@ const AboutPage = lazy(() => import('../pages/marketing/AboutPage'));
 const ContactPage = lazy(() => import('../pages/marketing/ContactPage'));
 const PrivacyPolicyPage = lazy(() => import('../pages/marketing/PrivacyPolicyPage'));
 const TermsPage = lazy(() => import('../pages/marketing/TermsPage'));
-const PublicHome = lazy(() => import('../pages/PublicHome'));
+
 const PublicProductPage = lazy(() => import('../pages/PublicProductPage'));
 const PublicAppointmentManagePage = lazy(() => import('../pages/PublicAppointmentManagePage'));
 const PublicReviewPage = lazy(() => import('../pages/PublicReviewPage'));
@@ -81,7 +82,7 @@ const App: React.FC = () => {
           <Route path="/privacidade" element={<PrivacyPolicyPage />} />
           <Route path="/termos" element={<TermsPage />} />
           <Route path="/queue" element={<QueueIndexRoute />} />
-          <Route path="/queue/:id" element={<PublicHome />} />
+          <Route path="/queue/:id" element={<PublicShopRoute />} />
           <Route path="/queue/:id/produtos/:productId" element={<PublicProductPage />} />
           <Route path="/agendamento/gerenciar" element={<PublicAppointmentManagePage />} />
           <Route path="/avaliar" element={<PublicReviewPage />} />

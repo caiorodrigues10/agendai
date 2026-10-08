@@ -143,7 +143,6 @@ export default defineConfig(() => {
 						// Páginas públicas carregadas por lazy(): sem elas no precache a
 						// rota cai no ErrorBoundary offline (evidência do P1).
 						'assets/{FeaturesPage,AiPredictivePage,SchedulingPage,AboutPage,ContactPage,PrivacyPolicyPage,TermsPage,ForgotPasswordPage,NotFoundPage,CommercialIntentPage,PricingPersuasionCharts,BarChart,ThemeToggle}-*.js',
-						'assets/ShopProfile-*.css',
 					],
 					runtimeCaching: [
 						{
