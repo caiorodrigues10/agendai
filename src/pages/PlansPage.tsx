@@ -229,15 +229,15 @@ export const PlansPage: React.FC = () => {
         <section id="precos" className="px-6 pb-16 pt-32 md:px-10 md:pb-20 md:pt-40 xl:px-12">
           <div className="mx-auto max-w-6xl">
             <div className="mx-auto max-w-2xl text-center">
-              <h1 className="text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl md:text-6xl">
+              <h1 className="text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl md:text-6xl planos-hero-rise planos-hero-rise-1">
                 Teste grátis ou escolha o plano
               </h1>
-              <p className="mx-auto mt-4 max-w-xl text-base font-medium leading-relaxed text-neutral-400 md:text-lg">
+              <p className="mx-auto mt-4 max-w-xl text-base font-medium leading-relaxed text-neutral-400 md:text-lg planos-hero-rise planos-hero-rise-2">
                 {trialCampaign.body} {trialCampaign.afterTrial}
               </p>
             </div>
 
-            <div className="mt-8 flex justify-center">
+            <div className="mt-8 flex justify-center planos-hero-rise planos-hero-rise-3">
               <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1">
                 <button
                   type="button"
