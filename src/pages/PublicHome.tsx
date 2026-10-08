@@ -134,6 +134,18 @@ export const PublicHome: React.FC = () => {
   const pendingUrlShop = Boolean(id) && id !== barbershopId;
   const stillLoading = pendingUrlShop || shopLoading || schedulingLoading;
 
+  // ITEM 4 — métrica de conteúdo útil: marca o instante em que a página
+  // pública sai do estado de carregamento e renderiza conteúdo real (ou o
+  // estado vazio explícito). duração = public-content-usable (ms desde
+  // timeOrigin). Só a primeira transição por montagem.
+  const contentMarkedRef = React.useRef(false);
+  React.useEffect(() => {
+    if (stillLoading || contentMarkedRef.current) return;
+    contentMarkedRef.current = true;
+    performance.mark('public-content-ready');
+    performance.measure('public-content-usable', { start: 0, end: 'public-content-ready' });
+  }, [stillLoading]);
+
   if (stillLoading) {
     return <div role="status" aria-label="Carregando salão"><PublicPageSkeleton /></div>;
   }
