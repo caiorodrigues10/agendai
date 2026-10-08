@@ -39,10 +39,14 @@ export const ForgotPasswordPage: React.FC = () => {
     setError(null);
     try {
       const token = await getRecaptchaToken('forgot_password');
-      await authApi.forgotPassword(email.trim(), token);
+      try {
+        await authApi.forgotPassword(email.trim(), token);
+      } catch {
+        // Anti-enumeração: sucesso mesmo se a API falhar.
+      }
       setSuccess(true);
-    } catch {
-      setSuccess(true);
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : 'Não foi possível enviar. Tente novamente.');
     } finally {
       setSubmitting(false);
     }

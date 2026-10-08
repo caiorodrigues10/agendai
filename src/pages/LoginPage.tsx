@@ -45,7 +45,7 @@ import {
 } from '../utils/documentUtils';
 import { referralStorage } from '../utils/referralStorage';
 import { decodeGoogleCredential } from '../utils/googleCredential';
-import { getRecaptchaToken, useRecaptchaBadge } from '../utils/recaptcha';
+import { getRecaptchaToken, useRecaptchaBadge, RECAPTCHA_ERROR_MESSAGE } from '../utils/recaptcha';
 import { plansApi, Plan } from '../infra/plansApi';
 import { subscriptionsApi } from '../infra/subscriptionsApi';
 import { needsPaywallAfterAuth } from '../utils/subscriptionPaywall';
@@ -275,7 +275,13 @@ const ensureGis = (): Promise<void> => {
     script.async = true;
     script.defer = true;
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Falha ao carregar script do Google.'));
+    script.onerror = () => {
+      // Reseta para permitir retry: antes, a promessa rejeitada ficava presa e
+      // todo clique seguinte falhava sem chance de recarregar o script.
+      gsiPromise = null;
+      script.remove();
+      reject(new Error('Falha ao carregar script do Google.'));
+    };
     document.head.appendChild(script);
   });
   return gsiPromise;
@@ -383,7 +389,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     // Garante initialize antes do prompt mesmo que o prefetch ainda não tenha resolvido.
     initializeGoogle();
     const w = window as unknown as { google?: { accounts?: { id?: { prompt: (cb: (notification: { isNotDisplayed: () => boolean; isSkippedMoment: () => boolean }) => void) => void } } } };
-    if (!w.google?.accounts?.id) return;
+    if (!w.google?.accounts?.id) {
+      // Retorno silencioso confundia o usuário (clique "não fazia nada").
+      const message = 'Não foi possível carregar o Google. Tente novamente.';
+      if (googleAuthModeRef.current === 'register') setGoogleRegisterError(message);
+      else setGoogleError(message);
+      return;
+    }
     w.google.accounts.id.prompt(notification => {
       if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
         const message = 'Não foi possível continuar com o Google. Tente novamente.';
@@ -600,11 +612,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   const handleLogin = async (data: LoginFormData) => {
     setPaywallDismissed(false);
     setSubmitting(true);
-    const token = await getRecaptchaToken('login');
-    const result = await login(data.email, data.password, token, rememberMe);
-    setSubmitting(false);
-    if (result.ok === false) {
-      showErrorToast(result.message);
+    try {
+      const token = await getRecaptchaToken('login');
+      const result = await login(data.email, data.password, token, rememberMe);
+      if (result.ok === false) {
+        showErrorToast(result.message);
+      }
+    } catch (err) {
+      showErrorToast(err instanceof Error && err.message ? err.message : RECAPTCHA_ERROR_MESSAGE);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -664,71 +681,76 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     }
     setPaywallDismissed(false);
     setSubmitting(true);
-    const referralCode = referralStorage.get() ?? undefined;
-    const token = await getRecaptchaToken('register');
-    const schedule = [0, 1, 2, 3, 4, 5, 6].map(dayOfWeek => ({
-      dayOfWeek,
-      isOpen: scheduleDays[dayOfWeek].isOpen,
-      openTime: scheduleDays[dayOfWeek].openTime,
-      closeTime: scheduleDays[dayOfWeek].closeTime,
-    }));
-    const result =
-      data.authMethod === 'google'
-        ? await registerWithGoogle({
-            ownerName: data.ownerName.trim(),
-            idToken: data.googleIdToken ?? '',
-            cpf,
-            barbershopName: data.barbershopName.trim(),
-            whatsapp: normalizePhoneBR(data.whatsapp),
-            address:
-              [
+    try {
+      const referralCode = referralStorage.get() ?? undefined;
+      const token = await getRecaptchaToken('register');
+      const schedule = [0, 1, 2, 3, 4, 5, 6].map(dayOfWeek => ({
+        dayOfWeek,
+        isOpen: scheduleDays[dayOfWeek].isOpen,
+        openTime: scheduleDays[dayOfWeek].openTime,
+        closeTime: scheduleDays[dayOfWeek].closeTime,
+      }));
+      const result =
+        data.authMethod === 'google'
+          ? await registerWithGoogle({
+              ownerName: data.ownerName.trim(),
+              idToken: data.googleIdToken ?? '',
+              cpf,
+              barbershopName: data.barbershopName.trim(),
+              whatsapp: normalizePhoneBR(data.whatsapp),
+              address:
+                [
+                  data.address?.trim(),
+                  data.addressNumber?.trim() ? `nº ${data.addressNumber.trim()}` : null,
+                  data.addressComplement?.trim(),
+                ]
+                  .filter(Boolean)
+                  .join(', ') || undefined,
+              city: data.city.trim(),
+              cnpj: data.cnpj ? normalizeDocument(data.cnpj) : undefined,
+              referralCode,
+              termsVersion: data.termsVersion,
+              termsAccepted: data.termsAccepted,
+              marketingOptIn: data.marketingOptIn,
+              lgpdConsent: data.lgpdConsent,
+              schedule,
+              recaptchaToken: token,
+            })
+          : await registerUser({
+              ownerName: data.ownerName.trim(),
+              email: data.email.trim(),
+              password: data.password ?? '',
+              cpf,
+              barbershopName: data.barbershopName.trim(),
+              whatsapp: normalizePhoneBR(data.whatsapp),
+              address: [
                 data.address?.trim(),
                 data.addressNumber?.trim() ? `nº ${data.addressNumber.trim()}` : null,
                 data.addressComplement?.trim(),
-              ]
-                .filter(Boolean)
-                .join(', ') || undefined,
-            city: data.city.trim(),
-            cnpj: data.cnpj ? normalizeDocument(data.cnpj) : undefined,
-            referralCode,
-            termsVersion: data.termsVersion,
-            termsAccepted: data.termsAccepted,
-            marketingOptIn: data.marketingOptIn,
-            lgpdConsent: data.lgpdConsent,
-            schedule,
-            recaptchaToken: token,
-          })
-        : await registerUser({
-            ownerName: data.ownerName.trim(),
-            email: data.email.trim(),
-            password: data.password ?? '',
-            cpf,
-            barbershopName: data.barbershopName.trim(),
-            whatsapp: normalizePhoneBR(data.whatsapp),
-            address: [
-              data.address?.trim(),
-              data.addressNumber?.trim() ? `nº ${data.addressNumber.trim()}` : null,
-              data.addressComplement?.trim(),
-            ].filter(Boolean).join(', ') || undefined,
-            city: data.city.trim(),
-            cnpj: data.cnpj ? normalizeDocument(data.cnpj) : undefined,
-            referralCode,
-            termsVersion: data.termsVersion,
-            termsAccepted: data.termsAccepted,
-            marketingOptIn: data.marketingOptIn,
-            lgpdConsent: data.lgpdConsent,
-            schedule,
-            recaptchaToken: token,
-          });
-    setSubmitting(false);
-    if (result.ok === false) {
-      showErrorToast(result.message);
-      return;
-    }
-    referralStorage.clear();
-    if (data.authMethod !== 'google') {
-      setResendVerificationStatus('idle');
-      setRegisterVerificationEmail(data.email.trim());
+              ].filter(Boolean).join(', ') || undefined,
+              city: data.city.trim(),
+              cnpj: data.cnpj ? normalizeDocument(data.cnpj) : undefined,
+              referralCode,
+              termsVersion: data.termsVersion,
+              termsAccepted: data.termsAccepted,
+              marketingOptIn: data.marketingOptIn,
+              lgpdConsent: data.lgpdConsent,
+              schedule,
+              recaptchaToken: token,
+            });
+      if (result.ok === false) {
+        showErrorToast(result.message);
+        return;
+      }
+      referralStorage.clear();
+      if (data.authMethod !== 'google') {
+        setResendVerificationStatus('idle');
+        setRegisterVerificationEmail(data.email.trim());
+      }
+    } catch (err) {
+      showErrorToast(err instanceof Error && err.message ? err.message : RECAPTCHA_ERROR_MESSAGE);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -1528,6 +1550,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                 <button
                   type="button"
                   onClick={handleGoogleClick}
+                  onPointerDown={prefetchGoogle}
                   onPointerEnter={prefetchGoogle}
                   onFocus={prefetchGoogle}
                   disabled={submitting}
@@ -1586,6 +1609,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                 <button
                   type="button"
                   onClick={handleGoogleClick}
+                  onPointerDown={prefetchGoogle}
                   onPointerEnter={prefetchGoogle}
                   onFocus={prefetchGoogle}
                   disabled={submitting}
