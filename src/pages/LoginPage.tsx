@@ -256,6 +256,31 @@ const BrandPanel: React.FC = () => (
   </div>
 );
 
+/**
+ * Carrega o GIS (Google Identity Services) sob demanda — hover/foco/clique no
+ * botão Google — em vez de no mount, para não disputar banda com o LCP.
+ * Módulo compartilhado: a promessa evita múltiplas injeções entre montagens.
+ */
+let gsiPromise: Promise<void> | null = null;
+const ensureGis = (): Promise<void> => {
+  if (gsiPromise) return gsiPromise;
+  gsiPromise = new Promise<void>((resolve, reject) => {
+    const w = window as Window & { google?: { accounts?: { id?: unknown } } };
+    if (w.google?.accounts?.id) {
+      resolve();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error('Falha ao carregar script do Google.'));
+    document.head.appendChild(script);
+  });
+  return gsiPromise;
+};
+
 export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -300,7 +325,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
   const [googleError, setGoogleError] = useState<string | null>(null);
   const googleRenderedRef = useRef(false);
-  const [googleLoaded, setGoogleLoaded] = useState(false);
   const [googleRegisterError, setGoogleRegisterError] = useState<string | null>(null);
   const [googleEmailLocked, setGoogleEmailLocked] = useState(false);
   const googleAuthModeRef = useRef<Tab>(mode);
@@ -317,28 +341,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     }
   };
 
-  useEffect(() => {
-    if (!googleClientId) return;
-    if ((window as Window & { google?: { accounts?: { id?: unknown } } }).google?.accounts?.id) {
-      setGoogleLoaded(true);
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      if ((window as Window & { google?: { accounts?: { id?: unknown } } }).google?.accounts?.id) setGoogleLoaded(true);
-    };
-    script.onerror = () => setGoogleError('Falha ao carregar script do Google.');
-    document.head.appendChild(script);
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, [googleClientId]);
-
-  useEffect(() => {
-    if (!googleClientId || !googleLoaded || googleRenderedRef.current) return;
+  const initializeGoogle = () => {
+    if (!googleClientId || googleRenderedRef.current) return;
     try {
       const google = (window as unknown as { google: { accounts: { id: { initialize: (opts: Record<string, unknown>) => void } } } }).google;
       google.accounts.id.initialize({
@@ -358,10 +362,27 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     } catch {
       setGoogleError('Erro ao inicializar botão Google.');
     }
-  }, [googleClientId, googleLoaded]);
+  };
 
-  const handleGoogleClick = () => {
-    const w = window as unknown as { google: { accounts: { id: { prompt: (cb: (notification: { isNotDisplayed: () => boolean; isSkippedMoment: () => boolean }) => void) => void } } } };
+  /** Pré-carrega o GIS quando o usuário demonstra intenção (hover/foco no botão). */
+  const prefetchGoogle = () => {
+    if (!googleClientId) return;
+    void ensureGis()
+      .then(initializeGoogle)
+      .catch(() => undefined);
+  };
+
+  const handleGoogleClick = async () => {
+    if (!googleClientId) return;
+    try {
+      await ensureGis();
+    } catch {
+      setGoogleError('Falha ao carregar script do Google.');
+      return;
+    }
+    // Garante initialize antes do prompt mesmo que o prefetch ainda não tenha resolvido.
+    initializeGoogle();
+    const w = window as unknown as { google?: { accounts?: { id?: { prompt: (cb: (notification: { isNotDisplayed: () => boolean; isSkippedMoment: () => boolean }) => void) => void } } } };
     if (!w.google?.accounts?.id) return;
     w.google.accounts.id.prompt(notification => {
       if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
@@ -1507,6 +1528,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                 <button
                   type="button"
                   onClick={handleGoogleClick}
+                  onPointerEnter={prefetchGoogle}
+                  onFocus={prefetchGoogle}
                   disabled={submitting}
                   className="w-full py-3 rounded-xl border border-border bg-bg hover:bg-surface hover:border-border-strong text-text-primary text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-200 disabled:opacity-60 cursor-pointer"
                 >
@@ -1563,6 +1586,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                 <button
                   type="button"
                   onClick={handleGoogleClick}
+                  onPointerEnter={prefetchGoogle}
+                  onFocus={prefetchGoogle}
                   disabled={submitting}
                   className="w-full py-3 rounded-xl border border-border bg-bg hover:bg-surface hover:border-border-strong text-text-primary text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-200 disabled:opacity-60 cursor-pointer"
                 >

@@ -41,16 +41,49 @@ export async function getRecaptchaToken(action: string): Promise<string> {
   }
 }
 
-/** Carrega o script e mostra o badge só enquanto a página de login estiver montada. */
+/**
+ * Carrega o script e mostra o badge enquanto a página de login estiver montada.
+ * O download fica adiado para a primeira interação (pointerdown/focusin) ou para
+ * um idle após o `load` — assim api.js não disputa banda com LCP. O token
+ * (`getRecaptchaToken`) continua carregando sob demanda no submit.
+ */
 export function useRecaptchaBadge(): void {
   useEffect(() => {
     if (!RECAPTCHA_SITE_KEY) return;
     let cancelled = false;
-    void loadScript().then(() => {
-      if (!cancelled) document.body.classList.add(BADGE_CLASS);
-    });
+    let started = false;
+
+    const show = () => {
+      if (cancelled || started) return;
+      started = true;
+      void loadScript().then(() => {
+        if (!cancelled) document.body.classList.add(BADGE_CLASS);
+      });
+    };
+
+    const onInteraction = () => {
+      document.removeEventListener('pointerdown', onInteraction, true);
+      document.removeEventListener('focusin', onInteraction, true);
+      window.removeEventListener('load', onIdleFallback);
+      show();
+    };
+
+    const onIdleFallback = () => {
+      const w = window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number };
+      if (w.requestIdleCallback) w.requestIdleCallback(show, { timeout: 5000 });
+      else window.setTimeout(show, 3000);
+    };
+
+    document.addEventListener('pointerdown', onInteraction, true);
+    document.addEventListener('focusin', onInteraction, true);
+    if (document.readyState === 'complete') onIdleFallback();
+    else window.addEventListener('load', onIdleFallback, { once: true });
+
     return () => {
       cancelled = true;
+      document.removeEventListener('pointerdown', onInteraction, true);
+      document.removeEventListener('focusin', onInteraction, true);
+      window.removeEventListener('load', onIdleFallback);
       document.body.classList.remove(BADGE_CLASS);
     };
   }, []);

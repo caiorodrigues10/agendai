@@ -118,4 +118,5 @@ vi.mock('../contexts/ThemeContext', () => ({
     toggleTheme: () => undefined,
     setTheme: () => undefined,
   }),
+  useOptionalTheme: () => 'dark' as const,
 }));
