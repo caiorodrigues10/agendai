@@ -26,30 +26,30 @@ Legenda: ✅ ok · ❌ falhou/bug · ⚠️ parcial/problema · ⏸ não testado
 | # | Área / verificação | Resultado | Evidência |
 |---|---|---|---|
 | 1 | Stack local sobe e responde | ✅ | `curl /health` 200, `/ready` 200, backend+frontend no ar |
-| 2 | Backend: `typecheck` | ✅ exit 0 | `evidencias/backend-gates.log` |
+| 2 | Backend: `typecheck` | ✅ exit 0 | `evidencias/backend-gates.txt` |
 | 3 | Backend: `docs:check` | ✅ exit 0 | idem |
-| 4 | Backend: `prisma validate` | ✅ exit 0 | `evidencias/backend-gates3.log` |
+| 4 | Backend: `prisma validate` | ✅ exit 0 | `evidencias/backend-gates3.txt` |
 | 5 | Backend: `build` (tsup) | ✅ exit 0 | idem |
-| 6 | Backend: `test:unit` (2 execuções consecutivas) | ✅ 166 arquivos / 1500 testes, idêntico nas 2 rodadas (sem flaky) | `evidencias/backend-unit-2x.log` |
-| 7 | Backend: `test:security` | ✅ 2 arquivos / 7 testes | `evidencias/backend-gates.log` |
-| 8 | Frontend: `typecheck` | ✅ exit 0 | `evidencias/frontend-gates.log` |
-| 9 | Frontend: `docs:check` | ✅ exit 0 | `evidencias/frontend-gates2.log` |
-| 10 | Frontend: `test` (vitest) | ✅ 134 arquivos / 596 testes | `evidencias/frontend-test.log` |
-| 11 | Frontend: `test:contract` | ✅ 8/8 | `evidencias/frontend-gates2.log` |
-| 12 | Frontend: `lint` (gate do CI: `--max-warnings 215`) | ❌ **480 warnings / 0 errors → exit 1** | `evidencias/frontend-gates.log` |
+| 6 | Backend: `test:unit` (2 execuções consecutivas) | ✅ 166 arquivos / 1500 testes, idêntico nas 2 rodadas (sem flaky) | `evidencias/backend-unit-2x.txt` |
+| 7 | Backend: `test:security` | ✅ 2 arquivos / 7 testes | `evidencias/backend-gates.txt` |
+| 8 | Frontend: `typecheck` | ✅ exit 0 | `evidencias/frontend-gates.txt` |
+| 9 | Frontend: `docs:check` | ✅ exit 0 | `evidencias/frontend-gates2.txt` |
+| 10 | Frontend: `test` (vitest) | ✅ 134 arquivos / 596 testes | `evidencias/frontend-test.txt` |
+| 11 | Frontend: `test:contract` | ✅ 8/8 | `evidencias/frontend-gates2.txt` |
+| 12 | Frontend: `lint` (gate do CI: `--max-warnings 215`) | ❌ **480 warnings / 0 errors → exit 1** | `evidencias/frontend-gates.txt` |
 | 13 | Frontend: `build` | ✅ (rodou dentro do E2E/preview) | §5 |
-| 14 | E2E público (desktop 1440 + mobile 375) | ✅ **56 passed, 17 skipped, 0 failed** | `evidencias/e2e-report.json` |
-| 15 | E2E `e2e/master/` (login real master/owner) | ⚠️ **17 passed / 1 failed** (1 falha = ambiente, ver B7) | `evidencias/e2e-master2.json` |
+| 14 | E2E público (desktop 1440 + mobile 375) | ✅ **56 passed, 17 skipped, 0 failed** | `evidencias/e2e-publico-resumo.md` |
+| 15 | E2E `e2e/master/` (login real master/owner) | ⚠️ **17 passed / 1 failed** (1 falha = ambiente, ver B7) | `evidencias/e2e-master-resumo.md` |
 | 16 | E2E WebKit/iPhone (`login-safari.spec`) | ⏸ **pulado** — exige `VITE_RECAPTCHA_SITE_KEY` no build (chave de teste do Google não disponível) | `playwright.config.ts`, `e2e/login-safari.spec.ts:18` |
 | 17 | E2E `panel-queue.spec` | ⏸ **pulado** — exige `PANEL_E2E=1` + credenciais | `e2e/panel-queue.spec.ts:17` |
 | 18 | E2E `post-editor.spec` | ⏸ **pulado** — exige `POST_EDITOR_QA=1` | `e2e/post-editor.spec.ts:11` |
-| 19 | Matriz de autorização/IDOR da API (102 probes) | ⚠️ 88 ok / 14 desvios (detalhados em §4) | `evidencias/matrix-102-probes.json` |
+| 19 | Matriz de autorização/IDOR da API (102 probes) | ⚠️ 88 ok / 14 desvios (detalhados em §4) | `evidencias/matrix-102-probes-resumo.md` |
 | 20 | IDOR de tenant em `PUT/PATCH /api/barbershops/:id` e `/:id/schedule` | ❌→✅ **bug crítico, corrigido nesta sessão** | B1 |
-| 21 | Login: brute force / lockout | ✅ 401 → **423 na 10ª tentativa** ("Conta bloqueada… 5 segundos"), volta a 401 após o reset | `evidencias/p2-authz.log`, `p2-authz2.log` |
-| 22 | Login: enumeração de usuário | ✅ usuário inexistente e senha errada → mesmo status e mesma mensagem | `evidencias/p2-authz2.log` |
-| 23 | Refresh token: rotação | ✅ cookie rotaciona a cada `/auth/refresh` | `evidencias/p2-refresh.log` |
-| 24 | Refresh token: reuse (janela de graça 15s) | ✅ reuse <15s aceito, **>15s → 401** | `evidencias/p2-grace.log` |
-| 25 | Refresh token: rate limit | ✅ 429 na ~119ª chamada (~120/min por sessão) | `evidencias/p2-refresh.log` |
+| 21 | Login: brute force / lockout | ✅ 401 → **423 na 10ª tentativa** ("Conta bloqueada… 5 segundos"), volta a 401 após o reset | `evidencias/p2-authz.txt`, `p2-authz2.txt` |
+| 22 | Login: enumeração de usuário | ✅ usuário inexistente e senha errada → mesmo status e mesma mensagem | `evidencias/p2-authz2.txt` |
+| 23 | Refresh token: rotação | ✅ cookie rotaciona a cada `/auth/refresh` | `evidencias/p2-refresh.txt` |
+| 24 | Refresh token: reuse (janela de graça 15s) | ✅ reuse <15s aceito, **>15s → 401** | `evidencias/p2-grace.txt` |
+| 25 | Refresh token: rate limit | ✅ 429 na ~119ª chamada (~120/min por sessão) | `evidencias/p2-refresh.txt` |
 | 26 | Cookies de sessão | ✅ `refresh_token` + `saved_refresh_{userId}` com `HttpOnly`, `SameSite=Lax`, `Path=/api/auth` | §5 |
 | 27 | Rotas admin (master-only) | ✅ OWNER → 403 em `/api/admin/*`; master → 200 | matriz |
 | 28 | Webhook Mercado Pago (genérico) | ⏸ **não testado de verdade** — `MERCADOPAGO_WEBHOOK_SECRET` ausente no `.env` local; em dev o controller valida e avisa, em produção recusa (regra já coberta por teste) | `ProcessWebhookController.ts:29-45` |
@@ -61,7 +61,7 @@ Legenda: ✅ ok · ❌ falhou/bug · ⚠️ parcial/problema · ⏸ não testado
 | 34 | Crons agendados no boot | ✅ 9 registrados (lista em §6) | `evidencias/server-log-extract.txt` |
 | 35 | Crons executando de fato | ✅ `CronRun` com status `COMPLETED` (`deposit-expiration`, `post-publisher`, `waitlist-expiration` a cada 1 min) | §6 |
 | 36 | Health detalhado | ⚠️ `/health` 200 porém `status:"degraded"` e `migrations:{status:"error"}` | B5 |
-| 37 | Swagger `/docs` | ✅ 200 em dev (589 operações / 457 paths) | `/tmp/swagger.json` |
+| 37 | Swagger `/docs` | ✅ 200 em dev (589 operações / 457 paths) | `/tmp/swagger.json` (fora do repo) |
 | 38 | Migrações (`prisma migrate status`) | ⚠️ **drift**: tabela `_prisma_migrations` inexistente → todas as 91 migrations aparecem "não aplicadas" (banco criado por `db push`) | B5 |
 | 39 | Responsividade (375 e 1440, 5 rotas) | ✅ 0 estouros horizontais, 0 alvos <44px, 0 textos <12px, todos com exatamente 1 `<h1>`, `<img>` com width/height | `summary.md` |
 | 40 | Core Web Vitals (4G + CPU 4x) | ✅ CLS máx **0,0743** (limite 0,1) · LCP med 1,86–2,33s · FCP med ~1,29s | `summary.md` |
@@ -92,7 +92,7 @@ Legenda: ✅ ok · ❌ falhou/bug · ⚠️ parcial/problema · ⏸ não testado
 - **Como reproduzir:** `npm run lint -- --max-warnings 215` em `frontend/`.
 - **Esperado:** exit 0 (limite do CI) · **Obtido:** exit 1 — `✖ 480 problems (0 errors, 480 warnings)`.
 - **Impacto:** o job `lint` do workflow de CI falha; não é regressão minha (não toquei em `src/`).
-- **Arquivo:** `frontend/src/**` (distribuição em `evidencias/frontend-gates.log`). Regras mais frequentes: `no-unused-vars` em helper de mapa, `no-explicit-any`, `no-console`, `complexity` (`src/utils/errorMessage.ts:104`, complexidade 56 vs máximo 20).
+- **Arquivo:** `frontend/src/**` (distribuição em `evidencias/frontend-gates.txt`). Regras mais frequentes: `no-unused-vars` em helper de mapa, `no-explicit-any`, `no-console`, `complexity` (`src/utils/errorMessage.ts:104`, complexidade 56 vs máximo 20).
 - **Status:** **relatado, não corrigido** — corrigir 480 warnings não é "bug pequeno e seguro"; depende de decisão (rebaixar o limite, `--fix` parcial ou limpeza gradual).
 
 ### B3 — 🟠 MÉDIO — `GET /api/barbershops` público devolve WhatsApp e CNPJ de todos os salões *(RELATADO — precisa de decisão)*
@@ -172,7 +172,7 @@ Legenda: ✅ ok · ❌ falhou/bug · ⚠️ parcial/problema · ⏸ não testado
 
 - **Suíte pública:** `npx playwright test` → 73 testes, **56 pass, 17 pulados** (17 = 9 `login-safari` × 3 projetos + 4 `panel-queue` + 4 `post-editor`, todos por gates de ambiente, §2.16–18), **0 falha**.
 - **Suíte master:** 18 testes → **17 pass, 1 falha** (B7).
-- **Screenshots** (`screenshots/`, gerados no navegador real, não mock): 8 em 1440×900 (landing, login, cadastro, planos, fila pública, master overview/accounts/usuarios) e 5 em 375×812 (landing, login, cadastro, planos, fila pública).
+- **Screenshots** (`screenshots/`, gerados no navegador real, não mock): 8 em 1440×900 (landing, login, cadastro, planos, fila pública, master overview/accounts/usuarios) e 5 em 375×812 (landing, login, cadastro, planos, fila pública). Estão apenas no disco: o `.gitignore` do repo ignora `scripts/measurements/**/*.png` e `*.log`, por isso as evidências foram exportadas como `.txt`/`.md` (nada de `-f` para contornar o ignore).
 - **Medições** (`summary.md`): 10 combinações rota×largura; nenhum critério de acessibilidade/layout reprovado; CLS ≤ 0,0743.
 - **Precache:** `node scripts/precache-report.mjs --limit=3185427` → **OK: 2.331.370 B** (69 itens; maior `index-*.js` com 491.751 B).
 
