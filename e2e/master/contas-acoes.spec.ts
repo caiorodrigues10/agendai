@@ -66,13 +66,16 @@ test('ações de controle: suspende, reativa e entra em visão temporária', asy
   expect(impersonateResponse.status()).toBe(200);
 
   await page.waitForURL(/\/app\/overview/, { timeout: 15_000 });
-  const banner = page.getByRole('status');
+  // O app também usa role="status" no overlay de carregamento full-screen,
+  // então o locator precisa restringir ao banner de visão temporária.
+  const banner = page.getByRole('status').filter({ hasText: 'Visão temporária somente-leitura' });
   await expect(banner).toContainText('Visão temporária somente-leitura');
   await expect(banner).toContainText('expira em');
 
   await banner.getByRole('button', { name: 'Encerrar' }).click();
   await page.waitForURL(new RegExp(accountUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-  await expect(page.getByRole('status')).toHaveCount(0);
+  await expect(page.getByRole('status').filter({ hasText: 'Visão temporária' })).toHaveCount(0);
+  await expect(page.getByLabel('Carregando')).toHaveCount(0);
   await expect(page.getByText('Ações de controle')).toBeVisible();
 });
 
@@ -96,7 +99,9 @@ test('sair pela header durante a visão temporária volta ao painel do master', 
   expect(impersonateResponse.status()).toBe(200);
 
   await page.waitForURL(/\/app\/overview/, { timeout: 15_000 });
-  await expect(page.getByRole('status')).toContainText('Visão temporária somente-leitura');
+  await expect(
+    page.getByRole('status').filter({ hasText: 'Visão temporária somente-leitura' }),
+  ).toContainText('Visão temporária somente-leitura');
 
   // "Sair" encerra só a visão temporária: a sessão do master continua viva,
   // então o destino é o painel do master (e não a landing pública).
@@ -104,6 +109,7 @@ test('sair pela header durante a visão temporária volta ao painel do master', 
   await page.waitForURL(new RegExp(accountUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), {
     timeout: 15_000,
   });
-  await expect(page.getByRole('status')).toHaveCount(0);
+  await expect(page.getByRole('status').filter({ hasText: 'Visão temporária' })).toHaveCount(0);
+  await expect(page.getByLabel('Carregando')).toHaveCount(0);
   await expect(page.getByText('Ações de controle')).toBeVisible();
 });
