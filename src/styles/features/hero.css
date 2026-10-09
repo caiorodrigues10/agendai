@@ -6,14 +6,39 @@
  * gera CLS nem reordena o LCP); roda em @keyframes puro, sem depender de
  * JS; e some por completo em prefers-reduced-motion.
  *
- * "/" — a animação das linhas do H1 (hero-line-rise) foi implementada e
- * revertida: ela piorou LCP de forma consistente em off@1440 em 6 sessões
- * de A/B na mesma build (com animação: 2184/2288/2360 ms; sem: 2032/2032/2104
- * ms, custo ~+220 ms), enquanto as demais células e a produção (real) ficaram
- * neutras. Pela regra da rodada ("se piorar LCP, manter sem animação com
- * números"), "/" fica sem animação de CSS. As animações GSAP do badge/copy/
- * scene do LandingPage não fazem parte deste arquivo e não mudaram.
+ * "/" — hero-line-rise nas três linhas do H1: implementada no Item C,
+ * revertida por piora de LCP em off@1440 (6 sessões: com 2184/2288/2360 ms
+ * vs sem 2032/2032/2104 ms, ~+220 ms) e REAVALIADA no Item 3 desta rodada:
+ * A/B intercalado de 6 sessões na build atual com delta +20 ms em off@1440
+ * (2008/1988/2012 sem vs 2028/2028/2020 com; off@375 neutro), dentro do
+ * critério ≤ +100 ms — animação MANTIDA (scripts/measurements/item3-ab/).
  */
+@keyframes hero-line-rise {
+  from {
+    transform: translateY(0.75rem);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.hero-line-rise {
+  animation: hero-line-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-line-rise-2 {
+  animation-delay: 0.08s;
+}
+
+.hero-line-rise-3 {
+  animation-delay: 0.16s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-line-rise {
+    animation: none;
+  }
+}
 
 /* "/planos" — título, subtítulo e alternador mensal/anual. O L2 removeu o
    motion.* (opacity inicial 0 que empurrava o LCP); aqui só deslocamento

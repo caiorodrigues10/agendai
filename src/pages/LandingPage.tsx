@@ -697,20 +697,20 @@ export const LandingPage: React.FC = () => {
 
               <h1 className="max-w-200 text-[clamp(2.9rem,13vw,3.6rem)] font-black leading-none tracking-[-0.06em] text-white sm:text-[clamp(3.6rem,4.7vw,5.6rem)]">
                 <span className="-mb-[0.12em] block overflow-hidden pb-[0.2em]">
-                  <span data-hero-line className="block md:whitespace-nowrap">
+                  <span data-hero-line className="hero-line-rise block md:whitespace-nowrap">
                     Fila e agenda
                   </span>
                 </span>
                 <span className="-mb-[0.12em] block overflow-hidden pb-[0.2em]">
                   <span
                     data-hero-line
-                    className="block bg-linear-to-r from-emerald-300 via-emerald-400 to-cyan-400 bg-clip-text text-transparent md:whitespace-nowrap"
+                    className="hero-line-rise hero-line-rise-2 block bg-linear-to-r from-emerald-300 via-emerald-400 to-cyan-400 bg-clip-text text-transparent md:whitespace-nowrap"
                   >
                     sem confusão.
                   </span>
                 </span>
                 <span className="-mb-[0.12em] block overflow-hidden pb-[0.2em]">
-                  <span data-hero-line className="block text-white md:whitespace-nowrap">
+                  <span data-hero-line className="hero-line-rise hero-line-rise-3 block text-white md:whitespace-nowrap">
                     Resultado à vista.
                   </span>
                 </span>

@@ -36,12 +36,11 @@ test.describe('Movimento reduzido (R12)', () => {
 
   // Item C: `/planos` ganhou animação de @keyframes (só transform) que precisa
   // existir no caminho normal e sumir com prefers-reduced-motion.
-  // O "/" teve animação de CSS implementada e revertida: 6 sessões de A/B na
-  // mesma build mostraram custo de ~+220 ms de LCP em off@1440 com a animação
-  // ligada (2184/2288/2360 vs 2032/2032/2104 sem) — as linhas do H1 ficam,
-  // portanto, sem animationName. Se alguém reativar, este teste falha de
-  // propósito: refaça a medição antes.
-  test('/: as linhas do H1 continuam sem animação de CSS', async ({ page }) => {
+  // Item 3: o "/" implementou hero-line-rise nas linhas do H1. No Item C ela
+  // foi revertida (+220 ms de LCP em 6 sessões de A/B); o Item 3 refez o A/B
+  // intercalado na build atual e o delta caiu para +20 ms (≤ +100 ms), então
+  // a animação ficou. O contrato: anima sem reduce, some com reduce.
+  test('/: as linhas do H1 animam sem reduce e param com reduce', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.goto('/', { waitUntil: 'load' });
     await page.waitForSelector('[data-hero-line]');
@@ -52,9 +51,9 @@ test.describe('Movimento reduzido (R12)', () => {
       })),
     );
     expect(visiveis).toEqual([
-      { animationName: 'none', opacity: '1' },
-      { animationName: 'none', opacity: '1' },
-      { animationName: 'none', opacity: '1' },
+      { animationName: 'hero-line-rise', opacity: '1' },
+      { animationName: 'hero-line-rise', opacity: '1' },
+      { animationName: 'hero-line-rise', opacity: '1' },
     ]);
 
     await page.emulateMedia({ reducedMotion: 'reduce' });

@@ -15,11 +15,14 @@ import path from 'node:path';
  * - sem dependência de JS (roda junto com o primeiro paint);
  * - desligado em prefers-reduced-motion.
  *
- * Escopo final: a animação do `/planos` ficou (custo ~0); a do `/` foi
- * implementada e REVERTIDA por piora de LCP em off@1440 — 6 sessões de A/B
- * na mesma build, com animação 2184/2288/2360 ms vs sem 2032/2032/2104 ms
- * (~+220 ms), demais células neutras. Estes contratos falham antes da
- * restauração (hero.css/ausente, classes sem animação) e passam depois.
+ * Escopo final: a animação do `/planos` ficou (custo ~0); a do `/`
+ * (hero-line-rise) foi implementada no Item C, revertida por piora de LCP
+ * (+220 ms em 6 sessões) e REAVALIADA no Item 3 desta rodada: novo A/B
+ * intercalado de 6 sessões na build atual mostrou delta +20 ms em off@1440
+ * (2008/1988/2012 sem vs 2028/2028/2020 com; off@375 neutro) — dentro do
+ * critério (≤ +100 ms), então a animação foi MANTIDA. Estes contratos falham
+ * antes da restauração (hero.css sem keyframes, classes sem animação) e
+ * passam depois.
  */
 const SRC = path.resolve(process.cwd(), 'src');
 const read = (rel: string) => fs.readFileSync(path.join(SRC, rel), 'utf8');
@@ -31,16 +34,19 @@ describe('Item C — animações restauradas sem esconder conteúdo', () => {
     expect(read('index.css')).toContain("@import './styles/features/hero.css';");
   });
 
-  it("`/` fica sem animação de CSS no H1 (revertida por piora de LCP)", () => {
+  it('`/` anima as linhas do H1 com hero-line-rise (mantida no Item 3)', () => {
     const css = heroCss();
-    // A regra da rodada: se piorar LCP, mantém sem animação — com números.
-    expect(css).not.toContain('@keyframes hero-line-rise');
-    expect(css).not.toMatch(/\[data-hero-line\]\s*\{/);
+    expect(css).toContain('@keyframes hero-line-rise');
+    expect(css).toContain('.hero-line-rise');
+    expect(css).toContain('animation-delay: 0.08s');
+    expect(css).toContain('animation-delay: 0.16s');
     // Nenhuma regra (declarada) do arquivo pode esconder conteúdo via opacity.
     expect(css).not.toMatch(/opacity\s*:/);
-    // E o LandingPage não re-insere o tween do H1 no gsap.
+    // E o LandingPage continua sem re-insere o tween do H1 no gsap.
     const src = read('pages/LandingPage.tsx');
     expect(src).not.toMatch(/'\[data-hero-line\]'/);
+    const usos = src.match(/hero-line-rise/g) || [];
+    expect(usos.length).toBeGreaterThanOrEqual(3);
   });
 
   it('hero de `/planos` usa as classes de rise com stagger', () => {
@@ -63,6 +69,7 @@ describe('Item C — animações restauradas sem esconder conteúdo', () => {
     const css = heroCss();
     const bloco = css.slice(css.indexOf('@media (prefers-reduced-motion: reduce)'));
     expect(bloco).toContain('.planos-hero-rise');
+    expect(bloco).toContain('.hero-line-rise');
     expect(bloco).toContain('animation: none');
   });
 });
