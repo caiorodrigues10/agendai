@@ -7,6 +7,48 @@ import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import jsxA11yPlugin from 'eslint-plugin-jsx-a11y';
 import prettierConfig from 'eslint-config-prettier';
 
+// S9 — regra interna: <a target="_blank"> precisa de rel com "noopener"
+// (previne tab-nabbing). Literais são validados; rel em expressão passa
+// (não determinístico estaticamente).
+const internalPlugin = {
+  rules: {
+    'no-unsafe-blank': {
+      meta: {
+        type: 'problem',
+        docs: { description: 'exige rel com "noopener" em <a target="_blank">' },
+        messages: {
+          missing: 'target="_blank" precisa de rel contendo "noopener" (tab-nabbing).',
+        },
+        schema: [],
+      },
+      create(context) {
+        return {
+          JSXOpeningElement(node) {
+            if (node.name.name !== 'a') return;
+            const attrs = node.attributes.filter((a) => a.type === 'JSXAttribute');
+            const target = attrs.find((a) => a.name.name === 'target');
+            if (!target || target.value?.type !== 'Literal' || target.value.value !== '_blank') {
+              return;
+            }
+            const rel = attrs.find((a) => a.name.name === 'rel');
+            if (!rel) {
+              context.report({ node, messageId: 'missing' });
+              return;
+            }
+            if (
+              rel.value?.type === 'Literal' &&
+              typeof rel.value.value === 'string' &&
+              !rel.value.value.includes('noopener')
+            ) {
+              context.report({ node, messageId: 'missing' });
+            }
+          },
+        };
+      },
+    },
+  },
+};
+
 export default tseslint.config({
   ignores: [
     'dist/',
@@ -25,6 +67,7 @@ export default tseslint.config({
   plugins: {
     'react-hooks': reactHooksPlugin,
     'jsx-a11y': jsxA11yPlugin,
+    'internal': internalPlugin,
   },
   rules: {
     ...reactHooksPlugin.configs['recommended-latest'].rules,
@@ -40,6 +83,7 @@ export default tseslint.config({
     'jsx-a11y/label-has-associated-control': 'warn',
     'jsx-a11y/no-autofocus': 'warn',
     'jsx-a11y/autocomplete-valid': 'warn',
+    'internal/no-unsafe-blank': 'error',
     'no-empty': 'warn',
     'react-hooks/exhaustive-deps': 'warn',
     'react-hooks/set-state-in-effect': 'warn',
