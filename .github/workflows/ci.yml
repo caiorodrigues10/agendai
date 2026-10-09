@@ -23,5 +23,21 @@ jobs:
       - run: npm run lint -- --max-warnings 215
       - run: npm test
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:e2e
+      # ITEM 2 — o projeto webkit-iphone (login-safari.spec.ts) só roda com
+      # VITE_RECAPTCHA_SITE_KEY no build (senão o test.skip dispara e o job
+      # ficaria verde sem provar nada). Step dedicado: roda os 3 testes no
+      # WebKit oficial (Ubuntu) e FALHA se qualquer um skippar.
+      - name: E2E WebKit/iPhone (não pode skippar)
+        env:
+          # Chave de teste pública do Google reCAPTCHA (documentada em
+          # developers.google.com/recaptcha/docs/faq) — não é segredo.
+          VITE_RECAPTCHA_SITE_KEY: 6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
+        run: |
+          set -o pipefail
+          npx playwright test --project=webkit-iphone --reporter=line 2>&1 | tee /tmp/webkit-e2e.log
+          if grep -qE '[1-9][0-9]* skipped' /tmp/webkit-e2e.log; then
+            echo '::error::webkit-iphone skippou — test.skip ativo (VITE_RECAPTCHA_SITE_KEY ausente no build?)'
+            exit 1
+          fi
