@@ -9,11 +9,21 @@ import { randomUUID } from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// S8 — mock de desenvolvimento apenas. Credenciais e JWT deste arquivo são
+// fictícios (db.json local); nunca pode subir fora de ambiente dev.
+if (process.env.NODE_ENV === 'production') {
+  console.error('[mock-server] NODE_ENV=production — recusando iniciar (mock só para dev).');
+  process.exit(1);
+}
+
 const server = jsonServer.create();
 const router = jsonServer.router(path.join(__dirname, 'db.json'));
 const middlewares = jsonServer.defaults();
 
-const SECRET = process.env.JWT_SECRET || 'agendai_dev_secret';
+// Segredo por processo quando a env não existe: tokens do mock morrem no
+// restart (nada de secret fixo reutilizável fora deste arquivo de dev).
+const SECRET = process.env.JWT_SECRET || randomUUID();
 const ACCESS_TTL = '15m';
 const REFRESH_TTL = '7d';
 
