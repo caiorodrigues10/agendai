@@ -47,6 +47,14 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
   const [loading, setLoading] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
 
+  // A API de serviços devolve também os inativos (o painel do dono precisa
+  // reativá-los), mas escolher um inativo na fila faz o backend recusar com
+  // 400 "Serviço inválido para este estabelecimento".
+  const availableServices = React.useMemo(
+    () => services.filter(service => service.active !== false),
+    [services]
+  );
+
   const {
     register,
     handleSubmit,
@@ -59,17 +67,17 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
     ),
     defaultValues: {
       whatsapp: '',
-      serviceId: services.length > 0 ? services[0].id : '',
+      serviceId: availableServices.length > 0 ? availableServices[0].id : '',
     },
   });
 
   const selectedServiceId = watch('serviceId');
 
   useEffect(() => {
-    if (services.length > 0 && !selectedServiceId) {
-      setValue('serviceId', services[0].id);
+    if (availableServices.length > 0 && !selectedServiceId) {
+      setValue('serviceId', availableServices[0].id);
     }
-  }, [services, setValue, selectedServiceId]);
+  }, [availableServices, setValue, selectedServiceId]);
 
   const onSubmit = async (data: CustomerQueueFormData | CustomerQueueStaffFormData) => {
     setLoading(true);
@@ -198,13 +206,13 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
                 Escolha 1
               </span>
             </div>
-            {services.length === 0 ? (
+            {availableServices.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-border bg-bg p-4 text-center text-text-muted">
                 Nenhum serviço disponível no momento.
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-3">
-                {services.map(service => (
+                {availableServices.map(service => (
                   <ServiceCard
                     key={service.id}
                     service={service}

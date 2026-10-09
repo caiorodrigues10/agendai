@@ -8,6 +8,8 @@ export interface Service {
   icon: string;
   barbershopId?: string;
   commissionPercent?: number;
+  /** A API devolve serviços inativos também; `undefined` conta como ativo. */
+  active?: boolean;
 }
 
 export interface QueueItem {
