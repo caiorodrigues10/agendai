@@ -21,6 +21,7 @@
  *   npm run measure:responsive -- --label=lcp-antes --lcp --runs=3
  *   npm run measure:responsive -- --label=x --lcp --lcp-widths=375,1440 --routes=/login
  *   npm run measure:responsive -- --label=x --screens --shots=/,/login --shot-widths=375,768
+ *   npm run measure:responsive -- --label=x --perf --perf-widths=375,1440 --routes=/,/login
  *
  * Performance: cada rota é medida `--runs` vezes (padrão 5) com throttling
  * idêntico e o valor reportado é a MEDIANA entre as execuções (nunca a
@@ -90,6 +91,7 @@ function parseArgs(argv) {
     routes: PUBLIC_ROUTES,
     widths: WIDTHS,
     lcpWidths: [375],
+    perfWidths: null, // null = comportamento antigo (375 em tudo + 1440 só nas rotas-chave)
     shots: SHOT_ROUTES,
     shotWidths: SHOT_WIDTHS,
   };
@@ -107,6 +109,7 @@ function parseArgs(argv) {
     else if (raw.startsWith('--routes=')) args.routes = raw.slice(9).split(',');
     else if (raw.startsWith('--widths=')) args.widths = raw.slice(9).split(',').map(Number);
     else if (raw.startsWith('--lcp-widths=')) args.lcpWidths = raw.slice(13).split(',').map(Number);
+    else if (raw.startsWith('--perf-widths=')) args.perfWidths = raw.slice(14).split(',').map(Number);
     else if (raw.startsWith('--shots=')) args.shots = raw.slice(8).split(',');
     else if (raw.startsWith('--shot-widths=')) args.shotWidths = raw.slice(14).split(',').map(Number);
     else {
@@ -510,7 +513,7 @@ async function layoutPass(browser, { base, routes, widths, out }) {
   out.layout = results;
 }
 
-async function perfPass(browser, { base, routes, apiMode, out, suffix, runs }) {
+async function perfPass(browser, { base, routes, apiMode, out, suffix, runs, widths }) {
   const results = [];
   const scenarios = [];
   if (apiMode === 'off' || apiMode === 'both') scenarios.push('off');
@@ -571,17 +574,28 @@ async function perfPass(browser, { base, routes, apiMode, out, suffix, runs }) {
     return entry;
   };
 
-  for (const scenario of scenarios) {
-    for (const route of routes) {
-      results.push(await runGroup({ width: 375, height: 667, mobile: true, route, scenario }));
+  if (widths && widths.length) {
+    // grade explícita: TODAS as rotas em TODAS as larguras pedidas
+    for (const scenario of scenarios) {
+      for (const route of routes) {
+        for (const width of widths) {
+          results.push(await runGroup({ width, height: width < 500 ? 667 : 900, mobile: width < 500, route, scenario }));
+        }
+      }
     }
-  }
-  // desktop 1440 nas rotas-chave + rotas /queue (fila pública é medida nos
-  // dois viewports — item B da rodada LCP)
-  const desktopRoutes = [...new Set([...KEY_ROUTES, ...routes.filter((r) => r.startsWith('/queue'))])];
-  for (const scenario of scenarios) {
-    for (const route of desktopRoutes) {
-      results.push(await runGroup({ width: 1440, height: 900, mobile: false, route, scenario }));
+  } else {
+    for (const scenario of scenarios) {
+      for (const route of routes) {
+        results.push(await runGroup({ width: 375, height: 667, mobile: true, route, scenario }));
+      }
+    }
+    // desktop 1440 nas rotas-chave + rotas /queue (fila pública é medida nos
+    // dois viewports — item B da rodada LCP)
+    const desktopRoutes = [...new Set([...KEY_ROUTES, ...routes.filter((r) => r.startsWith('/queue'))])];
+    for (const scenario of scenarios) {
+      for (const route of desktopRoutes) {
+        results.push(await runGroup({ width: 1440, height: 900, mobile: false, route, scenario }));
+      }
     }
   }
   out[`perf${suffix}`] = results;
@@ -932,7 +946,7 @@ async function main() {
   try {
     if (args.lcp) await lcpPass(browser, { base, routes: lcpRoutes, apiMode, runs: args.runs, widths: args.lcpWidths, out });
     if (args.layout) await layoutPass(browser, { base, routes: args.routes, widths: args.widths, out });
-    if (args.perf) await perfPass(browser, { base, routes: args.routes, apiMode, out, suffix: '', runs: args.runs });
+    if (args.perf) await perfPass(browser, { base, routes: args.routes, apiMode, out, suffix: '', runs: args.runs, widths: args.perfWidths });
     if (args.screens) await screensPass(browser, { base, dir, shots: args.shots, shotWidths: args.shotWidths });
   } finally {
     await browser.close();
