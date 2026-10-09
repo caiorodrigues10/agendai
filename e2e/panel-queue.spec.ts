@@ -83,7 +83,8 @@ test.describe('painel — fila (login, chamar, concluir 2x, arquivar)', () => {
       timeout: 10_000,
     });
     await page.getByRole('button', { name: 'Fiado', exact: true }).click();
-    await expect(page.getByText(/conclu[ií]do|atendimento conclu[ií]do/i)).toBeVisible({
+    // A UI atual não exibe a palavra "concluído": o card sai da fila ativa.
+    await expect(page.getByRole('heading', { level: 4, name: name })).toBeHidden({
       timeout: 10_000,
     });
 
@@ -106,8 +107,10 @@ test.describe('painel — fila (login, chamar, concluir 2x, arquivar)', () => {
 
     await page.goto('/app/finance');
     // OWNER vê o painel; EMPLOYEE sem FINANCE_VIEW vê o bloqueio.
-    const denied = page.getByText(/acesso negado/i);
-    const allowed = page.getByText(/financeiro/i);
+    // Scope no heading: o mesmo texto existe num item de navegação oculto
+    // (menu "Mais") no viewport de 375px.
+    const denied = page.getByRole('heading', { name: /acesso negado/i });
+    const allowed = page.getByRole('heading', { name: /financeiro/i });
     await expect(denied.or(allowed).first()).toBeVisible({ timeout: 10_000 });
   });
 });
