@@ -118,11 +118,11 @@ export const StoryModal: React.FC<StoryModalProps> = ({
             {shopLogoUrl ? (
               <img src={shopLogoUrl} alt="" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-[10px] font-black text-white">{shopName.slice(0, 2).toUpperCase()}</span>
+              <span className="text-2xs font-black text-white">{shopName.slice(0, 2).toUpperCase()}</span>
             )}
           </div>
           <p className="text-xs font-bold text-white truncate">{shopName}</p>
-          <span className="text-[11px] text-white/60">{formatStoryTime(story.publishedAt ?? story.createdAt)}</span>
+          <span className="text-2xs text-white/60">{formatStoryTime(story.publishedAt ?? story.createdAt)}</span>
         </div>
 
         <div className="rounded-2xl overflow-hidden bg-black border border-white/10 max-h-[75vh] flex items-center justify-center">

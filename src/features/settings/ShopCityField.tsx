@@ -25,7 +25,7 @@ export const ShopCityField: React.FC<{
           placeholder="São Paulo"
         />
       </Field>
-      <p className={`mt-1.5 text-[11px] flex items-start gap-1.5 ${locationReady ? 'text-success' : 'text-text-muted'}`}>
+      <p className={`mt-1.5 text-2xs flex items-start gap-1.5 ${locationReady ? 'text-success' : 'text-text-muted'}`}>
         <MapPin size={12} className="mt-0.5 shrink-0" />
         <span>
           {locationReady

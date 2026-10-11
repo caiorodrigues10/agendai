@@ -111,7 +111,7 @@ export const PrivacyPolicyPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-accent">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-2xs font-black uppercase tracking-[0.2em] text-accent">
               <ShieldCheck size={24} className="h-3.5 w-3.5" />
               Privacidade e LGPD
             </div>

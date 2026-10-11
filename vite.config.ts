@@ -22,17 +22,29 @@ export default defineConfig(() => {
 				'2669-201-33-79-229.ngrok-free.app',
 			],
 		},
+		// `vite preview` serve o build. Só o script de medição (e quem quiser)
+		// liga o proxy de /api — sem isso o preview responde 404 em /api e o
+		// e2e que roda sem backend não muda de comportamento.
+		preview: process.env.MEASURE_API_PROXY
+			? {
+					port: Number(process.env.MEASURE_PORT || 4173),
+					proxy: {
+						'/api': {
+							target: 'http://127.0.0.1:3333',
+							ws: true,
+						},
+					},
+				}
+			: undefined,
 		plugins: [
 			react(),
 			// No Storybook (env STORYBOOK) o app não é servido como PWA.
 			...(process.env.STORYBOOK ? [] : [VitePWA({
 				registerType: 'prompt',
 				injectRegister: null,
-				includeAssets: [
-					'favicon.png',
-					'brand/*.png',
-					'icons/*.png',
-				],
+				// Arquivos do `public/` entram pela `globPatterns` do workbox abaixo
+				// (manifest e demais assets são adicionados pelo próprio plugin).
+				includeAssets: undefined,
 				manifest: {
 					id: '/',
 					name: `${BRAND_NAME} — Gestão para salões, barbearias e studios`,
@@ -75,16 +87,16 @@ export default defineConfig(() => {
 					],
 					screenshots: [
 						{
-							src: '/screenshots/queue-real.png',
+							src: '/screenshots/queue-real.webp',
 							sizes: '1400x900',
-							type: 'image/png',
+							type: 'image/webp',
 							form_factor: 'wide',
 							label: 'Fila digital do salão',
 						},
 						{
-							src: '/screenshots/appointments-real.png',
+							src: '/screenshots/appointments-real.webp',
 							sizes: '1400x1001',
-							type: 'image/png',
+							type: 'image/webp',
 							form_factor: 'wide',
 							label: 'Agenda do salão',
 						},
@@ -110,10 +122,53 @@ export default defineConfig(() => {
 					skipWaiting: false,
 					navigateFallback: '/index.html',
 					navigateFallbackDenylist: [/^\/api\//, /^\/robots\.txt$/, /^\/sitemap\.xml$/],
+					// Shell + fechamento estático de TODAS as rotas públicas (/, /planos,
+					// /login, /cadastro, /queue, marketing e conteúdos públicos) — o
+					// pre-cache é o que garante que essas telas abram offline na
+					// primeira visita. O restante (painel autenticado, etc.) entra no
+					// cache de runtime após a primeira visita. Mantenha a lista em dia
+					// com `npm run build && node scripts/precache-report.mjs --limit=3185427`
+					// e com o e2e `e2e/pwa-offline.spec.ts`.
+					globPatterns: [
+						'index.html',
+						'favicon.png',
+						'brand/*.webp',
+						'fonts/dm-sans-normal-latin.woff2',
+						'fonts/dm-sans-italic-latin.woff2',
+						'fonts/syne-normal-latin.woff2',
+						'weather/*.jpg',
+						'assets/index-*.{js,css}',
+						'assets/ScrollTrigger-*.js',
+						'assets/{LandingPage,MarketingLayout,PlansPage,LoginPage,PublicHome,ShopProfile,SmartSelect,Combination,PostDetail,schemas,utils,Toast,ModalShell,ConfirmDialog,StatusBadge,PasswordInput,clientPortalApi,documentUtils,notificationsApi,reputationApi,publicProductsApi,plansApi,recaptcha,reducedMotion,softwareApplicationLd,subscriptionPaywall,trialCampaign,weatherVisuals,formatters,brand,Avatar,Button,Card,chart}-*.js',
+						// Páginas públicas carregadas por lazy(): sem elas no precache a
+						// rota cai no ErrorBoundary offline (evidência do P1).
+						'assets/{FeaturesPage,AiPredictivePage,SchedulingPage,AboutPage,ContactPage,PrivacyPolicyPage,TermsPage,ForgotPasswordPage,NotFoundPage,CommercialIntentPage,PricingPersuasionCharts,BarChart,ThemeToggle}-*.js',
+					],
 					runtimeCaching: [
 						{
 							urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
 							handler: 'NetworkOnly',
+						},
+						{
+							// Chunks fora do precache (painel, gráficos do /planos etc.)
+							// ficam disponíveis offline depois da primeira visita.
+							urlPattern: ({ url }) => url.pathname.startsWith('/assets/'),
+							handler: 'StaleWhileRevalidate',
+							options: {
+								cacheName: 'agendai-runtime-assets',
+								cacheableResponse: { statuses: [0, 200] },
+								expiration: { maxEntries: 160, maxAgeSeconds: 60 * 60 * 24 * 30 },
+							},
+						},
+						{
+							// Fontes fora do precache (latín-ext, grego) caem aqui.
+							urlPattern: ({ url }) => url.pathname.startsWith('/fonts/'),
+							handler: 'StaleWhileRevalidate',
+							options: {
+								cacheName: 'agendai-runtime-fonts',
+								cacheableResponse: { statuses: [0, 200] },
+								expiration: { maxEntries: 16, maxAgeSeconds: 60 * 60 * 24 * 365 },
+							},
 						},
 						{
 							urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

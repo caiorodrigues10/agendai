@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { lazy, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   LuArrowRight as ArrowRight,
   LuCheck as Check,
   LuCircleCheck as CheckCircle2,
-  LuLoaderCircle as Loader2,
   LuX as X,
 } from 'react-icons/lu';
 import { plansApi, Plan } from '../infra/plansApi';
@@ -13,13 +12,20 @@ import { useSubscription } from '../contexts/SubscriptionContext';
 import { useAuth } from '../contexts/AuthContext';
 import { MarketingLayout } from '../layouts/marketing/MarketingLayout';
 import { SectionError } from '../components/patterns/states/SectionError';
-import { PricingPersuasionCharts } from '../features/marketing';
 import { softwareApplicationLd } from '../marketing/softwareApplicationLd';
 import { getErrorMessage } from '../utils/errorMessage';
 import { trialCampaign } from '../marketing/trialCampaign';
 import { isPaidSubscription, staffHomePath } from '../utils/subscriptionPaywall';
 import { formatCurrencyBRL } from '../utils/formatters';
 import { ESSENTIAL_MONTHLY, PRO_MONTHLY, ESSENTIAL_YEARLY, PRO_YEARLY } from '../marketing/planPrices';
+
+// Gráficos de persuasão (recharts) fora do caminho crítico: o LCP da rota era
+// adiado pela execução do bundle do gráfico antes do primeiro render do hero.
+const PricingPersuasionCharts = lazy(() =>
+  import('../features/marketing/PricingPersuasionCharts').then(module => ({
+    default: module.PricingPersuasionCharts,
+  }))
+);
 
 const matrix = [
   { label: 'Fila digital + agenda online', essential: true, pro: true },
@@ -223,35 +229,21 @@ export const PlansPage: React.FC = () => {
         <section id="precos" className="px-6 pb-16 pt-32 md:px-10 md:pb-20 md:pt-40 xl:px-12">
           <div className="mx-auto max-w-6xl">
             <div className="mx-auto max-w-2xl text-center">
-              <motion.h1
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl md:text-6xl"
-              >
+              <h1 className="text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl md:text-6xl planos-hero-rise planos-hero-rise-1">
                 Teste grátis ou escolha o plano
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 }}
-                className="mx-auto mt-4 max-w-xl text-base font-medium leading-relaxed text-neutral-400 md:text-lg"
-              >
+              </h1>
+              <p className="mx-auto mt-4 max-w-xl text-base font-medium leading-relaxed text-neutral-400 md:text-lg planos-hero-rise planos-hero-rise-2">
                 {trialCampaign.body} {trialCampaign.afterTrial}
-              </motion.p>
+              </p>
             </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="mt-8 flex justify-center"
-            >
+            <div className="mt-8 flex justify-center planos-hero-rise planos-hero-rise-3">
               <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1">
                 <button
                   type="button"
                   aria-pressed={!isYearly}
                   onClick={() => setIsYearly(false)}
-                  className={`rounded-full px-5 py-2.5 text-sm font-bold transition ${
+                  className={`flex min-h-11 items-center rounded-full px-5 py-2.5 text-sm font-bold transition lg:min-h-0 ${
                     !isYearly ? 'bg-white text-black' : 'text-neutral-400 hover:text-white'
                   }`}
                 >
@@ -261,26 +253,26 @@ export const PlansPage: React.FC = () => {
                   type="button"
                   aria-pressed={isYearly}
                   onClick={() => setIsYearly(true)}
-                  className={`rounded-full px-5 py-2.5 text-sm font-bold transition ${
+                  className={`flex min-h-11 items-center rounded-full px-5 py-2.5 text-sm font-bold transition lg:min-h-0 ${
                     isYearly ? 'bg-white text-black' : 'text-neutral-400 hover:text-white'
                   }`}
                 >
                   Anual
                 </button>
-                <span className="rounded-full bg-accent px-3 py-2 text-[10px] font-black uppercase tracking-wider text-black">
+                <span className="rounded-full bg-accent px-3 py-2 text-2xs font-black uppercase tracking-wider text-black">
                   2 meses grátis
                 </span>
               </div>
-            </motion.div>
+            </div>
 
             {error && <SectionError message={error} className="mx-auto mt-8 max-w-md" />}
 
-            {loading ? (
-              <div className="flex justify-center py-20 text-accent">
-                <Loader2 className="animate-spin" size={36} />
-              </div>
-            ) : (
-              <div className="mt-10 grid grid-cols-1 items-stretch gap-5 lg:grid-cols-3 lg:items-end lg:gap-4 lg:py-4">
+            {/* Cards sempre montados: esconder atrás de spinner trocava ~200px por
+                ~2000px e era a maior fonte de CLS da página (auditoria R3). */}
+            <div
+              className="mt-10 grid grid-cols-1 items-stretch gap-5 lg:grid-cols-3 lg:items-end lg:gap-4 lg:py-4"
+              aria-busy={loading}
+            >
                 <motion.article
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -290,7 +282,7 @@ export const PlansPage: React.FC = () => {
                     <h2 className="text-sm font-black uppercase tracking-[0.18em] text-white">
                       Teste grátis
                     </h2>
-                    <span className="rounded-full border border-white/15 bg-white/8 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-neutral-200">
+                    <span className="rounded-full border border-white/15 bg-white/8 px-2.5 py-1 text-2xs font-black uppercase tracking-wider text-neutral-200">
                       30 dias
                     </span>
                   </div>
@@ -311,7 +303,7 @@ export const PlansPage: React.FC = () => {
                   >
                     {trialCta}
                   </button>
-                  <p className="mt-2 text-center text-[11px] text-text-muted">
+                  <p className="mt-2 text-center text-2xs text-text-muted">
                     Sem cartão, sem cobrança automática
                   </p>
                   <FeatureList rows={trialRows} />
@@ -328,7 +320,7 @@ export const PlansPage: React.FC = () => {
                       Essencial
                     </h2>
                     {essentialCurrent && (
-                      <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-accent">
+                      <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-2xs font-bold uppercase tracking-wider text-accent">
                         Atual
                       </span>
                     )}
@@ -373,7 +365,7 @@ export const PlansPage: React.FC = () => {
                     {essentialPlan ? paidCta('Essencial', essentialCurrent) : 'Indisponível'}
                   </button>
                   {!essentialCurrent && (
-                    <p className="mt-2 text-center text-[11px] text-text-muted">
+                    <p className="mt-2 text-center text-2xs text-text-muted">
                       {trialCampaign.afterTrialThenEssential}
                     </p>
                   )}
@@ -386,7 +378,7 @@ export const PlansPage: React.FC = () => {
                   transition={{ delay: 0.1 }}
                   className="relative z-10 flex flex-col rounded-[1.75rem] border border-accent/50 bg-linear-to-b from-accent/25 to-[#07140f] p-6 shadow-[0_0_80px_rgba(52,211,153,0.16)] md:p-7 lg:scale-[1.02]"
                 >
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-1 text-[10px] font-black uppercase tracking-widest text-black">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-1 text-2xs font-black uppercase tracking-widest text-black">
                     Mais escolhido
                   </div>
                   <div className="flex items-start justify-between gap-3">
@@ -395,12 +387,12 @@ export const PlansPage: React.FC = () => {
                     </h2>
                     <div className="flex flex-wrap justify-end gap-1.5">
                       {isYearly && (
-                        <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-black">
+                        <span className="rounded-full bg-white px-2.5 py-1 text-2xs font-black uppercase tracking-wider text-black">
                           2 meses grátis
                         </span>
                       )}
                       {proCurrent && (
-                        <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-accent">
+                        <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-2xs font-bold uppercase tracking-wider text-accent">
                           Atual
                         </span>
                       )}
@@ -443,14 +435,13 @@ export const PlansPage: React.FC = () => {
                     {proPlan ? paidCta('Pro', proCurrent) : 'Indisponível'}
                   </button>
                   {!proCurrent && (
-                    <p className="mt-2 text-center text-[11px] text-neutral-400">
+                    <p className="mt-2 text-center text-2xs text-neutral-400">
                       {trialCampaign.afterTrialThenPro}
                     </p>
                   )}
                   <FeatureList rows={proRows} accent />
                 </motion.article>
               </div>
-            )}
 
             <p className="mx-auto mt-8 max-w-3xl text-center text-xs leading-relaxed text-text-muted">
               O teste de 30 dias de Pro começa no cadastro, sem cartão. A cobrança só é criada
@@ -473,7 +464,9 @@ export const PlansPage: React.FC = () => {
 
         <section className="border-y border-white/8 bg-white/1.5 px-6 py-20 md:px-10 md:py-28 xl:px-12">
           <div className="mx-auto max-w-6xl">
-            <PricingPersuasionCharts variant="dark" />
+            <React.Suspense fallback={null}>
+              <PricingPersuasionCharts variant="dark" />
+            </React.Suspense>
           </div>
         </section>
 
@@ -490,7 +483,7 @@ export const PlansPage: React.FC = () => {
 
             <div className="overflow-hidden rounded-4xl border border-white/10 bg-surface">
               <div className="overflow-x-auto">
-                <div className="grid grid-cols-[1.5fr_0.75fr_0.75fr] border-b border-white/8 px-5 py-4 text-[10px] font-black uppercase tracking-wider text-text-muted md:px-8 md:text-xs">
+                <div className="grid grid-cols-[1.5fr_0.75fr_0.75fr] border-b border-white/8 px-5 py-4 text-2xs font-black uppercase tracking-wider text-text-muted md:px-8 md:text-xs">
                   <span>Recurso</span>
                   <span className="text-center">Essencial</span>
                   <span className="text-center text-accent">Pro</span>

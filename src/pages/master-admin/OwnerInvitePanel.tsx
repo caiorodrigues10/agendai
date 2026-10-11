@@ -75,7 +75,7 @@ export const OwnerInvitePanel: React.FC<OwnerInvitePanelProps> = ({ shopId, invi
         </div>
         <div className="flex items-center justify-between gap-2">
           <span className="text-text-muted">Status</span>
-          <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${status.tone}`}>
+          <span className={`px-2 py-0.5 rounded text-2xs font-medium ${status.tone}`}>
             {status.label}
           </span>
         </div>

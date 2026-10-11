@@ -6,7 +6,7 @@ import { SeoHead } from '../../components/marketing/SeoHead';
 type JsonLd = Record<string, unknown> | Record<string, unknown>[];
 
 export const MARKETING_WRAPPER =
-  'min-h-screen overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30';
+  'min-h-dvh overflow-x-hidden bg-black font-sans text-neutral-100 selection:bg-accent/30';
 
 export interface MarketingLayoutProps {
   title?: string;

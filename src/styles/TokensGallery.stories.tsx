@@ -71,7 +71,7 @@ const Swatch: FC<{ label: string; cssVar: string }> = ({ label, cssVar }) => (
       data-testid={`swatch-${label}`}
     />
     <span className="text-xs font-bold text-text-primary">{label}</span>
-    <code className="text-[10px] text-text-muted">var({cssVar})</code>
+    <code className="text-2xs text-text-muted">var({cssVar})</code>
   </div>
 );
 

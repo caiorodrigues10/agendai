@@ -3,7 +3,7 @@ import { ShowcasePublicPage } from '../features/showcase';
 
 const ShowcasePage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-dvh bg-bg">
       <ShowcasePublicPage />
     </div>
   );

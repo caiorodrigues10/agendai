@@ -1,8 +1,10 @@
 ﻿@import 'tailwindcss';
 @import './styles/tokens.css';
+@import './styles/fonts.css';
 @import './styles/base.css';
 @import './styles/vendors.css';
 @import './styles/features/weather.css';
+@import './styles/features/hero.css';
 
 /* Utilities usados só por stories ficam fora do bundle (D-002). */
 @source not './**/*.stories.tsx';

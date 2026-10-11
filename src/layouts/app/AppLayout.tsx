@@ -34,7 +34,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   onNavigate,
   children,
 }) => (
-  <div className="min-h-screen bg-bg pb-[max(5.5rem,env(safe-area-inset-bottom))] text-text-primary lg:pb-0">
+  <div className="min-h-dvh bg-bg pb-[max(5.5rem,env(safe-area-inset-bottom))] text-text-primary lg:pb-0">
     <a
       href="#main-content"
       className="sr-only fixed left-4 top-4 z-[90] rounded-lg bg-accent px-4 py-2 text-sm font-bold text-accent-fg focus:not-sr-only"

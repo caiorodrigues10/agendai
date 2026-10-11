@@ -120,7 +120,7 @@ export const EmailHistoryPanel: React.FC<EmailHistoryPanelProps> = ({ barbershop
                   <span className="truncate text-sm font-bold text-text-primary">
                     {entry.subject}
                   </span>
-                  <span className="shrink-0 rounded-full border border-border bg-bg px-2 py-0.5 text-[10px] font-bold text-text-muted">
+                  <span className="shrink-0 rounded-full border border-border bg-bg px-2 py-0.5 text-2xs font-bold text-text-muted">
                     {entry.template}
                   </span>
                 </div>
@@ -130,7 +130,7 @@ export const EmailHistoryPanel: React.FC<EmailHistoryPanelProps> = ({ barbershop
                 {entry.errorMessage && (
                   <p className="mt-1 text-xs text-danger truncate">{entry.errorMessage}</p>
                 )}
-                <p className="mt-1 text-[11px] text-text-muted">
+                <p className="mt-1 text-2xs text-text-muted">
                   {entry.sentAt
                     ? `Enviado em ${new Date(entry.sentAt).toLocaleString('pt-BR')}`
                     : `Criado em ${new Date(entry.createdAt).toLocaleString('pt-BR')}`}
@@ -142,7 +142,7 @@ export const EmailHistoryPanel: React.FC<EmailHistoryPanelProps> = ({ barbershop
                   {STATUS_META[entry.status]?.label ?? entry.status}
                 </span>
                 {entry.deliveredAt && (
-                  <span className="text-[10px] text-text-muted">
+                  <span className="text-2xs text-text-muted">
                     Entregue {new Date(entry.deliveredAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 )}

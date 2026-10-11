@@ -36,10 +36,14 @@ export const ForgotPasswordPage: React.FC = () => {
     setSubmitting(true);
     try {
       const token = await getRecaptchaToken('forgot_password');
-      await authApi.forgotPassword(email.trim(), token);
+      try {
+        await authApi.forgotPassword(email.trim(), token);
+      } catch {
+        // Anti-enumeração: sucesso mesmo se a API falhar.
+      }
       setSuccess(true);
-    } catch {
-      setSuccess(true);
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : 'Não foi possível enviar. Tente novamente.');
     } finally {
       setSubmitting(false);
     }
@@ -47,7 +51,7 @@ export const ForgotPasswordPage: React.FC = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center p-4 relative">
+      <div className="min-h-dvh bg-bg flex items-center justify-center p-4 relative">
         <div className="absolute top-4 right-4">
           <ThemeToggle />
         </div>
@@ -56,7 +60,7 @@ export const ForgotPasswordPage: React.FC = () => {
             <Logo size="md" />
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg border border-border">
               <LockKeyhole size={10} className="text-text-muted" />
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
+              <span className="text-2xs font-bold text-text-muted uppercase tracking-widest">
                 E-mail enviado
               </span>
             </div>
@@ -64,9 +68,9 @@ export const ForgotPasswordPage: React.FC = () => {
           <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
             <CheckCircle size={24} className="text-success" />
           </div>
-          <h2 className="text-lg font-bold text-text-primary mb-2">
+          <h1 className="text-lg font-bold text-text-primary mb-2">
             Verifique sua caixa de entrada
-          </h2>
+          </h1>
           <p className="text-sm text-text-muted leading-relaxed mb-6">
             Se o e-mail <strong className="text-text-secondary">{email}</strong> estiver cadastrado,
             enviaremos instruções para redefinir sua senha.
@@ -84,7 +88,7 @@ export const ForgotPasswordPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center p-4 relative">
+    <div className="min-h-dvh bg-bg flex items-center justify-center p-4 relative">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
@@ -97,26 +101,26 @@ export const ForgotPasswordPage: React.FC = () => {
         />
         <div className="p-8 flex flex-col items-center">
           <div className="mb-6 flex flex-col items-center gap-4">
-            <button type="button" onClick={() => navigate('/login')} className="cursor-pointer">
+            <button type="button" onClick={() => navigate('/login')} className="min-h-11 cursor-pointer lg:min-h-0">
               <Logo size="md" />
             </button>
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg border border-border">
               <LockKeyhole size={10} className="text-text-muted" />
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
+              <h1 className="text-2xs font-bold text-text-muted uppercase tracking-widest">
                 Recuperar senha
-              </span>
+              </h1>
             </div>
           </div>
 
           <form onSubmit={handleEmailSubmit} className="w-full space-y-6">
               <div className="space-y-4">
-                <p className="text-[11px] text-text-muted text-center leading-relaxed">
+                <p className="text-2xs text-text-muted text-center leading-relaxed">
                   Informe o e-mail associado à sua conta para recuperar sua senha.
                 </p>
                 <div className="space-y-1">
                   <label
                     htmlFor="forgot-password-email"
-                    className="text-[10px] font-bold uppercase tracking-wider text-accent"
+                    className="text-2xs font-bold uppercase tracking-wider text-accent"
                   >
                     E-mail
                   </label>
@@ -153,7 +157,7 @@ export const ForgotPasswordPage: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate('/login')}
-            className="mt-4 text-[11px] text-text-muted hover:text-accent transition-colors"
+            className="mt-4 inline-flex min-h-11 items-center text-2xs text-text-muted hover:text-accent transition-colors lg:min-h-0"
           >
             Voltar ao login
           </button>

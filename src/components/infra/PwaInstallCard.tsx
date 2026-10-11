@@ -55,7 +55,7 @@ export const PwaInstallCard: React.FC<PwaInstallCardProps> = ({
                 controls
                 playsInline
                 preload="metadata"
-                poster="/screenshots/queue-real.png"
+                poster="/screenshots/queue-real.webp"
                 src={videoUrl}
               >
                 Seu navegador não reproduz este vídeo.
@@ -97,8 +97,8 @@ export const PwaInstallCard: React.FC<PwaInstallCardProps> = ({
               <p
                 className={
                   marketing
-                    ? 'text-[11px] font-black uppercase tracking-[0.22em] text-accent'
-                    : 'text-[10px] font-bold uppercase tracking-wider text-accent'
+                    ? 'text-2xs font-black uppercase tracking-[0.22em] text-accent'
+                    : 'text-2xs font-bold uppercase tracking-wider text-accent'
                 }
               >
                 Aplicativo instalável

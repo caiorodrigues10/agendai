@@ -196,7 +196,7 @@ export const CashPanel: React.FC = () => {
             <div className="pointer-events-none absolute -right-3 -top-3 text-accent opacity-15">
               <Banknote size={64} />
             </div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+            <p className="text-2xs font-bold uppercase tracking-wider text-text-secondary">
               Total recebido
             </p>
             <p className="mt-1 text-xl font-bold text-text-primary">{formatCurrencyBRL(todayTotal)}</p>
@@ -211,13 +211,13 @@ export const CashPanel: React.FC = () => {
                 <div className="pointer-events-none absolute -right-2 -top-2 text-border opacity-20">
                   {PAYMENT_METHOD_ICONS[method]}
                 </div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                <p className="text-2xs font-bold uppercase tracking-wider text-text-muted">
                   {PAYMENT_METHOD_LABELS[method]}
                 </p>
                 <p className="mt-1 truncate text-lg font-bold text-text-primary">
                   {formatCurrencyBRL(entry?.total ?? 0)}
                 </p>
-                <p className="text-[11px] text-text-muted">
+                <p className="text-2xs text-text-muted">
                   {entry?.count ?? 0} {entry?.count === 1 ? 'movimentação' : 'movimentações'}
                 </p>
               </div>
@@ -264,7 +264,7 @@ export const CashPanel: React.FC = () => {
                     <span className="text-sm font-medium text-text-primary">
                       {MOVEMENT_TYPE_DISPLAY_LABELS[m.type] ?? m.type}
                     </span>
-                    <span className="inline-flex items-center gap-1 rounded-md bg-surface-2 px-2 py-0.5 text-[10px] font-semibold uppercase text-text-muted">
+                    <span className="inline-flex items-center gap-1 rounded-md bg-surface-2 px-2 py-0.5 text-2xs font-semibold uppercase text-text-muted">
                       {PAYMENT_METHOD_LABELS[m.paymentMethod as PaymentMethod] ?? m.paymentMethod}
                     </span>
                   </div>
@@ -276,7 +276,7 @@ export const CashPanel: React.FC = () => {
                   <p className="text-sm font-semibold text-text-primary">
                     {formatCurrencyBRL(m.amount)}
                   </p>
-                  <p className="text-[11px] text-text-muted">{formatDateTimeBR(m.createdAt)}</p>
+                  <p className="text-2xs text-text-muted">{formatDateTimeBR(m.createdAt)}</p>
                 </div>
               </div>
             ))}

@@ -69,12 +69,12 @@ export const ShopFloorControls: React.FC<ShopFloorControlsProps> = ({
     <div className="bg-surface border border-border rounded-xl p-5">
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-1">Status do salão</p>
+          <p className="text-2xs font-bold uppercase tracking-widest text-text-muted mb-1">Status do salão</p>
           <h3 className={`text-lg font-bold ${open ? 'text-success' : 'text-danger'}`}>{copy.title}</h3>
           <p className="text-xs text-text-secondary mt-1">{copy.detail}</p>
         </div>
         <span
-          className={`shrink-0 text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wide border ${
+          className={`shrink-0 text-2xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wide border ${
             open ? 'bg-success/10 text-success border-success/30' : 'bg-danger/10 text-danger border-danger/30'
           }`}
         >
@@ -201,7 +201,7 @@ export const ShopFloorControls: React.FC<ShopFloorControlsProps> = ({
                   }`}
                 >
                   <span className="block text-sm font-bold text-text-primary">{opt.title}</span>
-                  <span className="block text-[11px] text-text-muted mt-1">{opt.description}</span>
+                  <span className="block text-2xs text-text-muted mt-1">{opt.description}</span>
                 </button>
               );
             })}

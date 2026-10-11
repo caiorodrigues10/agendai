@@ -58,14 +58,14 @@ const OwnerInviteForm: React.FC<OwnerInviteFormProps> = ({ token, onSuccess }) =
       {error && <SectionError message={error} className="w-full mb-4" />}
       <form onSubmit={handleSubmit} className="w-full space-y-6">
         <div className="space-y-4">
-          <p className="text-[11px] text-text-muted text-center leading-relaxed">
+          <p className="text-2xs text-text-muted text-center leading-relaxed">
             Defina a senha de acesso ao painel do seu salão.
           </p>
 
           <div className="space-y-1">
             <label
               htmlFor="invite-new-password"
-              className="text-[10px] font-bold uppercase tracking-wider text-accent"
+              className="text-2xs font-bold uppercase tracking-wider text-accent"
             >
               Nova senha
             </label>
@@ -84,7 +84,7 @@ const OwnerInviteForm: React.FC<OwnerInviteFormProps> = ({ token, onSuccess }) =
           <div className="space-y-1">
             <label
               htmlFor="invite-confirm-password"
-              className="text-[10px] font-bold uppercase tracking-wider text-accent"
+              className="text-2xs font-bold uppercase tracking-wider text-accent"
             >
               Confirmar nova senha
             </label>
@@ -123,7 +123,7 @@ const OwnerInviteForm: React.FC<OwnerInviteFormProps> = ({ token, onSuccess }) =
       <button
         type="button"
         onClick={() => navigate('/login')}
-        className="mt-4 text-[11px] text-text-muted hover:text-accent transition-colors"
+        className="mt-4 text-2xs text-text-muted hover:text-accent transition-colors"
       >
         Ir para o login
       </button>
@@ -138,7 +138,7 @@ export const PublicOwnerInvitePage: React.FC = () => {
 
   if (!token || token.length < 32) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center p-4 relative">
+      <div className="min-h-dvh bg-bg flex items-center justify-center p-4 relative">
         <div className="absolute top-4 right-4">
           <ThemeToggle />
         </div>
@@ -147,7 +147,7 @@ export const PublicOwnerInvitePage: React.FC = () => {
             <Logo size="md" />
             <KeyRound size={32} className="text-danger mx-auto" />
           </div>
-          <h2 className="text-lg font-bold text-text-primary mb-2">Link inválido</h2>
+          <h1 className="text-lg font-bold text-text-primary mb-2">Link inválido</h1>
           <p className="text-sm text-text-muted leading-relaxed mb-6">
             Este link de convite é inválido. Peça ao administrador para reenviar o convite.
           </p>
@@ -165,7 +165,7 @@ export const PublicOwnerInvitePage: React.FC = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center p-4 relative">
+      <div className="min-h-dvh bg-bg flex items-center justify-center p-4 relative">
         <div className="absolute top-4 right-4">
           <ThemeToggle />
         </div>
@@ -174,7 +174,7 @@ export const PublicOwnerInvitePage: React.FC = () => {
             <Logo size="md" />
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg border border-border">
               <KeyRound size={10} className="text-text-muted" />
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
+              <span className="text-2xs font-bold text-text-muted uppercase tracking-widest">
                 Convite aceito
               </span>
             </div>
@@ -182,7 +182,7 @@ export const PublicOwnerInvitePage: React.FC = () => {
           <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
             <CheckCircle size={24} className="text-success" />
           </div>
-          <h2 className="text-lg font-bold text-text-primary mb-2">Senha definida com sucesso!</h2>
+          <h1 className="text-lg font-bold text-text-primary mb-2">Senha definida com sucesso!</h1>
           <p className="text-sm text-text-muted leading-relaxed mb-6">
             Agora você já pode entrar no painel com seu e-mail e a nova senha.
           </p>
@@ -199,7 +199,7 @@ export const PublicOwnerInvitePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center p-4 relative">
+    <div className="min-h-dvh bg-bg flex items-center justify-center p-4 relative">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
@@ -210,14 +210,14 @@ export const PublicOwnerInvitePage: React.FC = () => {
         />
         <div className="p-8 flex flex-col items-center">
           <div className="mb-6 flex flex-col items-center gap-4">
-            <button type="button" onClick={() => navigate('/login')} className="cursor-pointer">
+            <button type="button" onClick={() => navigate('/login')} className="min-h-11 cursor-pointer lg:min-h-0">
               <Logo size="md" />
             </button>
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg border border-border">
               <KeyRound size={10} className="text-text-muted" />
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
+              <h1 className="text-2xs font-bold text-text-muted uppercase tracking-widest">
                 Aceitar convite
-              </span>
+              </h1>
             </div>
           </div>
 

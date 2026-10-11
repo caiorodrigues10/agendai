@@ -33,7 +33,7 @@ interface BarbershopContextValue {
 
 const BarbershopContext = createContext<BarbershopContextValue | undefined>(undefined);
 
-function isShopStaffRole(role?: string) {
+export function isShopStaffRole(role?: string) {
   const normalized = (role || '').toUpperCase();
   return normalized === 'OWNER' || normalized === 'EMPLOYEE';
 }

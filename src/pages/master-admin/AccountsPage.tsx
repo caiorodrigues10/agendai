@@ -55,7 +55,7 @@ const formatDate = (iso: string): string =>
 
 const StatusBadge: React.FC<{ active: boolean }> = ({ active }) => (
   <span
-    className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+    className={`px-2 py-0.5 rounded text-2xs font-medium ${
       active ? 'text-success bg-success/10' : 'text-danger bg-danger/10'
     }`}
   >
@@ -70,7 +70,7 @@ const ApprovalBadge: React.FC<{ status: AccountsApprovalFilter }> = ({ status })
       : status === 'PENDING'
         ? 'text-warning bg-warning/10'
         : 'text-danger bg-danger/10';
-  return <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${tone}`}>{APPROVAL_LABEL[status]}</span>;
+  return <span className={`px-2 py-0.5 rounded text-2xs font-medium ${tone}`}>{APPROVAL_LABEL[status]}</span>;
 };
 
 export const AccountsPage: React.FC = () => {

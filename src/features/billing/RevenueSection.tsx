@@ -139,7 +139,7 @@ export const RevenueSection: React.FC = () => {
           ) : summary ? (
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-bg/40 border border-border rounded-xl p-4">
-                <p className="text-[10px] text-text-muted uppercase tracking-widest font-semibold mb-1">
+                <p className="text-2xs text-text-muted uppercase tracking-widest font-semibold mb-1">
                   Total original
                 </p>
                 <p className="text-lg font-black text-text-primary">
@@ -147,7 +147,7 @@ export const RevenueSection: React.FC = () => {
                 </p>
               </div>
               <div className="bg-bg/40 border border-border rounded-xl p-4">
-                <p className="text-[10px] text-text-muted uppercase tracking-widest font-semibold mb-1">
+                <p className="text-2xs text-text-muted uppercase tracking-widest font-semibold mb-1">
                   Total pago
                 </p>
                 <p className="text-lg font-black text-success">
@@ -155,7 +155,7 @@ export const RevenueSection: React.FC = () => {
                 </p>
               </div>
               <div className="bg-bg/40 border border-border rounded-xl p-4">
-                <p className="text-[10px] text-text-muted uppercase tracking-widest font-semibold mb-1">
+                <p className="text-2xs text-text-muted uppercase tracking-widest font-semibold mb-1">
                   Pendente
                 </p>
                 <p className="text-lg font-black text-warning">
@@ -163,7 +163,7 @@ export const RevenueSection: React.FC = () => {
                 </p>
               </div>
               <div className="bg-bg/40 border border-border rounded-xl p-4">
-                <p className="text-[10px] text-text-muted uppercase tracking-widest font-semibold mb-1">
+                <p className="text-2xs text-text-muted uppercase tracking-widest font-semibold mb-1">
                   Vencido ({summary.fiados.overdueCount})
                 </p>
                 <p className="text-lg font-black text-danger">

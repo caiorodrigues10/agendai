@@ -292,7 +292,7 @@ export const CatalogManager: React.FC = () => {
                     <p className="text-sm font-bold text-text-primary">{c.name}</p>
                     {c.description && <p className="text-xs text-text-muted">{c.description}</p>}
                   </div>
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${c.isActive ? 'bg-success/15 text-success' : 'bg-surface-2 text-text-muted'}`}>
+                  <span className={`rounded-full px-2 py-0.5 text-2xs font-bold ${c.isActive ? 'bg-success/15 text-success' : 'bg-surface-2 text-text-muted'}`}>
                     {c.isActive ? 'Ativo' : 'Inativo'}
                   </span>
                 </div>

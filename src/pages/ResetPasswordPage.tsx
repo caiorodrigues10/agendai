@@ -60,7 +60,7 @@ export const ResetPasswordPage: React.FC = () => {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center p-4 relative">
+      <div className="min-h-dvh bg-bg flex items-center justify-center p-4 relative">
         <div className="absolute top-4 right-4">
           <ThemeToggle />
         </div>
@@ -69,7 +69,7 @@ export const ResetPasswordPage: React.FC = () => {
             <Logo size="md" />
           </div>
           <AlertCircle size={32} className="text-danger mx-auto mb-4" />
-          <h2 className="text-lg font-bold text-text-primary mb-2">Link inválido</h2>
+          <h1 className="text-lg font-bold text-text-primary mb-2">Link inválido</h1>
           <p className="text-sm text-text-muted mb-6">
             Este link de redefinição de senha é inválido. Solicite um novo link.
           </p>
@@ -87,7 +87,7 @@ export const ResetPasswordPage: React.FC = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center p-4 relative">
+      <div className="min-h-dvh bg-bg flex items-center justify-center p-4 relative">
         <div className="absolute top-4 right-4">
           <ThemeToggle />
         </div>
@@ -96,7 +96,7 @@ export const ResetPasswordPage: React.FC = () => {
             <Logo size="md" />
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg border border-border">
               <LockKeyhole size={10} className="text-text-muted" />
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
+              <span className="text-2xs font-bold text-text-muted uppercase tracking-widest">
                 Senha redefinida
               </span>
             </div>
@@ -104,7 +104,7 @@ export const ResetPasswordPage: React.FC = () => {
           <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
             <CheckCircle size={24} className="text-success" />
           </div>
-          <h2 className="text-lg font-bold text-text-primary mb-2">Senha alterada com sucesso!</h2>
+          <h1 className="text-lg font-bold text-text-primary mb-2">Senha alterada com sucesso!</h1>
           <p className="text-sm text-text-muted leading-relaxed mb-6">
             Você será redirecionado para a tela de login em alguns segundos.
           </p>
@@ -121,7 +121,7 @@ export const ResetPasswordPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center p-4 relative">
+    <div className="min-h-dvh bg-bg flex items-center justify-center p-4 relative">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
@@ -134,14 +134,14 @@ export const ResetPasswordPage: React.FC = () => {
         />
         <div className="p-8 flex flex-col items-center">
           <div className="mb-6 flex flex-col items-center gap-4">
-            <button type="button" onClick={() => navigate('/login')} className="cursor-pointer">
+            <button type="button" onClick={() => navigate('/login')} className="min-h-11 cursor-pointer lg:min-h-0">
               <Logo size="md" />
             </button>
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg border border-border">
               <LockKeyhole size={10} className="text-text-muted" />
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
+              <h1 className="text-2xs font-bold text-text-muted uppercase tracking-widest">
                 Redefinir senha
-              </span>
+              </h1>
             </div>
           </div>
 
@@ -149,14 +149,14 @@ export const ResetPasswordPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="w-full space-y-6">
             <div className="space-y-4">
-              <p className="text-[11px] text-text-muted text-center leading-relaxed">
+              <p className="text-2xs text-text-muted text-center leading-relaxed">
                 Crie uma nova senha segura para sua conta.
               </p>
 
               <div className="space-y-1">
                 <label
                   htmlFor="reset-new-password"
-                  className="text-[10px] font-bold uppercase tracking-wider text-accent"
+                  className="text-2xs font-bold uppercase tracking-wider text-accent"
                 >
                   Nova senha
                 </label>
@@ -175,7 +175,7 @@ export const ResetPasswordPage: React.FC = () => {
               <div className="space-y-1">
                 <label
                   htmlFor="reset-confirm-password"
-                  className="text-[10px] font-bold uppercase tracking-wider text-accent"
+                  className="text-2xs font-bold uppercase tracking-wider text-accent"
                 >
                   Confirmar nova senha
                 </label>
@@ -214,7 +214,7 @@ export const ResetPasswordPage: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate('/esqueci-senha')}
-            className="mt-4 text-[11px] text-text-muted hover:text-accent transition-colors"
+            className="mt-4 text-2xs text-text-muted hover:text-accent transition-colors"
           >
             Solicitar um novo link
           </button>

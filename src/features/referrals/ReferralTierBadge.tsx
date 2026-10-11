@@ -54,7 +54,7 @@ export const ReferralTierBadge: React.FC<ReferralTierBadgeProps> = ({
       </div>
       {nextTierIn !== null && nextTierIn > 0 && (
         <div className="mt-3">
-          <div className="flex justify-between text-[10px] text-text-muted mb-1">
+          <div className="flex justify-between text-2xs text-text-muted mb-1">
             <span>Progresso para o próximo nível</span>
             <span>
               {nextTierIn} restante{nextTierIn !== 1 ? 's' : ''}
@@ -71,7 +71,7 @@ export const ReferralTierBadge: React.FC<ReferralTierBadgeProps> = ({
         </div>
       )}
       {nextTierIn === null && (
-        <p className="mt-2 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+        <p className="mt-2 text-2xs font-bold uppercase tracking-wider text-text-muted">
           Nível máximo atingido!
         </p>
       )}

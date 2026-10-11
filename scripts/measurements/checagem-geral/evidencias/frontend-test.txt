@@ -1,0 +1,24 @@
+### npm test (vitest)
+
+> agendai@0.0.0 test
+> vitest run
+
+│
+▲  No story files found for the specified pattern: src/**/*.mdx
+
+ RUN  v4.1.10 /Users/viniciusvieira/agendai-projeto/frontend
+
+Error: Not implemented: navigation (except hash changes)
+    at module.exports (/Users/viniciusvieira/agendai-projeto/frontend/node_modules/jsdom/lib/jsdom/browser/not-implemented.js:9:17)
+    at navigateFetch (/Users/viniciusvieira/agendai-projeto/frontend/node_modules/jsdom/lib/jsdom/living/window/navigation.js:77:3)
+    at exports.navigate (/Users/viniciusvieira/agendai-projeto/frontend/node_modules/jsdom/lib/jsdom/living/window/navigation.js:55:3)
+    at Timeout._onTimeout (/Users/viniciusvieira/agendai-projeto/frontend/node_modules/jsdom/lib/jsdom/living/nodes/HTMLHyperlinkElementUtils-impl.js:80:7)
+    at listOnTimeout (node:internal/timers:605:17)
+    at processTimers (node:internal/timers:541:7) undefined
+
+ Test Files  134 passed (134)
+      Tests  596 passed (596)
+   Start at  01:35:03
+   Duration  140.71s (transform 2.86s, setup 219.24s, import 181.16s, tests 217.24s, environment 22.25s)
+
+EXIT_TEST=0

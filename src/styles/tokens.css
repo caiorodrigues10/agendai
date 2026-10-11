@@ -144,6 +144,8 @@
 @theme {
   --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
   --font-display: 'Syne', ui-sans-serif, system-ui, sans-serif;
+  /* Rótulo micro da UI: nenhum texto de conteúdo abaixo de 12px (auditoria R2). */
+  --text-2xs: 0.75rem;
   --animate-fade-in: fade-in 0.8s ease-out forwards;
 
   @keyframes fade-in {

@@ -137,7 +137,7 @@ export const CommercialIntentPage: React.FC = () => {
                 key={faq.question}
                 className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 open:border-accent/30"
               >
-                <summary className="cursor-pointer text-base font-bold text-white">{faq.question}</summary>
+                <summary className="min-h-11 cursor-pointer py-2.5 text-base font-bold text-white lg:min-h-0 lg:py-0">{faq.question}</summary>
                 <p className="mt-3 text-sm leading-relaxed text-neutral-400">{faq.answer}</p>
               </details>
             ))}
@@ -147,7 +147,7 @@ export const CommercialIntentPage: React.FC = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className="rounded-full border border-white/12 px-5 py-2.5 text-sm font-bold text-neutral-300 transition hover:border-white/30 hover:text-white"
+                className="flex min-h-11 items-center rounded-full border border-white/12 px-5 py-2.5 text-sm font-bold text-neutral-300 transition hover:border-white/30 hover:text-white lg:min-h-0"
               >
                 {link.label}
               </Link>

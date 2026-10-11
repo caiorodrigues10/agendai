@@ -275,12 +275,12 @@ export const OwnerSubscriptionPanel: React.FC = () => {
           <>
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[10px] uppercase tracking-wider text-text-muted font-bold">
+                <p className="text-2xs uppercase tracking-wider text-text-muted font-bold">
                   Plano atual
                 </p>
                 <p className="text-xl font-bold">{sub.planName}</p>
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full border border-border bg-surface-2">
+              <span className="text-2xs font-bold uppercase tracking-widest px-2 py-1 rounded-full border border-border bg-surface-2">
                 {STATUS_LABEL[sub.status] ?? sub.status}
               </span>
             </div>
@@ -302,7 +302,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
           </>
         ) : trial ? (
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-text-muted font-bold">
+            <p className="text-2xs uppercase tracking-wider text-text-muted font-bold">
               Trial Pro · 30 dias
             </p>
             <p className="text-lg font-bold mt-1">
@@ -381,13 +381,13 @@ export const OwnerSubscriptionPanel: React.FC = () => {
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-accent">
+                    <p className="text-2xs font-bold uppercase tracking-wider text-accent">
                       {isPro ? 'Mais vendido' : 'Começar barato'}
                     </p>
                     <p className="text-lg font-extrabold">{plan.name}</p>
                   </div>
                   {isCurrent && (
-                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-success/15 text-success">
+                    <span className="text-2xs font-bold uppercase px-2 py-0.5 rounded-full bg-success/15 text-success">
                       Atual
                     </span>
                   )}
@@ -434,7 +434,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => goCheckout(plan, false)}
-                    className="w-full text-[11px] font-bold text-text-muted hover:text-text-secondary"
+                    className="w-full text-2xs font-bold text-text-muted hover:text-text-secondary"
                   >
                     Só cadastrar cartão (cobra depois do trial)
                   </button>
@@ -535,7 +535,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
                             <p className="text-lg font-black text-text-primary leading-tight">
                               {m.value}
                             </p>
-                            <p className="text-[10px] text-text-muted uppercase tracking-wider font-semibold mt-0.5">
+                            <p className="text-2xs text-text-muted uppercase tracking-wider font-semibold mt-0.5">
                               {m.label}
                             </p>
                           </div>

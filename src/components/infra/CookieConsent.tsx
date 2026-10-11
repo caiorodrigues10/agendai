@@ -63,14 +63,14 @@ export const CookieConsent: React.FC = () => {
               <button
                 type="button"
                 onClick={acceptEssential}
-                className="shrink-0 cursor-pointer rounded-xl border border-border px-5 py-2.5 text-sm font-bold text-text-secondary transition hover:bg-bg"
+                className="shrink-0 cursor-pointer rounded-xl border border-border px-5 py-2.5 min-h-11 text-sm font-bold text-text-secondary transition hover:bg-bg"
               >
                 Só o necessário
               </button>
               <button
                 type="button"
                 onClick={acceptAll}
-                className="shrink-0 cursor-pointer rounded-xl bg-accent px-5 py-2.5 text-sm font-bold text-accent-fg transition hover:bg-accent-hover"
+                className="shrink-0 cursor-pointer rounded-xl bg-accent px-5 py-2.5 min-h-11 text-sm font-bold text-accent-fg transition hover:bg-accent-hover"
               >
                 Aceitar todos
               </button>

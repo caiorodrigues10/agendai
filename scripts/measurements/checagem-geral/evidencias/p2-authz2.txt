@@ -1,0 +1,18 @@
+== C2) enumeration (rate limit limpo) ==
+usuario inexistente -> 401 {"success":false,"message":"Credenciais inválidas","correlationId":"8b25c72c-15e7-47c9-a3d7-74a39adb3273"}
+senha errada admin -> 401 {"success":false,"message":"Credenciais inválidas","correlationId":"047aef2a-48f5-41d9-99c4-e2291987ba85"}
+status iguais: true | mensagens iguais: true
+
+== A2) lockout 423: corpo e comportamento ==
+mudou de status na tentativa: 10 -> 423 {"success":false,"message":"Conta bloqueada por múltiplas tentativas. Tente novamente em 5 segundos.","correlationId":"561c7f79-8e86-4d38-bead-c3afad9b3482"}
+apos reset de rate limit -> 401 {"success":false,"message":"Credenciais inválidas","correlationId":"b6b82552-d39e-41d7-a164-9988b5b73843"}
+
+== D2) refresh: campo esperado (swagger) ==
+docs/json status 200
+GET refresh -> 404
+body {refreshToken} -> 401 {"message":"Refresh token não fornecido"}
+body {token} -> 401 {"message":"Refresh token não fornecido"}
+body {refresh_token} -> 401 {"message":"Refresh token não fornecido"}
+body {jwt} -> 401 {"message":"Refresh token não fornecido"}
+
+fim

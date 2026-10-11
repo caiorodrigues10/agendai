@@ -64,7 +64,7 @@ export const MarketingNav: React.FC = () => {
       <div className="mx-auto flex max-w-400 items-center justify-between gap-4">
         <Link
           to="/"
-          className="flex shrink-0 items-center gap-3 cursor-pointer group"
+          className="flex min-h-11 shrink-0 items-center gap-3 cursor-pointer group lg:min-h-0"
           onClick={() => setMobileOpen(false)}
         >
           <Logo size="md" className="text-white" />
@@ -76,7 +76,7 @@ export const MarketingNav: React.FC = () => {
               key={link.id}
               type="button"
               onClick={() => goToSection(link.id)}
-              className="relative cursor-pointer text-[11px] font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
+              className="relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
             >
               {link.label}
             </button>
@@ -86,7 +86,7 @@ export const MarketingNav: React.FC = () => {
             <Link
               key={link.to}
               to={link.to}
-              className="text-[11px] font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
+              className="text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors hover:text-white"
             >
               {link.label}
             </Link>
@@ -98,7 +98,7 @@ export const MarketingNav: React.FC = () => {
             <button
               type="button"
               onClick={goPanel}
-              className="hidden rounded-full bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-tighter text-black shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] sm:block"
+              className="hidden rounded-full bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-tighter text-black shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] sm:flex sm:min-h-11 sm:items-center sm:justify-center lg:min-h-0"
             >
               Ir para o painel
             </button>
@@ -107,14 +107,14 @@ export const MarketingNav: React.FC = () => {
               <button
                 type="button"
                 onClick={goPanel}
-                className="hidden text-xs font-bold uppercase tracking-tighter text-white/90 transition-colors hover:text-white md:block"
+                className="hidden px-0.5 text-xs font-bold uppercase tracking-tighter text-white/90 transition-colors hover:text-white md:flex md:min-h-11 md:items-center lg:min-h-0 lg:px-0"
               >
                 Entrar
               </button>
               <button
                 type="button"
                 onClick={goStart}
-                className="hidden rounded-full bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-tighter text-black shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] sm:block"
+                className="hidden rounded-full bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-tighter text-black shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] sm:flex sm:min-h-11 sm:items-center sm:justify-center lg:min-h-0"
               >
                 Criar conta
               </button>
@@ -139,7 +139,7 @@ export const MarketingNav: React.FC = () => {
               key={link.id}
               type="button"
               onClick={() => goToSection(link.id)}
-              className="py-3 text-left transition-colors hover:text-white"
+              className="flex min-h-11 items-center py-3 text-left transition-colors hover:text-white lg:min-h-0"
             >
               {link.label}
             </button>
@@ -150,7 +150,7 @@ export const MarketingNav: React.FC = () => {
               key={link.to}
               to={link.to}
               onClick={() => setMobileOpen(false)}
-              className="py-3 transition-colors hover:text-white"
+              className="flex min-h-11 items-center py-3 transition-colors hover:text-white lg:min-h-0"
             >
               {link.label}
             </Link>

@@ -357,7 +357,7 @@ export const AboutPage: React.FC = () => {
                       }`}
                     >
                       <p
-                        className={`text-[10px] font-black uppercase tracking-wider ${
+                        className={`text-2xs font-black uppercase tracking-wider ${
                           msg.side === 'right' ? 'text-black/55' : 'text-neutral-500'
                         }`}
                       >
@@ -418,7 +418,7 @@ export const AboutPage: React.FC = () => {
               <div className="p-8 md:p-12 lg:p-16">
                 <div className="flex items-center gap-3 mb-5">
                   <div className="h-px w-10 bg-gradient-to-r from-accent to-transparent" />
-                  <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-accent/90">
+                  <p className="text-2xs font-bold uppercase tracking-[0.3em] text-accent/90">
                     De onde viemos
                   </p>
                 </div>

@@ -117,7 +117,7 @@ export const TrialExpiredPaywallModal: React.FC<TrialExpiredPaywallModalProps> =
                   >
                     <div className="mb-2 min-h-5">
                       {badge && (
-                        <span className="inline-flex rounded-full bg-warning/10 px-2 py-0.5 text-[11px] font-bold text-warning">
+                        <span className="inline-flex rounded-full bg-warning/10 px-2 py-0.5 text-2xs font-bold text-warning">
                           {badge}
                         </span>
                       )}

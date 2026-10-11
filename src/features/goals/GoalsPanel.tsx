@@ -209,10 +209,10 @@ export const GoalsPanel: React.FC = () => {
 
               <div className="mt-3">
                 <div className="mb-1 flex items-center justify-between">
-                  <span className="text-[11px] text-text-muted">
+                  <span className="text-2xs text-text-muted">
                     {formatDateBR(goal.startDate)} — {formatDateBR(goal.endDate)}
                   </span>
-                  <span className="text-[11px] font-semibold text-text-primary">
+                  <span className="text-2xs font-semibold text-text-primary">
                     {formatPercentBR(goal.percentage / 100)}
                   </span>
                 </div>

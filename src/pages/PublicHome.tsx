@@ -1,12 +1,18 @@
-import React, { useCallback, useState } from 'react';
+import React, { Suspense, useCallback, useState } from 'react';
 import { useNavigate, useParams, useSearchParams, Navigate } from 'react-router-dom';
 import { QueueItemCard, QueueStatusCard } from '../features/queue';
-import { AddCustomerForm } from '../features/clients';
-import { ShopProfile } from '../features/shop';
-import { AppointmentScheduler } from '../features/appointments';
+// Import direto do módulo (sem barrel): a barrel {features/clients} puxava
+// ClientsTab → CrmIntelligencePanel → ui/chart (77,9 kB) para o chunk da fila.
+import { AddCustomerForm } from '../features/clients/AddCustomerForm';
+import { AppointmentScheduler } from '../features/appointments/AppointmentScheduler';
 import { PublicProductCarousel } from '../components/domain/PublicProductCarousel';
 import { PublicPageSkeleton } from '../components/patterns/skeletons';
 import { Toast } from '../components/ui/Toast';
+
+// Perfil não é crítico (aba não padrão): sai do closure inicial da rota.
+const ShopProfile = React.lazy(() =>
+  import('../features/shop/ShopProfile').then(m => ({ default: m.ShopProfile })),
+);
 import { useAuth } from '../contexts/AuthContext';
 import { useBarbershop } from '../contexts/BarbershopContext';
 import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
@@ -128,6 +134,18 @@ export const PublicHome: React.FC = () => {
   const pendingUrlShop = Boolean(id) && id !== barbershopId;
   const stillLoading = pendingUrlShop || shopLoading || schedulingLoading;
 
+  // ITEM 4 — métrica de conteúdo útil: marca o instante em que a página
+  // pública sai do estado de carregamento e renderiza conteúdo real (ou o
+  // estado vazio explícito). duração = public-content-usable (ms desde
+  // timeOrigin). Só a primeira transição por montagem.
+  const contentMarkedRef = React.useRef(false);
+  React.useEffect(() => {
+    if (stillLoading || contentMarkedRef.current) return;
+    contentMarkedRef.current = true;
+    performance.mark('public-content-ready');
+    performance.measure('public-content-usable', { start: 0, end: 'public-content-ready' });
+  }, [stillLoading]);
+
   if (stillLoading) {
     return <div role="status" aria-label="Carregando salão"><PublicPageSkeleton /></div>;
   }
@@ -136,7 +154,7 @@ export const PublicHome: React.FC = () => {
   if (!barbershopId || !settings) {
     if (id) {
       return (
-        <div className="min-h-screen bg-bg text-text-primary flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <div className="min-h-dvh bg-bg text-text-primary flex flex-col items-center justify-center gap-4 px-6 text-center">
           <Store className="text-text-muted" size={40} />
           <div>
             <h1 className="text-lg font-bold">Salão não encontrado</h1>
@@ -147,7 +165,7 @@ export const PublicHome: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="px-4 py-2 rounded-xl bg-accent text-accent-fg text-sm font-bold"
+            className="min-h-11 inline-flex items-center px-4 py-2 rounded-xl bg-accent text-accent-fg text-sm font-bold"
           >
             Voltar ao início
           </button>
@@ -173,7 +191,7 @@ export const PublicHome: React.FC = () => {
       : null;
 
   return (
-    <div className="min-h-screen pb-[max(5rem,env(safe-area-inset-bottom))] bg-bg text-text-primary">
+    <div className="min-h-dvh pb-[max(5rem,env(safe-area-inset-bottom))] bg-bg text-text-primary">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       <main className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 pt-6">
@@ -182,7 +200,7 @@ export const PublicHome: React.FC = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 z-10 relative
+              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 z-10 relative after:absolute after:-inset-y-1.5 after:inset-x-0 after:content-['']
                         ${activeTab === tab ? 'text-accent' : 'text-text-muted'}
                     `}
             >
@@ -216,16 +234,18 @@ export const PublicHome: React.FC = () => {
         </div>
 
         {activeTab === 'profile' && (
-          <ShopProfile
-            settings={settings}
-            posts={feed}
-            currentUser={user}
-            audience="public"
-            onGoQueue={() => setActiveTab('queue')}
-            onGoAppointments={() => setActiveTab('appointments')}
-            onDeletePost={deletePost}
-            onLikePost={likePost}
-          />
+          <Suspense fallback={<PublicPageSkeleton />}>
+            <ShopProfile
+              settings={settings}
+              posts={feed}
+              currentUser={user}
+              audience="public"
+              onGoQueue={() => setActiveTab('queue')}
+              onGoAppointments={() => setActiveTab('appointments')}
+              onDeletePost={deletePost}
+              onLikePost={likePost}
+            />
+          </Suspense>
         )}
 
         {activeTab === 'appointments' && (
@@ -286,7 +306,7 @@ export const PublicHome: React.FC = () => {
                 <span className="block text-3xl font-bold text-text-primary mb-1">
                   {peopleWaiting}
                 </span>
-                <span className="text-[10px] text-text-muted uppercase tracking-widest font-bold">
+                <span className="text-2xs text-text-muted uppercase tracking-widest font-bold">
                   Na Fila
                 </span>
               </div>
@@ -294,7 +314,7 @@ export const PublicHome: React.FC = () => {
                 <span className="block text-3xl font-bold text-tertiary mb-1">
                   {currentInChair ? '1' : '0'}
                 </span>
-                <span className="text-[10px] text-text-muted uppercase tracking-widest font-bold">
+                <span className="text-2xs text-text-muted uppercase tracking-widest font-bold">
                   Em Atendimento
                 </span>
               </div>
@@ -339,7 +359,7 @@ export const PublicHome: React.FC = () => {
                     <DynamicIcon name="UserPlus" size={16} className="text-tertiary" />
                     Adicionar dependente
                   </span>
-                  <span className="text-[11px] font-medium text-text-muted">
+                  <span className="text-2xs font-medium text-text-muted">
                     Filho, parceiro ou quem veio junto — sem entrar de novo
                   </span>
                 </button>

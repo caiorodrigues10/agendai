@@ -103,7 +103,7 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
           className="sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-2xl border border-border bg-surface p-3 shadow-card"
         >
           <div className="mb-3 border-b border-border px-2 pb-3">
-            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-text-muted">
+            <p className="text-2xs font-bold uppercase tracking-[0.24em] text-text-muted">
               Navegação
             </p>
             <p className="mt-1 font-display text-sm font-bold tracking-wide text-text-primary">Áreas do salão</p>
@@ -114,7 +114,7 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
               <section key={group.id} aria-labelledby={`desktop-nav-${group.id}`}>
                 <p
                   id={`desktop-nav-${group.id}`}
-                  className="mb-1.5 px-2 font-display text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted"
+                  className="mb-1.5 px-2 font-display text-2xs font-bold uppercase tracking-[0.14em] text-text-muted"
                 >
                   {group.label}
                 </p>
@@ -153,7 +153,7 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
             aria-controls="staff-navigation-more"
             aria-current={moreIsActive ? 'page' : undefined}
             onClick={() => setMoreOpen(open => !open)}
-            className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-[10px] font-semibold transition-colors ${
+            className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-2xs font-semibold transition-colors ${
               moreIsActive || moreOpen
                 ? 'border-accent/30 bg-selection text-accent'
                 : 'text-text-muted hover:bg-bg hover:text-text-primary'
@@ -184,7 +184,7 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
               <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-border-strong" />
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
-                  <p className="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
+                  <p className="font-display text-2xs font-bold uppercase tracking-[0.14em] text-text-muted">
                     Navegação
                   </p>
                   <h2
@@ -209,7 +209,7 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
                   <section key={group.id} aria-labelledby={`mobile-nav-${group.id}`}>
                     <p
                       id={`mobile-nav-${group.id}`}
-                      className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted"
+                      className="mb-2 font-display text-2xs font-bold uppercase tracking-[0.14em] text-text-muted"
                     >
                       {group.label}
                     </p>
@@ -286,7 +286,7 @@ function MobileNavigationItem({
       type="button"
       onClick={() => onNavigate(tab.id)}
       aria-current={active ? 'page' : undefined}
-      className={`group flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-[10px] font-semibold transition-colors ${
+      className={`group flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-2xs font-semibold transition-colors ${
         active
           ? 'border-accent/30 bg-selection text-accent'
           : 'text-text-muted hover:bg-bg hover:text-text-primary'

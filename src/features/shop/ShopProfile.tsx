@@ -313,11 +313,11 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
               <div className="mt-3 grid grid-cols-2 gap-3 sm:flex sm:gap-7">
                 <div>
                   <strong className="text-base sm:text-lg">{publicPosts.length}</strong>
-                  <p className="text-[11px] sm:text-xs text-text-muted">publicações</p>
+                  <p className="text-2xs sm:text-xs text-text-muted">publicações</p>
                 </div>
                 <div>
                   <strong className="text-base sm:text-lg">{videos.length}</strong>
-                  <p className="text-[11px] sm:text-xs text-text-muted">vídeos</p>
+                  <p className="text-2xs sm:text-xs text-text-muted">vídeos</p>
                 </div>
                 {rating?.showAverage && rating.average !== null && rating.count > 0 && (
                   <button
@@ -329,7 +329,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
                       <Star size={14} className="text-warning fill-warning" />
                       {rating.average.toFixed(1)}
                     </strong>
-                    <p className="text-[11px] sm:text-xs text-text-muted">
+                    <p className="text-2xs sm:text-xs text-text-muted">
                       {rating.count} avaliações
                     </p>
                   </button>
@@ -446,7 +446,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
                     )}
                   </span>
                 </span>
-                <span className="mt-1 block truncate text-[10px] text-text-secondary">
+                <span className="mt-1 block truncate text-2xs text-text-secondary">
                   {story.title || 'Story'}
                 </span>
               </button>

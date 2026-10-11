@@ -235,7 +235,7 @@ export const ProfitEnginePanel: React.FC<ProfitEnginePanelProps> = ({ barbershop
             { label: 'Impostos', value: brl(periodData?.totals.taxAmount ?? 0), tone: 'text-warning' },
           ].map(item => (
             <div key={item.label} className="rounded-2xl border border-border bg-bg p-4">
-              <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-secondary">{item.label}</div>
+              <div className="text-2xs font-bold uppercase tracking-[0.18em] text-text-secondary">{item.label}</div>
               <div className={`mt-2 text-2xl font-extrabold ${item.tone}`}>{item.value}</div>
             </div>
           ))}

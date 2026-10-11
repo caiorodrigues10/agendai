@@ -18,6 +18,7 @@
 | `format` | `prettier --write …` | geração | `npm install` | Formata fontes |
 | `format:check` | `prettier --check …` | leitura | `npm install` | Verifica formatação |
 | `docs:check` | `node scripts/check-docs.mjs` | leitura | Node | Valida inventários documentais |
+| `measure:responsive` | `node scripts/measure-responsive.mjs` | medição | `npm run build` (ou `--no-build`) + Chromium Playwright | Mede as rotas públicas em 320–1440 px: estouro horizontal, alvos <44 px, textos <12 px, `h1`, `<img>` sem dimensões, CLS/LCP/FCP (4G lenta + CPU 4×) e bytes de JS/CSS/imagens por rota. Args: `--label`, `--layout`, `--perf`, `--screens`, `--api=off|real|both`, `--base`, `--routes`, `--widths`. Saída em `scripts/measurements/<label>/` |
 | `contract:check` | `node scripts/check-api-contract.mjs` | leitura | backend irmão | Compara wrappers HTTP com rotas |
 | `test:contract` | `node --test scripts/check-api-contract.test.mjs` | testes | Node | Testa o parser de contrato |
 | `verify:delivery` | `node scripts/verify-delivery.mjs` | leitura | `npm install` | Encadeia docs, typecheck, contrato e Vitest (sem produção) |

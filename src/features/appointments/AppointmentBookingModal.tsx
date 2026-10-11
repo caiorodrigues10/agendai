@@ -209,7 +209,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-6">
             <section className="space-y-3">
-              <p className="text-[11px] text-text-secondary font-bold uppercase tracking-wider">
+              <p className="text-2xs text-text-secondary font-bold uppercase tracking-wider">
                 Serviço
               </p>
               <div
@@ -252,7 +252,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
             </section>
 
             <section className="space-y-3">
-              <p className="text-[11px] text-text-secondary font-bold uppercase tracking-wider">
+              <p className="text-2xs text-text-secondary font-bold uppercase tracking-wider">
                 Profissional
               </p>
               <div className="flex flex-wrap gap-2">
@@ -282,7 +282,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
             </section>
 
             <section className="space-y-3">
-              <p className="text-[11px] text-text-secondary font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <p className="text-2xs text-text-secondary font-bold uppercase tracking-wider flex items-center gap-1.5">
                 <Calendar size={12} /> Data
               </p>
               <p className="text-sm text-text-primary font-medium capitalize -mt-1">
@@ -302,7 +302,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
             </section>
 
             <section className="space-y-3">
-              <p className="text-[11px] text-text-secondary font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <p className="text-2xs text-text-secondary font-bold uppercase tracking-wider flex items-center gap-1.5">
                 <Clock size={12} /> Horário
               </p>
               {isDateClosed ? (
@@ -342,7 +342,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
             <section className="space-y-3">
               <label
                 htmlFor="appointment-customer-name"
-                className="text-[11px] text-text-secondary font-bold uppercase tracking-wider"
+                className="text-2xs text-text-secondary font-bold uppercase tracking-wider"
               >
                 Cliente
               </label>

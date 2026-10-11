@@ -101,7 +101,7 @@ export const AuditAlertsPanel: React.FC = () => {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {alerts.byGroup.map((group) => (
               <div key={group.key} className="bg-bg border border-border rounded-lg p-2">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
+                <p className="text-2xs font-bold uppercase tracking-widest text-text-muted">
                   {group.label}
                 </p>
                 <p

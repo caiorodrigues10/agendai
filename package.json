@@ -20,6 +20,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,json,css,md}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,json,css,md}\"",
     "docs:check": "node scripts/check-docs.mjs",
+    "measure:responsive": "node scripts/measure-responsive.mjs",
     "postinstall": "node scripts/patch-storybook-compat.mjs",
     "contract:check": "node scripts/check-api-contract.mjs",
     "contract:check:strict": "node scripts/check-api-contract.mjs --strict",

@@ -309,7 +309,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
       )}
 
       {view === 'professional' && hasMultipleStaff && (
-        <p className="text-[10px] text-text-secondary text-center -mt-2">
+        <p className="text-2xs text-text-secondary text-center -mt-2">
           Visão por profissional
         </p>
       )}
@@ -371,7 +371,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
 
             <div className="grid grid-cols-7 gap-0.5 mb-1">
               {WEEKDAYS.map(d => (
-                <div key={d} className="text-[10px] font-bold text-text-muted text-center py-1">
+                <div key={d} className="text-2xs font-bold text-text-muted text-center py-1">
                   {d}
                 </div>
               ))}
@@ -414,11 +414,11 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
             className="grid border-b border-border"
             style={{ gridTemplateColumns: `3.5rem repeat(${columns.length}, 1fr)` }}
           >
-            <div className="p-2 text-[10px] text-text-muted font-bold border-r border-border" />
+            <div className="p-2 text-2xs text-text-muted font-bold border-r border-border" />
             {columns.map(col => (
               <div
                 key={String(col.id)}
-                className="p-2 text-[10px] text-text-secondary font-bold text-center border-r border-border last:border-r-0 truncate"
+                className="p-2 text-2xs text-text-secondary font-bold text-center border-r border-border last:border-r-0 truncate"
               >
                 {col.label}
               </div>
@@ -432,7 +432,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                 className="grid border-b border-border/50 min-h-[2.75rem]"
                 style={{ gridTemplateColumns: `3.5rem repeat(${columns.length}, 1fr)` }}
               >
-                <div className="p-1.5 text-[10px] text-text-muted font-mono border-r border-border flex items-start pt-2">
+                <div className="p-1.5 text-2xs text-text-muted font-mono border-r border-border flex items-start pt-2">
                   {slot}
                 </div>
                 {columns.map(col => {
@@ -454,10 +454,10 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                             className="absolute inset-x-0.5 top-0.5 bg-selection border border-accent/30 rounded-lg p-1.5 text-left hover:bg-accent/10 transition-colors z-10 overflow-hidden"
                             style={{ minHeight: `${rows * 2.5}rem` }}
                           >
-                            <p className="text-[10px] font-bold text-text-primary truncate">
+                            <p className="text-2xs font-bold text-text-primary truncate">
                               {appt.customerName}
                             </p>
-                            <p className="text-[9px] text-text-secondary truncate">
+                            <p className="text-2xs text-text-secondary truncate">
                               {appt.serviceName ?? getServiceName(appt.serviceId, services)}
                             </p>
                           </button>
@@ -495,7 +495,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
             </div>
             {selectedAppt.reservedProducts && selectedAppt.reservedProducts.length > 0 && (
               <div className="rounded-xl border border-border bg-bg p-3">
-                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                <p className="mb-2 text-2xs font-bold uppercase tracking-wider text-text-muted">
                   Produtos reservados
                 </p>
                 <div className="space-y-2">

@@ -281,7 +281,7 @@ export const RecurringPackagesPanel: React.FC = () => {
                   {Array.isArray(plan.benefits) && plan.benefits.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {plan.benefits.map(b => (
-                        <span key={b.id} className="inline-flex rounded bg-surface px-2 py-0.5 text-[10px] text-text-muted">
+                        <span key={b.id} className="inline-flex rounded bg-surface px-2 py-0.5 text-2xs text-text-muted">
                           {b.description}
                         </span>
                       ))}
@@ -330,7 +330,7 @@ export const RecurringPackagesPanel: React.FC = () => {
                   {Array.isArray(m.usageSummary) && m.usageSummary.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {m.usageSummary.map(u => (
-                        <span key={u.benefitId} className="inline-flex rounded bg-surface px-2 py-0.5 text-[10px] text-text-muted">
+                        <span key={u.benefitId} className="inline-flex rounded bg-surface px-2 py-0.5 text-2xs text-text-muted">
                           {u.used}/{u.total} usos
                         </span>
                       ))}

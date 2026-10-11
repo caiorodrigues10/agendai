@@ -96,7 +96,7 @@ export const BlockedSection: React.FC = () => {
                 setActiveFilter(s);
                 setPage(1);
               }}
-              className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-2xs font-bold uppercase tracking-wider transition-all ${
                 activeFilter === s
                   ? 'bg-accent text-accent-fg'
                   : 'text-text-muted hover:text-text-primary hover:bg-surface-2'
@@ -121,7 +121,7 @@ export const BlockedSection: React.FC = () => {
         <div className="bg-surface border border-border rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-bg text-text-muted uppercase text-[10px] font-bold tracking-widest border-b border-border">
+              <thead className="bg-bg text-text-muted uppercase text-2xs font-bold tracking-widest border-b border-border">
                 <tr>
                   <th className="px-6 py-3.5">Tipo / Valor</th>
                   <th className="px-6 py-3.5 hidden md:table-cell">Motivo</th>
@@ -134,7 +134,7 @@ export const BlockedSection: React.FC = () => {
                 {entities.map(entity => (
                     <tr key={entity.id} className="hover:bg-surface-2/20 transition-colors">
                       <td className="px-6 py-4">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border bg-surface-2 text-text-secondary border-border-strong mr-2">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-bold uppercase tracking-widest border bg-surface-2 text-text-secondary border-border-strong mr-2">
                           {entity.type}
                         </span>
                         <span className="font-mono text-sm text-text-primary">{entity.value}</span>
@@ -146,7 +146,7 @@ export const BlockedSection: React.FC = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${
+                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-2xs font-bold uppercase tracking-widest border ${
                             entity.isActive
                               ? 'bg-danger/10 text-danger border-danger/20'
                               : 'bg-success/10 text-success border-success/20'

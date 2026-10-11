@@ -115,11 +115,11 @@ function Metric({
 }) {
   return (
     <div className="min-w-0">
-      <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">{label}</p>
+      <p className="text-2xs font-bold uppercase tracking-wider text-text-muted">{label}</p>
       <p className={`truncate font-bold ${METRIC_VALUE_SIZE[tone]} ${muted ? METRIC_VALUE_MUTED_COLOR : METRIC_VALUE_COLOR[tone]}`}>
         {value}
       </p>
-      {sub && <p className="truncate text-[10px] text-text-muted">{sub}</p>}
+      {sub && <p className="truncate text-2xs text-text-muted">{sub}</p>}
     </div>
   );
 }
@@ -177,7 +177,7 @@ export function Thumb({ product }: { product: Product }) {
         </div>
       )}
       {inactive && (
-        <span className="absolute bottom-1 left-1 rounded-full border border-border bg-surface/90 px-1.5 py-0.5 text-[9px] font-bold leading-none text-text-secondary">
+        <span className="absolute bottom-1 left-1 rounded-full border border-border bg-surface/90 px-1.5 py-0.5 text-2xs font-bold leading-none text-text-secondary">
           Inativo
         </span>
       )}
@@ -200,12 +200,12 @@ export function CardHead({ product }: { product: Product }) {
         {(product.category?.name || product.type === 'BOTH') && (
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
             {product.category?.name && (
-              <span className="inline-flex rounded-full border border-border bg-bg px-2 py-0.5 text-[10px] font-semibold text-text-secondary">
+              <span className="inline-flex rounded-full border border-border bg-bg px-2 py-0.5 text-2xs font-semibold text-text-secondary">
                 {product.category.name}
               </span>
             )}
             {product.type === 'BOTH' && (
-              <span className="inline-flex rounded-full border border-border bg-bg px-2 py-0.5 text-[10px] font-semibold text-text-secondary">
+              <span className="inline-flex rounded-full border border-border bg-bg px-2 py-0.5 text-2xs font-semibold text-text-secondary">
                 {PRODUCT_PURPOSE_SHORT.BOTH}
               </span>
             )}
@@ -340,7 +340,7 @@ export function ReservationsBlock({ product, open, onToggle, onGoReservations }:
               <p className="text-xs font-semibold text-text-primary">
                 {reservation.quantity}× · {reservation.customerName} · {formatBrPhone(reservation.whatsapp)}
               </p>
-              <p className="text-[11px] text-text-muted">
+              <p className="text-2xs text-text-muted">
                 retirar até {formatDateTimeBR(reservation.expiresAt)}
               </p>
               <a

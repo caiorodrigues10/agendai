@@ -67,7 +67,7 @@ export function ProfileGrid({
               <Play size={16} fill="currentColor" aria-hidden />
             </span>
           )}
-          <span className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-gradient-to-t from-black/70 to-transparent px-2 pb-2 pt-5 text-[10px] sm:text-xs text-white">
+          <span className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-gradient-to-t from-black/70 to-transparent px-2 pb-2 pt-5 text-2xs sm:text-xs text-white">
             <span className="truncate">{post.title || 'Publicação'}</span>
             <span className="flex shrink-0 items-center gap-1">
               <MessageCircle size={12} aria-hidden />

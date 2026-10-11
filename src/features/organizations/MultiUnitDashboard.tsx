@@ -48,7 +48,7 @@ function ShopCard({
         <span className="min-w-0 truncate font-semibold">{shop.name}</span>
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-1">
           <span
-            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+            className={`rounded-full px-2 py-0.5 text-2xs font-bold ${
               shop.isOpen ? 'bg-success/15 text-success' : 'bg-surface-2 text-text-muted'
             }`}
           >
@@ -85,11 +85,11 @@ function ShopCard({
       )}
       <div className="mt-3 grid grid-cols-2 gap-2">
         <div className="rounded-lg bg-surface-2 p-3 text-center">
-          <p className="text-[11px] text-text-muted">Na fila</p>
+          <p className="text-2xs text-text-muted">Na fila</p>
           <p className="text-xl font-bold">{shop.waitingCount}</p>
         </div>
         <div className="rounded-lg bg-surface-2 p-3 text-center">
-          <p className="text-[11px] text-text-muted">Em atendimento</p>
+          <p className="text-2xs text-text-muted">Em atendimento</p>
           <p className="text-xl font-bold">{shop.inServiceCount}</p>
         </div>
       </div>

@@ -338,7 +338,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
                     </>
                   )}
                   {isEmployee && member.id === currentAdminId && (
-                    <span className="px-2 text-[10px] text-text-muted">Você</span>
+                    <span className="px-2 text-2xs text-text-muted">Você</span>
                   )}
                   {!isEmployee && (
                     <ChevronDown
@@ -379,7 +379,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
 
               {isPermissionsExpanded && isEmployee && (
                 <div className="animate-fade-in-down border-t border-border px-3 pb-3 pt-2">
-                  <p className="mb-2 text-[10px] font-bold uppercase text-text-muted">Permissões</p>
+                  <p className="mb-2 text-2xs font-bold uppercase text-text-muted">Permissões</p>
                   <div className="grid grid-cols-2 gap-1">
                     {ALL_PERMISSIONS.map(perm => (
                       <label

@@ -55,3 +55,9 @@ export const useTheme = () => {
   if (!ctx) throw new Error('useTheme must be used within ThemeProvider');
   return ctx;
 };
+
+/** Tema efetivo sem exigir ThemeProvider (fallback dark = política pública). */
+export const useOptionalTheme = (): Theme => {
+  const ctx = useContext(ThemeContext);
+  return ctx ? ctx.resolvedTheme : 'dark';
+};

@@ -282,16 +282,16 @@ export const PostsManager: React.FC = () => {
                     previewUrl={post.imageUrl ?? null}
                     className="!rounded-none !border-0"
                   />
-                  <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold ${badge.className}`}>
+                  <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-2xs font-bold ${badge.className}`}>
                     {badge.label}
                   </span>
-                  <span className="absolute right-2 bottom-2 rounded-full bg-black/50 px-1.5 py-0.5 text-[9px] font-bold text-white">
+                  <span className="absolute right-2 bottom-2 rounded-full bg-black/50 px-1.5 py-0.5 text-2xs font-bold text-white">
                     {post.format === 'portrait' ? '4:5' : post.format === 'story' ? '9:16' : '1:1'}
                   </span>
                 </div>
                 <div className="p-3 space-y-1.5">
                   <p className="truncate text-sm font-semibold text-text-primary">{post.title || 'Sem título'}</p>
-                  <p className="text-[11px] text-text-muted">
+                  <p className="text-2xs text-text-muted">
                     {post.status === 'scheduled' ? `Agendado: ${formatDate(post.scheduledFor)}`
                       : post.status === 'published' ? `Publicado: ${formatDate(post.publishedAt)}`
                       : `Editado: ${formatDate(post.createdAt)}`}

@@ -29,6 +29,7 @@ import { MarketingLayout } from '../../layouts/marketing/MarketingLayout';
 import { trialCampaign } from '../../marketing/trialCampaign';
 import { softwareApplicationLd } from '../../marketing/softwareApplicationLd';
 import { registerScrollTrigger } from '../../components/infra/scrollTriggerRuntime';
+import { prefersReducedMotion } from '../../utils/reducedMotion';
 
 gsap.registerPlugin(ScrollTrigger);
 registerScrollTrigger(ScrollTrigger);
@@ -45,6 +46,10 @@ const PainSolution = ({
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!ref.current) return;
+    if (prefersReducedMotion()) {
+      gsap.set(ref.current, { opacity: 1 });
+      return;
+    }
     gsap.fromTo(
       ref.current,
       { opacity: 0, x: -30 },
@@ -100,7 +105,7 @@ const QueueSimulation = () => {
           <div className="text-xs font-bold text-white tracking-wide">FILA AO VIVO</div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-            <span className="text-[10px] text-accent font-bold">3 na fila</span>
+            <span className="text-2xs text-accent font-bold">3 na fila</span>
           </div>
         </div>
         {clients.map((client, i) => (
@@ -114,7 +119,7 @@ const QueueSimulation = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-2xs font-bold ${
                     active === i ? 'bg-accent text-accent-fg' : 'bg-white/10 text-neutral-400'
                   }`}
                 >
@@ -122,12 +127,12 @@ const QueueSimulation = () => {
                 </div>
                 <div>
                   <div className="text-xs font-semibold text-white">{client.name}</div>
-                  <div className="text-[10px] text-neutral-500">{client.service}</div>
+                  <div className="text-2xs text-neutral-500">{client.service}</div>
                 </div>
               </div>
               <div className="text-right">
                 <div className="text-xs font-bold text-accent">{client.time}</div>
-                <div className="text-[10px] text-neutral-600">estimado</div>
+                <div className="text-2xs text-neutral-600">estimado</div>
               </div>
             </div>
           </div>
@@ -135,11 +140,11 @@ const QueueSimulation = () => {
         <div className="mt-4 p-3 rounded-xl bg-accent/5 border border-accent/20">
           <div className="flex items-center gap-2 mb-1">
             <Bell size={24} className="w-3 h-3 text-accent" />
-            <span className="text-[10px] font-bold text-accent uppercase tracking-wider">
+            <span className="text-2xs font-bold text-accent uppercase tracking-wider">
               Próximo aviso
             </span>
           </div>
-          <div className="text-[10px] text-neutral-400">
+          <div className="text-2xs text-neutral-400">
             Lucas será notificado quando faltar 5 min
           </div>
         </div>
@@ -162,6 +167,7 @@ const DashboardMini = () => {
 
   useEffect(() => {
     if (!chartRef.current) return;
+    if (prefersReducedMotion()) return;
     const barEls = chartRef.current.querySelectorAll('.chart-bar');
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -210,7 +216,7 @@ const DashboardMini = () => {
           >
             <div className="relative flex w-full flex-1 items-end">
               {hoveredBar === i && (
-                <div className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-bold text-accent">
+                <div className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-2xs font-bold text-accent">
                   {bar.val}
                 </div>
               )}
@@ -221,7 +227,7 @@ const DashboardMini = () => {
                 style={{ height: `${bar.h}%` }}
               />
             </div>
-            <span className="text-[10px] text-neutral-600">{bar.label}</span>
+            <span className="text-2xs text-neutral-600">{bar.label}</span>
           </div>
         ))}
       </div>
@@ -239,6 +245,10 @@ export const FeaturesPage: React.FC = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      if (prefersReducedMotion()) {
+        gsap.set('.opacity-0', { opacity: 1 });
+        return;
+      }
       // Hero entrance
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
       tl.fromTo('.hero-badge', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6 })
@@ -449,7 +459,7 @@ export const FeaturesPage: React.FC = () => {
   return (
     <MarketingLayout
       ref={pageRef}
-      wrapperClassName="min-h-screen bg-black text-neutral-100 selection:bg-accent/30 font-sans overflow-x-hidden"
+      wrapperClassName="min-h-dvh bg-black text-neutral-100 selection:bg-accent/30 font-sans overflow-x-hidden"
       title="Funcionalidades — Fila, agenda, financeiro e mais | Agenda Já"
       description="Fila digital, agendamento 24/7, financeiro, equipe ilimitada, WhatsApp automático e previsão de demanda — tudo num só painel para salão e barbearia."
       path="/funcionalidades"
@@ -468,7 +478,7 @@ export const FeaturesPage: React.FC = () => {
       <section className="relative pt-40 pb-20 md:pt-52 md:pb-28 px-6 overflow-hidden">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 relative z-10">
           <div className="flex-1 text-center lg:text-left">
-            <div className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-accent/20 bg-accent/5 text-accent text-[10px] font-black uppercase tracking-[0.3em] mb-8 opacity-0">
+            <div className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-accent/20 bg-accent/5 text-accent text-2xs font-black uppercase tracking-[0.3em] mb-8 opacity-0">
               <Sparkles size={24} className="w-3.5 h-3.5" />
               Para quem não para
             </div>
@@ -517,7 +527,7 @@ export const FeaturesPage: React.FC = () => {
       <section className="py-16 px-6 relative z-10 border-y border-white/5 bg-neutral-950/50">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-accent">
+            <span className="text-2xs font-black uppercase tracking-[0.3em] text-accent">
               O que muda
             </span>
           </div>
@@ -560,7 +570,7 @@ export const FeaturesPage: React.FC = () => {
       <section className="feature-section py-24 md:py-36 px-6 relative z-10">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
           <div className="feature-text flex-1">
-            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/20 bg-accent/5 text-accent text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
+            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/20 bg-accent/5 text-accent text-2xs font-black uppercase tracking-[0.2em] mb-6 opacity-0">
               <Clock size={24} className="w-3.5 h-3.5" />
               Fila Digital
             </div>
@@ -602,18 +612,18 @@ export const FeaturesPage: React.FC = () => {
               <div className="space-y-4">
                 <div className="text-xs font-bold text-white tracking-wide">AGENDAR HORÁRIO</div>
                 <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                  <div className="text-[10px] text-neutral-500 mb-1">Serviço</div>
+                  <div className="text-2xs text-neutral-500 mb-1">Serviço</div>
                   <div className="text-xs font-semibold text-white">Corte + Barba</div>
                 </div>
                 <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                  <div className="text-[10px] text-neutral-500 mb-1">Profissional</div>
+                  <div className="text-2xs text-neutral-500 mb-1">Profissional</div>
                   <div className="text-xs font-semibold text-white">Carlos</div>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   {['09:00', '10:30', '14:00'].map((time, i) => (
                     <div
                       key={time}
-                      className={`p-2 rounded-lg text-center text-[10px] font-bold ${
+                      className={`p-2 rounded-lg text-center text-2xs font-bold ${
                         i === 1 ? 'bg-accent text-accent-fg' : 'bg-white/5 text-neutral-400'
                       }`}
                     >
@@ -625,7 +635,7 @@ export const FeaturesPage: React.FC = () => {
                   {['15:30', '16:00', '17:30'].map(time => (
                     <div
                       key={time}
-                      className="p-2 rounded-lg text-center text-[10px] font-bold bg-white/5 text-neutral-400"
+                      className="p-2 rounded-lg text-center text-2xs font-bold bg-white/5 text-neutral-400"
                     >
                       {time}
                     </div>
@@ -638,7 +648,7 @@ export const FeaturesPage: React.FC = () => {
             </PhoneMockup>
           </div>
           <div className="feature-text flex-1">
-            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-teal-500/20 bg-teal-500/5 text-teal-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
+            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-teal-500/20 bg-teal-500/5 text-teal-400 text-2xs font-black uppercase tracking-[0.2em] mb-6 opacity-0">
               <Calendar size={24} className="w-3.5 h-3.5" />
               Agendamento 24/7
             </div>
@@ -652,7 +662,7 @@ export const FeaturesPage: React.FC = () => {
               confirma no WhatsApp. Você só vê o agendamento pronto na manhã seguinte.
             </p>
             <div className="bg-neutral-900/60 rounded-2xl border border-white/5 p-6">
-              <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-4">
+              <div className="text-2xs font-bold text-neutral-500 uppercase tracking-wider mb-4">
                 O que acontece em 3 segundos
               </div>
               <div className="space-y-3">
@@ -662,7 +672,7 @@ export const FeaturesPage: React.FC = () => {
                   { step: '3', text: 'Confirma + envia lembrete 24h antes' },
                 ].map(item => (
                   <div key={item.step} className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full bg-teal-500/20 flex items-center justify-center text-[10px] font-bold text-teal-400 shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-teal-500/20 flex items-center justify-center text-2xs font-bold text-teal-400 shrink-0">
                       {item.step}
                     </div>
                     <span className="text-sm text-neutral-300">{item.text}</span>
@@ -678,7 +688,7 @@ export const FeaturesPage: React.FC = () => {
       <section className="feature-section py-24 md:py-36 px-6 relative z-10">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
           <div className="feature-text flex-1">
-            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/20 bg-cyan-500/5 text-cyan-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
+            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/20 bg-cyan-500/5 text-cyan-400 text-2xs font-black uppercase tracking-[0.2em] mb-6 opacity-0">
               <Wallet size={24} className="w-3.5 h-3.5" />
               Financeiro
             </div>
@@ -704,7 +714,7 @@ export const FeaturesPage: React.FC = () => {
                 >
                   <item.icon className="w-5 h-5 text-cyan-400 mb-2" />
                   <div className="text-sm font-bold text-white">{item.label}</div>
-                  <div className="text-[11px] text-neutral-500">{item.desc}</div>
+                  <div className="text-2xs text-neutral-500">{item.desc}</div>
                 </div>
               ))}
             </div>
@@ -718,7 +728,7 @@ export const FeaturesPage: React.FC = () => {
       {/* Feature 4: Equipe */}
       <section className="py-24 md:py-36 px-6 relative z-10 bg-neutral-950/50 border-y border-white/5">
         <div className="max-w-5xl mx-auto text-center">
-          <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-500/20 bg-blue-500/5 text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
+          <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-500/20 bg-blue-500/5 text-blue-400 text-2xs font-black uppercase tracking-[0.2em] mb-6 opacity-0">
             <Users size={24} className="w-3.5 h-3.5" />
             Equipe
           </div>
@@ -765,16 +775,16 @@ export const FeaturesPage: React.FC = () => {
                   </div>
                   <div>
                     <div className="text-sm font-bold text-white">{person.name}</div>
-                    <div className="text-[11px] text-neutral-500">{person.role}</div>
+                    <div className="text-2xs text-neutral-500">{person.role}</div>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-white/5 rounded-lg p-3">
-                    <div className="text-[10px] text-neutral-500 mb-1">Hoje</div>
+                    <div className="text-2xs text-neutral-500 mb-1">Hoje</div>
                     <div className="text-sm font-bold text-white">{person.today}</div>
                   </div>
                   <div className="bg-white/5 rounded-lg p-3">
-                    <div className="text-[10px] text-neutral-500 mb-1">Faturamento</div>
+                    <div className="text-2xs text-neutral-500 mb-1">Faturamento</div>
                     <div className="text-sm font-bold text-accent">{person.revenue}</div>
                   </div>
                 </div>
@@ -790,7 +800,7 @@ export const FeaturesPage: React.FC = () => {
           <div className="feature-visual flex-1 flex justify-center phone-parallax">
             <PhoneMockup>
               <div className="space-y-3">
-                <div className="text-[10px] font-bold text-accent uppercase tracking-wider mb-2">
+                <div className="text-2xs font-bold text-accent uppercase tracking-wider mb-2">
                   Mensagens automáticas
                 </div>
                 {[
@@ -816,7 +826,7 @@ export const FeaturesPage: React.FC = () => {
                 ].map((msg, i) => (
                   <div
                     key={i}
-                    className={`p-2.5 rounded-xl text-[10px] max-w-[85%] ${
+                    className={`p-2.5 rounded-xl text-2xs max-w-[85%] ${
                       msg.from === 'bot'
                         ? 'bg-accent/10 border border-accent/20 text-neutral-300 mr-auto'
                         : 'bg-blue-500/20 border border-blue-500/20 text-white ml-auto'
@@ -833,7 +843,7 @@ export const FeaturesPage: React.FC = () => {
             </PhoneMockup>
           </div>
           <div className="feature-text flex-1">
-            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
+            <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-400 text-2xs font-black uppercase tracking-[0.2em] mb-6 opacity-0">
               <MessageSquare size={24} className="w-3.5 h-3.5" />
               WhatsApp Automático
             </div>
@@ -847,7 +857,7 @@ export const FeaturesPage: React.FC = () => {
               tudo automático, tudo no WhatsApp que ele já usa. Sem app. Sem link estranho.
             </p>
             <div className="bg-neutral-900/60 rounded-2xl border border-white/5 p-6">
-              <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-4">
+              <div className="text-2xs font-bold text-neutral-500 uppercase tracking-wider mb-4">
                 Automatizações
               </div>
               <div className="space-y-3">
@@ -875,7 +885,7 @@ export const FeaturesPage: React.FC = () => {
       <section className="feature-section relative z-10 border-y border-white/5 bg-neutral-950/50 px-6 py-24 md:py-36">
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-16 lg:flex-row-reverse">
           <div className="feature-text flex-1">
-            <div className="feature-badge mb-6 inline-flex items-center gap-2 rounded-full border border-green-500/20 bg-green-500/5 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-green-400 opacity-0">
+            <div className="feature-badge mb-6 inline-flex items-center gap-2 rounded-full border border-green-500/20 bg-green-500/5 px-3 py-1 text-2xs font-black uppercase tracking-[0.2em] text-green-400 opacity-0">
               <Store size={24} className="h-3.5 w-3.5" />
               Perfil Público
             </div>
@@ -889,7 +899,7 @@ export const FeaturesPage: React.FC = () => {
               — sem baixar app e sem ligar para o balcão.
             </p>
             <div className="rounded-2xl border border-white/5 bg-neutral-900/60 p-6">
-              <div className="mb-4 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+              <div className="mb-4 text-2xs font-bold uppercase tracking-wider text-neutral-500">
                 O que o cliente vê
               </div>
               <div className="space-y-3">
@@ -924,28 +934,28 @@ export const FeaturesPage: React.FC = () => {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-xs font-bold text-white">Barbearia Central</div>
-                      <div className="text-[10px] text-neutral-400">Unissex · Centro</div>
+                      <div className="text-2xs text-neutral-400">Unissex · Centro</div>
                     </div>
                     <div className="flex items-center gap-1 rounded-full bg-accent/15 px-2 py-1">
                       <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-                      <span className="text-[9px] font-bold text-accent-light">Aberto</span>
+                      <span className="text-2xs font-bold text-accent-light">Aberto</span>
                     </div>
                   </div>
-                  <div className="border-t border-white/8 px-3 py-2 text-[10px] text-neutral-400">
+                  <div className="border-t border-white/8 px-3 py-2 text-2xs text-neutral-400">
                     Hoje · 09:00–19:00
                   </div>
                 </div>
 
                 <div className="flex gap-2">
-                  <div className="flex-1 rounded-lg bg-accent px-2 py-2.5 text-center text-[10px] font-black text-black">
+                  <div className="flex-1 rounded-lg bg-accent px-2 py-2.5 text-center text-2xs font-black text-black">
                     Entrar na fila
                   </div>
-                  <div className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-2.5 text-center text-[10px] font-bold text-white">
+                  <div className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-2.5 text-center text-2xs font-bold text-white">
                     Agendar
                   </div>
                 </div>
 
-                <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+                <div className="text-2xs font-bold uppercase tracking-wider text-neutral-500">
                   Serviços
                 </div>
                 {[
@@ -958,18 +968,18 @@ export const FeaturesPage: React.FC = () => {
                     className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-3 py-2.5"
                   >
                     <div>
-                      <div className="text-[11px] font-semibold text-white">{service.name}</div>
-                      <div className="text-[9px] text-neutral-500">{service.time}</div>
+                      <div className="text-2xs font-semibold text-white">{service.name}</div>
+                      <div className="text-2xs text-neutral-500">{service.time}</div>
                     </div>
-                    <div className="text-[11px] font-bold text-accent-light">{service.price}</div>
+                    <div className="text-2xs font-bold text-accent-light">{service.price}</div>
                   </div>
                 ))}
 
                 <div className="rounded-xl border border-white/5 bg-white/4 px-3 py-2.5">
-                  <div className="mb-1 text-[9px] font-bold uppercase tracking-wider text-neutral-500">
+                  <div className="mb-1 text-2xs font-bold uppercase tracking-wider text-neutral-500">
                     Link do salão
                   </div>
-                  <div className="truncate text-[10px] font-medium text-neutral-300">
+                  <div className="truncate text-2xs font-medium text-neutral-300">
                     agendai.app/queue/barbearia-central
                   </div>
                 </div>
@@ -982,7 +992,7 @@ export const FeaturesPage: React.FC = () => {
       {/* Feature 7: Segurança */}
       <section className="py-24 md:py-36 px-6 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-teal-500/20 bg-teal-500/5 text-teal-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-0">
+          <div className="feature-badge inline-flex items-center gap-2 px-3 py-1 rounded-full border border-teal-500/20 bg-teal-500/5 text-teal-400 text-2xs font-black uppercase tracking-[0.2em] mb-6 opacity-0">
             <ShieldCheck size={24} className="w-3.5 h-3.5" />
             Segurança
           </div>
@@ -1007,7 +1017,7 @@ export const FeaturesPage: React.FC = () => {
               >
                 <item.icon className="w-8 h-8 text-teal-400 mb-3 mx-auto" />
                 <div className="text-sm font-bold text-white mb-1">{item.title}</div>
-                <div className="text-[11px] text-neutral-500">{item.desc}</div>
+                <div className="text-2xs text-neutral-500">{item.desc}</div>
               </div>
             ))}
           </div>
@@ -1041,7 +1051,7 @@ export const FeaturesPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/queue')}
-                className="group inline-flex items-center justify-center gap-2 px-2 py-3 text-sm font-bold text-neutral-600 transition hover:text-black sm:justify-start sm:px-3"
+                className="group inline-flex min-h-12 items-center justify-center gap-2 px-2 py-3 text-sm font-bold text-neutral-600 transition hover:text-black sm:justify-start sm:px-3 lg:min-h-0"
               >
                 Ver demonstração
                 <ChevronRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

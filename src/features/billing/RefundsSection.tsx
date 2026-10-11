@@ -36,7 +36,7 @@ const RefundStatusBadge: React.FC<{ status: string }> = ({ status }) => {
   };
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${cfg.className}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-bold uppercase tracking-widest border ${cfg.className}`}
     >
       {cfg.label}
     </span>
@@ -93,7 +93,7 @@ export const RefundsSection: React.FC<{ shopNames: Map<string, string> }> = ({ s
         <div className="bg-surface border border-border rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-bg text-text-muted uppercase text-[10px] font-bold tracking-widest border-b border-border">
+              <thead className="bg-bg text-text-muted uppercase text-2xs font-bold tracking-widest border-b border-border">
                 <tr>
                   <th className="px-6 py-3.5">Valor</th>
                   <th className="px-6 py-3.5 hidden md:table-cell">Motivo</th>
