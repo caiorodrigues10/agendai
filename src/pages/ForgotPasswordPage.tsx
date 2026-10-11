@@ -4,6 +4,7 @@ import { authApi } from '../infra/authApi';
 import { getRecaptchaToken } from '../utils/recaptcha';
 import { Logo } from '../components/ui/Logo';
 import { ThemeToggle } from '../components/infra/ThemeToggle';
+import { SectionError } from '../components/patterns/states/SectionError';
 import {
   LuArrowRight as ArrowRight,
   LuLockKeyhole as LockKeyhole,
@@ -26,6 +27,7 @@ export const ForgotPasswordPage: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -34,6 +36,7 @@ export const ForgotPasswordPage: React.FC = () => {
     e.preventDefault();
     if (!isValidEmail) return;
     setSubmitting(true);
+    setError(null);
     try {
       const token = await getRecaptchaToken('forgot_password');
       try {
@@ -111,6 +114,8 @@ export const ForgotPasswordPage: React.FC = () => {
               </h1>
             </div>
           </div>
+
+          {error && <SectionError message={error} className="w-full mb-4" />}
 
           <form onSubmit={handleEmailSubmit} className="w-full space-y-6">
               <div className="space-y-4">
