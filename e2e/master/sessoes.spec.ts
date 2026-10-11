@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
 import {
   acceptCookies,
   login,
@@ -6,6 +6,7 @@ import {
   MASTER_EMAIL,
   MASTER_PASSWORD,
   MASTER_SKIP,
+  test,
 } from './helpers';
 
 test.skip(!masterConfigured, MASTER_SKIP);

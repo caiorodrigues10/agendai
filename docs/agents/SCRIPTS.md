@@ -11,7 +11,7 @@
 | `test` | `vitest run` | testes | `npm install` | Unit/componentes (`src/**/*.{test,spec}.{ts,tsx}`) |
 | `test:watch` | `vitest` | testes | `npm install` | Vitest em watch |
 | `typecheck` | `tsc --noEmit` | leitura | `npm install` | Checagem TypeScript |
-| `test:e2e` | `playwright test` | testes | browsers Playwright instalados | E2E (`e2e/`) |
+| `test:e2e` | `playwright test` | testes | browsers Playwright instalados; specs de `e2e/master/` exigem `E2E_BASE_URL` + `E2E_MASTER_EMAIL`/`E2E_MASTER_PASSWORD` | E2E (`e2e/`). Sem `E2E_BASE_URL` o `webServer` faz `build` + `preview` em `127.0.0.1:4173`; com a env aponta para o servidor informado |
 | `lint` | `eslint src --ext .ts,.tsx` | leitura | `npm install` | Lint |
 | `lint:fix` | `eslint … --fix` | geração | `npm install` | Corrige lint autofixável |
 | `audit:frontend-structure` | `node scripts/audit-frontend-structure.mjs` | leitura | Node | Auditoria estrutural |

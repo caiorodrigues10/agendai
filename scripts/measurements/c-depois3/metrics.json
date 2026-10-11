@@ -1,0 +1,774 @@
+{
+  "label": "c-depois3",
+  "createdAt": "2026-10-08T04:01:54.714Z",
+  "base": "http://127.0.0.1:4173",
+  "apiMode": "both",
+  "backendUp": true,
+  "routes": [
+    "/",
+    "/planos"
+  ],
+  "widths": [
+    320,
+    375,
+    390,
+    768,
+    1024,
+    1440
+  ],
+  "runs": 5,
+  "env": {
+    "slow4g": {
+      "latency": 150,
+      "downloadThroughput": 209715.2,
+      "uploadThroughput": 98304
+    },
+    "cpuRate": 4,
+    "minTap": 44,
+    "minFont": 12
+  },
+  "perf": [
+    {
+      "route": "/",
+      "width": 375,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0502,
+        "lcp": 1976,
+        "fcp": 1300,
+        "jsBytes": 230811,
+        "jsRequests": 13,
+        "cssBytes": 28406,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 357791,
+        "totalRequests": 16
+      },
+      "runs": [
+        {
+          "cls": 0.0502,
+          "lcp": 2196,
+          "fcp": 1500
+        },
+        {
+          "cls": 0.0502,
+          "lcp": 1976,
+          "fcp": 1324
+        },
+        {
+          "cls": 0.0502,
+          "lcp": 1908,
+          "fcp": 1292
+        },
+        {
+          "cls": 0.0502,
+          "lcp": 1924,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0502,
+          "lcp": 2004,
+          "fcp": 1292
+        }
+      ]
+    },
+    {
+      "route": "/planos",
+      "width": 375,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0743,
+        "lcp": 1904,
+        "fcp": 1304,
+        "jsBytes": 289543,
+        "jsRequests": 14,
+        "cssBytes": 28406,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 416523,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0743,
+          "lcp": 1896,
+          "fcp": 1316
+        },
+        {
+          "cls": 0.0743,
+          "lcp": 1928,
+          "fcp": 1320
+        },
+        {
+          "cls": 0.0743,
+          "lcp": 1884,
+          "fcp": 1296
+        },
+        {
+          "cls": 0.0743,
+          "lcp": 1904,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0743,
+          "lcp": 1904,
+          "fcp": 1304
+        }
+      ]
+    },
+    {
+      "route": "/",
+      "width": 375,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0502,
+        "lcp": 1944,
+        "fcp": 1312,
+        "jsBytes": 230811,
+        "jsRequests": 13,
+        "cssBytes": 28406,
+        "imageBytes": 65829,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 387902,
+        "totalRequests": 17
+      },
+      "runs": [
+        {
+          "cls": 0.0502,
+          "lcp": 1976,
+          "fcp": 1376
+        },
+        {
+          "cls": 0.0502,
+          "lcp": 1944,
+          "fcp": 1296
+        },
+        {
+          "cls": 0.0502,
+          "lcp": 1956,
+          "fcp": 1316
+        },
+        {
+          "cls": 0.0502,
+          "lcp": 1912,
+          "fcp": 1312
+        },
+        {
+          "cls": 0.0502,
+          "lcp": 1896,
+          "fcp": 1284
+        }
+      ]
+    },
+    {
+      "route": "/planos",
+      "width": 375,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0217,
+        "lcp": 1864,
+        "fcp": 1292,
+        "jsBytes": 289543,
+        "jsRequests": 14,
+        "cssBytes": 28406,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 418686,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0217,
+          "lcp": 1884,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0217,
+          "lcp": 1864,
+          "fcp": 1292
+        },
+        {
+          "cls": 0.0217,
+          "lcp": 1860,
+          "fcp": 1288
+        },
+        {
+          "cls": 0.0217,
+          "lcp": 1864,
+          "fcp": 1288
+        },
+        {
+          "cls": 0.0217,
+          "lcp": 1944,
+          "fcp": 1364
+        }
+      ]
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0015,
+        "lcp": 2184,
+        "fcp": 1308,
+        "jsBytes": 230811,
+        "jsRequests": 13,
+        "cssBytes": 28406,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 357791,
+        "totalRequests": 16
+      },
+      "runs": [
+        {
+          "cls": 0.0015,
+          "lcp": 2184,
+          "fcp": 1308
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2140,
+          "fcp": 1296
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2268,
+          "fcp": 1348
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2208,
+          "fcp": 1328
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2040,
+          "fcp": 1300
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0003,
+        "lcp": 2128,
+        "fcp": 1300,
+        "jsBytes": 206970,
+        "jsRequests": 15,
+        "cssBytes": 28406,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 333950,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0003,
+          "lcp": 2120,
+          "fcp": 1288
+        },
+        {
+          "cls": 0.0003,
+          "lcp": 2128,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 2264,
+          "fcp": 1316
+        },
+        {
+          "cls": 0.0003,
+          "lcp": 2140,
+          "fcp": 1304
+        },
+        {
+          "cls": 0.0003,
+          "lcp": 2128,
+          "fcp": 1296
+        }
+      ]
+    },
+    {
+      "route": "/cadastro",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0005,
+        "lcp": 2144,
+        "fcp": 1308,
+        "jsBytes": 206970,
+        "jsRequests": 15,
+        "cssBytes": 28406,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 333950,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0005,
+          "lcp": 2144,
+          "fcp": 1316
+        },
+        {
+          "cls": 0,
+          "lcp": 2204,
+          "fcp": 1304
+        },
+        {
+          "cls": 0.0005,
+          "lcp": 2112,
+          "fcp": 1288
+        },
+        {
+          "cls": 0.0005,
+          "lcp": 2120,
+          "fcp": 1308
+        },
+        {
+          "cls": 0.0005,
+          "lcp": 2208,
+          "fcp": 1348
+        }
+      ]
+    },
+    {
+      "route": "/planos",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0348,
+        "lcp": 1980,
+        "fcp": 1316,
+        "jsBytes": 289543,
+        "jsRequests": 14,
+        "cssBytes": 28406,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 416523,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0356,
+          "lcp": 2060,
+          "fcp": 1328
+        },
+        {
+          "cls": 0.0347,
+          "lcp": 2072,
+          "fcp": 1360
+        },
+        {
+          "cls": 0.0348,
+          "lcp": 1952,
+          "fcp": 1316
+        },
+        {
+          "cls": 0.0348,
+          "lcp": 1928,
+          "fcp": 1308
+        },
+        {
+          "cls": 0.0348,
+          "lcp": 1980,
+          "fcp": 1312
+        }
+      ]
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0015,
+        "lcp": 2144,
+        "fcp": 1344,
+        "jsBytes": 230811,
+        "jsRequests": 13,
+        "cssBytes": 28406,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 357791,
+        "totalRequests": 16
+      },
+      "runs": [
+        {
+          "cls": 0.0015,
+          "lcp": 2180,
+          "fcp": 1344
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2208,
+          "fcp": 1368
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2048,
+          "fcp": 1288
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2144,
+          "fcp": 1368
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2068,
+          "fcp": 1296
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0003,
+        "lcp": 2128,
+        "fcp": 1308,
+        "jsBytes": 206970,
+        "jsRequests": 15,
+        "cssBytes": 28406,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 333950,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0003,
+          "lcp": 2112,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0003,
+          "lcp": 2216,
+          "fcp": 1360
+        },
+        {
+          "cls": 0,
+          "lcp": 2264,
+          "fcp": 1320
+        },
+        {
+          "cls": 0.0003,
+          "lcp": 2128,
+          "fcp": 1308
+        },
+        {
+          "cls": 0.0003,
+          "lcp": 2120,
+          "fcp": 1308
+        }
+      ]
+    },
+    {
+      "route": "/cadastro",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0,
+        "lcp": 2208,
+        "fcp": 1312,
+        "jsBytes": 206970,
+        "jsRequests": 15,
+        "cssBytes": 28406,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 333950,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 2204,
+          "fcp": 1312
+        },
+        {
+          "cls": 0.0005,
+          "lcp": 2128,
+          "fcp": 1312
+        },
+        {
+          "cls": 0,
+          "lcp": 2220,
+          "fcp": 1288
+        },
+        {
+          "cls": 0,
+          "lcp": 2220,
+          "fcp": 1312
+        },
+        {
+          "cls": 0.0005,
+          "lcp": 2208,
+          "fcp": 1324
+        }
+      ]
+    },
+    {
+      "route": "/planos",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.009,
+        "lcp": 1996,
+        "fcp": 1332,
+        "jsBytes": 289543,
+        "jsRequests": 14,
+        "cssBytes": 28406,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 418686,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0089,
+          "lcp": 1996,
+          "fcp": 1360
+        },
+        {
+          "cls": 0.0101,
+          "lcp": 1944,
+          "fcp": 1312
+        },
+        {
+          "cls": 0.0101,
+          "lcp": 1940,
+          "fcp": 1308
+        },
+        {
+          "cls": 0.009,
+          "lcp": 2248,
+          "fcp": 1364
+        },
+        {
+          "cls": 0.009,
+          "lcp": 2088,
+          "fcp": 1332
+        }
+      ]
+    }
+  ],
+  "perfSummary": [
+    {
+      "scenario": "off@375",
+      "rotas": 2,
+      "clsMed": 0.0743,
+      "clsMax": 0.0743,
+      "lcpMed": 1976,
+      "lcpMax": 1976,
+      "fcpMed": 1304,
+      "jsMedKB": 283,
+      "jsReqMed": 14,
+      "imgMedKB": 35,
+      "porRota": [
+        {
+          "route": "/",
+          "cls": 0.0502,
+          "lcp": 1976,
+          "fcp": 1300,
+          "jsKB": 225,
+          "jsReq": 13,
+          "imgKB": 35
+        },
+        {
+          "route": "/planos",
+          "cls": 0.0743,
+          "lcp": 1904,
+          "fcp": 1304,
+          "jsKB": 283,
+          "jsReq": 14,
+          "imgKB": 35
+        }
+      ]
+    },
+    {
+      "scenario": "real@375",
+      "rotas": 2,
+      "clsMed": 0.0502,
+      "clsMax": 0.0502,
+      "lcpMed": 1944,
+      "lcpMax": 1944,
+      "fcpMed": 1312,
+      "jsMedKB": 283,
+      "jsReqMed": 14,
+      "imgMedKB": 64,
+      "porRota": [
+        {
+          "route": "/",
+          "cls": 0.0502,
+          "lcp": 1944,
+          "fcp": 1312,
+          "jsKB": 225,
+          "jsReq": 13,
+          "imgKB": 64
+        },
+        {
+          "route": "/planos",
+          "cls": 0.0217,
+          "lcp": 1864,
+          "fcp": 1292,
+          "jsKB": 283,
+          "jsReq": 14,
+          "imgKB": 35
+        }
+      ]
+    },
+    {
+      "scenario": "off@1440",
+      "rotas": 4,
+      "clsMed": 0.0015,
+      "clsMax": 0.0348,
+      "lcpMed": 2144,
+      "lcpMax": 2184,
+      "fcpMed": 1308,
+      "jsMedKB": 225,
+      "jsReqMed": 15,
+      "imgMedKB": 35,
+      "porRota": [
+        {
+          "route": "/",
+          "cls": 0.0015,
+          "lcp": 2184,
+          "fcp": 1308,
+          "jsKB": 225,
+          "jsReq": 13,
+          "imgKB": 35
+        },
+        {
+          "route": "/login",
+          "cls": 0.0003,
+          "lcp": 2128,
+          "fcp": 1300,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        },
+        {
+          "route": "/cadastro",
+          "cls": 0.0005,
+          "lcp": 2144,
+          "fcp": 1308,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        },
+        {
+          "route": "/planos",
+          "cls": 0.0348,
+          "lcp": 1980,
+          "fcp": 1316,
+          "jsKB": 283,
+          "jsReq": 14,
+          "imgKB": 35
+        }
+      ]
+    },
+    {
+      "scenario": "real@1440",
+      "rotas": 4,
+      "clsMed": 0.0015,
+      "clsMax": 0.009,
+      "lcpMed": 2144,
+      "lcpMax": 2208,
+      "fcpMed": 1332,
+      "jsMedKB": 225,
+      "jsReqMed": 15,
+      "imgMedKB": 35,
+      "porRota": [
+        {
+          "route": "/",
+          "cls": 0.0015,
+          "lcp": 2144,
+          "fcp": 1344,
+          "jsKB": 225,
+          "jsReq": 13,
+          "imgKB": 35
+        },
+        {
+          "route": "/login",
+          "cls": 0.0003,
+          "lcp": 2128,
+          "fcp": 1308,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        },
+        {
+          "route": "/cadastro",
+          "cls": 0,
+          "lcp": 2208,
+          "fcp": 1312,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        },
+        {
+          "route": "/planos",
+          "cls": 0.009,
+          "lcp": 1996,
+          "fcp": 1332,
+          "jsKB": 283,
+          "jsReq": 14,
+          "imgKB": 35
+        }
+      ]
+    }
+  ]
+}

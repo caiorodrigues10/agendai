@@ -1,7 +1,7 @@
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
 import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { acceptCookies, login, loginAsMaster, MASTER_EMAIL, MASTER_SKIP, masterConfigured } from './helpers';
+import { acceptCookies, login, loginAsMaster, MASTER_EMAIL, MASTER_SKIP, masterConfigured, test } from './helpers';
 
 test.skip(!masterConfigured, MASTER_SKIP);
 

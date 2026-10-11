@@ -1,0 +1,5281 @@
+{
+  "label": "abc-antes",
+  "createdAt": "2026-10-08T00:11:09.975Z",
+  "base": "http://127.0.0.1:4173",
+  "apiMode": "both",
+  "backendUp": true,
+  "routes": [
+    "/",
+    "/planos",
+    "/login",
+    "/cadastro",
+    "/queue",
+    "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+    "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+    "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c"
+  ],
+  "widths": [
+    320,
+    375,
+    390,
+    768,
+    1024,
+    1440
+  ],
+  "runs": 5,
+  "env": {
+    "slow4g": {
+      "latency": 150,
+      "downloadThroughput": 209715.2,
+      "uploadThroughput": 98304
+    },
+    "cpuRate": 4,
+    "minTap": 44,
+    "minFont": 12
+  },
+  "layout": [
+    {
+      "route": "/",
+      "width": 320,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 22,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 72,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Fila e agendasem confusão.Resultado à vista.",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/planos",
+      "width": 320,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 23,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 135,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Teste grátis ou escolha o plano",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/login",
+      "width": 320,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 11,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 2
+          }
+        },
+        "tiny": {
+          "total": 9,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Bem-vindo de volta",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 1,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/cadastro",
+      "width": 320,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 13,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 4
+          }
+        },
+        "tiny": {
+          "total": 16,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Comece pelo seu acesso",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 1,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue",
+      "width": 320,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 22,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 72,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Fila e agendasem confusão.Resultado à vista.",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+      "width": 320,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "Voltar ao início",
+              "cls": "px-4 py-2 rounded-xl bg-accent text-accent-fg text-sm font-bold",
+              "w": 134,
+              "h": 36,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+      "width": 320,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "Voltar ao início",
+              "cls": "px-4 py-2 rounded-xl bg-accent text-accent-fg text-sm font-bold",
+              "w": 134,
+              "h": 36,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+      "width": 320,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "Voltar ao salão",
+              "cls": "rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-accent-fg",
+              "w": 272,
+              "h": 40,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Não foi possível conectar ao servidor. Verifique se a API está no ar e tente de ",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/",
+      "width": 375,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 22,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 72,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Fila e agendasem confusão.Resultado à vista.",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/planos",
+      "width": 375,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 23,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 137,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Teste grátis ou escolha o plano",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/login",
+      "width": 375,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 11,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 2
+          }
+        },
+        "tiny": {
+          "total": 9,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Bem-vindo de volta",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 1,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/cadastro",
+      "width": 375,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 13,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 4
+          }
+        },
+        "tiny": {
+          "total": 16,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Comece pelo seu acesso",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 1,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue",
+      "width": 375,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 22,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 72,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Fila e agendasem confusão.Resultado à vista.",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+      "width": 375,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "Voltar ao início",
+              "cls": "px-4 py-2 rounded-xl bg-accent text-accent-fg text-sm font-bold",
+              "w": 134,
+              "h": 36,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+      "width": 375,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "Voltar ao início",
+              "cls": "px-4 py-2 rounded-xl bg-accent text-accent-fg text-sm font-bold",
+              "w": 134,
+              "h": 36,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+      "width": 375,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "Voltar ao salão",
+              "cls": "rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-accent-fg",
+              "w": 327,
+              "h": 40,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Não foi possível conectar ao servidor. Verifique se a API está no ar e tente de ",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/",
+      "width": 390,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 22,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 72,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Fila e agendasem confusão.Resultado à vista.",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/planos",
+      "width": 390,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 23,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 137,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Teste grátis ou escolha o plano",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/login",
+      "width": 390,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 11,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 2
+          }
+        },
+        "tiny": {
+          "total": 9,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Bem-vindo de volta",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 1,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/cadastro",
+      "width": 390,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 13,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 4
+          }
+        },
+        "tiny": {
+          "total": 16,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Comece pelo seu acesso",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 1,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue",
+      "width": 390,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 22,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 72,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Fila e agendasem confusão.Resultado à vista.",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+      "width": 390,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "Voltar ao início",
+              "cls": "px-4 py-2 rounded-xl bg-accent text-accent-fg text-sm font-bold",
+              "w": 134,
+              "h": 36,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+      "width": 390,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "Voltar ao início",
+              "cls": "px-4 py-2 rounded-xl bg-accent text-accent-fg text-sm font-bold",
+              "w": 134,
+              "h": 36,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+      "width": 390,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "Voltar ao salão",
+              "cls": "rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-accent-fg",
+              "w": 342,
+              "h": 40,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Não foi possível conectar ao servidor. Verifique se a API está no ar e tente de ",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/",
+      "width": 768,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 25,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 81,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Fila e agendasem confusão.Resultado à vista.",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/planos",
+      "width": 768,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 25,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 140,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Teste grátis ou escolha o plano",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/login",
+      "width": 768,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 11,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 2
+          }
+        },
+        "tiny": {
+          "total": 9,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Bem-vindo de volta",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 1,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/cadastro",
+      "width": 768,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 13,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 4
+          }
+        },
+        "tiny": {
+          "total": 16,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Comece pelo seu acesso",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 1,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue",
+      "width": 768,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 25,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 81,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Fila e agendasem confusão.Resultado à vista.",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+      "width": 768,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "Voltar ao início",
+              "cls": "px-4 py-2 rounded-xl bg-accent text-accent-fg text-sm font-bold",
+              "w": 134,
+              "h": 36,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+      "width": 768,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "Voltar ao início",
+              "cls": "px-4 py-2 rounded-xl bg-accent text-accent-fg text-sm font-bold",
+              "w": 134,
+              "h": 36,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+      "width": 768,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "Voltar ao salão",
+              "cls": "rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-accent-fg",
+              "w": 400,
+              "h": 40,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Não foi possível conectar ao servidor. Verifique se a API está no ar e tente de ",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/",
+      "width": 1024,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 31,
+          "tooSmall": [
+            {
+              "tag": "a",
+              "text": "",
+              "cls": "flex min-h-11 shrink-0 items-center gap-3 cursor-pointer group lg:min-h-0",
+              "w": 174,
+              "h": 36,
+              "href": "/",
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Recursos",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 73,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Aplicativo",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 82,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Preços",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 55,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Funcionalidades",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 130,
+              "h": 18,
+              "href": "/funcionalidades",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 55,
+              "h": 18,
+              "href": "/planos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Sobre",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 45,
+              "h": 18,
+              "href": "/sobre",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 65,
+              "h": 18,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Entrar",
+              "cls": "hidden px-0.5 text-xs font-bold uppercase tracking-tighter text-white/90 transit",
+              "w": 43,
+              "h": 16,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Ver o produto",
+              "cls": "group inline-flex min-h-12 items-center gap-1.5 pb-1 text-sm font-medium text-ne",
+              "w": 111,
+              "h": 24,
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Agenda Já",
+              "cls": "-my-[15px] inline-flex min-h-11 items-center transition-colors hover:text-neutra",
+              "w": 82,
+              "h": 16,
+              "href": "/",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Recursos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 56,
+              "h": 17,
+              "href": "/#recursos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Aplicativo",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 61,
+              "h": 17,
+              "href": "/#produto",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Preços",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 42,
+              "h": 17,
+              "href": "/#precos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Ver demonstração",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 90,
+              "h": 41,
+              "href": "/#produto",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Funcionalidades",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 100,
+              "h": 17,
+              "href": "/funcionalidades",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Agendamento",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 87,
+              "h": 17,
+              "href": "/agendamento",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Dashboard",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 67,
+              "h": 17,
+              "href": "/dashboard",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 40,
+              "h": 17,
+              "href": "/planos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Sobre",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 36,
+              "h": 17,
+              "href": "/sobre",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 50,
+              "h": 17,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Acessar painel",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 90,
+              "h": 17,
+              "href": "/login",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Criar conta grátis",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 69,
+              "h": 41,
+              "href": "/cadastro",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 46,
+              "h": 20,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Privacidade",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 67,
+              "h": 20,
+              "href": "/privacidade",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Termos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 42,
+              "h": 20,
+              "href": "/termos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 37,
+              "h": 20,
+              "href": "/planos",
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 89,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Fila e agendasem confusão.Resultado à vista.",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/planos",
+      "width": 1024,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 31,
+          "tooSmall": [
+            {
+              "tag": "a",
+              "text": "",
+              "cls": "flex min-h-11 shrink-0 items-center gap-3 cursor-pointer group lg:min-h-0",
+              "w": 174,
+              "h": 36,
+              "href": "/",
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Recursos",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 73,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Aplicativo",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 82,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Preços",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 55,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Funcionalidades",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 130,
+              "h": 18,
+              "href": "/funcionalidades",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 55,
+              "h": 18,
+              "href": "/planos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Sobre",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 45,
+              "h": 18,
+              "href": "/sobre",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 65,
+              "h": 18,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Entrar",
+              "cls": "hidden px-0.5 text-xs font-bold uppercase tracking-tighter text-white/90 transit",
+              "w": 43,
+              "h": 16,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Mensal",
+              "cls": "flex min-h-11 items-center rounded-full px-5 py-2.5 text-sm font-bold transition",
+              "w": 89,
+              "h": 40,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Anual",
+              "cls": "flex min-h-11 items-center rounded-full px-5 py-2.5 text-sm font-bold transition",
+              "w": 79,
+              "h": 40,
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Agenda Já",
+              "cls": "-my-[15px] inline-flex min-h-11 items-center transition-colors hover:text-neutra",
+              "w": 82,
+              "h": 16,
+              "href": "/",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Recursos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 56,
+              "h": 17,
+              "href": "/#recursos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Aplicativo",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 61,
+              "h": 17,
+              "href": "/#produto",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Preços",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 42,
+              "h": 17,
+              "href": "/#precos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Ver demonstração",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 90,
+              "h": 41,
+              "href": "/#produto",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Funcionalidades",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 100,
+              "h": 17,
+              "href": "/funcionalidades",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Agendamento",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 87,
+              "h": 17,
+              "href": "/agendamento",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Dashboard",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 67,
+              "h": 17,
+              "href": "/dashboard",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 40,
+              "h": 17,
+              "href": "/planos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Sobre",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 36,
+              "h": 17,
+              "href": "/sobre",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 50,
+              "h": 17,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Acessar painel",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 90,
+              "h": 17,
+              "href": "/login",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Criar conta grátis",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 69,
+              "h": 41,
+              "href": "/cadastro",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 46,
+              "h": 20,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Privacidade",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 67,
+              "h": 20,
+              "href": "/privacidade",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Termos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 42,
+              "h": 20,
+              "href": "/termos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 37,
+              "h": 20,
+              "href": "/planos",
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 147,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Teste grátis ou escolha o plano",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/login",
+      "width": 1024,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 11,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "",
+              "cls": "min-h-11 cursor-pointer transition-transform hover:scale-105 lg:min-h-0",
+              "w": 174,
+              "h": 43,
+              "inParagraph": false
+            },
+            {
+              "tag": "label",
+              "text": "Manter conectado",
+              "cls": "flex min-h-11 lg:min-h-0 items-center gap-2 cursor-pointer ",
+              "w": 127,
+              "h": 16,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 2
+          }
+        },
+        "tiny": {
+          "total": 25,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Bem-vindo de volta",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/cadastro",
+      "width": 1024,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 13,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "",
+              "cls": "min-h-11 cursor-pointer transition-transform hover:scale-105 lg:min-h-0",
+              "w": 174,
+              "h": 43,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 4
+          }
+        },
+        "tiny": {
+          "total": 32,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Comece pelo seu acesso",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue",
+      "width": 1024,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 31,
+          "tooSmall": [
+            {
+              "tag": "a",
+              "text": "",
+              "cls": "flex min-h-11 shrink-0 items-center gap-3 cursor-pointer group lg:min-h-0",
+              "w": 174,
+              "h": 36,
+              "href": "/",
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Recursos",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 73,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Aplicativo",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 82,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Preços",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 55,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Funcionalidades",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 130,
+              "h": 18,
+              "href": "/funcionalidades",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 55,
+              "h": 18,
+              "href": "/planos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Sobre",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 45,
+              "h": 18,
+              "href": "/sobre",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 65,
+              "h": 18,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Entrar",
+              "cls": "hidden px-0.5 text-xs font-bold uppercase tracking-tighter text-white/90 transit",
+              "w": 43,
+              "h": 16,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Ver o produto",
+              "cls": "group inline-flex min-h-12 items-center gap-1.5 pb-1 text-sm font-medium text-ne",
+              "w": 111,
+              "h": 24,
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Agenda Já",
+              "cls": "-my-[15px] inline-flex min-h-11 items-center transition-colors hover:text-neutra",
+              "w": 82,
+              "h": 16,
+              "href": "/",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Recursos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 56,
+              "h": 17,
+              "href": "/#recursos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Aplicativo",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 61,
+              "h": 17,
+              "href": "/#produto",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Preços",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 42,
+              "h": 17,
+              "href": "/#precos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Ver demonstração",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 90,
+              "h": 41,
+              "href": "/#produto",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Funcionalidades",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 100,
+              "h": 17,
+              "href": "/funcionalidades",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Agendamento",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 87,
+              "h": 17,
+              "href": "/agendamento",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Dashboard",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 67,
+              "h": 17,
+              "href": "/dashboard",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 40,
+              "h": 17,
+              "href": "/planos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Sobre",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 36,
+              "h": 17,
+              "href": "/sobre",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 50,
+              "h": 17,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Acessar painel",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 90,
+              "h": 17,
+              "href": "/login",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Criar conta grátis",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 69,
+              "h": 41,
+              "href": "/cadastro",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 46,
+              "h": 20,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Privacidade",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 67,
+              "h": 20,
+              "href": "/privacidade",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Termos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 42,
+              "h": 20,
+              "href": "/termos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 37,
+              "h": 20,
+              "href": "/planos",
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 89,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Fila e agendasem confusão.Resultado à vista.",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+      "width": 1024,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "Voltar ao início",
+              "cls": "px-4 py-2 rounded-xl bg-accent text-accent-fg text-sm font-bold",
+              "w": 134,
+              "h": 36,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+      "width": 1024,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "Voltar ao início",
+              "cls": "px-4 py-2 rounded-xl bg-accent text-accent-fg text-sm font-bold",
+              "w": 134,
+              "h": 36,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+      "width": 1024,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "Voltar ao salão",
+              "cls": "rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-accent-fg",
+              "w": 400,
+              "h": 40,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Não foi possível conectar ao servidor. Verifique se a API está no ar e tente de ",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 31,
+          "tooSmall": [
+            {
+              "tag": "a",
+              "text": "",
+              "cls": "flex min-h-11 shrink-0 items-center gap-3 cursor-pointer group lg:min-h-0",
+              "w": 174,
+              "h": 36,
+              "href": "/",
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Recursos",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 73,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Aplicativo",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 82,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Preços",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 55,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Funcionalidades",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 130,
+              "h": 18,
+              "href": "/funcionalidades",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 55,
+              "h": 18,
+              "href": "/planos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Sobre",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 45,
+              "h": 18,
+              "href": "/sobre",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 65,
+              "h": 18,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Entrar",
+              "cls": "hidden px-0.5 text-xs font-bold uppercase tracking-tighter text-white/90 transit",
+              "w": 43,
+              "h": 16,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Criar conta",
+              "cls": "hidden rounded-full bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-ti",
+              "w": 114,
+              "h": 36,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Ver o produto",
+              "cls": "group inline-flex min-h-12 items-center gap-1.5 pb-1 text-sm font-medium text-ne",
+              "w": 111,
+              "h": 24,
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Agenda Já",
+              "cls": "-my-[15px] inline-flex min-h-11 items-center transition-colors hover:text-neutra",
+              "w": 82,
+              "h": 16,
+              "href": "/",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Recursos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 56,
+              "h": 17,
+              "href": "/#recursos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Aplicativo",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 61,
+              "h": 17,
+              "href": "/#produto",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Preços",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 42,
+              "h": 17,
+              "href": "/#precos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Ver demonstração",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 114,
+              "h": 17,
+              "href": "/#produto",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Funcionalidades",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 100,
+              "h": 17,
+              "href": "/funcionalidades",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Agendamento",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 87,
+              "h": 17,
+              "href": "/agendamento",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Dashboard",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 67,
+              "h": 17,
+              "href": "/dashboard",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 40,
+              "h": 17,
+              "href": "/planos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Sobre",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 36,
+              "h": 17,
+              "href": "/sobre",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 50,
+              "h": 17,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Acessar painel",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 90,
+              "h": 17,
+              "href": "/login",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Criar conta grátis",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 107,
+              "h": 17,
+              "href": "/cadastro",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 46,
+              "h": 20,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Privacidade",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 67,
+              "h": 20,
+              "href": "/privacidade",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Termos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 42,
+              "h": 20,
+              "href": "/termos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 37,
+              "h": 20,
+              "href": "/planos",
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 90,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Fila e agendasem confusão.Resultado à vista.",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/planos",
+      "width": 1440,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 31,
+          "tooSmall": [
+            {
+              "tag": "a",
+              "text": "",
+              "cls": "flex min-h-11 shrink-0 items-center gap-3 cursor-pointer group lg:min-h-0",
+              "w": 174,
+              "h": 36,
+              "href": "/",
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Recursos",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 73,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Aplicativo",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 82,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Preços",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 55,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Funcionalidades",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 130,
+              "h": 18,
+              "href": "/funcionalidades",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 55,
+              "h": 18,
+              "href": "/planos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Sobre",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 45,
+              "h": 18,
+              "href": "/sobre",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 65,
+              "h": 18,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Entrar",
+              "cls": "hidden px-0.5 text-xs font-bold uppercase tracking-tighter text-white/90 transit",
+              "w": 43,
+              "h": 16,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Criar conta",
+              "cls": "hidden rounded-full bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-ti",
+              "w": 114,
+              "h": 36,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Mensal",
+              "cls": "flex min-h-11 items-center rounded-full px-5 py-2.5 text-sm font-bold transition",
+              "w": 89,
+              "h": 40,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Anual",
+              "cls": "flex min-h-11 items-center rounded-full px-5 py-2.5 text-sm font-bold transition",
+              "w": 79,
+              "h": 40,
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Agenda Já",
+              "cls": "-my-[15px] inline-flex min-h-11 items-center transition-colors hover:text-neutra",
+              "w": 82,
+              "h": 16,
+              "href": "/",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Recursos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 56,
+              "h": 17,
+              "href": "/#recursos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Aplicativo",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 61,
+              "h": 17,
+              "href": "/#produto",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Preços",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 42,
+              "h": 17,
+              "href": "/#precos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Ver demonstração",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 114,
+              "h": 17,
+              "href": "/#produto",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Funcionalidades",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 100,
+              "h": 17,
+              "href": "/funcionalidades",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Agendamento",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 87,
+              "h": 17,
+              "href": "/agendamento",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Dashboard",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 67,
+              "h": 17,
+              "href": "/dashboard",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 40,
+              "h": 17,
+              "href": "/planos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Sobre",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 36,
+              "h": 17,
+              "href": "/sobre",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 50,
+              "h": 17,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Acessar painel",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 90,
+              "h": 17,
+              "href": "/login",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Criar conta grátis",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 107,
+              "h": 17,
+              "href": "/cadastro",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 46,
+              "h": 20,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Privacidade",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 67,
+              "h": 20,
+              "href": "/privacidade",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Termos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 42,
+              "h": 20,
+              "href": "/termos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 37,
+              "h": 20,
+              "href": "/planos",
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 147,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Teste grátis ou escolha o plano",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/login",
+      "width": 1440,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 11,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "",
+              "cls": "min-h-11 cursor-pointer transition-transform hover:scale-105 lg:min-h-0",
+              "w": 174,
+              "h": 43,
+              "inParagraph": false
+            },
+            {
+              "tag": "label",
+              "text": "Manter conectado",
+              "cls": "flex min-h-11 lg:min-h-0 items-center gap-2 cursor-pointer ",
+              "w": 127,
+              "h": 16,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 2
+          }
+        },
+        "tiny": {
+          "total": 25,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Bem-vindo de volta",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/cadastro",
+      "width": 1440,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 13,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "",
+              "cls": "min-h-11 cursor-pointer transition-transform hover:scale-105 lg:min-h-0",
+              "w": 174,
+              "h": 43,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 4
+          }
+        },
+        "tiny": {
+          "total": 32,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Comece pelo seu acesso",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue",
+      "width": 1440,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 31,
+          "tooSmall": [
+            {
+              "tag": "a",
+              "text": "",
+              "cls": "flex min-h-11 shrink-0 items-center gap-3 cursor-pointer group lg:min-h-0",
+              "w": 174,
+              "h": 36,
+              "href": "/",
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Recursos",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 73,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Aplicativo",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 82,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Preços",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 55,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Funcionalidades",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 130,
+              "h": 18,
+              "href": "/funcionalidades",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 55,
+              "h": 18,
+              "href": "/planos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Sobre",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 45,
+              "h": 18,
+              "href": "/sobre",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 65,
+              "h": 18,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Entrar",
+              "cls": "hidden px-0.5 text-xs font-bold uppercase tracking-tighter text-white/90 transit",
+              "w": 43,
+              "h": 16,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Criar conta",
+              "cls": "hidden rounded-full bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-ti",
+              "w": 114,
+              "h": 36,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Ver o produto",
+              "cls": "group inline-flex min-h-12 items-center gap-1.5 pb-1 text-sm font-medium text-ne",
+              "w": 111,
+              "h": 24,
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Agenda Já",
+              "cls": "-my-[15px] inline-flex min-h-11 items-center transition-colors hover:text-neutra",
+              "w": 82,
+              "h": 16,
+              "href": "/",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Recursos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 56,
+              "h": 17,
+              "href": "/#recursos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Aplicativo",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 61,
+              "h": 17,
+              "href": "/#produto",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Preços",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 42,
+              "h": 17,
+              "href": "/#precos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Ver demonstração",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 114,
+              "h": 17,
+              "href": "/#produto",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Funcionalidades",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 100,
+              "h": 17,
+              "href": "/funcionalidades",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Agendamento",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 87,
+              "h": 17,
+              "href": "/agendamento",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Dashboard",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 67,
+              "h": 17,
+              "href": "/dashboard",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 40,
+              "h": 17,
+              "href": "/planos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Sobre",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 36,
+              "h": 17,
+              "href": "/sobre",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 50,
+              "h": 17,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Acessar painel",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 90,
+              "h": 17,
+              "href": "/login",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Criar conta grátis",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 107,
+              "h": 17,
+              "href": "/cadastro",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 46,
+              "h": 20,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Privacidade",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 67,
+              "h": 20,
+              "href": "/privacidade",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Termos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 42,
+              "h": 20,
+              "href": "/termos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 37,
+              "h": 20,
+              "href": "/planos",
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 89,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Fila e agendasem confusão.Resultado à vista.",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+      "width": 1440,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "Voltar ao início",
+              "cls": "px-4 py-2 rounded-xl bg-accent text-accent-fg text-sm font-bold",
+              "w": 134,
+              "h": 36,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+      "width": 1440,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "Voltar ao início",
+              "cls": "px-4 py-2 rounded-xl bg-accent text-accent-fg text-sm font-bold",
+              "w": 134,
+              "h": 36,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+      "width": 1440,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "Voltar ao salão",
+              "cls": "rounded-xl bg-accent px-4 py-2.5 text-sm font-bold text-accent-fg",
+              "w": 400,
+              "h": 40,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Não foi possível conectar ao servidor. Verifique se a API está no ar e tente de ",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    }
+  ],
+  "perf": [
+    {
+      "route": "/",
+      "width": 375,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0501,
+        "lcp": 1908,
+        "fcp": 1296,
+        "jsBytes": 230711,
+        "jsRequests": 13,
+        "cssBytes": 28167,
+        "imageBytes": 72008,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 393742,
+        "totalRequests": 17
+      },
+      "runs": [
+        {
+          "cls": 0.0501,
+          "lcp": 1916,
+          "fcp": 1296
+        },
+        {
+          "cls": 0.0501,
+          "lcp": 1924,
+          "fcp": 1296
+        },
+        {
+          "cls": 0.0501,
+          "lcp": 1904,
+          "fcp": 1292
+        },
+        {
+          "cls": 0.0501,
+          "lcp": 1908,
+          "fcp": 1296
+        },
+        {
+          "cls": 0.0501,
+          "lcp": 1888,
+          "fcp": 1280
+        }
+      ]
+    },
+    {
+      "route": "/planos",
+      "width": 375,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0743,
+        "lcp": 1872,
+        "fcp": 1288,
+        "jsBytes": 289431,
+        "jsRequests": 14,
+        "cssBytes": 28167,
+        "imageBytes": 72008,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 452462,
+        "totalRequests": 19
+      },
+      "runs": [
+        {
+          "cls": 0.0743,
+          "lcp": 1864,
+          "fcp": 1284
+        },
+        {
+          "cls": 0.0743,
+          "lcp": 1860,
+          "fcp": 1284
+        },
+        {
+          "cls": 0.0743,
+          "lcp": 1880,
+          "fcp": 1304
+        },
+        {
+          "cls": 0.0743,
+          "lcp": 1872,
+          "fcp": 1292
+        },
+        {
+          "cls": 0.0743,
+          "lcp": 1892,
+          "fcp": 1288
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "width": 375,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0,
+        "lcp": 2560,
+        "fcp": 1296,
+        "jsBytes": 206828,
+        "jsRequests": 16,
+        "cssBytes": 28167,
+        "imageBytes": 72008,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 369859,
+        "totalRequests": 21
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 2568,
+          "fcp": 1304
+        },
+        {
+          "cls": 0,
+          "lcp": 2580,
+          "fcp": 1296
+        },
+        {
+          "cls": 0,
+          "lcp": 2076,
+          "fcp": 1296
+        },
+        {
+          "cls": 0,
+          "lcp": 2560,
+          "fcp": 1292
+        },
+        {
+          "cls": 0,
+          "lcp": 2552,
+          "fcp": 1296
+        }
+      ]
+    },
+    {
+      "route": "/cadastro",
+      "width": 375,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0002,
+        "lcp": 2064,
+        "fcp": 1300,
+        "jsBytes": 206828,
+        "jsRequests": 16,
+        "cssBytes": 28167,
+        "imageBytes": 72008,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 369859,
+        "totalRequests": 21
+      },
+      "runs": [
+        {
+          "cls": 0.0002,
+          "lcp": 2040,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0002,
+          "lcp": 2048,
+          "fcp": 1292
+        },
+        {
+          "cls": 0,
+          "lcp": 2088,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 2096,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0002,
+          "lcp": 2064,
+          "fcp": 1300
+        }
+      ]
+    },
+    {
+      "route": "/queue",
+      "width": 375,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0501,
+        "lcp": 1948,
+        "fcp": 1432,
+        "jsBytes": 230711,
+        "jsRequests": 13,
+        "cssBytes": 28167,
+        "imageBytes": 72008,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 393742,
+        "totalRequests": 17
+      },
+      "runs": [
+        {
+          "cls": 0.0501,
+          "lcp": 1964,
+          "fcp": 1436
+        },
+        {
+          "cls": 0.0501,
+          "lcp": 1948,
+          "fcp": 1440
+        },
+        {
+          "cls": 0.0501,
+          "lcp": 1912,
+          "fcp": 1432
+        },
+        {
+          "cls": 0.0501,
+          "lcp": 1904,
+          "fcp": 1420
+        },
+        {
+          "cls": 0.0501,
+          "lcp": 1964,
+          "fcp": 1424
+        }
+      ]
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+      "width": 375,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0,
+        "lcp": 2924,
+        "fcp": 1304,
+        "jsBytes": 357759,
+        "jsRequests": 23,
+        "cssBytes": 30523,
+        "imageBytes": 0,
+        "imageRequests": 0,
+        "fontBytes": 62856,
+        "totalBytes": 451138,
+        "totalRequests": 36
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 2924,
+          "fcp": 1292
+        },
+        {
+          "cls": 0,
+          "lcp": 2952,
+          "fcp": 1348
+        },
+        {
+          "cls": 0,
+          "lcp": 2924,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 2912,
+          "fcp": 1312
+        },
+        {
+          "cls": 0,
+          "lcp": 2924,
+          "fcp": 1304
+        }
+      ]
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+      "width": 375,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0,
+        "lcp": 2912,
+        "fcp": 1296,
+        "jsBytes": 357759,
+        "jsRequests": 23,
+        "cssBytes": 30523,
+        "imageBytes": 0,
+        "imageRequests": 0,
+        "fontBytes": 62856,
+        "totalBytes": 451138,
+        "totalRequests": 36
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 2940,
+          "fcp": 1316
+        },
+        {
+          "cls": 0,
+          "lcp": 2944,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 2880,
+          "fcp": 1276
+        },
+        {
+          "cls": 0,
+          "lcp": 2912,
+          "fcp": 1292
+        },
+        {
+          "cls": 0,
+          "lcp": 2900,
+          "fcp": 1296
+        }
+      ]
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+      "width": 375,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0058,
+        "lcp": 1696,
+        "fcp": 1296,
+        "jsBytes": 184928,
+        "jsRequests": 9,
+        "cssBytes": 28167,
+        "imageBytes": 0,
+        "imageRequests": 0,
+        "fontBytes": 62856,
+        "totalBytes": 275951,
+        "totalRequests": 12
+      },
+      "runs": [
+        {
+          "cls": 0.0058,
+          "lcp": 1684,
+          "fcp": 1296
+        },
+        {
+          "cls": 0.0058,
+          "lcp": 1704,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0058,
+          "lcp": 1688,
+          "fcp": 1296
+        },
+        {
+          "cls": 0.0058,
+          "lcp": 1720,
+          "fcp": 1320
+        },
+        {
+          "cls": 0.0058,
+          "lcp": 1696,
+          "fcp": 1292
+        }
+      ]
+    },
+    {
+      "route": "/",
+      "width": 375,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0501,
+        "lcp": 1904,
+        "fcp": 1304,
+        "jsBytes": 230711,
+        "jsRequests": 13,
+        "cssBytes": 28167,
+        "imageBytes": 72008,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 393742,
+        "totalRequests": 17
+      },
+      "runs": [
+        {
+          "cls": 0.0501,
+          "lcp": 1956,
+          "fcp": 1332
+        },
+        {
+          "cls": 0.0501,
+          "lcp": 1900,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0501,
+          "lcp": 1904,
+          "fcp": 1312
+        },
+        {
+          "cls": 0.0501,
+          "lcp": 1912,
+          "fcp": 1304
+        },
+        {
+          "cls": 0.0501,
+          "lcp": 1888,
+          "fcp": 1280
+        }
+      ]
+    },
+    {
+      "route": "/planos",
+      "width": 375,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0217,
+        "lcp": 1876,
+        "fcp": 1300,
+        "jsBytes": 289431,
+        "jsRequests": 14,
+        "cssBytes": 28167,
+        "imageBytes": 72008,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 454625,
+        "totalRequests": 19
+      },
+      "runs": [
+        {
+          "cls": 0.0217,
+          "lcp": 1884,
+          "fcp": 1304
+        },
+        {
+          "cls": 0.0217,
+          "lcp": 1876,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0217,
+          "lcp": 1876,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0217,
+          "lcp": 1860,
+          "fcp": 1284
+        },
+        {
+          "cls": 0.0217,
+          "lcp": 1888,
+          "fcp": 1304
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "width": 375,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0,
+        "lcp": 2448,
+        "fcp": 1304,
+        "jsBytes": 206828,
+        "jsRequests": 16,
+        "cssBytes": 28167,
+        "imageBytes": 72008,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 369859,
+        "totalRequests": 21
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 2068,
+          "fcp": 1304
+        },
+        {
+          "cls": 0,
+          "lcp": 2104,
+          "fcp": 1312
+        },
+        {
+          "cls": 0,
+          "lcp": 2504,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 2448,
+          "fcp": 1272
+        },
+        {
+          "cls": 0,
+          "lcp": 2552,
+          "fcp": 1316
+        }
+      ]
+    },
+    {
+      "route": "/cadastro",
+      "width": 375,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0002,
+        "lcp": 2096,
+        "fcp": 1304,
+        "jsBytes": 206828,
+        "jsRequests": 16,
+        "cssBytes": 28167,
+        "imageBytes": 72008,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 369859,
+        "totalRequests": 21
+      },
+      "runs": [
+        {
+          "cls": 0.0002,
+          "lcp": 2044,
+          "fcp": 1312
+        },
+        {
+          "cls": 0.0002,
+          "lcp": 2116,
+          "fcp": 1324
+        },
+        {
+          "cls": 0,
+          "lcp": 2096,
+          "fcp": 1304
+        },
+        {
+          "cls": 0,
+          "lcp": 2096,
+          "fcp": 1292
+        },
+        {
+          "cls": 0.0002,
+          "lcp": 2056,
+          "fcp": 1300
+        }
+      ]
+    },
+    {
+      "route": "/queue",
+      "width": 375,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0501,
+        "lcp": 1956,
+        "fcp": 1448,
+        "jsBytes": 230711,
+        "jsRequests": 13,
+        "cssBytes": 28167,
+        "imageBytes": 102119,
+        "imageRequests": 3,
+        "fontBytes": 62856,
+        "totalBytes": 423853,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0501,
+          "lcp": 1956,
+          "fcp": 1448
+        },
+        {
+          "cls": 0.0501,
+          "lcp": 1984,
+          "fcp": 1444
+        },
+        {
+          "cls": 0.0501,
+          "lcp": 1964,
+          "fcp": 1468
+        },
+        {
+          "cls": 0.0501,
+          "lcp": 1912,
+          "fcp": 1432
+        },
+        {
+          "cls": 0.0501,
+          "lcp": 1956,
+          "fcp": 1472
+        }
+      ]
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+      "width": 375,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0136,
+        "lcp": 3248,
+        "fcp": 1308,
+        "jsBytes": 357759,
+        "jsRequests": 23,
+        "cssBytes": 30523,
+        "imageBytes": 0,
+        "imageRequests": 0,
+        "fontBytes": 62856,
+        "totalBytes": 517229,
+        "totalRequests": 36
+      },
+      "runs": [
+        {
+          "cls": 0.0136,
+          "lcp": 3260,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0136,
+          "lcp": 3244,
+          "fcp": 1304
+        },
+        {
+          "cls": 0.0136,
+          "lcp": 3276,
+          "fcp": 1320
+        },
+        {
+          "cls": 0.0136,
+          "lcp": 3248,
+          "fcp": 1308
+        },
+        {
+          "cls": 0.0136,
+          "lcp": 3240,
+          "fcp": 1308
+        }
+      ]
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+      "width": 375,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0,
+        "lcp": 1316,
+        "fcp": 1316,
+        "jsBytes": 357759,
+        "jsRequests": 23,
+        "cssBytes": 30523,
+        "imageBytes": 0,
+        "imageRequests": 0,
+        "fontBytes": 62856,
+        "totalBytes": 521421,
+        "totalRequests": 38
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 1308,
+          "fcp": 1308
+        },
+        {
+          "cls": 0,
+          "lcp": 1320,
+          "fcp": 1320
+        },
+        {
+          "cls": 0,
+          "lcp": 1316,
+          "fcp": 1316
+        },
+        {
+          "cls": 0,
+          "lcp": 1316,
+          "fcp": 1316
+        },
+        {
+          "cls": 0,
+          "lcp": 1308,
+          "fcp": 1308
+        }
+      ]
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+      "width": 375,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0,
+        "lcp": 1888,
+        "fcp": 1300,
+        "jsBytes": 184928,
+        "jsRequests": 9,
+        "cssBytes": 28167,
+        "imageBytes": 0,
+        "imageRequests": 0,
+        "fontBytes": 62856,
+        "totalBytes": 276593,
+        "totalRequests": 12
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 1900,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 1856,
+          "fcp": 1292
+        },
+        {
+          "cls": 0,
+          "lcp": 1860,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 1892,
+          "fcp": 1324
+        },
+        {
+          "cls": 0,
+          "lcp": 1888,
+          "fcp": 1296
+        }
+      ]
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0015,
+        "lcp": 2024,
+        "fcp": 1296,
+        "jsBytes": 230711,
+        "jsRequests": 13,
+        "cssBytes": 28167,
+        "imageBytes": 102119,
+        "imageRequests": 3,
+        "fontBytes": 62856,
+        "totalBytes": 423853,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0015,
+          "lcp": 2056,
+          "fcp": 1312
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2024,
+          "fcp": 1296
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2024,
+          "fcp": 1296
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2076,
+          "fcp": 1296
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2012,
+          "fcp": 1272
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0,
+        "lcp": 2196,
+        "fcp": 1300,
+        "jsBytes": 206828,
+        "jsRequests": 16,
+        "cssBytes": 28167,
+        "imageBytes": 72008,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 369859,
+        "totalRequests": 21
+      },
+      "runs": [
+        {
+          "cls": 0.0003,
+          "lcp": 2136,
+          "fcp": 1308
+        },
+        {
+          "cls": 0,
+          "lcp": 2248,
+          "fcp": 1308
+        },
+        {
+          "cls": 0,
+          "lcp": 2200,
+          "fcp": 1296
+        },
+        {
+          "cls": 0,
+          "lcp": 2164,
+          "fcp": 1288
+        },
+        {
+          "cls": 0,
+          "lcp": 2196,
+          "fcp": 1300
+        }
+      ]
+    },
+    {
+      "route": "/cadastro",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0005,
+        "lcp": 2132,
+        "fcp": 1304,
+        "jsBytes": 206828,
+        "jsRequests": 16,
+        "cssBytes": 28167,
+        "imageBytes": 72008,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 369859,
+        "totalRequests": 21
+      },
+      "runs": [
+        {
+          "cls": 0.0005,
+          "lcp": 2112,
+          "fcp": 1304
+        },
+        {
+          "cls": 0.0005,
+          "lcp": 2132,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0005,
+          "lcp": 2156,
+          "fcp": 1308
+        },
+        {
+          "cls": 0.0005,
+          "lcp": 2112,
+          "fcp": 1292
+        },
+        {
+          "cls": 0,
+          "lcp": 2176,
+          "fcp": 1312
+        }
+      ]
+    },
+    {
+      "route": "/planos",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0348,
+        "lcp": 1904,
+        "fcp": 1296,
+        "jsBytes": 289431,
+        "jsRequests": 14,
+        "cssBytes": 28167,
+        "imageBytes": 72008,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 452462,
+        "totalRequests": 19
+      },
+      "runs": [
+        {
+          "cls": 0.0348,
+          "lcp": 1904,
+          "fcp": 1288
+        },
+        {
+          "cls": 0.0356,
+          "lcp": 1900,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0348,
+          "lcp": 1920,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0348,
+          "lcp": 1904,
+          "fcp": 1288
+        },
+        {
+          "cls": 0.0356,
+          "lcp": 1912,
+          "fcp": 1296
+        }
+      ]
+    },
+    {
+      "route": "/queue",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0015,
+        "lcp": 2040,
+        "fcp": 1432,
+        "jsBytes": 230711,
+        "jsRequests": 13,
+        "cssBytes": 28167,
+        "imageBytes": 127409,
+        "imageRequests": 4,
+        "fontBytes": 62856,
+        "totalBytes": 449143,
+        "totalRequests": 19
+      },
+      "runs": [
+        {
+          "cls": 0.0015,
+          "lcp": 2040,
+          "fcp": 1448
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2064,
+          "fcp": 1436
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2036,
+          "fcp": 1432
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2048,
+          "fcp": 1420
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2024,
+          "fcp": 1420
+        }
+      ]
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0,
+        "lcp": 2908,
+        "fcp": 1288,
+        "jsBytes": 357759,
+        "jsRequests": 23,
+        "cssBytes": 30523,
+        "imageBytes": 0,
+        "imageRequests": 0,
+        "fontBytes": 62856,
+        "totalBytes": 451138,
+        "totalRequests": 36
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 2884,
+          "fcp": 1280
+        },
+        {
+          "cls": 0,
+          "lcp": 2896,
+          "fcp": 1284
+        },
+        {
+          "cls": 0,
+          "lcp": 2908,
+          "fcp": 1292
+        },
+        {
+          "cls": 0,
+          "lcp": 2908,
+          "fcp": 1288
+        },
+        {
+          "cls": 0,
+          "lcp": 2924,
+          "fcp": 1296
+        }
+      ]
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0,
+        "lcp": 2908,
+        "fcp": 1296,
+        "jsBytes": 357759,
+        "jsRequests": 23,
+        "cssBytes": 30523,
+        "imageBytes": 0,
+        "imageRequests": 0,
+        "fontBytes": 62856,
+        "totalBytes": 451138,
+        "totalRequests": 36
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 2896,
+          "fcp": 1292
+        },
+        {
+          "cls": 0,
+          "lcp": 2908,
+          "fcp": 1296
+        },
+        {
+          "cls": 0,
+          "lcp": 2920,
+          "fcp": 1296
+        },
+        {
+          "cls": 0,
+          "lcp": 2908,
+          "fcp": 1296
+        },
+        {
+          "cls": 0,
+          "lcp": 2908,
+          "fcp": 1292
+        }
+      ]
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.3445,
+        "lcp": 1692,
+        "fcp": 1292,
+        "jsBytes": 184928,
+        "jsRequests": 9,
+        "cssBytes": 28167,
+        "imageBytes": 0,
+        "imageRequests": 0,
+        "fontBytes": 62856,
+        "totalBytes": 275951,
+        "totalRequests": 12
+      },
+      "runs": [
+        {
+          "cls": 0.3445,
+          "lcp": 1704,
+          "fcp": 1308
+        },
+        {
+          "cls": 0.3445,
+          "lcp": 1676,
+          "fcp": 1292
+        },
+        {
+          "cls": 0,
+          "lcp": 1696,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 1692,
+          "fcp": 1288
+        },
+        {
+          "cls": 0.3445,
+          "lcp": 1680,
+          "fcp": 1280
+        }
+      ]
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0015,
+        "lcp": 1976,
+        "fcp": 1288,
+        "jsBytes": 230711,
+        "jsRequests": 13,
+        "cssBytes": 28167,
+        "imageBytes": 72008,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 393742,
+        "totalRequests": 17
+      },
+      "runs": [
+        {
+          "cls": 0.0015,
+          "lcp": 1924,
+          "fcp": 1280
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 1984,
+          "fcp": 1288
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 1980,
+          "fcp": 1284
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 1968,
+          "fcp": 1288
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 1976,
+          "fcp": 1288
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0003,
+        "lcp": 2080,
+        "fcp": 1288,
+        "jsBytes": 206828,
+        "jsRequests": 16,
+        "cssBytes": 28167,
+        "imageBytes": 72008,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 369859,
+        "totalRequests": 21
+      },
+      "runs": [
+        {
+          "cls": 0.0003,
+          "lcp": 2076,
+          "fcp": 1284
+        },
+        {
+          "cls": 0.0003,
+          "lcp": 2080,
+          "fcp": 1280
+        },
+        {
+          "cls": 0.0003,
+          "lcp": 2060,
+          "fcp": 1288
+        },
+        {
+          "cls": 0,
+          "lcp": 2164,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0003,
+          "lcp": 2096,
+          "fcp": 1292
+        }
+      ]
+    },
+    {
+      "route": "/cadastro",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0005,
+        "lcp": 2088,
+        "fcp": 1288,
+        "jsBytes": 206828,
+        "jsRequests": 16,
+        "cssBytes": 28167,
+        "imageBytes": 72008,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 369859,
+        "totalRequests": 21
+      },
+      "runs": [
+        {
+          "cls": 0.0005,
+          "lcp": 2080,
+          "fcp": 1280
+        },
+        {
+          "cls": 0.0005,
+          "lcp": 2088,
+          "fcp": 1288
+        },
+        {
+          "cls": 0.0005,
+          "lcp": 2092,
+          "fcp": 1288
+        },
+        {
+          "cls": 0.0005,
+          "lcp": 2088,
+          "fcp": 1296
+        },
+        {
+          "cls": 0.0005,
+          "lcp": 2108,
+          "fcp": 1288
+        }
+      ]
+    },
+    {
+      "route": "/planos",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0101,
+        "lcp": 1904,
+        "fcp": 1284,
+        "jsBytes": 289431,
+        "jsRequests": 14,
+        "cssBytes": 28167,
+        "imageBytes": 72008,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 454625,
+        "totalRequests": 19
+      },
+      "runs": [
+        {
+          "cls": 0.0101,
+          "lcp": 1904,
+          "fcp": 1296
+        },
+        {
+          "cls": 0.0101,
+          "lcp": 1892,
+          "fcp": 1280
+        },
+        {
+          "cls": 0.0101,
+          "lcp": 1892,
+          "fcp": 1284
+        },
+        {
+          "cls": 0.0093,
+          "lcp": 1904,
+          "fcp": 1276
+        },
+        {
+          "cls": 0.0093,
+          "lcp": 1908,
+          "fcp": 1288
+        }
+      ]
+    },
+    {
+      "route": "/queue",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0015,
+        "lcp": 2044,
+        "fcp": 1420,
+        "jsBytes": 230711,
+        "jsRequests": 13,
+        "cssBytes": 28167,
+        "imageBytes": 72008,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 393742,
+        "totalRequests": 17
+      },
+      "runs": [
+        {
+          "cls": 0.0015,
+          "lcp": 2012,
+          "fcp": 1420
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2036,
+          "fcp": 1420
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2072,
+          "fcp": 1428
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2044,
+          "fcp": 1432
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2076,
+          "fcp": 1420
+        }
+      ]
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0,
+        "lcp": 3248,
+        "fcp": 1300,
+        "jsBytes": 357759,
+        "jsRequests": 23,
+        "cssBytes": 30523,
+        "imageBytes": 0,
+        "imageRequests": 0,
+        "fontBytes": 62856,
+        "totalBytes": 517229,
+        "totalRequests": 36
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 3248,
+          "fcp": 1284
+        },
+        {
+          "cls": 0,
+          "lcp": 3252,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 3248,
+          "fcp": 1304
+        },
+        {
+          "cls": 0,
+          "lcp": 3240,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 3232,
+          "fcp": 1308
+        }
+      ]
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0,
+        "lcp": 1304,
+        "fcp": 1304,
+        "jsBytes": 357759,
+        "jsRequests": 23,
+        "cssBytes": 30523,
+        "imageBytes": 0,
+        "imageRequests": 0,
+        "fontBytes": 62856,
+        "totalBytes": 521421,
+        "totalRequests": 38
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 1300,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 1304,
+          "fcp": 1304
+        },
+        {
+          "cls": 0,
+          "lcp": 1308,
+          "fcp": 1308
+        },
+        {
+          "cls": 0,
+          "lcp": 1304,
+          "fcp": 1304
+        },
+        {
+          "cls": 0,
+          "lcp": 1256,
+          "fcp": 1256
+        }
+      ]
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0,
+        "lcp": 1868,
+        "fcp": 1300,
+        "jsBytes": 184928,
+        "jsRequests": 9,
+        "cssBytes": 28167,
+        "imageBytes": 0,
+        "imageRequests": 0,
+        "fontBytes": 62856,
+        "totalBytes": 276593,
+        "totalRequests": 12
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 1856,
+          "fcp": 1296
+        },
+        {
+          "cls": 0,
+          "lcp": 1876,
+          "fcp": 1308
+        },
+        {
+          "cls": 0,
+          "lcp": 1868,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 1856,
+          "fcp": 1308
+        },
+        {
+          "cls": 0,
+          "lcp": 1868,
+          "fcp": 1292
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "rotas": 48,
+    "overflow": {
+      "total": 0,
+      "maxPx": 0,
+      "detalhe": []
+    },
+    "tapUnder44Mobile": {
+      "total": 12,
+      "excecoes": {
+        "paragrafo": 0,
+        "frase": 0,
+        "labelComControle": 24
+      },
+      "detalhe": [
+        "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab@320=1",
+        "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments@320=1",
+        "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c@320=1",
+        "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab@375=1",
+        "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments@375=1",
+        "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c@375=1",
+        "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab@390=1",
+        "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments@390=1",
+        "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c@390=1",
+        "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab@768=1",
+        "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments@768=1",
+        "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c@768=1"
+      ]
+    },
+    "tinyTextMobile": {
+      "total": 0,
+      "detalhe": []
+    },
+    "h1": [],
+    "imagesWithoutDims": {
+      "total": 0,
+      "detalhe": []
+    }
+  },
+  "perfSummary": [
+    {
+      "scenario": "off@375",
+      "rotas": 8,
+      "clsMed": 0.0058,
+      "clsMax": 0.0743,
+      "lcpMed": 2064,
+      "lcpMax": 2924,
+      "fcpMed": 1296,
+      "jsMedKB": 225,
+      "jsReqMed": 16,
+      "imgMedKB": 70,
+      "porRota": [
+        {
+          "route": "/",
+          "cls": 0.0501,
+          "lcp": 1908,
+          "fcp": 1296,
+          "jsKB": 225,
+          "jsReq": 13,
+          "imgKB": 70
+        },
+        {
+          "route": "/planos",
+          "cls": 0.0743,
+          "lcp": 1872,
+          "fcp": 1288,
+          "jsKB": 283,
+          "jsReq": 14,
+          "imgKB": 70
+        },
+        {
+          "route": "/login",
+          "cls": 0,
+          "lcp": 2560,
+          "fcp": 1296,
+          "jsKB": 202,
+          "jsReq": 16,
+          "imgKB": 70
+        },
+        {
+          "route": "/cadastro",
+          "cls": 0.0002,
+          "lcp": 2064,
+          "fcp": 1300,
+          "jsKB": 202,
+          "jsReq": 16,
+          "imgKB": 70
+        },
+        {
+          "route": "/queue",
+          "cls": 0.0501,
+          "lcp": 1948,
+          "fcp": 1432,
+          "jsKB": 225,
+          "jsReq": 13,
+          "imgKB": 70
+        },
+        {
+          "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+          "cls": 0,
+          "lcp": 2924,
+          "fcp": 1304,
+          "jsKB": 349,
+          "jsReq": 23,
+          "imgKB": 0
+        },
+        {
+          "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+          "cls": 0,
+          "lcp": 2912,
+          "fcp": 1296,
+          "jsKB": 349,
+          "jsReq": 23,
+          "imgKB": 0
+        },
+        {
+          "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+          "cls": 0.0058,
+          "lcp": 1696,
+          "fcp": 1296,
+          "jsKB": 181,
+          "jsReq": 9,
+          "imgKB": 0
+        }
+      ]
+    },
+    {
+      "scenario": "real@375",
+      "rotas": 8,
+      "clsMed": 0.0136,
+      "clsMax": 0.0501,
+      "lcpMed": 1956,
+      "lcpMax": 3248,
+      "fcpMed": 1304,
+      "jsMedKB": 225,
+      "jsReqMed": 16,
+      "imgMedKB": 70,
+      "porRota": [
+        {
+          "route": "/",
+          "cls": 0.0501,
+          "lcp": 1904,
+          "fcp": 1304,
+          "jsKB": 225,
+          "jsReq": 13,
+          "imgKB": 70
+        },
+        {
+          "route": "/planos",
+          "cls": 0.0217,
+          "lcp": 1876,
+          "fcp": 1300,
+          "jsKB": 283,
+          "jsReq": 14,
+          "imgKB": 70
+        },
+        {
+          "route": "/login",
+          "cls": 0,
+          "lcp": 2448,
+          "fcp": 1304,
+          "jsKB": 202,
+          "jsReq": 16,
+          "imgKB": 70
+        },
+        {
+          "route": "/cadastro",
+          "cls": 0.0002,
+          "lcp": 2096,
+          "fcp": 1304,
+          "jsKB": 202,
+          "jsReq": 16,
+          "imgKB": 70
+        },
+        {
+          "route": "/queue",
+          "cls": 0.0501,
+          "lcp": 1956,
+          "fcp": 1448,
+          "jsKB": 225,
+          "jsReq": 13,
+          "imgKB": 100
+        },
+        {
+          "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+          "cls": 0.0136,
+          "lcp": 3248,
+          "fcp": 1308,
+          "jsKB": 349,
+          "jsReq": 23,
+          "imgKB": 0
+        },
+        {
+          "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+          "cls": 0,
+          "lcp": 1316,
+          "fcp": 1316,
+          "jsKB": 349,
+          "jsReq": 23,
+          "imgKB": 0
+        },
+        {
+          "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+          "cls": 0,
+          "lcp": 1888,
+          "fcp": 1300,
+          "jsKB": 181,
+          "jsReq": 9,
+          "imgKB": 0
+        }
+      ]
+    },
+    {
+      "scenario": "off@1440",
+      "rotas": 8,
+      "clsMed": 0.0015,
+      "clsMax": 0.3445,
+      "lcpMed": 2132,
+      "lcpMax": 2908,
+      "fcpMed": 1296,
+      "jsMedKB": 225,
+      "jsReqMed": 16,
+      "imgMedKB": 70,
+      "porRota": [
+        {
+          "route": "/",
+          "cls": 0.0015,
+          "lcp": 2024,
+          "fcp": 1296,
+          "jsKB": 225,
+          "jsReq": 13,
+          "imgKB": 100
+        },
+        {
+          "route": "/login",
+          "cls": 0,
+          "lcp": 2196,
+          "fcp": 1300,
+          "jsKB": 202,
+          "jsReq": 16,
+          "imgKB": 70
+        },
+        {
+          "route": "/cadastro",
+          "cls": 0.0005,
+          "lcp": 2132,
+          "fcp": 1304,
+          "jsKB": 202,
+          "jsReq": 16,
+          "imgKB": 70
+        },
+        {
+          "route": "/planos",
+          "cls": 0.0348,
+          "lcp": 1904,
+          "fcp": 1296,
+          "jsKB": 283,
+          "jsReq": 14,
+          "imgKB": 70
+        },
+        {
+          "route": "/queue",
+          "cls": 0.0015,
+          "lcp": 2040,
+          "fcp": 1432,
+          "jsKB": 225,
+          "jsReq": 13,
+          "imgKB": 124
+        },
+        {
+          "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+          "cls": 0,
+          "lcp": 2908,
+          "fcp": 1288,
+          "jsKB": 349,
+          "jsReq": 23,
+          "imgKB": 0
+        },
+        {
+          "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+          "cls": 0,
+          "lcp": 2908,
+          "fcp": 1296,
+          "jsKB": 349,
+          "jsReq": 23,
+          "imgKB": 0
+        },
+        {
+          "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+          "cls": 0.3445,
+          "lcp": 1692,
+          "fcp": 1292,
+          "jsKB": 181,
+          "jsReq": 9,
+          "imgKB": 0
+        }
+      ]
+    },
+    {
+      "scenario": "real@1440",
+      "rotas": 8,
+      "clsMed": 0.0005,
+      "clsMax": 0.0101,
+      "lcpMed": 2044,
+      "lcpMax": 3248,
+      "fcpMed": 1300,
+      "jsMedKB": 225,
+      "jsReqMed": 16,
+      "imgMedKB": 70,
+      "porRota": [
+        {
+          "route": "/",
+          "cls": 0.0015,
+          "lcp": 1976,
+          "fcp": 1288,
+          "jsKB": 225,
+          "jsReq": 13,
+          "imgKB": 70
+        },
+        {
+          "route": "/login",
+          "cls": 0.0003,
+          "lcp": 2080,
+          "fcp": 1288,
+          "jsKB": 202,
+          "jsReq": 16,
+          "imgKB": 70
+        },
+        {
+          "route": "/cadastro",
+          "cls": 0.0005,
+          "lcp": 2088,
+          "fcp": 1288,
+          "jsKB": 202,
+          "jsReq": 16,
+          "imgKB": 70
+        },
+        {
+          "route": "/planos",
+          "cls": 0.0101,
+          "lcp": 1904,
+          "fcp": 1284,
+          "jsKB": 283,
+          "jsReq": 14,
+          "imgKB": 70
+        },
+        {
+          "route": "/queue",
+          "cls": 0.0015,
+          "lcp": 2044,
+          "fcp": 1420,
+          "jsKB": 225,
+          "jsReq": 13,
+          "imgKB": 70
+        },
+        {
+          "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+          "cls": 0,
+          "lcp": 3248,
+          "fcp": 1300,
+          "jsKB": 349,
+          "jsReq": 23,
+          "imgKB": 0
+        },
+        {
+          "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+          "cls": 0,
+          "lcp": 1304,
+          "fcp": 1304,
+          "jsKB": 349,
+          "jsReq": 23,
+          "imgKB": 0
+        },
+        {
+          "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+          "cls": 0,
+          "lcp": 1868,
+          "fcp": 1300,
+          "jsKB": 181,
+          "jsReq": 9,
+          "imgKB": 0
+        }
+      ]
+    }
+  ]
+}

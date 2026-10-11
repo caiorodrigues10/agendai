@@ -1,0 +1,1972 @@
+{
+  "label": "checagem-geral",
+  "createdAt": "2026-10-09T05:23:20.099Z",
+  "base": "http://127.0.0.1:4173",
+  "apiMode": "both",
+  "backendUp": true,
+  "routes": [
+    "/",
+    "/login",
+    "/cadastro",
+    "/planos",
+    "/queue"
+  ],
+  "widths": [
+    375,
+    1440
+  ],
+  "runs": 1,
+  "env": {
+    "slow4g": {
+      "latency": 150,
+      "downloadThroughput": 209715.2,
+      "uploadThroughput": 98304
+    },
+    "cpuRate": 4,
+    "minTap": 44,
+    "minFont": 12
+  },
+  "layout": [
+    {
+      "route": "/",
+      "width": 375,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 22,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 72,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Fila e agendasem confusão.Resultado à vista.",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/login",
+      "width": 375,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 11,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 2
+          }
+        },
+        "tiny": {
+          "total": 9,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Bem-vindo de volta",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 1,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/cadastro",
+      "width": 375,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 13,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 4
+          }
+        },
+        "tiny": {
+          "total": 16,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Comece pelo seu acesso",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 1,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/planos",
+      "width": 375,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 23,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 137,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Teste grátis ou escolha o plano",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue",
+      "width": 375,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 22,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 72,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Fila e agendasem confusão.Resultado à vista.",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 31,
+          "tooSmall": [
+            {
+              "tag": "a",
+              "text": "",
+              "cls": "flex min-h-11 shrink-0 items-center gap-3 cursor-pointer group lg:min-h-0",
+              "w": 174,
+              "h": 36,
+              "href": "/",
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Recursos",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 73,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Aplicativo",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 82,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Preços",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 55,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Funcionalidades",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 130,
+              "h": 18,
+              "href": "/funcionalidades",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 55,
+              "h": 18,
+              "href": "/planos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Sobre",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 45,
+              "h": 18,
+              "href": "/sobre",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 65,
+              "h": 18,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Entrar",
+              "cls": "hidden px-0.5 text-xs font-bold uppercase tracking-tighter text-white/90 transit",
+              "w": 43,
+              "h": 16,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Criar conta",
+              "cls": "hidden rounded-full bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-ti",
+              "w": 114,
+              "h": 36,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Ver o produto",
+              "cls": "group inline-flex min-h-12 items-center gap-1.5 pb-1 text-sm font-medium text-ne",
+              "w": 111,
+              "h": 24,
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Agenda Já",
+              "cls": "-my-[15px] inline-flex min-h-11 items-center transition-colors hover:text-neutra",
+              "w": 82,
+              "h": 16,
+              "href": "/",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Recursos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 56,
+              "h": 17,
+              "href": "/#recursos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Aplicativo",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 61,
+              "h": 17,
+              "href": "/#produto",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Preços",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 42,
+              "h": 17,
+              "href": "/#precos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Ver demonstração",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 114,
+              "h": 17,
+              "href": "/#produto",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Funcionalidades",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 100,
+              "h": 17,
+              "href": "/funcionalidades",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Agendamento",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 87,
+              "h": 17,
+              "href": "/agendamento",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Dashboard",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 67,
+              "h": 17,
+              "href": "/dashboard",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 40,
+              "h": 17,
+              "href": "/planos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Sobre",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 36,
+              "h": 17,
+              "href": "/sobre",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 50,
+              "h": 17,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Acessar painel",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 90,
+              "h": 17,
+              "href": "/login",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Criar conta grátis",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 107,
+              "h": 17,
+              "href": "/cadastro",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 46,
+              "h": 20,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Privacidade",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 67,
+              "h": 20,
+              "href": "/privacidade",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Termos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 42,
+              "h": 20,
+              "href": "/termos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 37,
+              "h": 20,
+              "href": "/planos",
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 90,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Fila e agendasem confusão.Resultado à vista.",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/login",
+      "width": 1440,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 11,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "",
+              "cls": "min-h-11 cursor-pointer transition-transform hover:scale-105 lg:min-h-0",
+              "w": 174,
+              "h": 43,
+              "inParagraph": false
+            },
+            {
+              "tag": "label",
+              "text": "Manter conectado",
+              "cls": "flex min-h-11 lg:min-h-0 items-center gap-2 cursor-pointer ",
+              "w": 127,
+              "h": 16,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 2
+          }
+        },
+        "tiny": {
+          "total": 25,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Bem-vindo de volta",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/cadastro",
+      "width": 1440,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 13,
+          "tooSmall": [
+            {
+              "tag": "button",
+              "text": "",
+              "cls": "min-h-11 cursor-pointer transition-transform hover:scale-105 lg:min-h-0",
+              "w": 174,
+              "h": 43,
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 4
+          }
+        },
+        "tiny": {
+          "total": 32,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Comece pelo seu acesso",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/planos",
+      "width": 1440,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 31,
+          "tooSmall": [
+            {
+              "tag": "a",
+              "text": "",
+              "cls": "flex min-h-11 shrink-0 items-center gap-3 cursor-pointer group lg:min-h-0",
+              "w": 174,
+              "h": 36,
+              "href": "/",
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Recursos",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 73,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Aplicativo",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 82,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Preços",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 55,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Funcionalidades",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 130,
+              "h": 18,
+              "href": "/funcionalidades",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 55,
+              "h": 18,
+              "href": "/planos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Sobre",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 45,
+              "h": 18,
+              "href": "/sobre",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 65,
+              "h": 18,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Entrar",
+              "cls": "hidden px-0.5 text-xs font-bold uppercase tracking-tighter text-white/90 transit",
+              "w": 43,
+              "h": 16,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Criar conta",
+              "cls": "hidden rounded-full bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-ti",
+              "w": 114,
+              "h": 36,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Mensal",
+              "cls": "flex min-h-11 items-center rounded-full px-5 py-2.5 text-sm font-bold transition",
+              "w": 89,
+              "h": 40,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Anual",
+              "cls": "flex min-h-11 items-center rounded-full px-5 py-2.5 text-sm font-bold transition",
+              "w": 79,
+              "h": 40,
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Agenda Já",
+              "cls": "-my-[15px] inline-flex min-h-11 items-center transition-colors hover:text-neutra",
+              "w": 82,
+              "h": 16,
+              "href": "/",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Recursos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 56,
+              "h": 17,
+              "href": "/#recursos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Aplicativo",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 61,
+              "h": 17,
+              "href": "/#produto",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Preços",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 42,
+              "h": 17,
+              "href": "/#precos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Ver demonstração",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 114,
+              "h": 17,
+              "href": "/#produto",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Funcionalidades",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 100,
+              "h": 17,
+              "href": "/funcionalidades",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Agendamento",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 87,
+              "h": 17,
+              "href": "/agendamento",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Dashboard",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 67,
+              "h": 17,
+              "href": "/dashboard",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 40,
+              "h": 17,
+              "href": "/planos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Sobre",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 36,
+              "h": 17,
+              "href": "/sobre",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 50,
+              "h": 17,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Acessar painel",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 90,
+              "h": 17,
+              "href": "/login",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Criar conta grátis",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 107,
+              "h": 17,
+              "href": "/cadastro",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 46,
+              "h": 20,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Privacidade",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 67,
+              "h": 20,
+              "href": "/privacidade",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Termos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 42,
+              "h": 20,
+              "href": "/termos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 37,
+              "h": 20,
+              "href": "/planos",
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 147,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Teste grátis ou escolha o plano",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue",
+      "width": 1440,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 31,
+          "tooSmall": [
+            {
+              "tag": "a",
+              "text": "",
+              "cls": "flex min-h-11 shrink-0 items-center gap-3 cursor-pointer group lg:min-h-0",
+              "w": 174,
+              "h": 36,
+              "href": "/",
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Recursos",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 73,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Aplicativo",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 82,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Preços",
+              "cls": "relative cursor-pointer text-2xs font-bold uppercase tracking-widest text-neutra",
+              "w": 55,
+              "h": 18,
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Funcionalidades",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 130,
+              "h": 18,
+              "href": "/funcionalidades",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 55,
+              "h": 18,
+              "href": "/planos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Sobre",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 45,
+              "h": 18,
+              "href": "/sobre",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "text-2xs font-bold uppercase tracking-widest text-neutral-400 transition-colors ",
+              "w": 65,
+              "h": 18,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Entrar",
+              "cls": "hidden px-0.5 text-xs font-bold uppercase tracking-tighter text-white/90 transit",
+              "w": 43,
+              "h": 16,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Criar conta",
+              "cls": "hidden rounded-full bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-ti",
+              "w": 114,
+              "h": 36,
+              "inParagraph": false
+            },
+            {
+              "tag": "button",
+              "text": "Ver o produto",
+              "cls": "group inline-flex min-h-12 items-center gap-1.5 pb-1 text-sm font-medium text-ne",
+              "w": 111,
+              "h": 24,
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Agenda Já",
+              "cls": "-my-[15px] inline-flex min-h-11 items-center transition-colors hover:text-neutra",
+              "w": 82,
+              "h": 16,
+              "href": "/",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Recursos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 56,
+              "h": 17,
+              "href": "/#recursos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Aplicativo",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 61,
+              "h": 17,
+              "href": "/#produto",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Preços",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 42,
+              "h": 17,
+              "href": "/#precos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Ver demonstração",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 114,
+              "h": 17,
+              "href": "/#produto",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Funcionalidades",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 100,
+              "h": 17,
+              "href": "/funcionalidades",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Agendamento",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 87,
+              "h": 17,
+              "href": "/agendamento",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Dashboard",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 67,
+              "h": 17,
+              "href": "/dashboard",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 40,
+              "h": 17,
+              "href": "/planos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Sobre",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 36,
+              "h": 17,
+              "href": "/sobre",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 50,
+              "h": 17,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Acessar painel",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 90,
+              "h": 17,
+              "href": "/login",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Criar conta grátis",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading",
+              "w": 107,
+              "h": 17,
+              "href": "/cadastro",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Contato",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 46,
+              "h": 20,
+              "href": "/contato",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Privacidade",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 67,
+              "h": 20,
+              "href": "/privacidade",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Termos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 42,
+              "h": 20,
+              "href": "/termos",
+              "inParagraph": false
+            },
+            {
+              "tag": "a",
+              "text": "Planos",
+              "cls": "-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-wh",
+              "w": 37,
+              "h": 20,
+              "href": "/planos",
+              "inParagraph": false
+            }
+          ],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 89,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Fila e agendasem confusão.Resultado à vista.",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 2,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    }
+  ],
+  "perf": [
+    {
+      "route": "/",
+      "width": 375,
+      "api": "off",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0.0502,
+        "lcp": 1872,
+        "fcp": 1280,
+        "jsBytes": 230913,
+        "jsRequests": 13,
+        "cssBytes": 28373,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 357860,
+        "totalRequests": 16
+      },
+      "runs": [
+        {
+          "cls": 0.0502,
+          "lcp": 1872,
+          "fcp": 1280
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "width": 375,
+      "api": "off",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0,
+        "lcp": 2332,
+        "fcp": 1288,
+        "jsBytes": 207222,
+        "jsRequests": 15,
+        "cssBytes": 28373,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 334169,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 2332,
+          "fcp": 1288
+        }
+      ]
+    },
+    {
+      "route": "/cadastro",
+      "width": 375,
+      "api": "off",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0,
+        "lcp": 2084,
+        "fcp": 1280,
+        "jsBytes": 207222,
+        "jsRequests": 15,
+        "cssBytes": 28373,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 334169,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 2084,
+          "fcp": 1280
+        }
+      ]
+    },
+    {
+      "route": "/planos",
+      "width": 375,
+      "api": "off",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0.0743,
+        "lcp": 1872,
+        "fcp": 1292,
+        "jsBytes": 289637,
+        "jsRequests": 14,
+        "cssBytes": 28373,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 416584,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0743,
+          "lcp": 1872,
+          "fcp": 1292
+        }
+      ]
+    },
+    {
+      "route": "/queue",
+      "width": 375,
+      "api": "off",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0.0502,
+        "lcp": 1932,
+        "fcp": 1412,
+        "jsBytes": 230913,
+        "jsRequests": 13,
+        "cssBytes": 28373,
+        "imageBytes": 65829,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 387971,
+        "totalRequests": 17
+      },
+      "runs": [
+        {
+          "cls": 0.0502,
+          "lcp": 1932,
+          "fcp": 1412
+        }
+      ]
+    },
+    {
+      "route": "/",
+      "width": 375,
+      "api": "real",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0.0502,
+        "lcp": 1876,
+        "fcp": 1292,
+        "jsBytes": 230913,
+        "jsRequests": 13,
+        "cssBytes": 28373,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 357860,
+        "totalRequests": 16
+      },
+      "runs": [
+        {
+          "cls": 0.0502,
+          "lcp": 1876,
+          "fcp": 1292
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "width": 375,
+      "api": "real",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0,
+        "lcp": 2080,
+        "fcp": 1292,
+        "jsBytes": 207222,
+        "jsRequests": 15,
+        "cssBytes": 28373,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 334169,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 2080,
+          "fcp": 1292
+        }
+      ]
+    },
+    {
+      "route": "/cadastro",
+      "width": 375,
+      "api": "real",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0.0002,
+        "lcp": 2028,
+        "fcp": 1296,
+        "jsBytes": 207222,
+        "jsRequests": 15,
+        "cssBytes": 28373,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 334169,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0002,
+          "lcp": 2028,
+          "fcp": 1296
+        }
+      ]
+    },
+    {
+      "route": "/planos",
+      "width": 375,
+      "api": "real",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0.0217,
+        "lcp": 1860,
+        "fcp": 1288,
+        "jsBytes": 289637,
+        "jsRequests": 14,
+        "cssBytes": 28373,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 418747,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0217,
+          "lcp": 1860,
+          "fcp": 1288
+        }
+      ]
+    },
+    {
+      "route": "/queue",
+      "width": 375,
+      "api": "real",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0.0502,
+        "lcp": 1940,
+        "fcp": 1424,
+        "jsBytes": 230913,
+        "jsRequests": 13,
+        "cssBytes": 28373,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 357860,
+        "totalRequests": 16
+      },
+      "runs": [
+        {
+          "cls": 0.0502,
+          "lcp": 1940,
+          "fcp": 1424
+        }
+      ]
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0.0015,
+        "lcp": 2048,
+        "fcp": 1284,
+        "jsBytes": 230913,
+        "jsRequests": 13,
+        "cssBytes": 28373,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 357860,
+        "totalRequests": 16
+      },
+      "runs": [
+        {
+          "cls": 0.0015,
+          "lcp": 2048,
+          "fcp": 1284
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0.0003,
+        "lcp": 2092,
+        "fcp": 1296,
+        "jsBytes": 207222,
+        "jsRequests": 15,
+        "cssBytes": 28373,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 334169,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0003,
+          "lcp": 2092,
+          "fcp": 1296
+        }
+      ]
+    },
+    {
+      "route": "/cadastro",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0,
+        "lcp": 2196,
+        "fcp": 1320,
+        "jsBytes": 207222,
+        "jsRequests": 15,
+        "cssBytes": 28373,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 334169,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 2196,
+          "fcp": 1320
+        }
+      ]
+    },
+    {
+      "route": "/planos",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0.0356,
+        "lcp": 1900,
+        "fcp": 1292,
+        "jsBytes": 289637,
+        "jsRequests": 14,
+        "cssBytes": 28373,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 416584,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0356,
+          "lcp": 1900,
+          "fcp": 1292
+        }
+      ]
+    },
+    {
+      "route": "/queue",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0.0015,
+        "lcp": 2040,
+        "fcp": 1416,
+        "jsBytes": 230913,
+        "jsRequests": 13,
+        "cssBytes": 28373,
+        "imageBytes": 65829,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 387971,
+        "totalRequests": 17
+      },
+      "runs": [
+        {
+          "cls": 0.0015,
+          "lcp": 2040,
+          "fcp": 1416
+        }
+      ]
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0.0015,
+        "lcp": 2000,
+        "fcp": 1284,
+        "jsBytes": 230913,
+        "jsRequests": 13,
+        "cssBytes": 28373,
+        "imageBytes": 91119,
+        "imageRequests": 3,
+        "fontBytes": 62856,
+        "totalBytes": 413261,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0015,
+          "lcp": 2000,
+          "fcp": 1284
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0,
+        "lcp": 2156,
+        "fcp": 1284,
+        "jsBytes": 207222,
+        "jsRequests": 15,
+        "cssBytes": 28373,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 334169,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 2156,
+          "fcp": 1284
+        }
+      ]
+    },
+    {
+      "route": "/cadastro",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0,
+        "lcp": 2132,
+        "fcp": 1284,
+        "jsBytes": 207222,
+        "jsRequests": 15,
+        "cssBytes": 28373,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 334169,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 2132,
+          "fcp": 1284
+        }
+      ]
+    },
+    {
+      "route": "/planos",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0.0101,
+        "lcp": 1904,
+        "fcp": 1284,
+        "jsBytes": 289637,
+        "jsRequests": 14,
+        "cssBytes": 28373,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 418747,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0101,
+          "lcp": 1904,
+          "fcp": 1284
+        }
+      ]
+    },
+    {
+      "route": "/queue",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 1,
+      "okRuns": 1,
+      "metrics": {
+        "cls": 0.0015,
+        "lcp": 2012,
+        "fcp": 1424,
+        "jsBytes": 230913,
+        "jsRequests": 13,
+        "cssBytes": 28373,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 357860,
+        "totalRequests": 16
+      },
+      "runs": [
+        {
+          "cls": 0.0015,
+          "lcp": 2012,
+          "fcp": 1424
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "rotas": 10,
+    "overflow": {
+      "total": 0,
+      "maxPx": 0,
+      "detalhe": []
+    },
+    "tapUnder44Mobile": {
+      "total": 0,
+      "excecoes": {
+        "paragrafo": 0,
+        "frase": 0,
+        "labelComControle": 6
+      },
+      "detalhe": []
+    },
+    "tinyTextMobile": {
+      "total": 0,
+      "detalhe": []
+    },
+    "h1": [],
+    "imagesWithoutDims": {
+      "total": 0,
+      "detalhe": []
+    }
+  },
+  "perfSummary": [
+    {
+      "scenario": "off@375",
+      "rotas": 5,
+      "clsMed": 0.0502,
+      "clsMax": 0.0743,
+      "lcpMed": 1932,
+      "lcpMax": 2332,
+      "fcpMed": 1288,
+      "jsMedKB": 226,
+      "jsReqMed": 14,
+      "imgMedKB": 35,
+      "porRota": [
+        {
+          "route": "/",
+          "cls": 0.0502,
+          "lcp": 1872,
+          "fcp": 1280,
+          "jsKB": 226,
+          "jsReq": 13,
+          "imgKB": 35
+        },
+        {
+          "route": "/login",
+          "cls": 0,
+          "lcp": 2332,
+          "fcp": 1288,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        },
+        {
+          "route": "/cadastro",
+          "cls": 0,
+          "lcp": 2084,
+          "fcp": 1280,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        },
+        {
+          "route": "/planos",
+          "cls": 0.0743,
+          "lcp": 1872,
+          "fcp": 1292,
+          "jsKB": 283,
+          "jsReq": 14,
+          "imgKB": 35
+        },
+        {
+          "route": "/queue",
+          "cls": 0.0502,
+          "lcp": 1932,
+          "fcp": 1412,
+          "jsKB": 226,
+          "jsReq": 13,
+          "imgKB": 64
+        }
+      ]
+    },
+    {
+      "scenario": "real@375",
+      "rotas": 5,
+      "clsMed": 0.0217,
+      "clsMax": 0.0502,
+      "lcpMed": 1940,
+      "lcpMax": 2080,
+      "fcpMed": 1292,
+      "jsMedKB": 226,
+      "jsReqMed": 14,
+      "imgMedKB": 35,
+      "porRota": [
+        {
+          "route": "/",
+          "cls": 0.0502,
+          "lcp": 1876,
+          "fcp": 1292,
+          "jsKB": 226,
+          "jsReq": 13,
+          "imgKB": 35
+        },
+        {
+          "route": "/login",
+          "cls": 0,
+          "lcp": 2080,
+          "fcp": 1292,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        },
+        {
+          "route": "/cadastro",
+          "cls": 0.0002,
+          "lcp": 2028,
+          "fcp": 1296,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        },
+        {
+          "route": "/planos",
+          "cls": 0.0217,
+          "lcp": 1860,
+          "fcp": 1288,
+          "jsKB": 283,
+          "jsReq": 14,
+          "imgKB": 35
+        },
+        {
+          "route": "/queue",
+          "cls": 0.0502,
+          "lcp": 1940,
+          "fcp": 1424,
+          "jsKB": 226,
+          "jsReq": 13,
+          "imgKB": 35
+        }
+      ]
+    },
+    {
+      "scenario": "off@1440",
+      "rotas": 5,
+      "clsMed": 0.0015,
+      "clsMax": 0.0356,
+      "lcpMed": 2048,
+      "lcpMax": 2196,
+      "fcpMed": 1296,
+      "jsMedKB": 226,
+      "jsReqMed": 14,
+      "imgMedKB": 35,
+      "porRota": [
+        {
+          "route": "/",
+          "cls": 0.0015,
+          "lcp": 2048,
+          "fcp": 1284,
+          "jsKB": 226,
+          "jsReq": 13,
+          "imgKB": 35
+        },
+        {
+          "route": "/login",
+          "cls": 0.0003,
+          "lcp": 2092,
+          "fcp": 1296,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        },
+        {
+          "route": "/cadastro",
+          "cls": 0,
+          "lcp": 2196,
+          "fcp": 1320,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        },
+        {
+          "route": "/planos",
+          "cls": 0.0356,
+          "lcp": 1900,
+          "fcp": 1292,
+          "jsKB": 283,
+          "jsReq": 14,
+          "imgKB": 35
+        },
+        {
+          "route": "/queue",
+          "cls": 0.0015,
+          "lcp": 2040,
+          "fcp": 1416,
+          "jsKB": 226,
+          "jsReq": 13,
+          "imgKB": 64
+        }
+      ]
+    },
+    {
+      "scenario": "real@1440",
+      "rotas": 5,
+      "clsMed": 0.0015,
+      "clsMax": 0.0101,
+      "lcpMed": 2012,
+      "lcpMax": 2156,
+      "fcpMed": 1284,
+      "jsMedKB": 226,
+      "jsReqMed": 14,
+      "imgMedKB": 35,
+      "porRota": [
+        {
+          "route": "/",
+          "cls": 0.0015,
+          "lcp": 2000,
+          "fcp": 1284,
+          "jsKB": 226,
+          "jsReq": 13,
+          "imgKB": 89
+        },
+        {
+          "route": "/login",
+          "cls": 0,
+          "lcp": 2156,
+          "fcp": 1284,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        },
+        {
+          "route": "/cadastro",
+          "cls": 0,
+          "lcp": 2132,
+          "fcp": 1284,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        },
+        {
+          "route": "/planos",
+          "cls": 0.0101,
+          "lcp": 1904,
+          "fcp": 1284,
+          "jsKB": 283,
+          "jsReq": 14,
+          "imgKB": 35
+        },
+        {
+          "route": "/queue",
+          "cls": 0.0015,
+          "lcp": 2012,
+          "fcp": 1424,
+          "jsKB": 226,
+          "jsReq": 13,
+          "imgKB": 35
+        }
+      ]
+    }
+  ]
+}

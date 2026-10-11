@@ -525,6 +525,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       !!rawFrom &&
       rawFrom.startsWith('/') &&
       !rawFrom.startsWith('//') &&
+      // Navegadores normalizam "\" para "/" — "/\evil.com" vira "//evil.com"
+      // e escapa do app (open redirect do react-router; GHSA-wrjc-x8rr-h8h6).
+      !rawFrom.includes('\\') &&
       !rawFrom.startsWith('/login') &&
       !rawFrom.startsWith('/cadastro') &&
       !rawFrom.startsWith('/bloqueado');

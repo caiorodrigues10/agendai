@@ -72,6 +72,43 @@ test('resolves local path helpers as arguments and template spans', t => {
     ['GET /api/shops/{}/posts/{}', 'GET /api/shops/{}/posts/{}/comments', 'GET /api/shops/{}/stories']);
 });
 
+test('expande segmento final dinâmico tipado como union local', t => {
+  const root = fixture(t, {
+    'src/shared/infra/http/app.ts': 'app.register(apiRoutes, { prefix: "/api" });',
+    'src/shared/infra/http/routes/api.ts':
+      'import { accountRoutes } from "./account.routes"; async function apiRoutes(app) { await accountRoutes(app); }',
+    'src/shared/infra/http/routes/account.routes.ts':
+      'function accountRoutes(app) { app.post("/admin/accounts/:id/suspend", h); app.post("/admin/accounts/:id/approve", h); }',
+    'wrapper.ts': [
+      "export type AccountAction = 'suspend' | 'approve';",
+      'const api = {',
+      '  accountAction(id: string, action: AccountAction) {',
+      '    return apiClient(\x60/api/admin/accounts/\${id}/\${action}\x60, "POST");',
+      '  },',
+      '};',
+    ].join('\n'),
+  });
+  const requests = frontendRequests(path.join(root, 'wrapper.ts'));
+  assert.deepEqual(requests.map(request => request.key), [
+    'POST /api/admin/accounts/{}/suspend',
+    'POST /api/admin/accounts/{}/approve',
+  ]);
+  const routes = backendRoutes(root);
+  assert.deepEqual(requests.map(request => routes.has(request.key)), [true, true]);
+});
+
+test('sem union declarada o segmento final dinâmico segue caindo como antes', t => {
+  const root = fixture(t, { 'wrapper.ts': `
+    const api = {
+      accountAction(id: string, action: string) {
+        return apiClient(\x60/api/admin/accounts/\${id}/\${action}\x60, "POST");
+      },
+    };
+  ` });
+  assert.deepEqual(frontendRequests(path.join(root, 'wrapper.ts')).map(r => r.key),
+    ['POST /api/admin/accounts/{}/{}']);
+});
+
 test('follows nested route delegations and const-string template URLs', t => {
   const root = fixture(t, {
     'src/shared/infra/http/app.ts': 'app.register(apiRoutes, { prefix: "/api" });',
