@@ -78,7 +78,7 @@ Nenhuma migration e nenhum schema no frontend. O contrato é verificado contra o
 
 | # | Risco | Severidade | Evidência | Mitigação | Status |
 |---|---|---|---|---|---|
-| R1 | CI do frontend falha em `npm run test:contract` (step 14, **incondicional**) porque o backend-irmão não existe no checkout do Actions | Alta | run `37568643259` (`fix/seguranca`) falha nesse step; `scripts/check-api-contract.mjs` lança `Backend não encontrado em ".../backend"` | Ver §6 — duas opções, **nenhuma aplicada** | ❌ Não resolvido (reportado) |
+| R1 | CI do frontend falha em `npm run test:contract` (step 14, **incondicional**) porque o backend-irmão não existe no checkout do Actions | Alta | runs `37568643259` (`fix/seguranca`) e **`38182230575` (`release/frontend`)** falham nesse step; `scripts/check-api-contract.mjs` lança `Backend não encontrado em ".../backend"` | Ver §5 — duas opções, **nenhuma aplicada** | ❌ Não resolvido (reportado) |
 | R2 | CI também falharia em `npm run test:e2e`: `e2e/post-social.spec.ts` faz `readFileSync('../backend/...')` no load do módulo | Alta | Reproduzido no baseline: `ENOENT .../agendai-back-end/src/modules/posts/assets/salon-editorial.png` | mesma correção de R1 | ❌ Não resolvido (reportado) |
 | R3 | Limite de lint em **484** warnings com **480** reais — margem de 4 | Média | `npx eslint src --ext .ts,.tsx` → 480 warnings, 0 errors | Baixar o débito antes de apertar o limite | ⚠️ Aceito (limite veio de `9bb0fcd`) |
 | R4 | `e2e/master/**` **não roda** em CI (sem `E2E_MASTER_*`) | Média | `playwright.config.ts` ignora a pasta sem as envs | Rodar local com seed do master antes do merge | ⬜ Ação recomendada |
@@ -92,6 +92,9 @@ Nenhuma migration e nenhum schema no frontend. O contrato é verificado contra o
 |---|---|---|
 | `37506054627` | `main` | `Run npm run typecheck` (import `../../agendai-back-end/...` em `e2e/post-editor.spec.ts`) |
 | `37568643259` | `fix/seguranca` | `Run npm run test:contract` (backend-irmão ausente) |
+| `38182230575` | **`release/frontend`** | `Run npm run test:contract` (idem — confirmação empírica) |
+
+O workflow de frontend usa `on: [push, pull_request]` **sem filtro de branch**, então a `release/frontend` gera run — ao contrário do backend, cujo workflow só dispara em `main`/PR para `main`.
 
 `release/frontend` corrige o primeiro (`1fd06a3` trocou os caminhos por `../backend`). O segundo é **ambiental**: no Actions só o repositório do frontend é baixado, então `../backend` não existe.
 
@@ -158,6 +161,7 @@ Ambiente: macOS local, Node 24. Nenhum ambiente de produção foi tocado.
 | 8 | Gate de precache | **2330221 ≤ 3185427** | `node scripts/precache-report.mjs --limit=3185427` | ✅ |
 | 9 | Chunk mais pesado (regra R7) | `index-BQQI5Fs4.js` 491 kB (< 500 kB) | saída do build | ✅ |
 | 10 | E2E chromium desktop + mobile | **54 passed / 16 skipped / 0 failed** | `npx playwright test --project=desktop-chromium --project=mobile-chromium` | ✅ |
+| 10.1 | CI em `release/frontend` (run `38182230575`) | falhou em `npm run test:contract` (R1) | `gh run view 38182230575` | ❌ |
 
 ### 7.2 Comparação com o baseline (`origin/main`)
 
