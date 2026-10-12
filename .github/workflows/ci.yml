@@ -4,12 +4,25 @@ jobs:
   frontend:
     runs-on: ubuntu-latest
     env:
-      # check-api-contract.mjs resolve o backend no IMPORT (nao so no run), e o
-      # default e `../backend` — fora do workspace no Actions. Apontar para o
-      # checkout irmago cobre tanto test:contract quanto contract:check:strict.
+      # Layout deliberado, nao estetico:
+      #   $GITHUB_WORKSPACE/agendai      <- este repo
+      #   $GITHUB_WORKSPACE/backend      <- repo irmao
+      # e2e/post-editor.spec.ts importa '../../backend/src/...', relativo a
+      # e2e/, ou seja: irmao da raiz do frontend. Com o frontend em
+      # $GITHUB_WORKSPACE esse caminho apontaria para fora do runner; com o
+      # frontend dentro de `agendai/` ele resolve. E e o mesmo layout do
+      # monorepo local (agendai-projeto/{agendai,backend}).
+      #
+      # check-api-contract.mjs valida o backend no IMPORT (nao so no run), e o
+      # default dele e `../backend` — tambem resolvido por este layout.
       API_CONTRACT_BACKEND: ${{ github.workspace }}/backend
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}/agendai
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: agendai
       - uses: actions/checkout@v4
         with:
           repository: caiorodrigues10/agendai-back-end
@@ -18,6 +31,7 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
+          cache-dependency-path: agendai/package-lock.json
       - run: npm ci
       - run: npm run docs:check
       - run: npm run test:contract
