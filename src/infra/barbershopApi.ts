@@ -1,7 +1,7 @@
 import { serviceCategoriesApi } from './categoriesApi';
 import { API_BASE, apiClient, apiFetch } from './apiClient';
 import { authStorage } from './authStorage';
-import { DaySchedule, Service, StaffMember, FeedPost, PostMode, PostConfig, OperationMode, OpeningMode, ManualShopStatus, ShopOpenState, BusinessSegment } from '../types';
+import { DaySchedule, Service, StaffMember, FeedPost, PostMode, PostConfig, OperationMode, OpeningMode, ManualShopStatus, ShopOpenState, BusinessSegment, TargetAudience } from '../types';
 import { mapScheduleToApi } from '../utils/schedulingUtils';
 
 function unwrap<T>(res: unknown): T {
@@ -22,6 +22,7 @@ interface BarbershopData {
   operationMode?: OperationMode;
   openingMode?: OpeningMode;
   businessSegment?: BusinessSegment;
+  targetAudience?: TargetAudience | null;
   manualStatus?: ManualShopStatus;
   openState?: ShopOpenState;
   googleReviewUrl?: string | null;

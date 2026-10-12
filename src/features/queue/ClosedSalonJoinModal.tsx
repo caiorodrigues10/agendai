@@ -33,7 +33,7 @@ export const ClosedSalonJoinModal: React.FC<ClosedSalonJoinModalProps> = ({
   return (
     <ModalShell
       open={open}
-      title="O salão está fechado"
+      title="Estabelecimento fechado"
       titleId="closed-salon-title"
       icon={<AlertCircle size={22} />}
       iconClassName="bg-warning/15 text-warning"
@@ -81,7 +81,7 @@ export const ClosedSalonJoinModal: React.FC<ClosedSalonJoinModalProps> = ({
               onClick={onOpenSettings}
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-bold text-text-primary transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
             >
-              <Settings size={16} /> Abrir/ajustar salão nas configurações
+              <Settings size={16} /> Abrir/ajustar nas configurações
             </button>
             <button
               type="button"
@@ -96,7 +96,7 @@ export const ClosedSalonJoinModal: React.FC<ClosedSalonJoinModalProps> = ({
       }
     >
       <p className="mt-1 text-sm leading-relaxed text-text-secondary">
-        Você tem certeza de que deseja adicionar este cliente enquanto o salão está fechado?
+        Você tem certeza de que deseja adicionar este cliente enquanto o estabelecimento está fechado?
       </p>
     </ModalShell>
   );

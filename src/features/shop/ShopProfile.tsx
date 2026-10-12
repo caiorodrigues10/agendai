@@ -14,6 +14,8 @@ import { barbershopApi } from '../../infra/barbershopApi';
 import { socialApi, type PublicSocialPost } from '../../infra/socialApi';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
+import { useSegmentLabels } from '../../hooks/useSegmentLabels';
+import { AUDIENCE_OPTIONS } from '../../shared/segments';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Toast } from '../../components/ui/Toast';
@@ -112,6 +114,11 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
     Boolean(currentUser && ['OWNER', 'EMPLOYEE', 'MASTER_ADMIN'].includes(currentUser.role));
   const canModerate = canCompose && currentUser?.role !== 'EMPLOYEE';
   const social = useSalonSocial(barbershopId, canModerate);
+  // Vocabulário do segmento (o provider já carregou o salão; o override cobre
+  // os testes/story que passam settings explícito sem provider).
+  const { labels, config } = useSegmentLabels(settings.businessSegment ?? null);
+  const audienceValue = config.targetAudience.applies ? settings.targetAudience ?? null : null;
+  const audienceLabel = AUDIENCE_OPTIONS.find(option => option.value === audienceValue)?.label;
   const [tab, setTab] = useState<ProfileTab>('Publicações');
   const [logoUrl, setLogoUrl] = useState(settings.logoUrl);
   const [logoBusy, setLogoBusy] = useState(false);
@@ -310,6 +317,10 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
               <h1 className="break-words text-lg sm:text-2xl font-bold tracking-tight">
                 {settings.shopName}
               </h1>
+              <p className="mt-0.5 text-xs text-text-muted">
+                {labels.segmentLabel}
+                {audienceLabel ? ` · ${audienceLabel}` : ''}
+              </p>
               <div className="mt-3 grid grid-cols-2 gap-3 sm:flex sm:gap-7">
                 <div>
                   <strong className="text-base sm:text-lg">{publicPosts.length}</strong>

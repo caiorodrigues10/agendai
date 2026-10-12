@@ -58,7 +58,7 @@ export const RevenueSection: React.FC = () => {
           icon={<Wallet size={16} />}
           value={overview ? brl.format(overview.expenses.thisMonth) : '—'}
           label="Despesas no mês"
-          hint="Despesas registradas pelas barbearias"
+          hint="Despesas registradas pelos estabelecimentos"
           loading={loading}
         />
         <BillingKpiCard

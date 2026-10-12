@@ -47,17 +47,19 @@ const DESTINATIONS: Record<string, string> = {
 };
 
 const TITLES: Record<string, string> = {
-  PROFILE: 'Confirme os dados do seu salão',
-  SEGMENT: 'Qual é o tipo do seu espaço?',
+  PROFILE: 'Confirme os dados do seu espaço',
+  SEGMENT: 'Qual é o tipo do seu negócio?',
   SCHEDULE: 'Diga quando você atende',
   SERVICES: 'Cadastre o que seus clientes podem escolher',
   OPERATION_MODE: 'Escolha como seus clientes serão atendidos',
-  PUBLIC_LINK: 'Coloque seu salão no ar',
+  PUBLIC_LINK: 'Coloque seu espaço no ar',
 };
 
 const DESCRIPTIONS: Record<string, string> = {
   PROFILE: 'Nome, endereço e WhatsApp do seu espaço.',
-  SEGMENT: 'Barbearia, salão, estúdio — isso ajuda a personalizar sua experiência.',
+  // Lista dos 4 segmentos do cadastro — o vocabulário por segmento entra nas
+  // telas, não no item de onboarding (que é pré-escolha).
+  SEGMENT: 'Barbearia, salão, petshop ou nails — isso ajuda a personalizar sua experiência.',
   SCHEDULE: 'Defina os dias e horários em que você atende.',
   SERVICES: 'Crie os serviços que seus clientes podem agendar.',
   OPERATION_MODE: 'Fila, agenda ou ambos — como seus clientes serão atendidos.',

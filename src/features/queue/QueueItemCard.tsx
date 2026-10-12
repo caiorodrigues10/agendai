@@ -129,7 +129,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
           : `Olá ${item.customerName}! Você é o próximo na fila do ${shopName}. Por favor, fique atento!`;
     const shopId = barbershopId || item.barbershopId;
     if (!shopId) {
-      onNotify?.('Conecte o WhatsApp do salão em Configurações para enviar mensagens.', 'error');
+      onNotify?.('Conecte o WhatsApp em Configurações para enviar mensagens.', 'error');
       return;
     }
     setSending(kind);
@@ -149,7 +149,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
       );
     } catch (err) {
       onNotify?.(
-        getErrorMessage(err, 'Conecte o WhatsApp do salão em Configurações para enviar mensagens.'),
+        getErrorMessage(err, 'Conecte o WhatsApp em Configurações para enviar mensagens.'),
         'error'
       );
     } finally {

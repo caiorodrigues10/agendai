@@ -31,7 +31,9 @@ interface BarbershopContextValue {
   getTodayScheduleDisplay: () => string;
 }
 
-const BarbershopContext = createContext<BarbershopContextValue | undefined>(undefined);
+// Exportado cru (sem o throw do useBarbershop) para hooks de vocabulário
+// funcionarem também fora do provider — com fallback para o default.
+export const BarbershopContext = createContext<BarbershopContextValue | undefined>(undefined);
 
 function isShopStaffRole(role?: string) {
   const normalized = (role || '').toUpperCase();
@@ -115,6 +117,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
               operationMode?: OperationMode;
               openingMode?: OpeningMode;
               businessSegment?: import('../types').BusinessSegment;
+              targetAudience?: import('../types').TargetAudience | null;
               manualStatus?: ManualShopStatus;
               openState?: ShopOpenState;
             } | null>,
@@ -160,6 +163,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
             operationMode: shopData.operationMode ?? 'HYBRID',
             openingMode: shopData.openingMode ?? 'SCHEDULE',
             businessSegment: shopData.businessSegment ?? 'OTHER',
+            targetAudience: shopData.targetAudience ?? null,
             manualStatus: shopData.manualStatus ?? 'AUTO',
             openState: shopData.openState,
             schedule,
@@ -184,7 +188,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const setSettings = async (newSettings: ShopSettings) => {
     if (!barbershopId) return;
-    const shopPayload: Record<string, string | number | undefined> = {
+    const shopPayload: Record<string, string | number | null | undefined> = {
       name: newSettings.shopName,
       whatsapp: newSettings.whatsapp,
       address: newSettings.address,
@@ -201,10 +205,16 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
       shopPayload.longitude = newSettings.longitude;
     }
     if (newSettings.businessSegment) shopPayload.businessSegment = newSettings.businessSegment;
+    if (newSettings.targetAudience !== undefined) {
+      shopPayload.targetAudience = newSettings.targetAudience;
+    }
     const updated = await barbershopApi.updateBarbershop(barbershopId, shopPayload);
     await barbershopApi.updateSchedule(barbershopId, newSettings.schedule);
     setSettingsState({
       ...newSettings,
+      // O backend normaliza o par (PETSHOP zera o público): o estado local
+      // espelha o que voltou, não o que foi enviado.
+      targetAudience: updated.targetAudience ?? null,
       city: updated.city ?? newSettings.city,
       latitude: updated.latitude ?? undefined,
       longitude: updated.longitude ?? undefined,

@@ -3,6 +3,7 @@ import { productsApi, type Product, type ProductCategory, type ProductListPurpos
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useAuth } from '../../contexts/AuthContext';
 import type { BusinessSegment } from '../../types';
+import { getSegmentConfig } from '../../shared/segments';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { ProductFormModal } from './ProductFormModal';
@@ -18,16 +19,9 @@ import {
   Thumb,
 } from './ProductCatalogCard';
 
-const SEGMENTS: Record<BusinessSegment, string> = {
-  BARBERSHOP: 'Barbearia',
-  HAIR_SALON: 'Salão de cabelo',
-  BEAUTY_STUDIO: 'Studio de beleza',
-  NAIL_STUDIO: 'Unhas',
-  LASH_BROW_STUDIO: 'Cílios e sobrancelhas',
-  AESTHETICS: 'Estética',
-  SPA: 'Spa',
-  OTHER: 'Outro',
-};
+// Rótulo do segmento vem do config central: o mapa à mão já ficou para trás
+// (sem PETSHOP) e quebrava o Record assim que o enum cresceu.
+const segmentLabel = (segment: BusinessSegment) => getSegmentConfig(segment).labels.segmentLabel;
 
 type CatalogPurpose = ProductListPurpose;
 
@@ -177,7 +171,7 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
       {canManage && barbershopId && (
         <div className="rounded-xl border border-border bg-surface p-4">
           <p className="text-sm font-bold text-text-primary">
-            Modelo sugerido para {SEGMENTS[settings?.businessSegment ?? 'OTHER']}
+            Modelo sugerido para {segmentLabel(settings?.businessSegment ?? 'OTHER')}
           </p>
           <p className="mt-1 text-xs text-text-secondary">A instalação nunca sobrescreve cadastros existentes.</p>
           <button type="button" onClick={() => setTemplateOpen(true)} className="mt-3 rounded-xl bg-accent px-4 py-2 text-sm font-bold text-accent-fg">

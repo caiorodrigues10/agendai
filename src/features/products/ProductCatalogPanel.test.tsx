@@ -14,7 +14,13 @@ const mocks = vi.hoisted(() => ({
   reload: vi.fn(),
 }));
 vi.mock('../../infra/productsApi', () => ({ productsApi: mocks.api }));
-vi.mock('../../contexts/BarbershopContext', () => ({ useBarbershop: () => ({ settings: null }) }));
+vi.mock('../../contexts/BarbershopContext', async () => {
+  const { createContext } = await import('react');
+  return {
+    useBarbershop: () => ({ settings: null }),
+    BarbershopContext: createContext(undefined),
+  };
+});
 vi.mock('../../contexts/AuthContext', () => ({ useAuth: () => ({ user: { barbershopId: 'shop-1', role: 'OWNER' } }) }));
 
 const PRODUCT = {

@@ -8,6 +8,7 @@ import {
   LuStore as Store,
 } from 'react-icons/lu';
 import { AIInsight } from '../../types';
+import { useSegmentLabels } from '../../hooks/useSegmentLabels';
 
 type BusyLevel = AIInsight['busyLevel'];
 
@@ -71,6 +72,7 @@ export const QueueStatusCard: React.FC<QueueStatusCardProps> = ({
 }) => {
   const tone = busyStyles(isOpen, insight?.busyLevel);
   const wait = insight?.estimatedWait || (showStaffStats ? '--' : '0 min');
+  const { labels } = useSegmentLabels();
 
   return (
     <div className="mb-6 relative overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
@@ -86,7 +88,7 @@ export const QueueStatusCard: React.FC<QueueStatusCardProps> = ({
               Fila ao vivo
             </p>
             <h2 className="text-xl font-bold text-text-primary tracking-tight truncate">
-              {shopName || 'Salão'}
+              {shopName || labels.segmentLabel}
             </h2>
             <p className="mt-1 flex items-center gap-1.5 text-xs text-text-secondary">
               <Store size={13} className="text-text-secondary shrink-0" />
@@ -143,9 +145,9 @@ export const QueueStatusCard: React.FC<QueueStatusCardProps> = ({
           <p className="text-sm text-text-secondary leading-relaxed">
             {insight?.message ||
               (queueClosed && isOpen
-                ? 'O salão continua aberto, mas a fila de hoje já foi encerrada.'
+                ? 'A fila de hoje já foi encerrada; quem está nela continua sendo atendido.'
                 : isOpen
-                ? 'O salão está pronto para atender.'
+                ? 'Tudo pronto para atender.'
                 : 'Fora do horário de funcionamento.')}
           </p>
         </div>

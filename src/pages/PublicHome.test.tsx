@@ -33,28 +33,32 @@ vi.mock('../contexts/BarbershopFiltersContext', () => ({
   }),
 }));
 
-vi.mock('../contexts/BarbershopContext', () => ({
-  useBarbershop: () => ({
-    settings: {
-      shopName: 'Salão Teste',
-      whatsapp: '11999999999',
-      schedule: [],
-      logoUrl: undefined,
-      operationMode: mockOperationMode.value,
-    },
-    services: [{ id: 's1', name: 'Corte', price: 40, avgTimeMinutes: 30, icon: 'scissors' }],
-    staff: [],
-    feed: [],
-    loading: false,
-    isShopOpen: () => true,
-    isQueueClosed: () => false,
-    addPost: vi.fn(),
-    deletePost: vi.fn(),
-    likePost: vi.fn(),
-    refresh: vi.fn(),
-    updateSettings: vi.fn(),
-  }),
-}));
+vi.mock('../contexts/BarbershopContext', async () => {
+  const { createContext } = await import('react');
+  return {
+    useBarbershop: () => ({
+      settings: {
+        shopName: 'Salão Teste',
+        whatsapp: '11999999999',
+        schedule: [],
+        logoUrl: undefined,
+        operationMode: mockOperationMode.value,
+      },
+      services: [{ id: 's1', name: 'Corte', price: 40, avgTimeMinutes: 30, icon: 'scissors' }],
+      staff: [],
+      feed: [],
+      loading: false,
+      isShopOpen: () => true,
+      isQueueClosed: () => false,
+      addPost: vi.fn(),
+      deletePost: vi.fn(),
+      likePost: vi.fn(),
+      refresh: vi.fn(),
+      updateSettings: vi.fn(),
+    }),
+    BarbershopContext: createContext(undefined),
+  };
+});
 
 vi.mock('../contexts/SchedulingContext', () => ({
   useScheduling: () => ({

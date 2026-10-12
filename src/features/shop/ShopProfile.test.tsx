@@ -7,7 +7,14 @@ import type { FeedPost, ShopSettings, StaffMember } from '../../types';
 
 vi.mock('../../infra/socialApi', () => ({ socialApi: { stories: vi.fn(), tagged: vi.fn(), getPost: vi.fn(), moderateTag: vi.fn(), canComment: () => false, comments: vi.fn() } }));
 vi.mock('../../infra/reputationApi', () => ({ reputationApi: { getPublicSummary: vi.fn() } }));
-vi.mock('../../contexts/BarbershopContext', () => ({ useBarbershop: () => ({ services: [], isShopOpen: () => true, getTodayScheduleDisplay: () => '09:00 – 18:00' }) }));
+vi.mock('../../contexts/BarbershopContext', async () => {
+  const { createContext } = await import('react');
+  return {
+    useBarbershop: () => ({ services: [], isShopOpen: () => true, getTodayScheduleDisplay: () => '09:00 – 18:00' }),
+    // O useSegmentLabels lê o contexto cru; sem valor ele cai no default.
+    BarbershopContext: createContext(undefined),
+  };
+});
 vi.mock('../../contexts/BarbershopFiltersContext', () => ({ useBarbershopFilters: () => ({ barbershopId: 'salon' }) }));
 
 const settings: ShopSettings = { shopName: 'Studio Teste', whatsapp: '11999999999', schedule: [], operationMode: 'HYBRID' };

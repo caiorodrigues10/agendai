@@ -10,6 +10,7 @@ import { Toast } from '../components/ui/Toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useBarbershop } from '../contexts/BarbershopContext';
 import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
+import { useSegmentLabels } from '../hooks/useSegmentLabels';
 import { useScheduling } from '../contexts/SchedulingContext';
 import { schedulingApi } from '../infra/schedulingApi';
 import { productsApi, PublicSaleProduct } from '../infra/productsApi';
@@ -61,6 +62,7 @@ export const PublicHome: React.FC = () => {
     clientId,
     loading: schedulingLoading,
   } = useScheduling();
+  const { labels } = useSegmentLabels(settings?.businessSegment ?? null);
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [joinMode, setJoinMode] = useState<'self' | 'dependent'>('self');
   const operationMode = settings?.operationMode ?? 'HYBRID';
@@ -129,7 +131,7 @@ export const PublicHome: React.FC = () => {
   const stillLoading = pendingUrlShop || shopLoading || schedulingLoading;
 
   if (stillLoading) {
-    return <div role="status" aria-label="Carregando salão"><PublicPageSkeleton /></div>;
+    return <div role="status" aria-label="Carregando estabelecimento"><PublicPageSkeleton /></div>;
   }
 
   // /queue without id → landing. /queue/:id with failed load → explicit empty state.
@@ -139,7 +141,7 @@ export const PublicHome: React.FC = () => {
         <div className="min-h-screen bg-bg text-text-primary flex flex-col items-center justify-center gap-4 px-6 text-center">
           <Store className="text-text-muted" size={40} />
           <div>
-            <h1 className="text-lg font-bold">Salão não encontrado</h1>
+            <h1 className="text-lg font-bold">Estabelecimento não encontrado</h1>
             <p className="text-sm text-text-secondary mt-1">
               Não foi possível carregar os dados deste estabelecimento.
             </p>
@@ -166,7 +168,7 @@ export const PublicHome: React.FC = () => {
   const canJoinQueue = isOpen && !queueClosed;
   const closedBanner = !isOpen
     ? settings.openState?.reason === 'MANUAL_MODE_NOT_OPENED'
-      ? 'O salão ainda não abriu hoje.'
+      ? `${labels.segmentLabel} ainda não abriu hoje.`
       : 'Fechado no momento'
     : queueClosed
       ? 'Fila encerrada por hoje'
@@ -274,7 +276,7 @@ export const PublicHome: React.FC = () => {
                 <p className="font-bold text-text-primary">{closedBanner}</p>
                 <p className="text-xs mt-1">
                   {!isOpen
-                    ? 'A entrada na fila está indisponível até o salão reabrir.'
+                    ? 'A entrada na fila está indisponível até o estabelecimento reabrir.'
                     : 'Quem já está na fila continua sendo atendido. Agendamentos seguem liberados.'}
                 </p>
               </div>

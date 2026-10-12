@@ -18,9 +18,13 @@ vi.mock('../../contexts/AuthContext', () => ({
   useAuth: () => ({ switchOrigin: headerAuth.switchOrigin, switchBack }),
 }));
 
-vi.mock('../../contexts/BarbershopContext', () => ({
-  useBarbershop: () => ({ settings: headerAuth.settings }),
-}));
+vi.mock('../../contexts/BarbershopContext', async () => {
+  const { createContext } = await import('react');
+  return {
+    useBarbershop: () => ({ settings: headerAuth.settings }),
+    BarbershopContext: createContext(undefined),
+  };
+});
 
 vi.mock('../../components/infra/ThemeToggle', () => ({
   ThemeToggle: () => <button type="button">Tema</button>,

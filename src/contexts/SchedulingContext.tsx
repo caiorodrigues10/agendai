@@ -597,7 +597,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   // Public booking (no auth) – used on the public barbershop page.
   const bookAppointmentPublic = useCallback(
     async (data: any) => {
-      if (!barbershopId) throw new Error('Barbearia não selecionada');
+      if (!barbershopId) throw new Error('Estabelecimento não selecionado');
 
       const created = await schedulingApi.bookAppointmentPublic({
         ...data,

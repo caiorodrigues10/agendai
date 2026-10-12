@@ -65,15 +65,10 @@ export interface DaySchedule {
 
 export type OperationMode = 'QUEUE_ONLY' | 'APPOINTMENTS_ONLY' | 'HYBRID';
 export type OpeningMode = 'SCHEDULE' | 'MANUAL';
-export type BusinessSegment =
-  | 'BARBERSHOP'
-  | 'HAIR_SALON'
-  | 'BEAUTY_STUDIO'
-  | 'NAIL_STUDIO'
-  | 'LASH_BROW_STUDIO'
-  | 'AESTHETICS'
-  | 'SPA'
-  | 'OTHER';
+// Derivado do config central: a union à mão já ficou para trás (faltava PETSHOP)
+// e quebrava Records como o de ícones do catálogo de produtos.
+export type { BusinessSegment, TargetAudience } from './shared/segments';
+import type { BusinessSegment, TargetAudience } from './shared/segments';
 export type ManualShopStatus = 'AUTO' | 'OPEN' | 'CLOSED';
 
 export interface ShopOpenState {
@@ -94,6 +89,8 @@ export interface ShopSettings {
   operationMode?: OperationMode;
   openingMode?: OpeningMode;
   businessSegment?: BusinessSegment;
+  /** Público atendido. Em PETSHOP não se aplica (o backend zera). */
+  targetAudience?: TargetAudience | null;
   manualStatus?: ManualShopStatus;
   openState?: ShopOpenState;
   googleReviewUrl?: string | null;
