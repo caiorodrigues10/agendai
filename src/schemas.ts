@@ -202,6 +202,8 @@ export const AppointmentSchema = z.object({
   whatsapp: whatsappRequired,
   clientId: z.string().uuid().optional(),
   clientPackageId: z.string().uuid().optional(),
+  /** Pet escolhido no petshop. O backend resolve o nome do pet. */
+  petId: z.string().uuid().optional(),
   reservedProducts: z
     .array(
       z.object({

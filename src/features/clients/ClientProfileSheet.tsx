@@ -43,6 +43,8 @@ import {
 } from '../../utils/clientLabels';
 import { METRIC_LABEL } from '../../utils/metricLabels';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { ClientPetsPanel } from './ClientPetsPanel';
+import { useSegmentLabels } from '../../hooks/useSegmentLabels';
 import { ModalShell } from '../../components/patterns/ModalShell';
 import { SectionError } from '../../components/patterns';
 import { BookPackageSessionsModal, AppointmentBookingModal } from '../../features/appointments';
@@ -58,7 +60,7 @@ const PAYMENT_LABEL: Record<PackagePaymentMethod, string> = {
   other: 'Outro',
 };
 
-type ProfileTab = 'geral' | 'pacotes' | 'historico' | 'financeiro';
+type ProfileTab = 'geral' | 'pacotes' | 'historico' | 'financeiro' | 'pets';
 
 function clientPhoneLabel(whatsapp: string): string {
   const digits = whatsapp.replace(/\D/g, '');
@@ -106,6 +108,8 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const titleId = useId();
+  const { segment } = useSegmentLabels();
+  const isPetshop = segment === 'PETSHOP';
 
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -160,10 +164,11 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
           ['geral', 'Geral'],
           ['pacotes', 'Pacotes'],
           ['historico', 'Histórico'],
+          ...(isPetshop ? [['pets', 'Pets'] as const] : []),
           ...(canAnalytics ? [['financeiro', 'Financeiro'] as const] : []),
         ] as [ProfileTab, string][]
       ),
-    [canAnalytics]
+    [canAnalytics, isPetshop]
   );
 
   const loadDetail = useCallback(async () => {
@@ -885,6 +890,10 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                   )}
                 </div>
               </div>
+            )}
+
+            {tab === 'pets' && isPetshop && clientId && (
+              <ClientPetsPanel clientId={clientId} onChanged={() => void loadDetail()} />
             )}
 
             {tab === 'financeiro' && canAnalytics && crmProfile && (

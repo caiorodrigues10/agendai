@@ -73,7 +73,7 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await canvas.findByRole('heading', { name: /Vamos colocar/ }, { timeout: 10000 });
-    await canvas.findByText('Confirme os dados do seu salão', {}, { timeout: 10000 });
+    await canvas.findByText('Confirme os dados do seu espaço', {}, { timeout: 10000 });
     await settleMotion();
   },
 };

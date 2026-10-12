@@ -45,6 +45,33 @@ export interface ProcedureRecord {
   updatedAt: string;
 }
 
+export type PetSpecies = 'DOG' | 'CAT' | 'OTHER';
+export type PetSize = 'SMALL' | 'MEDIUM' | 'LARGE' | 'EXTRA_LARGE';
+
+export interface ClientPet {
+  id: string;
+  barbershopId: string;
+  clientId: string;
+  name: string;
+  species: PetSpecies;
+  breed: string | null;
+  size: PetSize | null;
+  coat: string | null;
+  notes: string | null;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ClientPetBody {
+  name: string;
+  species?: PetSpecies;
+  breed?: string | null;
+  size?: PetSize | null;
+  coat?: string | null;
+  notes?: string | null;
+}
+
 export const clientsApi = {
   list: async (params?: { search?: string; page?: number; limit?: number }) => {
     const res = await apiClient<{ success: boolean; data: SalonClient[]; meta: ListMeta }>(
@@ -159,6 +186,45 @@ export const clientsApi = {
   deleteProcedure: async (clientId: string, recordId: string) => {
     await apiClient<void>(
       `/api/clients/${clientId}/procedures/${recordId}`,
+      'DELETE',
+      undefined,
+      token()
+    );
+  },
+
+  listPets: async (clientId: string) => {
+    const res = await apiClient<{ success: boolean; data: ClientPet[] }>(
+      `/api/clients/${clientId}/pets`,
+      'GET',
+      undefined,
+      token()
+    );
+    return unwrap<ClientPet[]>(res);
+  },
+
+  createPet: async (clientId: string, body: ClientPetBody) => {
+    const res = await apiClient<{ success: boolean; data: ClientPet }>(
+      `/api/clients/${clientId}/pets`,
+      'POST',
+      body,
+      token()
+    );
+    return unwrap<ClientPet>(res);
+  },
+
+  updatePet: async (clientId: string, petId: string, body: Partial<ClientPetBody> & { active?: boolean }) => {
+    const res = await apiClient<{ success: boolean; data: ClientPet }>(
+      `/api/clients/${clientId}/pets/${petId}`,
+      'PATCH',
+      body,
+      token()
+    );
+    return unwrap<ClientPet>(res);
+  },
+
+  deletePet: async (clientId: string, petId: string) => {
+    await apiClient<void>(
+      `/api/clients/${clientId}/pets/${petId}`,
       'DELETE',
       undefined,
       token()

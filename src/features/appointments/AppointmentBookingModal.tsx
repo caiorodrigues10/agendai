@@ -21,12 +21,14 @@ import {
   LuCircleCheck as CheckCircle,
   LuCircleAlert as AlertCircle,
   LuClock as Clock,
+  LuPawPrint as Paw,
 } from 'react-icons/lu';
 import { Avatar } from '../../components/ui/Avatar';
 import { DynamicIcon } from '../../components/ui/DynamicIcon';
 import { ThemedCalendar, toLocalISO } from '../../components/ui/ThemedCalendar';
 import { ModalShell } from '../../components/patterns/ModalShell';
 import { formatCurrencyBRL } from '../../utils/formatters';
+import { ClientPet } from '../../infra/clientsApi';
 
 interface AppointmentBookingModalProps {
   services: Service[];
@@ -82,6 +84,9 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
   );
   const [clientPackages, setClientPackages] = React.useState<ClientPackage[]>([]);
   const [usePackage, setUsePackage] = React.useState(false);
+  const [clientPets, setClientPets] = React.useState<ClientPet[]>([]);
+  const [selectedPetId, setSelectedPetId] = React.useState('');
+  const isPetshop = settings.businessSegment === 'PETSHOP';
 
   const {
     register,
@@ -152,13 +157,27 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
     if (!selectedClient) {
       setClientPackages([]);
       setUsePackage(false);
+      setClientPets([]);
+      setSelectedPetId('');
       return;
     }
     packagesApi
       .listSold({ clientId: selectedClient.id, status: 'ACTIVE' })
       .then(setClientPackages)
       .catch(() => setClientPackages([]));
-  }, [selectedClient]);
+    if (isPetshop) {
+      clientsApi
+        .listPets(selectedClient.id)
+        .then(pets => {
+          setClientPets(pets.filter(p => p.active));
+          setSelectedPetId('');
+        })
+        .catch(() => setClientPets([]));
+    } else {
+      setClientPets([]);
+      setSelectedPetId('');
+    }
+  }, [selectedClient, isPetshop]);
 
   React.useEffect(() => {
     if (!matchingPackage) setUsePackage(false);
@@ -183,6 +202,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
         ...data,
         clientId: selectedClient?.id,
         clientPackageId: usePackage && matchingPackage ? matchingPackage.id : undefined,
+        petId: isPetshop && selectedPetId ? selectedPetId : undefined,
       });
       onClose();
     } finally {
@@ -397,6 +417,27 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
                       {c.remainingSessions > 0 ? ` · ${c.remainingSessions} sessão(ões)` : ''}
                     </button>
                   ))}
+                </div>
+              )}
+              {isPetshop && selectedClient && clientPets.length > 0 && (
+                <div className="space-y-1">
+                  <p className="flex items-center gap-1 text-[11px] text-text-secondary font-bold uppercase tracking-wider">
+                    <Paw size={12} /> Pet
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {clientPets.map(pet => (
+                      <button
+                        key={pet.id}
+                        type="button"
+                        onClick={() => setSelectedPetId(prev => (prev === pet.id ? '' : pet.id))}
+                        className={`rounded-xl border px-3 py-1.5 text-xs font-bold transition-colors ${
+                          selectedPetId === pet.id ? selectedCard : idleCard
+                        }`}
+                      >
+                        {pet.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
               {matchingPackage && (
