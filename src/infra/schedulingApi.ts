@@ -38,6 +38,8 @@ interface JoinQueuePayload {
   barbershopId: string;
   sessionId?: string;
   responsibleSessionId?: string;
+  /** Pet escolhido (MVP petshop). O backend resolve o nome do pet. */
+  petId?: string;
 }
 
 export interface QueueUpdatePayload {

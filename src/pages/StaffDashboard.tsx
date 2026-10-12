@@ -97,7 +97,7 @@ export const StaffDashboard: React.FC = () => {
   } = useScheduling();
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [showClosedSalonModal, setShowClosedSalonModal] = useState(false);
-  const [pendingJoin, setPendingJoin] = useState<{ name: string; whatsapp: string; serviceId: string } | null>(null);
+  const [pendingJoin, setPendingJoin] = useState<{ name: string; whatsapp: string; serviceId: string; petId?: string } | null>(null);
   const [joiningClosedSalon, setJoiningClosedSalon] = useState(false);
   const [onboardingChecked, setOnboardingChecked] = useState(false);
   const isOnboardingRole = user?.role === 'OWNER' || user?.role === 'MASTER_ADMIN';
@@ -205,17 +205,23 @@ export const StaffDashboard: React.FC = () => {
     }
   };
 
-  const handleJoinQueue = async (name: string, whatsapp: string, serviceId: string) => {
+  const handleJoinQueue = async (
+    name: string,
+    whatsapp: string,
+    serviceId: string,
+    _isManualEntry?: boolean,
+    petId?: string
+  ) => {
     if (!isShopOpen()) {
-      setPendingJoin({ name, whatsapp, serviceId });
+      setPendingJoin({ name, whatsapp, serviceId, petId });
       setShowClosedSalonModal(true);
       return;
     }
-    await addClientToQueue(name, whatsapp, serviceId);
+    await addClientToQueue(name, whatsapp, serviceId, petId);
   };
 
-  const addClientToQueue = async (name: string, whatsapp: string, serviceId: string) => {
-    await joinQueue(name, whatsapp, serviceId);
+  const addClientToQueue = async (name: string, whatsapp: string, serviceId: string, petId?: string) => {
+    await joinQueue(name, whatsapp, serviceId, petId ? { petId } : undefined);
     setShowJoinForm(false);
     showToast('Cliente adicionado!');
   };
@@ -224,7 +230,7 @@ export const StaffDashboard: React.FC = () => {
     if (!pendingJoin) return;
     setJoiningClosedSalon(true);
     try {
-      await addClientToQueue(pendingJoin.name, pendingJoin.whatsapp, pendingJoin.serviceId);
+      await addClientToQueue(pendingJoin.name, pendingJoin.whatsapp, pendingJoin.serviceId, pendingJoin.petId);
       setPendingJoin(null);
       setShowClosedSalonModal(false);
     } catch (error) {
@@ -687,6 +693,7 @@ export const StaffDashboard: React.FC = () => {
           onJoin={handleJoinQueue}
           onCancel={() => setShowJoinForm(false)}
           isStaffMode={true}
+          showPetSelector={settings?.businessSegment === 'PETSHOP'}
         />
       )}
       <ClosedSalonJoinModal

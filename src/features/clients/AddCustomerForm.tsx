@@ -13,6 +13,7 @@ import {
   LuSparkles as Sparkles,
   LuMessageCircle as MessageCircle,
   LuScissors as Scissors,
+  LuPawPrint as Paw,
 } from 'react-icons/lu';
 import {
   CustomerQueueSchema,
@@ -20,6 +21,7 @@ import {
   CustomerQueueFormData,
   CustomerQueueStaffFormData,
 } from '../../schemas';
+import { clientsApi, ClientPet } from '../../infra/clientsApi';
 
 /** Enviado ao backend somente quando o staff não informa WhatsApp do cliente. */
 const STAFF_PLACEHOLDER_WHATSAPP = '00000000000';
@@ -30,11 +32,14 @@ interface AddCustomerFormProps {
     name: string,
     whatsapp: string,
     serviceId: string,
-    isManualEntry?: boolean
+    isManualEntry?: boolean,
+    petId?: string
   ) => void | Promise<void>;
   onCancel: () => void;
   isStaffMode?: boolean;
   isAdditionalPerson?: boolean;
+  /** Mostra o seletor de pet quando o WhatsApp casa com um cliente que tem pets (petshop). */
+  showPetSelector?: boolean;
 }
 
 export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
@@ -43,9 +48,12 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
   onCancel,
   isStaffMode = false,
   isAdditionalPerson = false,
+  showPetSelector = false,
 }) => {
   const [loading, setLoading] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const [clientPets, setClientPets] = React.useState<ClientPet[]>([]);
+  const [selectedPetId, setSelectedPetId] = React.useState('');
 
   const {
     register,
@@ -64,12 +72,45 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
   });
 
   const selectedServiceId = watch('serviceId');
+  const whatsappValue = watch('whatsapp') ?? '';
 
   useEffect(() => {
     if (services.length > 0 && !selectedServiceId) {
       setValue('serviceId', services[0].id);
     }
   }, [services, setValue, selectedServiceId]);
+
+  // Petshop: quando o WhatsApp digitado casa com um cliente que tem pets
+  // ativos, oferece o seletor de pet (o backend grava o snapshot na fila).
+  useEffect(() => {
+    if (!showPetSelector || !isStaffMode) return;
+    const digits = whatsappValue.replace(/\D/g, '');
+    if (digits.length < 10) {
+      setClientPets([]);
+      setSelectedPetId('');
+      return;
+    }
+    const t = setTimeout(() => {
+      clientsApi
+        .list({ search: digits, limit: 1 })
+        .then(async res => {
+          const hit = res.data[0];
+          if (!hit) {
+            setClientPets([]);
+            setSelectedPetId('');
+            return;
+          }
+          const pets = await clientsApi.listPets(hit.id);
+          setClientPets(pets.filter(p => p.active));
+          setSelectedPetId('');
+        })
+        .catch(() => {
+          setClientPets([]);
+          setSelectedPetId('');
+        });
+    }, 300);
+    return () => clearTimeout(t);
+  }, [whatsappValue, showPetSelector, isStaffMode]);
 
   const onSubmit = async (data: CustomerQueueFormData | CustomerQueueStaffFormData) => {
     setLoading(true);
@@ -82,7 +123,13 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
           : isAdditionalPerson && !raw
             ? ''
             : normalizePhoneBR(raw);
-      await onJoin(data.name, whatsapp, data.serviceId, isStaffMode || isAdditionalPerson);
+      await onJoin(
+        data.name,
+        whatsapp,
+        data.serviceId,
+        isStaffMode || isAdditionalPerson,
+        selectedPetId || undefined
+      );
     } catch (err) {
       setSubmitError(getErrorMessage(err, 'Não foi possível entrar na fila. Tente de novo.'));
     } finally {
@@ -216,6 +263,30 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
             )}
             {errors.serviceId && <p className="mt-1 text-xs text-danger">Selecione um serviço</p>}
           </div>
+
+          {clientPets.length > 0 && (
+            <div>
+              <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-text-secondary">
+                <Paw size={14} /> Pet
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {clientPets.map(pet => (
+                  <button
+                    key={pet.id}
+                    type="button"
+                    onClick={() => setSelectedPetId(prev => (prev === pet.id ? '' : pet.id))}
+                    className={`rounded-xl border px-3 py-1.5 text-xs font-bold transition-colors ${
+                      selectedPetId === pet.id
+                        ? 'border-accent bg-accent/15 text-text-primary'
+                        : 'border-border bg-bg text-text-secondary hover:border-border-strong'
+                    }`}
+                  >
+                    {pet.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="pt-2">
             {submitError && (
