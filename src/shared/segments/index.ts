@@ -36,7 +36,7 @@ export type BusinessSegment =
 
 export type TargetAudience = 'MASCULINO' | 'FEMININO' | 'UNISSEX';
 
-export type SegmentConfig = {
+export interface SegmentConfig {
   segment: BusinessSegment;
   firstClass: boolean;
   labels: Record<SegmentLabelKey, string>;
@@ -50,7 +50,13 @@ export type SegmentConfig = {
   cardDescription: string;
   /** Texto do segmented control de público. */
   audienceQuestion: string;
-};
+  /**
+   * Resumo mostrado embaixo das opções depois da escolha ("Vamos preparar…").
+   * Só do lado do front: a paridade com o backend compara labels/firstClass/
+   * targetAudience, não este texto.
+   */
+  pickSummary: string;
+}
 
 export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
   BARBERSHOP: {
@@ -59,6 +65,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     icon: 'Scissors',
     cardDescription: 'Cortes, barba e atendimento por fila.',
     audienceQuestion: 'Quem você atende?',
+    pickSummary: 'Vamos preparar serviços, textos e horários para barbearias.',
     labels: {
       segmentLabel: 'Barbearia',
       shopNoun: 'barbearia',
@@ -81,6 +88,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     icon: 'Sparkles',
     cardDescription: 'Corte, coloração e tratamento com hora marcada.',
     audienceQuestion: 'Quem você atende?',
+    pickSummary: 'Vamos preparar serviços, textos e horários para salões de cabelo.',
     labels: {
       segmentLabel: 'Salão de cabelo',
       shopNoun: 'salão',
@@ -103,6 +111,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     icon: 'Gem',
     cardDescription: 'Manicure, pedicure, gel e nail art.',
     audienceQuestion: 'Quem você atende?',
+    pickSummary: 'Vamos preparar serviços, textos e horários para estúdios de unhas.',
     labels: {
       segmentLabel: 'Manicure e nails',
       shopNoun: 'studio',
@@ -125,6 +134,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     icon: 'Droplets',
     cardDescription: 'Banho, tosa e cuidados para pets.',
     audienceQuestion: 'Quem você atende?',
+    pickSummary: 'Vamos preparar serviços, textos e horários para petshops.',
     labels: {
       segmentLabel: 'Petshop',
       shopNoun: 'petshop',
@@ -147,6 +157,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     icon: 'Smile',
     cardDescription: 'Estética facial e corporal.',
     audienceQuestion: 'Quem você atende?',
+    pickSummary: 'Vamos preparar serviços, textos e horários para studios de beleza.',
     labels: {
       segmentLabel: 'Studio de beleza',
       shopNoun: 'studio',
@@ -169,6 +180,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     icon: 'Eye',
     cardDescription: 'Extensão de cílios e design de sobrancelha.',
     audienceQuestion: 'Quem você atende?',
+    pickSummary: 'Vamos preparar serviços, textos e horários para estúdios de cílios e sobrancelhas.',
     labels: {
       segmentLabel: 'Cílios e sobrancelhas',
       shopNoun: 'studio',
@@ -191,6 +203,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     icon: 'Paintbrush',
     cardDescription: 'Protocolos de estética.',
     audienceQuestion: 'Quem você atende?',
+    pickSummary: 'Vamos preparar serviços, textos e horários para clínicas de estética.',
     labels: {
       segmentLabel: 'Estética',
       shopNoun: 'estética',
@@ -213,6 +226,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     icon: 'Coffee',
     cardDescription: 'Massagem e relaxamento.',
     audienceQuestion: 'Quem você atende?',
+    pickSummary: 'Vamos preparar serviços, textos e horários para spas.',
     labels: {
       segmentLabel: 'Spa',
       shopNoun: 'spa',
@@ -235,6 +249,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     icon: 'Briefcase',
     cardDescription: 'Não se encaixa nas opções acima.',
     audienceQuestion: 'Quem você atende?',
+    pickSummary: 'Você pode ajustar serviços e textos depois, nas configurações.',
     labels: {
       segmentLabel: 'Outro',
       shopNoun: 'estabelecimento',

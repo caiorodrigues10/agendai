@@ -208,6 +208,8 @@ describe('LoginPage (usabilidade)', () => {
     fireEvent.change(screen.getByPlaceholderText('(11) 99999-9999'), {
       target: { value: '(11) 99999-9999' },
     });
+    // Segmento é obrigatório no cadastro — sem escolher, o form não avança.
+    fireEvent.click(screen.getByRole('radio', { name: /barbearia/i }));
     fireEvent.change(screen.getByPlaceholderText('São Paulo'), {
       target: { value: 'São Paulo' },
     });

@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { authStorage } from '../infra/authStorage';
 import { authApi } from '../infra/authApi';
 import { Logo } from '../components/ui/Logo';
+import { SegmentPicker } from '../components/domain/SegmentPicker';
 import { PasswordInput } from '../components/ui/PasswordInput';
 import { Toast } from '../components/ui/Toast';
 import { ConsentCheckbox } from '../components/ui/ConsentCheckbox';
@@ -406,6 +407,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       cpf: '',
       barbershopName: '',
       whatsapp: '',
+      businessSegment: undefined,
+      targetAudience: null,
       address: '',
       city: '',
       cep: '',
@@ -659,6 +662,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
             cpf,
             barbershopName: data.barbershopName.trim(),
             whatsapp: normalizePhoneBR(data.whatsapp),
+            businessSegment: data.businessSegment,
+            targetAudience: data.targetAudience,
             address:
               [
                 data.address?.trim(),
@@ -684,6 +689,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
             cpf,
             barbershopName: data.barbershopName.trim(),
             whatsapp: normalizePhoneBR(data.whatsapp),
+            businessSegment: data.businessSegment,
+            targetAudience: data.targetAudience,
             address: [
               data.address?.trim(),
               data.addressNumber?.trim() ? `nº ${data.addressNumber.trim()}` : null,
@@ -752,6 +759,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
         cpf: '',
         barbershopName: '',
         whatsapp: '',
+        businessSegment: undefined,
+        targetAudience: null,
         address: '',
         city: '',
         cnpj: '',
@@ -1200,6 +1209,25 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                       <p className="text-[11px] text-text-muted text-center leading-relaxed pb-1">
                         Quase lá — conte um pouco sobre o salão.
                       </p>
+
+                      <SegmentPicker
+                        value={registerForm.watch('businessSegment')}
+                        audience={registerForm.watch('targetAudience')}
+                        onChange={segment =>
+                          registerForm.setValue('businessSegment', segment, {
+                            shouldValidate: true,
+                          })
+                        }
+                        onAudienceChange={audience =>
+                          registerForm.setValue('targetAudience', audience, {
+                            shouldValidate: true,
+                          })
+                        }
+                        error={
+                          registerForm.formState.errors.businessSegment?.message ??
+                          registerForm.formState.errors.targetAudience?.message
+                        }
+                      />
 
                       <Field
                         label="Nome do salão"

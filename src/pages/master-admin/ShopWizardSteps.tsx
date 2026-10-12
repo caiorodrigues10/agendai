@@ -1,37 +1,76 @@
 import React from 'react';
 import { z } from 'zod';
-import type { UseFormGetValues, UseFormRegister } from 'react-hook-form';
+import type {
+  UseFormGetValues,
+  UseFormRegister,
+  UseFormSetValue,
+  UseFormWatch,
+} from 'react-hook-form';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR } from '../../components/ui/Field';
 import { SectionError } from '../../components/patterns';
+import { SegmentPicker } from '../../components/domain/SegmentPicker';
+import {
+  ALL_SEGMENTS,
+  AUDIENCE_OPTIONS,
+  audienceAppliesTo,
+  getSegmentConfig,
+  type BusinessSegment,
+  type TargetAudience,
+} from '../../shared/segments';
 import type { Plan } from '../../infra/plansApi';
 
-export const shopSchema = z.object({
-  name: z.string().trim().min(2, 'Informe o nome do salão.'),
-  whatsapp: z
-    .string()
-    .trim()
-    .min(10, 'Informe o WhatsApp com DDD.')
-    .max(20, 'WhatsApp muito longo.')
-    .regex(/^[0-9()+\-\s]+$/, 'Use apenas números, parênteses, +, - ou espaço.'),
-  cnpj: z
-    .string()
-    .trim()
-    .regex(/^$|^[0-9]{14}$/, 'O CNPJ deve ter 14 dígitos, sem pontuação.'),
-  address: z.string().trim().max(500, 'Endereço muito longo.').optional(),
-  active: z.boolean(),
-  ownerName: z.string().trim().min(2, 'Informe o nome do dono.'),
-  ownerEmail: z
-    .string()
-    .trim()
-    .min(1, 'Informe o e-mail do dono.')
-    .email('E-mail inválido.'),
-  planId: z.string().min(1, 'Selecione um plano.'),
-  trialDays: z.coerce
-    .number({ invalid_type_error: 'Informe os dias de trial.' })
-    .int('Informe um número inteiro de dias.')
-    .min(1, 'Trial mínimo: 1 dia.')
-    .max(60, 'Trial máximo: 60 dias.'),
-});
+// Derivados do config central — mesma fonte do cadastro do dono (schemas.ts).
+const businessSegmentEnum = z.enum(
+  ALL_SEGMENTS as [BusinessSegment, ...BusinessSegment[]],
+  { errorMap: () => ({ message: 'Selecione o tipo do negócio.' }) }
+);
+const targetAudienceEnum = z.enum(
+  AUDIENCE_OPTIONS.map(option => option.value) as [TargetAudience, ...TargetAudience[]]
+);
+
+export const shopSchema = z
+  .object({
+    name: z.string().trim().min(2, 'Informe o nome do salão.'),
+    whatsapp: z
+      .string()
+      .trim()
+      .min(10, 'Informe o WhatsApp com DDD.')
+      .max(20, 'WhatsApp muito longo.')
+      .regex(/^[0-9()+\-\s]+$/, 'Use apenas números, parênteses, +, - ou espaço.'),
+    cnpj: z
+      .string()
+      .trim()
+      .regex(/^$|^[0-9]{14}$/, 'O CNPJ deve ter 14 dígitos, sem pontuação.'),
+    address: z.string().trim().max(500, 'Endereço muito longo.').optional(),
+    active: z.boolean(),
+    businessSegment: businessSegmentEnum,
+    targetAudience: targetAudienceEnum.nullable().optional(),
+    ownerName: z.string().trim().min(2, 'Informe o nome do dono.'),
+    ownerEmail: z
+      .string()
+      .trim()
+      .min(1, 'Informe o e-mail do dono.')
+      .email('E-mail inválido.'),
+    planId: z.string().min(1, 'Selecione um plano.'),
+    trialDays: z.coerce
+      .number({ invalid_type_error: 'Informe os dias de trial.' })
+      .int('Informe um número inteiro de dias.')
+      .min(1, 'Trial mínimo: 1 dia.')
+      .max(60, 'Trial máximo: 60 dias.'),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      data.targetAudience &&
+      data.businessSegment &&
+      !audienceAppliesTo(data.businessSegment)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['targetAudience'],
+        message: 'Público não se aplica ao segmento escolhido.',
+      });
+    }
+  });
 
 export type ShopFormData = z.infer<typeof shopSchema>;
 
@@ -39,7 +78,7 @@ export const STEP_TITLES = ['Salão', 'Endereço e ajustes', 'Dono', 'Plano e tr
 
 /** Campos validados ao sair de cada etapa. */
 export const STEP_FIELDS: (keyof ShopFormData)[][] = [
-  ['name', 'whatsapp', 'cnpj'],
+  ['name', 'whatsapp', 'businessSegment', 'targetAudience', 'cnpj'],
   ['address'],
   ['ownerName', 'ownerEmail'],
   ['planId', 'trialDays'],
@@ -70,9 +109,12 @@ interface StepProps {
   errors: Partial<Record<keyof ShopFormData, { message?: string }>>;
   register: UseFormRegister<ShopFormData>;
   getValues: UseFormGetValues<ShopFormData>;
+  /** Para controles fora do padrão register (cards de segmento). */
+  setValue: UseFormSetValue<ShopFormData>;
+  watch: UseFormWatch<ShopFormData>;
 }
 
-export const ShopStep: React.FC<StepProps> = ({ errors, register }) => (
+export const ShopStep: React.FC<StepProps> = ({ errors, register, setValue, watch }) => (
   <>
     <Field label="Nome do salão" error={errors.name?.message}>
       <input
@@ -91,6 +133,17 @@ export const ShopStep: React.FC<StepProps> = ({ errors, register }) => (
         {...register('whatsapp')}
       />
     </Field>
+    <SegmentPicker
+      value={watch('businessSegment')}
+      audience={watch('targetAudience')}
+      onChange={segment =>
+        setValue('businessSegment', segment, { shouldValidate: true, shouldDirty: true })
+      }
+      onAudienceChange={audience =>
+        setValue('targetAudience', audience, { shouldValidate: true, shouldDirty: true })
+      }
+      error={errors.businessSegment?.message ?? errors.targetAudience?.message}
+    />
     <Field label="CNPJ (opcional)" hint="14 dígitos, sem pontuação." error={errors.cnpj?.message}>
       <input
         type="text"
@@ -215,6 +268,8 @@ export const WizardFormBody: React.FC<WizardFormBodyProps> = ({
   errors,
   register,
   getValues,
+  setValue,
+  watch,
   activeState,
   onActiveChange,
   submitError,
@@ -225,22 +280,42 @@ export const WizardFormBody: React.FC<WizardFormBodyProps> = ({
 }) => (
   <form id="shop-wizard-form" onSubmit={onSubmit} noValidate className="space-y-4">
     {submitError && <SectionError message={submitError} />}
-    {step === 0 && <ShopStep errors={errors} register={register} getValues={getValues} />}
+    {step === 0 && (
+      <ShopStep
+        errors={errors}
+        register={register}
+        getValues={getValues}
+        setValue={setValue}
+        watch={watch}
+      />
+    )}
     {step === 1 && (
       <AddressStep
         errors={errors}
         register={register}
         getValues={getValues}
+        setValue={setValue}
+        watch={watch}
         activeState={activeState}
         onActiveChange={onActiveChange}
       />
     )}
-    {step === 2 && <OwnerStep errors={errors} register={register} getValues={getValues} />}
+    {step === 2 && (
+      <OwnerStep
+        errors={errors}
+        register={register}
+        getValues={getValues}
+        setValue={setValue}
+        watch={watch}
+      />
+    )}
     {step === 3 && (
       <PlanStep
         errors={errors}
         register={register}
         getValues={getValues}
+        setValue={setValue}
+        watch={watch}
         plans={plans}
         plansError={plansError}
       />
@@ -250,6 +325,8 @@ export const WizardFormBody: React.FC<WizardFormBodyProps> = ({
         errors={errors}
         register={register}
         getValues={getValues}
+        setValue={setValue}
+        watch={watch}
         activeState={activeState}
         planName={planName}
       />
@@ -259,17 +336,26 @@ export const WizardFormBody: React.FC<WizardFormBodyProps> = ({
 
 export const ReviewStep: React.FC<StepProps & { activeState: boolean; planName: string }> = ({
   getValues,
+  watch,
   activeState,
   planName,
-}) => (
-  <dl className="space-y-2 rounded-xl border border-border bg-surface-2 p-4 text-sm">
-    <ReviewRow label="Nome" value={getValues('name')} />
-    <ReviewRow label="WhatsApp" value={getValues('whatsapp')} />
-    <ReviewRow label="CNPJ" value={getValues('cnpj') || '—'} />
-    <ReviewRow label="Endereço" value={getValues('address') || '—'} />
-    <ReviewRow label="Dono" value={`${getValues('ownerName')} · ${getValues('ownerEmail')}`} />
-    <ReviewRow label="Plano" value={planName} />
-    <ReviewRow label="Trial" value={`${getValues('trialDays')} dias`} />
-    <ReviewRow label="Status" value={activeState ? 'Ativo' : 'Inativo'} />
-  </dl>
-);
+}) => {
+  const segment = watch('businessSegment');
+  const audience = watch('targetAudience');
+  const config = getSegmentConfig(segment);
+  const audienceLabel = AUDIENCE_OPTIONS.find(o => o.value === audience)?.label;
+  return (
+    <dl className="space-y-2 rounded-xl border border-border bg-surface-2 p-4 text-sm">
+      <ReviewRow label="Nome" value={getValues('name')} />
+      <ReviewRow label="WhatsApp" value={getValues('whatsapp')} />
+      <ReviewRow label="Tipo" value={config.labels.segmentLabel} />
+      <ReviewRow label="Público" value={audienceLabel ?? '—'} />
+      <ReviewRow label="CNPJ" value={getValues('cnpj') || '—'} />
+      <ReviewRow label="Endereço" value={getValues('address') || '—'} />
+      <ReviewRow label="Dono" value={`${getValues('ownerName')} · ${getValues('ownerEmail')}`} />
+      <ReviewRow label="Plano" value={planName} />
+      <ReviewRow label="Trial" value={`${getValues('trialDays')} dias`} />
+      <ReviewRow label="Status" value={activeState ? 'Ativo' : 'Inativo'} />
+    </dl>
+  );
+};

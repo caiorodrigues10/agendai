@@ -1,4 +1,5 @@
 import { apiClient } from './apiClient';
+import type { BusinessSegment, TargetAudience } from '@/shared/segments';
 
 export interface AuthUser {
   id: string;
@@ -26,6 +27,10 @@ export interface RegisterPayload {
   cpf: string;
   barbershopName: string;
   whatsapp: string;
+  /** Obrigatório no form; opcional na API (compat com cliente antigo). */
+  businessSegment?: BusinessSegment;
+  /** Público atendido. Em PETSHOP não se aplica e o backend recusa. */
+  targetAudience?: TargetAudience | null;
   address?: string;
   city?: string;
   latitude?: number;

@@ -1,6 +1,7 @@
 import { apiClient, apiFetch } from './apiClient';
 import { authStorage } from './authStorage';
 import { buildQuery } from '../utils/query';
+import type { BusinessSegment, TargetAudience } from '@/shared/segments';
 
 export type DashboardPeriod =
   'day' | 'week' | '1m' | '3m' | '6m' | '12m' | '1y' | '2y' | '3y' | '5y';
@@ -425,6 +426,8 @@ export const adminApi = {
     cnpj?: string | null;
     address?: string;
     active?: boolean;
+    businessSegment?: BusinessSegment;
+    targetAudience?: TargetAudience | null;
     owner?: { name: string; email: string };
     planId?: string;
     trialDays?: number;

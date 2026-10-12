@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import type { UseFormGetValues, UseFormSetValue } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LuCheck, LuLoader } from 'react-icons/lu';
 import { ModalShell } from '../../components/patterns/ModalShell';
@@ -24,6 +25,8 @@ const DEFAULT_VALUES: ShopFormData = {
   cnpj: '',
   address: '',
   active: true,
+  businessSegment: 'BARBERSHOP',
+  targetAudience: 'MASCULINO',
   ownerName: '',
   ownerEmail: '',
   planId: '',
@@ -36,28 +39,13 @@ export interface ShopCreateWizardProps {
   onCreated: (shop: BarbershopListItem) => void;
 }
 
-export const ShopCreateWizard: React.FC<ShopCreateWizardProps> = ({ open, onClose, onCreated }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [step, setStep] = useState(0);
-  const [created, setCreated] = useState<CreatedState | null>(null);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [activeState, setActiveState] = useState(true);
+/** Carrega os planos no mount e pré-seleciona o primeiro quando não há escolha. */
+function useInitialPlans(
+  getValues: UseFormGetValues<ShopFormData>,
+  setValue: UseFormSetValue<ShopFormData>
+) {
   const [plans, setPlans] = useState<Plan[] | null>(null);
   const [plansError, setPlansError] = useState<string | null>(null);
-
-  const {
-    register,
-    handleSubmit,
-    trigger,
-    getValues,
-    setValue,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<ShopFormData>({
-    resolver: zodResolver(shopSchema),
-    defaultValues: DEFAULT_VALUES,
-  });
 
   useEffect(() => {
     let active = true;
@@ -75,6 +63,33 @@ export const ShopCreateWizard: React.FC<ShopCreateWizardProps> = ({ open, onClos
       active = false;
     };
   }, [getValues, setValue]);
+
+  return { plans, plansError };
+}
+
+export const ShopCreateWizard: React.FC<ShopCreateWizardProps> = ({ open, onClose, onCreated }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [step, setStep] = useState(0);
+  const [created, setCreated] = useState<CreatedState | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [activeState, setActiveState] = useState(true);
+
+  const {
+    register,
+    handleSubmit,
+    trigger,
+    getValues,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ShopFormData>({
+    resolver: zodResolver(shopSchema),
+    defaultValues: DEFAULT_VALUES,
+  });
+
+  const { plans, plansError } = useInitialPlans(getValues, setValue);
 
   const resetWizard = () => {
     reset(DEFAULT_VALUES);
@@ -109,6 +124,8 @@ export const ShopCreateWizard: React.FC<ShopCreateWizardProps> = ({ open, onClos
         cnpj: data.cnpj ? data.cnpj.replace(/\D/g, '') : null,
         address: data.address || undefined,
         active: data.active,
+        businessSegment: data.businessSegment,
+        targetAudience: data.targetAudience,
         owner: { name: data.ownerName, email: data.ownerEmail },
         planId: data.planId,
         trialDays: data.trialDays,
@@ -174,6 +191,8 @@ export const ShopCreateWizard: React.FC<ShopCreateWizardProps> = ({ open, onClos
             errors={errors}
             register={register}
             getValues={getValues}
+            setValue={setValue}
+            watch={watch}
             activeState={activeState}
             onActiveChange={setActiveState}
             submitError={submitError}

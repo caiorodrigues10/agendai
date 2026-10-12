@@ -1,4 +1,20 @@
 import { z } from 'zod';
+import {
+  ALL_SEGMENTS,
+  AUDIENCE_OPTIONS,
+  audienceAppliesTo,
+  type BusinessSegment,
+  type TargetAudience,
+} from '@/shared/segments';
+
+// Derivados do config central: um z.enum listado à mão diverge na primeira
+// vez que um segmento novo entrar (já aconteceu com PETSHOP no backend).
+const businessSegmentEnum = z.enum(
+  ALL_SEGMENTS as [BusinessSegment, ...BusinessSegment[]]
+);
+const targetAudienceEnum = z.enum(
+  AUDIENCE_OPTIONS.map(option => option.value) as [TargetAudience, ...TargetAudience[]]
+);
 
 export const CrmMergeSchema = z.object({
   targetId: z.string().uuid('Selecione o cadastro principal'),
@@ -56,6 +72,12 @@ export const RegisterSchema = z.object({
     .refine(v => isValidCpf(v), { message: 'CPF inválido (dígitos verificadores incorretos)' }),
   barbershopName: z.string().min(3, 'Nome do salão é obrigatório'),
   whatsapp: whatsappRequired,
+  // Obrigatório no formulário: sem segmento o cadastro não avança. O backend
+  // aceita omitido (compat), mas a UI exige — é lá que a regra vive.
+  businessSegment: businessSegmentEnum,
+  // Público só existe em segmentos de beleza; PETSHOP não tem. O backend
+  // também recusa — aqui o erro aparece antes de a requisição sair.
+  targetAudience: targetAudienceEnum.nullable().optional(),
   cnpj: z
     .string()
     .optional()
@@ -87,6 +109,17 @@ export const RegisterSchema = z.object({
     .max(7)
     .optional(),
 }).superRefine((data, ctx) => {
+  if (
+    data.targetAudience &&
+    data.businessSegment &&
+    !audienceAppliesTo(data.businessSegment)
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['targetAudience'],
+      message: 'Público não se aplica ao segmento escolhido.',
+    });
+  }
   if (data.authMethod === 'password') {
     if (!data.password || data.password.length < 6) {
       ctx.addIssue({

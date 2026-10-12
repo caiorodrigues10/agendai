@@ -29,7 +29,7 @@ const backend = path.resolve(
 );
 const parityPath = path.join(backend, 'src/shared/segments/segmentParity.json');
 
-type ParityFile = {
+interface ParityFile {
   labelKeys: string[];
   allSegments: string[];
   firstClassSegments: string[];
@@ -37,7 +37,7 @@ type ParityFile = {
     string,
     { firstClass: boolean; labels: Record<string, string>; targetAudience: { applies: boolean; suggested: string | null } }
   >;
-};
+}
 
 function readParity(): ParityFile {
   return JSON.parse(fs.readFileSync(parityPath, 'utf8'));
