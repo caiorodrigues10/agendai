@@ -134,7 +134,12 @@ export const TicketDetailPage: React.FC = () => {
     <div className="space-y-6 max-w-4xl">
       {/* Header */}
       <div className="flex items-start gap-4">
-        <button type="button" onClick={() => navigate('/master/tickets')} aria-label="Voltar" className="mt-1 p-1 rounded hover:bg-surface-2">
+        <button
+          type="button"
+          onClick={() => navigate('/master/tickets')}
+          aria-label="Voltar para a lista"
+          className="mt-1 p-1 rounded hover:bg-surface-2"
+        >
           <LuArrowLeft size={18} />
         </button>
         <div className="flex-1">

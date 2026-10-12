@@ -33,13 +33,26 @@ export const AdminLayout: React.FC = () => {
     setSidebarOpen(false);
   }, [location.pathname]);
 
+  // Menu lateral aberto também fecha pelo teclado (Escape), já que o fundo
+  // clicável sozinho não alcança quem navega sem mouse.
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSidebarOpen(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [sidebarOpen]);
+
   return (
     <div className="flex h-screen bg-bg text-text-primary overflow-hidden">
       {/* Mobile overlay */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+        <button
+          type="button"
+          aria-label="Fechar menu"
           onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
         />
       )}
 
@@ -62,7 +75,9 @@ export const AdminLayout: React.FC = () => {
               <span className="font-display font-bold text-sm">Agenda Já</span>
             </NavLink>
             <button
+              type="button"
               onClick={() => setSidebarOpen(false)}
+              aria-label="Fechar menu"
               className="md:hidden p-1 rounded hover:bg-surface-2"
             >
               <LuChevronLeft size={18} />
@@ -119,14 +134,17 @@ export const AdminLayout: React.FC = () => {
         {/* Top bar */}
         <header className="flex items-center h-12 px-4 border-b border-border bg-surface/50 backdrop-blur-sm shrink-0">
           <button
+            type="button"
             onClick={() => setSidebarOpen(true)}
+            aria-label="Abrir menu"
             className="md:hidden p-1.5 rounded-lg hover:bg-surface-2 mr-3"
           >
             <LuMenu size={18} />
           </button>
-          <h1 className="text-sm font-medium text-text-secondary">
+          {/* Rótulo fixo do layout: o h1 de cada tela fica no conteúdo (Outlet). */}
+          <p className="text-sm font-medium text-text-secondary">
             Painel Interno
-          </h1>
+          </p>
         </header>
 
         {/* Content */}

@@ -87,6 +87,24 @@ describe('OperationsPage', () => {
     expect(screen.getByText('Nenhuma falha recente de cron.')).toBeInTheDocument();
   });
 
+  it('explica quais fontes causaram o status fora de saudável', async () => {
+    vi.mocked(adminInternalApi.getOperationsHealth).mockResolvedValue({
+      success: true,
+      data: {
+        ...health,
+        status: 'UNHEALTHY',
+        statusReasons: [
+          { source: 'cron', status: 'UNHEALTHY', message: '6 falhas de cron nas últimas 24h' },
+        ],
+      },
+    } as never);
+
+    renderPage();
+
+    expect(await screen.findByText('Indisponível')).toBeInTheDocument();
+    expect(screen.getByText(/6 falhas de cron nas últimas 24h/)).toBeInTheDocument();
+  });
+
   it('mostra estado de erro com opção de tentar novamente', async () => {
     vi.mocked(adminInternalApi.getOperationsHealth).mockRejectedValue(new Error('boom'));
 

@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   LuSearch, LuPlus, LuLoader, LuTriangleAlert, LuArrowRight, LuCalendar, LuFilter
 } from 'react-icons/lu';
 import { adminInternalApi, Task } from '../../infra/adminInternalApi';
+import { Toast } from '../../components/ui/Toast';
+import { TaskFormDialog } from './TaskFormDialog';
 
 const PRIORITY_COLORS: Record<string, string> = {
   URGENT: 'text-danger bg-danger/10', HIGH: 'text-warning bg-warning/10',
@@ -23,16 +25,19 @@ const STATUS_LABELS: Record<string, string> = {
 
 export const TasksPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [meta, setMeta] = useState({ total: 0, page: 1, limit: 25, totalPages: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState(searchParams.get('search') ?? '');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const page = Number(searchParams.get('page') ?? 1);
   const status = searchParams.get('status') ?? '';
   const priority = searchParams.get('priority') ?? '';
+  const isNew = location.pathname === '/master/tasks/new';
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -143,6 +148,18 @@ export const TasksPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      <TaskFormDialog
+        open={isNew}
+        onClose={() => navigate('/master/tasks')}
+        onSaved={() => {
+          setToast({ message: 'Tarefa criada.', type: 'success' });
+          navigate('/master/tasks');
+          void load();
+        }}
+        onError={(message) => setToast({ message, type: 'error' })}
+      />
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };

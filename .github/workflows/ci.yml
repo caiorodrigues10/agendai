@@ -14,7 +14,7 @@ jobs:
       - run: npm run test:contract
       - name: API contract against sibling backend
         run: |
-          if [ -d "$GITHUB_WORKSPACE/../agendai-back-end" ] || [ -d "$GITHUB_WORKSPACE/agendai-back-end" ]; then
+          if [ -d "$GITHUB_WORKSPACE/../backend" ] || [ -d "$GITHUB_WORKSPACE/backend" ]; then
             npm run contract:check
           else
             echo "Backend sibling absent in this checkout; parser covered by test:contract. Run contract:check via verify:delivery locally."

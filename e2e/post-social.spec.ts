@@ -5,7 +5,7 @@ import path from 'node:path';
 const salonId = '11111111-1111-4111-8111-111111111111';
 const postId = '22222222-2222-4222-8222-222222222222';
 const videoId = '33333333-3333-4333-8333-333333333333';
-const photo = readFileSync(path.resolve('../agendai-back-end/src/modules/posts/assets/salon-editorial.png'));
+const photo = readFileSync(path.resolve('../backend/src/modules/posts/assets/salon-editorial.png'));
 const now = Date.now();
 const posts = [
   { id: postId, barbershopId: salonId, shopName: 'Studio Aurora', type: 'announcement', title: 'Seu momento de cuidado', content: 'Conheça nosso espaço. Imagem ilustrativa.', imageUrl: '/social-fixtures/salon.png', format: 'portrait', status: 'published', createdAt: now, publishedAt: now, likes: 12, commentsCount: 1 },

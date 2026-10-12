@@ -71,7 +71,7 @@ export const WorkSummaryPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">Meu trabalho</h1>
-        <button onClick={load} className="p-2 rounded-lg hover:bg-surface-2 text-text-muted">
+        <button onClick={load} title="Atualizar" className="p-2 rounded-lg hover:bg-surface-2 text-text-muted">
           <LuRefreshCcw size={16} />
         </button>
       </div>
