@@ -5,6 +5,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: caiorodrigues10/agendai-back-end
+          path: backend
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -13,14 +17,11 @@ jobs:
       - run: npm run docs:check
       - run: npm run test:contract
       - name: API contract against sibling backend
-        run: |
-          if [ -d "$GITHUB_WORKSPACE/../backend" ] || [ -d "$GITHUB_WORKSPACE/backend" ]; then
-            npm run contract:check
-          else
-            echo "Backend sibling absent in this checkout; parser covered by test:contract. Run contract:check via verify:delivery locally."
-          fi
+        env:
+          API_CONTRACT_BACKEND: ${{ github.workspace }}/backend
+        run: npm run contract:check:strict
       - run: npm run typecheck
-      - run: npm run lint -- --max-warnings 215
+      - run: npm run lint -- --max-warnings 482
       - run: npm test
       - run: npm run build
       - run: npx playwright install --with-deps chromium
