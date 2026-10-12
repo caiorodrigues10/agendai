@@ -39,7 +39,12 @@ jobs:
         run: npm run contract:check:strict
       - run: npm run typecheck
       - run: npm run lint -- --max-warnings 482
+      # ANTES de `npm test`: o projeto `storybook` do vitest.config.ts abre
+      # Chromium de verdade (browser.enabled + @vitest/browser-playwright).
+      # Instalar depois reprovava com
+      # "browserType.launch: Executable doesn't exist at
+      #  .../chromium_headless_shell-1234/...".
+      - run: npx playwright install --with-deps chromium
       - run: npm test
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
