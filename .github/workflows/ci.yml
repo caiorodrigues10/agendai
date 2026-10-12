@@ -3,6 +3,11 @@ on: [push, pull_request]
 jobs:
   frontend:
     runs-on: ubuntu-latest
+    env:
+      # check-api-contract.mjs resolve o backend no IMPORT (nao so no run), e o
+      # default e `../backend` — fora do workspace no Actions. Apontar para o
+      # checkout irmago cobre tanto test:contract quanto contract:check:strict.
+      API_CONTRACT_BACKEND: ${{ github.workspace }}/backend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
@@ -17,8 +22,6 @@ jobs:
       - run: npm run docs:check
       - run: npm run test:contract
       - name: API contract against sibling backend
-        env:
-          API_CONTRACT_BACKEND: ${{ github.workspace }}/backend
         run: npm run contract:check:strict
       - run: npm run typecheck
       - run: npm run lint -- --max-warnings 482
