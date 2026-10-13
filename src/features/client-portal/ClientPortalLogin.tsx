@@ -83,7 +83,7 @@ export const ClientPortalLogin: React.FC<ClientPortalLoginProps> = ({ onAuthenti
               type="text"
               value={name}
               onChange={e => { setName(e.target.value); setError(''); }}
-              placeholder="Como o salão deve te chamar"
+              placeholder="Como o estabelecimento deve te chamar"
               className="w-full rounded-xl border border-border bg-bg py-3 px-4 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </div>

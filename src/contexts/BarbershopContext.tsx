@@ -121,7 +121,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
               manualStatus?: ManualShopStatus;
               openState?: ShopOpenState;
             } | null>,
-            'Falha ao carregar configurações do salão',
+            'Falha ao carregar configurações do estabelecimento',
             null
           ),
           settle(

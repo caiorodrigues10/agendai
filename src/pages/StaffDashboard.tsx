@@ -332,7 +332,7 @@ export const StaffDashboard: React.FC = () => {
                       </p>
                     </div>
                     <div className="rounded-lg bg-surface-2 p-3">
-                      <p className="text-xs text-text-muted">Status do salão</p>
+                      <p className="text-xs text-text-muted">Status do estabelecimento</p>
                       <p className={`text-sm font-bold ${isOpen ? 'text-success' : 'text-danger'}`}>
                         {isOpen ? 'Aberto' : 'Fechado'}
                       </p>
@@ -482,7 +482,7 @@ export const StaffDashboard: React.FC = () => {
 
           {activeTab === 'appointments' && !settings && (
             <div className="text-center py-12 bg-surface rounded-xl border border-border border-dashed">
-              <p className="text-text-muted">Carregando configurações do salão...</p>
+              <p className="text-text-muted">Carregando configurações do estabelecimento...</p>
             </div>
           )}
 
@@ -492,7 +492,7 @@ export const StaffDashboard: React.FC = () => {
 
           {activeTab === 'clients' && !settings && (
             <div className="text-center py-12 bg-surface rounded-xl border border-border border-dashed">
-              <p className="text-text-muted">Carregando configurações do salão...</p>
+              <p className="text-text-muted">Carregando configurações do estabelecimento...</p>
             </div>
           )}
 

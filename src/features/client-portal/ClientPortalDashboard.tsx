@@ -143,8 +143,8 @@ export const ClientPortalDashboard: React.FC = () => {
           {salons.length === 0 && (
             <div className="rounded-2xl border border-dashed border-border bg-surface p-6 text-center">
               <Store size={32} className="mx-auto text-text-muted" />
-              <p className="mt-2 text-sm text-text-secondary">Nenhum salão vinculado ainda.</p>
-              <p className="mt-1 text-xs text-text-muted">Peça ao salão para vincular seu número.</p>
+              <p className="mt-2 text-sm text-text-secondary">Nenhum estabelecimento vinculado ainda.</p>
+              <p className="mt-1 text-xs text-text-muted">Peça ao estabelecimento para vincular seu número.</p>
             </div>
           )}
         </div>
@@ -155,7 +155,7 @@ export const ClientPortalDashboard: React.FC = () => {
         <div className="space-y-3">
           {salons.length === 0 && (
             <div className="rounded-2xl border border-dashed border-border bg-surface p-6 text-center">
-              <p className="text-sm text-text-secondary">Nenhum salão vinculado.</p>
+              <p className="text-sm text-text-secondary">Nenhum estabelecimento vinculado.</p>
             </div>
           )}
           {salons.map(salon => (
@@ -168,7 +168,7 @@ export const ClientPortalDashboard: React.FC = () => {
                 <p className="mt-0.5 text-xs text-text-muted">
                   Status: <span className={salon.status === 'CONFIRMED' ? 'text-success' : 'text-warning'}>{salon.status}</span>
                 </p>
-                {salon.salonClientName && <p className="text-xs text-text-muted">Nome no salão: {salon.salonClientName}</p>}
+                {salon.salonClientName && <p className="text-xs text-text-muted">Nome no estabelecimento: {salon.salonClientName}</p>}
               </div>
               <button
                 onClick={() => void handleUnlink(salon.id)}

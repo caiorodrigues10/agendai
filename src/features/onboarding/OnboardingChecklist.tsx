@@ -10,6 +10,7 @@ import {
 import { SectionError } from '../../components/patterns';
 import { barbershopApi } from '../../infra/barbershopApi';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { ALL_SEGMENTS, getSegmentConfig } from '../../shared/segments';
 
 /**
  * OnboardingChecklist — Wizard-style onboarding.
@@ -55,11 +56,16 @@ const TITLES: Record<string, string> = {
   PUBLIC_LINK: 'Coloque seu espaço no ar',
 };
 
+/** Cinco exemplos do catálogo de segmentos, na ordem do cadastro. */
+const SEGMENT_EXAMPLES = ALL_SEGMENTS.slice(0, 5)
+  .map(segment => getSegmentConfig(segment).labels.segmentLabel)
+  .join(', ');
+
 const DESCRIPTIONS: Record<string, string> = {
   PROFILE: 'Nome, endereço e WhatsApp do seu espaço.',
-  // Lista dos 4 segmentos do cadastro — o vocabulário por segmento entra nas
-  // telas, não no item de onboarding (que é pré-escolha).
-  SEGMENT: 'Barbearia, salão, petshop ou nails — isso ajuda a personalizar sua experiência.',
+  // Exemplos vêm do config central: a lista cresce sozinha quando um
+  // segmento novo entra (o vocabulário em si fica nas telas).
+  SEGMENT: `${SEGMENT_EXAMPLES} ou qualquer outro tipo — isso ajuda a personalizar sua experiência.`,
   SCHEDULE: 'Defina os dias e horários em que você atende.',
   SERVICES: 'Crie os serviços que seus clientes podem agendar.',
   OPERATION_MODE: 'Fila, agenda ou ambos — como seus clientes serão atendidos.',
@@ -155,7 +161,7 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
             <Check size={28} />
           </div>
           <h2 className="mt-4 text-2xl font-black text-text-primary">
-            {shopName || 'Seu salão'} está no ar!
+            {shopName || 'Seu estabelecimento'} está no ar!
           </h2>
           <p className="mt-2 text-sm text-text-secondary">
             Tudo pronto para receber seus primeiros clientes.
@@ -219,7 +225,7 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
               Primeiro acesso
             </p>
             <h1 className="mt-1 text-xl font-black text-text-primary">
-              Vamos colocar {shopName || 'seu salão'} no ar
+              Vamos colocar {shopName || 'seu estabelecimento'} no ar
             </h1>
           </div>
         </div>

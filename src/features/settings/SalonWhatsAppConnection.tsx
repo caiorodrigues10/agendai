@@ -90,7 +90,7 @@ export const SalonWhatsAppConnection: React.FC<{
       setError(
         platformWhatsAppUnavailable(err)
           ? 'WhatsApp da plataforma indisponível.'
-          : getErrorMessage(err, 'Não foi possível consultar o WhatsApp do salão.')
+          : getErrorMessage(err, 'Não foi possível consultar o WhatsApp do estabelecimento.')
       );
       return null;
     }
@@ -194,7 +194,7 @@ export const SalonWhatsAppConnection: React.FC<{
       <h3 className="text-lg font-bold text-text-primary mb-1">WhatsApp</h3>
 
       <div className="border-2 border-accent/40 rounded-xl p-5 mb-4">
-        <h4 className="text-sm font-bold text-text-primary mb-1">WhatsApp do salão</h4>
+        <h4 className="text-sm font-bold text-text-primary mb-1">WhatsApp do estabelecimento</h4>
         <p className="text-sm text-text-secondary mb-4">
           Este é o número que <span className="font-semibold text-text-primary">envia</span> as
           mensagens (fila, lembretes, posts).

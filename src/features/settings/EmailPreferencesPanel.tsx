@@ -34,7 +34,7 @@ const CATEGORIES: CategoryDef[] = [
   },
   {
     key: 'OPERATION',
-    label: 'Operação do salão',
+    label: 'Operação do estabelecimento',
     description: 'Resumo diário, cancelamentos e remarcações urgentes.',
     examples: ['Resumo do dia (agenda)', 'Cancelamento urgente', 'Reagendamento urgente'],
     canDisable: true,
