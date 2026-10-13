@@ -62,6 +62,38 @@ export const SEGMENT_GROUP_LABELS: Record<SegmentGroup, string> = {
 /** Ficha auxiliar do cliente sugerida pelo segmento (pet reusa o MVP de pets). */
 export type SegmentAuxiliaryProfile = 'pet' | 'vehicle';
 
+/**
+ * Modo de atendimento que o backend já aplica na criação quando o segmento
+ * vem informado: fila só, agenda só ou os dois.
+ */
+export type SegmentOperationMode = 'QUEUE_ONLY' | 'APPOINTMENTS_ONLY' | 'HYBRID';
+
+export interface SegmentCatalogCategory {
+  name: string;
+  icon: string;
+}
+
+export interface SegmentCatalogService {
+  name: string;
+  /** 0 = placeholder: o dono preenche o preço. */
+  price: number;
+  avgTimeMinutes: number;
+  icon: string;
+  categoryName: string;
+}
+
+export interface SegmentCatalog {
+  serviceCategories: SegmentCatalogCategory[];
+  services: SegmentCatalogService[];
+}
+
+export interface SegmentScheduleDay {
+  dayOfWeek: number;
+  isOpen: boolean;
+  openTime: string;
+  closeTime: string;
+}
+
 export interface SegmentConfig {
   segment: BusinessSegment;
   group: SegmentGroup;

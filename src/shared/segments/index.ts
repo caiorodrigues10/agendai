@@ -9,11 +9,17 @@
  * tipos em `./types` — este módulo é a superfície pública.
  */
 import { SEGMENT_CONFIGS, SEGMENT_SEARCH_ALIASES } from './segmentConfigs';
+import { SEGMENT_CATALOGS, SEGMENT_OPERATION_MODES, SEGMENT_SCHEDULE_PRESETS } from './segmentCatalogs';
 import { SEGMENT_GROUP_LABELS } from './types';
 import type { BusinessSegment, SegmentConfig, SegmentGroup, TargetAudience } from './types';
 
 export * from './types';
 export { SEGMENT_CONFIGS } from './segmentConfigs';
+export {
+  SEGMENT_CATALOGS,
+  SEGMENT_OPERATION_MODES,
+  SEGMENT_SCHEDULE_PRESETS,
+} from './segmentCatalogs';
 
 /** Ordem de exibição achatada (grupos + ordem interna), para o radiogroup. */
 export const FIRST_CLASS_SEGMENTS: BusinessSegment[] = [
@@ -97,6 +103,21 @@ export function getSegmentConfig(segment: BusinessSegment | null | undefined): S
 
 export function audienceAppliesTo(segment: BusinessSegment): boolean {
   return getSegmentConfig(segment).targetAudience.applies;
+}
+
+/** Catálogo de serviços do segmento (mesmo dado do backend). */
+export function getSegmentCatalog(segment: BusinessSegment) {
+  return SEGMENT_CATALOGS[segment];
+}
+
+/** Preset de horário sugerido na criação da agenda. */
+export function getSchedulePreset(segment: BusinessSegment) {
+  return SEGMENT_SCHEDULE_PRESETS[segment];
+}
+
+/** Fila, agenda ou ambos — o que o backend aplica quando o segmento vem no cadastro. */
+export function getSuggestedOperationMode(segment: BusinessSegment) {
+  return SEGMENT_OPERATION_MODES[segment];
 }
 
 /**

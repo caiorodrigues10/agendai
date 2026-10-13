@@ -15,6 +15,7 @@
 | `lint` | `eslint src --ext .ts,.tsx` | leitura | `npm install` | Lint |
 | `lint:fix` | `eslint … --fix` | geração | `npm install` | Corrige lint autofixável |
 | `audit:frontend-structure` | `node scripts/audit-frontend-structure.mjs` | leitura | Node | Auditoria estrutural |
+| `segments:mirror` | `node scripts/generateSegmentMirror.mjs` + prettier | geração | backend irmão (`segmentParity.json`) | Reescreve `src/shared/segments/segmentCatalogs.ts` (catálogo, preset de horário e modo sugerido) a partir do JSON publicado pelo backend. Rodar `npm run segments:parity` lá e este aqui depois de mexer em segmentos |
 | `format` | `prettier --write …` | geração | `npm install` | Formata fontes |
 | `format:check` | `prettier --check …` | leitura | `npm install` | Verifica formatação |
 | `docs:check` | `node scripts/check-docs.mjs` | leitura | Node | Valida inventários documentais |

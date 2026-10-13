@@ -6,14 +6,17 @@ import {
   ALL_SEGMENTS,
   AUDIENCE_OPTIONS,
   FIRST_CLASS_SEGMENTS,
+  SEGMENT_CATALOGS,
   SEGMENT_CONFIGS,
   SEGMENT_LABEL_KEYS,
+  SEGMENT_OPERATION_MODES,
+  SEGMENT_SCHEDULE_PRESETS,
   SEGMENTS_BY_GROUP,
   audienceAppliesTo,
   getSegmentConfig,
   segmentSearchText,
 } from './index';
-import { ICON_OPTIONS } from '../../components/ui/DynamicIcon';
+import { ICON_OPTIONS, normalizeIconName } from '../../components/ui/DynamicIcon';
 
 /**
  * Os pacotes são separados (backend/ e frontend/), então a paridade de
@@ -31,18 +34,36 @@ const backend = path.resolve(
 );
 const parityPath = path.join(backend, 'src/shared/segments/segmentParity.json');
 
+interface ParitySegment {
+  group: string;
+  labels: Record<string, string>;
+  targetAudience: { applies: boolean; suggested: string | null };
+  suggestedOperationMode: string;
+  complianceNote: string | null;
+  auxiliaryProfile: string | null;
+  catalog: {
+    serviceCategories: { name: string; icon: string }[];
+    services: {
+      name: string;
+      price: number;
+      avgTimeMinutes: number;
+      icon: string;
+      categoryName: string;
+    }[];
+  };
+  schedulePreset: {
+    dayOfWeek: number;
+    isOpen: boolean;
+    openTime: string;
+    closeTime: string;
+  }[];
+}
+
 interface ParityFile {
   labelKeys: string[];
   allSegments: string[];
   firstClassSegments: string[];
-  segments: Record<
-    string,
-    {
-      group: string;
-      labels: Record<string, string>;
-      targetAudience: { applies: boolean; suggested: string | null };
-    }
-  >;
+  segments: Record<string, ParitySegment>;
 }
 
 function readParity(): ParityFile {
@@ -78,6 +99,82 @@ describe('paridade com o backend', () => {
       expect(config.group, `group de ${segment}`).toBe(mirror.group);
       expect(config.labels, `labels de ${segment}`).toEqual(mirror.labels);
       expect(config.targetAudience, `targetAudience de ${segment}`).toEqual(mirror.targetAudience);
+    }
+  });
+
+  it('tem o mesmo modo sugerido, preset de horário e catálogo do backend', () => {
+    const parity = readParity();
+    for (const segment of ALL_SEGMENTS) {
+      const mirror = parity.segments[segment];
+      expect(mirror, `segmento ${segment} ausente no backend`).toBeDefined();
+      expect(SEGMENT_OPERATION_MODES[segment], `modo de ${segment}`).toBe(
+        mirror.suggestedOperationMode
+      );
+      expect(SEGMENT_SCHEDULE_PRESETS[segment], `schedulePreset de ${segment}`).toEqual(
+        mirror.schedulePreset
+      );
+      expect(SEGMENT_CATALOGS[segment], `catalog de ${segment}`).toEqual(mirror.catalog);
+    }
+  });
+
+  it('complianceNote e auxiliaryProfile espelhados do backend (null = sem)', () => {
+    const parity = readParity();
+    for (const segment of ALL_SEGMENTS) {
+      const mirror = parity.segments[segment];
+      expect(getSegmentConfig(segment).complianceNote ?? null, `complianceNote de ${segment}`).toBe(
+        mirror.complianceNote
+      );
+      expect(getSegmentConfig(segment).auxiliaryProfile ?? null, `auxiliaryProfile de ${segment}`).toBe(
+        mirror.auxiliaryProfile
+      );
+    }
+  });
+
+  it('catálogo do espelho é utilizável: sem duplicatas, horários válidos e ícones existentes', () => {
+    for (const segment of ALL_SEGMENTS) {
+      const { serviceCategories, services } = SEGMENT_CATALOGS[segment];
+      expect(services.length, `${segment}: serviços de exemplo`).toBeGreaterThan(0);
+      expect(serviceCategories.length, `${segment}: categorias`).toBeGreaterThan(0);
+
+      const categoryNames = serviceCategories.map((c) => c.name);
+      expect(new Set(categoryNames).size, `${segment}: categorias duplicadas`).toBe(
+        categoryNames.length
+      );
+      const serviceNames = services.map((s) => s.name);
+      expect(new Set(serviceNames).size, `${segment}: serviços duplicados`).toBe(serviceNames.length);
+
+      for (const category of serviceCategories) {
+        expect(
+          ICON_OPTIONS,
+          `${segment}: ícone de categoria "${category.icon}" fora do DynamicIcon`
+        ).toContain(normalizeIconName(category.icon));
+      }
+      for (const service of services) {
+        expect(
+          categoryNames,
+          `${segment}: categoryName "${service.categoryName}" sem categoria correspondente`
+        ).toContain(service.categoryName);
+        expect(service.avgTimeMinutes, `${segment}: "${service.name}" com duração inválida`).toBeGreaterThan(0);
+        expect(
+          ICON_OPTIONS,
+          `${segment}: ícone "${service.icon}" fora do DynamicIcon`
+        ).toContain(normalizeIconName(service.icon));
+        expect(service.price, `${segment}: "${service.name}" com preço negativo`).toBeGreaterThanOrEqual(0);
+      }
+    }
+  });
+
+  it('preset de horário tem os 7 dias, e nenhum horário aberto invertido', () => {
+    for (const segment of ALL_SEGMENTS) {
+      const preset = SEGMENT_SCHEDULE_PRESETS[segment];
+      expect(preset.map((d) => d.dayOfWeek), `${segment}: dias`).toEqual([0, 1, 2, 3, 4, 5, 6]);
+      expect(
+        preset.some((d) => d.isOpen),
+        `${segment}: preset totalmente fechado`
+      ).toBe(true);
+      for (const day of preset.filter((d) => d.isOpen)) {
+        expect(day.openTime < day.closeTime, `${segment}: dia ${day.dayOfWeek} invertido`).toBe(true);
+      }
     }
   });
 });

@@ -249,7 +249,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar sessões, textos e horários para fisioterapia e quiropraxia.',
     complianceNote:
-      'O sistema organiza agenda e relacionamento. Não é prontuário clínico nem substitui documentação profissional.',
+      'O sistema organiza agenda e relacionamento com clientes. Não é prontuário clínico e não substitui documentação profissional regulada.',
     labels: {
       segmentLabel: 'Fisioterapia e quiropraxia',
       shopNoun: 'consultório',
@@ -274,7 +274,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar consultas, textos e horários para nutrição.',
     complianceNote:
-      'O sistema organiza agenda e relacionamento. Não é prontuário clínico nem substitui documentação profissional.',
+      'O sistema organiza agenda e relacionamento com clientes. Não é prontuário clínico e não substitui documentação profissional regulada.',
     labels: {
       segmentLabel: 'Nutrição',
       shopNoun: 'consultório',
@@ -299,7 +299,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar sessões, textos e horários para psicologia e terapia.',
     complianceNote:
-      'O sistema organiza agenda e relacionamento. Não é prontuário clínico nem substitui documentação profissional.',
+      'O sistema organiza agenda e relacionamento com clientes. Não é prontuário clínico e não substitui documentação profissional regulada.',
     labels: {
       segmentLabel: 'Psicologia e terapia',
       shopNoun: 'consultório',
