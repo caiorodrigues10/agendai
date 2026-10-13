@@ -1,9 +1,17 @@
 import React, { useState, useRef, useEffect, useCallback, useId } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { ZodTypeAny } from 'zod';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { LoginSchema, LoginFormData, RegisterSchema, RegisterFormData } from '../schemas';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import {
+  LoginSchema,
+  LoginFormData,
+  RegisterSchema,
+  RegisterStep1Schema,
+  RegisterStep2Schema,
+  RegisterFormData,
+} from '../schemas';
 import { useAuth } from '../contexts/AuthContext';
 import { authStorage } from '../infra/authStorage';
 import { authApi } from '../infra/authApi';
@@ -51,10 +59,26 @@ import { plansApi, Plan } from '../infra/plansApi';
 import { subscriptionsApi } from '../infra/subscriptionsApi';
 import { needsPaywallAfterAuth } from '../utils/subscriptionPaywall';
 import { TrialExpiredPaywallModal } from '../features/subscription';
+import { RegisterStepper, type RegisterStep } from '../features/auth/register/RegisterStepper';
+import { getSegmentConfig, shopNounPossessive } from '../shared/segments';
 import type { StaffMember } from '../types';
 
 type Tab = 'login' | 'register';
-type RegisterStep = 1 | 2;
+
+const REGISTER_STEP_COPY: Record<RegisterStep, { title: string; subtitle: string }> = {
+  1: {
+    title: 'Comece pelo seu acesso',
+    subtitle: 'Crie sua conta em poucos minutos. Sem cartão e sem compromisso.',
+  },
+  2: {
+    title: 'Qual é o seu negócio?',
+    subtitle: 'Isso deixa textos, serviços e horários do seu jeito.',
+  },
+  3: {
+    title: 'Agora, os dados do negócio',
+    subtitle: 'Últimos ajustes e sua conta entra no ar.',
+  },
+};
 
 interface LoginPageProps {
   mode?: Tab;
@@ -593,37 +617,75 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
 
   const showRegisterValidationError = () => {
     const errors = registerForm.formState.errors;
-    const first = [
-      errors.ownerName,
-      errors.email,
-      errors.cpf,
-      errors.password,
-      errors.googleIdToken,
-      errors.barbershopName,
-      errors.whatsapp,
-      errors.city,
-      errors.cnpj,
-      errors.termsAccepted,
-      errors.lgpdConsent,
-    ].find(e => e?.message);
+    const first = Object.values(errors).find(e => e?.message);
     showErrorToast(first?.message ?? 'Preencha todos os campos obrigatórios.');
   };
 
-  const goToRegisterStep2 = async () => {
-    const isGoogle = registerForm.getValues('authMethod') === 'google';
-    const ok = await registerForm.trigger(
-      isGoogle ? ['ownerName', 'email', 'cpf'] : ['ownerName', 'email', 'cpf', 'password'],
-    );
-    if (!ok) {
-      showRegisterValidationError();
+  /** Campo → etapa que o exibe: um erro da API leva o usuário de volta pra lá. */
+  const FIELD_STEP: Record<string, RegisterStep> = {
+    ownerName: 1,
+    email: 1,
+    cpf: 1,
+    password: 1,
+    googleIdToken: 1,
+    termsAccepted: 1,
+    lgpdConsent: 1,
+    marketingOptIn: 1,
+    businessSegment: 2,
+    businessSegmentOther: 2,
+    targetAudience: 2,
+    barbershopName: 3,
+    whatsapp: 3,
+    cnpj: 3,
+    address: 3,
+    addressNumber: 3,
+    addressComplement: 3,
+    city: 3,
+    cep: 3,
+  };
+
+  /** Mensagem PT do primeiro campo inválido da etapa (formState ainda não reagiu no mesmo tick). */
+  const stepValidationMessage = (schema: ZodTypeAny) => {
+    try {
+      schema.parse(registerForm.getValues());
+      return 'Preencha todos os campos obrigatórios.';
+    } catch (err) {
+      const issues = (err as { issues?: { message?: string }[] }).issues;
+      return issues?.[0]?.message ?? 'Preencha todos os campos obrigatórios.';
+    }
+  };
+
+  const goToRegisterStep = async (target: RegisterStep) => {
+    if (target <= registerStep) {
+      setRegisterStep(target);
       return;
     }
-    const cpf = normalizeDocument(registerForm.getValues('cpf') ?? '');
-    if (!isValidDocument('CPF', cpf)) {
-      showErrorToast('CPF inválido. Confira o número digitado.');
-      return;
+    // Avançar só valida a etapa atual; as demais ficam intactas no form.
+    if (registerStep === 1) {
+      const isGoogle = registerForm.getValues('authMethod') === 'google';
+      const ok = await registerForm.trigger(
+        isGoogle
+          ? ['ownerName', 'email', 'cpf', 'termsAccepted', 'lgpdConsent']
+          : ['ownerName', 'email', 'cpf', 'password', 'termsAccepted', 'lgpdConsent'],
+      );
+      if (!ok) {
+        showErrorToast(stepValidationMessage(RegisterStep1Schema));
+        return;
+      }
+      const cpf = normalizeDocument(registerForm.getValues('cpf') ?? '');
+      if (!isValidDocument('CPF', cpf)) {
+        showErrorToast('CPF inválido. Confira o número digitado.');
+        return;
+      }
     }
-    setRegisterStep(2);
+    if (registerStep === 2) {
+      const ok = await registerForm.trigger(['businessSegment', 'targetAudience']);
+      if (!ok) {
+        showErrorToast(stepValidationMessage(RegisterStep2Schema));
+        return;
+      }
+    }
+    setRegisterStep(target);
   };
 
   const handleRegister = async (data: RegisterFormData) => {
@@ -714,6 +776,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
           });
     setSubmitting(false);
     if (result.ok === false) {
+      // Erro de conta (e-mail/CPF duplicado) volta para a etapa 1; erro de
+      // estabelecimento (nome/WhatsApp/cidade) fica na etapa 3.
+      if (/e-?mail já cadastrado|cpf já cadastrado/i.test(result.message)) {
+        setRegisterStep(1);
+      } else if (/nome do salão|whatsapp|cidade|cnpj/i.test(result.message)) {
+        setRegisterStep(3);
+      }
       showErrorToast(result.message);
       return;
     }
@@ -787,6 +856,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     switchTab(next);
   };
 
+  // Vocabulário do segmento escolhido na etapa 2 (placeholder e resumo da etapa 3).
+  const registerSegment = registerForm.watch('businessSegment') ?? 'OTHER';
+  const registerSegmentConfig = getSegmentConfig(registerSegment);
+  const shopPossessive = shopNounPossessive(registerSegment);
+  const reduceMotion = useReducedMotion();
+  const registerTitleRef = useRef<HTMLHeadingElement>(null);
+  const prevRegisterStepRef = useRef(registerStep);
+
+  // Foco no título da etapa ao trocar de passo (acessibilidade).
+  useEffect(() => {
+    if (tab === 'register' && prevRegisterStepRef.current !== registerStep) {
+      registerTitleRef.current?.focus();
+    }
+    prevRegisterStepRef.current = registerStep;
+  }, [registerStep, tab]);
+
   const primaryBtn =
     'relative w-full min-h-12 px-5 bg-accent text-accent-fg hover:bg-accent-hover shadow-[0_8px_24px_color-mix(in_srgb,var(--ag-accent)_12%,transparent)] rounded-xl font-black text-xs uppercase tracking-[0.16em] flex items-center justify-center gap-3 transition-all duration-300 disabled:opacity-60 overflow-hidden group/btn active:scale-[0.98] cursor-pointer';
 
@@ -846,13 +931,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                   <span className="mt-5 inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-accent">
                     <Sparkles size={12} /> 30 dias grátis no Pro
                   </span>
-                  <h1 className="mt-4 text-center text-2xl font-black tracking-tight text-text-primary sm:text-3xl">
-                    {registerStep === 1 ? 'Comece pelo seu acesso' : 'Agora, configure seu salão'}
+                  <h1
+                    ref={registerTitleRef}
+                    tabIndex={-1}
+                    className="mt-4 text-center text-2xl font-black tracking-tight text-text-primary focus:outline-none sm:text-3xl"
+                  >
+                    {REGISTER_STEP_COPY[registerStep].title}
                   </h1>
                   <p className="mt-2 max-w-sm text-center text-sm leading-relaxed text-text-muted">
-                    {registerStep === 1
-                      ? 'Crie sua conta em poucos minutos. Sem cartão e sem compromisso.'
-                      : 'Essas informações deixam sua agenda pronta para receber clientes.'}
+                    {REGISTER_STEP_COPY[registerStep].subtitle}
                   </p>
                 </>
               ) : (
@@ -877,29 +964,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
             )}
 
             {tab === 'register' && !registerVerificationEmail && (
-              <div className="relative mb-6 w-full px-2">
-                <div className="absolute left-[20%] right-[20%] top-4 h-px bg-border" />
-                <div
-                  className={`absolute left-[20%] top-4 h-px bg-accent transition-all duration-500 ${registerStep === 2 ? 'w-[60%]' : 'w-0'}`}
-                />
-                <div className="relative flex items-start justify-between">
-                  {[
-                    { step: 1 as const, label: 'Seus dados' },
-                    { step: 2 as const, label: 'Seu salão' },
-                  ].map(item => {
-                    const complete = registerStep > item.step;
-                    const active = registerStep === item.step;
-                    return (
-                      <div key={item.step} className="flex w-28 flex-col items-center gap-2">
-                        <div className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-black transition-all ${active || complete ? 'border-accent bg-accent text-accent-fg shadow-[0_0_20px_color-mix(in_srgb,var(--ag-accent)_28%,transparent)]' : 'border-border bg-bg text-text-muted'}`}>
-                          {complete ? <Check size={14} /> : item.step}
-                        </div>
-                        <span className={`text-[10px] font-bold uppercase tracking-wider ${active ? 'text-text-primary' : 'text-text-muted'}`}>{item.label}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+              <RegisterStepper current={registerStep} onStepClick={step => void goToRegisterStep(step)} />
             )}
 
             {tab === 'register' && !registerVerificationEmail && pendingReferral && (
@@ -1097,18 +1162,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
               ) : (
                 <motion.form
                   key={`register-${registerStep}`}
-                  initial={{ opacity: 0, x: registerStep === 1 ? 16 : -16 }}
+                  initial={reduceMotion ? false : { opacity: 0, x: registerStep === 1 ? 16 : -16 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: registerStep === 1 ? -16 : 16 }}
-                  transition={{ duration: 0.2 }}
+                  exit={reduceMotion ? undefined : { opacity: 0, x: registerStep === 1 ? -16 : 16 }}
+                  transition={reduceMotion ? { duration: 0 } : { duration: 0.2 }}
                   autoComplete="off"
                   onSubmit={e => {
                     e.preventDefault();
-                    if (registerStep === 1) {
-                      void goToRegisterStep2();
+                    if (registerStep < 3) {
+                      void goToRegisterStep((registerStep + 1) as RegisterStep);
                       return;
                     }
-                    void registerForm.handleSubmit(handleRegister, () => {
+                    void registerForm.handleSubmit(handleRegister, errors => {
+                      // Erro de campo leva de volta para a etapa que o exibe.
+                      const firstStep = FIELD_STEP[Object.keys(errors)[0] ?? ''];
+                      if (firstStep) setRegisterStep(firstStep);
                       showRegisterValidationError();
                     })(e);
                   }}
@@ -1203,6 +1271,38 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                         </p>
                       )}
 
+                      <div className="space-y-3 pt-2 border-t border-border">
+                        <p className="text-[11px] text-text-muted text-center">
+                          Ao criar sua conta, você concorda com nossos termos e políticas.
+                        </p>
+                        <ConsentCheckbox
+                          label="Li e aceito os Termos de Uso"
+                          checked={registerForm.watch('termsAccepted')}
+                          onChange={v =>
+                            registerForm.setValue('termsAccepted', v, { shouldValidate: true })
+                          }
+                          required
+                          error={registerForm.formState.errors.termsAccepted?.message}
+                          helpLink={{ label: 'Ler Termos de Uso', href: '/termos' }}
+                        />
+                        <ConsentCheckbox
+                          label="Consinto com o tratamento dos meus dados pessoais conforme a LGPD (Lei nº 13.709/2018)"
+                          checked={registerForm.watch('lgpdConsent')}
+                          onChange={v =>
+                            registerForm.setValue('lgpdConsent', v, { shouldValidate: true })
+                          }
+                          required
+                          error={registerForm.formState.errors.lgpdConsent?.message}
+                          helpLink={{ label: 'Política de Privacidade', href: '/privacidade' }}
+                        />
+                        <ConsentCheckbox
+                          label="Desejo receber comunicações de marketing, novidades e ofertas por e-mail"
+                          checked={registerForm.watch('marketingOptIn')}
+                          onChange={v => registerForm.setValue('marketingOptIn', v)}
+                          helpText="Você pode cancelar a inscrição a qualquer momento."
+                        />
+                      </div>
+
                       <button type="submit" className={primaryBtn}>
                         Continuar
                         <ArrowRight
@@ -1211,13 +1311,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                         />
                       </button>
                     </>
-                  ) : (
+                  ) : registerStep === 2 ? (
                     <>
-                      <p className="text-[11px] text-text-muted text-center leading-relaxed pb-1">
-                        Quase lá — conte um pouco sobre o salão.
-                      </p>
-
-                      <SegmentPicker
+                                            <SegmentPicker
                         value={registerForm.watch('businessSegment')}
                         audience={registerForm.watch('targetAudience')}
                         otherText={registerForm.watch('businessSegmentOther')}
@@ -1242,20 +1338,45 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                         }
                       />
 
-                      <Field
-                        label="Nome do salão"
+
+                      <div className="flex gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setRegisterStep(1)}
+                          className="flex-1 py-3.5 rounded-xl border border-border bg-bg text-text-secondary hover:text-text-primary hover:border-border-strong font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                        >
+                          <ArrowLeft size={14} />
+                          Voltar
+                        </button>
+                        <button type="submit" className={`${primaryBtn} flex-[1.4]`}>
+                          Continuar
+                          <ArrowRight
+                            size={14}
+                            className="transition-transform group-hover/btn:translate-x-1"
+                          />
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-[11px] text-text-muted text-center leading-relaxed pb-1">
+                        {registerSegmentConfig.pickSummary}
+                      </p>
+
+                                            <Field
+                        label="Nome do negócio"
                         icon={Store}
                         error={registerForm.formState.errors.barbershopName?.message}
                       >
                         <input
                           className={inputClass(!!registerForm.formState.errors.barbershopName)}
-                          placeholder="Salão Beleza & Estilo"
+                          placeholder={`Nome ${shopPossessive}`}
                           {...registerForm.register('barbershopName')}
                         />
                       </Field>
 
                       <Field
-                        label="WhatsApp do salão"
+                        label="WhatsApp do negócio"
                         icon={Smartphone}
                         error={registerForm.formState.errors.whatsapp?.message}
                       >
@@ -1471,44 +1592,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                         )}
                       </div>
 
-                      <div className="space-y-3 pt-2 border-t border-border">
-                        <p className="text-[11px] text-text-muted text-center">
-                          Ao criar sua conta, você concorda com nossos termos e políticas.
-                        </p>
-                        <ConsentCheckbox
-                          label="Li e aceito os Termos de Uso"
-                          checked={registerForm.watch('termsAccepted')}
-                          onChange={v =>
-                            registerForm.setValue('termsAccepted', v, { shouldValidate: true })
-                          }
-                          required
-                          error={registerForm.formState.errors.termsAccepted?.message}
-                          helpLink={{ label: 'Ler Termos de Uso', href: '/termos' }}
-                        />
-                        <ConsentCheckbox
-                          label="Consinto com o tratamento dos meus dados pessoais conforme a LGPD (Lei nº 13.709/2018)"
-                          checked={registerForm.watch('lgpdConsent')}
-                          onChange={v =>
-                            registerForm.setValue('lgpdConsent', v, { shouldValidate: true })
-                          }
-                          required
-                          error={registerForm.formState.errors.lgpdConsent?.message}
-                          helpLink={{ label: 'Política de Privacidade', href: '/privacidade' }}
-                        />
-                        <ConsentCheckbox
-                          label="Desejo receber comunicações de marketing, novidades e ofertas por e-mail"
-                          checked={registerForm.watch('marketingOptIn')}
-                          onChange={v => registerForm.setValue('marketingOptIn', v)}
-                          helpText="Você pode cancelar a inscrição a qualquer momento."
-                        />
-                      </div>
 
                       <div className="flex gap-2 pt-1">
                         <button
                           type="button"
-                          onClick={() => {
-                            setRegisterStep(1);
-                          }}
+                          onClick={() => setRegisterStep(2)}
                           className="flex-1 py-3.5 rounded-xl border border-border bg-bg text-text-secondary hover:text-text-primary hover:border-border-strong font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-colors cursor-pointer"
                         >
                           <ArrowLeft size={14} />
@@ -1523,7 +1611,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                             <Loader2 size={14} className="animate-spin" />
                           ) : (
                             <>
-                              Criar conta
+                              Criar minha conta
                               <ArrowRight
                                 size={14}
                                 className="transition-transform group-hover/btn:translate-x-1"

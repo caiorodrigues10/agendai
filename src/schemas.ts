@@ -10,7 +10,8 @@ import {
 // Derivados do config central: um z.enum listado à mão diverge na primeira
 // vez que um segmento novo entrar (já aconteceu com PETSHOP no backend).
 const businessSegmentEnum = z.enum(
-  ALL_SEGMENTS as [BusinessSegment, ...BusinessSegment[]]
+  ALL_SEGMENTS as [BusinessSegment, ...BusinessSegment[]],
+  { errorMap: () => ({ message: 'Escolha o tipo do seu negócio' }) }
 );
 const targetAudienceEnum = z.enum(
   AUDIENCE_OPTIONS.map(option => option.value) as [TargetAudience, ...TargetAudience[]]

@@ -14,7 +14,7 @@ const RAW_VALIDATION_PATTERN =
 const RAW_DATABASE_PATTERN =
   /prisma\.|findmany|findunique|findfirst|update\(\)|create\(\)|unknown field|provided date object is invalid|cannot read properties of undefined/i;
 
-function isNetworkError(err: unknown): boolean {
+export function isNetworkError(err: unknown): boolean {
   if (err instanceof ApiError) {
     return err.code === 'NETWORK_ERROR' || err.statusCode === 0;
   }

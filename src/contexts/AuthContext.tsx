@@ -4,7 +4,7 @@ import { authStorage, SwitchOrigin } from '../infra/authStorage';
 import { impersonationStorage, ImpersonationStartPayload } from '../infra/impersonationStorage';
 import { ApiError, refreshAccessToken } from '../infra/apiClient';
 import { organizationsApi } from '../infra/organizationsApi';
-import { getErrorMessage } from '../utils/errorMessage';
+import { getErrorMessage, isNetworkError } from '../utils/errorMessage';
 import { StaffMember } from '../types';
 import { usersApi } from '../infra/usersApi';
 import { useBarbershopFilters } from './BarbershopFiltersContext';
@@ -254,7 +254,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (err) {
       return {
         ok: false,
-        message: getErrorMessage(err, 'Não foi possível criar sua conta. Tente novamente.'),
+        message: isNetworkError(err)
+          ? 'Sem conexão. Nada foi criado.'
+          : getErrorMessage(err, 'Não foi possível criar sua conta. Tente novamente.'),
       };
     }
   };
@@ -269,7 +271,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (err) {
       return {
         ok: false,
-        message: getErrorMessage(err, 'Não foi possível criar sua conta com Google. Tente novamente.'),
+        message: isNetworkError(err)
+          ? 'Sem conexão. Nada foi criado.'
+          : getErrorMessage(err, 'Não foi possível criar sua conta com Google. Tente novamente.'),
       };
     }
   };
