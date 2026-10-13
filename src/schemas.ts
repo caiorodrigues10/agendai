@@ -58,8 +58,12 @@ export const LoginSchema = z.object({
 
 export type LoginFormData = z.infer<typeof LoginSchema>;
 
-// --- Register Schema (cadastro owner + salão) ---
-export const RegisterSchema = z.object({
+// --- Register Schema (cadastro owner + salão, wizard de 3 etapas) ---
+// Um schema por etapa: o "Continuar" valida só os campos da própria tela e o
+// `RegisterSchema` (composição) segue sendo o contrato enviado ao backend —
+// mesma payload, nenhuma quebra.
+
+const registerAccountShape = {
   ownerName: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
   email: z.string().email('E-mail inválido'),
   authMethod: z.enum(['password', 'google']).default('password'),
@@ -70,8 +74,15 @@ export const RegisterSchema = z.object({
     .min(11, 'CPF inválido')
     .transform(v => normalizeDocument(v))
     .refine(v => isValidCpf(v), { message: 'CPF inválido (dígitos verificadores incorretos)' }),
-  barbershopName: z.string().min(3, 'Nome do salão é obrigatório'),
-  whatsapp: whatsappRequired,
+  termsVersion: z.string().min(1),
+  termsAccepted: z.boolean().refine(v => v === true, 'É necessário aceitar os Termos de Uso'),
+  marketingOptIn: z.boolean().optional().default(false),
+  lgpdConsent: z
+    .boolean()
+    .refine(v => v === true, 'É necessário consentir com o tratamento de dados (LGPD)'),
+};
+
+const registerSegmentShape = {
   // Obrigatório no formulário: sem segmento o cadastro não avança. O backend
   // aceita omitido (compat), mas a UI exige — é lá que a regra vive.
   businessSegment: businessSegmentEnum,
@@ -81,6 +92,11 @@ export const RegisterSchema = z.object({
   // Público só existe em segmentos de beleza; PETSHOP não tem. O backend
   // também recusa — aqui o erro aparece antes de a requisição sair.
   targetAudience: targetAudienceEnum.nullable().optional(),
+};
+
+const registerBusinessShape = {
+  barbershopName: z.string().min(3, 'Nome do salão é obrigatório'),
+  whatsapp: whatsappRequired,
   cnpj: z
     .string()
     .optional()
@@ -93,36 +109,13 @@ export const RegisterSchema = z.object({
   addressComplement: z.string().max(100).optional(),
   city: z.string().min(2, 'Informe a cidade').max(120),
   cep: z.string().max(9).optional(),
-  termsVersion: z.string().min(1),
-  termsAccepted: z.boolean().refine(v => v === true, 'É necessário aceitar os Termos de Uso'),
-  marketingOptIn: z.boolean().optional().default(false),
-  lgpdConsent: z
-    .boolean()
-    .refine(v => v === true, 'É necessário consentir com o tratamento de dados (LGPD)'),
-  schedule: z
-    .array(
-      z.object({
-        dayOfWeek: z.number().min(0).max(6),
-        isOpen: z.boolean(),
-        openTime: z.string().min(4).max(5),
-        closeTime: z.string().min(4).max(5),
-      })
-    )
-    .min(7)
-    .max(7)
-    .optional(),
-}).superRefine((data, ctx) => {
-  if (
-    data.targetAudience &&
-    data.businessSegment &&
-    !audienceAppliesTo(data.businessSegment)
-  ) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['targetAudience'],
-      message: 'Público não se aplica ao segmento escolhido.',
-    });
-  }
+};
+
+/** Etapa 1 — dados iniciais do responsável (inclui aceites; senha só no modo password). */
+const refineAccountAuth = (
+  data: z.infer<z.ZodObject<typeof registerAccountShape>>,
+  ctx: z.RefinementCtx
+) => {
   if (data.authMethod === 'password') {
     if (!data.password || data.password.length < 6) {
       ctx.addIssue({
@@ -139,9 +132,64 @@ export const RegisterSchema = z.object({
       message: 'Continue com o Google para concluir o cadastro',
     });
   }
-});
+};
+
+/** Etapa 2 — público só nos segmentos em que se aplica. */
+const refineSegmentAudience = (
+  data: z.infer<z.ZodObject<typeof registerSegmentShape>>,
+  ctx: z.RefinementCtx
+) => {
+  if (
+    data.targetAudience &&
+    data.businessSegment &&
+    !audienceAppliesTo(data.businessSegment)
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['targetAudience'],
+      message: 'Público não se aplica ao segmento escolhido.',
+    });
+  }
+};
+
+export const RegisterStep1Schema = z
+  .object(registerAccountShape)
+  .superRefine(refineAccountAuth);
+
+export const RegisterStep2Schema = z
+  .object(registerSegmentShape)
+  .superRefine(refineSegmentAudience);
+
+export const RegisterStep3Schema = z.object(registerBusinessShape);
+
+/** Contrato completo enviado ao backend (uma chamada, no fim da etapa 3). */
+export const RegisterSchema = z
+  .object({
+    ...registerAccountShape,
+    ...registerSegmentShape,
+    ...registerBusinessShape,
+    schedule: z
+      .array(
+        z.object({
+          dayOfWeek: z.number().min(0).max(6),
+          isOpen: z.boolean(),
+          openTime: z.string().min(4).max(5),
+          closeTime: z.string().min(4).max(5),
+        })
+      )
+      .min(7)
+      .max(7)
+      .optional(),
+  })
+  .superRefine((data, ctx) => {
+    refineSegmentAudience(data, ctx);
+    refineAccountAuth(data, ctx);
+  });
 
 export type RegisterFormData = z.infer<typeof RegisterSchema>;
+export type RegisterStep1FormData = z.infer<typeof RegisterStep1Schema>;
+export type RegisterStep2FormData = z.infer<typeof RegisterStep2Schema>;
+export type RegisterStep3FormData = z.infer<typeof RegisterStep3Schema>;
 
 // --- Customer/Queue Schema ---
 export const CustomerQueueSchema = z.object({

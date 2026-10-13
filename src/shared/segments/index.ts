@@ -111,6 +111,34 @@ export function audienceAppliesTo(segment: BusinessSegment): boolean {
   return getSegmentConfig(segment).targetAudience.applies;
 }
 
+/**
+ * Substantivos masculinos do catálogo: o artigo do placeholder do cadastro
+ * ("Nome da sua barbearia" × "Nome do seu petshop") vem do gênero do noun,
+ * não de um chute no formulário. Noun novo que não estiver aqui cai no fem.
+ */
+const MASCULINE_SHOP_NOUNS = new Set([
+  'salão',
+  'studio',
+  'petshop',
+  'spa',
+  'estabelecimento',
+  'estúdio',
+  'consultório',
+  'lava jato',
+  'oficina',
+  'espaço',
+  'empresa',
+]);
+
+/**
+ * "da sua barbearia" / "do seu petshop" / "do seu estabelecimento" (OTHER):
+ * trecho pronto para o placeholder "Nome {trecho}" do cadastro.
+ */
+export function shopNounPossessive(segment: BusinessSegment | null | undefined): string {
+  const noun = getSegmentConfig(segment).labels.shopNoun;
+  return MASCULINE_SHOP_NOUNS.has(noun) ? `do seu ${noun}` : `da sua ${noun}`;
+}
+
 /** Catálogo de serviços do segmento (mesmo dado do backend). */
 export function getSegmentCatalog(segment: BusinessSegment) {
   return SEGMENT_CATALOGS[segment];
