@@ -75,6 +75,9 @@ export const RegisterSchema = z.object({
   // Obrigatório no formulário: sem segmento o cadastro não avança. O backend
   // aceita omitido (compat), mas a UI exige — é lá que a regra vive.
   businessSegment: businessSegmentEnum,
+  // Texto livre de OTHER ("o que você faz?"). Normalizado/limitado no backend;
+  // aqui só cortamos o óbvio para não enviar lixo.
+  businessSegmentOther: z.string().max(80).optional(),
   // Público só existe em segmentos de beleza; PETSHOP não tem. O backend
   // também recusa — aqui o erro aparece antes de a requisição sair.
   targetAudience: targetAudienceEnum.nullable().optional(),

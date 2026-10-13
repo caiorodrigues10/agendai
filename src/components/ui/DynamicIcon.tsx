@@ -30,6 +30,14 @@ import {
   LuFeather as Feather,
   LuCircleCheck as CheckCircle,
   LuUserPlus as UserPlus,
+  LuHeart as Heart,
+  LuStethoscope as Stethoscope,
+  LuWrench as Wrench,
+  LuCamera as Camera,
+  LuPenTool as PenTool,
+  LuPackage as Package,
+  LuHouse as Home,
+  LuClipboardList as Clipboard,
 } from 'react-icons/lu';
 
 export const ICON_OPTIONS = [
@@ -63,6 +71,14 @@ export const ICON_OPTIONS = [
   'Rocket',
   'CheckCircle',
   'UserPlus',
+  'Heart',
+  'Stethoscope',
+  'Wrench',
+  'Camera',
+  'PenTool',
+  'Package',
+  'Home',
+  'Clipboard',
 ];
 
 interface DynamicIconProps {
@@ -71,8 +87,16 @@ interface DynamicIconProps {
   size?: number;
 }
 
+/**
+ * Aceita os dois formatos que circulam hoje: PascalCase (escolhido na UI) e
+ * minúsculas (catálogo semeado pelo backend). Sem isso todo serviço vindo do
+ * seed caía no `default` e renderizava a tesoura.
+ */
+export const normalizeIconName = (name: string): string =>
+  name ? name.charAt(0).toUpperCase() + name.slice(1) : name;
+
 export const DynamicIcon: React.FC<DynamicIconProps> = ({ name, className, size = 24 }) => {
-  switch (name) {
+  switch (normalizeIconName(name)) {
     case 'Scissors':
       return <Scissors className={className} size={size} />;
     case 'Zap':
@@ -133,6 +157,22 @@ export const DynamicIcon: React.FC<DynamicIconProps> = ({ name, className, size 
       return <CheckCircle className={className} size={size} />;
     case 'UserPlus':
       return <UserPlus className={className} size={size} />;
+    case 'Heart':
+      return <Heart className={className} size={size} />;
+    case 'Stethoscope':
+      return <Stethoscope className={className} size={size} />;
+    case 'Wrench':
+      return <Wrench className={className} size={size} />;
+    case 'Camera':
+      return <Camera className={className} size={size} />;
+    case 'PenTool':
+      return <PenTool className={className} size={size} />;
+    case 'Package':
+      return <Package className={className} size={size} />;
+    case 'Home':
+      return <Home className={className} size={size} />;
+    case 'Clipboard':
+      return <Clipboard className={className} size={size} />;
     default:
       return <Scissors className={className} size={size} />;
   }

@@ -29,6 +29,8 @@ export interface RegisterPayload {
   whatsapp: string;
   /** Obrigatório no form; opcional na API (compat com cliente antigo). */
   businessSegment?: BusinessSegment;
+  /** Texto livre quando o segmento é OTHER. O backend normaliza e corta em 80. */
+  businessSegmentOther?: string | null;
   /** Público atendido. Em PETSHOP não se aplica e o backend recusa. */
   targetAudience?: TargetAudience | null;
   address?: string;

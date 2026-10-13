@@ -26,6 +26,7 @@ const DEFAULT_VALUES: ShopFormData = {
   address: '',
   active: true,
   businessSegment: 'BARBERSHOP',
+  businessSegmentOther: '',
   targetAudience: 'MASCULINO',
   ownerName: '',
   ownerEmail: '',
@@ -125,6 +126,8 @@ export const ShopCreateWizard: React.FC<ShopCreateWizardProps> = ({ open, onClos
         address: data.address || undefined,
         active: data.active,
         businessSegment: data.businessSegment,
+        businessSegmentOther:
+          data.businessSegment === 'OTHER' ? data.businessSegmentOther?.trim() || undefined : undefined,
         targetAudience: data.targetAudience,
         owner: { name: data.ownerName, email: data.ownerEmail },
         planId: data.planId,

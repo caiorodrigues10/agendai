@@ -427,6 +427,7 @@ export const adminApi = {
     address?: string;
     active?: boolean;
     businessSegment?: BusinessSegment;
+    businessSegmentOther?: string | null;
     targetAudience?: TargetAudience | null;
     owner?: { name: string; email: string };
     planId?: string;

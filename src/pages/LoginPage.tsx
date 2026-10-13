@@ -408,6 +408,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       barbershopName: '',
       whatsapp: '',
       businessSegment: undefined,
+      businessSegmentOther: '',
       targetAudience: null,
       address: '',
       city: '',
@@ -654,6 +655,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       openTime: scheduleDays[dayOfWeek].openTime,
       closeTime: scheduleDays[dayOfWeek].closeTime,
     }));
+    // Só OTHER leva o texto livre; nos demais segmentos o campo é ignorado.
+    const businessSegmentOther =
+      data.businessSegment === 'OTHER' ? data.businessSegmentOther?.trim() || undefined : undefined;
     const result =
       data.authMethod === 'google'
         ? await registerWithGoogle({
@@ -663,6 +667,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
             barbershopName: data.barbershopName.trim(),
             whatsapp: normalizePhoneBR(data.whatsapp),
             businessSegment: data.businessSegment,
+            businessSegmentOther,
             targetAudience: data.targetAudience,
             address:
               [
@@ -690,6 +695,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
             barbershopName: data.barbershopName.trim(),
             whatsapp: normalizePhoneBR(data.whatsapp),
             businessSegment: data.businessSegment,
+            businessSegmentOther,
             targetAudience: data.targetAudience,
             address: [
               data.address?.trim(),
@@ -760,6 +766,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
         barbershopName: '',
         whatsapp: '',
         businessSegment: undefined,
+        businessSegmentOther: '',
         targetAudience: null,
         address: '',
         city: '',
@@ -1213,6 +1220,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                       <SegmentPicker
                         value={registerForm.watch('businessSegment')}
                         audience={registerForm.watch('targetAudience')}
+                        otherText={registerForm.watch('businessSegmentOther')}
                         onChange={segment =>
                           registerForm.setValue('businessSegment', segment, {
                             shouldValidate: true,
@@ -1220,6 +1228,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                         }
                         onAudienceChange={audience =>
                           registerForm.setValue('targetAudience', audience, {
+                            shouldValidate: true,
+                          })
+                        }
+                        onOtherTextChange={text =>
+                          registerForm.setValue('businessSegmentOther', text, {
                             shouldValidate: true,
                           })
                         }

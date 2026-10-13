@@ -2,32 +2,50 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { SegmentPicker } from './SegmentPicker';
-import type { TargetAudience } from '../../shared/segments';
+import { ALL_SEGMENTS, SEGMENTS_BY_GROUP, type TargetAudience } from '../../shared/segments';
 
 function setup(props?: Partial<Parameters<typeof SegmentPicker>[0]>) {
   const onChange = vi.fn();
   const onAudienceChange = vi.fn();
+  const onOtherTextChange = vi.fn();
   const view = render(
     <SegmentPicker
       value={null}
       audience={null}
       onChange={onChange}
       onAudienceChange={onAudienceChange}
+      onOtherTextChange={onOtherTextChange}
       {...props}
     />
   );
-  return { ...view, onChange, onAudienceChange };
+  return { ...view, onChange, onAudienceChange, onOtherTextChange };
 }
 
 describe('SegmentPicker', () => {
-  it('renderiza os 4 segmentos do cadastro como radios', () => {
+  it('renderiza todos os segmentos, agrupados, com "Outro" por último', () => {
     setup();
-    const group = screen.getByRole('radiogroup', { name: /tipo do seu negócio/i });
-    expect(group).toBeInTheDocument();
-    expect(screen.getByRole('radio', { name: /barbearia/i })).toBeInTheDocument();
-    expect(screen.getByRole('radio', { name: /salão de cabelo/i })).toBeInTheDocument();
-    expect(screen.getByRole('radio', { name: /manicure e nails/i })).toBeInTheDocument();
-    expect(screen.getByRole('radio', { name: /petshop/i })).toBeInTheDocument();
+    expect(screen.getByRole('radiogroup', { name: /tipo do seu negócio/i })).toBeInTheDocument();
+    expect(screen.getAllByRole('radio')).toHaveLength(ALL_SEGMENTS.length);
+    for (const group of SEGMENTS_BY_GROUP) {
+      expect(screen.getByText(group.label), `grupo ${group.label}`).toBeInTheDocument();
+    }
+    const cards = screen.getAllByRole('radio');
+    expect(cards[cards.length - 1]).toHaveTextContent(/qualquer outro tipo/i);
+  });
+
+  it('busca "unha" destaca Manicure e mantém "Outro" visível', () => {
+    setup();
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'unha' } });
+    expect(screen.getByRole('radio', { name: /manicure/i })).toBeInTheDocument();
+    expect(screen.queryByRole('radio', { name: /^barbearia/i })).toBeNull();
+    expect(screen.getByRole('radio', { name: /qualquer outro tipo/i })).toBeInTheDocument();
+  });
+
+  it('busca sem resultado avisa e só resta "Outro"', () => {
+    setup();
+    fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'zzzz' } });
+    expect(screen.getByText(/nenhum segmento encontrado/i)).toBeInTheDocument();
+    expect(screen.getAllByRole('radio')).toHaveLength(1);
   });
 
   it('ao escolher um segmento emite o segmento e o público sugerido', () => {
@@ -49,9 +67,9 @@ describe('SegmentPicker', () => {
     );
   });
 
-  it('mostra o público para segmentos de beleza e esconde em PETSHOP', async () => {
+  it('mostra o público para segmentos de beleza e esconde em PETSHOP e em OTHER', () => {
     const view = setup({ value: 'BARBERSHOP', audience: 'MASCULINO' });
-    expect(await screen.findByRole('radiogroup', { name: /quem você atende/i })).toBeInTheDocument();
+    expect(screen.getByRole('radiogroup', { name: /quem você atende/i })).toBeInTheDocument();
 
     view.rerender(
       <SegmentPicker
@@ -62,6 +80,38 @@ describe('SegmentPicker', () => {
       />
     );
     expect(screen.queryByRole('radiogroup', { name: /quem você atende/i })).toBeNull();
+
+    view.rerender(
+      <SegmentPicker
+        value="OTHER"
+        audience={null}
+        onChange={() => undefined}
+        onAudienceChange={() => undefined}
+      />
+    );
+    expect(screen.queryByRole('radiogroup', { name: /quem você atende/i })).toBeNull();
+  });
+
+  it('"Outro" abre o campo de texto livre e repassa o que foi digitado', () => {
+    const { onOtherTextChange } = setup({ value: 'OTHER' });
+    const field = screen.getByLabelText(/descreva seu negócio/i);
+    fireEvent.change(field, { target: { value: 'Estúdio de pilates com aula individual' } });
+    expect(onOtherTextChange).toHaveBeenCalledWith('Estúdio de pilates com aula individual');
+    expect(field).toHaveAttribute('maxlength', '80');
+  });
+
+  it('o campo de texto livre some quando o segmento não é "Outro"', () => {
+    const view = setup({ value: 'OTHER' });
+    expect(screen.getByLabelText(/descreva seu negócio/i)).toBeInTheDocument();
+    view.rerender(
+      <SegmentPicker
+        value="HAIR_SALON"
+        audience="FEMININO"
+        onChange={() => undefined}
+        onAudienceChange={() => undefined}
+      />
+    );
+    expect(screen.queryByLabelText(/descreva seu negócio/i)).toBeNull();
   });
 
   it('setas movem a seleção do público', () => {

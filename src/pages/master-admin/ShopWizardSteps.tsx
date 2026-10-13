@@ -44,6 +44,7 @@ export const shopSchema = z
     address: z.string().trim().max(500, 'Endereço muito longo.').optional(),
     active: z.boolean(),
     businessSegment: businessSegmentEnum,
+    businessSegmentOther: z.string().max(80).optional(),
     targetAudience: targetAudienceEnum.nullable().optional(),
     ownerName: z.string().trim().min(2, 'Informe o nome do dono.'),
     ownerEmail: z
@@ -136,11 +137,15 @@ export const ShopStep: React.FC<StepProps> = ({ errors, register, setValue, watc
     <SegmentPicker
       value={watch('businessSegment')}
       audience={watch('targetAudience')}
+      otherText={watch('businessSegmentOther')}
       onChange={segment =>
         setValue('businessSegment', segment, { shouldValidate: true, shouldDirty: true })
       }
       onAudienceChange={audience =>
         setValue('targetAudience', audience, { shouldValidate: true, shouldDirty: true })
+      }
+      onOtherTextChange={text =>
+        setValue('businessSegmentOther', text, { shouldValidate: true, shouldDirty: true })
       }
       error={errors.businessSegment?.message ?? errors.targetAudience?.message}
     />

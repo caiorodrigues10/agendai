@@ -8,8 +8,10 @@ import {
   FIRST_CLASS_SEGMENTS,
   SEGMENT_CONFIGS,
   SEGMENT_LABEL_KEYS,
+  SEGMENTS_BY_GROUP,
   audienceAppliesTo,
   getSegmentConfig,
+  segmentSearchText,
 } from './index';
 import { ICON_OPTIONS } from '../../components/ui/DynamicIcon';
 
@@ -35,7 +37,11 @@ interface ParityFile {
   firstClassSegments: string[];
   segments: Record<
     string,
-    { firstClass: boolean; labels: Record<string, string>; targetAudience: { applies: boolean; suggested: string | null } }
+    {
+      group: string;
+      labels: Record<string, string>;
+      targetAudience: { applies: boolean; suggested: string | null };
+    }
   >;
 }
 
@@ -56,29 +62,35 @@ describe('paridade com o backend', () => {
     expect([...SEGMENT_LABEL_KEYS]).toEqual(readParity().labelKeys);
   });
 
-  it('tem os mesmos segmentos do backend', () => {
+  it('tem os mesmos segmentos do backend (mesmo conjunto, qualquer ordem)', () => {
     const parity = readParity();
-    expect([...ALL_SEGMENTS]).toEqual(parity.allSegments);
-    expect([...FIRST_CLASS_SEGMENTS]).toEqual(parity.firstClassSegments);
+    expect(new Set(ALL_SEGMENTS)).toEqual(new Set(parity.allSegments));
+    expect(new Set(FIRST_CLASS_SEGMENTS)).toEqual(new Set(parity.firstClassSegments));
   });
 
-  it('tem os mesmos labels, firstClass e targetAudience de cada segmento', () => {
+  it('tem os mesmos labels, group e targetAudience de cada segmento', () => {
     const parity = readParity();
     for (const segment of ALL_SEGMENTS) {
       const config = SEGMENT_CONFIGS[segment];
       expect(config, `segmento ${segment} ausente no frontend`).toBeDefined();
-      expect(parity.segments[segment].firstClass, `firstClass de ${segment}`).toBe(config.firstClass);
-      expect(config.labels, `labels de ${segment}`).toEqual(parity.segments[segment].labels);
-      expect(config.targetAudience, `targetAudience de ${segment}`).toEqual(
-        parity.segments[segment].targetAudience
-      );
+      const mirror = parity.segments[segment];
+      expect(mirror, `segmento ${segment} ausente no backend`).toBeDefined();
+      expect(config.group, `group de ${segment}`).toBe(mirror.group);
+      expect(config.labels, `labels de ${segment}`).toEqual(mirror.labels);
+      expect(config.targetAudience, `targetAudience de ${segment}`).toEqual(mirror.targetAudience);
     }
   });
 });
 
 describe('config de segmento no frontend', () => {
-  it('os 4 segmentos do cadastro são os first-class, na ordem pedida', () => {
-    expect([...FIRST_CLASS_SEGMENTS]).toEqual(['BARBERSHOP', 'HAIR_SALON', 'NAIL_STUDIO', 'PETSHOP']);
+  it('todos os 22 segmentos são oferecidos no cadastro, agrupados', () => {
+    expect(FIRST_CLASS_SEGMENTS).toHaveLength(22);
+    expect(new Set(FIRST_CLASS_SEGMENTS)).toEqual(new Set(ALL_SEGMENTS));
+    // Cada segmento aparece em exatamente um grupo, e `other` é o último.
+    const grouped = SEGMENTS_BY_GROUP.flatMap((g) => g.segments);
+    expect(grouped).toHaveLength(22);
+    expect(new Set(grouped)).toEqual(new Set(ALL_SEGMENTS));
+    expect(SEGMENTS_BY_GROUP[SEGMENTS_BY_GROUP.length - 1].group).toBe('other');
   });
 
   it('todo segmento tem ícone e descrição de card', () => {
@@ -100,11 +112,17 @@ describe('config de segmento no frontend', () => {
     }
   });
 
-  it('PETSHOP não tem público; os de beleza têm', () => {
+  it('só beleza e bem-estar têm público; saúde/pet/auto/serviços/other não', () => {
     expect(audienceAppliesTo('PETSHOP')).toBe(false);
     expect(audienceAppliesTo('BARBERSHOP')).toBe(true);
     expect(audienceAppliesTo('HAIR_SALON')).toBe(true);
     expect(audienceAppliesTo('NAIL_STUDIO')).toBe(true);
+    expect(audienceAppliesTo('MAKEUP_STUDIO')).toBe(true);
+    expect(audienceAppliesTo('SPA')).toBe(true);
+    // Nenhum segmento fora de beleza/bem-estar pergunta público.
+    for (const s of ['PHYSIOTHERAPY', 'NUTRITION', 'PSYCHOTHERAPY', 'VETERINARY', 'CAR_WASH', 'AUTO_REPAIR', 'PHOTO_STUDIO', 'TATTOO_PIERCING', 'COACHING', 'PRIVATE_CLASSES', 'TECH_SUPPORT', 'HOME_SERVICES', 'OTHER'] as const) {
+      expect(audienceAppliesTo(s), `${s} não deveria perguntar público`).toBe(false);
+    }
   });
 
   it('sugere MASCULINO para barbearia, como pedido', () => {
@@ -124,5 +142,48 @@ describe('config de segmento no frontend', () => {
   it('cai no fallback OTHER para segmento desconhecido', () => {
     expect(getSegmentConfig(null).segment).toBe('OTHER');
     expect(getSegmentConfig('INEXISTENTE' as never).segment).toBe('OTHER');
+  });
+
+  it('OTHER é o modo genérico: sem público, sem ficha auxiliar, sem compliance', () => {
+    const other = getSegmentConfig('OTHER');
+    expect(other.targetAudience.applies).toBe(false);
+    expect(other.targetAudience.suggested).toBeNull();
+    expect(other.auxiliaryProfile).toBeUndefined();
+    expect(other.complianceNote).toBeUndefined();
+  });
+
+  it('segmentos de saúde carregam o aviso de que não é prontuário', () => {
+    for (const s of ['PHYSIOTHERAPY', 'NUTRITION', 'PSYCHOTHERAPY'] as const) {
+      expect(getSegmentConfig(s).complianceNote, `${s}: complianceNote`).toBeTruthy();
+    }
+  });
+
+  it('ficha auxiliar: pet em veterinária; veículo em automotivo; nenhum em OTHER', () => {
+    expect(getSegmentConfig('VETERINARY').auxiliaryProfile).toBe('pet');
+    expect(getSegmentConfig('CAR_WASH').auxiliaryProfile).toBe('vehicle');
+    expect(getSegmentConfig('AUTO_REPAIR').auxiliaryProfile).toBe('vehicle');
+    expect(getSegmentConfig('BARBERSHOP').auxiliaryProfile).toBeUndefined();
+    expect(getSegmentConfig('OTHER').auxiliaryProfile).toBeUndefined();
+  });
+});
+
+describe('busca de segmento no cadastro', () => {
+  it('vocabulário e aliases comuns são indexados em minúsculas', () => {
+    expect(segmentSearchText('BARBERSHOP')).toContain('barbearia');
+    expect(segmentSearchText('BARBERSHOP')).toBe(segmentSearchText('BARBERSHOP').toLowerCase());
+  });
+
+  it('termos do dia a dia acham o segmento certo', () => {
+    expect(segmentSearchText('NAIL_STUDIO')).toContain('unha');
+    expect(segmentSearchText('CAR_WASH')).toContain('carro');
+    expect(segmentSearchText('AUTO_REPAIR')).toContain('carro');
+    expect(segmentSearchText('PETSHOP')).toContain('tosa');
+    expect(segmentSearchText('PRIVATE_CLASSES')).toContain('pilates');
+  });
+
+  it('todo segmento tem vocabulário indexável (nunca string vazia)', () => {
+    for (const segment of ALL_SEGMENTS) {
+      expect(segmentSearchText(segment).length, `${segment}: texto de busca`).toBeGreaterThan(0);
+    }
   });
 });

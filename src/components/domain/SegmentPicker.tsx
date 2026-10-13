@@ -1,58 +1,46 @@
-import React, { useId, useRef } from 'react';
+import React, { useId, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { DynamicIcon } from '../ui/DynamicIcon';
 import {
   AUDIENCE_OPTIONS,
   FIRST_CLASS_SEGMENTS,
+  SEGMENTS_BY_GROUP,
   audienceAppliesTo,
   getSegmentConfig,
+  segmentSearchText,
   type BusinessSegment,
   type TargetAudience,
 } from '../../shared/segments';
+import {
+  SegmentAudienceControl,
+  SegmentOtherField,
+  useRadioArrowKey,
+} from './SegmentPickerParts';
 
-type OptionRefs = React.MutableRefObject<(HTMLButtonElement | null)[]>;
-/**
- * Setas dentro de um radiogroup movem seleção e foco (padrão APG).
- * `options` é a ordem visual; o foco vai para o botão recém-selecionado.
- */
-function useRadioArrowKey<V extends string>(
-  options: readonly V[],
-  current: V | null | undefined,
-  select: (value: V) => void,
-  refs: OptionRefs
-) {
-  return (event: React.KeyboardEvent<HTMLDivElement>) => {
-    const index = options.findIndex(option => option === current);
-    if (index < 0) return;
-    let next = index;
-    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
-      next = (index + 1) % options.length;
-    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
-      next = (index - 1 + options.length) % options.length;
-    } else {
-      return;
-    }
-    event.preventDefault();
-    select(options[next]);
-    refs.current[next]?.focus();
-  };
+/** Busca por nome, descrição e aliases comuns ("unha", "pet", "carro"). */
+function matchesSearch(segment: BusinessSegment, needle: string): boolean {
+  if (!needle) return true;
+  return segmentSearchText(segment).includes(needle);
 }
 
 /**
  * Escolha de segmento no cadastro e no wizard do master.
  *
- * Só os 4 first-class são oferecidos — BEAUTY_STUDIO, LASH_BROW_STUDIO,
- * AESTHETICS e SPA continuam válidos para quem já os tem, mas não são
- * apresentados a quem está começando.
+ * Os 22 segmentos são oferecidos, agrupados por categoria e com busca no topo
+ * (digitar "unha" destaca Manicure). "Outro" fica sempre visível no final, com
+ * um campo de texto opcional para o usuário descrever o negócio.
  *
  * Público é um segmented control que só aparece quando faz sentido no segmento:
- * em PETSHOP ele não é exibido (e o backend recusa se chegar).
+ * em PETSHOP e nos demais sem público ele não é exibido (e o backend recusa).
  */
 export const SegmentPicker: React.FC<{
   value?: BusinessSegment | null;
   audience?: TargetAudience | null;
+  /** Texto livre de OTHER (máx. 80). Nulo/vazio em qualquer outro segmento. */
+  otherText?: string | null;
   onChange: (segment: BusinessSegment) => void;
   onAudienceChange: (audience: TargetAudience | null) => void;
+  onOtherTextChange?: (text: string) => void;
   error?: string;
   /** Rótulo acima do grid. */
   legend?: string;
@@ -61,8 +49,10 @@ export const SegmentPicker: React.FC<{
 }> = ({
   value,
   audience,
+  otherText,
   onChange,
   onAudienceChange,
+  onOtherTextChange,
   error,
   legend = 'Qual é o tipo do seu negócio?',
   showAudienceBeforeChoice = false,
@@ -70,11 +60,31 @@ export const SegmentPicker: React.FC<{
   const groupId = useId();
   const segmentRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const audienceRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [query, setQuery] = useState('');
 
   const config = getSegmentConfig(value);
   const showAudience = value
     ? audienceAppliesTo(value)
     : showAudienceBeforeChoice;
+  const showOtherField = value === 'OTHER';
+
+  const needle = query.trim().toLowerCase();
+  // "Outro" é a saída de emergência: fica sempre visível, mesmo sem busca
+  // bater, para ninguém ficar preso num grid filtrado.
+  const visibleSegments = useMemo(() => {
+    const found = FIRST_CLASS_SEGMENTS.filter(s => s !== 'OTHER' && matchesSearch(s, needle));
+    return [...found, 'OTHER'];
+  }, [needle]);
+  // Grupos com os visíveis preservando a ordem; grupos vazios somem.
+  const visibleGroups = useMemo(
+    () =>
+      SEGMENTS_BY_GROUP.map(group => ({
+        ...group,
+        segments: group.segments.filter(s => s === 'OTHER' || matchesSearch(s, needle)),
+      })).filter(group => group.segments.length > 0),
+    [needle]
+  );
+  const hasResults = visibleSegments.some(s => s !== 'OTHER');
 
   // Trocar de segmento leva o público para o sugerido do novo. Feito no clique,
   // e não num useEffect, porque o callback do pai é inline: com efeito ficaria
@@ -84,7 +94,7 @@ export const SegmentPicker: React.FC<{
     onAudienceChange(getSegmentConfig(segment).targetAudience.suggested);
   };
 
-  const onSegmentsKeyDown = useRadioArrowKey(FIRST_CLASS_SEGMENTS, value, pick, segmentRefs);
+  const onSegmentsKeyDown = useRadioArrowKey(visibleSegments, value, pick, segmentRefs);
   const onAudienceKeyDown = useRadioArrowKey(
     AUDIENCE_OPTIONS.map(option => option.value),
     audience ?? null,
@@ -96,55 +106,85 @@ export const SegmentPicker: React.FC<{
     <fieldset
       className="min-w-0"
       aria-invalid={error ? true : undefined}
-      aria-describedby={error ? `${groupId}-error` : undefined}
+      aria-describedby={error ? `${groupId}-error` : `${groupId}-summary`}
     >
       <legend className="text-sm font-bold text-text-primary mb-3">{legend}</legend>
+
+      <label className="block mb-3">
+        <span className="sr-only">Buscar segmento</span>
+        <input
+          type="search"
+          value={query}
+          onChange={event => setQuery(event.target.value)}
+          placeholder="Buscar segmento (ex.: unha, pet, carro)"
+          className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted outline-none focus-visible:ring-2 focus-visible:ring-focus"
+        />
+      </label>
 
       <div
         role="radiogroup"
         aria-label={legend}
         tabIndex={-1}
-        className="grid grid-cols-1 sm:grid-cols-2 gap-2"
         onKeyDown={onSegmentsKeyDown}
       >
-        {FIRST_CLASS_SEGMENTS.map((segment, index) => {
-          const c = getSegmentConfig(segment);
-          const selected = value === segment;
-          return (
-            <button
-              key={segment}
-              ref={node => {
-                segmentRefs.current[index] = node;
-              }}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              tabIndex={selected || (!value && index === 0) ? 0 : -1}
-              onClick={() => pick(segment)}
-              className={[
-                'flex flex-col gap-1 rounded-xl border p-3 text-left transition-colors outline-none',
-                'focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
-                selected
-                  ? 'border-accent bg-accent/10'
-                  : 'border-border bg-surface hover:border-hover-border',
-              ].join(' ')}
-            >
-              <DynamicIcon
-                name={c.icon}
-                size={20}
-                className={selected ? 'text-accent-fg' : 'text-text-muted'}
-              />
-              <span className="text-sm font-bold text-text-primary">{c.labels.segmentLabel}</span>
-              <span className="text-xs text-text-muted leading-snug">{c.cardDescription}</span>
-            </button>
-          );
-        })}
+        {visibleGroups.map(group => (
+          <div key={group.group} className="mb-4 last:mb-0">
+            <p className="text-xs font-bold uppercase tracking-wide text-text-muted mb-2">
+              {group.label}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+              {group.segments.map(segment => {
+                const index = visibleSegments.indexOf(segment);
+                const c = getSegmentConfig(segment);
+                const selected = value === segment;
+                return (
+                  <button
+                    key={segment}
+                    ref={node => {
+                      segmentRefs.current[index] = node;
+                    }}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    tabIndex={selected || (!value && visibleSegments[0] === segment) ? 0 : -1}
+                    onClick={() => pick(segment)}
+                    className={[
+                      'flex flex-col gap-1 rounded-xl border p-3 text-left transition-colors outline-none',
+                      'focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
+                      selected
+                        ? 'border-accent bg-accent/10'
+                        : 'border-border bg-surface hover:border-hover-border',
+                    ].join(' ')}
+                  >
+                    <DynamicIcon
+                      name={c.icon}
+                      size={20}
+                      className={selected ? 'text-accent-fg' : 'text-text-muted'}
+                    />
+                    <span className="text-sm font-bold text-text-primary">{c.labels.segmentLabel}</span>
+                    <span className="text-xs text-text-muted leading-snug">{c.cardDescription}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+
+        {!hasResults && (
+          <p className="text-sm text-text-muted py-4 text-center">
+            Nenhum segmento encontrado para “{query}”. Tente outra palavra ou escolha “Outro”.
+          </p>
+        )}
       </div>
 
       {error && (
         <p id={`${groupId}-error`} role="alert" className="mt-2 text-xs text-danger">
           {error}
         </p>
+      )}
+
+      {showOtherField && onOtherTextChange && (
+        <SegmentOtherField value={otherText} onChange={onOtherTextChange} />
       )}
 
       <AnimatePresence initial={false}>
@@ -157,49 +197,23 @@ export const SegmentPicker: React.FC<{
             transition={{ duration: 0.2, ease: 'easeOut' }}
             className="overflow-hidden"
           >
-            <div className="mt-4">
-              <p id={`${groupId}-audience`} className="text-sm font-bold text-text-primary mb-2">
-                {config.audienceQuestion}
-              </p>
-              <div
-                role="radiogroup"
-                aria-labelledby={`${groupId}-audience`}
-                tabIndex={-1}
-                className="inline-flex rounded-xl border border-border bg-surface p-1"
-                onKeyDown={onAudienceKeyDown}
-              >
-                {AUDIENCE_OPTIONS.map((option, index) => {
-                  const selected = audience === option.value;
-                  return (
-                    <button
-                      key={option.value}
-                      ref={node => {
-                        audienceRefs.current[index] = node;
-                      }}
-                      type="button"
-                      role="radio"
-                      aria-checked={selected}
-                      tabIndex={selected ? 0 : -1}
-                      onClick={() => onAudienceChange(option.value)}
-                      className={[
-                        'rounded-lg px-4 py-1.5 text-sm font-bold transition-colors outline-none',
-                        'focus-visible:ring-2 focus-visible:ring-focus',
-                        selected
-                          ? 'bg-accent text-accent-fg'
-                          : 'text-text-muted hover:text-text-primary',
-                      ].join(' ')}
-                    >
-                      {option.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <SegmentAudienceControl
+              groupId={groupId}
+              audience={audience ?? null}
+              question={config.audienceQuestion}
+              onAudienceChange={onAudienceChange}
+              refs={audienceRefs}
+              onKeyDown={onAudienceKeyDown}
+            />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {value && <p className="mt-3 text-xs text-text-muted">{config.pickSummary}</p>}
+      {value && (
+        <p id={`${groupId}-summary`} className="mt-3 text-xs text-text-muted">
+          {config.pickSummary}
+        </p>
+      )}
     </fieldset>
   );
 };
