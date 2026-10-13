@@ -644,15 +644,26 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     cep: 3,
   };
 
-  /** Mensagem PT do primeiro campo inválido da etapa (formState ainda não reagiu no mesmo tick). */
-  const stepValidationMessage = (schema: ZodTypeAny) => {
+  /** Mensagem PT + campo do primeiro erro da etapa (formState ainda não reagiu no mesmo tick). */
+  const stepValidationError = (schema: ZodTypeAny) => {
     try {
       schema.parse(registerForm.getValues());
-      return 'Preencha todos os campos obrigatórios.';
+      return { message: 'Preencha todos os campos obrigatórios.', field: undefined };
     } catch (err) {
-      const issues = (err as { issues?: { message?: string }[] }).issues;
-      return issues?.[0]?.message ?? 'Preencha todos os campos obrigatórios.';
+      const issues = (err as { issues?: { message?: string; path?: (string | number)[] }[] }).issues;
+      const first = issues?.[0];
+      const field = first?.path?.[0];
+      return {
+        message: first?.message ?? 'Preencha todos os campos obrigatórios.',
+        field: typeof field === 'string' ? field : undefined,
+      };
     }
+  };
+
+  const showStepError = (schema: ZodTypeAny) => {
+    const { message, field } = stepValidationError(schema);
+    if (field) registerForm.setFocus(field as never);
+    showErrorToast(message);
   };
 
   const goToRegisterStep = async (target: RegisterStep) => {
@@ -669,7 +680,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
           : ['ownerName', 'email', 'cpf', 'password', 'termsAccepted', 'lgpdConsent'],
       );
       if (!ok) {
-        showErrorToast(stepValidationMessage(RegisterStep1Schema));
+        showStepError(RegisterStep1Schema);
         return;
       }
       const cpf = normalizeDocument(registerForm.getValues('cpf') ?? '');
@@ -681,7 +692,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     if (registerStep === 2) {
       const ok = await registerForm.trigger(['businessSegment', 'targetAudience']);
       if (!ok) {
-        showErrorToast(stepValidationMessage(RegisterStep2Schema));
+        showStepError(RegisterStep2Schema);
         return;
       }
     }
@@ -1174,9 +1185,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                       return;
                     }
                     void registerForm.handleSubmit(handleRegister, errors => {
-                      // Erro de campo leva de volta para a etapa que o exibe.
-                      const firstStep = FIELD_STEP[Object.keys(errors)[0] ?? ''];
+                      // Erro de campo leva de volta para a etapa que o exibe,
+                      // com foco no primeiro campo inválido.
+                      const firstField = Object.keys(errors)[0];
+                      const firstStep = FIELD_STEP[firstField ?? ''];
                       if (firstStep) setRegisterStep(firstStep);
+                      if (firstField) registerForm.setFocus(firstField as never);
                       showRegisterValidationError();
                     })(e);
                   }}

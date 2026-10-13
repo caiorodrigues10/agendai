@@ -323,6 +323,24 @@ describe('Cadastro em 3 etapas (wizard)', () => {
     expect(screen.queryByRole('button', { name: /cadastrar com google/i })).toBeNull();
   });
 
+  it('erro de campo na etapa 3 leva o foco para o primeiro campo inválido', async () => {
+    registerMock.mockResolvedValue({ ok: true });
+    renderWithProviders(<LoginPage mode="register" />, { route: '/cadastro' });
+
+    await goToStep3(/barbearia/i);
+    // Nome e WhatsApp ok, cidade vazia (obrigatória).
+    fireEvent.change(screen.getByPlaceholderText(/^nome /i), {
+      target: { value: 'Barbearia Teste' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('(11) 99999-9999'), {
+      target: { value: '(11) 99999-9999' },
+    });
+    submitFinal();
+
+    await waitFor(() => expect(screen.getByPlaceholderText('São Paulo')).toHaveFocus());
+    expect(registerMock).not.toHaveBeenCalled();
+  });
+
   it('a etapa 3 mostra o vocabulário do segmento escolhido', async () => {
     renderWithProviders(<LoginPage mode="register" />, { route: '/cadastro' });
 
