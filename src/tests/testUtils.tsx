@@ -9,10 +9,16 @@ export function renderWithProviders(
   options?: Omit<RenderOptions, 'wrapper'> & { route?: string; entryState?: unknown }
 ) {
   const { route = '/', entryState, ...renderOptions } = options ?? {};
+  // A route pode trazer query (?ref=...): o MemoryRouter separa pathname/search.
+  const [pathname, search] = route.split('?');
 
   function Wrapper({ children }: PropsWithChildren) {
     return (
-      <MemoryRouter initialEntries={[{ pathname: route, state: entryState }]}>
+      <MemoryRouter
+        initialEntries={[
+          { pathname, search: search ? `?${search}` : undefined, state: entryState },
+        ]}
+      >
         <PwaInstallProvider>{children}</PwaInstallProvider>
       </MemoryRouter>
     );

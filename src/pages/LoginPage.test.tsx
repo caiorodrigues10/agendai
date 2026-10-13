@@ -196,25 +196,31 @@ describe('LoginPage (usabilidade)', () => {
     fireEvent.change(screen.getByPlaceholderText('Crie uma senha segura'), {
       target: { value: 'senha123' },
     });
+    // Aceites são da etapa 1 (junto com a criação da conta).
+    fireEvent.click(screen.getByLabelText(/li e aceito os termos de uso/i));
+    fireEvent.click(screen.getByLabelText(/consinto com o tratamento dos meus dados/i));
     fireEvent.click(screen.getByRole('button', { name: /continuar/i }));
 
+    // Etapa 2 — segmento obrigatório.
     await waitFor(() => {
-      expect(screen.getByPlaceholderText('Salão Beleza & Estilo')).toBeInTheDocument();
+      expect(screen.getByRole('radio', { name: /barbearia/i })).toBeInTheDocument();
     });
+    fireEvent.click(screen.getByRole('radio', { name: /barbearia/i }));
+    fireEvent.click(screen.getByRole('button', { name: /continuar/i }));
 
-    fireEvent.change(screen.getByPlaceholderText('Salão Beleza & Estilo'), {
+    // Etapa 3 — dados do negócio (placeholder no vocabulário do segmento).
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Nome da sua barbearia')).toBeInTheDocument();
+    });
+    fireEvent.change(screen.getByPlaceholderText('Nome da sua barbearia'), {
       target: { value: 'Barbearia Teste' },
     });
     fireEvent.change(screen.getByPlaceholderText('(11) 99999-9999'), {
       target: { value: '(11) 99999-9999' },
     });
-    // Segmento é obrigatório no cadastro — sem escolher, o form não avança.
-    fireEvent.click(screen.getByRole('radio', { name: /barbearia/i }));
     fireEvent.change(screen.getByPlaceholderText('São Paulo'), {
       target: { value: 'São Paulo' },
     });
-    fireEvent.click(screen.getByLabelText(/li e aceito os termos de uso/i));
-    fireEvent.click(screen.getByLabelText(/consinto com o tratamento dos meus dados/i));
 
     registerMock.mockImplementation(async () => {
       authState.user = {
@@ -225,7 +231,7 @@ describe('LoginPage (usabilidade)', () => {
       } as StaffMember;
       return { ok: true };
     });
-    fireEvent.click(screen.getByRole('button', { name: /criar conta/i }));
+    fireEvent.click(screen.getByRole('button', { name: /criar minha conta/i }));
   };
 
   it('após cadastro por e-mail mostra tela de confirmação e não redireciona', async () => {
