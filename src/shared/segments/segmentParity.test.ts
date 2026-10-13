@@ -13,6 +13,7 @@ import {
   SEGMENT_SCHEDULE_PRESETS,
   SEGMENTS_BY_GROUP,
   audienceAppliesTo,
+  getAuxiliaryProfile,
   getSegmentConfig,
   segmentSearchText,
 } from './index';
@@ -261,6 +262,15 @@ describe('config de segmento no frontend', () => {
     expect(getSegmentConfig('AUTO_REPAIR').auxiliaryProfile).toBe('vehicle');
     expect(getSegmentConfig('BARBERSHOP').auxiliaryProfile).toBeUndefined();
     expect(getSegmentConfig('OTHER').auxiliaryProfile).toBeUndefined();
+  });
+
+  it('o helper que a UI usa devolve a mesma ficha (sem comparar enum à mão)', () => {
+    expect(getAuxiliaryProfile('PETSHOP')).toBe('pet');
+    expect(getAuxiliaryProfile('VETERINARY')).toBe('pet');
+    expect(getAuxiliaryProfile('CAR_WASH')).toBe('vehicle');
+    expect(getAuxiliaryProfile('BARBERSHOP')).toBeUndefined();
+    expect(getAuxiliaryProfile(null)).toBeUndefined();
+    expect(getAuxiliaryProfile(undefined)).toBeUndefined();
   });
 });
 

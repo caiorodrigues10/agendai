@@ -9,7 +9,7 @@ import {
 } from '../shared/segments';
 
 export interface SegmentLabels {
-  /** Segmento resolvido (BARBERSHOP quando o salão ainda não escolheu). */
+  /** Segmento resolvido (OTHER quando o salão ainda não escolheu). */
   segment: BusinessSegment;
   /** Valor bruto do salão, sem fallback — null quando desconhecido. */
   rawSegment: BusinessSegment | null;
@@ -20,8 +20,9 @@ export interface SegmentLabels {
 
 /**
  * Vocabulário do segmento do salão logado (ou do público, que lê o mesmo
- * contexto). Fora do provider cai no default de barbearia — o app inteiro é
- * envolvido pelo BarbershopProvider, então o fallback é só para testes/isolado.
+ * contexto). Sem salão/settings o fallback é OTHER — o mesmo default de
+ * `BarbershopContext` e `BusinessSegmentSection`, para o app nunca assumir
+ * palavras de barbearia num negócio que ainda não escolheu o segmento.
  *
  * `segmentOverride` serve para telas que mostram o vocabulário de um segmento
  * que ainda não é o do salão (ex.: resumo no cadastro).
@@ -33,9 +34,7 @@ export function useSegmentLabels(segmentOverride?: BusinessSegment | null): Segm
 
   return useMemo(
     () => {
-      // Sem salão ainda (contexto vazio/settings carregando) o vocabulário é o
-      // de barbearia — o mesmo default do banco. OTHER explícito é OTHER.
-      const config = getSegmentConfig(rawSegment ?? 'BARBERSHOP');
+      const config = getSegmentConfig(rawSegment ?? 'OTHER');
       return {
         segment: config.segment,
         rawSegment,

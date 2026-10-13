@@ -46,6 +46,7 @@ import { RecurringPackagesPanel } from '../features/recurring';
 import { OrganizationsPanel } from '../features/organizations';
 import { ErrorBoundary } from '../components/infra/ErrorBoundary';
 import { EquipmentPanel } from '../features/equipment';
+import { getAuxiliaryProfile } from '../shared/segments';
 
 
 export const StaffDashboard: React.FC = () => {
@@ -693,7 +694,7 @@ export const StaffDashboard: React.FC = () => {
           onJoin={handleJoinQueue}
           onCancel={() => setShowJoinForm(false)}
           isStaffMode={true}
-          showPetSelector={settings?.businessSegment === 'PETSHOP'}
+          showPetSelector={getAuxiliaryProfile(settings?.businessSegment) === 'pet'}
         />
       )}
       <ClosedSalonJoinModal

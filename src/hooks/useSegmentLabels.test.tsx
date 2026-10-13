@@ -15,11 +15,12 @@ function wrapperWithSettings(settings: unknown) {
 }
 
 describe('useSegmentLabels', () => {
-  it('sem provider cai no vocabulário de barbearia (compat)', () => {
+  it('sem provider cai no vocabulário genérico de OTHER (fallback único do app)', () => {
     const { result } = renderHook(() => useSegmentLabels());
-    expect(result.current.segment).toBe('BARBERSHOP');
+    expect(result.current.segment).toBe('OTHER');
     expect(result.current.rawSegment).toBeNull();
-    expect(result.current.labels.professional).toBe('barbeiro');
+    expect(result.current.labels.professional).toBeTruthy();
+    expect(result.current.config.targetAudience.applies).toBe(false);
   });
 
   it('lê o segmento e o público do salão no contexto', () => {

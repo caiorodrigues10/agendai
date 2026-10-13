@@ -158,4 +158,23 @@ describe('SegmentPicker', () => {
     setup({ value: 'PETSHOP' });
     expect(screen.getByText(/preparar serviços, textos e horários para petshops/i)).toBeInTheDocument();
   });
+
+  it('mostra o aviso de que não é prontuário nos segmentos de saúde', () => {
+    setup({ value: 'PSYCHOTHERAPY', audience: null });
+    expect(screen.getByRole('note')).toHaveTextContent(/não é prontuário/i);
+  });
+
+  it('o aviso de saúde não aparece fora dos segmentos de saúde', () => {
+    const view = setup({ value: 'BARBERSHOP', audience: 'MASCULINO' });
+    expect(screen.queryByRole('note')).toBeNull();
+    view.rerender(
+      <SegmentPicker
+        value="CAR_WASH"
+        audience={null}
+        onChange={() => undefined}
+        onAudienceChange={() => undefined}
+      />
+    );
+    expect(screen.queryByRole('note')).toBeNull();
+  });
 });

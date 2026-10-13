@@ -35,6 +35,7 @@ export const BusinessSegmentSection: React.FC<{
   const current = settings.businessSegment ?? 'OTHER';
   const audienceApplies = audienceAppliesTo(current);
   const currentAudience = audienceApplies ? (settings.targetAudience ?? null) : null;
+  const complianceNote = getSegmentConfig(current).complianceNote;
 
   const save = async (patch: Partial<ShopSettings>, successMessage: string) => {
     setSaving(true);
@@ -100,6 +101,13 @@ export const BusinessSegmentSection: React.FC<{
             }}
           />
         </div>
+      )}
+
+      {/* Segmentos de saúde: deixa claro que é agenda, não prontuário. */}
+      {complianceNote && (
+        <p className="mt-4 rounded-lg bg-warning/10 px-3 py-2 text-xs text-warning" role="note">
+          {complianceNote}
+        </p>
       )}
     </div>
   );

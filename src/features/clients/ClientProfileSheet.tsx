@@ -44,6 +44,7 @@ import {
 import { METRIC_LABEL } from '../../utils/metricLabels';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { ClientPetsPanel } from './ClientPetsPanel';
+import { ClientVehiclesPanel } from './ClientVehiclesPanel';
 import { useSegmentLabels } from '../../hooks/useSegmentLabels';
 import { ModalShell } from '../../components/patterns/ModalShell';
 import { SectionError } from '../../components/patterns';
@@ -60,7 +61,7 @@ const PAYMENT_LABEL: Record<PackagePaymentMethod, string> = {
   other: 'Outro',
 };
 
-type ProfileTab = 'geral' | 'pacotes' | 'historico' | 'financeiro' | 'pets';
+type ProfileTab = 'geral' | 'pacotes' | 'historico' | 'financeiro' | 'pets' | 'vehicles';
 
 function clientPhoneLabel(whatsapp: string): string {
   const digits = whatsapp.replace(/\D/g, '');
@@ -108,8 +109,11 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const titleId = useId();
-  const { segment } = useSegmentLabels();
-  const isPetshop = segment === 'PETSHOP';
+  const { config } = useSegmentLabels();
+  // Ficha auxiliar manda na aba: pet em petshop/veterinária, veículo em
+  // lava jato/oficina (antes era `segment === 'PETSHOP'` no código todo).
+  const showPets = config.auxiliaryProfile === 'pet';
+  const showVehicles = config.auxiliaryProfile === 'vehicle';
 
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -164,11 +168,12 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
           ['geral', 'Geral'],
           ['pacotes', 'Pacotes'],
           ['historico', 'Histórico'],
-          ...(isPetshop ? [['pets', 'Pets'] as const] : []),
+          ...(showPets ? [['pets', 'Pets'] as const] : []),
+          ...(showVehicles ? [['vehicles', 'Veículos'] as const] : []),
           ...(canAnalytics ? [['financeiro', 'Financeiro'] as const] : []),
         ] as [ProfileTab, string][]
       ),
-    [canAnalytics, isPetshop]
+    [canAnalytics, showPets, showVehicles]
   );
 
   const loadDetail = useCallback(async () => {
@@ -892,8 +897,12 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
               </div>
             )}
 
-            {tab === 'pets' && isPetshop && clientId && (
+            {tab === 'pets' && showPets && clientId && (
               <ClientPetsPanel clientId={clientId} onChanged={() => void loadDetail()} />
+            )}
+
+            {tab === 'vehicles' && showVehicles && clientId && (
+              <ClientVehiclesPanel clientId={clientId} onChanged={() => void loadDetail()} />
             )}
 
             {tab === 'financeiro' && canAnalytics && crmProfile && (

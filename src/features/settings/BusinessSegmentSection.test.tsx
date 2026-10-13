@@ -63,4 +63,14 @@ describe('BusinessSegmentSection', () => {
       expect.objectContaining({ businessSegment: 'BARBERSHOP', targetAudience: 'UNISSEX' })
     );
   });
+
+  it('mostra o aviso de que não é prontuário quando o segmento é de saúde', () => {
+    setup(baseSettings({ businessSegment: 'NUTRITION', targetAudience: null }));
+    expect(screen.getByRole('note')).toHaveTextContent(/não é prontuário/i);
+  });
+
+  it('não mostra o aviso fora dos segmentos de saúde', () => {
+    setup(baseSettings());
+    expect(screen.queryByRole('note')).toBeNull();
+  });
 });

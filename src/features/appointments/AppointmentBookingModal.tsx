@@ -29,6 +29,7 @@ import { ThemedCalendar, toLocalISO } from '../../components/ui/ThemedCalendar';
 import { ModalShell } from '../../components/patterns/ModalShell';
 import { formatCurrencyBRL } from '../../utils/formatters';
 import { ClientPet } from '../../infra/clientsApi';
+import { getAuxiliaryProfile } from '../../shared/segments';
 
 interface AppointmentBookingModalProps {
   services: Service[];
@@ -86,7 +87,8 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
   const [usePackage, setUsePackage] = React.useState(false);
   const [clientPets, setClientPets] = React.useState<ClientPet[]>([]);
   const [selectedPetId, setSelectedPetId] = React.useState('');
-  const isPetshop = settings.businessSegment === 'PETSHOP';
+  // Pet só entra na ficha dos segmentos de pet (não em "petshop" hardcodado).
+  const showPetSelector = getAuxiliaryProfile(settings.businessSegment) === 'pet';
 
   const {
     register,
@@ -165,7 +167,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
       .listSold({ clientId: selectedClient.id, status: 'ACTIVE' })
       .then(setClientPackages)
       .catch(() => setClientPackages([]));
-    if (isPetshop) {
+    if (showPetSelector) {
       clientsApi
         .listPets(selectedClient.id)
         .then(pets => {
@@ -177,7 +179,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
       setClientPets([]);
       setSelectedPetId('');
     }
-  }, [selectedClient, isPetshop]);
+  }, [selectedClient, showPetSelector]);
 
   React.useEffect(() => {
     if (!matchingPackage) setUsePackage(false);
@@ -202,7 +204,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
         ...data,
         clientId: selectedClient?.id,
         clientPackageId: usePackage && matchingPackage ? matchingPackage.id : undefined,
-        petId: isPetshop && selectedPetId ? selectedPetId : undefined,
+        petId: showPetSelector && selectedPetId ? selectedPetId : undefined,
       });
       onClose();
     } finally {
@@ -419,7 +421,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
                   ))}
                 </div>
               )}
-              {isPetshop && selectedClient && clientPets.length > 0 && (
+              {showPetSelector && selectedClient && clientPets.length > 0 && (
                 <div className="space-y-1">
                   <p className="flex items-center gap-1 text-[11px] text-text-secondary font-bold uppercase tracking-wider">
                     <Paw size={12} /> Pet

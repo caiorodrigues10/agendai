@@ -11,7 +11,13 @@
 import { SEGMENT_CONFIGS, SEGMENT_SEARCH_ALIASES } from './segmentConfigs';
 import { SEGMENT_CATALOGS, SEGMENT_OPERATION_MODES, SEGMENT_SCHEDULE_PRESETS } from './segmentCatalogs';
 import { SEGMENT_GROUP_LABELS } from './types';
-import type { BusinessSegment, SegmentConfig, SegmentGroup, TargetAudience } from './types';
+import type {
+  BusinessSegment,
+  SegmentAuxiliaryProfile,
+  SegmentConfig,
+  SegmentGroup,
+  TargetAudience,
+} from './types';
 
 export * from './types';
 export { SEGMENT_CONFIGS } from './segmentConfigs';
@@ -118,6 +124,18 @@ export function getSchedulePreset(segment: BusinessSegment) {
 /** Fila, agenda ou ambos — o que o backend aplica quando o segmento vem no cadastro. */
 export function getSuggestedOperationMode(segment: BusinessSegment) {
   return SEGMENT_OPERATION_MODES[segment];
+}
+
+/**
+ * Ficha auxiliar do cliente que o segmento pede: pet em petshop/veterinária,
+ * veículo em lava jato/oficina. Consumidores leem isto em vez de comparar o
+ * enum à mão — com 22 segmentos, `segment === 'PETSHOP'` no código inteiro é
+ * como uma ficha nova esquece de ser ligada.
+ */
+export function getAuxiliaryProfile(
+  segment: BusinessSegment | null | undefined
+): SegmentAuxiliaryProfile | undefined {
+  return getSegmentConfig(segment).auxiliaryProfile;
 }
 
 /**

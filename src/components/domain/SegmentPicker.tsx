@@ -214,6 +214,13 @@ export const SegmentPicker: React.FC<{
           {config.pickSummary}
         </p>
       )}
+
+      {/* Saúde: o aviso acompanha a escolha, para não virar prontuário por engano. */}
+      {value && config.complianceNote && (
+        <p className="mt-2 rounded-lg bg-warning/10 px-3 py-2 text-xs text-warning" role="note">
+          {config.complianceNote}
+        </p>
+      )}
     </fieldset>
   );
 };

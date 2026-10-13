@@ -101,6 +101,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
       staff: 'equipe',
     },
     targetAudience: { applies: false, suggested: null },
+    auxiliaryProfile: 'pet',
   },
   BEAUTY_STUDIO: {
     segment: 'BEAUTY_STUDIO',
