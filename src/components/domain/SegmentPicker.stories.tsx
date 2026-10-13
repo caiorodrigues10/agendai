@@ -48,6 +48,22 @@ export const PetshopSelecionado: Story = {
   render: controlled('PETSHOP', null),
 };
 
+export const VeterinariaComPets: Story = {
+  render: controlled('VETERINARY', null),
+};
+
+export const LavaJatoComVeiculos: Story = {
+  render: controlled('CAR_WASH', null),
+};
+
+export const SaudeComAvisoDeProntuario: Story = {
+  render: controlled('PHYSIOTHERAPY', null),
+};
+
+export const OutroSelecionado: Story = {
+  render: controlled('OTHER', null),
+};
+
 export const ComErro: Story = {
   args: { error: 'Selecione o tipo do negócio.' },
   render: () => (
