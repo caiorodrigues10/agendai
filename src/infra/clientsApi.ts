@@ -72,6 +72,26 @@ export interface ClientPetBody {
   notes?: string | null;
 }
 
+export interface ClientVehicle {
+  id: string;
+  barbershopId: string;
+  clientId: string;
+  plate: string;
+  vehicleModel: string;
+  color: string | null;
+  notes: string | null;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ClientVehicleBody {
+  plate: string;
+  vehicleModel: string;
+  color?: string | null;
+  notes?: string | null;
+}
+
 export const clientsApi = {
   list: async (params?: { search?: string; page?: number; limit?: number }) => {
     const res = await apiClient<{ success: boolean; data: SalonClient[]; meta: ListMeta }>(
@@ -225,6 +245,49 @@ export const clientsApi = {
   deletePet: async (clientId: string, petId: string) => {
     await apiClient<void>(
       `/api/clients/${clientId}/pets/${petId}`,
+      'DELETE',
+      undefined,
+      token()
+    );
+  },
+
+  listVehicles: async (clientId: string) => {
+    const res = await apiClient<{ success: boolean; data: ClientVehicle[] }>(
+      `/api/clients/${clientId}/vehicles`,
+      'GET',
+      undefined,
+      token()
+    );
+    return unwrap<ClientVehicle[]>(res);
+  },
+
+  createVehicle: async (clientId: string, body: ClientVehicleBody) => {
+    const res = await apiClient<{ success: boolean; data: ClientVehicle }>(
+      `/api/clients/${clientId}/vehicles`,
+      'POST',
+      body,
+      token()
+    );
+    return unwrap<ClientVehicle>(res);
+  },
+
+  updateVehicle: async (
+    clientId: string,
+    vehicleId: string,
+    body: Partial<ClientVehicleBody> & { active?: boolean }
+  ) => {
+    const res = await apiClient<{ success: boolean; data: ClientVehicle }>(
+      `/api/clients/${clientId}/vehicles/${vehicleId}`,
+      'PATCH',
+      body,
+      token()
+    );
+    return unwrap<ClientVehicle>(res);
+  },
+
+  deleteVehicle: async (clientId: string, vehicleId: string) => {
+    await apiClient<void>(
+      `/api/clients/${clientId}/vehicles/${vehicleId}`,
       'DELETE',
       undefined,
       token()
