@@ -53,8 +53,13 @@ vi.mock('../infra/authStorage', () => ({
   },
 }));
 
+const checkCpfMock = vi.fn();
+
 vi.mock('../infra/authApi', () => ({
-  authApi: { resendVerification: vi.fn() },
+  authApi: {
+    resendVerification: vi.fn(),
+    checkCpf: (...args: unknown[]) => checkCpfMock(...args),
+  },
 }));
 
 vi.mock('../infra/subscriptionsApi', () => ({
@@ -63,6 +68,8 @@ vi.mock('../infra/subscriptionsApi', () => ({
 
 function resetMocks() {
   authState = { user: null, loading: false };
+  checkCpfMock.mockReset();
+  checkCpfMock.mockResolvedValue({ success: true, data: { available: true } });
   registerMock.mockReset();
   navigateMock.mockReset();
   subscriptionsMeMock.mockReset();
@@ -347,5 +354,52 @@ describe('Cadastro em 3 etapas (wizard)', () => {
     await goToStep3(/petshop/i);
     expect(screen.getByPlaceholderText('Nome do seu petshop')).toBeInTheDocument();
     expect(screen.getByText(/horários para petshops/i)).toBeInTheDocument();
+  });
+
+  it('CPF duplicado: erro inline no campo com link "Entrar agora?" e volta para a etapa 1', async () => {
+    registerMock.mockResolvedValue({ ok: false, message: 'CPF já cadastrado' });
+    renderWithProviders(<LoginPage mode="register" />, { route: '/cadastro' });
+
+    await goToStep3(/barbearia/i);
+    fillStep3();
+    submitFinal();
+
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Comece pelo seu acesso' })).toBeInTheDocument()
+    );
+    expect(screen.getByText('Este CPF já está cadastrado.')).toBeInTheDocument();
+    // O link do campo tem a interrogação; o atalho do topo ("Entrar agora") não.
+    expect(screen.getByRole('button', { name: 'Entrar agora?' })).toBeInTheDocument();
+  });
+
+  it('check-cpf no blur: CPF ocupado mostra erro inline e o Continuar não avança', async () => {
+    checkCpfMock.mockResolvedValue({ success: true, data: { available: false } });
+    renderWithProviders(<LoginPage mode="register" />, { route: '/cadastro' });
+
+    // Preenche a etapa 1 inteira, mas o CPF está ocupado no servidor.
+    fireEvent.change(screen.getByPlaceholderText('João Silva'), {
+      target: { value: 'João Silva' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('seu@email.com'), {
+      target: { value: 'caio@example.com' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('000.000.000-00'), {
+      target: { value: '52998224725' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('Crie uma senha segura'), {
+      target: { value: 'senha123' },
+    });
+    fireEvent.click(screen.getByLabelText(/li e aceito os termos de uso/i));
+    fireEvent.click(screen.getByLabelText(/consinto com o tratamento dos meus dados/i));
+
+    fireEvent.blur(screen.getByPlaceholderText('000.000.000-00'));
+    await waitFor(() =>
+      expect(screen.getByText('Este CPF já está cadastrado.')).toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /^continuar$/i }));
+    expect(checkCpfMock).toHaveBeenCalled();
+    expect(screen.getByRole('heading', { name: 'Comece pelo seu acesso' })).toBeInTheDocument();
+    expect(registerMock).not.toHaveBeenCalled();
   });
 });

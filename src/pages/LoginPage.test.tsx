@@ -61,6 +61,7 @@ const resendVerificationMock = vi.hoisted(() => vi.fn());
 
 vi.mock('../infra/authApi', () => ({
   authApi: {
+    checkCpf: vi.fn().mockResolvedValue({ success: true, data: { available: true } }),
     resendVerification: resendVerificationMock,
   },
 }));

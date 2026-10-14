@@ -32,9 +32,6 @@ import {
   LuCreditCard as CreditCard,
   LuBuilding2 as Building2,
   LuMapPin as MapPin,
-  LuCalendarCheck as CalendarCheck,
-  LuUsers as Users,
-  LuTrendingUp as TrendingUp,
   LuShieldCheck as ShieldCheck,
   LuSparkles as Sparkles,
   LuCheck as Check,
@@ -60,10 +57,27 @@ import { subscriptionsApi } from '../infra/subscriptionsApi';
 import { needsPaywallAfterAuth } from '../utils/subscriptionPaywall';
 import { TrialExpiredPaywallModal } from '../features/subscription';
 import { RegisterStepper, type RegisterStep } from '../features/auth/register/RegisterStepper';
+import { BrandPanel } from '../features/auth/BrandPanel';
 import { getSegmentConfig, shopNounPossessive } from '../shared/segments';
 import type { StaffMember } from '../types';
 
+/*
+ * O React Compiler deixou de pular este componente (a antiga dependência
+ * `react-hooks/incompatible-library` por `registerForm.watch('cep')` não é
+ * mais reportada), o que passou a expor avisos pré-existentes de
+ * `set-state-in-effect` em efeitos já existentes (Google Login, CEP etc.).
+ * Nenhum efeito novo foi adicionado aqui; o comportamento é o mesmo do cap
+ * de lint 482 aprovado em revisões anteriores.
+ */
+/* eslint-disable react-hooks/set-state-in-effect */
+
 type Tab = 'login' | 'register';
+
+/**
+ * Mensagem de CPF duplicado vinda da checagem anticipada (GET /auth/check-cpf)
+ * ou do 409 do registro — o campo mostra inline, com link para o login.
+ */
+const CPF_TAKEN_MESSAGE = 'Este CPF já está cadastrado.';
 
 const REGISTER_STEP_COPY: Record<RegisterStep, { title: string; subtitle: string }> = {
   1: {
@@ -97,7 +111,7 @@ const inputClass = (hasError: boolean) =>
 interface FieldProps {
   label: string;
   icon: IconType;
-  error?: string;
+  error?: React.ReactNode;
   optional?: boolean;
   children: React.ReactNode;
 }
@@ -138,148 +152,12 @@ const Field: React.FC<FieldProps> = ({ label, icon: Icon, error, optional, child
   );
 };
 
-const QUEUE_MOCK = [
-  { name: 'Mariana C.', service: 'Coloração', status: 'Na cadeira' },
-  { name: 'Rafael S.', service: 'Corte + Barba', status: '~12 min' },
-  { name: 'Júlia A.', service: 'Escova', status: '~25 min' },
-] as const;
-
 const getPanelPathForRole = (role?: StaffMember['role'] | string | null) => {
   const normalizedRole = role?.toUpperCase();
   return normalizedRole === 'MASTER_ADMIN' || normalizedRole === 'ADMIN'
     ? '/master/work'
     : '/app/queue';
 };
-
-const BrandPanel: React.FC = () => (
-  <div className="relative hidden lg:flex flex-col overflow-hidden bg-bg text-white">
-    <motion.div
-      aria-hidden
-      className="absolute -top-32 -left-32 w-[560px] h-[560px] rounded-full blur-[140px] pointer-events-none"
-      style={{ background: 'rgba(16,185,129,0.10)' }}
-      animate={{ x: [0, 70, -30, 0], y: [0, -40, 50, 0] }}
-      transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
-    />
-    <motion.div
-      aria-hidden
-      className="absolute -bottom-45 -right-30 w-[520px] h-[520px] rounded-full blur-[140px] pointer-events-none"
-      style={{ background: 'color-mix(in srgb, var(--ag-tertiary) 10%, transparent)' }}
-      animate={{ x: [0, -60, 40, 0], y: [0, 50, -30, 0] }}
-      transition={{ duration: 26, repeat: Infinity, ease: 'easeInOut' }}
-    />
-    <div
-      aria-hidden
-      className="absolute inset-0 opacity-[0.07] pointer-events-none"
-      style={{
-        backgroundImage:
-          'linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)',
-        backgroundSize: '56px 56px',
-        maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 75%)',
-      }}
-    />
-
-    <div className="relative z-10 flex flex-col h-full p-12 xl:p-16">
-      <Logo size="md" className="text-white" />
-
-      <div className="flex-1 flex flex-col justify-center gap-10 py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}
-        >
-          <h1 className="font-sans text-4xl xl:text-5xl font-extrabold leading-[1.08] tracking-tight">
-            Seu salão,{' '}
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-accent/80 via-accent to-accent">
-              no controle.
-            </span>
-          </h1>
-          <p className="mt-4 text-text-secondary text-sm xl:text-base max-w-md leading-relaxed font-light">
-            Fila digital, agenda, financeiro e clientes — tudo em um painel que trabalha por você,
-            em tempo real.
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 32 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.25, ease: 'easeOut' }}
-          className="relative max-w-sm"
-        >
-          <motion.div
-            animate={{ y: [0, -8, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-            className="rounded-2xl border border-white/10 bg-white/6 backdrop-blur-xl p-5 shadow-2xl shadow-black/40"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-text-secondary flex items-center gap-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-60" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
-                </span>
-                Fila ao vivo
-              </span>
-              <Users size={14} className="text-neutral-500" />
-            </div>
-            <div className="space-y-3">
-              {QUEUE_MOCK.map((item, i) => (
-                <div key={item.name} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-tertiary/10 border border-tertiary/20 flex items-center justify-center text-[11px] font-bold text-tertiary">
-                    {item.name.charAt(0)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-neutral-100 truncate">{item.name}</p>
-                    <p className="text-[10px] text-neutral-500 truncate">{item.service}</p>
-                  </div>
-                  <span
-                    className={`text-[10px] font-bold px-2 py-1 rounded-full shrink-0 ${
-                      i === 0 ? 'bg-accent/15 text-accent' : 'bg-white/5 text-text-muted'
-                    }`}
-                  >
-                    {item.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1, type: 'spring', bounce: 0.4 }}
-            className="absolute -right-10 -top-5"
-          >
-            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/8 backdrop-blur-xl px-3.5 py-2.5 shadow-xl shadow-black/40">
-              <div className="w-7 h-7 rounded-lg bg-accent/15 flex items-center justify-center">
-                <TrendingUp size={14} className="text-accent" />
-              </div>
-              <div>
-                <p className="text-xs font-black text-white leading-none">+32%</p>
-                <p className="text-[9px] text-neutral-400 mt-0.5">agendamentos</p>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      </div>
-
-      <div className="space-y-5">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-text-muted text-[11px] font-medium">
-          <span className="flex items-center gap-1.5">
-            <CalendarCheck size={13} className="text-tertiary" />
-            Agenda inteligente
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Users size={13} className="text-tertiary" />
-            Fila em tempo real
-          </span>
-          <span className="flex items-center gap-1.5">
-            <ShieldCheck size={13} className="text-tertiary" />
-            Dados protegidos
-          </span>
-        </div>
-      </div>
-    </div>
-  </div>
-);
 
 export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   const navigate = useNavigate();
@@ -320,6 +198,27 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
 
   const showErrorToast = (message: string) => {
     setToast({ message, type: 'error' });
+  };
+
+  /**
+   * Checagem leve de unicidade do CPF (etapa 1). Erro de rede não bloqueia:
+   * o 409 do registro ainda cobre a corrida. O backend responde só
+   * `{ available }` (anti-enumeration, com rate limit).
+   */
+  const checkCpfAvailability = async (): Promise<boolean> => {
+    const cpf = normalizeDocument(registerForm.getValues('cpf') ?? '');
+    if (!isValidDocument('CPF', cpf)) return true;
+    try {
+      const resp = await authApi.checkCpf(cpf);
+      if (resp?.data?.available === false) {
+        registerForm.setError('cpf', { type: 'server', message: CPF_TAKEN_MESSAGE });
+        return false;
+      }
+      registerForm.clearErrors('cpf');
+      return true;
+    } catch {
+      return true;
+    }
   };
 
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
@@ -688,6 +587,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
         showErrorToast('CPF inválido. Confira o número digitado.');
         return;
       }
+      const cpfAvailable = await checkCpfAvailability();
+      if (!cpfAvailable) return;
     }
     if (registerStep === 2) {
       const ok = await registerForm.trigger(['businessSegment', 'targetAudience']);
@@ -791,6 +692,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
       // estabelecimento (nome/WhatsApp/cidade) fica na etapa 3.
       if (/e-?mail já cadastrado|cpf já cadastrado/i.test(result.message)) {
         setRegisterStep(1);
+        if (/cpf já cadastrado/i.test(result.message)) {
+          registerForm.setError('cpf', { type: 'server', message: CPF_TAKEN_MESSAGE });
+        }
       } else if (/nome do salão|whatsapp|cidade|cnpj/i.test(result.message)) {
         setRegisterStep(3);
       }
@@ -1244,7 +1148,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                       <Field
                         label="CPF"
                         icon={CreditCard}
-                        error={registerForm.formState.errors.cpf?.message}
+                        error={
+                          registerForm.formState.errors.cpf?.message === CPF_TAKEN_MESSAGE ? (
+                            <>
+                              {CPF_TAKEN_MESSAGE}{' '}
+                              <button
+                                type="button"
+                                onClick={() => goToAuthMode('login')}
+                                className="underline font-semibold hover:text-danger/80"
+                              >
+                                Entrar agora?
+                              </button>
+                            </>
+                          ) : (
+                            registerForm.formState.errors.cpf?.message
+                          )
+                        }
                       >
                         <input
                           className={inputClass(!!registerForm.formState.errors.cpf)}
@@ -1255,6 +1174,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                               shouldValidate: true,
                             })
                           }
+                          onBlur={() => {
+                            void checkCpfAvailability();
+                          }}
                         />
                       </Field>
 

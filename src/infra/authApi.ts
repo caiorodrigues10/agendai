@@ -73,6 +73,11 @@ export const authApi = {
     apiClient<AuthResponse>('/api/auth/register', 'POST', payload),
   registerWithGoogle: (payload: RegisterWithGooglePayload & { recaptchaToken?: string }) =>
     apiClient<AuthResponse>('/api/auth/register-google', 'POST', payload),
+  checkCpf: (cpf: string) =>
+    apiClient<{ success: boolean; data: { available: boolean } }>(
+      `/api/auth/check-cpf?cpf=${encodeURIComponent(cpf)}`,
+      'GET'
+    ),
   refresh: (refreshToken?: string) =>
     apiClient<AuthResponse>('/api/auth/refresh', 'POST', { refreshToken }),
   me: (token: string) => apiClient<{ user: AuthUser }>('/api/auth/me', 'GET', undefined, token, { retried: true }),
