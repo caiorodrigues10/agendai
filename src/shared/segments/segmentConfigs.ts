@@ -14,7 +14,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     segment: 'BARBERSHOP',
     group: 'beauty',
     icon: 'Scissors',
-    cardDescription: 'Cortes, barba e atendimento por fila.',
+    cardDescription: 'Cortes, barba e fila digital',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar serviços, textos e horários para barbearias.',
     labels: {
@@ -37,7 +37,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     segment: 'HAIR_SALON',
     group: 'beauty',
     icon: 'Sparkles',
-    cardDescription: 'Corte, coloração e tratamento com hora marcada.',
+    cardDescription: 'Corte, cor e tratamento',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar serviços, textos e horários para salões de cabelo.',
     labels: {
@@ -59,8 +59,8 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
   NAIL_STUDIO: {
     segment: 'NAIL_STUDIO',
     group: 'beauty',
-    icon: 'Gem',
-    cardDescription: 'Manicure, pedicure, gel e nail art.',
+    icon: 'Hand',
+    cardDescription: 'Manicure, pedicure e nail art',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar serviços, textos e horários para estúdios de unhas.',
     labels: {
@@ -82,8 +82,8 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
   PETSHOP: {
     segment: 'PETSHOP',
     group: 'pet',
-    icon: 'Droplets',
-    cardDescription: 'Banho, tosa e cuidados para pets.',
+    icon: 'PawPrint',
+    cardDescription: 'Banho, tosa e cuidados para pets',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar serviços, textos e horários para petshops.',
     labels: {
@@ -130,7 +130,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     segment: 'LASH_BROW_STUDIO',
     group: 'beauty',
     icon: 'Eye',
-    cardDescription: 'Extensão de cílios e design de sobrancelha.',
+    cardDescription: 'Cílios e sobrancelhas',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar serviços, textos e horários para estúdios de cílios e sobrancelhas.',
     labels: {
@@ -152,8 +152,8 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
   AESTHETICS: {
     segment: 'AESTHETICS',
     group: 'beauty',
-    icon: 'Paintbrush',
-    cardDescription: 'Protocolos de estética.',
+    icon: 'Flower2',
+    cardDescription: 'Protocolos de estética',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar serviços, textos e horários para clínicas de estética.',
     labels: {
@@ -175,8 +175,8 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
   SPA: {
     segment: 'SPA',
     group: 'wellness',
-    icon: 'Coffee',
-    cardDescription: 'Massagem e relaxamento.',
+    icon: 'Waves',
+    cardDescription: 'Massagem e relaxamento',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar serviços, textos e horários para spas.',
     labels: {
@@ -199,7 +199,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     segment: 'OTHER',
     group: 'other',
     icon: 'Briefcase',
-    cardDescription: 'Qualquer outro tipo de negócio com atendimento.',
+    cardDescription: 'Qualquer outro tipo de negócio',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Você pode ajustar serviços e textos depois, nas configurações.',
     labels: {
@@ -223,7 +223,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     segment: 'MAKEUP_STUDIO',
     group: 'beauty',
     icon: 'Palette',
-    cardDescription: 'Maquiagem social, noiva e penteado para eventos.',
+    cardDescription: 'Maquiagem, noiva e penteado',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar serviços, textos e horários para maquiagem e penteado.',
     labels: {
@@ -245,8 +245,8 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
   PHYSIOTHERAPY: {
     segment: 'PHYSIOTHERAPY',
     group: 'health',
-    icon: 'Heart',
-    cardDescription: 'Sessões de fisioterapia e quiropraxia com hora marcada.',
+    icon: 'Activity',
+    cardDescription: 'Fisioterapia e quiropraxia',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar sessões, textos e horários para fisioterapia e quiropraxia.',
     complianceNote:
@@ -270,8 +270,8 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
   NUTRITION: {
     segment: 'NUTRITION',
     group: 'health',
-    icon: 'Clipboard',
-    cardDescription: 'Consultas e acompanhamento nutricional.',
+    icon: 'Apple',
+    cardDescription: 'Consultas e acompanhamento nutricional',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar consultas, textos e horários para nutrição.',
     complianceNote:
@@ -295,8 +295,8 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
   PSYCHOTHERAPY: {
     segment: 'PSYCHOTHERAPY',
     group: 'health',
-    icon: 'Heart',
-    cardDescription: 'Sessões de psicologia e terapia.',
+    icon: 'Brain',
+    cardDescription: 'Psicologia e terapia',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar sessões, textos e horários para psicologia e terapia.',
     complianceNote:
@@ -321,7 +321,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     segment: 'VETERINARY',
     group: 'pet',
     icon: 'Stethoscope',
-    cardDescription: 'Consultas e vacinas com cadastro de pet.',
+    cardDescription: 'Consultas, vacinas e cadastro de pet',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar consultas, textos e horários para clínicas veterinárias.',
     auxiliaryProfile: 'pet',
@@ -345,7 +345,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     segment: 'CAR_WASH',
     group: 'automotive',
     icon: 'Droplets',
-    cardDescription: 'Lavagem, enceramento e estética automotiva.',
+    cardDescription: 'Lavagem, enceramento e estética',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar serviços, textos e horários para lava jato.',
     auxiliaryProfile: 'vehicle',
@@ -369,7 +369,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     segment: 'AUTO_REPAIR',
     group: 'automotive',
     icon: 'Wrench',
-    cardDescription: 'Manutenção, revisão e serviços de oficina.',
+    cardDescription: 'Manutenção, revisão e oficina',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar serviços, textos e horários para mecânica e oficina.',
     auxiliaryProfile: 'vehicle',
@@ -393,7 +393,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     segment: 'PHOTO_STUDIO',
     group: 'services',
     icon: 'Camera',
-    cardDescription: 'Ensaios e coberturas com hora marcada.',
+    cardDescription: 'Ensaios e coberturas',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar sessões, textos e horários para fotografia.',
     labels: {
@@ -416,7 +416,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     segment: 'TATTOO_PIERCING',
     group: 'services',
     icon: 'PenTool',
-    cardDescription: 'Tatuagem e piercing com agendamento de sessão.',
+    cardDescription: 'Tatuagem e piercing',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar sessões, textos e horários para tatuagem e piercing.',
     labels: {
@@ -438,8 +438,8 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
   COACHING: {
     segment: 'COACHING',
     group: 'services',
-    icon: 'Briefcase',
-    cardDescription: 'Consultoria e coaching para clientes e empresas.',
+    icon: 'Target',
+    cardDescription: 'Consultoria e coaching',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar sessões, textos e horários para consultoria e coaching.',
     labels: {
@@ -462,7 +462,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     segment: 'PRIVATE_CLASSES',
     group: 'services',
     icon: 'Music',
-    cardDescription: 'Aulas particulares de música, idiomas e reforço.',
+    cardDescription: 'Música, idiomas e reforço',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar aulas, textos e horários para aulas particulares.',
     labels: {
@@ -484,8 +484,8 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
   TECH_SUPPORT: {
     segment: 'TECH_SUPPORT',
     group: 'services',
-    icon: 'Wrench',
-    cardDescription: 'Reparos e assistência técnica com visita agendada.',
+    icon: 'Laptop',
+    cardDescription: 'Assistência técnica e reparos',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar atendimentos, textos e horários para assistência técnica.',
     labels: {
@@ -508,7 +508,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     segment: 'HOME_SERVICES',
     group: 'services',
     icon: 'Home',
-    cardDescription: 'Diaristas e serviços domiciliares com visita agendada.',
+    cardDescription: 'Diaristas e serviços domiciliares',
     audienceQuestion: 'Quem você atende?',
     pickSummary: 'Vamos preparar serviços, textos e horários para serviços domiciliares.',
     labels: {

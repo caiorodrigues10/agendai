@@ -228,12 +228,15 @@ function RevenueCard() {
 }
 
 function GrowthBadge() {
+  // Flutua acima do card: -top-11 (44px) >= altura do badge (46px - 2px de
+  // folga) tira a badge da área de conteúdo — não cobre nem o ícone de
+  // usuários nem o rótulo do cabeçalho; -right-3 mantém o canto alinhado.
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.85 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.9, type: 'spring', bounce: 0.4 }}
-      className="absolute -top-4 right-1 xl:-top-5 xl:-right-5 z-30"
+      className="absolute -top-11 -right-3 z-10"
     >
       <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/8 backdrop-blur-xl px-3 py-2 shadow-xl shadow-black/40">
         <div className="w-6 h-6 rounded-lg bg-accent/15 flex items-center justify-center">

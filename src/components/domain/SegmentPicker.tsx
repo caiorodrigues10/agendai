@@ -1,5 +1,11 @@
 import React, { useId, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import {
+  LuCheck as Check,
+  LuSearch as Search,
+  LuSearchX as SearchX,
+  LuX as X,
+} from 'react-icons/lu';
 import { DynamicIcon } from '../ui/DynamicIcon';
 import {
   AUDIENCE_OPTIONS,
@@ -22,6 +28,65 @@ function matchesSearch(segment: BusinessSegment, needle: string): boolean {
   if (!needle) return true;
   return segmentSearchText(segment).includes(needle);
 }
+
+/**
+ * Card de segmento: chip do ícone, título com no máximo 2 linhas e
+ * descrição cortada em 2. Mesmo tamanho para qualquer card do grid
+ * (h-full + min-h), com estados de hover/foco/selecionado.
+ */
+const SegmentCard: React.FC<{
+  segment: BusinessSegment;
+  selected: boolean;
+  tabIndex: 0 | -1;
+  innerRef: (node: HTMLButtonElement | null) => void;
+  onPick: () => void;
+}> = ({ segment, selected, tabIndex, innerRef, onPick }) => {
+  const c = getSegmentConfig(segment);
+  return (
+    <button
+      ref={innerRef}
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      tabIndex={tabIndex}
+      onClick={onPick}
+      className={[
+        'relative flex h-full min-h-[128px] w-full flex-col gap-2 rounded-2xl border p-4 text-left',
+        'transition-[transform,box-shadow,border-color,background-color] duration-200 ease-out outline-none',
+        'hover:-translate-y-0.5 hover:shadow-[0_8px_30px_-12px] hover:shadow-accent/30',
+        'motion-reduce:hover:translate-y-0 motion-reduce:transition-none',
+        'focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
+        selected
+          ? 'border-accent bg-accent/10'
+          : 'border-border bg-surface hover:border-accent/40',
+      ].join(' ')}
+    >
+      <span
+        aria-hidden
+        className={[
+          'flex size-10 shrink-0 items-center justify-center rounded-xl transition-colors',
+          selected ? 'bg-accent text-accent-fg' : 'bg-accent/10 text-accent',
+        ].join(' ')}
+      >
+        <DynamicIcon name={c.icon} size={18} />
+      </span>
+      <span className="line-clamp-2 text-sm font-semibold leading-tight text-balance break-words text-text-primary">
+        {c.labels.segmentLabel}
+      </span>
+      <span className="line-clamp-2 text-xs leading-snug text-text-secondary">
+        {c.cardDescription}
+      </span>
+      {selected && (
+        <span
+          aria-hidden
+          className="absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-accent-fg"
+        >
+          <Check size={11} strokeWidth={3} />
+        </span>
+      )}
+    </button>
+  );
+};
 
 /**
  * Escolha de segmento no cadastro e no wizard do master.
@@ -110,60 +175,71 @@ export const SegmentPicker: React.FC<{
     >
       <legend className="text-sm font-bold text-text-primary mb-3">{legend}</legend>
 
-      <label className="block mb-3">
-        <span className="sr-only">Buscar segmento</span>
-        <input
-          type="search"
-          value={query}
-          onChange={event => setQuery(event.target.value)}
-          placeholder="Buscar segmento (ex.: unha, pet, carro)"
-          className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted outline-none focus-visible:ring-2 focus-visible:ring-focus"
-        />
-      </label>
+      {/* Busca sticky: a lista de grupos é longa; o campo acompanha a rolagem. */}
+      <div className="sticky top-0 z-20 mb-4 bg-bg/80 pb-2 backdrop-blur">
+        <div className="relative">
+          <label htmlFor={`${groupId}-search`} className="sr-only">
+            Buscar segmento
+          </label>
+          <Search
+            size={15}
+            aria-hidden
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+          />
+          <input
+            id={`${groupId}-search`}
+            type="search"
+            value={query}
+            onChange={event => setQuery(event.target.value)}
+            placeholder="Buscar segmento (ex.: unha, pet, carro)"
+            className="w-full rounded-xl border border-border bg-surface py-2.5 pl-9 pr-10 text-sm text-text-primary placeholder:text-text-muted outline-none transition-colors focus-visible:ring-2 focus-visible:ring-focus [&::-webkit-search-cancel-button]:hidden"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              aria-label="Limpar busca"
+              className="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-2 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+            >
+              <X size={14} aria-hidden />
+            </button>
+          )}
+        </div>
+      </div>
 
       <div
         role="radiogroup"
         aria-label={legend}
         tabIndex={-1}
         onKeyDown={onSegmentsKeyDown}
+        className="@container"
       >
         {visibleGroups.map(group => (
-          <div key={group.group} className="mb-4 last:mb-0">
-            <p className="text-xs font-bold uppercase tracking-wide text-text-muted mb-2">
-              {group.label}
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+          <div key={group.group} className="mt-6">
+            <div className="mb-3 flex items-baseline justify-between border-t border-white/5 pt-3">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-text-secondary">
+                {group.label}
+              </p>
+              <span aria-hidden className="text-[11px] font-semibold tabular-nums text-text-muted">
+                {group.segments.length}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-3 @sm:grid-cols-3 @lg:grid-cols-4">
               {group.segments.map(segment => {
                 const index = visibleSegments.indexOf(segment);
-                const c = getSegmentConfig(segment);
-                const selected = value === segment;
                 return (
-                  <button
+                  <SegmentCard
                     key={segment}
-                    ref={node => {
+                    segment={segment}
+                    selected={value === segment}
+                    tabIndex={
+                      value === segment || (!value && visibleSegments[0] === segment) ? 0 : -1
+                    }
+                    innerRef={node => {
                       segmentRefs.current[index] = node;
                     }}
-                    type="button"
-                    role="radio"
-                    aria-checked={selected}
-                    tabIndex={selected || (!value && visibleSegments[0] === segment) ? 0 : -1}
-                    onClick={() => pick(segment)}
-                    className={[
-                      'flex flex-col gap-1 rounded-xl border p-3 text-left transition-colors outline-none',
-                      'focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-bg',
-                      selected
-                        ? 'border-accent bg-accent/10'
-                        : 'border-border bg-surface hover:border-hover-border',
-                    ].join(' ')}
-                  >
-                    <DynamicIcon
-                      name={c.icon}
-                      size={20}
-                      className={selected ? 'text-accent-fg' : 'text-text-muted'}
-                    />
-                    <span className="text-sm font-bold text-text-primary">{c.labels.segmentLabel}</span>
-                    <span className="text-xs text-text-muted leading-snug">{c.cardDescription}</span>
-                  </button>
+                    onPick={() => pick(segment)}
+                  />
                 );
               })}
             </div>
@@ -171,9 +247,13 @@ export const SegmentPicker: React.FC<{
         ))}
 
         {!hasResults && (
-          <p className="text-sm text-text-muted py-4 text-center">
-            Nenhum segmento encontrado para “{query}”. Tente outra palavra ou escolha “Outro”.
-          </p>
+          <div className="mt-6 flex flex-col items-center gap-2 rounded-2xl border border-dashed border-border bg-surface/50 px-4 py-10 text-center">
+            <SearchX size={22} className="text-text-muted" aria-hidden />
+            <p className="text-sm font-medium text-text-secondary">
+              Nenhum segmento encontrado para “{query}”.
+            </p>
+            <p className="text-xs text-text-muted">Tente outro termo ou escolha “Outro”.</p>
+          </div>
         )}
       </div>
 

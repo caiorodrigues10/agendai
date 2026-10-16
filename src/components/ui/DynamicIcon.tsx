@@ -38,6 +38,15 @@ import {
   LuPackage as Package,
   LuHouse as Home,
   LuClipboardList as Clipboard,
+  LuHand as Hand,
+  LuPawPrint as PawPrint,
+  LuFlower2 as Flower2,
+  LuWaves as Waves,
+  LuActivity as Activity,
+  LuApple as Apple,
+  LuBrain as Brain,
+  LuTarget as Target,
+  LuLaptop as Laptop,
 } from 'react-icons/lu';
 
 export const ICON_OPTIONS = [
@@ -79,6 +88,15 @@ export const ICON_OPTIONS = [
   'Package',
   'Home',
   'Clipboard',
+  'Hand',
+  'PawPrint',
+  'Flower2',
+  'Waves',
+  'Activity',
+  'Apple',
+  'Brain',
+  'Target',
+  'Laptop',
 ];
 
 interface DynamicIconProps {
@@ -173,6 +191,24 @@ export const DynamicIcon: React.FC<DynamicIconProps> = ({ name, className, size 
       return <Home className={className} size={size} />;
     case 'Clipboard':
       return <Clipboard className={className} size={size} />;
+    case 'Hand':
+      return <Hand className={className} size={size} />;
+    case 'PawPrint':
+      return <PawPrint className={className} size={size} />;
+    case 'Flower2':
+      return <Flower2 className={className} size={size} />;
+    case 'Waves':
+      return <Waves className={className} size={size} />;
+    case 'Activity':
+      return <Activity className={className} size={size} />;
+    case 'Apple':
+      return <Apple className={className} size={size} />;
+    case 'Brain':
+      return <Brain className={className} size={size} />;
+    case 'Target':
+      return <Target className={className} size={size} />;
+    case 'Laptop':
+      return <Laptop className={className} size={size} />;
     default:
       return <Scissors className={className} size={size} />;
   }
