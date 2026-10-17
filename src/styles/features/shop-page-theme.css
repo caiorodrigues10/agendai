@@ -1,0 +1,49 @@
+/*
+ * Tema da página pública do salão (customização do dono).
+ * As cores entram via CSS variables (`--ag-*`) no wrapper `[data-ag-shop-theme]`
+ * (ver features/appearance/themeVars.ts). Aqui ficam só os ajustes estruturais
+ * que as utilities não cobrem: raio dos cantos e estilo de botão "contorno".
+ */
+
+/* Estilo dos cantos: reto / arredondado (padrão Tailwind) / bem arredondado. */
+[data-ag-shop-theme][data-radius='squared'] {
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
+}
+
+[data-ag-shop-theme][data-radius='pill'] {
+  --radius-xs: 9999px;
+  --radius-sm: 9999px;
+  --radius-md: 9999px;
+  --radius-lg: 9999px;
+  --radius-xl: 9999px;
+  --radius-2xl: 9999px;
+  --radius-3xl: 9999px;
+  --radius-4xl: 9999px;
+}
+
+/* Estilo do botão "contorno": ação deixa de ser preenchida (escopado à página). */
+[data-ag-shop-theme][data-button-style='outline'] .bg-accent {
+  background-color: transparent !important;
+  border: 1px solid var(--ag-accent);
+}
+
+[data-ag-shop-theme][data-button-style='outline'] .text-accent-fg {
+  color: var(--ag-accent) !important;
+}
+
+[data-ag-shop-theme][data-button-style='outline'] .hover\:bg-accent-hover:hover {
+  background-color: color-mix(in srgb, var(--ag-accent) 12%, transparent) !important;
+}
+
+/* Capa da página: camada de imagem + overlay de legibilidade. */
+.ag-shop-cover-img {
+  object-fit: cover;
+  object-position: center;
+}

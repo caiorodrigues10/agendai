@@ -18,6 +18,8 @@
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "audit:frontend-structure": "node scripts/audit-frontend-structure.mjs",
     "segments:mirror": "node scripts/generateSegmentMirror.mjs && npx prettier --write src/shared/segments/segmentCatalogs.ts",
+    "theme:mirror": "node scripts/generate-shop-theme-mirror.mjs",
+    "theme:check": "node scripts/generate-shop-theme-mirror.mjs --check",
     "format": "prettier --write \"src/**/*.{ts,tsx,json,css,md}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,json,css,md}\"",
     "docs:check": "node scripts/check-docs.mjs",

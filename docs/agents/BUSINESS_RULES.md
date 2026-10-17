@@ -33,6 +33,13 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 
 - WhatsApp/e-mail são opcionais: falha de gateway não deve quebrar a UI principal; painéis de health mostram estado.
 
+## Aparência da página pública (tema)
+
+- Tema via CSS vars (`--ag-*`) escopadas no wrapper `[data-ag-shop-theme]`; padrão = visual dark atual (`PAGE_THEME_DEFAULTS` em `src/shared/pageThemeDefaults.ts`, espelho do backend via `npm run theme:mirror`).
+- Contraste WCAG AA (texto/fundo + muted/fundo + texto/sobre-acento) é **bloqueante** no botão Salvar e no back (`pageThemeContrast.ts`); sem token de owner, o painel mostra estado somente-leitura.
+- Capa: validação instantânea no front (JPEG/PNG/WebP, 16:9, dimensões mínimas de `imageSpecs.ts`), overlay 0–80, envio multipart para Cloudinary via backend; GIF/SVG rejeitados.
+- Anti-FOUC: `PublicHome` aplica o tema o quanto antes carregado (`usePageTheme` com cache por módulo; `clearPageThemeCache()` para testes).
+
 ## Pendências documentais
 
 Divergências código ↔ regra de produto aprovada devem ser listadas como pendência **sem** alterar comportamento nesta entrega só documental.

@@ -16,6 +16,8 @@
 | `lint:fix` | `eslint … --fix` | geração | `npm install` | Corrige lint autofixável |
 | `audit:frontend-structure` | `node scripts/audit-frontend-structure.mjs` | leitura | Node | Auditoria estrutural |
 | `segments:mirror` | `node scripts/generateSegmentMirror.mjs` + prettier | geração | backend irmão (`segmentParity.json`) | Reescreve `src/shared/segments/segmentCatalogs.ts` (catálogo, preset de horário e modo sugerido) a partir do JSON publicado pelo backend. Rodar `npm run segments:parity` lá e este aqui depois de mexer em segmentos |
+| `theme:mirror` | `node scripts/generate-shop-theme-mirror.mjs` | geração | backend irmão (arquivos TS auto-contidos) | Espelha `imageSpecs`, `pageThemeDefaults` e `pageThemeContrast` do backend em `src/shared/` (formatação prettier local). Rodar depois de mexer na spec de imagem/tema do backend |
+| `theme:check` | `node scripts/generate-shop-theme-mirror.mjs --check` | leitura | backend irmão | Exit 1 se o espelho do tema/spec estiver desatualizado em relação ao backend |
 | `format` | `prettier --write …` | geração | `npm install` | Formata fontes |
 | `format:check` | `prettier --check …` | leitura | `npm install` | Verifica formatação |
 | `docs:check` | `node scripts/check-docs.mjs` | leitura | Node | Valida inventários documentais |

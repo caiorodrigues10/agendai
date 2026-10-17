@@ -109,6 +109,18 @@ vi.mock('../infra/publicProductsApi', () => ({
   },
 }));
 
+// Tema da página pública: sem tema salvo (null) → visual padrão, sem fetch real.
+vi.mock('../features/appearance/usePageTheme', async () => {
+  const actual = await vi.importActual<typeof import('../features/appearance/usePageTheme')>(
+    '../features/appearance/usePageTheme'
+  );
+  return {
+    ...actual,
+    usePageTheme: () => ({ loading: false, theme: null, applyTheme: vi.fn() }),
+    clearPageThemeCache: () => actual.clearPageThemeCache(),
+  };
+});
+
 function renderPublicHome() {
   return render(
     <MemoryRouter initialEntries={['/queue/shop-1']}>

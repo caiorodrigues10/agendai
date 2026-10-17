@@ -3,6 +3,9 @@ import { useNavigate, useParams, useSearchParams, Navigate } from 'react-router-
 import { QueueItemCard, QueueStatusCard } from '../features/queue';
 import { AddCustomerForm } from '../features/clients';
 import { ShopProfile } from '../features/shop';
+import { ShopPageTheme, usePageTheme } from '../features/appearance';
+import { SeoHead } from '../components/marketing/SeoHead';
+import { API_BASE } from '../infra/apiClient';
 import { AppointmentScheduler } from '../features/appointments';
 import { PublicProductCarousel } from '../components/domain/PublicProductCarousel';
 import { PublicPageSkeleton } from '../components/patterns/skeletons';
@@ -63,6 +66,7 @@ export const PublicHome: React.FC = () => {
     loading: schedulingLoading,
   } = useScheduling();
   const { labels } = useSegmentLabels(settings?.businessSegment ?? null);
+  const { loading: themeLoading } = usePageTheme(barbershopId);
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [joinMode, setJoinMode] = useState<'self' | 'dependent'>('self');
   const operationMode = settings?.operationMode ?? 'HYBRID';
@@ -126,9 +130,10 @@ export const PublicHome: React.FC = () => {
     setShowJoinForm(true);
   };
 
-  // Wait until URL tenant is applied before deciding to redirect
+  // Wait until URL tenant is applied before deciding to redirect.
+  // themeLoading evita flash do tema padrão (FOUC) quando o salão tem tema salvo.
   const pendingUrlShop = Boolean(id) && id !== barbershopId;
-  const stillLoading = pendingUrlShop || shopLoading || schedulingLoading;
+  const stillLoading = pendingUrlShop || shopLoading || schedulingLoading || themeLoading;
 
   if (stillLoading) {
     return <div role="status" aria-label="Carregando estabelecimento"><PublicPageSkeleton /></div>;
@@ -175,7 +180,19 @@ export const PublicHome: React.FC = () => {
       : null;
 
   return (
-    <div className="min-h-screen pb-[max(5rem,env(safe-area-inset-bottom))] bg-bg text-text-primary">
+    <ShopPageTheme barbershopId={barbershopId}>
+      {barbershopId && (
+        <SeoHead
+          title={settings?.shopName ? `${settings.shopName} — Agenda Já` : 'Agenda Já'}
+          description={
+            settings?.shopName
+              ? `Fila, agenda e serviços de ${settings.shopName}. Agende pelo Agenda Já.`
+              : 'Fila, agenda e serviços. Agende pelo Agenda Já.'
+          }
+          path={`/queue/${barbershopId}`}
+          image={`${API_BASE}/api/barbershops/${barbershopId}/page-theme/og-image`}
+        />
+      )}
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       <main className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 pt-6">
@@ -406,7 +423,7 @@ export const PublicHome: React.FC = () => {
           isAdditionalPerson={joinMode === 'dependent'}
         />
       )}
-    </div>
+    </ShopPageTheme>
   );
 };
 

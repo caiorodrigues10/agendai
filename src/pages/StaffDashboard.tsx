@@ -13,6 +13,7 @@ import { OwnerReferralsPanel } from '../features/referrals';
 import { OwnerSubscriptionPanel } from '../features/subscription';
 import { PostsManager } from '../features/posts';
 import { ShowcasePanel, PublicLinkPanel } from '../features/showcase';
+import { PageAppearancePanel } from '../features/appearance';
 import { AppointmentCalendar } from '../features/appointments';
 import { Toast } from '../components/ui/Toast';
 import { Button } from '../components/ui/Button';
@@ -614,7 +615,16 @@ export const StaffDashboard: React.FC = () => {
 
           {activeTab === 'link' &&
             (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') &&
-            barbershopId && <PublicLinkPanel barbershopId={barbershopId} operationMode={settings?.operationMode} />}
+            barbershopId && (
+              <div className="space-y-6">
+                <PublicLinkPanel barbershopId={barbershopId} operationMode={settings?.operationMode} />
+                <PageAppearancePanel
+                  barbershopId={barbershopId}
+                  shopName={settings?.shopName}
+                  onNotify={showToast}
+                />
+              </div>
+            )}
 
           {activeTab === 'referrals' &&
             (user?.role === 'MASTER_ADMIN' || user?.role === 'OWNER') && <OwnerReferralsPanel onNotify={showToast} />}

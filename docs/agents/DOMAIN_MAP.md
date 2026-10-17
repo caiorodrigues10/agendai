@@ -15,6 +15,7 @@ Código existente ≠ comprovadamente funcional em produção. Distinguir:
 | Auth | `LoginPage`, reset/verify | `authApi` | `/api/auth` |
 | Assinatura / planos | `PlansPage`, `CheckoutPage`, `OwnerSubscriptionPanel` | `plansApi`, `subscriptionsApi`, `paymentsApi` | `/api/plans`, `/api/subscriptions`, `/api/payments` |
 | Barbearia / settings | `SettingsManager` | `barbershopApi` | `/api/barbershops` |
+| Aparência da página pública | `PageAppearancePanel` (aba Link), wrapper `ShopPageTheme` no `PublicHome` | `pageThemeApi` | `/api/barbershops/:id/page-theme*` (GET/PUT + cover; Cloudinary) |
 | Serviços | `ServiceManager`, `ServiceForm` | `barbershopApi` / services | `/api/services` |
 | Equipe | `TeamManager` | `usersApi` | `/api/users` |
 | Fila | `QueueItemCard`, `PublicHome` | `schedulingApi` | `/api/queue` |
