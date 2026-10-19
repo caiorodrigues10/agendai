@@ -8,12 +8,15 @@
 | `dev` | `vite` | leitura/dev | `npm install` | Sobe Vite (proxy `/api` em dev) |
 | `build` | `vite build` | geração | `npm install` | Gera `dist/` |
 | `preview` | `vite preview` | leitura | build prévio | Serve build local |
-| `test` | `vitest run` | testes | `npm install` | Unit/componentes (`src/**/*.{test,spec}.{ts,tsx}`) |
-| `test:watch` | `vitest` | testes | `npm install` | Vitest em watch |
-| `typecheck` | `tsc --noEmit` | leitura | `npm install` | Checagem TypeScript |
+| `test` | `NODE_OPTIONS=--max-old-space-size=2048 vitest run --project app --maxWorkers=2` | testes | `npm install` | Unit/componentes (`src/**/*.{test,spec}.{ts,tsx}`), só o projeto `app` (sem Storybook), 2 workers. Suíte completa só no CI |
+| `test:watch` | `NODE_OPTIONS=… vitest --project app --pool=forks --maxWorkers=2` | testes | `npm install` | Vitest em watch (limitado) |
+| `test:changed` | `NODE_OPTIONS=… vitest run --project app --changed` | testes | `npm install` + git | Só testes afetados pelos arquivos alterados — preferir durante o desenvolvimento |
+| `test:related` | `NODE_OPTIONS=… vitest related --project app` | testes | `npm install` + git | Testes relacionados aos arquivos informados (`-- <arquivos>`) — preferir durante o desenvolvimento |
+| `typecheck` | `tsc --noEmit` | leitura | `npm install` | Checagem TypeScript (incremental em `node_modules/.cache`) |
 | `test:e2e` | `playwright test` | testes | browsers Playwright instalados; specs de `e2e/master/` exigem `E2E_BASE_URL` + `E2E_MASTER_EMAIL`/`E2E_MASTER_PASSWORD` | E2E (`e2e/`). Sem `E2E_BASE_URL` o `webServer` faz `build` + `preview` em `127.0.0.1:4173`; com a env aponta para o servidor informado |
-| `lint` | `eslint src --ext .ts,.tsx` | leitura | `npm install` | Lint |
-| `lint:fix` | `eslint … --fix` | geração | `npm install` | Corrige lint autofixável |
+| `lint` | `eslint src --ext .ts,.tsx --cache --cache-location node_modules/.cache/eslint` | leitura | `npm install` | Lint com cache |
+| `lint:fix` | `eslint … --cache … --fix` | geração | `npm install` | Corrige lint autofixável |
+| `lint:changed` | `git diff --name-only \| grep .ts/.tsx` + `eslint --cache …` | leitura | git | Lint só nos `.ts`/`.tsx` alterados (não varre o projeto) |
 | `audit:frontend-structure` | `node scripts/audit-frontend-structure.mjs` | leitura | Node | Auditoria estrutural |
 | `segments:mirror` | `node scripts/generateSegmentMirror.mjs` + prettier | geração | backend irmão (`segmentParity.json`) | Reescreve `src/shared/segments/segmentCatalogs.ts` (catálogo, preset de horário e modo sugerido) a partir do JSON publicado pelo backend. Rodar `npm run segments:parity` lá e este aqui depois de mexer em segmentos |
 | `theme:mirror` | `node scripts/generate-shop-theme-mirror.mjs` | geração | backend irmão (arquivos TS auto-contidos) | Espelha `imageSpecs`, `pageThemeDefaults` e `pageThemeContrast` do backend em `src/shared/` (formatação prettier local). Rodar depois de mexer na spec de imagem/tema do backend |

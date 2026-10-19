@@ -64,11 +64,21 @@ Diretório: **`agendai/`**.
 npm install
 npm run dev
 npm run typecheck
-npm test
-npm run lint
+npm test            # suíte do projeto 'app' (sem Storybook), limitada a 2 workers
+npm run lint        # com cache (--cache); lint de alterados: npm run lint:changed
 npm run docs:check
 npm run build
 ```
+
+**Testes durante o desenvolvimento (não pesar a máquina):**
+
+```bash
+npm run test:changed   # só arquivos alterados vs. HEAD (vitest --changed)
+npm run test:related   # testes relacionados aos arquivos informados (vitest related)
+```
+
+Suíte completa (`npm test`) **só no CI**. Storybook/Playwright/visual ficam fora do
+padrão: `npm run test:storybook`, `npm run test:e2e`, `npm run test:visual`.
 
 Detalhes e efeitos: [SCRIPTS.md](docs/agents/SCRIPTS.md).
 
@@ -108,13 +118,19 @@ npx playwright test e2e/master --project=desktop-chromium
 
 ---
 
-## 6. Risco conhecido: Vitest `pool: 'threads'` trava após testes completarem
+## 6. Ambiente de testes (vitest) — CPU/memória sob controle
 
-O `vitest.config.ts` usa `pool: 'threads'` com `fileParallelism: false`. Em combinação com o `jsdom` environment, o processo do vitest **não encerra sozinho** após todos os testes passarem — trava indefinidamente com handles abertos. Isso parece um hang, mas todos os testes já passaram.
+O `vitest.config.ts` usa `pool: 'forks'` (`maxForks: 2`, `fileParallelism: false`,
+`maxWorkers: 2`, `reporters: ['dot']`, `clearMocks`/`restoreMocks`, `css: false`,
+coverage desligado por padrão). `npm test` roda **só o projeto `app`** — o projeto
+`storybook` (browser + Playwright) só sobe via `npm run test:storybook`. Scripts de
+teste usam `NODE_OPTIONS=--max-old-space-size=2048` para não estourar heap.
 
-**Workaround:** rodar com `--pool=forks` contorna o problema (todos os arquivos completam e o processo encerra normalmente). Trocar o pool default no config é uma decisão de projeto; por enquanto, documentar aqui basta.
-
-Custo real: já causou ~15 min de debug desnecessário em 2026-09-19.
+- **Durante o desenvolvimento:** `npm run test:changed` / `npm run test:related`.
+- **Suíte completa (`npm test`):** só no CI / antes de subir PR.
+- O pool antigo `threads` travava após os testes (handles abertos; ~15 min de
+  debug em 2026-09-19) — `forks` já é o default e o workaround `--pool=forks`
+  não é mais necessário.
 
 ---
 

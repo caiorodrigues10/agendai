@@ -6,7 +6,18 @@ import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import { playwright } from '@vitest/browser-playwright';
 const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
-// More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
+/**
+ * Config enxuta p/ suíte de componentes/lógica (projeto 'app'):
+ * pool forks com poucos forks, sem paralelismo de arquivos, reporters 'dot',
+ * mocks restaurados por teste e coverage/css fora por padrão — roda só sob
+ * `--coverage`. O projeto 'storybook' (browser + Playwright) NÃO entra em
+ * `npm test` (só via `npm run test:storybook`).
+ *
+ * Durante o desenvolvimento: `npm run test:changed` / `npm run test:related`
+ * (suíte completa só no CI) — ver AGENTS.md.
+ *
+ * More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
+ */
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -17,6 +28,8 @@ export default defineConfig({
   test: {
     watch: false,
     teardownTimeout: 8_000,
+    reporters: ['dot'],
+    coverage: { enabled: false },
     projects: [{
       extends: true,
       test: {
@@ -26,9 +39,13 @@ export default defineConfig({
         setupFiles: ['./src/tests/setup.ts'],
         include: ['src/**/*.{test,spec}.{ts,tsx}'],
         pool: 'forks',
-        fileParallelism: true,
-        isolate: true,
+        poolOptions: { forks: { maxForks: 2, minForks: 1 } },
+        fileParallelism: false,
         maxWorkers: 2,
+        isolate: true,
+        css: false,
+        clearMocks: true,
+        restoreMocks: true,
         testTimeout: 15_000,
         hookTimeout: 10_000,
         hangTimeout: 45_000
