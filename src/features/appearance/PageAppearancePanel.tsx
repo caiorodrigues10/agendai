@@ -123,6 +123,20 @@ function draftKey(draft: Draft): string {
   ]);
 }
 
+/** Modo da página persistido → variante forçada da prévia (null = Automático). */
+function forcedVariantOf(mode: PageThemeMode | undefined): PageThemeVariant | null {
+  if (mode === 'LIGHT') return 'light';
+  if (mode === 'DARK') return 'dark';
+  return null;
+}
+
+/** Aviso ao lado do seletor da prévia quando o Modo da página força o modo. */
+function modeForcedNotice(mode: PageThemeMode | undefined): string | null {
+  if (mode === 'LIGHT') return 'Esta página sempre aparece no modo claro.';
+  if (mode === 'DARK') return 'Esta página sempre aparece no modo escuro.';
+  return null;
+}
+
 /** Salvar tema + ações de capa (fora do componente para manter o corpo enxuto). */
 function usePageThemeActions(options: {
   barbershopId: string;
@@ -238,7 +252,7 @@ const AppearanceSettingsColumn: React.FC<{
     <div>
       <p className="mb-2 text-[11px] text-text-muted" data-testid="editing-variant">
         Editando variante {variant === 'light' ? 'clara' : 'escura'}
-        {variant === 'light' && !draft.lightColors ? ' (gerada a partir do accent escuro)' : ''}
+        {variant === 'light' && !draft.lightColors ? ' (gerada a partir do accent)' : ''}
       </p>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         {COLOR_FIELDS.map(([field, label]) => (
@@ -282,10 +296,12 @@ const AppearanceSettingsColumn: React.FC<{
 
 /**
  * Painel "Aparência da página" (aba Link Público). Formulário + preview ao vivo.
- * Cores são editadas POR VARIANTE (Claro/Escuro na prévia); o Modo da página
- * (AUTO/LIGHT/DARK) controla a página real. Salvar fica BLOQUEADO enquanto
- * QUALQUER variante tiver par reprovado no contraste WCAG AA (mesma validação
- * do back); sugestões em 1 clique corrigem a variante ativa.
+ * A variante em edição (activeMode) segue AUTOMATICAMENTE o tema do app; o
+ * seletor da prévia é um override opcional ("Auto" = seguindo o app) e o Modo
+ * da página (AUTO/LIGHT/DARK) continua sendo a única configuração persistida.
+ * Salvar fica BLOQUEADO enquanto QUALQUER variante tiver par reprovado no
+ * contraste WCAG AA (mesma validação do back); sugestões em 1 clique corrigem
+ * a variante ativa.
  */
 export const PageAppearancePanel: React.FC<PageAppearancePanelProps> = ({
   barbershopId,
@@ -298,12 +314,14 @@ export const PageAppearancePanel: React.FC<PageAppearancePanelProps> = ({
   const [draft, setDraft] = useState<Draft>(() => toDraft(savedTheme));
   const [prevSaved, setPrevSaved] = useState(savedTheme);
   const [confirmRestore, setConfirmRestore] = useState(false);
-  // Variante escolhida livremente na prévia (vigor enquanto o Modo = AUTO).
+  // Tema do app (ThemeContext, já resolvido) — fonte única do modo automático.
   // Sem ThemeProvider (testes/isolamento) cai em 'dark' — igual ao visual
   // atual da página pública.
-  const [freeVariant, setFreeVariant] = useState<PageThemeVariant>(
-    () => themeContext?.resolvedTheme ?? 'dark'
-  );
+  const appTheme: PageThemeVariant = themeContext?.resolvedTheme ?? 'dark';
+  // Override manual do editor (só conferência, NUNCA persistido): null =
+  // seguir o tema do app. Zerado quando o tema do app ou o Modo muda (ver
+  // ajuste de render logo abaixo).
+  const [previewOverride, setPreviewOverride] = useState<PageThemeVariant | null>(null);
 
   // Tema salvo mudou (carga inicial, salvar, upload de capa): reseta o rascunho.
   if (prevSaved !== savedTheme) {
@@ -311,23 +329,35 @@ export const PageAppearancePanel: React.FC<PageAppearancePanelProps> = ({
     setDraft(toDraft(savedTheme));
   }
 
-  // Modo forçado (LIGHT/DARK) é DERIVADO no render (sem effect): a prévia
-  // acompanha o modo que a página real vai usar.
-  const forcedVariant: PageThemeVariant | null =
-    draft.mode === 'LIGHT' ? 'light' : draft.mode === 'DARK' ? 'dark' : null;
-  const variant = forcedVariant ?? freeVariant;
+  // Modo da página (config persistida) força a variante da prévia.
+  const pageModeForced = forcedVariantOf(draft.mode);
+
+  // Ajuste durante o render (padrão React de estado derivado, sem effect):
+  // trocar o tema do app (lua/sol) ou o Modo da página zera o override
+  // manual para TUDO seguir o automático — valores digitados no rascunho
+  // de cores não são tocados.
+  const [prevFollow, setPrevFollow] = useState<readonly [PageThemeVariant, PageThemeVariant | null]>(
+    [appTheme, pageModeForced]
+  );
+  if (prevFollow[0] !== appTheme || prevFollow[1] !== pageModeForced) {
+    setPrevFollow([appTheme, pageModeForced]);
+    setPreviewOverride(null);
+  }
+
+  // ÚNICA variante usada por prévia, chips, campos de cor, rótulo e validações.
+  const activeMode: PageThemeVariant = previewOverride ?? pageModeForced ?? appTheme;
 
   const activeColors: PageThemeVariantColors = useMemo(() => {
-    if (variant === 'dark') return draft.darkColors;
+    if (activeMode === 'dark') return draft.darkColors;
     return draft.lightColors ?? generateVariantColors(draft.darkColors.accentColor, 'light');
-  }, [variant, draft]);
+  }, [activeMode, draft]);
 
   const otherColors: PageThemeVariantColors = useMemo(() => {
-    if (variant === 'dark') {
+    if (activeMode === 'dark') {
       return draft.lightColors ?? generateVariantColors(draft.darkColors.accentColor, 'light');
     }
     return draft.darkColors;
-  }, [variant, draft]);
+  }, [activeMode, draft]);
 
   const failing = useMemo(
     () => failingContrastChecks(evaluateThemeContrast(activeColors)),
@@ -352,8 +382,8 @@ export const PageAppearancePanel: React.FC<PageAppearancePanelProps> = ({
     ? 'Salvando as alterações…'
     : failing.length > 0
       ? 'Corrija o contraste insuficiente (WCAG AA) para salvar.'
-      : failingOther.length > 0
-        ? `A variante ${variant === 'dark' ? 'clara' : 'escura'} tem contraste insuficiente (WCAG AA).`
+        : failingOther.length > 0
+          ? `A variante ${activeMode === 'dark' ? 'clara' : 'escura'} tem contraste insuficiente (WCAG AA).`
         : !dirty
           ? 'Nenhuma alteração para salvar.'
           : undefined;
@@ -366,7 +396,7 @@ export const PageAppearancePanel: React.FC<PageAppearancePanelProps> = ({
   const patchActiveColor = useCallback(
     (field: ColorFieldName, value: string) => {
       setDraft(prev => {
-        if (variant === 'dark') {
+        if (activeMode === 'dark') {
           const darkColors = { ...prev.darkColors, [field]: value };
           return { ...prev, darkColors, [field]: value };
         }
@@ -377,7 +407,7 @@ export const PageAppearancePanel: React.FC<PageAppearancePanelProps> = ({
         return { ...prev, lightColors };
       });
     },
-    [variant]
+    [activeMode]
   );
 
   const applySuggestion = (check: ContrastCheck) => {
@@ -410,7 +440,7 @@ export const PageAppearancePanel: React.FC<PageAppearancePanelProps> = ({
         <AppearanceSettingsColumn
           draft={draft}
           activeColors={activeColors}
-          variant={variant}
+          variant={activeMode}
           onPatch={patch}
           onColorChange={patchActiveColor}
           coverBusy={coverBusy}
@@ -430,9 +460,12 @@ export const PageAppearancePanel: React.FC<PageAppearancePanelProps> = ({
           settings={settings}
           slug={barbershopId}
           coverBusy={coverBusy}
-          variant={variant}
-          onVariantChange={setFreeVariant}
-          variantLocked={draft.mode !== 'AUTO'}
+          variant={activeMode}
+          onVariantChange={next => setPreviewOverride(next)}
+          variantLocked={pageModeForced !== null}
+          autoActive={previewOverride === null && pageModeForced === null}
+          onAuto={() => setPreviewOverride(null)}
+          modeNotice={modeForcedNotice(draft.mode)}
           failing={failing}
           otherFailing={failingOther}
           dirty={dirty}

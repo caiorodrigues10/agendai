@@ -1,6 +1,8 @@
 import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { LuTriangleAlert } from 'react-icons/lu';
 import type { ShopSettings } from '../../types';
 import type { ContrastCheck } from '../../shared/pageThemeContrast';
+import { useThemeOptional } from '../../contexts/ThemeContext';
 import { ContrastStatusPanel } from './panelSections';
 import { buildPreviewSettings } from './previewData';
 import {
@@ -20,9 +22,15 @@ interface ThemePreviewProps {
   slug?: string;
   /** True enquanto envia/remova a capa → skeleton na prévia. */
   coverBusy?: boolean;
-  /** Variante de cor da prévia (Claro | Escuro). Sem prop, estado interno. */
+  /** Variante de cor da prévia (Claro | Escuro). Sem prop, segue o tema do app. */
   variant?: 'light' | 'dark';
   onVariantChange?: (variant: 'light' | 'dark') => void;
+  /** True quando a prévia segue o tema do app (sem override manual nem modo forçado). */
+  autoActive?: boolean;
+  /** Volta a seguir o tema do app (limpa o override manual). */
+  onAuto?: () => void;
+  /** Aviso ao lado do seletor quando o Modo da página força o modo. */
+  modeNotice?: string | null;
   /** True quando o Modo da página força a variante (toggle bloqueado). */
   variantLocked?: boolean;
   failing: ContrastCheck[];
@@ -37,38 +45,56 @@ const DEVICE_LABEL: Record<PreviewDeviceMode, string> = {
   desktop: 'Desktop',
 };
 
-/** Toggle Claro | Escuro no topo da prévia (variante de cor do tema). */
+/** Auto | Claro | Escuro no topo da prévia (Auto = seguindo o tema do app). */
 function VariantToggle({
   variant,
+  auto,
   onChange,
+  onAuto,
   disabled = false,
 }: {
   variant: 'light' | 'dark';
+  auto?: boolean;
   onChange: (variant: 'light' | 'dark') => void;
+  onAuto?: () => void;
   disabled?: boolean;
 }) {
+  const options = [
+    ...(onAuto ? [{ key: 'auto', label: 'Auto' }] : []),
+    { key: 'light', label: 'Claro' },
+    { key: 'dark', label: 'Escuro' },
+  ] as const;
+  const activeKey: string = auto ? 'auto' : variant;
   return (
     <div
       className="flex rounded-lg border border-border bg-surface-2 p-0.5"
       role="group"
       aria-label="Tema da prévia"
-      title={disabled ? 'Variante definida pelo Modo da página' : undefined}
+      title={
+        disabled
+          ? 'Variante definida pelo Modo da página'
+          : auto
+            ? 'Seguindo o tema do app'
+            : undefined
+      }
     >
-      {(['light', 'dark'] as const).map(option => (
+      {options.map(option => (
         <button
-          key={option}
+          key={option.key}
           type="button"
-          aria-pressed={variant === option}
-          data-testid={`preview-variant-${option}`}
+          aria-pressed={activeKey === option.key}
+          data-testid={`preview-variant-${option.key}`}
           disabled={disabled}
-          onClick={() => onChange(option)}
+          onClick={() =>
+            option.key === 'auto' ? onAuto?.() : onChange(option.key === 'light' ? 'light' : 'dark')
+          }
           className={`rounded-md px-2.5 py-1 text-[11px] font-bold disabled:cursor-not-allowed disabled:opacity-60 ${
-            variant === option
+            activeKey === option.key
               ? 'bg-accent text-accent-fg'
               : 'text-text-muted hover:text-text-primary'
           }`}
         >
-          {option === 'light' ? 'Claro' : 'Escuro'}
+          {option.label}
         </button>
       ))}
     </div>
@@ -128,6 +154,9 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
   coverBusy,
   variant,
   onVariantChange,
+  autoActive,
+  onAuto,
+  modeNotice,
   variantLocked,
   failing,
   otherFailing,
@@ -136,12 +165,11 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
 }) => {
   const [mode, setMode] = useState<PreviewDeviceMode>('mobile');
   const [open, setOpen] = useState(true);
-  const [internalVariant, setInternalVariant] = useState<'light' | 'dark'>('dark');
-  const activeVariant = variant ?? internalVariant;
-  const handleVariantChange = (next: 'light' | 'dark') => {
-    setInternalVariant(next);
-    onVariantChange?.(next);
-  };
+  // Modo ativo vem TODO do editor (controlado); sem prop (uso isolado/testes)
+  // segue o tema do app — nunca estado guardado que deixe de reagir à troca.
+  const themeCtx = useThemeOptional();
+  const activeVariant = variant ?? themeCtx?.resolvedTheme ?? 'dark';
+  const handleVariantChange = (next: 'light' | 'dark') => onVariantChange?.(next);
   const frameRef = useRef<HTMLDivElement>(null);
   const layerRef = useRef<HTMLDivElement>(null);
   const previewSettings = useMemo(() => buildPreviewSettings(settings, shopName), [settings, shopName]);
@@ -191,13 +219,24 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-sm font-bold text-text-primary">Prévia ao vivo</h3>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <VariantToggle
             variant={activeVariant}
+            auto={autoActive}
             onChange={handleVariantChange}
+            onAuto={onAuto}
             disabled={variantLocked}
           />
           <DeviceToggle mode={mode} onChange={setMode} />
+          {modeNotice && (
+            <p
+              className="flex basis-full items-center gap-1.5 rounded-lg border border-warning/40 bg-warning/10 px-2.5 py-1.5 text-[11px] font-bold text-warning"
+              data-testid="mode-notice"
+            >
+              <LuTriangleAlert size={13} className="shrink-0" aria-hidden="true" />
+              {modeNotice}
+            </p>
+          )}
         </div>
       </div>
       <button

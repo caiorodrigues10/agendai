@@ -47,7 +47,7 @@ export const PanelHeader: React.FC<{
   </div>
 );
 
-/** Paletas prontas (swatch + rótulo). As bolinhas refletem a variante em edição (Claro | Escuro). */
+/** Paletas prontas (swatch + rótulo). As bolinhas refletem a variante em edição (Auto segue o tema do app). */
 export const PresetPicker: React.FC<{
   onPick: (preset: ThemePreset) => void;
   selectedKey?: string | null;
@@ -98,8 +98,10 @@ export const PAGE_MODE_OPTIONS = [
 /**
  * Controle segmentado (modo / cantos / estilo de botão) em `role="radiogroup"`:
  * grid de colunas iguais com largura total, altura única `h-11`, texto de uma
- * linha (`truncate`) — nunca deixa rótulos como "Arredondado"/"Sempre escuro"
- * espremidos ou sobrepostos. Navegação por setas move foco e seleção.
+ * linha (`whitespace-nowrap`, sem `truncate` — nunca corta "Sempre escuro").
+ * Usa container query: empilha em `grid-cols-1` enquanto o container não cabe
+ * (form estreito/`lg`), e vira 2/3 colunas a partir de 448px (`@md`). Navegação
+ * por setas move foco e seleção.
  */
 export const SegmentedOptions: React.FC<{
   legend: string;
@@ -120,14 +122,14 @@ export const SegmentedOptions: React.FC<{
     group.querySelectorAll<HTMLButtonElement>('[role="radio"]')[nextIndex]?.focus();
   };
   return (
-    <fieldset className="min-w-0">
+    <fieldset className="@container min-w-0">
       <legend className="mb-1.5 text-sm font-medium text-text-secondary">{legend}</legend>
       <div
         role="radiogroup"
         aria-label={legend}
         tabIndex={-1}
         onKeyDown={move}
-        className={`grid w-full gap-2 ${options.length <= 2 ? 'grid-cols-2' : 'grid-cols-3'}`}
+        className={`grid w-full grid-cols-1 gap-2 ${options.length <= 2 ? '@md:grid-cols-2' : '@md:grid-cols-3'}`}
       >
         {options.map(opt => (
           <button
@@ -137,7 +139,7 @@ export const SegmentedOptions: React.FC<{
             aria-checked={value === opt.value}
             tabIndex={value === opt.value ? 0 : -1}
             onClick={() => onChange(opt.value)}
-            className={`h-11 min-w-0 truncate whitespace-nowrap rounded-xl border px-2 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:z-10 ${
+            className={`h-11 min-w-0 whitespace-nowrap rounded-xl border px-2 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:z-10 ${
               value === opt.value
                 ? 'border-accent bg-accent/10 text-accent'
                 : 'border-border bg-surface text-text-secondary hover:border-border-strong hover:bg-surface-2'
