@@ -4,6 +4,7 @@
 @import './styles/vendors.css';
 @import './styles/features/weather.css';
 @import './styles/features/shop-page-theme.css';
+@import './styles/features/theme-preview.css';
 
 /* Utilities usados só por stories ficam fora do bundle (D-002). */
 @source not './**/*.stories.tsx';

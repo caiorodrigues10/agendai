@@ -102,38 +102,43 @@
  * Expõe os tokens como cores do Tailwind v4 (`@theme inline` referencia as
  * custom properties em runtime), gerando utilities como `bg-bg`, `bg-surface`,
  * `text-text-primary`, `border-border`, `bg-accent/10`, etc.
+ *
+ * Tokens do escopo da página pública do salão (`[data-ag-shop-theme]`) caem
+ * primeiro em `--shop-*` (definidos por `themeVars.pageThemeToCssVars`, por
+ * variante light/dark) e usam `--ag-*` como fallback — fora do escopo do salão
+ * o app inteiro continua exatamente como antes.
  */
 @theme inline {
-  --color-bg: var(--ag-bg);
-  --color-surface: var(--ag-surface);
-  --color-surface-2: var(--ag-surface-2);
-  --color-border: var(--ag-border);
-  --color-border-strong: var(--ag-border-strong);
+  --color-bg: var(--shop-bg, var(--ag-bg));
+  --color-surface: var(--shop-surface, var(--ag-surface));
+  --color-surface-2: var(--shop-surface-2, var(--ag-surface-2));
+  --color-border: var(--shop-border, var(--ag-border));
+  --color-border-strong: var(--shop-border-strong, var(--ag-border-strong));
   --color-hover-bg: var(--ag-hover-bg);
-  --color-hover-border: var(--ag-hover-border);
-  --color-input-bg: var(--ag-input-bg);
-  --color-input-border: var(--ag-input-border);
+  --color-hover-border: var(--shop-hover-border, var(--ag-hover-border));
+  --color-input-bg: var(--shop-input-bg, var(--ag-input-bg));
+  --color-input-border: var(--shop-input-border, var(--ag-input-border));
   --shadow-card: var(--ag-shadow-card);
-  --color-text-primary: var(--ag-text-primary);
-  --color-text-secondary: var(--ag-text-secondary);
-  --color-text-muted: var(--ag-text-muted);
-  --color-accent: var(--ag-accent);
-  --color-accent-hover: var(--ag-accent-hover);
-  --color-accent-fg: var(--ag-accent-fg);
-  --color-brand: var(--ag-brand);
-  --color-brand-hover: var(--ag-brand-hover);
-  --color-action-primary: var(--ag-action-primary);
-  --color-action-primary-hover: var(--ag-action-primary-hover);
-  --color-action-primary-fg: var(--ag-action-primary-fg);
+  --color-text-primary: var(--shop-text-primary, var(--ag-text-primary));
+  --color-text-secondary: var(--shop-text-secondary, var(--ag-text-secondary));
+  --color-text-muted: var(--shop-text-muted, var(--ag-text-muted));
+  --color-accent: var(--shop-accent, var(--ag-accent));
+  --color-accent-hover: var(--shop-accent-hover, var(--ag-accent-hover));
+  --color-accent-fg: var(--shop-accent-fg, var(--ag-accent-fg));
+  --color-brand: var(--shop-brand, var(--ag-brand));
+  --color-brand-hover: var(--shop-brand-hover, var(--ag-brand-hover));
+  --color-action-primary: var(--shop-action-primary, var(--ag-action-primary));
+  --color-action-primary-hover: var(--shop-action-primary-hover, var(--ag-action-primary-hover));
+  --color-action-primary-fg: var(--shop-action-primary-fg, var(--ag-action-primary-fg));
   --color-tertiary: var(--ag-tertiary);
   --color-support: var(--ag-support);
   --color-action-secondary: var(--ag-action-secondary);
-  --color-selection: var(--ag-selection);
-  --color-focus: var(--ag-focus);
-  --color-danger: var(--ag-danger);
-  --color-danger-fg: var(--ag-danger-fg);
-  --color-success: var(--ag-success);
-  --color-warning: var(--ag-warning);
+  --color-selection: var(--shop-selection, var(--ag-selection));
+  --color-focus: var(--shop-focus, var(--ag-focus));
+  --color-danger: var(--shop-danger, var(--ag-danger));
+  --color-danger-fg: var(--shop-danger-fg, var(--ag-danger-fg));
+  --color-success: var(--shop-success, var(--ag-success));
+  --color-warning: var(--shop-warning, var(--ag-warning));
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);

@@ -55,3 +55,9 @@ export const useTheme = () => {
   if (!ctx) throw new Error('useTheme must be used within ThemeProvider');
   return ctx;
 };
+
+/**
+ * Sem provider (prévia/painel isolados, testes, Storybook) devolve
+ * `undefined` em vez de lançar — quem chama decide o fallback.
+ */
+export const useThemeOptional = () => useContext(ThemeContext);

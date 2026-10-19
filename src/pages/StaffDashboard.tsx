@@ -621,6 +621,7 @@ export const StaffDashboard: React.FC = () => {
                 <PageAppearancePanel
                   barbershopId={barbershopId}
                   shopName={settings?.shopName}
+                  settings={settings}
                   onNotify={showToast}
                 />
               </div>

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import { socialApi, type TaggedPost } from '../../infra/socialApi';
-import { reputationApi, type PublicReviewSummary } from '../../infra/reputationApi';
 import type { FeedPost } from '../../types';
 
 export interface SocialResource<T> { data: T; loading: boolean; error: boolean }
@@ -36,10 +35,6 @@ export function useSalonSocial(salonId: string | null | undefined, canModerate: 
     () => (salonId ? socialApi.stories(salonId) : Promise.resolve(EMPTY_POSTS)),
     [salonId]
   );
-  const loadReviews = useCallback(
-    () => (salonId ? reputationApi.getPublicSummary(salonId) : Promise.resolve(null)),
-    [salonId]
-  );
   const loadTags = useCallback(
     () => (salonId ? socialApi.tagged(salonId) : Promise.resolve(EMPTY_TAGS)),
     [salonId]
@@ -50,7 +45,6 @@ export function useSalonSocial(salonId: string | null | undefined, canModerate: 
   );
   return {
     stories: useResource(loadStories, EMPTY_POSTS),
-    reviews: useResource<PublicReviewSummary | null>(loadReviews, null),
     tagged: useResource(loadTags, EMPTY_TAGS),
     pending: useResource(loadPending, EMPTY_TAGS),
   };

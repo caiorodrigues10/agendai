@@ -12,6 +12,9 @@ interface ColorFieldProps {
 /**
  * Color picker nativo + campo hex sincronizados. O valor só é propagado quando
  * é um hex válido (#RRGGBB); enquanto o dono digita, o texto fica local.
+ * O seletor vira um swatch customizado (xadrez neutro + cor com relevo) com o
+ * `input[type=color]` transparente por cima — o navegador estilo sistema fica
+ * por baixo e herda o foco/teclado via `peer-focus-visible`.
  */
 export const ColorField: React.FC<ColorFieldProps> = ({ label, value, onChange, disabled }) => {
   const inputId = `color-${label.replace(/\s+/g, '-').toLowerCase()}`;
@@ -29,15 +32,35 @@ export const ColorField: React.FC<ColorFieldProps> = ({ label, value, onChange, 
         {label}
       </label>
       <div className="flex items-center gap-2">
-        <input
-          id={inputId}
-          type="color"
-          value={isHexColor(value) ? value : '#000000'}
-          disabled={disabled}
-          onChange={e => onChange(e.target.value.toUpperCase())}
-          className="h-11 w-16 shrink-0 cursor-pointer rounded-lg border border-input-border bg-input-bg p-1 disabled:opacity-70"
-          aria-label={`${label} (seletor de cor)`}
-        />
+        {/* Swatch 40×40: xadrez neutro só POR TRÁS (aparece se a cor tiver
+            transparência); a cor preenche o swatch e a moldura é sólida. */}
+        <div className="relative h-10 w-10 shrink-0">
+          <input
+            id={inputId}
+            type="color"
+            value={isHexColor(value) ? value : '#000000'}
+            disabled={disabled}
+            onChange={e => onChange(e.target.value.toUpperCase())}
+            className="peer absolute inset-0 h-full w-full cursor-pointer rounded-lg opacity-0 disabled:cursor-not-allowed"
+            aria-label={`${label} (seletor de cor)`}
+          />
+          <div
+            className="pointer-events-none absolute inset-0 overflow-hidden rounded-lg ring-1 ring-black/15 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus dark:ring-white/20"
+            style={{
+              backgroundColor: '#e5e5e5',
+              backgroundImage:
+                'linear-gradient(45deg, #a3a3a3 25%, transparent 25%, transparent 75%, #a3a3a3 75%), linear-gradient(45deg, #a3a3a3 25%, transparent 25%, transparent 75%, #a3a3a3 75%)',
+              backgroundSize: '8px 8px',
+              backgroundPosition: '0 0, 4px 4px',
+            }}
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{ backgroundColor: isHexColor(value) ? value : '#000000' }}
+            aria-hidden="true"
+          />
+        </div>
         <input
           type="text"
           value={text}

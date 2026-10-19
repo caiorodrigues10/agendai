@@ -1,0 +1,32 @@
+/*
+ * Prévia ao vivo do painel "Aparência da página" (/app/link).
+ * Tokens e raio do tema chegam via CSS variables escopadas no wrapper
+ * `[data-ag-shop-theme]` (features/appearance/themeVars.ts). Aqui ficam só as
+ * transições suaves do preview — nunca vazam para o resto do painel.
+ */
+
+/* Troca de cor/paleta/canto: 150–200ms (regra de motion do preview). */
+[data-ag-preview-content],
+[data-ag-preview-content] * {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    border-radius 160ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-ag-preview-content],
+  [data-ag-preview-content] * {
+    transition: none !important;
+  }
+}
+
+/* Área rolável do mockup: some a barra de scroll sem perder a rolagem. */
+[data-ag-preview-scroll] {
+  scrollbar-width: none;
+}
+
+[data-ag-preview-scroll]::-webkit-scrollbar {
+  display: none;
+}

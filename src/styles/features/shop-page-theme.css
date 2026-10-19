@@ -1,11 +1,15 @@
 /*
  * Tema da página pública do salão (customização do dono).
- * As cores entram via CSS variables (`--ag-*`) no wrapper `[data-ag-shop-theme]`
- * (ver features/appearance/themeVars.ts). Aqui ficam só os ajustes estruturais
- * que as utilities não cobrem: raio dos cantos e estilo de botão "contorno".
+ * As cores entram via CSS variables no wrapper `[data-ag-shop-theme]`
+ * (ver features/appearance/themeVars.ts): família canônica `--shop-*` +
+ * espelho `--ag-*`, por variante claro/escuro. Aqui ficam só os ajustes
+ * estruturais que as utilities não cobrem: raio dos cantos e estilo de
+ * botão "contorno".
  */
 
-/* Estilo dos cantos: reto / arredondado (padrão Tailwind) / bem arredondado. */
+/* Estilo dos cantos: reto / arredondado (padrão Tailwind) / bem arredondado.
+   Mesmos valores de themeVars.radiusCssVars (espelho): clamp com piso e teto
+   — nunca 9999px em cards (virava círculo). */
 [data-ag-shop-theme][data-radius='squared'] {
   --radius-xs: 0px;
   --radius-sm: 0px;
@@ -17,29 +21,40 @@
   --radius-4xl: 0px;
 }
 
+[data-ag-shop-theme][data-radius='rounded'] {
+  --radius-xs: clamp(4px, 1em, 12px);
+  --radius-sm: clamp(4px, 1em, 12px);
+  --radius-md: clamp(4px, 1em, 12px);
+  --radius-lg: clamp(4px, 1em, 12px);
+  --radius-xl: clamp(4px, 1em, 12px);
+  --radius-2xl: clamp(4px, 1em, 12px);
+  --radius-3xl: clamp(4px, 1em, 12px);
+  --radius-4xl: clamp(4px, 1em, 12px);
+}
+
 [data-ag-shop-theme][data-radius='pill'] {
-  --radius-xs: 9999px;
-  --radius-sm: 9999px;
-  --radius-md: 9999px;
-  --radius-lg: 9999px;
-  --radius-xl: 9999px;
-  --radius-2xl: 9999px;
-  --radius-3xl: 9999px;
-  --radius-4xl: 9999px;
+  --radius-xs: clamp(4px, 1em, 20px);
+  --radius-sm: clamp(4px, 1em, 20px);
+  --radius-md: clamp(4px, 1em, 20px);
+  --radius-lg: clamp(4px, 1em, 20px);
+  --radius-xl: clamp(4px, 1em, 20px);
+  --radius-2xl: clamp(4px, 1em, 20px);
+  --radius-3xl: clamp(4px, 1em, 20px);
+  --radius-4xl: clamp(4px, 1em, 20px);
 }
 
 /* Estilo do botão "contorno": ação deixa de ser preenchida (escopado à página). */
 [data-ag-shop-theme][data-button-style='outline'] .bg-accent {
   background-color: transparent !important;
-  border: 1px solid var(--ag-accent);
+  border: 1px solid var(--shop-accent, var(--ag-accent));
 }
 
 [data-ag-shop-theme][data-button-style='outline'] .text-accent-fg {
-  color: var(--ag-accent) !important;
+  color: var(--shop-accent, var(--ag-accent)) !important;
 }
 
 [data-ag-shop-theme][data-button-style='outline'] .hover\:bg-accent-hover:hover {
-  background-color: color-mix(in srgb, var(--ag-accent) 12%, transparent) !important;
+  background-color: color-mix(in srgb, var(--shop-accent, var(--ag-accent)) 12%, transparent) !important;
 }
 
 /* Capa da página: camada de imagem + overlay de legibilidade. */

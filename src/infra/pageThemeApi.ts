@@ -3,6 +3,18 @@ import { authStorage } from './authStorage';
 
 export type RadiusStyle = 'squared' | 'rounded' | 'pill';
 export type ButtonStyle = 'filled' | 'outline';
+/** AUTO = página segue o sistema; LIGHT/DARK = forçado pelo dono. */
+export type PageThemeMode = 'AUTO' | 'LIGHT' | 'DARK';
+export type PageThemeVariant = 'light' | 'dark';
+
+/** Cores completas de uma variante (claro/escuro) do tema da página. */
+export interface PageThemeVariantColors {
+  accentColor: string;
+  backgroundColor: string;
+  surfaceColor: string;
+  textColor: string;
+  textMutedColor: string;
+}
 
 export interface PageTheme {
   id: string;
@@ -15,6 +27,12 @@ export interface PageTheme {
   textMutedColor: string;
   radiusStyle: RadiusStyle;
   buttonStyle: ButtonStyle;
+  /** Ausente em respostas legadas = AUTO. */
+  mode?: PageThemeMode;
+  /** Variante clara; null/ausente = ainda não materializada (gerada no cliente). */
+  lightColors?: PageThemeVariantColors | null;
+  /** Variante escura; ausente no legado = cores planas acima. */
+  darkColors?: PageThemeVariantColors | null;
   coverUrl: string | null;
   coverPublicId: string | null;
   coverOverlay: number;
@@ -54,6 +72,39 @@ function isValidPageTheme(value: unknown): value is PageTheme {
   );
 }
 
+function isVariantColors(value: unknown): value is PageThemeVariantColors {
+  if (!value || typeof value !== 'object') return false;
+  const v = value as Partial<PageThemeVariantColors>;
+  return (
+    typeof v.accentColor === 'string' &&
+    typeof v.backgroundColor === 'string' &&
+    typeof v.surfaceColor === 'string' &&
+    typeof v.textColor === 'string' &&
+    typeof v.textMutedColor === 'string'
+  );
+}
+
+/**
+ * Retrocompat: respostas legadas (sem `mode`/variantes) viram estrutura
+ * completa — `darkColors` = cores planas, `lightColors` = null (gerada no
+ * cliente), `mode` = AUTO. Shape de variante corrompido cai no mesmo caminho.
+ */
+export function normalizePageTheme(theme: PageTheme): PageTheme {
+  const flatColors: PageThemeVariantColors = {
+    accentColor: theme.accentColor,
+    backgroundColor: theme.backgroundColor,
+    surfaceColor: theme.surfaceColor,
+    textColor: theme.textColor,
+    textMutedColor: theme.textMutedColor,
+  };
+  return {
+    ...theme,
+    mode: theme.mode === 'LIGHT' || theme.mode === 'DARK' ? theme.mode : 'AUTO',
+    darkColors: isVariantColors(theme.darkColors) ? theme.darkColors : flatColors,
+    lightColors: isVariantColors(theme.lightColors) ? theme.lightColors : null,
+  };
+}
+
 export const pageThemeApi = {
   /** Público (cacheável no back por 60s). `null` = salão sem tema = visual padrão. */
   getPublic: (barbershopId: string): Promise<PageTheme | null> =>
@@ -61,7 +112,7 @@ export const pageThemeApi = {
       `/api/barbershops/${barbershopId}/page-theme`
     ).then(res => {
       const theme = unwrap<PageTheme | null>(res);
-      return isValidPageTheme(theme) ? theme : null;
+      return isValidPageTheme(theme) ? normalizePageTheme(theme) : null;
     }),
 
   update: (barbershopId: string, payload: PageThemeInput): Promise<PageTheme> => {
@@ -71,7 +122,10 @@ export const pageThemeApi = {
       'PUT',
       payload,
       token
-    ).then(res => unwrap<PageTheme>(res));
+    ).then(res => {
+      const theme = unwrap<PageTheme>(res);
+      return isValidPageTheme(theme) ? normalizePageTheme(theme) : theme;
+    });
   },
 
   uploadCover: async (barbershopId: string, file: File): Promise<PageTheme> => {
@@ -99,7 +153,7 @@ export const pageThemeApi = {
     }
     const parsed = JSON.parse(bodyText) as { data?: PageTheme };
     if (!parsed.data) throw new Error('Resposta inválida do servidor ao enviar a capa.');
-    return parsed.data;
+    return isValidPageTheme(parsed.data) ? normalizePageTheme(parsed.data) : parsed.data;
   },
 
   deleteCover: (barbershopId: string): Promise<PageTheme | null> => {
@@ -109,6 +163,9 @@ export const pageThemeApi = {
       'DELETE',
       undefined,
       token
-    ).then(res => unwrap<PageTheme | null>(res));
+    ).then(res => {
+      const theme = unwrap<PageTheme | null>(res);
+      return isValidPageTheme(theme) ? normalizePageTheme(theme) : theme;
+    });
   },
 };

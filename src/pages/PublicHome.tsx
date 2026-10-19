@@ -25,17 +25,7 @@ import {
   LuCoffee as Coffee,
   LuLoaderCircle as Loader2,
 } from 'react-icons/lu';
-import type { OperationMode } from '../types';
-
-type PublicTab = 'queue' | 'appointments' | 'profile';
-
-function visiblePublicTabs(mode?: OperationMode): PublicTab[] {
-  const tabs: PublicTab[] = [];
-  if (!mode || mode === 'QUEUE_ONLY' || mode === 'HYBRID') tabs.push('queue');
-  if (!mode || mode === 'APPOINTMENTS_ONLY' || mode === 'HYBRID') tabs.push('appointments');
-  tabs.push('profile');
-  return tabs;
-}
+import { visiblePublicTabs, type PublicTab } from '../shared/publicTabs';
 
 export const PublicHome: React.FC = () => {
   const { id } = useParams<{ id: string }>();

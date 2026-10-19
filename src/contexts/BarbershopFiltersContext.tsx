@@ -15,7 +15,8 @@ interface BarbershopFiltersValue {
   setDateRange: (range: DateRange | null) => void;
 }
 
-const BarbershopFiltersContext = createContext<BarbershopFiltersValue | undefined>(undefined);
+/** Exportado cru para a prévia do painel injetar um valor de exemplo (sem efeitos colaterais do provider). */
+export const BarbershopFiltersContext = createContext<BarbershopFiltersValue | undefined>(undefined);
 
 export const BarbershopFiltersProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [barbershopId, setBarbershopId] = useState<string | null>(null);

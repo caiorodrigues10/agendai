@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/media-has-caption -- miniatura silenciosa; o player completo é aberto no detalhe */
-import { LuPlay as Play, LuStar as Star, LuMessageCircle as MessageCircle } from 'react-icons/lu';
+import { LuPlay as Play } from 'react-icons/lu';
 import type { FeedPost, ShopSettings, Service } from '../../types';
-import type { PublicReviewSummary } from '../../infra/reputationApi';
 
 export function ProfileSkeleton() {
   return (
@@ -67,94 +66,11 @@ export function ProfileGrid({
               <Play size={16} fill="currentColor" aria-hidden />
             </span>
           )}
-          <span className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-gradient-to-t from-black/70 to-transparent px-2 pb-2 pt-5 text-[10px] sm:text-xs text-white">
-            <span className="truncate">{post.title || 'Publicação'}</span>
-            <span className="flex shrink-0 items-center gap-1">
-              <MessageCircle size={12} aria-hidden />
-              {post.commentsCount ?? 0}
-            </span>
+          <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/70 to-transparent px-2 pb-2 pt-5 text-[10px] sm:text-xs text-white">
+            {post.title || 'Publicação'}
           </span>
         </button>
       ))}
-    </div>
-  );
-}
-export function ProfileReviews({
-  summary,
-  googleUrl,
-}: {
-  summary: PublicReviewSummary | null;
-  googleUrl?: string | null;
-}) {
-  return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-bold">Avaliações recentes</h2>
-        <p className="mt-1 text-sm text-text-muted">
-          Depoimentos verificados de quem foi atendido no salão.
-        </p>
-        {summary?.showAverage && summary.count > 0 && summary.average !== null && (
-          <p className="mt-3 text-lg font-bold">
-            ★ {summary.average.toFixed(1)}{' '}
-            <span className="text-xs font-normal text-text-muted">
-              de 5 · {summary.count} avaliações
-            </span>
-          </p>
-        )}
-      </div>
-      {!summary?.reviews.length && (
-        <ProfileEmpty
-          title="Ainda sem depoimentos"
-          text="As avaliações aparecem após atendimentos concluídos. Nenhuma nota é exibida sem histórico suficiente."
-        />
-      )}
-      {summary?.reviews.map(review => {
-        const response =
-          typeof review.response === 'string'
-            ? review.response
-            : review.response?.content || review.response?.message;
-        return (
-          <article
-            key={review.id ?? review.createdAt}
-            className="rounded-xl border border-border bg-bg p-4"
-          >
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="text-sm font-bold">{review.clientName || 'Cliente'}</h3>
-              <span aria-label={`${review.rating} de 5 estrelas`} className="flex text-warning">
-                {[0, 1, 2, 3, 4].map(i => (
-                  <Star
-                    key={i}
-                    size={13}
-                    aria-hidden
-                    className={i < review.rating ? 'fill-current' : 'text-text-muted'}
-                  />
-                ))}
-              </span>
-            </div>
-            {review.comment && (
-              <p className="mt-3 break-words text-sm text-text-secondary">{review.comment}</p>
-            )}
-            <p className="mt-2 text-xs text-text-muted">
-              {new Date(review.createdAt).toLocaleDateString('pt-BR')}
-            </p>
-            {response && (
-              <p className="mt-3 rounded-lg bg-surface-2 p-3 text-xs text-text-secondary">
-                <strong>Resposta do salão:</strong> {response}
-              </p>
-            )}
-          </article>
-        );
-      })}
-      {googleUrl && (
-        <a
-          href={googleUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-h-11 items-center rounded-xl border border-border px-4 text-sm font-semibold hover:bg-surface-2"
-        >
-          Ver avaliações no Google ↗
-        </a>
-      )}
     </div>
   );
 }

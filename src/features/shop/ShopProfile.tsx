@@ -6,7 +6,6 @@ import {
   LuCamera as Camera,
   LuShare2 as Share2,
   LuPlus as Plus,
-  LuStar as Star,
   LuTrash2 as Trash2,
 } from 'react-icons/lu';
 import type { ShopSettings, FeedPost, StaffMember } from '../../types';
@@ -27,7 +26,6 @@ import {
   ProfileAbout,
   ProfileEmpty,
   ProfileGrid,
-  ProfileReviews,
   ProfileSkeleton,
 } from './ProfileSections';
 
@@ -41,8 +39,10 @@ interface ShopProfileProps {
   onGoQueue?: () => void;
   onGoAppointments?: () => void;
   onNotify?: (message: string, type: 'success' | 'error') => void;
+  /** Prévia no painel de aparência: sem fetch de social nem ações destrutivas. */
+  previewMode?: boolean;
 }
-const TABS = ['Publicações', 'Vídeos', 'Marcados', 'Avaliações', 'Sobre'] as const;
+const TABS = ['Publicações', 'Vídeos', 'Marcados', 'Sobre'] as const;
 type ProfileTab = (typeof TABS)[number];
 const actionClass =
   'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm font-semibold hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent';
@@ -101,6 +101,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
   onGoQueue,
   onGoAppointments,
   onNotify,
+  previewMode = false,
 }) => {
   const navigate = useNavigate();
   const { services, isShopOpen, getTodayScheduleDisplay } = useBarbershop();
@@ -113,7 +114,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
     ownsSalon &&
     Boolean(currentUser && ['OWNER', 'EMPLOYEE', 'MASTER_ADMIN'].includes(currentUser.role));
   const canModerate = canCompose && currentUser?.role !== 'EMPLOYEE';
-  const social = useSalonSocial(barbershopId, canModerate);
+  const social = useSalonSocial(previewMode ? null : barbershopId, canModerate);
   // Vocabulário do segmento (o provider já carregou o salão; o override cobre
   // os testes/story que passam settings explícito sem provider).
   const { labels, config } = useSegmentLabels(settings.businessSegment ?? null);
@@ -133,6 +134,30 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
   const [tagBusy, setTagBusy] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const tablistRef = useRef<HTMLDivElement>(null);
+  const [tabsOverflow, setTabsOverflow] = useState(false);
+  // Fade da borda direita só quando as abas realmente transbordam.
+  useEffect(() => {
+    const list = tablistRef.current;
+    if (!list) return;
+    const check = () => setTabsOverflow(list.scrollWidth > list.clientWidth + 1);
+    check();
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(check);
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, []);
+  // Aba ativa sempre visível na faixa rolável: scroll manual por offsetLeft
+  // (layout px, imune ao transform scale da prévia; scrollIntoView também
+  // rolagaria os ancestrores do mockup).
+  useEffect(() => {
+    const list = tablistRef.current;
+    const active = list?.querySelector<HTMLElement>('[data-tab-active="true"]');
+    if (!list || !active) return;
+    const left = active.offsetLeft - list.offsetLeft - (list.clientWidth - active.offsetWidth) / 2;
+    // optional call: jsdom não implementa Element.scrollTo (testes).
+    list.scrollTo?.({ left: Math.max(0, left) });
+  }, [tab]);
   const notify = (message: string, type: 'success' | 'error' = 'success') => {
     if (onNotify) onNotify(message, type);
     else setToast({ message, type });
@@ -153,7 +178,6 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
   const stories = social.stories.data.filter(
     post => storyNow - (post.publishedAt ?? post.createdAt) < 24 * 60 * 60 * 1000
   );
-  const rating = social.reviews.data;
   const initials = settings.shopName
     .split(/\s+/)
     .filter(Boolean)
@@ -267,7 +291,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
     }
   };
   const share = async () => {
-    if (!barbershopId) return;
+    if (previewMode || !barbershopId) return;
     try {
       const result = await shareUrl(buildProfileShareUrl(barbershopId), settings.shopName);
       if (result === 'copied') notify('Link do perfil copiado!');
@@ -276,8 +300,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
     }
   };
 
-  const tabResource =
-    tab === 'Marcados' ? social.tagged : tab === 'Avaliações' ? social.reviews : null;
+  const tabResource = tab === 'Marcados' ? social.tagged : null;
   return (
     <div className="pb-16 space-y-4" data-testid="salon-social-profile">
       <section className="overflow-hidden rounded-2xl border border-border bg-surface">
@@ -296,7 +319,12 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
                 className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-bg text-xl sm:text-3xl font-bold text-text-primary disabled:opacity-100"
               >
                 {logoUrl ? (
-                  <img src={logoUrl} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={logoUrl}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    onError={() => setLogoUrl(undefined)}
+                  />
                 ) : (
                   initials || 'S'
                 )}
@@ -321,30 +349,15 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
                 {labels.segmentLabel}
                 {audienceLabel ? ` · ${audienceLabel}` : ''}
               </p>
-              <div className="mt-3 grid grid-cols-2 gap-3 sm:flex sm:gap-7">
-                <div>
-                  <strong className="text-base sm:text-lg">{publicPosts.length}</strong>
-                  <p className="text-[11px] sm:text-xs text-text-muted">publicações</p>
+              <div className="mt-3 grid w-fit grid-cols-2 gap-x-6 gap-y-1">
+                <div className="min-w-0">
+                  <strong className="block text-base font-semibold">{publicPosts.length}</strong>
+                  <p className="truncate text-[11px] leading-tight text-text-muted">publicações</p>
                 </div>
-                <div>
-                  <strong className="text-base sm:text-lg">{videos.length}</strong>
-                  <p className="text-[11px] sm:text-xs text-text-muted">vídeos</p>
+                <div className="min-w-0">
+                  <strong className="block text-base font-semibold">{videos.length}</strong>
+                  <p className="truncate text-[11px] leading-tight text-text-muted">vídeos</p>
                 </div>
-                {rating?.showAverage && rating.average !== null && rating.count > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setTab('Avaliações')}
-                    className="text-left col-span-2"
-                  >
-                    <strong className="flex items-center gap-1 text-base sm:text-lg">
-                      <Star size={14} className="text-warning fill-warning" />
-                      {rating.average.toFixed(1)}
-                    </strong>
-                    <p className="text-[11px] sm:text-xs text-text-muted">
-                      {rating.count} avaliações
-                    </p>
-                  </button>
-                )}
               </div>
             </div>
           </div>
@@ -472,25 +485,35 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
             Stories indisponíveis · tentar novamente
           </button>
         ) : null}
-        <div
-          role="tablist"
-          aria-label="Conteúdo do perfil"
-          className="flex overflow-x-auto border-t border-border px-2 sm:px-4"
-        >
-          {TABS.map(item => (
-            <button
-              type="button"
-              role="tab"
-              aria-selected={tab === item}
-              aria-controls="salon-profile-content"
-              id={`salon-tab-${item}`}
-              key={item}
-              onClick={() => setTab(item)}
-              className={`min-h-12 shrink-0 border-t-2 px-3 sm:px-5 text-xs sm:text-sm font-semibold ${tab === item ? 'border-accent text-text-primary' : 'border-transparent text-text-muted hover:text-text-primary'}`}
-            >
-              {item}
-            </button>
-          ))}
+        {/* Faixa de abas: rolagem horizontal com snap + fade na borda direita
+            indicando overflow (nunca corta uma aba sem aviso). */}
+        <div className="relative border-t border-border">
+          <div
+            ref={tablistRef}
+            role="tablist"
+            aria-label="Conteúdo do perfil"
+            className="flex snap-x snap-mandatory overflow-x-auto px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-4"
+          >
+            {TABS.map(item => (
+              <button
+                type="button"
+                role="tab"
+                aria-selected={tab === item}
+                aria-controls="salon-profile-content"
+                id={`salon-tab-${item}`}
+                key={item}
+                data-tab-active={tab === item}
+                onClick={() => setTab(item)}
+                className={`min-h-12 shrink-0 snap-start border-t-2 px-3 text-xs font-semibold ${tab === item ? 'border-accent text-text-primary' : 'border-transparent text-text-muted hover:text-text-primary'}`}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+          <div
+            className={`pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-surface to-transparent ${tabsOverflow ? '' : 'hidden'}`}
+            aria-hidden="true"
+          />
         </div>
       </section>
       <section
@@ -588,11 +611,6 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
                     text="Publicações em que o salão foi marcado aparecem aqui após sua aprovação."
                   />
                 )}
-              </div>
-            )}
-            {tab === 'Avaliações' && (
-              <div className="p-2">
-                <ProfileReviews summary={rating} googleUrl={settings.googleReviewUrl} />
               </div>
             )}
             {tab === 'Sobre' && (

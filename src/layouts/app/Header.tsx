@@ -57,8 +57,10 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
 
   return (
     <header className="sticky top-0 z-50 bg-bg/95 backdrop-blur-sm border-b border-border shadow-lg shadow-black/5">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 lg:px-6">
-        <Logo size="sm" customImageUrl={logoUrl} />
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+        <span className="shrink-0">
+          <Logo size="sm" customImageUrl={logoUrl} />
+        </span>
         {currentUser && isSwitched && (
           <div
             data-testid="active-shop-notice"
@@ -86,12 +88,12 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
             )}
           </div>
         )}
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
           <ThemeToggle />
           {currentUser && isTrialActive && (
             <span
               aria-label={`Seu acesso de teste termina em ${trialDays} ${trialDays === 1 ? 'dia' : 'dias'}.`}
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[11px] font-bold sm:px-2.5 ${trialTone}`}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs font-bold sm:px-2.5 ${trialTone}`}
             >
               <Clock3 size={13} aria-hidden="true" />
               <span className="sm:hidden">{trialDays}d</span>
@@ -99,11 +101,11 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
             </span>
           )}
           {currentUser ? (
-            <div className="flex items-center gap-2 bg-surface rounded-lg p-1 pr-3 border border-border">
+            <div className="flex min-w-0 flex-wrap items-center gap-2 rounded-lg border border-border bg-surface p-1 pr-3">
               {currentUser.role === 'OWNER' && (
                 <Link
                   to="/app/subscription"
-                  className="px-2.5 py-1.5 rounded-md text-[11px] font-bold bg-accent text-accent-fg hover:bg-accent-hover flex items-center gap-1"
+                  className="flex items-center gap-1 rounded-md bg-accent px-2 py-1.5 text-xs font-bold text-accent-fg hover:bg-accent-hover"
                 >
                   <Wallet size={12} /> Plano
                 </Link>

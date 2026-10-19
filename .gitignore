@@ -51,3 +51,6 @@ playwright-report/
 storybook-static
 visual-regression/**/*-diff.png
 visual-regression/**/*-failure-diff.png
+
+# Screenshots de aceite (antes/depois) da prévia — anexados na entrega
+screenshots/appearance/

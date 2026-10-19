@@ -42,6 +42,11 @@ function setHex(fieldLabel: string, hex: string) {
   fireEvent.change(screen.getByLabelText(`${fieldLabel} (hex)`), { target: { value: hex } });
 }
 
+/** Valor de uma CSS variable aplicada no wrapper da prévia (tema escopado). */
+function previewVar(name: string): string {
+  return screen.getByTestId('theme-preview').style.getPropertyValue(name);
+}
+
 describe('PageAppearancePanel', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -58,17 +63,13 @@ describe('PageAppearancePanel', () => {
     expect(pageThemeApi.getPublic).toHaveBeenCalledWith(shop);
     const preview = screen.getByTestId('theme-preview');
     expect(preview).toHaveAttribute('data-radius', 'rounded');
-    expect(screen.getByText('Entrar na fila').closest('button')).toHaveStyle({
-      backgroundColor: 'rgb(44, 181, 138)',
-    });
+    expect(previewVar('--ag-accent')).toBe('#2CB58A');
   });
 
   it('muda a cor de destaque e o preview acompanha em tempo real', async () => {
     await renderPanel();
     setHex('Cor de destaque', '#A78BFA');
-    expect(screen.getByText('Entrar na fila').closest('button')).toHaveStyle({
-      backgroundColor: 'rgb(167, 139, 250)',
-    });
+    expect(previewVar('--ag-accent')).toBe('#A78BFA');
     expect(screen.getByTestId('dirty-warning')).toBeInTheDocument();
   });
 
@@ -76,9 +77,7 @@ describe('PageAppearancePanel', () => {
     await renderPanel();
     fireEvent.click(screen.getByTestId('preset-claro'));
     expect(screen.getByTestId('theme-preview')).toHaveAttribute('data-ag-shop-theme');
-    expect(screen.getByText('Entrar na fila').closest('button')).toHaveStyle({
-      backgroundColor: 'rgb(28, 126, 97)',
-    });
+    expect(previewVar('--ag-accent')).toBe('#1C7E61');
   });
 
   it('bloqueia Salvar e mostra o par reprovado quando o contraste falha', async () => {
@@ -114,9 +113,7 @@ describe('PageAppearancePanel', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Restaurar' }));
 
     await waitFor(() => expect(screen.queryByTestId('dirty-warning')).toBeNull());
-    expect(screen.getByText('Entrar na fila').closest('button')).toHaveStyle({
-      backgroundColor: 'rgb(44, 181, 138)',
-    });
+    expect(previewVar('--ag-accent')).toBe('#2CB58A');
   });
 
   it('salva o tema no backend e limpa o estado sujo', async () => {
@@ -133,9 +130,7 @@ describe('PageAppearancePanel', () => {
   it('sem tema salvo, parte do visual padrão (zero regressão)', async () => {
     vi.mocked(pageThemeApi.getPublic).mockResolvedValue(null);
     await renderPanel();
-    expect(screen.getByText('Entrar na fila').closest('button')).toHaveStyle({
-      backgroundColor: 'rgb(44, 181, 138)',
-    });
+    expect(previewVar('--ag-accent')).toBe('#2CB58A');
     expect(screen.getByTestId('save-theme')).toBeDisabled(); // nada alterado ainda
   });
 });

@@ -35,8 +35,8 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 
 ## Aparência da página pública (tema)
 
-- Tema via CSS vars (`--ag-*`) escopadas no wrapper `[data-ag-shop-theme]`; padrão = visual dark atual (`PAGE_THEME_DEFAULTS` em `src/shared/pageThemeDefaults.ts`, espelho do backend via `npm run theme:mirror`).
-- Contraste WCAG AA (texto/fundo + muted/fundo + texto/sobre-acento) é **bloqueante** no botão Salvar e no back (`pageThemeContrast.ts`); sem token de owner, o painel mostra estado somente-leitura.
+- Tema via CSS vars escopadas no wrapper `[data-ag-shop-theme]`: família canônica `--shop-*` (por variante) + espelho legado `--ag-*`; as utilities do Tailwind resolvem `var(--shop-x, var(--ag-x))` (`styles/tokens.css`). Variantes `light`/`dark` por salão (`darkColors`/`lightColors` no payload; `lightColors` nula é gerada no cliente via `generateVariantColors`, mesmo gerador do back) e `mode` do dono (`AUTO` segue `prefers-color-scheme`; `LIGHT`/`DARK` força). Padrão sem tema salvo = visual dark atual (`PAGE_THEME_DEFAULTS` em `src/shared/pageThemeDefaults.ts`, espelho do backend via `npm run theme:mirror`).
+- Contraste WCAG AA (texto/fundo + muted/fundo + acento/superfície + botão/acento) é **bloqueante** no botão Salvar — em QUALQUER variante, materializada ou gerada — e no back (`pageThemeContrast.ts`); cores são editadas na variante ativa da prévia (toggle Claro|Escuro, travado quando o Modo força a variante); sem token de owner, o painel mostra estado somente-leitura.
 - Capa: validação instantânea no front (JPEG/PNG/WebP, 16:9, dimensões mínimas de `imageSpecs.ts`), overlay 0–80, envio multipart para Cloudinary via backend; GIF/SVG rejeitados.
 - Anti-FOUC: `PublicHome` aplica o tema o quanto antes carregado (`usePageTheme` com cache por módulo; `clearPageThemeCache()` para testes).
 

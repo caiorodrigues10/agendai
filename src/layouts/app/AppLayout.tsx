@@ -34,7 +34,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   onNavigate,
   children,
 }) => (
-  <div className="min-h-screen bg-bg pb-[max(5.5rem,env(safe-area-inset-bottom))] text-text-primary lg:pb-0">
+  <div className="min-h-screen bg-bg pb-[calc(5.5rem+env(safe-area-inset-bottom))] text-text-primary lg:pb-0">
     <a
       href="#main-content"
       className="sr-only fixed left-4 top-4 z-[90] rounded-lg bg-accent px-4 py-2 text-sm font-bold text-accent-fg focus:not-sr-only"
@@ -43,7 +43,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
     </a>
     <Header currentUser={user} onOpenLogin={onLogin} onLogout={onLogout} logoUrl={logoUrl} />
     {toast}
-    <div className="mx-auto flex w-full max-w-7xl gap-6 px-4 py-6 lg:px-6">
+    <div className="mx-auto flex w-full max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:px-8">
       <StaffNavigation
         activeTab={activeTab}
         userRole={userRole}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { LuRotateCcw, LuSave } from 'react-icons/lu';
+import { LuCheck, LuCircleCheck, LuLoaderCircle, LuRotateCcw, LuSave, LuTriangleAlert } from 'react-icons/lu';
 import type { ContrastCheck } from '../../shared/pageThemeContrast';
 import { THEME_PRESETS, type ThemePreset } from './presets';
 
@@ -7,9 +7,11 @@ import { THEME_PRESETS, type ThemePreset } from './presets';
 export const PanelHeader: React.FC<{
   saving: boolean;
   canSave: boolean;
+  /** Motivo exibido no `title` quando o Salvar está desabilitado. */
+  disabledReason?: string;
   onRestore: () => void;
   onSave: () => void;
-}> = ({ saving, canSave, onRestore, onSave }) => (
+}> = ({ saving, canSave, disabledReason, onRestore, onSave }) => (
   <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
     <div>
       <h2 id="appearance-title" className="text-lg font-bold text-text-primary">
@@ -30,90 +32,137 @@ export const PanelHeader: React.FC<{
         type="button"
         onClick={onSave}
         disabled={!canSave}
-        className="flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-sm font-bold text-accent-fg hover:bg-accent-hover disabled:opacity-50"
+        title={disabledReason}
+        className="flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-sm font-bold text-accent-fg hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
         data-testid="save-theme"
       >
-        <LuSave size={16} /> {saving ? 'Salvando…' : 'Salvar'}
+        {saving ? (
+          <LuLoaderCircle size={16} className="animate-spin" aria-hidden="true" />
+        ) : (
+          <LuSave size={16} />
+        )}
+        {saving ? 'Salvando…' : 'Salvar'}
       </button>
     </div>
   </div>
 );
 
-/** Paletas prontas (swatch + rótulo). */
+/** Paletas prontas (swatch + rótulo). As bolinhas refletem a variante em edição (Claro | Escuro). */
 export const PresetPicker: React.FC<{
   onPick: (preset: ThemePreset) => void;
-}> = ({ onPick }) => (
+  selectedKey?: string | null;
+  /** Variante da prévia/modo em edição — chip mostra `preset[variant]`. */
+  variant: 'light' | 'dark';
+}> = ({ onPick, selectedKey, variant }) => (
   <div>
     <h3 className="mb-2 text-sm font-bold text-text-primary">Paletas prontas</h3>
     <div className="flex flex-wrap gap-2" role="group" aria-label="Paletas prontas">
-      {THEME_PRESETS.map(preset => (
-        <button
-          key={preset.key}
-          type="button"
-          onClick={() => onPick(preset)}
-          className="flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-xs font-bold text-text-secondary hover:border-accent"
-          data-testid={`preset-${preset.key}`}
-        >
-          <span className="flex">
-            <span
-              className="h-4 w-4 rounded-l-full border border-black/10"
-              style={{ backgroundColor: preset.colors.backgroundColor }}
-            />
-            <span
-              className="h-4 w-4 border-y border-black/10"
-              style={{ backgroundColor: preset.colors.surfaceColor }}
-            />
-            <span
-              className="h-4 w-4 rounded-r-full border border-black/10"
-              style={{ backgroundColor: preset.colors.accentColor }}
-            />
-          </span>
-          {preset.label}
-        </button>
-      ))}
+      {THEME_PRESETS.map(preset => {
+        const selected = preset.key === selectedKey;
+        const colors = preset[variant];
+        const dot = 'h-4 w-4 rounded-full ring-1 ring-black/15 dark:ring-white/20';
+        return (
+          <button
+            key={preset.key}
+            type="button"
+            onClick={() => onPick(preset)}
+            aria-pressed={selected}
+            className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-bold transition-colors ${
+              selected
+                ? 'border-accent bg-accent/10 text-accent ring-1 ring-accent'
+                : 'border-border text-text-secondary hover:border-border-strong hover:bg-surface-2'
+            }`}
+            data-testid={`preset-${preset.key}`}
+          >
+            <span className="flex" aria-hidden="true">
+              <span className={dot} style={{ backgroundColor: colors.backgroundColor }} />
+              <span className={`${dot} -ml-1.5`} style={{ backgroundColor: colors.surfaceColor }} />
+              <span className={`${dot} -ml-1.5`} style={{ backgroundColor: colors.accentColor }} />
+            </span>
+            {preset.label}
+            {selected && <LuCheck size={13} className="shrink-0" aria-hidden="true" />}
+          </button>
+        );
+      })}
     </div>
   </div>
 );
 
-/** Controle segmentado (cantos / estilo de botão). */
+/** Modo da página (semântica igual ao backend: AUTO segue o sistema). */
+export const PAGE_MODE_OPTIONS = [
+  { value: 'AUTO', label: 'Automático' },
+  { value: 'LIGHT', label: 'Sempre claro' },
+  { value: 'DARK', label: 'Sempre escuro' },
+] as const;
+
+/**
+ * Controle segmentado (modo / cantos / estilo de botão) em `role="radiogroup"`:
+ * grid de colunas iguais com largura total, altura única `h-11`, texto de uma
+ * linha (`truncate`) — nunca deixa rótulos como "Arredondado"/"Sempre escuro"
+ * espremidos ou sobrepostos. Navegação por setas move foco e seleção.
+ */
 export const SegmentedOptions: React.FC<{
   legend: string;
   options: readonly { value: string; label: string }[];
   value: string;
   onChange: (value: string) => void;
   testIdPrefix: string;
-}> = ({ legend, options, value, onChange, testIdPrefix }) => (
-  <fieldset>
-    <legend className="mb-1.5 text-sm font-medium text-text-secondary">{legend}</legend>
-    <div className="flex gap-2">
-      {options.map(opt => (
-        <button
-          key={opt.value}
-          type="button"
-          onClick={() => onChange(opt.value)}
-          aria-pressed={value === opt.value}
-          className={`flex-1 rounded-xl border px-2 py-2 text-xs font-bold ${
-            value === opt.value ? 'border-accent bg-accent/10 text-accent' : 'border-border text-text-secondary'
-          }`}
-          data-testid={`${testIdPrefix}-${opt.value}`}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  </fieldset>
-);
+}> = ({ legend, options, value, onChange, testIdPrefix }) => {
+  const move = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const deltas: Record<string, number> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+    const delta = deltas[event.key];
+    if (!delta) return;
+    event.preventDefault();
+    const current = Math.max(0, options.findIndex(opt => opt.value === value));
+    const nextIndex = (current + delta + options.length) % options.length;
+    onChange(options[nextIndex].value);
+    const group = event.currentTarget;
+    group.querySelectorAll<HTMLButtonElement>('[role="radio"]')[nextIndex]?.focus();
+  };
+  return (
+    <fieldset className="min-w-0">
+      <legend className="mb-1.5 text-sm font-medium text-text-secondary">{legend}</legend>
+      <div
+        role="radiogroup"
+        aria-label={legend}
+        tabIndex={-1}
+        onKeyDown={move}
+        className={`grid w-full gap-2 ${options.length <= 2 ? 'grid-cols-2' : 'grid-cols-3'}`}
+      >
+        {options.map(opt => (
+          <button
+            key={opt.value}
+            type="button"
+            role="radio"
+            aria-checked={value === opt.value}
+            tabIndex={value === opt.value ? 0 : -1}
+            onClick={() => onChange(opt.value)}
+            className={`h-11 min-w-0 truncate whitespace-nowrap rounded-xl border px-2 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:z-10 ${
+              value === opt.value
+                ? 'border-accent bg-accent/10 text-accent'
+                : 'border-border bg-surface text-text-secondary hover:border-border-strong hover:bg-surface-2'
+            }`}
+            data-testid={`${testIdPrefix}-${opt.value}`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    </fieldset>
+  );
+};
 
-/** Status de contraste WCAG AA (aria-live) + sugestões em 1 clique. */
+/** Status de contraste WCAG AA (aria-live) + sugestões em 1 clique. Fica ABAIXO da moldura da prévia. */
 export const ContrastStatusPanel: React.FC<{
   failing: ContrastCheck[];
   dirty: boolean;
   onApplySuggestion: (check: ContrastCheck) => void;
 }> = ({ failing, dirty, onApplySuggestion }) => (
-  <div aria-live="polite" data-testid="contrast-status">
+  <div aria-live="polite" data-testid="contrast-status" className="space-y-2">
     {failing.length > 0 ? (
-      <div className="rounded-xl border border-danger/40 bg-danger/5 p-3">
-        <p className="mb-2 text-xs font-bold text-danger">
+      <div className="rounded-xl border border-danger/40 bg-danger/10 p-3">
+        <p className="mb-2 flex items-center gap-1.5 text-xs font-bold text-danger">
+          <LuTriangleAlert size={14} className="shrink-0" aria-hidden="true" />
           Contraste insuficiente (WCAG AA) — corrija para salvar:
         </p>
         <ul className="space-y-2">
@@ -138,12 +187,17 @@ export const ContrastStatusPanel: React.FC<{
         </ul>
       </div>
     ) : (
-      <p className="rounded-xl border border-success/30 bg-success/5 p-3 text-[11px] font-bold text-success">
+      <p className="flex items-center gap-1.5 rounded-xl border border-success/40 bg-success/10 p-3 text-[11px] font-bold text-success">
+        <LuCircleCheck size={14} className="shrink-0" aria-hidden="true" />
         Contraste aprovado (WCAG AA).
       </p>
     )}
     {dirty && (
-      <p className="mt-2 text-[11px] font-medium text-warning" data-testid="dirty-warning">
+      <p
+        className="flex items-center gap-1.5 rounded-xl border border-warning/40 bg-warning/10 p-3 text-[11px] font-bold text-warning"
+        data-testid="dirty-warning"
+      >
+        <LuTriangleAlert size={13} className="shrink-0" aria-hidden="true" />
         Alterações não salvas.
       </p>
     )}
