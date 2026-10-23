@@ -322,6 +322,7 @@ describe('Cadastro em 3 etapas (wizard)', () => {
   });
 
   it('o botão do Google só existe na etapa 1', async () => {
+    vi.stubEnv('VITE_GOOGLE_CLIENT_ID', 'test-google-client-id');
     renderWithProviders(<LoginPage mode="register" />, { route: '/cadastro' });
 
     expect(screen.getByRole('button', { name: /cadastrar com google/i })).toBeInTheDocument();
