@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { LuCircleAlert as AlertCircle, LuRefreshCw as RefreshCw } from 'react-icons/lu';
 
 interface SectionErrorProps {
@@ -6,9 +6,38 @@ interface SectionErrorProps {
   onRetry?: () => void;
   action?: ReactNode;
   className?: string;
+  retryAfterSeconds?: number | null;
 }
 
-export function SectionError({ message, onRetry, action, className = '' }: SectionErrorProps) {
+export function SectionError({
+  message,
+  onRetry,
+  action,
+  className = '',
+  retryAfterSeconds,
+}: SectionErrorProps) {
+  const [countdown, setCountdown] = useState(() => Math.max(0, retryAfterSeconds ?? 0));
+
+  useEffect(() => {
+    setCountdown(Math.max(0, retryAfterSeconds ?? 0));
+  }, [retryAfterSeconds]);
+
+  useEffect(() => {
+    if (countdown <= 0) return;
+    const timer = window.setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          window.clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [countdown > 0]);
+
+  const retryDisabled = countdown > 0;
+
   return (
     <div
       role="alert"
@@ -24,10 +53,18 @@ export function SectionError({ message, onRetry, action, className = '' }: Secti
                 <button
                   type="button"
                   onClick={onRetry}
-                  className="inline-flex items-center gap-1 text-sm font-medium text-danger underline-offset-4 hover:underline"
+                  disabled={retryDisabled}
+                  className={`inline-flex items-center gap-1 text-sm font-medium text-danger underline-offset-4 ${
+                    retryDisabled ? 'cursor-not-allowed opacity-60' : 'hover:underline'
+                  }`}
                 >
                   <RefreshCw size={14} aria-hidden="true" /> Tentar novamente
                 </button>
+              ) : null}
+              {retryDisabled ? (
+                <span className="text-xs text-text-muted" aria-live="polite">
+                  Tente novamente em {countdown}s
+                </span>
               ) : null}
               {action}
             </div>

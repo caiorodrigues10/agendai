@@ -11,13 +11,18 @@ export const PanelHeader: React.FC<{
   disabledReason?: string;
   onRestore: () => void;
   onSave: () => void;
-}> = ({ saving, canSave, disabledReason, onRestore, onSave }) => (
-  <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+  }> = ({ saving, canSave, disabledReason, onRestore, onSave }) => (
+    <div
+      data-testid="appearance-action-bar"
+      className="sticky top-[var(--app-header-h,67px)] z-30 -mx-4 mb-4 flex flex-wrap items-start justify-between gap-3 border-b border-border bg-surface px-4 py-3 sm:-mx-6 sm:px-6"
+    >
     <div>
       <h2 id="appearance-title" className="text-lg font-bold text-text-primary">
         Aparência da página
       </h2>
-      <p className="text-sm text-text-muted">Personalize cores, capa e cantos do link público do salão.</p>
+      <p className="hidden text-sm text-text-muted sm:block">
+        Personalize cores, capa e cantos do link público do salão.
+      </p>
     </div>
     <div className="flex gap-2">
       <button

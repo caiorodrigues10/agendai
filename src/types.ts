@@ -138,6 +138,21 @@ export interface StaffMember {
   permissions?: EmployeePermission[];
 }
 
+/** Item da lista de preços do modelo price-split (o backend normaliza o preço). */
+export interface PriceSplitItem {
+  name: string;
+  /** Texto do editor ("45,90") ou número; null/'' = sem preço. */
+  price?: number | string | null;
+}
+
+/** Payload do modelo "Tabela de valores · Foto + painel" (até 8 itens). */
+export interface PriceSplitPayload {
+  items: PriceSplitItem[];
+  businessName?: string;
+  whatsapp?: string | null;
+  instagram?: string | null;
+}
+
 export interface FeedPost {
   id: string;
   barbershopId?: string;
@@ -160,7 +175,13 @@ export interface FeedPost {
   primaryMediaId?: string | null;
   secondaryMediaId?: string | null;
   paletteKey?: string;
-  designOptions?: { focalX?: number; focalY?: number; overlay?: number } | null;
+  designOptions?: {
+    focalX?: number;
+    focalY?: number;
+    overlay?: number;
+    /** Lista de preços gravada junto ao post (só no modelo price-split). */
+    priceSplit?: PriceSplitPayload;
+  } | null;
 }
 
 export type PostMode = 'queue' | 'appointments' | 'both';

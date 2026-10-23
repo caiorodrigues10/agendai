@@ -2,11 +2,9 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { ShopProfile } from './ShopProfile';
 import { socialApi } from '../../infra/socialApi';
-import { reputationApi } from '../../infra/reputationApi';
 import type { FeedPost, ShopSettings, StaffMember } from '../../types';
 
-vi.mock('../../infra/socialApi', () => ({ socialApi: { stories: vi.fn(), tagged: vi.fn(), getPost: vi.fn(), moderateTag: vi.fn(), canComment: () => false, comments: vi.fn() } }));
-vi.mock('../../infra/reputationApi', () => ({ reputationApi: { getPublicSummary: vi.fn() } }));
+vi.mock('../../infra/socialApi', () => ({ socialApi: { stories: vi.fn(), gallery: vi.fn(), tagged: vi.fn(), getPost: vi.fn(), moderateTag: vi.fn(), canComment: () => false, comments: vi.fn() } }));
 vi.mock('../../contexts/BarbershopContext', async () => {
   const { createContext } = await import('react');
   return {
@@ -26,8 +24,8 @@ function mount(props: Partial<Parameters<typeof ShopProfile>[0]> = {}) {
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(socialApi.stories).mockResolvedValue([]);
+  vi.mocked(socialApi.gallery).mockResolvedValue([]);
   vi.mocked(socialApi.tagged).mockResolvedValue([]);
-  vi.mocked(reputationApi.getPublicSummary).mockResolvedValue({ average: null, count: 0, threshold: 3, showAverage: false, reviews: [] });
 });
 
 it('mostra apenas publicações públicas na grade, sem rascunhos e sem stories', async () => {
@@ -36,40 +34,51 @@ it('mostra apenas publicações públicas na grade, sem rascunhos e sem stories'
   expect(screen.getByTestId('profile-post-grid').querySelectorAll('button')).toHaveLength(1);
   expect(screen.queryByText('0.0')).not.toBeInTheDocument();
 });
-it('filtra vídeos na aba específica', async () => {
-  mount({ posts: [post, { ...post, id: 'video', title: 'Bastidores', videoUrl: '/reel.mp4' }] });
-  fireEvent.click(screen.getByRole('tab', { name: 'Vídeos' }));
-  expect(screen.getByRole('button', { name: 'Abrir vídeo: Bastidores' })).toBeInTheDocument();
-  expect(screen.queryByRole('button', { name: 'Abrir publicação: Arte nova' })).not.toBeInTheDocument();
-});
-it('não exibe média abaixo do limiar, mas mantém os depoimentos reais', async () => {
-  vi.mocked(reputationApi.getPublicSummary).mockResolvedValue({ average: 5, count: 1, threshold: 3, showAverage: false, reviews: [{ id: 'review', rating: 5, clientName: 'Ana', comment: 'Muito bom!', createdAt: new Date().toISOString() }] });
+it('exibe apenas as abas Publicações, Fotos e Sobre', async () => {
   mount();
-  fireEvent.click(screen.getByRole('tab', { name: 'Avaliações' }));
-  expect(await screen.findByText('Muito bom!')).toBeInTheDocument();
-  expect(screen.queryByText('5.0')).not.toBeInTheDocument();
-  expect(screen.getByLabelText('5 de 5 estrelas')).toBeInTheDocument();
+  await waitFor(() => expect(socialApi.stories).toHaveBeenCalled());
+  const tabs = screen.getAllByRole('tab').map(t => t.textContent);
+  expect(tabs).toEqual(['Publicações', 'Fotos', 'Sobre']);
+});
+it('aba Fotos mostra estado vazio e o cabeçalho conta fotos (0 sem galeria ainda)', async () => {
+  mount();
+  await waitFor(() => expect(socialApi.stories).toHaveBeenCalled());
+  fireEvent.click(screen.getByRole('tab', { name: 'Fotos' }));
+  expect(screen.getByText('Galeria de fotos em breve')).toBeInTheDocument();
+  expect(screen.getByText('fotos')).toBeInTheDocument();
+  expect(screen.getByText('fotos').previousElementSibling).toHaveTextContent('0');
+});
+it('aba Fotos renderiza a galeria pública e atualiza o contador do cabeçalho', async () => {
+  vi.mocked(socialApi.gallery).mockResolvedValue([
+    { id: 'ph1', url: 'https://cdn.example.com/1.png', mimeType: 'image/png', createdAt: '2026-10-20T10:00:00.000Z' },
+    { id: 'ph2', url: 'https://cdn.example.com/2.png', mimeType: 'image/png', createdAt: '2026-10-21T10:00:00.000Z' },
+  ]);
+  mount();
+  await waitFor(() => expect(socialApi.gallery).toHaveBeenCalledWith('salon'));
+  fireEvent.click(screen.getByRole('tab', { name: 'Fotos' }));
+  expect(await screen.findAllByAltText('Foto do salão')).toHaveLength(2);
+  expect(screen.queryByText('Galeria de fotos em breve')).not.toBeInTheDocument();
+  expect(screen.getByText('fotos').previousElementSibling).toHaveTextContent('2');
+});
+it('vídeos publicados continuam visíveis na grade de Publicações', async () => {
+  mount({ posts: [post, { ...post, id: 'video', title: 'Bastidores', videoUrl: '/reel.mp4' }] });
+  await waitFor(() => expect(socialApi.stories).toHaveBeenCalled());
+  expect(screen.getByRole('button', { name: 'Abrir vídeo: Bastidores' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Abrir publicação: Arte nova' })).toBeInTheDocument();
+});
+it('não busca tagged nem pendentes e não expõe moderação no perfil público', async () => {
+  mount({ currentUser: owner, audience: 'public' });
+  await waitFor(() => expect(socialApi.stories).toHaveBeenCalled());
+  expect(socialApi.tagged).not.toHaveBeenCalled();
+  expect(screen.queryByRole('button', { name: 'Alterar logo' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Criar publicação' })).not.toBeInTheDocument();
+  expect(screen.queryByText('Aguardando sua aprovação')).not.toBeInTheDocument();
 });
 it('oferece somente a fila quando o salão não trabalha com agendamentos', async () => {
   mount({ settings: { ...settings, operationMode: 'QUEUE_ONLY' } });
   await waitFor(() => expect(socialApi.stories).toHaveBeenCalled());
   expect(screen.getByRole('button', { name: 'Entrar na fila' })).toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Agendar' })).not.toBeInTheDocument();
-});
-it('não expõe edição ou moderação da equipe no perfil público', async () => {
-  mount({ currentUser: owner, audience: 'public' });
-  await waitFor(() => expect(socialApi.tagged).toHaveBeenCalledWith('salon'));
-  expect(socialApi.tagged).not.toHaveBeenCalledWith('salon', true);
-  expect(screen.queryByRole('button', { name: 'Alterar logo' })).not.toBeInTheDocument();
-  expect(screen.queryByRole('button', { name: 'Criar publicação' })).not.toBeInTheDocument();
-});
-it('o responsável aprova marcações pendentes com escopo do salão', async () => {
-  vi.mocked(socialApi.tagged).mockImplementation(async (_id, pending) => pending ? [{ id: 'tag', postId: 'other-post', barbershopId: 'salon', status: 'PENDING', post: { ...post, id: 'other-post', barbershopId: 'other', shopName: 'Parceiro' } }] : []);
-  vi.mocked(socialApi.moderateTag).mockResolvedValue();
-  mount({ currentUser: owner, audience: 'staff' });
-  fireEvent.click(screen.getByRole('tab', { name: 'Marcados' }));
-  fireEvent.click(await screen.findByRole('button', { name: 'Aprovar' }));
-  await waitFor(() => expect(socialApi.moderateTag).toHaveBeenCalledWith('salon', 'tag', true));
 });
 it('stories expirados não aparecem e stories ativos abrem o visualizador', async () => {
   vi.mocked(socialApi.stories).mockResolvedValue([{ ...post, id: 'expired', title: 'Expirado', format: 'story', publishedAt: Date.now() - 25 * 3600_000 }, { ...post, id: 'active', title: 'Hoje', format: 'story' }]);
@@ -79,11 +88,4 @@ it('stories expirados não aparecem e stories ativos abrem o visualizador', asyn
   expect(screen.queryByRole('button', { name: 'Ver story: Expirado' })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Fechar story' }));
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-});
-it('separa marcados da grade própria e preserva a identidade de origem', async () => {
-  vi.mocked(socialApi.tagged).mockResolvedValue([{ id: 'tag', postId: 'other-post', barbershopId: 'salon', status: 'APPROVED', post: { ...post, id: 'other-post', title: 'Colaboração', barbershopId: 'other', shopName: 'Parceiro' } }]);
-  mount();
-  fireEvent.click(screen.getByRole('tab', { name: 'Marcados' }));
-  expect(await screen.findByRole('button', { name: 'Abrir publicação: Colaboração' })).toBeInTheDocument();
-  expect(screen.queryByRole('button', { name: 'Abrir publicação: Arte nova' })).not.toBeInTheDocument();
 });

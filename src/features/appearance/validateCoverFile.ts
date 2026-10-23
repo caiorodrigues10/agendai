@@ -1,8 +1,5 @@
-import {
-  COVER_IMAGE_SPEC,
-  describeImageDimensionError,
-  type ImageSpec,
-} from '../../shared/imageSpecs';
+import { COVER_IMAGE_SPEC, type CoverImageSpec } from '../../shared/imageSpecs';
+import { isSupportedImage } from '../../shared/isSupportedImage';
 
 export interface CoverFileValidation {
   ok: boolean;
@@ -11,18 +8,10 @@ export interface CoverFileValidation {
   height?: number;
 }
 
-function sizeErrorMessage(bytes: number, spec: ImageSpec): string {
-  const mb = (bytes / 1024 / 1024).toFixed(2).replace(/\.?0+$/, '');
-  const maxMb = (spec.maxBytes / 1024 / 1024).toString();
-  return `Sua imagem tem ${mb} MB. O máximo permitido é ${maxMb} MB.`;
-}
-
-function ratioErrorMessage(width: number, height: number, spec: ImageSpec): string {
-  return (
-    `Sua imagem tem ${width}×${height}, que não é ${spec.ratioLabel}. ` +
-    `Envie exatamente ${spec.recommendedWidth}×${spec.recommendedHeight} ` +
-    `(proporção ${spec.ratioLabel}).`
-  );
+/** Aviso NÃO bloqueante sobre a medida escolhida (capa aceita qualquer uma). */
+export interface CoverImageWarning {
+  tone: 'info' | 'ok';
+  text: string;
 }
 
 async function readImageDimensions(file: File): Promise<{ width: number; height: number }> {
@@ -48,24 +37,26 @@ async function readImageDimensions(file: File): Promise<{ width: number; height:
 }
 
 /**
- * Validação INSTANTÂNEA no front (camada 1 de 3). Nada é enviado ao back se
- * `ok` for false — sem "enviar mesmo assim", sem recorte escondido. O back
- * revalida tudo com sharp (autoridade) e o Cloudinary aplica limites do preset.
+ * Validação INSTANTÂNEA no front (camada 1 de 3): tipo real e legibilidade do
+ * arquivo. QUALQUER medida/proporção de capa é aceita — o recorte 16:9 e o
+ * ponto focal acontecem na entrega (helper único `shared/coverImage.ts`). O
+ * back revalida o tipo com sharp (autoridade) e o Cloudinary aplica o limite
+ * de peso do plano da conta (o app não define MB).
  */
 export async function validateCoverFile(
   file: File,
-  spec: ImageSpec = COVER_IMAGE_SPEC
+  spec: CoverImageSpec = COVER_IMAGE_SPEC
 ): Promise<CoverFileValidation> {
+  // Camada 1: MIME declarado (spec). Se não convencer (vazio, octet-stream
+  // ou MIME raro — comum em arrastar-e-soltar), a função única
+  // `isSupportedImage` decide por assinatura de bytes e extensão.
   const mimeType = file.type === 'image/jpg' ? 'image/jpeg' : file.type;
-  if (!mimeType || !spec.allowedMimeTypes[mimeType]) {
+  const mimeAllowed = Boolean(mimeType) && Boolean(spec.allowedMimeTypes[mimeType]);
+  if (!mimeAllowed && !(await isSupportedImage(file))) {
     return {
       ok: false,
-      error: `Tipo de arquivo não permitido${mimeType ? `: "${mimeType}"` : ''}. Aceitos: JPG, PNG, WebP.`,
+      error: `Tipo de arquivo não permitido${mimeType ? `: "${mimeType}"` : ''}. Aceitos: JPG, PNG ou WebP.`,
     };
-  }
-
-  if (file.size > spec.maxBytes) {
-    return { ok: false, error: sizeErrorMessage(file.size, spec) };
   }
 
   let width: number;
@@ -79,20 +70,45 @@ export async function validateCoverFile(
     };
   }
 
-  if (width < spec.minWidth || height < spec.minHeight) {
-    return { ok: false, error: describeImageDimensionError(spec, width, height), width, height };
-  }
-  if (width > spec.maxWidth || height > spec.maxHeight) {
-    return {
-      ok: false,
-      error: `Sua imagem tem ${width}×${height}. O máximo permitido é ${spec.maxWidth}×${spec.maxHeight}.`,
-      width,
-      height,
-    };
-  }
-  if (Math.abs(width / height - spec.ratio) > spec.ratioTolerance) {
-    return { ok: false, error: ratioErrorMessage(width, height, spec), width, height };
-  }
-
   return { ok: true, width, height };
+}
+
+/**
+ * Avisos suaves da medida escolhida — NUNCA bloqueiam o envio (a capa aceita
+ * qualquer tamanho). Saem em cor semântica (warning/success) nos dois temas.
+ */
+export function coverImageWarnings(
+  width?: number | null,
+  height?: number | null
+): CoverImageWarning[] {
+  if (!width || !height) return [];
+  const { recommended } = COVER_IMAGE_SPEC;
+  const ratio = width / height;
+  const idealRatio = Math.abs(ratio - 16 / 9) <= 0.02;
+  const warnings: CoverImageWarning[] = [];
+
+  if (height > width) {
+    warnings.push({
+      tone: 'info',
+      text: `Imagem vertical (${width}×${height}) — o recorte da capa é horizontal (16:9) e corta o topo e a base. Prefira uma foto deitada.`,
+    });
+  } else if (!idealRatio) {
+    warnings.push({
+      tone: 'info',
+      text: `Imagem ${width}×${height} — proporção diferente de ${recommended.aspect}; recortamos automaticamente para o enquadramento da capa. Ajuste o ponto focal abaixo.`,
+    });
+  }
+  if (width < 1280) {
+    warnings.push({
+      tone: 'info',
+      text: `Largura ${width}px — em telas grandes pode perder nitidez. Recomendado ${recommended.width}×${recommended.height}.`,
+    });
+  }
+  if (idealRatio && width >= 1280 && height <= width) {
+    warnings.push({
+      tone: 'ok',
+      text: `${width}×${height}px — proporção ${recommended.aspect} em alta resolução. Medidas ideais.`,
+    });
+  }
+  return warnings;
 }

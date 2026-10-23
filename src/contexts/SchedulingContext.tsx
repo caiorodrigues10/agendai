@@ -11,6 +11,7 @@ import React, {
 import { useLocation } from 'react-router-dom';
 import { Appointment, QueueItem, AIInsight } from '../types';
 import { schedulingApi, QueueUpdatePayload } from '../infra/schedulingApi';
+import { ApiError } from '../infra/apiClient';
 import { authStorage } from '../infra/authStorage';
 import { realtimeWsUrl } from '../infra/realtimeWs';
 import { useBarbershopFilters } from './BarbershopFiltersContext';
@@ -33,6 +34,7 @@ interface SchedulingContextValue {
   appointments: Appointment[];
   appointmentsState: ResourceStatus;
   appointmentsError: string | null;
+  appointmentsRetryAfter: number | null;
   appointmentsStale: boolean;
   appointmentsTruncated: boolean;
   availability: AvailabilitySlot[];
@@ -113,6 +115,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [appointmentsState, setAppointmentsState] = useState<ResourceStatus>('idle');
   const [appointmentsError, setAppointmentsError] = useState<string | null>(null);
+  const [appointmentsRetryAfter, setAppointmentsRetryAfter] = useState<number | null>(null);
   const [appointmentsTruncated, setAppointmentsTruncated] = useState(false);
   const [availability, setAvailability] = useState<AvailabilitySlot[]>([]);
   const [availabilityState, setAvailabilityState] = useState<ResourceStatus>('idle');
@@ -163,6 +166,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
     setAppointments([]);
     setAppointmentsState('idle');
     setAppointmentsError(null);
+    setAppointmentsRetryAfter(null);
     setAppointmentsTruncated(false);
     setAvailability([]);
     setAvailabilityState('idle');
@@ -250,6 +254,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       if (!options?.silent) {
         setAppointmentsState('loading');
         setAppointmentsError(null);
+        setAppointmentsRetryAfter(null);
       }
       try {
         let params: {
@@ -302,10 +307,15 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
         setAppointmentsError(null);
       } catch (error) {
         if (requestId !== appointmentsRequestIdRef.current || isAbortError(error)) return;
+        const retryAfter =
+          error instanceof ApiError && typeof error.retryAfter === 'number'
+            ? error.retryAfter
+            : null;
         if (options?.silent) {
           if (appointmentsHasDataRef.current) {
             setAppointmentsState('error');
             setAppointmentsError(getErrorMessage(error, 'Falha ao atualizar a agenda.'));
+            setAppointmentsRetryAfter(retryAfter);
           }
           return;
         }
@@ -314,6 +324,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
         setAppointmentsError(
           getErrorMessage(error, 'Não foi possível carregar a agenda.')
         );
+        setAppointmentsRetryAfter(retryAfter);
       }
     },
     [barbershopId]
@@ -640,6 +651,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       appointments,
       appointmentsState,
       appointmentsError,
+      appointmentsRetryAfter,
       appointmentsStale: appointments.length > 0 && appointmentsState === 'error',
       appointmentsTruncated,
       availability,
@@ -670,6 +682,7 @@ export const SchedulingProvider: React.FC<{ children: ReactNode }> = ({ children
       appointments,
       appointmentsState,
       appointmentsError,
+      appointmentsRetryAfter,
       appointmentsTruncated,
       availability,
       availabilityState,

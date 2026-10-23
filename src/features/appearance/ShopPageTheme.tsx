@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { PageThemeVariant } from '../../infra/pageThemeApi';
-import { cloudinaryDeliveryUrl, coverSrcSet, pageThemeToCssVars, radiusCssVars } from './themeVars';
+import { pageThemeToCssVars, radiusCssVars } from './themeVars';
+import { buildCoverSrcSet, buildCoverUrl, coverObjectPosition } from '../../shared/coverImage';
 import { resolveVariantColors } from './pageThemeVariants';
 import { usePageTheme } from './usePageTheme';
 
@@ -40,6 +41,12 @@ function usePrefersLightScheme(): boolean {
 export const ShopPageTheme: React.FC<ShopPageThemeProps> = ({ barbershopId, children }) => {
   const { theme } = usePageTheme(barbershopId);
   const prefersLight = usePrefersLightScheme();
+  // Capa morta no CDN (404/apagada): esconde o <img> e mostra o gradiente do
+  // tema — nunca ícone de imagem quebrada na página pública.
+  const [coverFailed, setCoverFailed] = useState(false);
+  useEffect(() => {
+    setCoverFailed(false);
+  }, [theme?.coverUrl]);
 
   if (!theme) {
     return (
@@ -77,15 +84,39 @@ export const ShopPageTheme: React.FC<ShopPageThemeProps> = ({ barbershopId, chil
           className="relative w-full aspect-[16/6] sm:aspect-[16/4] overflow-hidden"
           data-testid="shop-page-cover"
         >
-          <img
-            src={cloudinaryDeliveryUrl(theme.coverUrl, 1600)}
-            srcSet={coverSrcSet(theme.coverUrl)}
-            sizes="100vw"
-            alt=""
-            loading="eager"
-            fetchPriority="high"
-            className="ag-shop-cover-img absolute inset-0 h-full w-full"
-          />
+          {coverFailed ? (
+            <div
+              data-testid="shop-page-cover-fallback"
+              aria-hidden="true"
+              className="absolute inset-0 bg-linear-to-br from-[var(--ag-accent)] to-[var(--ag-surface)]"
+            />
+          ) : (
+            <img
+              src={buildCoverUrl(theme.coverUrl, {
+                width: 1600,
+                focalX: theme.coverFocalX,
+                focalY: theme.coverFocalY,
+                originalWidth: theme.coverWidth,
+                originalHeight: theme.coverHeight,
+              })}
+              srcSet={buildCoverSrcSet(theme.coverUrl, {
+                focalX: theme.coverFocalX,
+                focalY: theme.coverFocalY,
+                originalWidth: theme.coverWidth,
+                originalHeight: theme.coverHeight,
+              })}
+              sizes="100vw"
+              alt=""
+              loading="eager"
+              decoding="async"
+              onError={() => setCoverFailed(true)}
+              style={{ objectPosition: coverObjectPosition(theme.coverFocalX, theme.coverFocalY) }}
+              className="ag-shop-cover-img absolute inset-0 h-full w-full"
+              // React 18 não reconhece `fetchPriority` camelCase (warning no
+              // console); o atributo nativo é lowercase.
+              {...({ fetchpriority: 'high' } as React.ImgHTMLAttributes<HTMLImageElement>)}
+            />
+          )}
           <div
             className="absolute inset-0 bg-black"
             style={{ opacity: overlayAlpha }}

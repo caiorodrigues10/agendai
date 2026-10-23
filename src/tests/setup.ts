@@ -108,13 +108,17 @@ vi.mock('framer-motion', () => {
 });
 
 /** ThemeProvider real chama useAuth — stub global para smoke RTL. */
-vi.mock('../contexts/ThemeContext', () => ({
-  ThemeProvider: ({ children }: PropsWithChildren) =>
-    React.createElement(React.Fragment, null, children),
-  useTheme: () => ({
+vi.mock('../contexts/ThemeContext', () => {
+  const themeValue = {
     theme: 'dark' as const,
     resolvedTheme: 'dark' as const,
     toggleTheme: () => undefined,
     setTheme: () => undefined,
-  }),
-}));
+  };
+  return {
+    ThemeProvider: ({ children }: PropsWithChildren) =>
+      React.createElement(React.Fragment, null, children),
+    useTheme: () => themeValue,
+    useThemeOptional: () => themeValue,
+  };
+});

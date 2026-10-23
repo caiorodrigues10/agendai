@@ -94,6 +94,9 @@ export const PostsManager: React.FC = () => {
   const [loadingList, setLoadingList] = useState(true);
   const [palettes, setPalettes] = useState<PostPaletteDef[]>([]);
   const [mediaLibrary, setMediaLibrary] = useState<PostMedia[]>([]);
+  const [mediaLoading, setMediaLoading] = useState(true);
+  const [mediaError, setMediaError] = useState(false);
+  const [mediaVersion, setMediaVersion] = useState(0);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Ação WhatsApp
@@ -131,17 +134,21 @@ export const PostsManager: React.FC = () => {
   const loadMeta = useCallback(async () => {
     if (!barbershopId) return;
     try {
-      const [pl, md] = await Promise.all([
-        postsApi.palettes(),
-        postsApi.listMedia(barbershopId),
-      ]);
-      setPalettes(pl);
-      setMediaLibrary(md);
-    } catch { /* não bloqueia */ }
+      setPalettes(await postsApi.palettes());
+    } catch { /* paleta não bloqueia a aba Imagem */ }
+    setMediaLoading(true);
+    setMediaError(false);
+    try {
+      setMediaLibrary(await postsApi.listMedia(barbershopId));
+    } catch {
+      setMediaError(true);
+    } finally {
+      setMediaLoading(false);
+    }
   }, [barbershopId]);
 
   useEffect(() => { void loadTab(tab, 1); }, [tab, loadTab]);
-  useEffect(() => { void loadMeta(); }, [loadMeta]);
+  useEffect(() => { void loadMeta(); }, [loadMeta, mediaVersion]);
 
   const pageCount = Math.max(1, Math.ceil(total / 12));
 
@@ -157,6 +164,21 @@ export const PostsManager: React.FC = () => {
       void loadTab(tab, page);
     } catch (err) {
       showToast(getErrorMessage(err, 'Não foi possível publicar.'), 'error');
+    } finally {
+      setActionInFlight(null);
+    }
+  };
+
+  /** Posts agendados legados: cancelar o agendamento devolve o post a rascunho. */
+  const handleCancelSchedule = async (post: FeedPost) => {
+    if (actionInFlight) return;
+    setActionInFlight(`cancel-${post.id}`);
+    try {
+      await postsApi.cancelSchedule(post.id);
+      showToast('Agendamento cancelado. O post voltou a ser rascunho.');
+      void loadTab(tab, page);
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Não foi possível cancelar o agendamento.'), 'error');
     } finally {
       setActionInFlight(null);
     }
@@ -217,7 +239,7 @@ export const PostsManager: React.FC = () => {
             <Megaphone size={20} className="text-accent" aria-hidden /> Posts
           </h2>
           <p className="text-sm text-text-secondary mt-1">
-            Crie, agende e publique artes do seu salão.
+            Crie e publique artes do seu salão.
           </p>
         </div>
         <button
@@ -302,6 +324,7 @@ export const PostsManager: React.FC = () => {
                     onEdit={() => setEditingPost(post)}
                     onReuse={() => handleReuse(post)}
                     onPublish={() => void handlePublish(post)}
+                    onCancelSchedule={() => void handleCancelSchedule(post)}
                     onDelete={() => setDeletingPost(post)}
                     onWhatsapp={() => void openWhatsappConfirm(post)}
                     onDownload={() => post.imageUrl && downloadPostImage(post.imageUrl, `post-${post.id}.png`)}
@@ -352,6 +375,11 @@ export const PostsManager: React.FC = () => {
           }}
           showToast={showToast}
           onMediaUploaded={m => setMediaLibrary(prev => [m, ...prev])}
+          mediaLoading={mediaLoading}
+          mediaError={mediaError}
+          onRetryMedia={() => setMediaVersion(v => v + 1)}
+          onMediaRemoved={id => setMediaLibrary(prev => prev.filter(m => m.id !== id))}
+          onMediaUpdated={m => setMediaLibrary(prev => prev.map(x => (x.id === m.id ? m : x)))}
         />
       )}
 
@@ -391,13 +419,14 @@ interface RowActionsProps {
   onEdit: () => void;
   onReuse: () => void;
   onPublish: () => void;
+  onCancelSchedule: () => void;
   onDelete: () => void;
   onWhatsapp: () => void;
   onDownload: () => void;
 }
 
 const PostRowActions: React.FC<RowActionsProps> = ({
-  post, busy, onEdit, onReuse, onPublish, onDelete, onWhatsapp, onDownload,
+  post, busy, onEdit, onReuse, onPublish, onCancelSchedule, onDelete, onWhatsapp, onDownload,
 }) => {
   if (post.status === 'published') {
     return (
@@ -419,7 +448,7 @@ const PostRowActions: React.FC<RowActionsProps> = ({
   }
 
   return (
-    <div className="flex gap-1 pt-1">
+    <div className="flex flex-wrap gap-1 pt-1">
       <button type="button" onClick={onEdit} disabled={busy}
         className="flex-1 min-h-10 rounded-lg border border-border text-xs font-semibold text-text-secondary hover:border-accent/40 hover:text-accent disabled:opacity-40">
         Editar
@@ -430,9 +459,15 @@ const PostRowActions: React.FC<RowActionsProps> = ({
           Publicar
         </button>
       ) : null}
+      {post.status === 'scheduled' ? (
+        <button type="button" onClick={onCancelSchedule} disabled={busy} title="Cancelar agendamento"
+          className="min-h-10 rounded-lg border border-border px-2 text-[11px] font-semibold text-text-secondary hover:border-warning/60 hover:text-warning disabled:opacity-40">
+          Cancelar agendamento
+        </button>
+      ) : null}
       <button type="button" onClick={onDelete} disabled={busy}
         className="min-h-10 rounded-lg border border-border px-2 text-text-muted hover:border-danger/40 hover:text-danger disabled:opacity-40"
-        aria-label="Excluir rascunho">
+        aria-label={post.status === 'scheduled' ? 'Excluir post agendado' : 'Excluir rascunho'}>
         <Trash2 size={14} aria-hidden />
       </button>
     </div>

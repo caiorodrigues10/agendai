@@ -9,9 +9,36 @@ vi.mock('./apiClient', () => ({
   apiFetch: vi.fn(),
 }));
 vi.mock('./authStorage', () => ({ authStorage: { getAccessToken: () => 'test-token' } }));
+vi.mock('./cloudinaryDirectUpload', () => ({
+  CloudinaryUploadError: class CloudinaryUploadError extends Error {
+    signatureExpired: boolean;
+    canceled: boolean;
+    constructor(message: string, options?: { signatureExpired?: boolean; canceled?: boolean }) {
+      super(message);
+      this.name = 'CloudinaryUploadError';
+      this.signatureExpired = options?.signatureExpired ?? false;
+      this.canceled = options?.canceled ?? false;
+    }
+  },
+  uploadToCloudinary: vi.fn(),
+}));
 
-import { apiClient, apiFetch } from './apiClient';
+import { apiClient } from './apiClient';
+import { CloudinaryUploadError, uploadToCloudinary } from './cloudinaryDirectUpload';
 import { pageThemeApi, type PageThemeInput } from './pageThemeApi';
+
+const credentials = {
+  cloudName: 'devv5blyc',
+  apiKey: 'api-key',
+  uploadUrl: 'https://api.cloudinary.com/v1_1/devv5blyc/image/upload',
+  folder: `agendaja/${shop}/cover`,
+  publicId: `agendaja/${shop}/cover/cover`,
+  timestamp: 1792564621,
+  signature: 'sig',
+  expiresInSeconds: 600,
+  params: { signature: 'sig', api_key: 'api-key' },
+};
+const uploaded = { publicId: credentials.publicId, version: 1792564621, secureUrl: validUrl };
 
 const theme = {
   id: 'theme-1',
@@ -84,30 +111,71 @@ describe('pageThemeApi contracts', () => {
     );
   });
 
-  it('uploadCover faz multipart no endpoint /cover com campo "cover"', async () => {
-    vi.mocked(apiFetch).mockResolvedValue({
-      ok: true,
-      text: async () => JSON.stringify({ success: true, data: theme }),
-    } as Response);
-    const file = new File(['x'], 'capa.png', { type: 'image/png' });
-    const result = await pageThemeApi.uploadCover(shop, file);
+  it('uploadCover: assina no back, sobe no Cloudinary e confirma preservando as focais', async () => {
+    const themeWithFocals = { ...theme, coverFocalX: 46, coverFocalY: 4 };
+    vi.mocked(apiClient)
+      .mockResolvedValueOnce({ success: true, data: credentials })
+      .mockResolvedValueOnce({ success: true, data: themeWithFocals });
+    vi.mocked(uploadToCloudinary).mockResolvedValue(uploaded);
+
+    const result = await pageThemeApi.uploadCover(
+      shop,
+      new File(['x'], 'capa.png', { type: 'image/png' })
+    );
+
+    expect(apiClient).toHaveBeenNthCalledWith(
+      1,
+      `/api/barbershops/${shop}/uploads/sign`,
+      'POST',
+      { kind: 'cover' },
+      'test-token'
+    );
+    expect(uploadToCloudinary).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(uploadToCloudinary).mock.calls[0][1]).toMatchObject({
+      file: expect.any(File),
+    });
+    expect(apiClient).toHaveBeenNthCalledWith(
+      2,
+      `/api/barbershops/${shop}/page-theme/cover/confirm`,
+      'POST',
+      { publicId: uploaded.publicId, version: uploaded.version },
+      'test-token'
+    );
     expect(result.coverUrl).toBe(validUrl);
-    const [url, init, token] = vi.mocked(apiFetch).mock.calls[0];
-    expect(url).toBe(`/api/barbershops/${shop}/page-theme/cover`);
-    expect(init.method).toBe('POST');
-    expect((init.body as FormData).get('cover')).toBe(file);
-    expect(token).toBe('test-token');
+    expect(result.coverFocalX).toBe(46);
+    expect(result.coverFocalY).toBe(4);
   });
 
-  it('uploadCover traduz erro do back para Error com mensagem', async () => {
-    vi.mocked(apiFetch).mockResolvedValue({
-      ok: false,
-      status: 400,
-      text: async () => JSON.stringify({ success: false, message: 'Sua imagem tem 1200×800.' }),
-    } as Response);
+  it('uploadCover propaga o erro do confirm com a mensagem do back', async () => {
+    vi.mocked(apiClient)
+      .mockResolvedValueOnce({ success: true, data: credentials })
+      .mockRejectedValueOnce(new Error('Sua imagem tem 1200×800.'));
+    vi.mocked(uploadToCloudinary).mockResolvedValue(uploaded);
+
     await expect(
       pageThemeApi.uploadCover(shop, new File(['x'], 'x.png', { type: 'image/png' }))
     ).rejects.toThrowError('Sua imagem tem 1200×800.');
+  });
+
+  it('uploadCover re-assina UMA vez quando a assinatura do Cloudinary expira', async () => {
+    const themeWithFocals = { ...theme, coverFocalX: 46, coverFocalY: 4 };
+    vi.mocked(apiClient)
+      .mockResolvedValueOnce({ success: true, data: credentials })
+      .mockResolvedValueOnce({ success: true, data: credentials })
+      .mockResolvedValueOnce({ success: true, data: themeWithFocals });
+    vi.mocked(uploadToCloudinary)
+      .mockRejectedValueOnce(new CloudinaryUploadError('Assinatura expirada.', { signatureExpired: true }))
+      .mockResolvedValueOnce(uploaded);
+
+    const result = await pageThemeApi.uploadCover(
+      shop,
+      new File(['x'], 'capa.png', { type: 'image/png' })
+    );
+
+    expect(apiClient).toHaveBeenCalledTimes(3);
+    expect(uploadToCloudinary).toHaveBeenCalledTimes(2);
+    expect(result.coverFocalX).toBe(46);
+    expect(result.coverFocalY).toBe(4);
   });
 
   it('DELETE remove a capa', async () => {
@@ -122,12 +190,12 @@ describe('pageThemeApi contracts', () => {
   });
 });
 
-// sanity: a spec de capa continua 16:9 com mínimo 1600×900 (espelho do back)
+// sanity: a spec de capa continua 16:9 com recomendado 1920×1080 (espelho do back)
 describe('COVER_IMAGE_SPEC (espelho)', () => {
   it('mantém as dimensões publicadas na UI', () => {
-    expect(COVER_IMAGE_SPEC.recommendedWidth).toBe(1920);
-    expect(COVER_IMAGE_SPEC.recommendedHeight).toBe(1080);
-    expect(COVER_IMAGE_SPEC.minWidth).toBe(1600);
+    expect(COVER_IMAGE_SPEC.recommended.width).toBe(1920);
+    expect(COVER_IMAGE_SPEC.recommended.height).toBe(1080);
+    expect(COVER_IMAGE_SPEC.recommended.aspect).toBe('16:9');
     expect(COVER_IMAGE_SPEC.maxBytes).toBe(5 * 1024 * 1024);
   });
 });

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { socialApi, type TaggedPost } from '../../infra/socialApi';
+import { socialApi } from '../../infra/socialApi';
+import type { GalleryPhoto } from '../../infra/socialApi';
 import type { FeedPost } from '../../types';
 
 export interface SocialResource<T> { data: T; loading: boolean; error: boolean }
@@ -29,23 +30,18 @@ function useResource<T>(load: () => Promise<T>, initial: T) {
   return { ...resource, reload: () => setVersion(v => v + 1) };
 }
 const EMPTY_POSTS: FeedPost[] = [];
-const EMPTY_TAGS: TaggedPost[] = [];
-export function useSalonSocial(salonId: string | null | undefined, canModerate: boolean) {
+const EMPTY_GALLERY: GalleryPhoto[] = [];
+export function useSalonSocial(salonId: string | null | undefined) {
   const loadStories = useCallback(
     () => (salonId ? socialApi.stories(salonId) : Promise.resolve(EMPTY_POSTS)),
     [salonId]
   );
-  const loadTags = useCallback(
-    () => (salonId ? socialApi.tagged(salonId) : Promise.resolve(EMPTY_TAGS)),
+  const loadGallery = useCallback(
+    () => (salonId ? socialApi.gallery(salonId) : Promise.resolve(EMPTY_GALLERY)),
     [salonId]
-  );
-  const loadPending = useCallback(
-    () => (salonId && canModerate ? socialApi.tagged(salonId, true) : Promise.resolve(EMPTY_TAGS)),
-    [salonId, canModerate]
   );
   return {
     stories: useResource(loadStories, EMPTY_POSTS),
-    tagged: useResource(loadTags, EMPTY_TAGS),
-    pending: useResource(loadPending, EMPTY_TAGS),
+    gallery: useResource(loadGallery, EMPTY_GALLERY),
   };
 }

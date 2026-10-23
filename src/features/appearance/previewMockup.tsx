@@ -7,8 +7,9 @@ import { BarbershopContext } from '../../contexts/BarbershopContext';
 import { BarbershopFiltersContext } from '../../contexts/BarbershopFiltersContext';
 import { ShopProfile } from '../shop';
 import { visiblePublicTabs } from '../../shared/publicTabs';
-import { cloudinaryDeliveryUrl, COVER_ASPECT, coverSrcSet, pageThemeToCssVars, radiusCssVars } from './themeVars';
+import { COVER_ASPECT, pageThemeToCssVars, radiusCssVars } from './themeVars';
 import type { ThemeColorSource } from './themeVars';
+import { buildCoverSrcSet, buildCoverUrl, coverObjectPosition } from '../../shared/coverImage';
 import { PREVIEW_POSTS } from './previewData';
 
 /**
@@ -31,6 +32,12 @@ export type PreviewTheme = ThemeColorSource & {
   buttonStyle: PageThemeInput['buttonStyle'];
   coverOverlay: number;
   coverUrl?: string | null;
+  /** Ponto focal 0–100 (ausente = centro 50/50). */
+  coverFocalX?: number;
+  coverFocalY?: number;
+  /** Dimensões originais da capa (prévia também não amplia). */
+  coverWidth?: number | null;
+  coverHeight?: number | null;
 };
 
 const noop = () => undefined;
@@ -102,17 +109,28 @@ function PreviewCover({
   overlay,
   busy,
   aspect,
+  focalX = 50,
+  focalY = 50,
+  originalWidth,
+  originalHeight,
 }: {
   url?: string | null;
   overlay: number;
   busy?: boolean;
   aspect: string;
+  focalX?: number;
+  focalY?: number;
+  originalWidth?: number | null;
+  originalHeight?: number | null;
 }) {
   // Rastreia por URL: trocar a capa reseta skeleton/fallback sem efeito extra.
   const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
   const hasImg = Boolean(url) && failedUrl !== url;
   const loaded = loadedUrl === url;
+  // Src SEM gravity focal (estável durante o arraste): o enquadramento ao vivo
+  // vem do object-position; o recorte focal de verdade vale na entrega.
+  const delivery = { originalWidth, originalHeight };
 
   return (
     <div
@@ -130,11 +148,12 @@ function PreviewCover({
       {!busy && hasImg && url && (
         <img
           key={url}
-          src={cloudinaryDeliveryUrl(url, 1600)}
-          srcSet={coverSrcSet(url)}
+          src={buildCoverUrl(url, { width: 1600, ...delivery })}
+          srcSet={buildCoverSrcSet(url, delivery)}
           sizes="(max-width: 640px) 100vw, 1200px"
           alt=""
           loading="lazy"
+          style={{ objectPosition: coverObjectPosition(focalX, focalY) }}
           onLoad={() => setLoadedUrl(url)}
           onError={() => setFailedUrl(url)}
           className={`ag-shop-cover-img absolute inset-0 h-full w-full ${loaded ? '' : 'opacity-0'}`}
@@ -250,6 +269,10 @@ export function PreviewScreen({
             overlay={theme.coverOverlay}
             busy={coverBusy}
             aspect={coverAspect}
+            focalX={theme.coverFocalX}
+            focalY={theme.coverFocalY}
+            originalWidth={theme.coverWidth}
+            originalHeight={theme.coverHeight}
           />
           <div className="mx-auto max-w-md px-4 pt-2 pb-16 sm:max-w-xl md:max-w-3xl lg:max-w-4xl">
             <StaticPublicTabBar operationMode={settings.operationMode} />

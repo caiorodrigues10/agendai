@@ -251,10 +251,6 @@ export const ProductFormModal: React.FC<Props> = ({
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      onNotify?.('Imagem muito grande. Máximo: 5 MB.', 'error');
-      return;
-    }
     setImageFile(file);
     const reader = new FileReader();
     reader.onload = ev => setImagePreview(ev.target?.result as string);

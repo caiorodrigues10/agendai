@@ -5,6 +5,7 @@ import type {
   PageThemeMode,
   PageThemeVariant,
   PageThemeVariantColors,
+  UploadCoverOptions,
 } from '../../infra/pageThemeApi';
 import { pageThemeApi } from '../../infra/pageThemeApi';
 import type { ShopSettings } from '../../types';
@@ -54,6 +55,10 @@ const DEFAULT_DRAFT: Draft = {
   ...PAGE_THEME_DEFAULTS,
   coverUrl: null,
   coverPublicId: null,
+  coverFocalX: 50,
+  coverFocalY: 50,
+  coverWidth: null,
+  coverHeight: null,
   mode: 'AUTO',
   lightColors: null,
   darkColors: { ...DEFAULT_DARK },
@@ -98,6 +103,10 @@ function toDraft(theme: PageTheme | null): Draft {
     coverOverlay: theme.coverOverlay,
     coverUrl: theme.coverUrl ?? null,
     coverPublicId: theme.coverPublicId ?? null,
+    coverFocalX: theme.coverFocalX ?? 50,
+    coverFocalY: theme.coverFocalY ?? 50,
+    coverWidth: theme.coverWidth ?? null,
+    coverHeight: theme.coverHeight ?? null,
     mode: theme.mode ?? 'AUTO',
     lightColors: theme.lightColors ?? null,
     darkColors,
@@ -117,6 +126,8 @@ function draftKey(draft: Draft): string {
     draft.coverOverlay,
     draft.coverUrl,
     draft.coverPublicId,
+    draft.coverFocalX,
+    draft.coverFocalY,
     draft.mode,
     draft.darkColors,
     draft.lightColors,
@@ -168,13 +179,15 @@ function usePageThemeActions(options: {
         radiusStyle: draft.radiusStyle,
         buttonStyle: draft.buttonStyle,
         coverOverlay: draft.coverOverlay,
+        coverFocalX: draft.coverFocalX ?? 50,
+        coverFocalY: draft.coverFocalY ?? 50,
         mode: draft.mode ?? 'AUTO',
         darkColors,
         lightColors,
       };
       const saved = await pageThemeApi.update(barbershopId, payload);
       applyTheme(saved);
-      onNotify?.('Aparência da página salva!');
+      onNotify?.('Aparência salva');
     } catch (err) {
       onNotify?.(getErrorMessage(err, 'Não foi possível salvar a aparência.'), 'error');
     } finally {
@@ -182,10 +195,10 @@ function usePageThemeActions(options: {
     }
   };
 
-  const uploadCover = async (file: File) => {
+  const uploadCover = async (file: File, options?: UploadCoverOptions) => {
     setCoverBusy(true);
     try {
-      const updated = await pageThemeApi.uploadCover(barbershopId, file);
+      const updated = await pageThemeApi.uploadCover(barbershopId, file, options);
       applyTheme(updated);
       onNotify?.('Capa enviada com sucesso!');
     } catch (err) {
@@ -221,10 +234,10 @@ const AppearanceSettingsColumn: React.FC<{
   onPatch: (partial: Partial<Draft>) => void;
   onColorChange: (field: ColorFieldName, value: string) => void;
   coverBusy: boolean;
-  onCoverUpload: (file: File) => Promise<void>;
+  onCoverUpload: (file: File, options?: UploadCoverOptions) => Promise<void>;
   onCoverDelete: () => Promise<void>;
 }> = ({ draft, activeColors, variant, onPatch, onColorChange, coverBusy, onCoverUpload, onCoverDelete }) => (
-  <div className="space-y-6">
+  <div className="min-w-0 space-y-6">
     <SegmentedOptions
       legend="Modo da página"
       options={PAGE_MODE_OPTIONS}
@@ -289,6 +302,11 @@ const AppearanceSettingsColumn: React.FC<{
       onOverlayChange={value => onPatch({ coverOverlay: value })}
       onUpload={onCoverUpload}
       onDelete={onCoverDelete}
+      focalX={draft.coverFocalX ?? 50}
+      focalY={draft.coverFocalY ?? 50}
+      onFocalChange={(x, y) => onPatch({ coverFocalX: x, coverFocalY: y })}
+      coverWidth={draft.coverWidth ?? null}
+      coverHeight={draft.coverHeight ?? null}
       disabled={coverBusy}
     />
   </div>
@@ -436,7 +454,7 @@ export const PageAppearancePanel: React.FC<PageAppearancePanelProps> = ({
         onSave={() => void save()}
       />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_minmax(400px,460px)] xl:grid-cols-[minmax(0,1fr)_minmax(460px,520px)]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(400px,460px)] xl:grid-cols-[minmax(0,1fr)_minmax(460px,520px)]">
         <AppearanceSettingsColumn
           draft={draft}
           activeColors={activeColors}
@@ -455,6 +473,10 @@ export const PageAppearancePanel: React.FC<PageAppearancePanelProps> = ({
             buttonStyle: draft.buttonStyle,
             coverOverlay: draft.coverOverlay,
             coverUrl: draft.coverUrl,
+            coverFocalX: draft.coverFocalX,
+            coverFocalY: draft.coverFocalY,
+            coverWidth: draft.coverWidth,
+            coverHeight: draft.coverHeight,
           }}
           shopName={shopName}
           settings={settings}
@@ -479,7 +501,16 @@ export const PageAppearancePanel: React.FC<PageAppearancePanelProps> = ({
         message="Cores, cantos e botões voltam ao visual padrão do Agenda Já. A capa enviada é mantida."
         confirmLabel="Restaurar"
         onConfirm={() => {
-          setDraft(prev => ({ ...DEFAULT_DRAFT, coverUrl: prev.coverUrl, coverPublicId: prev.coverPublicId }));
+          setDraft(prev => ({
+            ...DEFAULT_DRAFT,
+            coverUrl: prev.coverUrl,
+            coverPublicId: prev.coverPublicId,
+            // Restaurar padrão zera o enquadramento junto com as cores.
+            coverFocalX: 50,
+            coverFocalY: 50,
+            coverWidth: prev.coverWidth ?? null,
+            coverHeight: prev.coverHeight ?? null,
+          }));
           setConfirmRestore(false);
         }}
         onCancel={() => setConfirmRestore(false)}

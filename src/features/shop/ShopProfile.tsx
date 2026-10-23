@@ -10,6 +10,7 @@ import {
 } from 'react-icons/lu';
 import type { ShopSettings, FeedPost, StaffMember } from '../../types';
 import { barbershopApi } from '../../infra/barbershopApi';
+import { isSupportedImage } from '../../shared/isSupportedImage';
 import { socialApi, type PublicSocialPost } from '../../infra/socialApi';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
@@ -42,7 +43,7 @@ interface ShopProfileProps {
   /** Prévia no painel de aparência: sem fetch de social nem ações destrutivas. */
   previewMode?: boolean;
 }
-const TABS = ['Publicações', 'Vídeos', 'Marcados', 'Sobre'] as const;
+const TABS = ['Publicações', 'Fotos', 'Sobre'] as const;
 type ProfileTab = (typeof TABS)[number];
 const actionClass =
   'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm font-semibold hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent';
@@ -114,7 +115,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
     ownsSalon &&
     Boolean(currentUser && ['OWNER', 'EMPLOYEE', 'MASTER_ADMIN'].includes(currentUser.role));
   const canModerate = canCompose && currentUser?.role !== 'EMPLOYEE';
-  const social = useSalonSocial(previewMode ? null : barbershopId, canModerate);
+  const social = useSalonSocial(previewMode ? null : barbershopId);
   // Vocabulário do segmento (o provider já carregou o salão; o override cobre
   // os testes/story que passam settings explícito sem provider).
   const { labels, config } = useSegmentLabels(settings.businessSegment ?? null);
@@ -131,7 +132,6 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
   const [detail, setDetail] = useState<PublicSocialPost | null>(null);
   const [detailError, setDetailError] = useState(false);
   const [detailVersion, setDetailVersion] = useState(0);
-  const [tagBusy, setTagBusy] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const tablistRef = useRef<HTMLDivElement>(null);
@@ -169,7 +169,8 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
       ),
     [posts]
   );
-  const videos = publicPosts.filter(post => Boolean(post.videoUrl));
+  // Total da galeria pública ("Fotos"): post_media marcadas com inGallery.
+  const photoCount = social.gallery.data.length;
   const [storyNow, setStoryNow] = useState(() => Date.now());
   useEffect(() => {
     const timer = window.setInterval(() => setStoryNow(Date.now()), 60_000);
@@ -230,11 +231,8 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file || !barbershopId || logoBusy) return;
-    if (
-      !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
-      file.size > 5 * 1024 * 1024
-    ) {
-      notify('Envie uma imagem JPG, PNG ou WebP de até 5 MB.', 'error');
+    if (!(await isSupportedImage(file))) {
+      notify('Envie uma imagem JPG, PNG ou WebP.', 'error');
       return;
     }
     setLogoBusy(true);
@@ -276,20 +274,6 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
       setDeleting(false);
     }
   };
-  const moderate = async (id: string, approve: boolean) => {
-    if (!barbershopId || tagBusy) return;
-    setTagBusy(id);
-    try {
-      await socialApi.moderateTag(barbershopId, id, approve);
-      social.pending.reload();
-      social.tagged.reload();
-      notify(approve ? 'Marcação aprovada.' : 'Marcação recusada.');
-    } catch (err) {
-      notify(getErrorMessage(err, 'Não foi possível atualizar a marcação.'), 'error');
-    } finally {
-      setTagBusy(null);
-    }
-  };
   const share = async () => {
     if (previewMode || !barbershopId) return;
     try {
@@ -300,7 +284,6 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
     }
   };
 
-  const tabResource = tab === 'Marcados' ? social.tagged : null;
   return (
     <div className="pb-16 space-y-4" data-testid="salon-social-profile">
       <section className="overflow-hidden rounded-2xl border border-border bg-surface">
@@ -355,8 +338,8 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
                   <p className="truncate text-[11px] leading-tight text-text-muted">publicações</p>
                 </div>
                 <div className="min-w-0">
-                  <strong className="block text-base font-semibold">{videos.length}</strong>
-                  <p className="truncate text-[11px] leading-tight text-text-muted">vídeos</p>
+                  <strong className="block text-base font-semibold">{photoCount}</strong>
+                  <p className="truncate text-[11px] leading-tight text-text-muted">fotos</p>
                 </div>
               </div>
             </div>
@@ -522,103 +505,60 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
         aria-labelledby={`salon-tab-${tab}`}
         className="rounded-2xl border border-border bg-surface p-2 sm:p-4"
       >
-        {tabResource?.loading ? (
-          <ProfileSkeleton />
-        ) : tabResource?.error ? (
-          <div className="py-10 text-center">
-            <p className="text-sm text-text-muted">Não foi possível carregar este conteúdo.</p>
-            <button type="button" onClick={tabResource.reload} className={`${actionClass} mt-3`}>
-              Tentar novamente
-            </button>
+        {tab === 'Publicações' &&
+          (publicPosts.length ? (
+            <ProfileGrid posts={publicPosts} onOpen={setSelected} />
+          ) : (
+            <ProfileEmpty
+              title="O próximo post começa aqui"
+              text={
+                canCompose
+                  ? 'Crie uma publicação para apresentar seu salão aos clientes.'
+                  : 'As fotos e novidades do salão vão aparecer aqui.'
+              }
+            />
+          ))}
+        {tab === 'Fotos' &&
+          (social.gallery.loading ? (
+            <div className="grid grid-cols-3 gap-2 p-2 sm:grid-cols-4" aria-busy="true" aria-label="Carregando galeria">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="aspect-square animate-pulse rounded-xl bg-bg" />
+              ))}
+            </div>
+          ) : social.gallery.error ? (
+            <ProfileEmpty
+              title="Não foi possível carregar as fotos"
+              text="Tente novamente em instantes."
+            />
+          ) : social.gallery.data.length ? (
+            <div className="grid grid-cols-3 gap-2 p-2 sm:grid-cols-4">
+              {social.gallery.data.map(photo => (
+                <a
+                  key={photo.id}
+                  href={photo.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative block aspect-square overflow-hidden rounded-xl"
+                >
+                  <img
+                    src={photo.url}
+                    alt="Foto do salão"
+                    loading="lazy"
+                    className="h-full w-full object-cover transition group-hover:scale-105"
+                  />
+                </a>
+              ))}
+            </div>
+          ) : (
+            <ProfileEmpty
+              title="Galeria de fotos em breve"
+              text="As fotos do espaço vão aparecer aqui."
+            />
+          ))}
+        {tab === 'Sobre' && (
+          <div className="p-2">
+            <ProfileAbout settings={settings} services={services} />
           </div>
-        ) : (
-          <>
-            {tab === 'Publicações' &&
-              (publicPosts.length ? (
-                <ProfileGrid posts={publicPosts} onOpen={setSelected} />
-              ) : (
-                <ProfileEmpty
-                  title="O próximo post começa aqui"
-                  text={
-                    canCompose
-                      ? 'Crie uma publicação para apresentar seu salão aos clientes.'
-                      : 'As fotos e novidades do salão vão aparecer aqui.'
-                  }
-                />
-              ))}
-            {tab === 'Vídeos' &&
-              (videos.length ? (
-                <ProfileGrid posts={videos} onOpen={setSelected} />
-              ) : (
-                <ProfileEmpty
-                  title="Ainda sem vídeos"
-                  text="Conheça o salão em movimento: bastidores e novidades aparecem nesta aba."
-                />
-              ))}
-            {tab === 'Marcados' && (
-              <div className="space-y-4">
-                {canModerate && social.pending.loading && <ProfileSkeleton />}
-                {canModerate && social.pending.error && (
-                  <button type="button" onClick={social.pending.reload} className={actionClass}>
-                    Tentar carregar marcações pendentes
-                  </button>
-                )}
-                {canModerate && social.pending.data.length > 0 && (
-                  <section className="rounded-xl border border-border p-3">
-                    <h2 className="mb-3 text-sm font-bold">Aguardando sua aprovação</h2>
-                    {social.pending.data.map(tag => (
-                      <div
-                        key={tag.id}
-                        className="flex flex-wrap items-center justify-between gap-2 py-2"
-                      >
-                        <button
-                          type="button"
-                          className="text-left text-sm"
-                          onClick={() => setSelected(tag.post)}
-                        >
-                          {tag.post.shopName} · {tag.post.title || 'Publicação'}
-                        </button>
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            disabled={Boolean(tagBusy)}
-                            onClick={() => void moderate(tag.id, true)}
-                            className={actionClass}
-                          >
-                            Aprovar
-                          </button>
-                          <button
-                            type="button"
-                            disabled={Boolean(tagBusy)}
-                            onClick={() => void moderate(tag.id, false)}
-                            className={actionClass}
-                          >
-                            Recusar
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </section>
-                )}
-                {social.tagged.data.length ? (
-                  <ProfileGrid
-                    posts={social.tagged.data.map(tag => tag.post)}
-                    onOpen={setSelected}
-                  />
-                ) : (
-                  <ProfileEmpty
-                    title="Marcados por outros salões"
-                    text="Publicações em que o salão foi marcado aparecem aqui após sua aprovação."
-                  />
-                )}
-              </div>
-            )}
-            {tab === 'Sobre' && (
-              <div className="p-2">
-                <ProfileAbout settings={settings} services={services} />
-              </div>
-            )}
-          </>
         )}
       </section>
       {selected && (

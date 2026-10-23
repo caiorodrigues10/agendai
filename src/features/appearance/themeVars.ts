@@ -163,8 +163,5 @@ export const COVER_ASPECT = {
   desktop: '16 / 4',
 } as const;
 
-export const COVER_SRCSET_WIDTHS = [640, 1024, 1600, 1920] as const;
-
-export function coverSrcSet(url: string): string {
-  return COVER_SRCSET_WIDTHS.map(w => `${cloudinaryDeliveryUrl(url, w)} ${w}w`).join(', ');
-}
+// URLs da capa (recorte 16:9 + focal + srcset sem ampliar) vivem no helper
+// único `src/shared/coverImage.ts` — página pública, prévia e OG compartilham.

@@ -1,5 +1,10 @@
-import { apiClient, apiFetch } from './apiClient';
+import { apiClient } from './apiClient';
 import { authStorage } from './authStorage';
+import {
+  CloudinaryUploadError,
+  uploadToCloudinary,
+  type SignedImageUpload,
+} from './cloudinaryDirectUpload';
 
 export type RadiusStyle = 'squared' | 'rounded' | 'pill';
 export type ButtonStyle = 'filled' | 'outline';
@@ -36,6 +41,12 @@ export interface PageTheme {
   coverUrl: string | null;
   coverPublicId: string | null;
   coverOverlay: number;
+  /** Ponto focal do recorte 16:9 (0–100); ausente em resposta legada = 50/50. */
+  coverFocalX?: number;
+  coverFocalY?: number;
+  /** Dimensões originais da capa (recorte sem ampliar); ausente = desconhecidas. */
+  coverWidth?: number | null;
+  coverHeight?: number | null;
 }
 
 /** Payload do PUT (coverUrl/coverPublicId só quando o backend aceitá-los juntos). */
@@ -46,6 +57,18 @@ export type PageThemeInput = Omit<
   coverUrl?: string | null;
   coverPublicId?: string | null;
 };
+
+/** Body do confirm de capa (back é a autoridade: valida recurso no Cloudinary). */
+interface ConfirmCoverBody {
+  publicId: string;
+  version?: number;
+}
+
+/** Opções do upload direto ao Cloudinary (progresso + cancelamento). */
+export interface UploadCoverOptions {
+  onProgress?: (percent: number) => void;
+  signal?: AbortSignal;
+}
 
 function unwrap<T>(res: unknown): T {
   if (res && typeof res === 'object' && 'data' in res) return (res as { data: T }).data;
@@ -128,32 +151,68 @@ export const pageThemeApi = {
     });
   },
 
-  uploadCover: async (barbershopId: string, file: File): Promise<PageTheme> => {
+  /**
+   * Capa via upload DIRETO ao Cloudinary (sem passar o arquivo pelo back):
+   * 1. POST /uploads/sign { kind: 'cover' } → credenciais assinadas no back
+   * 2. FormData direto no Cloudinary (progresso/AbortSignal em `options`)
+   * 3. POST /page-theme/cover/confirm { publicId, version } → back valida o
+   *    recurso (pasta/dimensões/formato) e grava. Assinatura expirada re-assina
+   *    UMA vez automaticamente.
+   */
+  uploadCover: async (
+    barbershopId: string,
+    file: File,
+    options?: UploadCoverOptions,
+  ): Promise<PageTheme> => {
     const token = authStorage.getAccessToken() || '';
-    const formData = new FormData();
-    formData.append('cover', file);
+    const sign = async (): Promise<SignedImageUpload> => {
+      const res = await apiClient<{ success: boolean; data: SignedImageUpload }>(
+        `/api/barbershops/${barbershopId}/uploads/sign`,
+        'POST',
+        { kind: 'cover' },
+        token
+      );
+      return unwrap<SignedImageUpload>(res);
+    };
 
-    const response = await apiFetch(
-      `/api/barbershops/${barbershopId}/page-theme/cover`,
-      { method: 'POST', body: formData },
+    let credentials = await sign();
+    let uploaded;
+    try {
+      uploaded = await uploadToCloudinary(credentials, {
+        file,
+        onProgress: options?.onProgress,
+        signal: options?.signal,
+      });
+    } catch (err) {
+      if (err instanceof CloudinaryUploadError && err.signatureExpired && !options?.signal?.aborted) {
+        try {
+          credentials = await sign();
+          uploaded = await uploadToCloudinary(credentials, {
+            file,
+            onProgress: options?.onProgress,
+            signal: options?.signal,
+          });
+        } catch (retryErr) {
+          // Re-assinou UMA vez e falhou de novo: mensagem amigável (nunca
+          // texto técnico do Cloudinary).
+          if (retryErr instanceof CloudinaryUploadError && retryErr.signatureExpired) {
+            throw new CloudinaryUploadError('Não foi possível autorizar o envio. Tente novamente.');
+          }
+          throw retryErr;
+        }
+      } else {
+        throw err;
+      }
+    }
+
+    const confirmRes = await apiClient<{ success: boolean; data: PageTheme }>(
+      `/api/barbershops/${barbershopId}/page-theme/cover/confirm`,
+      'POST',
+      { publicId: uploaded.publicId, version: uploaded.version } satisfies ConfirmCoverBody,
       token
     );
-    const bodyText = await response.text();
-    if (!response.ok) {
-      let message = `Falha ao enviar a capa (${response.status})`;
-      if (bodyText) {
-        try {
-          const parsed = JSON.parse(bodyText) as { message?: string };
-          if (parsed.message) message = parsed.message;
-        } catch {
-          /* corpo não-JSON: mantém mensagem genérica */
-        }
-      }
-      throw new Error(message);
-    }
-    const parsed = JSON.parse(bodyText) as { data?: PageTheme };
-    if (!parsed.data) throw new Error('Resposta inválida do servidor ao enviar a capa.');
-    return isValidPageTheme(parsed.data) ? normalizePageTheme(parsed.data) : parsed.data;
+    const theme = unwrap<PageTheme>(confirmRes);
+    return isValidPageTheme(theme) ? normalizePageTheme(theme) : theme;
   },
 
   deleteCover: (barbershopId: string): Promise<PageTheme | null> => {

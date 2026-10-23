@@ -51,28 +51,30 @@ describe('CoverUploader', () => {
     const guide = screen.getByTestId('cover-guide');
     expect(guide.textContent).toContain('1920×1080');
     expect(guide.textContent).toContain('16:9');
-    expect(guide.textContent).toContain('5 MB');
+    expect(guide.textContent).toContain('Qualquer outra medida é aceita');
   });
 
-  it('recusa imagem fora das medidas ANTES de enviar e não chama o upload', async () => {
+  it('aceita medida fora do ideal com aviso e não envia antes de "Enviar capa"', async () => {
     stubBitmap(1200, 800);
     const props = renderUploader();
     selectFile(fileFrom('capa.png', 'image/png'));
 
-    const alert = await screen.findByTestId('cover-error');
-    expect(alert).toHaveAttribute('role', 'alert');
-    expect(alert.textContent).toContain('1200×800');
+    await screen.findByTestId('cover-pending');
+    const warnings = await screen.findAllByTestId('cover-warning');
+    expect(warnings.map(w => w.textContent).join(' ')).toContain('1200×800');
+    expect(screen.queryByTestId('cover-error')).toBeNull();
     expect(props.onUpload).not.toHaveBeenCalled();
-    expect(screen.queryByTestId('cover-pending')).toBeNull();
+    expect(screen.queryByTestId('cover-pending')).not.toBeNull();
   });
 
-  it('recusa proporção errada (1920×1200) e explica o problema', async () => {
+  it('aceita proporção fora do 16:9 com aviso e não envia antes da confirmação', async () => {
     stubBitmap(1920, 1200);
     const props = renderUploader();
     selectFile(fileFrom('capa.png', 'image/png'));
 
-    const alert = await screen.findByTestId('cover-error');
-    expect(alert.textContent).toContain('16:9');
+    const warnings = await screen.findAllByTestId('cover-warning');
+    expect(warnings.map(w => w.textContent).join(' ')).toContain('16:9');
+    expect(screen.queryByTestId('cover-error')).toBeNull();
     expect(props.onUpload).not.toHaveBeenCalled();
   });
 

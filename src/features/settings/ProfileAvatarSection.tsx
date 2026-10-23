@@ -112,7 +112,7 @@ export const ProfileAvatarSection: React.FC<ProfileAvatarSectionProps> = ({
               </button>
             )}
           </div>
-          <p className="text-[11px] text-text-muted">JPEG, PNG ou WebP. Máximo 5 MB.</p>
+          <p className="text-[11px] text-text-muted">JPEG, PNG ou WebP.</p>
         </div>
       </div>
       <ConfirmDialog

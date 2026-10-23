@@ -29,7 +29,6 @@ test.beforeEach(async ({ page }) => {
     else if (endpoint.endsWith('/public-products')) data = { products: [], shop: { name: 'Studio Aurora' } };
     else if (endpoint.endsWith('/reviews')) data = { count: 3, average: 4.7, threshold: 3, showAverage: true, reviews: [{ id: 'review-1', clientName: 'Marina', rating: 5, comment: 'Atendimento excelente!', createdAt: new Date(now).toISOString() }] };
     else if (endpoint.endsWith('/stories')) data = [{ ...posts[0], id: '44444444-4444-4444-8444-444444444444', format: 'story' }];
-    else if (endpoint.endsWith('/tagged')) data = [];
     else if (endpoint.endsWith('/comments') && method === 'GET') { data = [{ id: 'comment-1', authorName: 'Marina', content: 'Que espaço bonito!', createdAt: new Date(now).toISOString() }]; meta = { page: 1, limit: 20, total: 1 }; }
     else if (endpoint.endsWith('/comments') && method === 'POST') data = { id: 'comment-2', authorId: 'client-1', authorName: 'Ana', content: route.request().postDataJSON().content, createdAt: new Date(now).toISOString() };
     else if (endpoint.endsWith('/request-otp')) data = {};
@@ -77,26 +76,33 @@ test('publicação com vídeo usa player mesmo quando existe uma capa', async ({
   await expect(video).not.toHaveAttribute('autoplay');
 });
 
-test('perfil mostra grade, abas sociais, stories e avaliações verificadas', async ({ page }, testInfo) => {
+test('perfil mostra grade, abas Publicações/Fotos/Sobre, stories e zero requests de tagged', async ({ page }, testInfo) => {
+  const taggedRequests: string[] = [];
+  page.on('request', req => {
+    if (new URL(req.url()).pathname.endsWith('/tagged')) taggedRequests.push(req.url());
+  });
   await page.goto(`/queue/${salonId}?tab=profile`);
   await expect(page.getByRole('heading', { name: 'Studio Aurora' }).first()).toBeVisible({ timeout: 15_000 });
-  for (const name of ['Publicações', 'Vídeos', 'Marcados', 'Avaliações', 'Sobre']) {
-    await expect(page.getByRole('button', { name: new RegExp(name) }).or(page.getByRole('tab', { name: new RegExp(name) })).first()).toBeVisible();
-  }
+  const tabs = page.getByRole('tablist', { name: 'Conteúdo do perfil' }).getByRole('tab');
+  await expect(tabs).toHaveText(['Publicações', 'Fotos', 'Sobre']);
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
   await page.screenshot({ path: testInfo.outputPath('salon-profile.png'), fullPage: true });
-  await page.getByRole('button', { name: /Avaliações/ }).or(page.getByRole('tab', { name: /Avaliações/ })).first().click();
-  await expect(page.getByText('Atendimento excelente!')).toBeVisible();
-  await page.getByRole('tab', { name: 'Vídeos', exact: true }).click();
-  await page.getByRole('button', { name: 'Abrir vídeo: Bastidores do studio' }).click();
-  await expect(page.getByRole('dialog').locator('video')).toBeVisible();
-  await page.getByRole('button', { name: 'Fechar', exact: true }).click();
-  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await page.getByRole('tab', { name: 'Fotos', exact: true }).click();
+  await expect(page.getByText('Galeria de fotos em breve')).toBeVisible();
   await page.getByRole('button', { name: 'Ver stories do salão' }).click();
   await expect(page.getByRole('dialog', { name: 'Story', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Fechar story', exact: true }).click();
   await expect(page.getByRole('dialog')).not.toBeVisible();
   expect(await page.evaluate(() => document.body.style.overflow)).not.toBe('hidden');
+  expect(taggedRequests).toEqual([]);
+});
+
+test('perfil com avaliações exibe depoimentos verificados (aba Avaliações — outro workstream)', async ({ page }, testInfo) => {
+  await page.goto(`/queue/${salonId}?tab=profile`);
+  await expect(page.getByRole('heading', { name: 'Studio Aurora' }).first()).toBeVisible({ timeout: 15_000 });
+  await page.screenshot({ path: testInfo.outputPath('salon-profile-reviews.png'), fullPage: true });
+  await page.getByRole('button', { name: /Avaliações/ }).or(page.getByRole('tab', { name: /Avaliações/ })).first().click();
+  await expect(page.getByText('Atendimento excelente!')).toBeVisible();
 });
 
 test('perfil sem avaliações não mostra nota zero', async ({ page }) => {

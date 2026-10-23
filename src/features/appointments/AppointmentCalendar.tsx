@@ -111,6 +111,8 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   const onDateChangeRef = useRef(onDateChange);
   onDateChangeRef.current = onDateChange;
 
+  const initialDateRef = useRef(selectedDate);
+
   useEffect(() => {
     if (currentUserRole !== 'EMPLOYEE' && !hasMultipleStaff && view !== 'salon') {
       setView('salon');
@@ -118,6 +120,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   }, [hasMultipleStaff, view, currentUserRole]);
 
   useEffect(() => {
+    if (selectedDate === initialDateRef.current) return;
     onDateChangeRef.current?.(selectedDate);
   }, [selectedDate]);
 

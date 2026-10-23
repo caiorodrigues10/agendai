@@ -32,8 +32,12 @@ const savedTheme: PageTheme = {
   coverOverlay: 40,
 };
 
-async function renderPanel() {
-  const utils = render(<PageAppearancePanel barbershopId={shop} shopName="Barba Nova" />);
+async function renderPanel(
+  onNotify?: (message: string, type?: 'success' | 'error' | 'bot') => void
+) {
+  const utils = render(
+    <PageAppearancePanel barbershopId={shop} shopName="Barba Nova" onNotify={onNotify} />
+  );
   await screen.findByTestId('save-theme');
   return utils;
 }
@@ -132,5 +136,92 @@ describe('PageAppearancePanel', () => {
     await renderPanel();
     expect(previewVar('--ag-accent')).toBe('#2CB58A');
     expect(screen.getByTestId('save-theme')).toBeDisabled(); // nada alterado ainda
+  });
+
+  it('mover o enquadramento marca sujo e envia coverFocalX/Y no save', async () => {
+    vi.mocked(pageThemeApi.getPublic).mockResolvedValue({
+      ...savedTheme,
+      coverUrl:
+        'https://res.cloudinary.com/x/image/upload/v17/agendaja/11111111-1111-1111-1111-111111111111/cover/cover.jpg',
+      coverPublicId: 'agendaja/11111111-1111-1111-1111-111111111111/cover/cover',
+      coverFocalX: 50,
+      coverFocalY: 50,
+      coverWidth: 1600,
+      coverHeight: 1067,
+    });
+    const notify = vi.fn();
+    await renderPanel(notify);
+    expect(screen.getByTestId('cover-focal-value')).toHaveTextContent('50% · 50%');
+    expect(screen.getByTestId('save-theme')).toBeDisabled(); // nada alterado ainda
+
+    // Setas do teclado (passo 2).
+    fireEvent.keyDown(screen.getByTestId('cover-focal-editor'), { key: 'ArrowRight' });
+    expect(screen.getByTestId('cover-focal-value')).toHaveTextContent('52% · 50%');
+    expect(screen.getByTestId('dirty-warning')).toBeInTheDocument();
+    expect(screen.getByTestId('save-theme')).toBeEnabled();
+
+    // Atalho "Topo" → 50% · 20%.
+    fireEvent.click(screen.getByTestId('cover-focal-top'));
+    expect(screen.getByTestId('cover-focal-value')).toHaveTextContent('50% · 20%');
+
+    fireEvent.click(screen.getByTestId('save-theme'));
+    await waitFor(() => expect(pageThemeApi.update).toHaveBeenCalledTimes(1));
+    const payload = vi.mocked(pageThemeApi.update).mock.calls[0][1];
+    expect(payload).toMatchObject({ coverFocalX: 50, coverFocalY: 20 });
+    await waitFor(() => expect(screen.queryByTestId('dirty-warning')).toBeNull());
+    expect(notify).toHaveBeenCalledWith('Aparência salva');
+  });
+
+  it('erro no save mostra a mensagem real no toast e mantém o rascunho sujo', async () => {
+    vi.mocked(pageThemeApi.getPublic).mockResolvedValue({
+      ...savedTheme,
+      coverUrl:
+        'https://res.cloudinary.com/x/image/upload/v17/agendaja/11111111-1111-1111-1111-111111111111/cover/cover.jpg',
+      coverPublicId: 'agendaja/11111111-1111-1111-1111-111111111111/cover/cover',
+      coverFocalX: 50,
+      coverFocalY: 50,
+      coverWidth: 1600,
+      coverHeight: 1067,
+    });
+    vi.mocked(pageThemeApi.update).mockRejectedValueOnce(
+      new Error('Saldo do salão não permite salvar agora')
+    );
+    const notify = vi.fn();
+    await renderPanel(notify);
+
+    fireEvent.keyDown(screen.getByTestId('cover-focal-editor'), { key: 'ArrowRight' });
+    fireEvent.click(screen.getByTestId('save-theme'));
+
+    await waitFor(() =>
+      expect(notify).toHaveBeenCalledWith('Saldo do salão não permite salvar agora', 'error')
+    );
+    expect(pageThemeApi.update).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('dirty-warning')).toBeInTheDocument(); // rascunho preservado
+    expect(screen.getByTestId('save-theme')).toBeEnabled();
+  });
+
+  it('Restaurar padrão zera o enquadramento salvo para 50% · 50%', async () => {
+    vi.mocked(pageThemeApi.getPublic).mockResolvedValue({
+      ...savedTheme,
+      coverUrl:
+        'https://res.cloudinary.com/x/image/upload/v17/agendaja/11111111-1111-1111-1111-111111111111/cover/cover.jpg',
+      coverPublicId: 'agendaja/11111111-1111-1111-1111-111111111111/cover/cover',
+      coverFocalX: 46,
+      coverFocalY: 4,
+      coverWidth: 1600,
+      coverHeight: 1067,
+    });
+    await renderPanel();
+    expect(screen.getByTestId('cover-focal-value')).toHaveTextContent('46% · 4%');
+
+    fireEvent.click(screen.getByTestId('cover-focal-top')); // deixa sujo
+    expect(screen.getByTestId('dirty-warning')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('restore-defaults'));
+    fireEvent.click(screen.getByRole('button', { name: 'Restaurar' }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId('cover-focal-value')).toHaveTextContent('50% · 50%')
+    );
   });
 });

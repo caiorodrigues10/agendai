@@ -52,6 +52,14 @@ function formatApiFieldErrors(errors: unknown): string | null {
 }
 
 function friendlyTechnicalMessage(raw: string): string | null {
+  // 404 do Fastify ("Route POST:/api/... not found") — nunca vaza ao usuário.
+  if (/^route\s+\S+\s+not found$/i.test(raw)) {
+    return 'Serviço indisponível no momento. Tente novamente em instantes.';
+  }
+  // 503 de credenciais Cloudinary ausentes no back (env não configurada).
+  if (/cloudinary/i.test(raw) && /credenciais|credentials/i.test(raw)) {
+    return 'Serviço de upload indisponível. Tente novamente em instantes.';
+  }
   if (RAW_VALIDATION_PATTERN.test(raw)) {
     if (/limit|too_big|less than or equal to 100/i.test(raw)) {
       return 'O limite máximo permitido é 100 registros por vez.';

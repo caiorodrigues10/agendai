@@ -26,6 +26,7 @@ import {
   LuLoaderCircle as Loader2,
 } from 'react-icons/lu';
 import { visiblePublicTabs, type PublicTab } from '../shared/publicTabs';
+import { buildCoverOgUrl } from '../shared/coverImage';
 
 export const PublicHome: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -56,7 +57,7 @@ export const PublicHome: React.FC = () => {
     loading: schedulingLoading,
   } = useScheduling();
   const { labels } = useSegmentLabels(settings?.businessSegment ?? null);
-  const { loading: themeLoading } = usePageTheme(barbershopId);
+  const { loading: themeLoading, theme: pageTheme } = usePageTheme(barbershopId);
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [joinMode, setJoinMode] = useState<'self' | 'dependent'>('self');
   const operationMode = settings?.operationMode ?? 'HYBRID';
@@ -180,7 +181,16 @@ export const PublicHome: React.FC = () => {
               : 'Fila, agenda e serviços. Agende pelo Agenda Já.'
           }
           path={`/queue/${barbershopId}`}
-          image={`${API_BASE}/api/barbershops/${barbershopId}/page-theme/og-image`}
+          image={
+            pageTheme?.coverUrl
+              ? buildCoverOgUrl(pageTheme.coverUrl, {
+                  focalX: pageTheme.coverFocalX,
+                  focalY: pageTheme.coverFocalY,
+                  originalWidth: pageTheme.coverWidth,
+                  originalHeight: pageTheme.coverHeight,
+                })
+              : `${API_BASE}/api/barbershops/${barbershopId}/page-theme/og-image`
+          }
         />
       )}
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}

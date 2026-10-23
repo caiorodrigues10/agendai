@@ -42,6 +42,17 @@ export interface TabDef {
   permissions?: string[];
 }
 
+export interface TabAccessExtras {
+  /**
+   * Ignorado por `canAccessTab`/`getDefaultTab` — eles decidem apenas
+   * papel/permissão. O paywall de plano sem dashboard é tratado à parte pelo
+   * `TabGuard`, que redireciona as abas de `DASHBOARD_GATED_TAB_IDS` para o
+   * mesmo destino de upgrade do `StaffDashboard`.
+   */
+  hasDashboard?: boolean;
+  permissions?: string[];
+}
+
 export interface TabGroup {
   id: string;
   label: string;
@@ -114,11 +125,33 @@ export const MOBILE_PRIMARY_TAB_IDS = ['overview', 'queue', 'appointments', 'cli
 /** Flat lookup of all tab IDs */
 export const ALL_TAB_IDS = TAB_GROUPS.flatMap(g => g.tabs.map(t => t.id));
 
+/**
+ * Abas que exigem plano com dashboard (paywall Pro). Quem não tem o plano não
+ * recebe "Acesso negado": é redirecionado para o mesmo destino de upgrade —
+ * tratado no `TabGuard` e reforçado no `StaffDashboard`.
+ */
+export const DASHBOARD_GATED_TAB_IDS: string[] = [
+  'reports',
+  'finance',
+  'products',
+  'profit',
+  'equipment',
+  'organizations',
+];
+
+/** Permissões que habilitam a aba `products` para EMPLOYEE (espelham o backend). */
+const PRODUCTS_TAB_PERMISSIONS = [
+  'RETAIL_SELL',
+  'PRODUCTS_VIEW',
+  'PRODUCTS_MANAGE',
+  'INVENTORY_MANAGE',
+];
+
 /** Check if a tab is valid and accessible */
 export function canAccessTab(
   tabId: string,
   userRole?: string,
-  extras?: { hasDashboard?: boolean; permissions?: string[] }
+  extras?: TabAccessExtras
 ): boolean {
   const privileged = userRole === 'OWNER' || userRole === 'MASTER_ADMIN';
   for (const group of TAB_GROUPS) {
@@ -126,9 +159,9 @@ export function canAccessTab(
     if (!tab) continue;
     if (tabId === 'products') {
       const permitted = extras?.permissions?.some(perm =>
-        ['RETAIL_SELL', 'PRODUCTS_VIEW', 'PRODUCTS_MANAGE', 'INVENTORY_MANAGE'].includes(perm)
+        PRODUCTS_TAB_PERMISSIONS.includes(perm)
       );
-      return Boolean(extras?.hasDashboard && (privileged || permitted));
+      return Boolean(privileged || permitted);
     }
     if (!tab.roles) return true;
     if (!tab.roles.includes(userRole as TabRole)) return false;
@@ -157,7 +190,7 @@ export function canAccessTabByMode(tabId: string, mode?: OperationMode): boolean
 export function getDefaultTab(
   userRole?: string,
   mode?: OperationMode,
-  extras?: { hasDashboard?: boolean; permissions?: string[] }
+  extras?: TabAccessExtras
 ): string {
   for (const group of TAB_GROUPS) {
     for (const tab of group.tabs) {

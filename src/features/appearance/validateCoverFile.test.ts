@@ -1,5 +1,5 @@
 /// <reference types="vitest/globals" />
-import { validateCoverFile } from './validateCoverFile';
+import { coverImageWarnings, validateCoverFile } from './validateCoverFile';
 
 function fakeFile(options: { type?: string; size?: number; name?: string } = {}): File {
   const bytes = new Uint8Array(options.size ?? 1024);
@@ -32,25 +32,27 @@ describe('validateCoverFile (validação instantânea do uploader)', () => {
     await expect(validateCoverFile(fakeFile())).resolves.toMatchObject({ ok: true });
   });
 
-  it('recusa 1200×800 com a mensagem de dimensão', async () => {
+  it('aceita 1200×800 — medida fora do ideal não bloqueia o envio', async () => {
     stubBitmap(1200, 800);
     const result = await validateCoverFile(fakeFile());
-    expect(result.ok).toBe(false);
-    expect(result.error).toContain('1200×800');
+    expect(result.ok).toBe(true);
+    expect(result.width).toBe(1200);
+    const warnings = coverImageWarnings(result.width, result.height).map(w => w.text).join(' ');
+    expect(warnings).toContain('1200×800');
   });
 
-  it('recusa proporção errada (1920×1200) mesmo dentro do peso', async () => {
+  it('aceita 1920×1200 e emite aviso de proporção (não bloqueia)', async () => {
     stubBitmap(1920, 1200);
     const result = await validateCoverFile(fakeFile());
-    expect(result.ok).toBe(false);
-    expect(result.error).toContain('16:9');
+    expect(result.ok).toBe(true);
+    const warnings = coverImageWarnings(result.width, result.height).map(w => w.text).join(' ');
+    expect(warnings).toContain('16:9');
   });
 
-  it('recusa arquivo acima de 5 MB antes de ler dimensões', async () => {
+  it('aceita arquivo acima de 5 MB — o peso é limite do plano, não do app', async () => {
+    stubBitmap(1920, 1080);
     const result = await validateCoverFile(fakeFile({ size: 6 * 1024 * 1024 }));
-    expect(result.ok).toBe(false);
-    expect(result.error).toContain('6');
-    expect(result.error).toContain('5 MB');
+    expect(result.ok).toBe(true);
   });
 
   it('recusa MIME não permitido (GIF) sem tocar no decoder', async () => {
@@ -58,7 +60,7 @@ describe('validateCoverFile (validação instantânea do uploader)', () => {
     vi.stubGlobal('createImageBitmap', decode);
     const result = await validateCoverFile(fakeFile({ type: 'image/gif' }));
     expect(result.ok).toBe(false);
-    expect(result.error).toContain('JPG, PNG, WebP');
+    expect(result.error).toContain('JPG, PNG ou WebP');
     expect(decode).not.toHaveBeenCalled();
   });
 

@@ -1,6 +1,7 @@
 import { serviceCategoriesApi } from './categoriesApi';
-import { API_BASE, apiClient, apiFetch } from './apiClient';
+import { API_BASE, apiClient } from './apiClient';
 import { authStorage } from './authStorage';
+import { detectImageMime } from '../shared/isSupportedImage';
 import { DaySchedule, Service, StaffMember, FeedPost, PostMode, PostConfig, OperationMode, OpeningMode, ManualShopStatus, ShopOpenState, BusinessSegment, TargetAudience } from '../types';
 import { mapScheduleToApi } from '../utils/schedulingUtils';
 
@@ -502,7 +503,10 @@ export const barbershopApi = {
   },
 
   uploadLogoDirect: async (barbershopId: string, file: File): Promise<{ logoUrl: string }> => {
-    const mimeType = file.type === 'image/jpg' ? 'image/jpeg' : file.type || 'image/jpeg';
+    // Tipo real p/ o header do PUT: bytes → tipo declarado → extensão
+    // (cobre `file.type` vazio em arrastar-e-soltar). Fallback legado por último.
+    const rawMime = file.type === 'image/jpg' ? 'image/jpeg' : file.type;
+    const mimeType = (await detectImageMime(file)) || rawMime || 'image/jpeg';
 
     try {
       const { uploadUrl, publicUrl } = await barbershopApi.getLogoUploadUrl(barbershopId, mimeType);
@@ -573,25 +577,6 @@ export const barbershopApi = {
       { closed },
       token
     ).then(res => unwrap<ShopStatusPayload>(res));
-  },
-
-  uploadPostVideo: async (barbershopId: string, file: File): Promise<{ videoUrl: string }> => {
-    const token = authStorage.getAccessToken() || '';
-    const formData = new FormData();
-    formData.append('video', file);
-
-    const response = await apiFetch(`/api/feed/${encodeURIComponent(barbershopId)}/video`, {
-      method: 'POST',
-      body: formData,
-    }, token);
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Erro ao enviar vídeo' }));
-      throw new Error(error.message || 'Erro ao enviar vídeo');
-    }
-
-    const result = await response.json();
-    return result.data;
   },
 };
 

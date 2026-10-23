@@ -1,9 +1,10 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { PostEditor } from './PostEditor';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { useState } from 'react';
+import { PostEditor, type PostEditorProps } from './PostEditor';
 import { PostPreviewBox } from './PostPreviewBox';
 import { TemplateThumbnail } from './TemplateThumbnail';
-import { postsApi } from '../../infra/postsApi';
-import { barbershopApi } from '../../infra/barbershopApi';
+import { postsApi, type PostMedia } from '../../infra/postsApi';
+import { optimizeImageIfNeeded } from './optimizeImage';
 
 vi.mock('../../infra/postsApi', async importOriginal => {
   const actual = await importOriginal<typeof import('../../infra/postsApi')>();
@@ -16,21 +17,23 @@ vi.mock('../../infra/postsApi', async importOriginal => {
       create: vi.fn(),
       update: vi.fn(),
       publish: vi.fn(),
-      schedule: vi.fn(),
+      uploadMedia: vi.fn(),
+      deleteMedia: vi.fn(),
+      listMedia: vi.fn(),
+      updateMedia: vi.fn(),
     },
   };
 });
 
-vi.mock('../../infra/barbershopApi', async importOriginal => {
-  const actual = await importOriginal<typeof import('../../infra/barbershopApi')>();
-  return {
-    ...actual,
-    barbershopApi: { ...actual.barbershopApi, uploadPostVideo: vi.fn(), generatePostContent: vi.fn() },
-  };
+vi.mock('./optimizeImage', async importOriginal => {
+  const actual = await importOriginal<typeof import('./optimizeImage')>();
+  // Por padrão é identidade (comportamento original); testes específicos
+  // sobrescrevem para simular a otimização de fotos grandes.
+  return { ...actual, optimizeImageIfNeeded: vi.fn(async (f: File) => f) };
 });
 
 const mockedPostsApi = vi.mocked(postsApi);
-const mockedBarbershopApi = vi.mocked(barbershopApi);
+const mockedOptimize = vi.mocked(optimizeImageIfNeeded);
 
 const TEMPLATES = [
   { key: 'agenda-aberta', name: 'Agenda aberta', description: 'Divulgue horários', requiredMedia: 0, formats: ['square'], previewUrl: '/api/posts/preview?x=1', group: 'agenda', photoMode: 'none' as const },
@@ -147,7 +150,8 @@ describe('PostEditor — draft', () => {
         title: 'Rascunho salvo',
         ctaText: 'Agendar',
         content: 'Legenda do rascunho',
-        videoUrl: null,
+        // legado de versão anterior com vídeo: o campo é ignorado ao restaurar
+        videoUrl: 'https://cdn.example.com/old.mp4',
         primaryMediaId: null,
         secondaryMediaId: null,
       })
@@ -161,6 +165,8 @@ describe('PostEditor — draft', () => {
     expect(persisted.title).toBe('Rascunho salvo');
     expect(persisted.content).toBe('Legenda do rascunho');
     expect(persisted.format).toBe('story');
+    // drafts novos não persistem mais vídeo
+    expect(persisted.videoUrl).toBeUndefined();
   });
 });
 
@@ -191,25 +197,14 @@ describe('PostEditor — publicação e modal', () => {
     expect(toggle.closest('details')).toHaveClass('lg:hidden');
     expect(toggle.tagName).toBe('SUMMARY');
   });
-  it('disponibiliza o agendamento no celular e permite voltar à publicação imediata', async () => {
-    await openEditor();
-    fireEvent.click(screen.getByRole('button', { name: 'Agendar publicação' }));
-    expect(screen.getByLabelText('Data e horário da publicação')).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Agendar' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Publicar agora' }));
-    expect(screen.queryByLabelText('Data e horário da publicação')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Publicar' })).toBeInTheDocument();
-  });
 
-  it('não cria post com agendamento inválido', async () => {
-    const props = await openEditor();
-    fireEvent.click(screen.getByRole('button', { name: /selecionar modelo|agenda aberta/i }));
-    fireEvent.click(await screen.findByText('Agenda aberta'));
-    fireEvent.click(screen.getByRole('button', { name: 'Agendar publicação' }));
-    fireEvent.change(screen.getByLabelText('Data e horário da publicação'), { target: { value: '2020-01-01T10:00' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Agendar' }));
-    expect(mockedPostsApi.create).not.toHaveBeenCalled();
-    expect(props.showToast).toHaveBeenCalledWith(expect.stringMatching(/5 minutos/), 'error');
+  it('não oferece agendamento: apenas Rascunho e Publicar', async () => {
+    await openEditor();
+    expect(screen.queryByRole('button', { name: 'Agendar publicação' })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Data e horário da publicação')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Agendar' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Publicar' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Rascunho' })).toBeInTheDocument();
   });
 
   it('exige fotos reais do modelo de resultados antes de publicar', async () => {
@@ -297,47 +292,443 @@ describe('PostPreviewBox — formato', () => {
   });
 });
 
-describe('PostEditor — vídeo', () => {
-  it('não permite salvar nem publicar enquanto o upload de vídeo está em andamento', async () => {
-    let finishUpload!: (value: { videoUrl: string }) => void;
-    mockedBarbershopApi.uploadPostVideo.mockImplementationOnce(() => new Promise(resolve => { finishUpload = resolve; }));
+describe('PostEditor — sem upload de vídeo', () => {
+  it('aba Imagem não oferece envio de vídeo', async () => {
     await openEditor();
     fireEvent.click(screen.getByRole('button', { name: 'Imagem' }));
-    const input = document.querySelector('input[type="file"][accept*="video"]') as HTMLInputElement;
-    fireEvent.change(input, { target: { files: [new File(['x'], 'video.mp4', { type: 'video/mp4' })] } });
-    expect(screen.getByRole('button', { name: 'Publicar' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Rascunho' })).toBeDisabled();
-    expect(mockedPostsApi.create).not.toHaveBeenCalled();
-    finishUpload({ videoUrl: 'https://cdn.example.com/video-barber1-abc.mp4' });
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Rascunho' })).toBeEnabled());
+    expect(screen.queryByText(/vídeo/i)).not.toBeInTheDocument();
+    expect(document.querySelector('input[type="file"][accept*="video"]')).toBeNull();
   });
-  it('faz upload via barbershopApi.uploadPostVideo e inclui videoUrl no payload', async () => {
-    mockedBarbershopApi.uploadPostVideo.mockResolvedValue({ videoUrl: 'https://cdn.example.com/video-barber1-abc.mp4' });
-    mockedPostsApi.create.mockResolvedValue({ id: 'post1' } as any);
-    const props = await openEditor();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Imagem' }));
-    const file = new File(['x'], 'video.mp4', { type: 'video/mp4' });
-    const input = document.querySelector('input[type="file"][accept*="video"]') as HTMLInputElement;
-    fireEvent.change(input, { target: { files: [file] } });
-    await waitFor(() => expect(mockedBarbershopApi.uploadPostVideo).toHaveBeenCalledWith('barber1', file));
-    // preview real do vídeo, sem fake
-    expect(await screen.findByText('Trocar vídeo')).toBeInTheDocument();
-
+  it('editar post antigo com vídeo não envia videoUrl no update (preserva o dado)', async () => {
+    mockedPostsApi.update.mockResolvedValue({ id: 'post1' } as any);
+    const props = renderEditor({
+      post: {
+        id: 'post1',
+        status: 'published',
+        videoUrl: 'https://cdn.example.com/old.mp4',
+        templateKey: 'agenda-aberta',
+        paletteKey: 'brand',
+        format: 'square',
+        postMode: 'both',
+        type: 'announcement',
+        title: 'Com vídeo antigo',
+        ctaText: '',
+        content: '',
+      } as any,
+    });
     fireEvent.click(screen.getByRole('button', { name: 'Rascunho' }));
-    await waitFor(() => expect(mockedPostsApi.create).toHaveBeenCalledWith(
-      expect.objectContaining({ videoUrl: 'https://cdn.example.com/video-barber1-abc.mp4' })
-    ));
+    await waitFor(() =>
+      expect(mockedPostsApi.update).toHaveBeenCalledWith(
+        'post1',
+        expect.not.objectContaining({ videoUrl: expect.anything() })
+      )
+    );
     expect(props.onSaved).toHaveBeenCalledWith('draft');
   });
+});
 
-  it('rejeita vídeo acima de 25 MB', async () => {
-    const props = await openEditor();
+// ─── Biblioteca de fotos (aba Imagem) ───────────────────────────
+
+const MEDIA_A: PostMedia = { id: 'media-a', url: 'https://cdn.example.com/a.png', mimeType: 'image/png', size: 1000, createdAt: '2026-10-01T12:00:00.000Z', inGallery: false };
+const MEDIA_B: PostMedia = { id: 'media-b', url: 'https://cdn.example.com/b.png', mimeType: 'image/png', size: 1000, createdAt: '2026-10-02T12:00:00.000Z', inGallery: true };
+
+function pngFile(name = 'foto.png', bytes = 16) {
+  return new File([new Uint8Array(bytes)], name, { type: 'image/png' });
+}
+
+/** Abre o editor já na aba Imagem com o template "Editorial foto" (photoMode optional). */
+async function openImageTab(overrides: Partial<Parameters<typeof PostEditor>[0]> = {}) {
+  const props = await openEditor(overrides);
+  fireEvent.click(screen.getByRole('button', { name: /selecionar modelo|agenda aberta/i }));
+  fireEvent.click(await screen.findByText('Editorial foto'));
+  fireEvent.click(screen.getByRole('button', { name: 'Imagem' }));
+  return props;
+}
+
+function imageInput() {
+  return document.querySelector('input[type="file"][accept*="image/jpeg"]') as HTMLInputElement;
+}
+
+/**
+ * Espelha o PostsManager: a biblioteca vive em estado e responde a
+ * onMediaUploaded/onMediaRemoved (sem isso o efeito de reconciliação limpa o
+ * id recém-enviado, já que a prop ficaria defasada).
+ */
+function MediaHarness({ initial, editorProps }: { initial: PostMedia[]; editorProps: Omit<PostEditorProps, 'mediaLibrary' | 'onMediaUploaded' | 'onMediaRemoved'> }) {
+  const [lib, setLib] = useState<PostMedia[]>(initial);
+  return (
+    <PostEditor
+      {...editorProps}
+      mediaLibrary={lib}
+      onMediaUploaded={m => setLib(prev => [m, ...prev])}
+      onMediaRemoved={id => setLib(prev => prev.filter(x => x.id !== id))}
+      onMediaUpdated={m => setLib(prev => prev.map(x => (x.id === m.id ? m : x)))}
+    />
+  );
+}
+
+function renderHarness(initial: PostMedia[], overrides: Partial<PostEditorProps> = {}) {
+  const props: Omit<PostEditorProps, 'mediaLibrary' | 'onMediaUploaded' | 'onMediaRemoved'> = {
+    post: null,
+    barbershopId: 'barber1',
+    userId: 'user1',
+    palettes: [{ key: 'brand', label: 'Marca' }],
+    onClose: vi.fn(),
+    onSaved: vi.fn(),
+    showToast: vi.fn(),
+    ...overrides,
+  } as any;
+  render(<MediaHarness initial={initial} editorProps={props} />);
+  return props;
+}
+
+async function openHarnessImageTab(initial: PostMedia[], overrides: Partial<PostEditorProps> = {}) {
+  const props = renderHarness(initial, overrides);
+  fireEvent.click(await screen.findByText('Divulgar serviço'));
+  fireEvent.click(screen.getByRole('button', { name: /selecionar modelo|agenda aberta/i }));
+  fireEvent.click(await screen.findByText('Editorial foto'));
+  fireEvent.click(screen.getByRole('button', { name: 'Imagem' }));
+  return props;
+}
+
+describe('PostEditor — biblioteca de fotos', () => {
+  it('limpa id órfão do rascunho e avisa quando a foto não está na biblioteca', async () => {
+    localStorage.setItem(
+      'agendai:post-draft:user1:barber1:new',
+      JSON.stringify({
+        version: 2,
+        savedAt: Date.now(),
+        objectiveId: 'fill-slots',
+        templateKey: 'editorial-foto',
+        paletteKey: 'brand',
+        format: 'square',
+        postMode: 'both',
+        type: 'haircut',
+        title: 'Com foto morta',
+        ctaText: '',
+        content: '',
+        primaryMediaId: 'ghost-id',
+        secondaryMediaId: null,
+      })
+    );
+    // draft tem objectiveId → o gate de objetivo é pulado; não usar openImageTab.
+    const props = renderEditor();
+    fireEvent.click(await screen.findByRole('button', { name: 'Imagem' }));
+    await waitFor(() =>
+      expect(props.showToast).toHaveBeenCalledWith(
+        expect.stringMatching(/não está mais disponível/),
+        'error'
+      )
+    );
+    expect(screen.getByRole('button', { name: 'Foto principal' })).toBeInTheDocument();
+  });
+
+  it('mostra estado vazio acionável no picker quando não há fotos', async () => {
+    await openImageTab();
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    expect(await screen.findByText(/envie a primeira foto do seu salão/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^enviar foto$/i })).toBeInTheDocument();
+    expect(screen.queryByText(/nenhuma foto na biblioteca/i)).not.toBeInTheDocument();
+  });
+
+  it('exibe diálogo acessível com role/aria-modal e fecha ao clicar no fundo', async () => {
+    await openImageTab({ mediaLibrary: [MEDIA_A] });
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Escolher foto' });
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
+    expect(screen.getByRole('button', { name: 'Fechar seletor de fotos' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Fechar seletor de fotos' }));
+    expect(screen.queryByRole('dialog', { name: 'Escolher foto' })).not.toBeInTheDocument();
+  });
+
+  it('seleciona foto do picker no slot com aria-pressed e check visual', async () => {
+    await openImageTab({ mediaLibrary: [MEDIA_A, MEDIA_B] });
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    const thumb = await screen.findByRole('button', { name: 'Foto 1' });
+    expect(thumb).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(thumb);
+    expect(screen.queryByRole('dialog', { name: 'Escolher foto' })).not.toBeInTheDocument();
+    // slot agora mostra a foto e "Trocar foto"
+    expect(screen.getByText('Trocar foto')).toBeInTheDocument();
+  });
+
+  it('mostra skeleton no picker enquanto mediaLoading está ativo', async () => {
+    await openImageTab({ mediaLibrary: [MEDIA_A], mediaLoading: true });
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    expect(screen.getByRole('dialog', { name: 'Escolher foto' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Carregando fotos')).toBeInTheDocument();
+  });
+
+  it('mostra erro de carregamento da biblioteca com botão de retry', async () => {
+    const onRetryMedia = vi.fn();
+    await openImageTab({ mediaLibrary: [], mediaError: true, onRetryMedia });
+    expect(screen.getByRole('alert')).toHaveTextContent(/não foi possível carregar a biblioteca/i);
+    fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }));
+    expect(onRetryMedia).toHaveBeenCalled();
+  });
+
+  it('filtra a biblioteca por "Galeria" no picker', async () => {
+    await openImageTab({ mediaLibrary: [MEDIA_A, MEDIA_B] });
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    await screen.findByRole('dialog', { name: 'Escolher foto' });
+    fireEvent.click(screen.getByRole('button', { name: 'Galeria' }));
+    // só MEDIA_B está na galeria
+    expect(screen.getByRole('button', { name: 'Foto 1' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Foto 2' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Todas' }));
+    expect(screen.getByRole('button', { name: 'Foto 2' })).toBeInTheDocument();
+  });
+
+  it('mostra estado vazio próprio quando o filtro Galeria não tem fotos', async () => {
+    await openImageTab({ mediaLibrary: [MEDIA_A] });
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Galeria' }));
+    expect(screen.getByText(/nenhuma foto na galeria do perfil/i)).toBeInTheDocument();
+  });
+
+  it('alterna a foto na galeria via estrela e atualiza a biblioteca', async () => {
+    mockedPostsApi.updateMedia.mockResolvedValueOnce({ ...MEDIA_A, inGallery: true });
+    const props = await openHarnessImageTab([MEDIA_A]);
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Publicar foto 1 na galeria' }));
+    await waitFor(() => expect(mockedPostsApi.updateMedia).toHaveBeenCalledWith('media-a', { inGallery: true }));
+    expect(await screen.findByRole('button', { name: 'Tirar foto 1 da galeria' })).toBeInTheDocument();
+    expect(props.showToast).toHaveBeenCalledWith('Foto publicada na galeria do perfil.');
+  });
+
+  it('envia "Publicar na galeria" no upload quando o toggle está marcado', async () => {
+    mockedPostsApi.uploadMedia.mockResolvedValueOnce({ ...MEDIA_A, inGallery: true });
+    await openHarnessImageTab([]);
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    fireEvent.click(await screen.findByRole('checkbox', { name: /publicar na galeria do perfil/i }));
+    fireEvent.change(imageInput(), { target: { files: [pngFile()] } });
+    await waitFor(() =>
+      expect(mockedPostsApi.uploadMedia).toHaveBeenCalledWith('barber1', expect.any(File), { inGallery: true })
+    );
+  });
+
+  it('impede usar a mesma foto nos dois slots (foto em uso fica desabilitada)', async () => {
+    const props = await openEditor({ mediaLibrary: [MEDIA_A, MEDIA_B] });
+    fireEvent.click(screen.getByRole('button', { name: /selecionar modelo|agenda aberta/i }));
+    fireEvent.click(await screen.findByText('Antes e depois'));
     fireEvent.click(screen.getByRole('button', { name: 'Imagem' }));
-    const big = new File([new Uint8Array(26 * 1024 * 1024)], 'big.mp4', { type: 'video/mp4' });
-    const input = document.querySelector('input[type="file"][accept*="video"]') as HTMLInputElement;
-    fireEvent.change(input, { target: { files: [big] } });
-    expect(mockedBarbershopApi.uploadPostVideo).not.toHaveBeenCalled();
-    expect(props.showToast).toHaveBeenCalledWith(expect.stringMatching(/25 MB/), 'error');
+    // seleciona MEDIA_A no slot principal
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Foto 1' }));
+    // no slot secundário, Foto 1 (mesma) deve estar desabilitada; Foto 2 liberada
+    fireEvent.click(screen.getByRole('button', { name: 'Foto secundária' }));
+    const foto1 = await screen.findByRole('button', { name: 'Foto 1' });
+    expect(foto1).toBeDisabled();
+    expect(foto1).toHaveAttribute('title', 'Já usada na foto principal');
+    const foto2 = screen.getByRole('button', { name: 'Foto 2' });
+    expect(foto2).toBeEnabled();
+    fireEvent.click(foto2);
+    expect(screen.queryByRole('dialog', { name: 'Escolher foto' })).not.toBeInTheDocument();
+    expect(screen.getAllByText('Trocar foto')).toHaveLength(2);
+    expect(props.showToast).not.toHaveBeenCalledWith(expect.stringMatching(/não está mais disponível/), 'error');
+  });
+
+  it('oferece "Remover foto" por slot e limpa a seleção sem excluir da biblioteca', async () => {
+    await openImageTab({ mediaLibrary: [MEDIA_A] });
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Foto 1' }));
+    expect(mockedPostsApi.deleteMedia).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Remover foto principal' }));
+    expect(screen.getByRole('button', { name: 'Foto principal' })).toBeInTheDocument();
+    expect(mockedPostsApi.deleteMedia).not.toHaveBeenCalled();
+  });
+
+  it('exclui foto da biblioteca via diálogo de confirmação e limpa o slot', async () => {
+    mockedPostsApi.deleteMedia.mockResolvedValue(undefined);
+    const props = await openImageTab({ mediaLibrary: [MEDIA_A] });
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Foto 1' }));
+    // reabre o picker e pede exclusão da miniatura
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Remover foto 1 da biblioteca' }));
+    const dialog = await screen.findByRole('alertdialog');
+    expect(dialog).toHaveTextContent(/no slot deste post/i);
+    fireEvent.click(screen.getByRole('button', { name: 'Remover' }));
+    await waitFor(() => expect(mockedPostsApi.deleteMedia).toHaveBeenCalledWith('media-a'));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Foto principal' })).toBeInTheDocument());
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(props.showToast).toHaveBeenCalledWith('Foto removida da biblioteca.');
+  });
+
+  it('mostra mensagem amigável quando o upload falha (rejeição do postsApi)', async () => {
+    const props = await openImageTab();
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    await screen.findByText(/envie a primeira foto/i);
+    // o postsApi real já converte o corpo da resposta em Error amigável;
+    // aqui garantimos que o editor repassa a mensagem sem mascarar.
+    mockedPostsApi.uploadMedia.mockRejectedValueOnce(new Error('A imagem é muito grande. O limite é de 5 MB por arquivo.'));
+    fireEvent.change(imageInput(), { target: { files: [pngFile()] } });
+    await waitFor(() =>
+      expect(props.showToast).toHaveBeenCalledWith(
+        expect.stringMatching(/muito grande/i),
+        'error'
+      )
+    );
+    const [msg] = vi.mocked(props.showToast).mock.calls.at(-1)!;
+    expect(msg).not.toMatch(/^{|^</);
+  });
+
+  it('rejeita arquivo não suportado (gif) antes de chamar a API', async () => {
+    const props = await openImageTab();
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    await screen.findByText(/envie a primeira foto/i);
+    const gif = new File([new Uint8Array(16)], 'anim.gif', { type: 'image/gif' });
+    fireEvent.change(imageInput(), { target: { files: [gif] } });
+    await waitFor(() =>
+      expect(props.showToast).toHaveBeenCalledWith(expect.stringMatching(/formato inválido/i), 'error')
+    );
+    expect(mockedPostsApi.uploadMedia).not.toHaveBeenCalled();
+  });
+
+  it('rejeita arquivo acima de 5 MB antes de chamar a API (otimização indisponível)', async () => {
+    const props = await openImageTab();
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    await screen.findByText(/envie a primeira foto/i);
+    const big = new File([new Uint8Array(6 * 1024 * 1024)], 'big.png', { type: 'image/png' });
+    fireEvent.change(imageInput(), { target: { files: [big] } });
+    await waitFor(() =>
+      expect(props.showToast).toHaveBeenCalledWith(expect.stringMatching(/excede o limite de 5 MB/i), 'error')
+    );
+    expect(mockedPostsApi.uploadMedia).not.toHaveBeenCalled();
+  });
+
+  it('otimiza foto acima de 5 MB no navegador e envia o arquivo otimizado', async () => {
+    const optimized = new File([new Uint8Array(32)], 'otimizada.jpg', { type: 'image/jpeg' });
+    mockedOptimize.mockResolvedValueOnce(optimized);
+    mockedPostsApi.uploadMedia.mockResolvedValueOnce(MEDIA_A);
+    await openImageTab();
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    await screen.findByText(/envie a primeira foto/i);
+    const big = new File([new Uint8Array(6 * 1024 * 1024)], 'celular.png', { type: 'image/png' });
+    fireEvent.change(imageInput(), { target: { files: [big] } });
+    await waitFor(() => expect(mockedOptimize).toHaveBeenCalledWith(big));
+    await waitFor(() =>
+      expect(mockedPostsApi.uploadMedia).toHaveBeenCalledWith('barber1', optimized, { inGallery: false })
+    );
+  });
+
+  it('multi-upload: se uma falha, as outras sobem e o resumo lista o que falhou', async () => {
+    mockedPostsApi.uploadMedia
+      .mockResolvedValueOnce(MEDIA_A)
+      .mockRejectedValueOnce(new Error('A imagem parece inválida ou corrompida.'))
+      .mockResolvedValueOnce(MEDIA_B);
+    const props = await openImageTab();
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    await screen.findByText(/envie a primeira foto/i);
+    fireEvent.change(imageInput(), { target: { files: [pngFile('1.png'), pngFile('2.png'), pngFile('3.png')] } });
+    await waitFor(() => expect(mockedPostsApi.uploadMedia).toHaveBeenCalledTimes(3));
+    await waitFor(() =>
+      expect(props.showToast).toHaveBeenCalledWith(
+        expect.stringMatching(/1 de 3 fotos não foram enviadas.*2\.png.*corrompida/i),
+        'error'
+      )
+    );
+  });
+
+  it('modelo sem foto oferece "Ver modelos com foto" e abre o picker filtrado em Com foto', async () => {
+    await openEditor();
+    fireEvent.click(screen.getByRole('button', { name: /selecionar modelo|agenda aberta/i }));
+    fireEvent.click(await screen.findByText('Agenda aberta'));
+    fireEvent.click(screen.getByRole('button', { name: 'Imagem' }));
+    expect(screen.getByText(/não usa foto/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Ver modelos com foto' }));
+    const pickerTitle = await screen.findByText('Escolher modelo');
+    const picker = pickerTitle.closest('.rounded-2xl') as HTMLElement;
+    expect(within(picker).getByText('Editorial foto')).toBeInTheDocument();
+    expect(within(picker).queryByText('Agenda aberta')).not.toBeInTheDocument();
+  });
+
+  it('rejeita imagem com lado menor que 600px quando o navegador informa dimensões', async () => {
+    vi.stubGlobal('createImageBitmap', vi.fn().mockResolvedValue({ width: 500, height: 282, close: vi.fn() }));
+    try {
+      const props = await openImageTab();
+      fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+      await screen.findByText(/envie a primeira foto/i);
+      fireEvent.change(imageInput(), { target: { files: [pngFile('pequena.png')] } });
+      await waitFor(() =>
+        expect(props.showToast).toHaveBeenCalledWith(
+          expect.stringMatching(/pelo menos 600px/),
+          'error'
+        )
+      );
+      expect(mockedPostsApi.uploadMedia).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('envia 1 arquivo: fecha o picker e seleciona no slot', async () => {
+    mockedPostsApi.uploadMedia.mockResolvedValue(MEDIA_A);
+    const props = await openHarnessImageTab([]);
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    await screen.findByText(/envie a primeira foto/i);
+    fireEvent.change(imageInput(), { target: { files: [pngFile()] } });
+    await waitFor(() => expect(mockedPostsApi.uploadMedia).toHaveBeenCalledWith('barber1', expect.any(File), { inGallery: false }));
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Escolher foto' })).not.toBeInTheDocument());
+    expect(screen.getByText('Trocar foto')).toBeInTheDocument();
+    expect(props.onSaved).not.toHaveBeenCalled();
+  });
+
+  it('envia vários arquivos: contador "Enviando X de Y", picker aberto e seleção manual', async () => {
+    let finishSecond!: (m: PostMedia) => void;
+    mockedPostsApi.uploadMedia
+      .mockResolvedValueOnce(MEDIA_A)
+      .mockImplementationOnce(() => new Promise(resolve => { finishSecond = resolve; }));
+    await openHarnessImageTab([]);
+    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
+    await screen.findByText(/envie a primeira foto/i);
+    fireEvent.change(imageInput(), { target: { files: [pngFile('1.png'), pngFile('2.png')] } });
+    await waitFor(() => expect(screen.getAllByText('Enviando 2 de 2…').length).toBeGreaterThan(0));
+    finishSecond(MEDIA_B);
+    await waitFor(() =>
+      expect(mockedPostsApi.uploadMedia).toHaveBeenCalledTimes(2)
+    );
+    // com vários arquivos o picker permanece aberto para escolha manual
+    expect(screen.getByRole('dialog', { name: 'Escolher foto' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Foto 1' }));
+    expect(screen.getByText('Trocar foto')).toBeInTheDocument();
+  });
+});
+
+describe('PostEditor — aviso de caracteres sem glifo no render', () => {
+  it('avisa no editor quando caracteres do título serão ignorados na imagem', async () => {
+    await openEditor();
+    const titleInput = await screen.findByLabelText('Título');
+    fireEvent.change(titleInput, { target: { value: '💈 Corte ✂️' } });
+    const warning = await screen.findByText(/não têm letra na fonte do post/);
+    expect(warning).toHaveTextContent('💈 ✂️');
+    expect(warning).toHaveAttribute('role', 'status');
+    expect(warning).toHaveAttribute('id', 'post-title-render-warning');
+  });
+
+  it('remove o aviso quando o texto volta a ter só caracteres com glifo', async () => {
+    await openEditor();
+    const titleInput = await screen.findByLabelText('Título');
+    fireEvent.change(titleInput, { target: { value: 'Corte ✂️' } });
+    await screen.findByText(/não têm letra na fonte do post/);
+    fireEvent.change(titleInput, { target: { value: 'Corte na tesoura' } });
+    await waitFor(() =>
+      expect(screen.queryByText(/não têm letra na fonte do post/)).not.toBeInTheDocument()
+    );
+  });
+
+  it('avisa quando o título passa do limite de 40 caracteres do modelo', async () => {
+    await openEditor();
+    const titleInput = await screen.findByLabelText('Título');
+    fireEvent.change(titleInput, { target: { value: 'TABELA DE VALORES COMPLETA DOS NOSSOS SERVIÇOS PREMIUM' } });
+    expect(await screen.findByText(/passa de 40 caracteres/)).toBeInTheDocument();
+  });
+
+  it('avisa também no campo de CTA', async () => {
+    await openEditor();
+    const ctaInput = await screen.findByLabelText('Texto do botão (CTA)');
+    fireEvent.change(ctaInput, { target: { value: 'Agendar 📅' } });
+    expect(await screen.findByText(/não têm letra na fonte do post/)).toHaveTextContent('📅');
   });
 });

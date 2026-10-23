@@ -6,6 +6,7 @@ export interface ApiRequestOptions {
   headers?: Record<string, string>;
   retried?: boolean;
   signal?: AbortSignal;
+  rateLimitAttempt?: number;
 }
 
 const isAbortError = (err: unknown): boolean =>
@@ -36,18 +37,70 @@ export class ApiError extends Error {
   statusCode: number;
   code?: string;
   data?: unknown;
+  retryAfter?: number;
 
-  constructor(message: string, statusCode: number, code?: string, data?: unknown) {
+  constructor(
+    message: string,
+    statusCode: number,
+    code?: string,
+    data?: unknown,
+    retryAfter?: number
+  ) {
     super(message);
     this.name = 'ApiError';
     this.statusCode = statusCode;
     this.code = code;
     this.data = data;
+    this.retryAfter = retryAfter;
   }
 
   get isAccessBlocked(): boolean {
     return ACCESS_BLOCKED_CODES.includes(this.code as AccessBlockedCode);
   }
+}
+
+let rateLimitedUntil = 0;
+const MAX_GET_RETRIES = 2;
+const BACKOFF_BASE_MS = 1_000;
+const MAX_AUTO_RETRY_WAIT_MS = 8_000;
+
+const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
+  new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      signal?.removeEventListener('abort', onAbort);
+      resolve();
+    }, ms);
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(new DOMException('Aborted', 'AbortError'));
+    };
+    if (signal?.aborted) {
+      onAbort();
+      return;
+    }
+    signal?.addEventListener('abort', onAbort, { once: true });
+  });
+
+function parseRetryAfter(res: Response, bodyRetryAfter?: unknown): number | null {
+  const header = Number(res.headers.get('retry-after'));
+  if (Number.isFinite(header) && header > 0) return Math.ceil(header);
+  const fromBody = Number(bodyRetryAfter);
+  if (Number.isFinite(fromBody) && fromBody > 0) return Math.ceil(fromBody);
+  return null;
+}
+
+function setRateLimitCooldown(retryAfterSeconds: number | null) {
+  const ms = retryAfterSeconds != null ? retryAfterSeconds * 1_000 : BACKOFF_BASE_MS;
+  rateLimitedUntil = Math.max(rateLimitedUntil, Date.now() + Math.min(ms, MAX_AUTO_RETRY_WAIT_MS));
+}
+
+async function waitForRateLimitGate(signal?: AbortSignal) {
+  const wait = rateLimitedUntil - Date.now();
+  if (wait > 0) await sleep(Math.min(wait, MAX_AUTO_RETRY_WAIT_MS), signal);
+}
+
+function backoffDelayMs(attempt: number): number {
+  return BACKOFF_BASE_MS * 2 ** attempt + Math.floor(Math.random() * 250);
 }
 
 /** Um único refresh em voo — evita rajada de 401 renovando N vezes. */
@@ -183,10 +236,10 @@ const tryParseJson = (text: string): unknown => {
  * antigas a `message` podia ser um JSON serializado (`{ code, message, ... }`),
  * então também tentamos parsear esse caso para extrair `code`/`plans`/etc.
  */
-const buildApiError = (status: number, rawBody: string): ApiError => {
+const buildApiError = (status: number, rawBody: string, retryAfter?: number): ApiError => {
   const body = tryParseJson(rawBody) as Record<string, unknown> | null;
   if (!body) {
-    return new ApiError(rawBody || `HTTP ${status}`, status);
+    return new ApiError(rawBody || `HTTP ${status}`, status, undefined, undefined, retryAfter);
   }
 
   let message: string = typeof body.message === 'string' ? body.message : `HTTP ${status}`;
@@ -202,7 +255,14 @@ const buildApiError = (status: number, rawBody: string): ApiError => {
   }
   (data as Record<string, unknown>).message = message;
 
-  return new ApiError(message, status, code, data);
+  const retryAfterFromBody = Number((data as Record<string, unknown>).retryAfter);
+  const finalRetryAfter =
+    retryAfter ??
+    (Number.isFinite(retryAfterFromBody) && retryAfterFromBody > 0
+      ? Math.ceil(retryAfterFromBody)
+      : undefined);
+
+  return new ApiError(message, status, code, data, finalRetryAfter);
 };
 
 const notifyIfAccessBlocked = (error: ApiError) => {
@@ -227,12 +287,15 @@ export const apiClient = async <T>(
   options: ApiRequestOptions = {}
 ): Promise<T> => {
   checkRateLimit();
+  if (method === 'GET') await waitForRateLimitGate(options.signal);
   const headers: Record<string, string> = { ...(options.headers ?? {}) };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   const hasJsonBody = body !== undefined && body !== null;
   if (hasJsonBody) {
     headers['Content-Type'] = 'application/json';
   }
+
+  const attempt = options.rateLimitAttempt ?? 0;
 
   let res: Response;
   try {
@@ -260,6 +323,27 @@ export const apiClient = async <T>(
   }
 
   if (!res.ok) {
+    if (res.status === 429 && method === 'GET' && attempt < MAX_GET_RETRIES) {
+      const rawBody = await res.clone().text();
+      const parsedBody = tryParseJson(rawBody) as Record<string, unknown> | null;
+      const retryAfter = parseRetryAfter(res, parsedBody?.retryAfter);
+      setRateLimitCooldown(retryAfter);
+      if (retryAfter == null || retryAfter * 1000 <= MAX_AUTO_RETRY_WAIT_MS) {
+        const waitMs =
+          retryAfter != null
+            ? Math.min(retryAfter * 1_000, MAX_AUTO_RETRY_WAIT_MS)
+            : backoffDelayMs(attempt);
+        await sleep(waitMs + Math.floor(Math.random() * 250), options.signal);
+        return apiClient<T>(url, method, body, token, {
+          ...options,
+          rateLimitAttempt: attempt + 1,
+        });
+      }
+      const error = buildApiError(res.status, rawBody, retryAfter ?? undefined);
+      notifyIfAccessBlocked(error);
+      throw error;
+    }
+
     const shouldRefresh =
       res.status === 401 &&
       Boolean(token) &&
@@ -274,7 +358,14 @@ export const apiClient = async <T>(
     }
 
     const text = await res.text();
-    const error = buildApiError(res.status, text);
+    const retryAfterHeader = Number(res.headers.get('retry-after'));
+    const error = buildApiError(
+      res.status,
+      text,
+      Number.isFinite(retryAfterHeader) && retryAfterHeader > 0
+        ? Math.ceil(retryAfterHeader)
+        : undefined
+    );
     // 401 com access token apresentado e fora das rotas de login/registro:
     // a sessão é inválida/expirada (refresh não resolveu). Marca com um código
     // próprio para o getErrorMessage traduzir em PT-BR amigável.

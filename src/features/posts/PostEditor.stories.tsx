@@ -29,8 +29,8 @@ const palettes: PostPaletteDef[] = [
 ];
 
 const mediaLibrary: PostMedia[] = [
-  { id: 'm-1', url: svg('#14261c'), mimeType: 'image/svg+xml', size: 2048, createdAt: '2026-09-20T12:00:00.000Z' },
-  { id: 'm-2', url: svg('#1c2233', '#60a5fa'), mimeType: 'image/svg+xml', size: 2048, createdAt: '2026-09-24T12:00:00.000Z' },
+  { id: 'm-1', url: svg('#14261c'), mimeType: 'image/svg+xml', size: 2048, createdAt: '2026-09-20T12:00:00.000Z', inGallery: true },
+  { id: 'm-2', url: svg('#1c2233', '#60a5fa'), mimeType: 'image/svg+xml', size: 2048, createdAt: '2026-09-24T12:00:00.000Z', inGallery: false },
 ];
 
 const mswHandlers = [
@@ -115,5 +115,44 @@ export const Identidade: Story = {
     await enterEditor();
     await openTab('Identidade', 'Baixar PNG');
     await within(document.body).findByRole('img', { name: 'Prévia do post' }, { timeout: 10000 });
+  },
+};
+
+export const BibliotecaVazia: Story = {
+  args: { userId: 'usr-bib-vazia', mediaLibrary: [] },
+  play: async () => {
+    await enterEditor();
+    await openTab('Imagem', 'Foto principal');
+    await userEvent.click(within(document.body).getByRole('button', { name: 'Foto principal' }));
+    await within(document.body).findByText(/envie a primeira foto do seu salão/i, {}, { timeout: 10000 });
+  },
+};
+
+export const BibliotecaCarregando: Story = {
+  args: { userId: 'usr-bib-loading', mediaLoading: true },
+  play: async () => {
+    await enterEditor();
+    await openTab('Imagem', 'Foto principal');
+    await userEvent.click(within(document.body).getByRole('button', { name: 'Foto principal' }));
+    await within(document.body).findByLabelText('Carregando fotos', {}, { timeout: 10000 });
+  },
+};
+
+export const BibliotecaErro: Story = {
+  args: { userId: 'usr-bib-erro', mediaLibrary: [], mediaError: true, onRetryMedia: fn() },
+  play: async () => {
+    await enterEditor();
+    await openTab('Imagem', 'Foto principal');
+    await within(document.body).findByText(/não foi possível carregar a biblioteca/i, {}, { timeout: 10000 });
+  },
+};
+
+export const BibliotecaComFotos: Story = {
+  args: { userId: 'usr-bib-fotos' },
+  play: async () => {
+    await enterEditor();
+    await openTab('Imagem', 'Foto principal');
+    await userEvent.click(within(document.body).getByRole('button', { name: 'Foto principal' }));
+    await within(document.body).findByRole('button', { name: 'Foto 1' }, { timeout: 10000 });
   },
 };

@@ -12,7 +12,7 @@ test.skip(process.env.POST_EDITOR_QA !== '1', 'Harness isolado: usar POST_EDITOR
 test.beforeAll(() => {
   const backend = path.resolve('../backend');
   output = mkdtempSync(path.join(tmpdir(), 'agendai-editor-e2e-'));
-  execFileSync(process.execPath, [path.join(backend, 'node_modules/tsx/dist/cli.mjs'), 'scripts/preview-post-editorial.ts', output], { cwd: backend, timeout: 55_000 });
+  execFileSync(process.execPath, [path.join(backend, 'node_modules/tsx/dist/cli.mjs'), 'scripts/preview-post-editorial.ts', output], { cwd: backend, timeout: 180_000 });
 });
 
 test.beforeEach(async ({ page }) => {
@@ -70,18 +70,24 @@ test('catálogo real oferece foto opcional e a prévia Story tem dimensões corr
   await page.screenshot({ path: info.outputPath('post-editor-story.png'), fullPage: true });
 });
 
-test('agendamento funciona no celular e o modal prende/restaura o foco e rolagem', async ({ page }, info) => {
-  await page.getByRole('button', { name: 'Agendar publicação' }).click();
-  await expect(page.getByLabel('Data e horário da publicação')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Agendar', exact: true })).toBeVisible();
+test('editor não oferece agendamento nem upload de vídeo', async ({ page }, info) => {
+  // Agendamento foi removido do editor: só Rascunho e Publicar.
+  await expect(page.getByRole('button', { name: 'Agendar publicação' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Agendar', exact: true })).toHaveCount(0);
+  await expect(page.getByLabel('Data e horário da publicação')).toHaveCount(0);
+  // Upload de vídeo também saiu da aba Imagem.
+  await page.getByRole('button', { name: 'Imagem', exact: true }).click();
+  await expect(page.locator('input[type="file"][accept*="video"]')).toHaveCount(0);
+  await expect(page.getByText(/vídeo/i)).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Rascunho' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Publicar' })).toBeVisible();
+  // O modal ainda prende/restaura foco e rolagem.
   for (let i = 0; i < 8; i += 1) {
     await page.keyboard.press('Tab');
     expect(await page.evaluate(() => Boolean(document.activeElement?.closest('[role="dialog"]')))).toBe(true);
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
-  await page.screenshot({ path: info.outputPath('post-editor-schedule.png'), fullPage: true });
-  await page.getByRole('button', { name: 'Publicar agora' }).click();
-  await expect(page.getByLabel('Data e horário da publicação')).toHaveCount(0);
+  await page.screenshot({ path: info.outputPath('post-editor-sem-agendamento.png'), fullPage: true });
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
   expect(await page.evaluate(() => document.body.style.overflow)).not.toBe('hidden');

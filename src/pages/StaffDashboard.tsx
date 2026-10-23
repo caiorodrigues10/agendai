@@ -22,7 +22,7 @@ import { useBarbershop } from '../contexts/BarbershopContext';
 import { useScheduling } from '../contexts/SchedulingContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
-import { ALL_TAB_IDS, getDefaultTab, canAccessTab, canAccessTabByMode, getPrimaryTabForMode } from '../config/tabRegistry';
+import { ALL_TAB_IDS, getDefaultTab, canAccessTab, canAccessTabByMode, getPrimaryTabForMode, DASHBOARD_GATED_TAB_IDS } from '../config/tabRegistry';
 
 import { getErrorMessage } from '../utils/errorMessage';
 import { ApiError } from '../infra/apiClient';
@@ -80,6 +80,7 @@ export const StaffDashboard: React.FC = () => {
     appointments,
     appointmentsState,
     appointmentsError,
+    appointmentsRetryAfter,
     appointmentsStale,
     availability,
     aiInsight,
@@ -173,7 +174,7 @@ export const StaffDashboard: React.FC = () => {
   // Re-check access including hasDashboard
   useEffect(() => {
     if (!user) return;
-    if ((activeTab === 'reports' || activeTab === 'finance' || activeTab === 'products' || activeTab === 'profit' || activeTab === 'equipment' || activeTab === 'organizations') && !hasDashboard) {
+    if (DASHBOARD_GATED_TAB_IDS.includes(activeTab) && !hasDashboard) {
       navigate(`/app/${getDefaultTab(user.role, operationMode)}`, { replace: true });
     }
   }, [activeTab, user, hasDashboard, operationMode, navigate]);
@@ -273,6 +274,15 @@ export const StaffDashboard: React.FC = () => {
     },
     [refreshAppointments, loadAvailability]
   );
+
+  const [appointmentsSeen, setAppointmentsSeen] = useState(false);
+  const nextAppointmentsSeen =
+    appointmentsState === 'ready' ? true : appointmentsState === 'idle' ? false : appointmentsSeen;
+  if (nextAppointmentsSeen !== appointmentsSeen) {
+    setAppointmentsSeen(nextAppointmentsSeen);
+  }
+  const showAppointmentsSkeleton =
+    appointmentsState === 'loading' && !appointmentsSeen;
 
   const activeQueue = queue.filter(q => q.status !== 'completed' && q.status !== 'cancelled');
   const peopleWaiting = activeQueue.filter(q => q.status === 'waiting').length;
@@ -445,12 +455,13 @@ export const StaffDashboard: React.FC = () => {
               {appointmentsStale && (
                 <StaleBanner onRefresh={() => void refreshAppointments()} />
               )}
-              {appointmentsState === 'loading' && appointments.length === 0 ? (
+              {showAppointmentsSkeleton ? (
                 <ListSkeleton rows={5} hasIcon />
               ) : appointmentsState === 'error' && appointments.length === 0 ? (
                 <SectionError
                   message={appointmentsError ?? 'Não foi possível carregar a agenda.'}
                   onRetry={() => void refreshAppointments()}
+                  retryAfterSeconds={appointmentsRetryAfter}
                 />
               ) : (
                 <AppointmentCalendar

@@ -66,13 +66,17 @@ describe('StaffNavigation', () => {
     expect(within(dialog).getByText('Mais opções')).toHaveClass('font-display');
   });
 
-  it('mostra Produtos na folha Mais só com dashboard Pro', () => {
-    const hidden = render(
+  it('mostra Produtos na folha Mais mesmo sem dashboard Pro (o paywall fica no guard)', () => {
+    const withoutPro = render(
       <StaffNavigation activeTab="overview" userRole="OWNER" onNavigate={vi.fn()} />
     );
     fireEvent.click(screen.getByRole('button', { name: 'Mais' }));
-    expect(screen.queryByRole('button', { name: 'Produtos' })).not.toBeInTheDocument();
-    hidden.unmount();
+    expect(
+      within(screen.getByRole('dialog', { name: 'Mais opções' })).getByRole('button', {
+        name: 'Produtos',
+      })
+    ).toBeInTheDocument();
+    withoutPro.unmount();
 
     render(
       <StaffNavigation

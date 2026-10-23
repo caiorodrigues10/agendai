@@ -1,6 +1,7 @@
 import { apiClient, apiFetch } from './apiClient';
 import { authStorage } from './authStorage';
-import type { FeedPost, PostMode } from '../types';
+import { COVER_IMAGE_SPEC } from '../shared/imageSpecs';
+import type { FeedPost, PostMode, PriceSplitPayload } from '../types';
 
 function token() {
   return authStorage.getAccessToken() || '';
@@ -33,11 +34,11 @@ export interface CreatePostPayload {
   format?: PostFormat;
   paletteKey?: string;
   designOptions?: PostDesignOptions;
+  /** Lista de preços do modelo price-split (também persistida em designOptions). */
+  priceSplit?: PriceSplitPayload;
   primaryMediaId?: string | null;
   secondaryMediaId?: string | null;
-  videoUrl?: string | null;
   postMode?: PostMode;
-  scheduledFor?: string | null;
   status?: 'draft';
 }
 
@@ -51,8 +52,8 @@ export type UpdatePostPayload = Partial<{
   paletteKey: string;
   primaryMediaId: string | null;
   secondaryMediaId: string | null;
-  videoUrl: string | null;
   designOptions: PostDesignOptions;
+  priceSplit: PriceSplitPayload;
 }>;
 
 export interface PostListResponse {
@@ -92,9 +93,42 @@ export interface PostMedia {
   mimeType: string;
   size: number;
   createdAt: string;
+  /** Marcada para a galeria pública do perfil (aba "Fotos"). */
+  inGallery: boolean;
 }
 
 // ─── API ───────────────────────────────────────────────────────
+
+/** Tamanho máximo por imagem, derivado da spec compartilhada (não duplica o número). */
+const UPLOAD_MAX_MB = Math.round(COVER_IMAGE_SPEC.maxBytes / (1024 * 1024));
+
+/**
+ * Converte a resposta de erro do upload em Error com mensagem amigável:
+ * extrai `message`/`error` do corpo JSON quando existe; trata 413/415/429 e
+ * 5xx com textos específicos; nunca devolve JSON/HTML cru ao toast.
+ */
+async function uploadMediaError(res: Response): Promise<Error> {
+  const text = await res.text().catch(() => '');
+  let serverMessage: string | null = null;
+  try {
+    const parsed = JSON.parse(text) as Record<string, unknown> | null;
+    if (parsed && typeof parsed === 'object') {
+      const candidate = parsed.message ?? parsed.error;
+      if (typeof candidate === 'string') serverMessage = candidate;
+      else if (candidate && typeof candidate === 'object' && typeof (candidate as { message?: unknown }).message === 'string') {
+        serverMessage = (candidate as { message: string }).message;
+      }
+    }
+  } catch { /* corpo não é JSON (HTML/texto cru) */ }
+  // Message parseada que ainda parece payload serializado é descartada.
+  if (serverMessage && /^\s*[{[]/.test(serverMessage)) serverMessage = null;
+
+  if (res.status === 413) return new Error(`A imagem é muito grande. O limite é de ${UPLOAD_MAX_MB} MB por arquivo.`);
+  if (res.status === 415) return new Error('Formato de imagem não suportado. Use JPG, PNG ou WebP.');
+  if (res.status === 429) return new Error('Muitos envios em sequência. Aguarde um instante e tente novamente.');
+  if (res.status >= 500) return new Error('O servidor falhou ao processar a imagem. Tente novamente em instantes.');
+  return new Error(serverMessage || 'Não foi possível enviar a imagem.');
+}
 
 export const postsApi = {
   /** Listagem paginada filtrada por status. */
@@ -139,6 +173,7 @@ export const postsApi = {
     paletteKey?: string;
     primaryMediaId?: string | null;
     secondaryMediaId?: string | null;
+    priceSplit?: PriceSplitPayload;
   }) {
     const params = new URLSearchParams({ barbershopId });
     if (opts.postMode) params.set('postMode', opts.postMode);
@@ -150,6 +185,8 @@ export const postsApi = {
     if (opts.paletteKey) params.set('paletteKey', opts.paletteKey);
     if (opts.primaryMediaId) params.set('primaryMediaId', opts.primaryMediaId);
     if (opts.secondaryMediaId) params.set('secondaryMediaId', opts.secondaryMediaId);
+    // Objeto viaja como JSON na query (o backend faz preprocess no schema).
+    if (opts.priceSplit) params.set('priceSplit', JSON.stringify(opts.priceSplit));
     return apiClient<{ success: boolean; data: { imageUrl: string } }>(
       `/api/posts/preview?${params.toString()}`, 'GET', undefined, token()
     ).then(r => unwrap<{ imageUrl: string }>(r).imageUrl);
@@ -177,12 +214,7 @@ export const postsApi = {
     ).then(r => unwrap<FeedPost>(r));
   },
 
-  schedule(id: string, scheduledFor: string) {
-    return apiClient<{ success: boolean; data: FeedPost }>(
-      `/api/posts/${id}/schedule`, 'POST', { scheduledFor }, token()
-    ).then(r => unwrap<FeedPost>(r));
-  },
-
+  /** Cancela agendamento legado (post volta a rascunho). Posts já agendados no banco não ficam órfãos. */
   cancelSchedule(id: string) {
     return apiClient<{ success: boolean; data: FeedPost }>(
       `/api/posts/${id}/cancel-schedule`, 'POST', undefined, token()
@@ -211,24 +243,35 @@ export const postsApi = {
 
   // ── Mídia ─────────────────────────────────────────────────
 
-  listMedia(barbershopId: string) {
+  listMedia(barbershopId: string, opts: { inGallery?: boolean } = {}) {
+    const params = new URLSearchParams({ barbershopId });
+    if (opts.inGallery !== undefined) params.set('inGallery', String(opts.inGallery));
     return apiClient<{ success: boolean; data: PostMedia[] }>(
-      `/api/posts/media?barbershopId=${encodeURIComponent(barbershopId)}`,
+      `/api/posts/media?${params.toString()}`,
       'GET', undefined, token()
     ).then(r => unwrap<PostMedia[]>(r));
   },
 
-  uploadMedia(barbershopId: string, file: File) {
+  uploadMedia(barbershopId: string, file: File, opts: { inGallery?: boolean } = {}) {
     const form = new FormData();
+    // Field antes do arquivo: o Fastify multipart só expõe fields que chegam antes do stream.
+    form.append('inGallery', String(opts.inGallery ?? false));
     form.append('file', file);
     return apiFetch(`/api/posts/media/${encodeURIComponent(barbershopId)}`, {
       method: 'POST',
       body: form,
     }, token()).then(async (res) => {
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) throw await uploadMediaError(res);
       const json = await res.json();
       return unwrap<PostMedia>(json);
     });
+  },
+
+  /** Alterna a foto na galeria pública do perfil (limite de 30 no backend). */
+  updateMedia(id: string, data: { inGallery: boolean }) {
+    return apiClient<{ success: boolean; data: PostMedia }>(
+      `/api/posts/media/${id}`, 'PATCH', data, token()
+    ).then(r => unwrap<PostMedia>(r));
   },
 
   deleteMedia(id: string) {

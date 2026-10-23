@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Logo } from '../../components/ui/Logo';
 import { Avatar } from '../../components/ui/Avatar';
 import {
@@ -28,6 +28,24 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
   const { settings } = useBarbershop();
   const [switchingBack, setSwitchingBack] = useState(false);
   const [switchBackError, setSwitchBackError] = useState('');
+  // Altura real do header (varia: quebra no mobile, aviso de troca de salão).
+  // Exposta como --app-header-h para elementos sticky por baixo (ex.: barra de
+  // Salvar da aparência) se alinharem sem sobrepor o header.
+  const headerRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const apply = () =>
+      document.documentElement.style.setProperty('--app-header-h', `${el.offsetHeight}px`);
+    apply();
+    if (typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(apply);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      document.documentElement.style.removeProperty('--app-header-h');
+    };
+  }, []);
   const trial = subscriptionData?.trial;
   const trialDays = trial?.daysRemainingInTrial;
   const isTrialActive = Boolean(trial?.isInTrial && !trial.isExpired && typeof trialDays === 'number');
@@ -56,7 +74,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-bg/95 backdrop-blur-sm border-b border-border shadow-lg shadow-black/5">
+    <header ref={headerRef} className="sticky top-0 z-50 bg-bg/95 backdrop-blur-sm border-b border-border shadow-lg shadow-black/5">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
         <span className="shrink-0">
           <Logo size="sm" customImageUrl={logoUrl} />

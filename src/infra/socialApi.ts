@@ -10,6 +10,12 @@ export interface TaggedPost {
   id: string; postId: string; barbershopId: string; status: 'PENDING' | 'APPROVED'; post: PublicSocialPost;
 }
 export interface CommentsPage { data: PostComment[]; meta: { page: number; limit: number; total: number } }
+export interface GalleryPhoto {
+  id: string;
+  url: string;
+  mimeType: string;
+  createdAt: string;
+}
 
 const base = (salonId: string) => `/api/salons/${encodeURIComponent(salonId)}`;
 const postPath = (salonId: string, postId: string) => `${base(salonId)}/posts/${encodeURIComponent(postId)}`;
@@ -25,6 +31,7 @@ export const socialApi = {
   comment: (salonId: string, postId: string, content: string) => apiClient<{ data: PostComment }>(`${postPath(salonId, postId)}/comments`, 'POST', { content }, token(), sessionOptions()).then(unwrap),
   deleteComment: async (salonId: string, postId: string, commentId: string) => { await apiClient(`${postPath(salonId, postId)}/comments/${encodeURIComponent(commentId)}`, 'DELETE', undefined, token(), sessionOptions()); },
   stories: (salonId: string) => apiClient<{ data: FeedPost[] }>(`${base(salonId)}/stories`).then(unwrap),
+  gallery: (salonId: string) => apiClient<{ data: GalleryPhoto[] }>(`${base(salonId)}/gallery`).then(unwrap),
   tagged: (salonId: string, pending = false) => apiClient<{ data: TaggedPost[] }>(`${base(salonId)}/tagged?pending=${pending}`, 'GET', undefined, pending ? authStorage.getAccessToken() || '' : undefined).then(unwrap),
   requestTag: async (salonId: string, postId: string, targetBarbershopId: string) => { await apiClient(`${postPath(salonId, postId)}/tags`, 'POST', { targetBarbershopId }, authStorage.getAccessToken() || ''); },
   moderateTag: async (salonId: string, tagId: string, approve: boolean) => { await apiClient(`${base(salonId)}/tags/${encodeURIComponent(tagId)}`, 'PATCH', { approve }, authStorage.getAccessToken() || ''); },
