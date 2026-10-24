@@ -17,6 +17,7 @@
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
     "lint": "eslint src --ext .ts,.tsx --cache --cache-location node_modules/.cache/eslint",
+    "lint:baseline": "node scripts/check-lint-warnings.mjs",
     "lint:fix": "eslint src --ext .ts,.tsx --cache --cache-location node_modules/.cache/eslint --fix",
     "lint:changed": "changed=$(git diff --name-only --diff-filter=d | grep -E '\\.(ts|tsx)$' || true); if [ -n \"$changed\" ]; then eslint --cache --cache-location node_modules/.cache/eslint $changed; else echo 'Nenhum .ts/.tsx alterado'; fi",
     "audit:frontend-structure": "node scripts/audit-frontend-structure.mjs",
