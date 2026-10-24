@@ -41,7 +41,9 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test('link direto permite comentar via OTP sem conta de salão', async ({ page }) => {
+// FIXME: a UI de comentários/OTP foi removida do PostDetail (workstream de
+// comentários ainda não reintroduziu o fluxo). Reativar com essa workstream.
+test.fixme('link direto permite comentar via OTP sem conta de salão', async ({ page }) => {
   await page.goto(`/saloes/${salonId}/posts/${postId}`);
   await expect(page.getByText('Que espaço bonito!')).toBeVisible();
   await page.getByRole('textbox', { name: 'Celular', exact: true }).fill('11987654321');
@@ -97,7 +99,9 @@ test('perfil mostra grade, abas Publicações/Fotos/Sobre, stories e zero reques
   expect(taggedRequests).toEqual([]);
 });
 
-test('perfil com avaliações exibe depoimentos verificados (aba Avaliações — outro workstream)', async ({ page }, testInfo) => {
+// FIXME: a aba Avaliações foi removida do perfil (workstream de avaliações
+// ainda não landed). Reativar com essa workstream.
+test.fixme('perfil com avaliações exibe depoimentos verificados (aba Avaliações — outro workstream)', async ({ page }, testInfo) => {
   await page.goto(`/queue/${salonId}?tab=profile`);
   await expect(page.getByRole('heading', { name: 'Studio Aurora' }).first()).toBeVisible({ timeout: 15_000 });
   await page.screenshot({ path: testInfo.outputPath('salon-profile-reviews.png'), fullPage: true });
@@ -105,7 +109,8 @@ test('perfil com avaliações exibe depoimentos verificados (aba Avaliações �
   await expect(page.getByText('Atendimento excelente!')).toBeVisible();
 });
 
-test('perfil sem avaliações não mostra nota zero', async ({ page }) => {
+// FIXME: depende da aba Avaliações (workstream pendente).
+test.fixme('perfil sem avaliações não mostra nota zero', async ({ page }) => {
   await page.route('**/reviews?*', route => route.fulfill({ json: { success: true, data: { average: null, count: 0, threshold: 3, showAverage: false, reviews: [] } } }));
   await page.goto(`/queue/${salonId}?tab=profile`);
   const profile = page.getByTestId('salon-social-profile');

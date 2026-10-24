@@ -28,7 +28,11 @@ async function seedStorage(page: Page) {
   });
 }
 
+// O fluxo real de cadastro exige backend vivo (POST /api/auth/register → 201).
+// Sem E2E_BASE_URL o vite preview proxyia /api para :3333 morto — pula o spec
+// (mesmo critério dos specs de e2e/master/).
 test('cadastra conta nova no /cadastro e entra no painel', async ({ page }) => {
+  test.skip(!process.env.E2E_BASE_URL, 'requer backend real (defina E2E_BASE_URL)');
   test.setTimeout(90_000);
   const email = `e2e-reg-${stamp}@example.com`;
   const cpf = makeCpf();

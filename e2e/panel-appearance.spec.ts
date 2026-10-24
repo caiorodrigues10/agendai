@@ -275,11 +275,13 @@ for (const vp of VIEWPORTS) {
     if (!SHOTS_ONLY) {
       await assertPreviewBasics(page, vp.width, 'desktop');
       await expect(page.getByTestId('device-desktop')).toBeVisible();
-      await expect(page.getByText('agendaja.com/queue/seu-salao')).toBeVisible();
+      await expect(page.getByText(`agendaja.com/queue/${SHOP_ID}`)).toBeVisible();
       await expect(page.getByTestId('device-mobile')).toHaveCount(0);
       const fb = await page.getByTestId('preview-frame').boundingBox();
       const db = await page.getByTestId('device-desktop').boundingBox();
-      expect(fb && db && Math.abs(db.width / db.height - 1200 / 750)).toBeLessThan(0.08);
+      // Desktop lógico = 1024×1100 (PREVIEW_DEVICES.desktop): largura = breakpoint
+      // lg real da página; altura cobre a primeira dobra com a barra do navegador.
+      expect(fb && db && Math.abs(db.width / db.height - 1024 / 1100)).toBeLessThan(0.08);
     }
     await shoot(page, `02-desktop-${vp.name}`);
   });

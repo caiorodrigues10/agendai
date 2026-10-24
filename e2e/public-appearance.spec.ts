@@ -12,6 +12,9 @@ const customTheme = {
   id: 'theme-1',
   barbershopId: SHOP_ID,
   presetKey: 'esmeralda',
+  // Modo fixo: sem `mode` o wrapper resolve AUTO → variante light do sistema
+  // e gera um bg diferente do salvo (comportamento intencional pós-variantes).
+  mode: 'DARK' as const,
   accentColor: '#2CB58A',
   backgroundColor: '#0F1110',
   surfaceColor: '#1B1F1D',

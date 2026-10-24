@@ -256,7 +256,7 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
           data-testid="preview-frame"
           role="img"
           aria-label="Prévia da página pública"
-          className="relative mx-auto w-full max-w-[360px] overflow-hidden rounded-2xl border border-border bg-surface-2 shadow-card lg:max-w-none"
+          className="relative mx-auto w-full max-w-[360px] shrink-0 overflow-hidden rounded-2xl border border-border bg-surface-2 shadow-card lg:max-w-none"
           style={{ aspectRatio: `${PREVIEW_DEVICES[mode].w} / ${PREVIEW_DEVICES[mode].h}` }}
         >
           <div
