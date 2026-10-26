@@ -8,15 +8,21 @@ import {
 import type { PublicSocialPost } from '../../infra/socialApi';
 import { SectionError } from '../../components/patterns';
 import { Link } from 'react-router-dom';
+import { getPublicSiteUrl } from '../../marketing/siteUrl';
 
 export function buildPostShareUrl(salonId: string, postId: string): string {
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   return `${origin}/saloes/${encodeURIComponent(salonId)}/posts/${encodeURIComponent(postId)}`;
 }
 
+/**
+ * Link público do perfil: a rota `/s/salon/:id` é servida pelo backend (fora do
+ * prefixo /api) com as meta tags Open Graph e só então redireciona para o app —
+ * sem ela o crawler lê o index.html da SPA e não vê prévia nenhuma. O host do
+ * frontend precisa reescrever `/s/*` para a API (ver docs/agents/BUSINESS_RULES.md).
+ */
 export function buildProfileShareUrl(salonId: string): string {
-  const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  return `${origin}/queue/${encodeURIComponent(salonId)}?tab=profile`;
+  return `${getPublicSiteUrl()}/s/salon/${encodeURIComponent(salonId)}`;
 }
 
 export async function shareUrl(url: string, title?: string): Promise<'shared' | 'copied' | 'cancelled'> {

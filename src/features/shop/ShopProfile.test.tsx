@@ -27,6 +27,10 @@ beforeEach(() => {
   vi.mocked(socialApi.gallery).mockResolvedValue([]);
   vi.mocked(socialApi.tagged).mockResolvedValue([]);
 });
+afterEach(() => {
+  vi.unstubAllEnvs();
+  delete (window.navigator as { share?: unknown }).share;
+});
 
 it('mostra apenas publicações públicas na grade, sem rascunhos e sem stories', async () => {
   mount({ posts: [post, { ...post, id: 'draft', status: 'draft' }, { ...post, id: 'story', format: 'story' }] });
@@ -88,4 +92,19 @@ it('stories expirados não aparecem e stories ativos abrem o visualizador', asyn
   expect(screen.queryByRole('button', { name: 'Ver story: Expirado' })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Fechar story' }));
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+});
+it('botão Compartilhar usa o link público /s/salon/:id (não a rota da SPA)', async () => {
+  vi.stubEnv('VITE_PUBLIC_SITE_URL', 'https://agendai.example.com');
+  const share = vi.fn().mockResolvedValue(undefined);
+  Object.defineProperty(window.navigator, 'share', { value: share, configurable: true, writable: true });
+
+  mount();
+  await waitFor(() => expect(socialApi.stories).toHaveBeenCalled());
+  fireEvent.click(screen.getByRole('button', { name: 'Compartilhar perfil' }));
+
+  await waitFor(() => expect(share).toHaveBeenCalledTimes(1));
+  expect(share.mock.calls[0][0]).toEqual({
+    title: 'Studio Teste',
+    url: 'https://agendai.example.com/s/salon/salon',
+  });
 });
