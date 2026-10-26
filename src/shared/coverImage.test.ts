@@ -1,5 +1,6 @@
 /// <reference types="vitest/globals" />
 import {
+  buildCoverOgUrl,
   buildCoverSrcSet,
   buildCoverSourceUrl,
   buildCoverUrl,
@@ -67,5 +68,47 @@ describe('coverImage (helper único de entrega da capa)', () => {
     expect(coverObjectPosition(undefined, null)).toBe('50% 50%');
     expect(coverObjectPosition(Number.NaN, 250)).toBe('50% 100%');
     expect(coverObjectPosition(-10, Number.NaN)).toBe('0% 50%');
+  });
+
+  describe('buildCoverOgUrl (coerente com a rota og-image, nunca amplia)', () => {
+    it('origem grande entrega 1200×630 em JPEG q_auto (PNG ~900KB, JPEG ~80KB)', () => {
+      const url = buildCoverOgUrl(base, {
+        originalWidth: 3840,
+        originalHeight: 2160,
+        focalX: 50,
+        focalY: 50,
+      });
+      expect(url).toContain('w_1200,h_630,c_fill,g_auto,f_jpg,q_auto');
+      expect(url).not.toContain('f_png');
+    });
+
+    it('3000×600 (muito larga) não amplia: corta para 1142×600', () => {
+      const url = buildCoverOgUrl(base, { originalWidth: 3000, originalHeight: 600 });
+      expect(url).toContain('w_1142,h_600,c_fill');
+      expect(url).toContain('f_jpg,q_auto');
+    });
+
+    it('600×3000 (muito alta) não amplia: corta para 600×315', () => {
+      const url = buildCoverOgUrl(base, { originalWidth: 600, originalHeight: 3000 });
+      expect(url).toContain('w_600,h_315,c_fill');
+      expect(url).toContain('f_jpg,q_auto');
+    });
+
+    it('aplica o mesmo focal da página (g_xy_center em px do original)', () => {
+      const url = buildCoverOgUrl(base, {
+        originalWidth: 3000,
+        originalHeight: 600,
+        focalX: 0,
+        focalY: 100,
+      });
+      expect(url).toContain('g_xy_center');
+      expect(url).not.toContain('g_auto');
+    });
+
+    it('fora do Cloudinary a URL passa intacta', () => {
+      expect(buildCoverOgUrl('https://cdn.example.com/capa.png', { originalWidth: 600 })).toBe(
+        'https://cdn.example.com/capa.png',
+      );
+    });
   });
 });
