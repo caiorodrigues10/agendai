@@ -40,6 +40,26 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 - Capa: aceita QUALQUER medida/proporção — validação instantânea no front só de tipo (JPEG/PNG/WebP; GIF/SVG rejeitados); medida fora do ideal vira aviso suave não-bloqueante. Recorte 16:9 + ponto focal (`coverFocalX/Y`, editor arrastável com setas do teclado) aplicados na entrega pelo helper único `src/shared/coverImage.ts` (`c_fill,ar_16:9,g_auto|g_xy_center,f_auto,q_auto`, srcset sem ampliar além do `coverWidth/Height` do back; OG `w_1200,h_630,f_jpg`); overlay 0–80; envio direto assinado ao Cloudinary com progresso/cancelamento (multipart via backend mantido como fallback).
 - Anti-FOUC: `PublicHome` aplica o tema o quanto antes carregado (`usePageTheme` com cache por módulo; `clearPageThemeCache()` para testes).
 
+## Compartilhamento público (`/s/salon/:id`)
+
+- O link que o dono compartilha é `${VITE_PUBLIC_SITE_URL}/s/salon/:id` (`buildProfileShareUrl` em `src/features/shop/PostDetail.tsx`). A rota `/queue/:id?tab=profile` continua sendo o destino **interno** do app (é para lá que a página de compartilhamento redireciona), não o link compartilhado.
+- O backend serve `GET /s/salon/:id` **fora do prefixo `/api`**: HTML com `<title>`, canonical e `og:url` lidos da env `PUBLIC_APP_URL` (que deve valer **a mesma origem** de `VITE_PUBLIC_SITE_URL`), tags Open Graph/Twitter e um `meta refresh` + link de fallback. O corpo é mínimo e acessível (`<main>`, `<h1>` "Abrindo o perfil...", link visível, fundo escuro `#0b1220`) — por isso também nenhum `<script>` inline: a CSP de produção do back não tem `unsafe-inline`. Salão inexistente ou inativo → 404 HTML com `noindex`; respostas 200/404 saem com `Cache-Control: public, max-age=300` (404: 60 s), `ETag` e `304` para `If-None-Match`, e `HEAD` devolve os mesmos cabeçalhos sem corpo.
+- `og:image`: com capa usa o recorte Cloudinary 1200×630 JPEG (`f_jpg,q_auto` + focal, largura limitada ao original — mesmo espelho do `buildCoverOgUrl` do front); sem capa aponta para `<PUBLIC_API_URL>/api/barbershops/:id/page-theme/og-image`. A base vem da env do back `PUBLIC_API_URL` (sem ela, **só fora de produção** a origem da requisição é usada; em produção cai para `PUBLIC_APP_URL` e, sem nenhuma, o `og:image` é omitido — a API avisa no boot).
+- **Rewrite obrigatório no host do frontend** — sem ele o catch-all da SPA engole `/s/salon/:id` e o crawler lê o `index.html` sem meta tags. Regras acima do catch-all, **mantidas comentadas até a URL pública do backend ser confirmada**:
+  - Render (`render.yaml`): `- type: rewrite` com `source: /s/*` e `destination: https://<backend>/s/*`.
+  - Netlify/Cloudflare (`public/_redirects`): `/s/*  https://<backend>/s/*  200`.
+- CORS fica restrito ao escopo `/api` (`corsOptions.ts`, registrado em `routes/api.ts`): `/s/salon/:id`, `/health` e `/docs` não emitem cabeçalhos CORS (`app.security.spec.ts` no back cobre os dois lados).
+
+### Ativação em staging (obrigatória antes de produção)
+
+Não descomentar a regra sem confirmar a URL pública do backend **e** rodar estes testes no staging (todos contra o host do front, não do back):
+
+1. `curl -s https://<front>/s/salon/<id> | head -30` → precisa conter `<title>`, `og:url` e `<meta http-equiv="refresh"`. Se vier o `index.html` da SPA (`<div id="root">`), a regra não está ativa ou está **depois** do catch-all.
+2. `curl -sI https://<front>/s/salon/<id>` → `content-type: text/html` + cabeçalhos do back (`etag`, `cache-control: public, max-age=300`); em `id` inexistente → `404` com HTML (não 200 da SPA).
+3. `curl -s https://<front>/s/salon/<id> | grep -o 'property="og:image" content="[^"]*"'` e depois `curl -sI <valor>` → `200` (isso valida também a origem de `/api`/`PUBLIC_API_URL`; sem capa, a URL do back precisa ser alcançável de fora).
+4. Ferramenta de preview (Facebook Sharing Debugger / opengraph.xyz) na URL do staging → título + imagem aparecem.
+5. Só então publicar a URL real em `render.yaml`/`_redirects` e repetir os 4 testes em produção.
+
 ## Pendências documentais
 
 Divergências código ↔ regra de produto aprovada devem ser listadas como pendência **sem** alterar comportamento nesta entrega só documental.

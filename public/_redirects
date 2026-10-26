@@ -1,1 +1,7 @@
+# Compartilhamento de perfil: /s/* → API (HTML com meta tags Open Graph).
+# Mantenha COMENTADA até a URL pública do backend estar confirmada; ao ativar,
+# rode os testes de staging de docs/agents/BUSINESS_RULES.md ("Ativação em
+# staging") — incluem validar o crawler/preview, não só o curl. A regra precisa
+# vir ANTES do catch-all da SPA.
+# /s/*  https://<backend-publico>/s/*  200
 /* /index.html 200
