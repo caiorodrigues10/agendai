@@ -10,7 +10,7 @@ export function ProfileSkeleton() {
       className="grid grid-cols-3 gap-1 animate-pulse"
     >
       {[0, 1, 2, 3, 4, 5].map(i => (
-        <div key={i} className="aspect-square bg-surface-2 rounded-sm" />
+        <div key={i} className="aspect-[4/5] bg-surface-2 rounded-sm" />
       ))}
     </div>
   );
@@ -38,7 +38,7 @@ export function ProfileGrid({
           key={post.id}
           onClick={() => onOpen(post)}
           aria-label={`Abrir ${post.videoUrl ? 'vídeo' : 'publicação'}: ${post.title || 'Post do salão'}`}
-          className="group relative aspect-square overflow-hidden rounded-sm bg-surface-2 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+          className="group relative aspect-[4/5] overflow-hidden rounded-sm bg-surface-2 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
         >
           {post.imageUrl ? (
             <img

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { PostEditor, type PostEditorProps } from './PostEditor';
 import { PostPreviewBox } from './PostPreviewBox';
 import { TemplateThumbnail } from './TemplateThumbnail';
-import { postsApi, type PostMedia } from '../../infra/postsApi';
+import { postsApi, type PostMedia, type PostTemplateDef } from '../../infra/postsApi';
 import { optimizeImageIfNeeded } from './optimizeImage';
 
 vi.mock('../../infra/postsApi', async importOriginal => {
@@ -102,6 +102,54 @@ describe('PostEditor — catálogo de modelos', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Todos' }));
     expect(screen.getByText('Agenda aberta')).toBeInTheDocument();
+  });
+});
+
+describe('PostEditor — formato padrão (paridade com o catálogo do back)', () => {
+  const priceSplit = (withDefault: boolean): PostTemplateDef => ({
+    key: 'price-split',
+    name: 'Tabela de valores',
+    description: 'Foto + painel de preços',
+    requiredMedia: 0,
+    formats: ['square', 'portrait', 'story'],
+    previewUrl: '/api/posts/preview?x=5',
+    group: 'ofertas',
+    photoMode: 'optional',
+    ...(withDefault ? { defaultFormat: 'portrait' } : {}),
+  });
+  const catalog = (withDefault: boolean): PostTemplateDef[] => [...TEMPLATES, priceSplit(withDefault)];
+
+  async function selectPriceSplit() {
+    fireEvent.click(screen.getByRole('button', { name: 'Formato' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Tabela de valores' }));
+  }
+
+  it('lê defaultFormat do catálogo e vira 4:5 ao escolher o modelo', async () => {
+    mockedPostsApi.templates.mockResolvedValue(catalog(true));
+    await openEditor();
+    await selectPriceSplit();
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /Retrato/ }).className).toContain('border-accent')
+    );
+  });
+
+  it('sem defaultFormat no catálogo, o fallback local (price-split → 4:5) vale', async () => {
+    mockedPostsApi.templates.mockResolvedValue(catalog(false));
+    await openEditor();
+    await selectPriceSplit();
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /Retrato/ }).className).toContain('border-accent')
+    );
+  });
+
+  it('formato escolhido à mão não é sobrescrito pela troca de modelo', async () => {
+    mockedPostsApi.templates.mockResolvedValue(catalog(true));
+    await openEditor();
+    fireEvent.click(screen.getByRole('button', { name: 'Formato' }));
+    fireEvent.click(screen.getByRole('button', { name: /Story/ }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Tabela de valores' }));
+    expect(screen.getByRole('button', { name: /Story/ }).className).toContain('border-accent');
+    expect(screen.getByRole('button', { name: /Retrato/ }).className).not.toContain('border-accent');
   });
 });
 

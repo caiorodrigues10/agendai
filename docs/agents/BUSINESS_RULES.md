@@ -37,8 +37,15 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 
 - Tema via CSS vars escopadas no wrapper `[data-ag-shop-theme]`: família canônica `--shop-*` (por variante) + espelho legado `--ag-*`; as utilities do Tailwind resolvem `var(--shop-x, var(--ag-x))` (`styles/tokens.css`). Variantes `light`/`dark` por salão (`darkColors`/`lightColors` no payload; `lightColors` nula é gerada no cliente via `generateVariantColors`, mesmo gerador do back) e `mode` do dono (`AUTO` segue `prefers-color-scheme`; `LIGHT`/`DARK` força). Padrão sem tema salvo = visual dark atual (`PAGE_THEME_DEFAULTS` em `src/shared/pageThemeDefaults.ts`, espelho do backend via `npm run theme:mirror`).
 - Contraste WCAG AA (texto/fundo + muted/fundo + acento/superfície + botão/acento) é **bloqueante** no botão Salvar — em QUALQUER variante, materializada ou gerada — e no back (`pageThemeContrast.ts`); cores são editadas na variante ativa da prévia (toggle Claro|Escuro, travado quando o Modo força a variante); sem token de owner, o painel mostra estado somente-leitura.
-- Capa: aceita QUALQUER medida/proporção — validação instantânea no front só de tipo (JPEG/PNG/WebP; GIF/SVG rejeitados); medida fora do ideal vira aviso suave não-bloqueante. Recorte 16:9 + ponto focal (`coverFocalX/Y`, editor arrastável com setas do teclado) aplicados na entrega pelo helper único `src/shared/coverImage.ts` (`c_fill,ar_16:9,g_auto|g_xy_center,f_auto,q_auto`, srcset sem ampliar além do `coverWidth/Height` do back; OG `w_1200,h_630,f_jpg`); overlay 0–80; envio direto assinado ao Cloudinary com progresso/cancelamento (multipart via backend mantido como fallback).
+- Capa: aceita QUALQUER medida/proporção — validação instantânea no front só de tipo (JPEG/PNG/WebP; GIF/SVG rejeitados); medida fora do ideal vira aviso suave não-bloqueante. Recorte 16:9 + ponto focal (`coverFocalX/Y`, editor arrastável com setas do teclado) aplicados na entrega pelo helper único `src/shared/coverImage.ts` (`c_fill,ar_16:9,g_auto|g_xy_center,f_auto,q_auto`, srcset sem ampliar além do `coverWidth/Height` do back; OG `w_1200,h_630,c_fill,f_jpg,q_auto` também sem ampliar); overlay 0–80; envio direto assinado ao Cloudinary com progresso/cancelamento (multipart via backend mantido como fallback).
 - Anti-FOUC: `PublicHome` aplica o tema o quanto antes carregado (`usePageTheme` com cache por módulo; `clearPageThemeCache()` para testes).
+
+## Posts (formato da arte)
+
+- Grade do perfil: célula **4:5** (`aspect-[4/5]` + `object-cover` em `ProfileSections.tsx`); o detalhe do post mostra a arte inteira (`object-contain` + `max-h-[70vh]` em `PostDetail.tsx`).
+- Formato padrão por modelo (`price-split` → 4:5, demais → 1:1) vem do catálogo **`GET /api/posts/templates`** (`defaultFormat`); o fallback local `defaultFormatFor` em `PostEditor.tsx` só vale antes da lista carregar (ou se a chamada falhar) e precisa ser alterado junto com o back no mesmo PR — regra completa em `backend/docs/agents/BUSINESS_RULES.md`.
+- Escolha manual no card "Formato" trava o default (`formatTouched`): trocar de modelo não sobrescreve a decisão do usuário.
+- OG da capa (`buildCoverOgUrl`): `w_1200,h_630,c_fill` + focal, largura limitada ao original (nunca amplia), **`f_jpg,q_auto`** — PNG a ~900 KB passava do limite de 300 KB aceito para `og:image`; JPEG fica em ~80 KB.
 
 ## Pendências documentais
 
