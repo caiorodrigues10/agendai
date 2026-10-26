@@ -27,13 +27,40 @@ function detailPost(format: FeedPost['format']): PublicSocialPost {
   return { ...feedPost(format), shopName: 'Studio Teste' };
 }
 
-describe('ProfileGrid — grade do perfil em 4:5', () => {
-  it.each(FORMATS)('card do post %s usa aspect-[4/5] com object-cover', format => {
+/** Opção B: célula 4:5 fixa; cover só no 4:5, contain em 1:1 e 9:16. */
+const FIT: Record<FeedPost['format'], string> = {
+  square: 'object-contain',
+  portrait: 'object-cover',
+  story: 'object-contain',
+};
+
+describe('ProfileGrid — grade 4:5 sem cortar arte antiga', () => {
+  it.each(FORMATS)('%s: célula 4:5 com fundo e o fit do formato', format => {
     render(<ProfileGrid posts={[feedPost(format)]} onOpen={vi.fn()} />);
     const card = screen.getByRole('button');
     expect(card.className).toContain('aspect-[4/5]');
+    expect(card.className).toContain('bg-surface-2');
     expect(card.className).not.toContain('aspect-square');
-    expect(card.querySelector('img')?.className).toContain('object-cover');
+
+    const img = card.querySelector('img');
+    expect(img?.className).toContain(FIT[format]);
+    if (format === 'portrait') expect(img?.className).not.toContain('object-contain');
+    else expect(img?.className).not.toContain('object-cover');
+  });
+
+  it('grade mista mantém a célula 4:5 para os 3 formatos', () => {
+    render(<ProfileGrid posts={FORMATS.map(feedPost)} onOpen={vi.fn()} />);
+    const cards = screen.getAllByRole('button');
+    expect(cards).toHaveLength(3);
+    for (const card of cards) expect(card.className).toContain('aspect-[4/5]');
+    expect(cards.filter(c => (c.querySelector('img')?.className ?? '').includes('object-cover'))).toHaveLength(1);
+    expect(cards.filter(c => (c.querySelector('img')?.className ?? '').includes('object-contain'))).toHaveLength(2);
+  });
+
+  it('vídeo também respeita o fit do formato (sem corte em 1:1/9:16)', () => {
+    const video: FeedPost = { ...feedPost('story'), imageUrl: undefined, videoUrl: '/clip.mp4' };
+    render(<ProfileGrid posts={[video]} onOpen={vi.fn()} />);
+    expect(screen.getByRole('button').querySelector('video')?.className).toContain('object-contain');
   });
 
   it('esqueleto de carregamento acompanha o 4:5 da grade', () => {

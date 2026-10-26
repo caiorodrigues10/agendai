@@ -42,7 +42,7 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 
 ## Posts (formato da arte)
 
-- Grade do perfil: célula **4:5** (`aspect-[4/5]` + `object-cover` em `ProfileSections.tsx`); o detalhe do post mostra a arte inteira (`object-contain` + `max-h-[70vh]` em `PostDetail.tsx`).
+- Grade do perfil: célula **4:5** (`aspect-[4/5]` + `bg-surface-2` em `ProfileSections.tsx`), sem cortar arte antiga — `object-cover` **só** no formato 4:5; 1:1 e 9:16 aparecem inteiros (`object-contain`, com as barras da célula nas laterais/base). O detalhe do post mostra a arte inteira (`object-contain` + `max-h-[70vh]` em `PostDetail.tsx`).
 - Formato padrão por modelo (`price-split` → 4:5, demais → 1:1) vem do catálogo **`GET /api/posts/templates`** (`defaultFormat`); o fallback local `defaultFormatFor` em `PostEditor.tsx` só vale antes da lista carregar (ou se a chamada falhar) e precisa ser alterado junto com o back no mesmo PR — regra completa em `backend/docs/agents/BUSINESS_RULES.md`.
 - Escolha manual no card "Formato" trava o default (`formatTouched`): trocar de modelo não sobrescreve a decisão do usuário.
 - OG da capa (`buildCoverOgUrl`): `w_1200,h_630,c_fill` + focal, largura limitada ao original (nunca amplia), **`f_jpg,q_auto`** — PNG a ~900 KB passava do limite de 300 KB aceito para `og:image`; JPEG fica em ~80 KB.

@@ -32,45 +32,50 @@ export function ProfileGrid({
 }) {
   return (
     <div className="grid grid-cols-3 gap-1 sm:gap-2" data-testid="profile-post-grid">
-      {posts.map(post => (
-        <button
-          type="button"
-          key={post.id}
-          onClick={() => onOpen(post)}
-          aria-label={`Abrir ${post.videoUrl ? 'vídeo' : 'publicação'}: ${post.title || 'Post do salão'}`}
-          className="group relative aspect-[4/5] overflow-hidden rounded-sm bg-surface-2 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
-        >
-          {post.imageUrl ? (
-            <img
-              src={post.imageUrl}
-              alt=""
-              loading="lazy"
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-          ) : post.videoUrl ? (
-            <video
-              src={post.videoUrl}
-              preload="metadata"
-              muted
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center p-3 sm:p-5">
-              <p className="line-clamp-4 text-xs sm:text-lg font-bold text-text-primary">
-                {post.title || post.content}
-              </p>
-            </div>
-          )}
-          {post.videoUrl && (
-            <span className="absolute right-2 top-2 rounded-full bg-black/50 p-1.5 text-white">
-              <Play size={16} fill="currentColor" aria-hidden />
+      {posts.map(post => {
+        // Célula 4:5 fixa; só a arte 4:5 pode ser cortada (cover). 1:1 e 9:16
+        // aparecem inteiras (contain) sobre o fundo da célula — nada de corte.
+        const fit = post.format === 'portrait' ? 'object-cover' : 'object-contain';
+        return (
+          <button
+            type="button"
+            key={post.id}
+            onClick={() => onOpen(post)}
+            aria-label={`Abrir ${post.videoUrl ? 'vídeo' : 'publicação'}: ${post.title || 'Post do salão'}`}
+            className="group relative aspect-[4/5] overflow-hidden rounded-sm bg-surface-2 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+          >
+            {post.imageUrl ? (
+              <img
+                src={post.imageUrl}
+                alt=""
+                loading="lazy"
+                className={`h-full w-full ${fit} transition-transform duration-300 group-hover:scale-105`}
+              />
+            ) : post.videoUrl ? (
+              <video
+                src={post.videoUrl}
+                preload="metadata"
+                muted
+                className={`h-full w-full ${fit}`}
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center p-3 sm:p-5">
+                <p className="line-clamp-4 text-xs sm:text-lg font-bold text-text-primary">
+                  {post.title || post.content}
+                </p>
+              </div>
+            )}
+            {post.videoUrl && (
+              <span className="absolute right-2 top-2 rounded-full bg-black/50 p-1.5 text-white">
+                <Play size={16} fill="currentColor" aria-hidden />
+              </span>
+            )}
+            <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/70 to-transparent px-2 pb-2 pt-5 text-[10px] sm:text-xs text-white">
+              {post.title || 'Publicação'}
             </span>
-          )}
-          <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/70 to-transparent px-2 pb-2 pt-5 text-[10px] sm:text-xs text-white">
-            {post.title || 'Publicação'}
-          </span>
-        </button>
-      ))}
+          </button>
+        );
+      })}
     </div>
   );
 }
