@@ -379,7 +379,6 @@ export const PostsManager: React.FC = () => {
           mediaError={mediaError}
           onRetryMedia={() => setMediaVersion(v => v + 1)}
           onMediaRemoved={id => setMediaLibrary(prev => prev.filter(m => m.id !== id))}
-          onMediaUpdated={m => setMediaLibrary(prev => prev.map(x => (x.id === m.id ? m : x)))}
         />
       )}
 

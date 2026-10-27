@@ -29,8 +29,8 @@ const palettes: PostPaletteDef[] = [
 ];
 
 const mediaLibrary: PostMedia[] = [
-  { id: 'm-1', url: svg('#14261c'), mimeType: 'image/svg+xml', size: 2048, createdAt: '2026-09-20T12:00:00.000Z', inGallery: true },
-  { id: 'm-2', url: svg('#1c2233', '#60a5fa'), mimeType: 'image/svg+xml', size: 2048, createdAt: '2026-09-24T12:00:00.000Z', inGallery: false },
+  { id: 'm-1', url: svg('#14261c'), mimeType: 'image/svg+xml', size: 2048, createdAt: '2026-09-20T12:00:00.000Z' },
+  { id: 'm-2', url: svg('#1c2233', '#60a5fa'), mimeType: 'image/svg+xml', size: 2048, createdAt: '2026-09-24T12:00:00.000Z' },
 ];
 
 const mswHandlers = [

@@ -93,8 +93,6 @@ export interface PostMedia {
   mimeType: string;
   size: number;
   createdAt: string;
-  /** Marcada para a galeria pública do perfil (aba "Fotos"). */
-  inGallery: boolean;
 }
 
 // ─── API ───────────────────────────────────────────────────────
@@ -243,19 +241,22 @@ export const postsApi = {
 
   // ── Mídia ─────────────────────────────────────────────────
 
-  listMedia(barbershopId: string, opts: { inGallery?: boolean } = {}) {
+  listMedia(barbershopId: string) {
     const params = new URLSearchParams({ barbershopId });
-    if (opts.inGallery !== undefined) params.set('inGallery', String(opts.inGallery));
     return apiClient<{ success: boolean; data: PostMedia[] }>(
       `/api/posts/media?${params.toString()}`,
       'GET', undefined, token()
     ).then(r => unwrap<PostMedia[]>(r));
   },
 
+  /**
+   * Envia a foto para a biblioteca. Toda foto entra na galeria pública do
+   * perfil (aba "Fotos"); o backend recusa com 400 quando a galeria está cheia.
+   */
   uploadMedia(barbershopId: string, file: File, opts: { inGallery?: boolean } = {}) {
     const form = new FormData();
     // Field antes do arquivo: o Fastify multipart só expõe fields que chegam antes do stream.
-    form.append('inGallery', String(opts.inGallery ?? false));
+    form.append('inGallery', String(opts.inGallery ?? true));
     form.append('file', file);
     return apiFetch(`/api/posts/media/${encodeURIComponent(barbershopId)}`, {
       method: 'POST',
@@ -265,13 +266,6 @@ export const postsApi = {
       const json = await res.json();
       return unwrap<PostMedia>(json);
     });
-  },
-
-  /** Alterna a foto na galeria pública do perfil (limite de 30 no backend). */
-  updateMedia(id: string, data: { inGallery: boolean }) {
-    return apiClient<{ success: boolean; data: PostMedia }>(
-      `/api/posts/media/${id}`, 'PATCH', data, token()
-    ).then(r => unwrap<PostMedia>(r));
   },
 
   deleteMedia(id: string) {

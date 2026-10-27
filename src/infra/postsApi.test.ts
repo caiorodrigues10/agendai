@@ -59,11 +59,11 @@ describe('postsApi.uploadMedia — erros amigáveis', () => {
 describe('postsApi — galeria (inGallery)', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('listMedia filtra pela galeria quando solicitado', async () => {
+  it('listMedia busca a biblioteca do salão', async () => {
     mockedClient.mockResolvedValueOnce({ success: true, data: [] });
-    await postsApi.listMedia(shop, { inGallery: true });
+    await postsApi.listMedia(shop);
     expect(mockedClient).toHaveBeenCalledWith(
-      expect.stringContaining('inGallery=true'),
+      expect.stringContaining('barbershopId=' + shop),
       'GET', undefined, 'test-token'
     );
   });
@@ -77,13 +77,5 @@ describe('postsApi — galeria (inGallery)', () => {
     expect(form.get('file')).toBeInstanceOf(File);
     // field antes do file: o Fastify multipart só lê fields que chegam antes do stream
     expect([...form.keys()][0]).toBe('inGallery');
-  });
-
-  it('updateMedia faz PATCH com a flag', async () => {
-    mockedClient.mockResolvedValueOnce({ success: true, data: { id: 'm1' } });
-    await postsApi.updateMedia('m1', { inGallery: false });
-    expect(mockedClient).toHaveBeenCalledWith(
-      '/api/posts/media/m1', 'PATCH', { inGallery: false }, 'test-token'
-    );
   });
 });
