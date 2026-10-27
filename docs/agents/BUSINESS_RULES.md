@@ -40,6 +40,14 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 - Capa: aceita QUALQUER medida/proporção — validação instantânea no front só de tipo (JPEG/PNG/WebP; GIF/SVG rejeitados); medida fora do ideal vira aviso suave não-bloqueante. Recorte 16:9 + ponto focal (`coverFocalX/Y`, editor arrastável com setas do teclado) aplicados na entrega pelo helper único `src/shared/coverImage.ts` (`c_fill,ar_16:9,g_auto|g_xy_center,f_auto,q_auto`, srcset sem ampliar além do `coverWidth/Height` do back; OG `w_1200,h_630,f_jpg`); overlay 0–80; envio direto assinado ao Cloudinary com progresso/cancelamento (multipart via backend mantido como fallback).
 - Anti-FOUC: `PublicHome` aplica o tema o quanto antes carregado (`usePageTheme` com cache por módulo; `clearPageThemeCache()` para testes).
 
+## Biblioteca de fotos e galeria do perfil
+
+- O seletor "Escolher foto" (`PostEditor.tsx`) é minimalista: **sem checkbox, sem filtro "Todas | Galeria" e sem estrela** — toda foto enviada entra automaticamente na galeria pública do perfil (aba "Fotos"), sem ação do dono.
+- `postsApi.uploadMedia` envia `inGallery: true`; o back recusa com **400** ("Sua galeria já tem 30 fotos. Remova uma foto para enviar outra.") quando a galeria está cheia e o front mostra a mensagem do backend no toast de erro.
+- `postsApi` não expõe mais `updateMedia` (toggle) nem filtro de `listMedia`; `PostMedia` não carrega `inGallery` (não há escolha de galeria na UI).
+- Excluir a foto da biblioteca apaga o registro no back → ela some da galeria do perfil. O backfill das fotos antigas (limite 30 por salão, mais recentes primeiro) está em `backend/docs/agents/BUSINESS_RULES.md`.
+- Perfil (`ShopProfile.tsx`): aba "Fotos" e contador usam `socialApi.gallery(salonId)` (`useSalonSocial`), que recarrega ao montar a tela; "Galeria de fotos em breve" só aparece com a galeria realmente vazia (fora do estado de carregamento/erro).
+
 ## Pendências documentais
 
 Divergências código ↔ regra de produto aprovada devem ser listadas como pendência **sem** alterar comportamento nesta entrega só documental.

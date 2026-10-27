@@ -14,7 +14,6 @@ import {
   LuSmartphone as Smartphone,
   LuTrash2 as Trash2,
   LuImageOff as ImageOff,
-  LuStar as Star,
 } from 'react-icons/lu';
 import { postsApi, type PostMedia, type PostPaletteDef, type PostTemplateDef } from '../../infra/postsApi';
 import { barbershopApi, PostAiSuggestion } from '../../infra/barbershopApi';
@@ -160,8 +159,6 @@ export interface PostEditorProps {
   mediaError?: boolean;
   onRetryMedia?: () => void;
   onMediaRemoved?: (id: string) => void;
-  /** Atualiza a biblioteca local quando a foto muda (ex.: toggle da galeria). */
-  onMediaUpdated?: (m: PostMedia) => void;
 }
 
 // ─── Componente ────────────────────────────────────────────────
@@ -180,7 +177,6 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   mediaError = false,
   onRetryMedia,
   onMediaRemoved,
-  onMediaUpdated,
 }) => {
   const isEditing = !!post;
   const storageKey = post?.id ?? 'new';
@@ -223,13 +219,6 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PostMedia | null>(null);
   const [deletingMedia, setDeletingMedia] = useState(false);
-  const [mediaFilter, setMediaFilter] = useState<'all' | 'gallery'>('all');
-  const [publishToGallery, setPublishToGallery] = useState(false);
-  const [togglingGalleryId, setTogglingGalleryId] = useState<string | null>(null);
-  const filteredMedia = useMemo(
-    () => (mediaFilter === 'gallery' ? mediaLibrary.filter(m => m.inGallery) : mediaLibrary),
-    [mediaFilter, mediaLibrary]
-  );
 
   const [tone, setTone] = useState<PostTone>(null);
   const [extra, setExtra] = useState('');
@@ -520,7 +509,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
           continue;
         }
         try {
-          const media = await postsApi.uploadMedia(barbershopId, candidate, { inGallery: publishToGallery });
+          const media = await postsApi.uploadMedia(barbershopId, candidate, { inGallery: true });
           uploaded.push(media);
           onMediaUploaded(media);
         } catch (err) {
@@ -640,21 +629,6 @@ export const PostEditor: React.FC<PostEditorProps> = ({
       showToast(getErrorMessage(err, 'Não foi possível remover a foto.'), 'error');
     } finally {
       setDeletingMedia(false);
-    }
-  };
-
-  /** Entra/sai da galeria pública do perfil (limite de 30 no backend). */
-  const handleToggleGallery = async (media: PostMedia) => {
-    if (togglingGalleryId) return;
-    setTogglingGalleryId(media.id);
-    try {
-      const updated = await postsApi.updateMedia(media.id, { inGallery: !media.inGallery });
-      onMediaUpdated?.(updated);
-      showToast(updated.inGallery ? 'Foto publicada na galeria do perfil.' : 'Foto removida da galeria do perfil.');
-    } catch (err) {
-      showToast(getErrorMessage(err, 'Não foi possível atualizar a galeria.'), 'error');
-    } finally {
-      setTogglingGalleryId(null);
     }
   };
 
@@ -1334,22 +1308,6 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                   ✕
                 </button>
               </div>
-              <div className="flex items-center gap-1 border-b border-border px-4 py-2" role="group" aria-label="Filtrar fotos">
-                {(['all', 'gallery'] as const).map(f => (
-                  <button
-                    key={f}
-                    type="button"
-                    aria-pressed={mediaFilter === f}
-                    onClick={() => setMediaFilter(f)}
-                    disabled={mediaBusy}
-                    className={`rounded-lg px-2.5 py-1 text-[11px] font-bold transition disabled:opacity-50 ${
-                      mediaFilter === f ? 'bg-accent text-accent-fg' : 'text-text-muted hover:bg-bg'
-                    }`}
-                  >
-                    {f === 'all' ? 'Todas' : 'Galeria'}
-                  </button>
-                ))}
-              </div>
               <div className="max-h-[min(70vh,28rem)] overflow-y-auto p-4">
                 {mediaLoading ? (
                   <div className="grid grid-cols-3 gap-2 sm:grid-cols-4" role="status" aria-busy="true" aria-label="Carregando fotos">
@@ -1364,16 +1322,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                       Tentar novamente
                     </Button>
                   </div>
-                ) : filteredMedia.length === 0 ? (
-                  mediaFilter === 'gallery' ? (
-                    <div className="flex flex-col items-center gap-2 py-10 text-center">
-                      <Star size={28} className="text-text-muted" aria-hidden />
-                      <p className="text-sm font-bold text-text-primary">Nenhuma foto na galeria do perfil</p>
-                      <p className="text-xs text-text-muted">
-                        Use a estrela em uma foto ou marque “Publicar na galeria” ao enviar imagens.
-                      </p>
-                    </div>
-                  ) : (
+                ) : mediaLibrary.length === 0 ? (
                   <div className="flex flex-col items-center gap-2 py-10 text-center">
                     <ImageOff size={28} className="text-text-muted" aria-hidden />
                     <p className="text-sm font-bold text-text-primary">Envie a primeira foto do seu salão</p>
@@ -1384,10 +1333,9 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                       <ImagePlus size={14} aria-hidden /> Enviar foto
                     </Button>
                   </div>
-                  )
                 ) : (
                   <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                    {filteredMedia.map((m, index) => {
+                    {mediaLibrary.map((m, index) => {
                       const isSelected = (showMediaPicker === 'primary' ? primaryMediaId : secondaryMediaId) === m.id;
                       const otherSlotId = showMediaPicker === 'primary' ? secondaryMediaId : primaryMediaId;
                       const usedInOtherSlot = m.id === otherSlotId;
@@ -1437,19 +1385,6 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                               <Trash2 size={12} aria-hidden />
                             </button>
                           )}
-                          <button
-                            type="button"
-                            disabled={uploadingPhoto || deletingMedia || togglingGalleryId === m.id}
-                            onClick={() => void handleToggleGallery(m)}
-                            className={`absolute bottom-1 left-1 rounded-lg p-1 transition disabled:opacity-40 ${
-                              m.inGallery ? 'bg-accent text-accent-fg' : 'bg-black/60 text-white hover:bg-black/80'
-                            }`}
-                            aria-label={m.inGallery ? `Tirar foto ${index + 1} da galeria` : `Publicar foto ${index + 1} na galeria`}
-                            aria-pressed={m.inGallery}
-                            title={m.inGallery ? 'Na galeria do perfil — clique para tirar' : 'Publicar na galeria do perfil'}
-                          >
-                            <Star size={12} className={m.inGallery ? 'fill-current' : ''} aria-hidden />
-                          </button>
                         </div>
                       );
                     })}
@@ -1457,16 +1392,6 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                 )}
               </div>
               <div className="border-t border-border p-4">
-                <label className="mb-3 flex cursor-pointer items-center gap-2 text-xs font-semibold text-text-secondary">
-                  <input
-                    type="checkbox"
-                    checked={publishToGallery}
-                    onChange={e => setPublishToGallery(e.target.checked)}
-                    disabled={uploadingPhoto}
-                    className="size-4 accent-[var(--color-accent, #2cb58a)]"
-                  />
-                  Publicar na galeria do perfil (aba Fotos)
-                </label>
                 <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={e => void handleUpload(e)} />
                 <Button variant="primary" onClick={() => fileInputRef.current?.click()} disabled={uploadingPhoto}
                   className="w-full gap-2 text-xs"
