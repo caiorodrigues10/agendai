@@ -202,10 +202,10 @@ export const ownerBotApi = {
     if (query.commandId) params.set('commandId', query.commandId);
     if (query.riskClass) params.set('riskClass', query.riskClass);
     if (query.status) params.set('status', query.status);
-    const qs = params.toString();
-    const suffix = qs ? `?${qs}` : '';
+    const search = params.toString();
+    const qs = search ? `?${search}` : '';
     return apiClient<{ success: boolean; data: OwnerBotActionLogEntry[] }>(
-      `/api/barbershops/${barbershopId}/owner-bot/action-logs${suffix}`,
+      `/api/barbershops/${barbershopId}/owner-bot/action-logs${qs}`,
       'GET',
       undefined,
       token()
