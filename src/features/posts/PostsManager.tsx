@@ -137,7 +137,7 @@ export const PostsManager: React.FC = () => {
     setMediaError(false);
     try {
       // Só as fotos da biblioteca do post: as fotos da galeria do perfil
-      // (inGallery=true) são enviadas na sub-aba "Fotos do perfil" e não
+      // (inGallery=true) são enviadas na sub-aba "Galeria do perfil" e não
       // aparecem aqui.
       setMediaLibrary(await postsApi.listMedia(barbershopId, { inGallery: false }));
     } catch {
@@ -257,7 +257,7 @@ export const PostsManager: React.FC = () => {
       <div role="tablist" aria-label="Seções de posts" className="flex gap-1 rounded-xl border border-border bg-surface p-1">
         {([
           { id: 'posts', label: 'Publicações' },
-          { id: 'gallery', label: 'Fotos do perfil' },
+          { id: 'gallery', label: 'Galeria do perfil' },
         ] as const).map(s => (
           <button
             key={s.id}

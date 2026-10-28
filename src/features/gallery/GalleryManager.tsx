@@ -180,7 +180,7 @@ export const GalleryManager: React.FC = () => {
   return (
     <section className="space-y-4">
       <header className="space-y-1">
-        <h2 className="text-lg font-bold text-text-primary">Galeria do perfil</h2>
+        <h2 className="text-lg font-bold text-text-primary">Suas fotos</h2>
         <p className="text-xs text-text-muted">
           As fotos enviadas aqui aparecem na aba Fotos do seu perfil.
         </p>

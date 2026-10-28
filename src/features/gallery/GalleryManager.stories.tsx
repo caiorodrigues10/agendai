@@ -22,7 +22,7 @@ const mswHandlers = [
 ];
 
 const meta = {
-  title: 'Posts/Fotos do perfil (GalleryManager)',
+  title: 'Posts/Galeria do perfil (GalleryManager)',
   component: GalleryManager,
   tags: ['autodocs', 'test'],
   parameters: {

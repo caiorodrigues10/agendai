@@ -127,7 +127,7 @@ export const ALL_TAB_IDS = TAB_GROUPS.flatMap(g => g.tabs.map(t => t.id));
 
 /**
  * Abas antigas → aba atual (link salvo/bookmark não quebra).
- * A galeria do perfil virou a sub-aba "Fotos do perfil" dentro de Posts.
+ * A galeria do perfil virou a sub-aba "Galeria do perfil" dentro de Posts.
  */
 export const LEGACY_TAB_REDIRECTS: Record<string, string> = {
   gallery: 'posts',

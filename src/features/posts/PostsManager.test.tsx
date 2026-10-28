@@ -51,21 +51,21 @@ beforeEach(() => {
   mockedPostsApi.listMedia.mockResolvedValue([]);
 });
 
-describe('PostsManager — seções Publicações / Fotos do perfil', () => {
-  it('mostra as abas Publicações e Fotos do perfil, começando em Publicações', async () => {
+describe('PostsManager — seções Publicações / Galeria do perfil', () => {
+  it('mostra as abas Publicações e Galeria do perfil, começando em Publicações', async () => {
     render(<PostsManager />);
     expect(screen.getByRole('tab', { name: 'Publicações' })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Fotos do perfil' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Galeria do perfil' })).toBeInTheDocument();
     // Aba inicial: publicações (com o botão "Criar post") e sem a galeria.
     expect(screen.getByRole('button', { name: /criar post/i })).toBeInTheDocument();
     expect(screen.queryByText('0 de 30 fotos')).not.toBeInTheDocument();
     await waitFor(() => expect(mockedPostsApi.list).toHaveBeenCalled());
   });
 
-  it('troca para Fotos do perfil: mostra a galeria e esconde "Criar post"', async () => {
+  it('troca para Galeria do perfil: mostra a galeria e esconde "Criar post"', async () => {
     mockedPostsApi.listMedia.mockResolvedValue([PHOTO]);
     render(<PostsManager />);
-    fireEvent.click(screen.getByRole('tab', { name: 'Fotos do perfil' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Galeria do perfil' }));
     expect(await screen.findByText('1 de 30 fotos')).toBeInTheDocument();
     expect(screen.getByAltText('Foto da galeria do perfil')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /criar post/i })).not.toBeInTheDocument();
@@ -75,10 +75,10 @@ describe('PostsManager — seções Publicações / Fotos do perfil', () => {
     );
   });
 
-  it('na aba Fotos do perfil, envia a foto direto para o perfil (inGallery=true)', async () => {
+  it('na aba Galeria do perfil, envia a foto direto para o perfil (inGallery=true)', async () => {
     mockedPostsApi.uploadMedia.mockResolvedValueOnce(PHOTO);
     render(<PostsManager />);
-    fireEvent.click(screen.getByRole('tab', { name: 'Fotos do perfil' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Galeria do perfil' }));
     await screen.findByText('0 de 30 fotos');
     fireEvent.change(fileInput(), { target: { files: [pngFile()] } });
     await waitFor(() =>

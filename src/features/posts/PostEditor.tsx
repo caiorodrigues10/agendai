@@ -1410,7 +1410,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                   <p role="status" className="mt-2 text-center text-[10px] text-text-muted">{uploadProgress ?? 'Enviando foto…'}</p>
                 )}
                 <p className="mt-2 text-center text-[10px] text-text-muted">
-                  Para publicar fotos no perfil do salão, use a aba Fotos do perfil.
+                  Para publicar fotos no perfil do salão, use a aba Galeria do perfil.
                 </p>
               </div>
             </div>
