@@ -23,6 +23,7 @@ import {
   LuUserX as UserX,
   LuPhone as Phone,
   LuChevronDown as ChevronDown,
+  LuBot as Bot,
 } from 'react-icons/lu';
 import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
@@ -463,6 +464,14 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                             <p className="text-[9px] text-text-secondary truncate">
                               {appt.serviceName ?? getServiceName(appt.serviceId, services)}
                             </p>
+                            {appt.source === 'WHATSAPP_OWNER_BOT' && (
+                              <span
+                                className="mt-0.5 inline-flex items-center gap-0.5 rounded-full bg-accent/15 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-accent"
+                                title="Criado pelo assistente no WhatsApp"
+                              >
+                                <Bot size={8} /> via WhatsApp
+                              </span>
+                            )}
                           </button>
                         );
                       })}
@@ -495,6 +504,11 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
               <p className="text-xs text-text-muted flex items-center gap-1 mt-1">
                 <Phone size={10} /> {selectedAppt.whatsapp}
               </p>
+              {selectedAppt.source === 'WHATSAPP_OWNER_BOT' && (
+                <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-accent">
+                  <Bot size={10} /> via WhatsApp
+                </p>
+              )}
             </div>
             {selectedAppt.reservedProducts && selectedAppt.reservedProducts.length > 0 && (
               <div className="rounded-xl border border-border bg-bg p-3">

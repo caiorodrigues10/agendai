@@ -186,6 +186,7 @@ export function mapAppointmentFromApi(raw: any): Appointment {
     time: typeof raw.time === 'string' ? raw.time.slice(0, 5) : raw.time,
     createdAt: raw.createdAt ?? Date.now(),
     status: (raw.status ?? 'confirmed').toLowerCase(),
+    source: raw.source,
     serviceName: raw.serviceName,
     staffName: raw.staffName,
     serviceDurationMinutes: raw.serviceDurationMinutes,
