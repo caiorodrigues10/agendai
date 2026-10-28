@@ -33,6 +33,16 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 
 - WhatsApp/e-mail são opcionais: falha de gateway não deve quebrar a UI principal; painéis de health mostram estado.
 
+## Assistente no WhatsApp (dono)
+
+- A seção fica em **Configurações → WhatsApp** (`OwnerBotSection`): gera o código de vínculo, mostra o estado, o que o assistente sabe fazer por segmento e o histórico de ações.
+- O código de vínculo é gerado pelo backend (6 caracteres, 10 minutos, uso único) e vale **apenas para o telefone cadastrado no estabelecimento** — a UI avisa quando o número vinculado é diferente do cadastrado.
+- O selo **"via WhatsApp"** aparece no agendamento quando `source === 'WHATSAPP_OWNER_BOT'` (`AppointmentCalendar`).
+- **Preferências** (`PreferencesPanel`): briefing/resumo com horário (`HH:MM`), alertas proativos por tipo (chips em `OWNER_BOT_ALERT_TYPES`) e tom — salvas via `PUT .../owner-bot/preferences` (upsert parcial, rascunho local em `prefsDraft` até "Salvar preferências").
+- **Catálogo** (`CatalogPanel`): `GET .../owner-bot/catalog` devolve só os comandos do `businessSegment` do salão (`buildOwnerBotSegmentCatalog`), agrupados por categoria com a classe de risco.
+- **Auditoria** (`ActionLogsPanel`): `GET .../owner-bot/action-logs` com filtros (`limit` ≤ 100, `from`, `to`, `commandId`, `riskClass`, `status`); rótulos via `ownerBotActionLabel`.
+- **Bloquear/desbloquear**: ação sensível com modal de confirmação; altera `blocked` nas preferências e o painel passa a exibir o selo bloqueado com botão "Desbloquear".
+
 ## Aparência da página pública (tema)
 
 - Tema via CSS vars escopadas no wrapper `[data-ag-shop-theme]`: família canônica `--shop-*` (por variante) + espelho legado `--ag-*`; as utilities do Tailwind resolvem `var(--shop-x, var(--ag-x))` (`styles/tokens.css`). Variantes `light`/`dark` por salão (`darkColors`/`lightColors` no payload; `lightColors` nula é gerada no cliente via `generateVariantColors`, mesmo gerador do back) e `mode` do dono (`AUTO` segue `prefers-color-scheme`; `LIGHT`/`DARK` força). Padrão sem tema salvo = visual dark atual (`PAGE_THEME_DEFAULTS` em `src/shared/pageThemeDefaults.ts`, espelho do backend via `npm run theme:mirror`).

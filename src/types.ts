@@ -41,6 +41,8 @@ export interface Appointment {
   time: string;
   createdAt: number;
     status: 'confirmed' | 'cancelled' | 'completed' | 'checked_in' | 'no_show';
+  /** Origem do agendamento — "WHATSAPP_OWNER_BOT" = criado pelo assistente do dono. */
+  source?: 'APP' | 'PUBLIC' | 'WHATSAPP_OWNER_BOT';
   serviceName?: string;
   staffName?: string;
   serviceDurationMinutes?: number;

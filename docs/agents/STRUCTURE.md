@@ -41,7 +41,8 @@ agendai/
     │   ├── goals/ loyalty/ waitlist/ recurring/ recommendations/ equipment/ deposits/
     │   │                      ← painéis do StaffDashboard com barrel próprio (Etapa 5b)
     │   ├── settings/          ← SettingsManager (+ ShopCityField, WeatherForecastCard, AppointmentPolicy,
-    │   │                          SalonWhatsAppConnection, BusinessSegmentSection, OperationModeSection extraídos),
+    │   │                          SalonWhatsAppConnection, OwnerBotSection, BusinessSegmentSection,
+    │   │                          OperationModeSection extraídos),
     │   │                          AccountPrivacy, EmailHistory/Preferences, ProfileSettings, ProfileAvatar,
     │   │                          QueueAlertSettings + barrel (Etapa 6c)
     │   ├── team/ support/ organizations/ referrals/
