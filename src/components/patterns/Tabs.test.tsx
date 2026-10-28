@@ -1,6 +1,6 @@
 /// <reference types="vitest/globals" />
 import { fireEvent, render, screen } from '@testing-library/react';
-import { Tabs, TabItem } from './Tabs';
+import { TabItem, Tabs } from './Tabs';
 
 const items: TabItem[] = [
   { id: 'hoje', label: 'Hoje' },
@@ -15,6 +15,29 @@ function renderTabs(onChange = vi.fn(), disabled = false) {
 }
 
 describe('Tabs', () => {
+  it('keeps two tab sets with identical item IDs associated with their own panels', () => {
+    render(
+      <>
+        <Tabs items={items} value="hoje" onChange={vi.fn()} ariaLabel="Primeiro">
+          Primeiro conteúdo
+        </Tabs>
+        <Tabs items={items} value="hoje" onChange={vi.fn()} ariaLabel="Segundo">
+          Segundo conteúdo
+        </Tabs>
+      </>
+    );
+    const panels = screen.getAllByRole('tabpanel');
+    expect(panels[0].id).not.toBe(panels[1].id);
+    for (const panel of panels) {
+      const tab = document.getElementById(panel.getAttribute('aria-labelledby')!)!;
+      expect(tab).toHaveAttribute('aria-controls', panel.id);
+    }
+  });
+
+  it('keeps an enabled tab reachable when the active item is removed', () => {
+    render(<Tabs items={items} value="removed" onChange={vi.fn()} ariaLabel="Seções" />);
+    expect(screen.getByRole('tab', { name: 'Hoje' })).toHaveAttribute('tabindex', '0');
+  });
   it('expõe tablist acessível com aba selecionada', () => {
     renderTabs();
     const list = screen.getByRole('tablist', { name: 'Seções' });

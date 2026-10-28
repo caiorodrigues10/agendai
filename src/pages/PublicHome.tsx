@@ -1,32 +1,27 @@
 import React, { useCallback, useState } from 'react';
-import { useNavigate, useParams, useSearchParams, Navigate } from 'react-router-dom';
-import { QueueItemCard, QueueStatusCard } from '../features/queue';
-import { AddCustomerForm } from '../features/clients';
-import { ShopProfile } from '../features/shop';
-import { ShopPageTheme, usePageTheme } from '../features/appearance';
-import { SeoHead } from '../components/marketing/SeoHead';
-import { API_BASE } from '../infra/apiClient';
-import { AppointmentScheduler } from '../features/appointments';
+import { LuCoffee as Coffee, LuStore as Store } from 'react-icons/lu';
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { PublicProductCarousel } from '../components/domain/PublicProductCarousel';
+import { SeoHead } from '../components/marketing/SeoHead';
+import { Tabs } from '../components/patterns';
 import { PublicPageSkeleton } from '../components/patterns/skeletons';
+import { DynamicIcon } from '../components/ui/DynamicIcon';
 import { Toast } from '../components/ui/Toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useBarbershop } from '../contexts/BarbershopContext';
 import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
-import { useSegmentLabels } from '../hooks/useSegmentLabels';
 import { useScheduling } from '../contexts/SchedulingContext';
-import { schedulingApi } from '../infra/schedulingApi';
+import { ShopPageTheme, usePageTheme } from '../features/appearance';
+import { AppointmentScheduler } from '../features/appointments';
+import { AddCustomerForm } from '../features/clients';
+import { QueueItemCard, QueueStatusCard } from '../features/queue';
+import { ShopProfile } from '../features/shop';
+import { useSegmentLabels } from '../hooks/useSegmentLabels';
+import { API_BASE } from '../infra/apiClient';
 import { productsApi, PublicSaleProduct } from '../infra/productsApi';
-import { DynamicIcon } from '../components/ui/DynamicIcon';
-import {
-  LuList as List,
-  LuCalendarDays as CalendarDays,
-  LuStore as Store,
-  LuCoffee as Coffee,
-  LuLoaderCircle as Loader2,
-} from 'react-icons/lu';
-import { visiblePublicTabs, type PublicTab } from '../shared/publicTabs';
+import { schedulingApi } from '../infra/schedulingApi';
 import { buildCoverOgUrl } from '../shared/coverImage';
+import { visiblePublicTabs, type PublicTab } from '../shared/publicTabs';
 
 export const PublicHome: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -74,7 +69,8 @@ export const PublicHome: React.FC = () => {
         setPublicSlots(undefined);
         return;
       }
-      schedulingApi.getAppointmentSlots(barbershopId, serviceId, date, staffId)
+      schedulingApi
+        .getAppointmentSlots(barbershopId, serviceId, date, staffId)
         .then(slots => setPublicSlots(slots.map(slot => slot.time)))
         .catch(() => setPublicSlots([]));
     },
@@ -127,7 +123,11 @@ export const PublicHome: React.FC = () => {
   const stillLoading = pendingUrlShop || shopLoading || schedulingLoading || themeLoading;
 
   if (stillLoading) {
-    return <div role="status" aria-label="Carregando estabelecimento"><PublicPageSkeleton /></div>;
+    return (
+      <div role="status" aria-label="Carregando estabelecimento">
+        <PublicPageSkeleton />
+      </div>
+    );
   }
 
   // /queue without id → landing. /queue/:id with failed load → explicit empty state.
@@ -196,223 +196,197 @@ export const PublicHome: React.FC = () => {
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
       <main className="max-w-md sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto px-4 pt-6">
-        <div className="flex bg-surface p-1 rounded-xl mb-6 border border-border relative">
-          {tabs.map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 z-10 relative
-                        ${activeTab === tab ? 'text-accent' : 'text-text-muted'}
-                    `}
-            >
-              {tab === 'queue' && (
-                <>
-                  <List size={16} /> Fila
-                </>
-              )}
-              {tab === 'appointments' && (
-                <>
-                  <CalendarDays size={16} /> Agenda
-                </>
-              )}
-              {tab === 'profile' && (
-                <>
-                  <Store size={16} /> Perfil
-                </>
-              )}
-            </button>
-          ))}
-
-          <div
-            className={`absolute top-1 bottom-1 bg-selection rounded-lg transition-all duration-300
-                ${tabs.length === 3
-                  ? `w-[calc(33.3%-2px)] ${activeTab === 'queue' ? 'left-1' : activeTab === 'appointments' ? 'left-[calc(33.3%+2px)]' : 'left-[calc(66.6%+2px)]'}`
-                  : tabs.length === 2
-                    ? `w-[calc(50%-2px)] ${activeTab === tabs[0] ? 'left-1' : 'left-[calc(50%+2px)]'}`
-                    : 'w-[calc(100%-8px)] left-1'
-                }`}
-          ></div>
-        </div>
-
-        {activeTab === 'profile' && (
-          <ShopProfile
-            settings={settings}
-            posts={feed}
-            currentUser={user}
-            audience="public"
-            onGoQueue={() => setActiveTab('queue')}
-            onGoAppointments={() => setActiveTab('appointments')}
-            onDeletePost={deletePost}
-            onLikePost={likePost}
-          />
-        )}
-
-        {activeTab === 'appointments' && (
-          <AppointmentScheduler
-            services={services}
-            staff={staff}
-            settings={settings}
-            occupancy={availability}
-            availableSlots={publicSlots}
-            publicProducts={publicProducts}
-            onBook={async d => {
-              try {
-                const created = await bookAppointmentPublic(d);
-                showToast('Agendado com sucesso!');
-                return created;
-              } catch (err) {
-                const { getErrorMessage } = await import('../utils/errorMessage');
-                showToast(
-                  getErrorMessage(err, 'Não foi possível agendar. Tente outro horário.'),
-                  'bot'
-                );
-                throw err;
-              }
-            }}
-            onDateChange={handleDateChange}
-          />
-        )}
-
-        {/* Reserva de produtos: conteúdo extra da aba Agenda e da aba Perfil
-            (em QUEUE_ONLY só existe Perfil; a aba Fila nunca mostra o carrossel). */}
-        {(activeTab === 'appointments' || activeTab === 'profile') && (
-          <PublicProductCarousel barbershopId={barbershopId} />
-        )}
-
-        {activeTab === 'queue' && (
-          <>
-            <QueueStatusCard
-              shopName={settings?.shopName}
-              isOpen={isOpen}
-              queueClosed={queueClosed}
-              insight={aiInsight}
+        <Tabs<PublicTab>
+          ariaLabel="Navegação do salão"
+          items={tabs.map(id => ({
+            id,
+            label: id === 'queue' ? 'Fila' : id === 'appointments' ? 'Agenda' : 'Perfil',
+          }))}
+          value={activeTab}
+          onChange={setActiveTab}
+        >
+          {activeTab === 'profile' && (
+            <ShopProfile
+              settings={settings}
+              posts={feed}
+              currentUser={user}
+              audience="public"
+              onGoQueue={() => setActiveTab('queue')}
+              onGoAppointments={() => setActiveTab('appointments')}
+              onDeletePost={deletePost}
+              onLikePost={likePost}
             />
+          )}
 
-            {closedBanner && (
-              <div className="mb-6 rounded-xl border border-border bg-surface px-4 py-3 text-sm text-text-secondary">
-                <p className="font-bold text-text-primary">{closedBanner}</p>
-                <p className="text-xs mt-1">
-                  {!isOpen
-                    ? 'A entrada na fila está indisponível até o estabelecimento reabrir.'
-                    : 'Quem já está na fila continua sendo atendido. Agendamentos seguem liberados.'}
-                </p>
-              </div>
-            )}
+          {activeTab === 'appointments' && (
+            <AppointmentScheduler
+              services={services}
+              staff={staff}
+              settings={settings}
+              occupancy={availability}
+              availableSlots={publicSlots}
+              publicProducts={publicProducts}
+              onBook={async d => {
+                try {
+                  const created = await bookAppointmentPublic(d);
+                  showToast('Agendado com sucesso!');
+                  return created;
+                } catch (err) {
+                  const { getErrorMessage } = await import('../utils/errorMessage');
+                  showToast(
+                    getErrorMessage(err, 'Não foi possível agendar. Tente outro horário.'),
+                    'bot'
+                  );
+                  throw err;
+                }
+              }}
+              onDateChange={handleDateChange}
+            />
+          )}
 
-            {/* STATS GRID */}
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="bg-surface p-4 rounded-xl border border-border text-center shadow-lg group">
-                <span className="block text-3xl font-bold text-text-primary mb-1">
-                  {peopleWaiting}
-                </span>
-                <span className="text-[10px] text-text-muted uppercase tracking-widest font-bold">
-                  Na Fila
-                </span>
-              </div>
-              <div className="bg-surface p-4 rounded-xl border border-border text-center shadow-lg group">
-                <span className="block text-3xl font-bold text-tertiary mb-1">
-                  {currentInChair ? '1' : '0'}
-                </span>
-                <span className="text-[10px] text-text-muted uppercase tracking-widest font-bold">
-                  Em Atendimento
-                </span>
-              </div>
-            </div>
+          {/* Reserva de produtos: conteúdo extra da aba Agenda e da aba Perfil
+            (em QUEUE_ONLY só existe Perfil; a aba Fila nunca mostra o carrossel). */}
+          {(activeTab === 'appointments' || activeTab === 'profile') && (
+            <PublicProductCarousel barbershopId={barbershopId} />
+          )}
 
-            {/* ACTIONS */}
-            <div className="mb-8 space-y-2">
-              {!isUserInQueue &&
-                (!canJoinQueue ? (
-                  <div className="w-full bg-surface border border-border text-text-muted font-bold text-lg py-4 rounded-xl flex items-center justify-center gap-3 opacity-75 cursor-not-allowed">
-                    <Coffee size={24} />
-                    <span>{queueClosed && isOpen ? 'Fila encerrada por hoje' : 'Fechado no momento'}</span>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => openJoinForm('self')}
-                    className="w-full bg-accent hover:bg-accent-hover text-accent-fg font-bold text-lg py-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 border border-accent/20 relative overflow-hidden group cursor-pointer"
-                  >
-                    <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 group-hover:translate-x-full"></div>
-                    <span className="relative flex items-center gap-3">
-                      <DynamicIcon name="Scissors" size={24} />
-                      Entrar na Fila
-                    </span>
-                  </button>
-                ))}
+          {activeTab === 'queue' && (
+            <>
+              <QueueStatusCard
+                shopName={settings?.shopName}
+                isOpen={isOpen}
+                queueClosed={queueClosed}
+                insight={aiInsight}
+              />
 
-              {isUserInQueue && (
-                <div className="w-full bg-selection border border-accent/30 text-accent text-center py-3 rounded-xl flex items-center justify-center gap-2">
-                  <DynamicIcon name="CheckCircle" size={20} className="text-success" />
-                  <span className="font-bold">Você já está na fila!</span>
+              {closedBanner && (
+                <div className="mb-6 rounded-xl border border-border bg-surface px-4 py-3 text-sm text-text-secondary">
+                  <p className="font-bold text-text-primary">{closedBanner}</p>
+                  <p className="text-xs mt-1">
+                    {!isOpen
+                      ? 'A entrada na fila está indisponível até o estabelecimento reabrir.'
+                      : 'Quem já está na fila continua sendo atendido. Agendamentos seguem liberados.'}
+                  </p>
                 </div>
               )}
 
-              {canJoinQueue && isUserInQueue && (
-                <button
-                  type="button"
-                  onClick={() => openJoinForm('dependent')}
-                  className="w-full bg-surface border border-border hover:border-accent/50 hover:bg-surface-2 text-text-primary text-sm font-bold py-3.5 rounded-xl transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer"
-                >
-                  <span className="flex items-center gap-2">
-                    <DynamicIcon name="UserPlus" size={16} className="text-tertiary" />
-                    Adicionar dependente
+              {/* STATS GRID */}
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                <div className="bg-surface p-4 rounded-xl border border-border text-center shadow-lg group">
+                  <span className="block text-3xl font-bold text-text-primary mb-1">
+                    {peopleWaiting}
                   </span>
-                  <span className="text-[11px] font-medium text-text-muted">
-                    Filho, parceiro ou quem veio junto — sem entrar de novo
+                  <span className="text-[10px] text-text-muted uppercase tracking-widest font-bold">
+                    Na Fila
                   </span>
-                </button>
-              )}
-            </div>
+                </div>
+                <div className="bg-surface p-4 rounded-xl border border-border text-center shadow-lg group">
+                  <span className="block text-3xl font-bold text-tertiary mb-1">
+                    {currentInChair ? '1' : '0'}
+                  </span>
+                  <span className="text-[10px] text-text-muted uppercase tracking-widest font-bold">
+                    Em Atendimento
+                  </span>
+                </div>
+              </div>
 
-            {/* QUEUE LIST HEADER */}
-            <div className="flex items-center gap-3 mb-4">
-              <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
-                Acompanhar Fila
-              </h3>
-              <span className="text-xs font-bold text-text-secondary bg-surface-2 px-2.5 py-0.5 rounded-full border border-border-strong">
-                {peopleWaiting}
-              </span>
-            </div>
-
-            <div className="space-y-4">
-              {activeQueue.length === 0 ? (
-                <div className="text-center py-16 bg-surface/50 rounded-2xl border-2 border-dashed border-border/60 flex flex-col items-center justify-center">
-                  <div className="mb-4 text-text-muted">
-                    <Coffee size={48} strokeWidth={1.5} />
-                  </div>
-                  <p className="text-text-muted font-medium">Nenhum cliente na fila.</p>
-                  {!isUserInQueue && canJoinQueue && (
+              {/* ACTIONS */}
+              <div className="mb-8 space-y-2">
+                {!isUserInQueue &&
+                  (!canJoinQueue ? (
+                    <div className="w-full bg-surface border border-border text-text-muted font-bold text-lg py-4 rounded-xl flex items-center justify-center gap-3 opacity-75 cursor-not-allowed">
+                      <Coffee size={24} />
+                      <span>
+                        {queueClosed && isOpen ? 'Fila encerrada por hoje' : 'Fechado no momento'}
+                      </span>
+                    </div>
+                  ) : (
                     <button
                       type="button"
                       onClick={() => openJoinForm('self')}
-                      className="text-accent text-sm font-bold mt-2 hover:underline cursor-pointer"
+                      className="w-full bg-accent hover:bg-accent-hover text-accent-fg font-bold text-lg py-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 border border-accent/20 relative overflow-hidden group cursor-pointer"
                     >
-                      Seja o primeiro!
+                      <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 group-hover:translate-x-full"></div>
+                      <span className="relative flex items-center gap-3">
+                        <DynamicIcon name="Scissors" size={24} />
+                        Entrar na Fila
+                      </span>
                     </button>
-                  )}
-                </div>
-              ) : (
-                activeQueue.map((item, index) => (
-                  <QueueItemCard
-                    key={item.id}
-                    item={item}
-                    service={services.find(s => s.id === item.serviceId)}
-                    position={index + 1}
-                    isAdmin={false}
-                    shopName={settings?.shopName}
-                    isCurrentUser={item.customerId === clientId}
-                    onStatusChange={() => {}}
-                    onLeaveQueue={id => {
-                      leaveQueue(id);
-                      showToast('Você saiu da fila.', 'bot');
-                    }}
-                  />
-                ))
-              )}
-            </div>
-          </>
-        )}
+                  ))}
+
+                {isUserInQueue && (
+                  <div className="w-full bg-selection border border-accent/30 text-accent text-center py-3 rounded-xl flex items-center justify-center gap-2">
+                    <DynamicIcon name="CheckCircle" size={20} className="text-success" />
+                    <span className="font-bold">Você já está na fila!</span>
+                  </div>
+                )}
+
+                {canJoinQueue && isUserInQueue && (
+                  <button
+                    type="button"
+                    onClick={() => openJoinForm('dependent')}
+                    className="w-full bg-surface border border-border hover:border-accent/50 hover:bg-surface-2 text-text-primary text-sm font-bold py-3.5 rounded-xl transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer"
+                  >
+                    <span className="flex items-center gap-2">
+                      <DynamicIcon name="UserPlus" size={16} className="text-tertiary" />
+                      Adicionar dependente
+                    </span>
+                    <span className="text-[11px] font-medium text-text-muted">
+                      Filho, parceiro ou quem veio junto — sem entrar de novo
+                    </span>
+                  </button>
+                )}
+              </div>
+
+              {/* QUEUE LIST HEADER */}
+              <div className="flex items-center gap-3 mb-4">
+                <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
+                  Acompanhar Fila
+                </h3>
+                <span className="text-xs font-bold text-text-secondary bg-surface-2 px-2.5 py-0.5 rounded-full border border-border-strong">
+                  {peopleWaiting}
+                </span>
+              </div>
+
+              <div className="space-y-4">
+                {activeQueue.length === 0 ? (
+                  <div className="text-center py-16 bg-surface/50 rounded-2xl border-2 border-dashed border-border/60 flex flex-col items-center justify-center">
+                    <div className="mb-4 text-text-muted">
+                      <Coffee size={48} strokeWidth={1.5} />
+                    </div>
+                    <p className="text-text-muted font-medium">Nenhum cliente na fila.</p>
+                    {!isUserInQueue && canJoinQueue && (
+                      <button
+                        type="button"
+                        onClick={() => openJoinForm('self')}
+                        className="text-accent text-sm font-bold mt-2 hover:underline cursor-pointer"
+                      >
+                        Seja o primeiro!
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  activeQueue.map((item, index) => (
+                    <QueueItemCard
+                      key={item.id}
+                      item={item}
+                      service={services.find(s => s.id === item.serviceId)}
+                      position={index + 1}
+                      isAdmin={false}
+                      shopName={settings?.shopName}
+                      isCurrentUser={item.customerId === clientId}
+                      onStatusChange={() => {}}
+                      onLeaveQueue={id => {
+                        leaveQueue(id);
+                        showToast('Você saiu da fila.', 'bot');
+                      }}
+                    />
+                  ))
+                )}
+              </div>
+            </>
+          )}
+        </Tabs>
       </main>
 
       {showJoinForm && (

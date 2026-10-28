@@ -1,3 +1,4 @@
+import { Tabs } from '../../components/patterns';
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -37,7 +38,8 @@ import {
   LuCircleHelp as CircleHelp,
 } from 'react-icons/lu';
 
-type SettingsSection = 'account' | 'shop' | 'social' | 'whatsapp' | 'operation' | 'email' | 'privacy' | 'help';
+type SettingsSection =
+  'account' | 'shop' | 'social' | 'whatsapp' | 'operation' | 'email' | 'privacy' | 'help';
 
 const SETTINGS_SECTIONS: { id: SettingsSection; label: string; icon: React.ElementType }[] = [
   { id: 'account', label: 'Conta', icon: UserRound },
@@ -147,239 +149,233 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <nav
-        className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1"
-        aria-label="Seções de configurações"
+      <Tabs<SettingsSection>
+        ariaLabel="Seções de configurações"
+        items={SETTINGS_SECTIONS.map(({ id, label }) => ({ id, label }))}
+        value={activeSection}
+        onChange={setActiveSection}
       >
-        {SETTINGS_SECTIONS.map(section => {
-          const Icon = section.icon;
-          const active = activeSection === section.id;
-          return (
-            <button
-              key={section.id}
-              type="button"
-              onClick={() => setActiveSection(section.id)}
-              className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-bold border transition-colors ${
-                active
-                  ? 'bg-accent text-accent-fg border-accent'
-                  : 'bg-surface text-text-secondary border-border hover:border-border-strong'
-              }`}
-            >
-              <Icon size={14} />
-              {section.label}
-            </button>
-          );
-        })}
-      </nav>
-
-      {activeSection === 'account' && (
         <div className="space-y-6">
-          {accountSection}
-          <button
-            type="button"
-            onClick={() => navigate('/app/subscription')}
-            className="w-full py-3 bg-accent/15 hover:bg-accent/25 text-accent font-bold rounded-xl flex items-center justify-center gap-2 border border-accent/40"
-          >
-            <Wallet size={16} /> Pagar ou gerenciar plano
-          </button>
-        </div>
-      )}
+          {activeSection === 'account' && (
+            <div className="space-y-6">
+              {accountSection}
+              <button
+                type="button"
+                onClick={() => navigate('/app/subscription')}
+                className="w-full py-3 bg-accent/15 hover:bg-accent/25 text-accent font-bold rounded-xl flex items-center justify-center gap-2 border border-accent/40"
+              >
+                <Wallet size={16} /> Pagar ou gerenciar plano
+              </button>
+            </div>
+          )}
 
-      {activeSection === 'shop' && (
-        <div className="space-y-6">
-          <div className="bg-surface border border-border rounded-xl p-5">
-            <h3 className="text-lg font-bold text-text-primary mb-1">Dados do estabelecimento</h3>
-            <p className="text-xs text-text-muted mb-4">
-              Nome, endereço, cidade e logo visíveis para os clientes.
-            </p>
+          {activeSection === 'shop' && (
+            <div className="space-y-6">
+              <div className="bg-surface border border-border rounded-xl p-5">
+                <h3 className="text-lg font-bold text-text-primary mb-1">
+                  Dados do estabelecimento
+                </h3>
+                <p className="text-xs text-text-muted mb-4">
+                  Nome, endereço, cidade e logo visíveis para os clientes.
+                </p>
 
-            <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row items-start gap-4">
-                <div className="shrink-0">
-                  <span className="block text-sm text-text-secondary mb-1.5">Logo do Salão</span>
-                  <div className="flex items-center gap-3">
-                    <div className="w-16 h-16 rounded-lg bg-bg border border-border flex items-center justify-center overflow-hidden">
-                      {logoUploading ? (
-                        <Loader2 className="text-accent animate-spin" size={20} />
-                      ) : logoUrl ? (
-                        <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
-                      ) : (
-                        <Upload className="text-text-muted" size={20} />
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row items-start gap-4">
+                    <div className="shrink-0">
+                      <span className="block text-sm text-text-secondary mb-1.5">
+                        Logo do Salão
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <div className="w-16 h-16 rounded-lg bg-bg border border-border flex items-center justify-center overflow-hidden">
+                          {logoUploading ? (
+                            <Loader2 className="text-accent animate-spin" size={20} />
+                          ) : logoUrl ? (
+                            <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                          ) : (
+                            <Upload className="text-text-muted" size={20} />
+                          )}
+                        </div>
+                        <label
+                          className={`px-3 py-2 text-xs bg-surface-2 text-text-secondary rounded-lg border border-border-strong cursor-pointer hover:bg-border-strong ${logoUploading ? 'opacity-50 pointer-events-none' : ''}`}
+                        >
+                          {logoUploading ? 'Enviando...' : 'Escolher arquivo'}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileUpload}
+                            className="sr-only"
+                            disabled={logoUploading}
+                          />
+                        </label>
+                      </div>
+                      {logoError && (
+                        <p className="mt-2 text-xs text-danger" role="alert">
+                          {logoError}
+                        </p>
                       )}
                     </div>
-                    <label
-                      className={`px-3 py-2 text-xs bg-surface-2 text-text-secondary rounded-lg border border-border-strong cursor-pointer hover:bg-border-strong ${logoUploading ? 'opacity-50 pointer-events-none' : ''}`}
-                    >
-                      {logoUploading ? 'Enviando...' : 'Escolher arquivo'}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                        disabled={logoUploading}
-                      />
-                    </label>
+                    <div className="flex-1 min-w-0 w-full">
+                      <Field label="Nome do Salão">
+                        <input
+                          type="text"
+                          value={shopName}
+                          onChange={e => setShopName(e.target.value)}
+                          className={FIELD_CONTROL}
+                        />
+                      </Field>
+                    </div>
                   </div>
-                  {logoError && (
-                    <p className="mt-2 text-xs text-danger" role="alert">
-                      {logoError}
-                    </p>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0 w-full">
-                  <Field label="Nome do Salão">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <Field label="Endereço">
+                        <input
+                          value={address}
+                          onChange={e => setAddress(e.target.value)}
+                          className={FIELD_CONTROL}
+                          placeholder="Rua, número e bairro"
+                        />
+                      </Field>
+                    </div>
+                    <div>
+                      <ShopCityField city={city} onCityChange={setCity} settings={settings} />
+                    </div>
+                  </div>
+                  <Field label="Link de avaliação do Google">
                     <input
-                      type="text"
-                      value={shopName}
-                      onChange={e => setShopName(e.target.value)}
+                      type="url"
+                      value={googleReviewUrl}
+                      onChange={e => setGoogleReviewUrl(e.target.value)}
                       className={FIELD_CONTROL}
+                      placeholder="https://g.page/r/..."
                     />
                   </Field>
                 </div>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <Field label="Endereço">
-                    <input
-                      value={address}
-                      onChange={e => setAddress(e.target.value)}
-                      className={FIELD_CONTROL}
-                      placeholder="Rua, número e bairro"
-                    />
-                  </Field>
-                </div>
-                <div>
-                  <ShopCityField
-                    city={city}
-                    onCityChange={setCity}
-                    settings={settings}
-                  />
-                </div>
-              </div>
-              <Field label="Link de avaliação do Google">
-                <input
-                  type="url"
-                  value={googleReviewUrl}
-                  onChange={e => setGoogleReviewUrl(e.target.value)}
-                  className={FIELD_CONTROL}
-                  placeholder="https://g.page/r/..."
+
+              <WeatherForecastCard barbershopId={barbershopId} settings={settings} />
+
+              <BusinessSegmentSection settings={settings} onNotify={onNotify} onSave={onSave} />
+              {saveButton}
+            </div>
+          )}
+
+          {activeSection === 'social' && (
+            <SocialLinksSection initialLinks={settings.socialLinks} onNotify={onNotify} />
+          )}
+
+          {activeSection === 'whatsapp' && (
+            <div className="space-y-6">
+              {barbershopId ? (
+                <SalonWhatsAppConnection
+                  barbershopId={barbershopId}
+                  whatsapp={whatsapp}
+                  onWhatsappChange={setWhatsapp}
                 />
-              </Field>
-            </div>
-          </div>
-
-          <WeatherForecastCard barbershopId={barbershopId} settings={settings} />
-
-          <BusinessSegmentSection settings={settings} onNotify={onNotify} onSave={onSave} />
-          {saveButton}
-        </div>
-      )}
-
-      {activeSection === 'social' && (
-        <SocialLinksSection initialLinks={settings.socialLinks} onNotify={onNotify} />
-      )}
-
-      {activeSection === 'whatsapp' && (
-        <div className="space-y-6">
-          {barbershopId ? (
-            <SalonWhatsAppConnection
-              barbershopId={barbershopId}
-              whatsapp={whatsapp}
-              onWhatsappChange={setWhatsapp}
-            />
-          ) : (
-            <div className="bg-surface border border-border rounded-xl p-5">
-              <h3 className="text-lg font-bold text-text-primary mb-1">WhatsApp</h3>
-              <p className="text-sm text-text-secondary">
-                Conecte um estabelecimento para configurar o WhatsApp.
-              </p>
-            </div>
-          )}
-          {barbershopId && <OwnerBotSection barbershopId={barbershopId} onNotify={onNotify} />}
-          {showNotifications && barbershopId && <OwnerNotificationsPanel onNotify={onNotify} />}
-          {showNotifications && barbershopId && (
-            <QueueAlertSettings barbershopId={barbershopId} onNotify={onNotify} />
-          )}
-          {saveButton}
-        </div>
-      )}
-
-      {activeSection === 'operation' && (
-        <div className="space-y-6">
-          <OperationModeSection settings={settings} barbershopId={barbershopId} onNotify={onNotify} />
-          {barbershopId && <ShopFloorControls variant="full" onNotify={onNotify} />}
-
-          <div className="bg-surface border border-border rounded-xl p-5">
-            <h3 className="text-lg font-bold text-text-primary mb-4">Horários de Funcionamento</h3>
-
-            <div className="space-y-3">
-              {schedule.map((day, index) => (
-                <div key={day.dayName} className="bg-bg border border-border rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <CalendarDays className="text-text-muted" size={16} />
-                      <span className="text-sm font-bold text-text-primary">{day.dayName}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleDayChange(index, 'isOpen', !day.isOpen)}
-                      className={`px-2 py-1 text-[10px] rounded-full font-bold ${
-                        day.isOpen ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'
-                      }`}
-                    >
-                      {day.isOpen ? 'Aberto' : 'Fechado'}
-                    </button>
-                  </div>
-
-                  {day.isOpen && (
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="relative">
-                        <Clock
-                          className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted"
-                          size={14}
-                        />
-                        <input
-                          type="time"
-                          value={day.openTime}
-                          onChange={e => handleDayChange(index, 'openTime', e.target.value)}
-                          className="w-full bg-surface border border-border rounded-lg pl-8 pr-2 py-2 text-text-primary text-xs outline-none"
-                        />
-                      </div>
-                      <div className="relative">
-                        <Clock
-                          className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted"
-                          size={14}
-                        />
-                        <input
-                          type="time"
-                          value={day.closeTime}
-                          onChange={e => handleDayChange(index, 'closeTime', e.target.value)}
-                          className="w-full bg-surface border border-border rounded-lg pl-8 pr-2 py-2 text-text-primary text-xs outline-none"
-                        />
-                      </div>
-                    </div>
-                  )}
+              ) : (
+                <div className="bg-surface border border-border rounded-xl p-5">
+                  <h3 className="text-lg font-bold text-text-primary mb-1">WhatsApp</h3>
+                  <p className="text-sm text-text-secondary">
+                    Conecte um estabelecimento para configurar o WhatsApp.
+                  </p>
                 </div>
-              ))}
+              )}
+              {barbershopId && <OwnerBotSection barbershopId={barbershopId} onNotify={onNotify} />}
+              {showNotifications && barbershopId && <OwnerNotificationsPanel onNotify={onNotify} />}
+              {showNotifications && barbershopId && (
+                <QueueAlertSettings barbershopId={barbershopId} onNotify={onNotify} />
+              )}
+              {saveButton}
             </div>
-          </div>
+          )}
 
-          {barbershopId && <AppointmentPolicySection barbershopId={barbershopId} onNotify={onNotify} />}
-          {saveButton}
+          {activeSection === 'operation' && (
+            <div className="space-y-6">
+              <OperationModeSection
+                settings={settings}
+                barbershopId={barbershopId}
+                onNotify={onNotify}
+              />
+              {barbershopId && <ShopFloorControls variant="full" onNotify={onNotify} />}
+
+              <div className="bg-surface border border-border rounded-xl p-5">
+                <h3 className="text-lg font-bold text-text-primary mb-4">
+                  Horários de Funcionamento
+                </h3>
+
+                <div className="space-y-3">
+                  {schedule.map((day, index) => (
+                    <div key={day.dayName} className="bg-bg border border-border rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <CalendarDays className="text-text-muted" size={16} />
+                          <span className="text-sm font-bold text-text-primary">{day.dayName}</span>
+                        </div>
+                        <button
+                          type="button"
+                          aria-pressed={day.isOpen}
+                          onClick={() => handleDayChange(index, 'isOpen', !day.isOpen)}
+                          className={`px-2 py-1 text-[10px] rounded-full font-bold ${
+                            day.isOpen ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'
+                          }`}
+                        >
+                          {day.isOpen ? 'Aberto' : 'Fechado'}
+                        </button>
+                      </div>
+
+                      {day.isOpen && (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="relative">
+                            <Clock
+                              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted"
+                              size={14}
+                            />
+                            <input
+                              type="time"
+                              aria-label={`Abertura de ${day.dayName}`}
+                              value={day.openTime}
+                              onChange={e => handleDayChange(index, 'openTime', e.target.value)}
+                              className="w-full bg-surface border border-border rounded-lg pl-8 pr-2 py-2 text-text-primary text-xs outline-none"
+                            />
+                          </div>
+                          <div className="relative">
+                            <Clock
+                              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted"
+                              size={14}
+                            />
+                            <input
+                              type="time"
+                              aria-label={`Fechamento de ${day.dayName}`}
+                              value={day.closeTime}
+                              onChange={e => handleDayChange(index, 'closeTime', e.target.value)}
+                              className="w-full bg-surface border border-border rounded-lg pl-8 pr-2 py-2 text-text-primary text-xs outline-none"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {barbershopId && (
+                <AppointmentPolicySection barbershopId={barbershopId} onNotify={onNotify} />
+              )}
+              {saveButton}
+            </div>
+          )}
+
+          {activeSection === 'privacy' && <AccountPrivacyPanel onNotify={onNotify} />}
+
+          {activeSection === 'help' && <SupportPanel />}
+
+          {activeSection === 'email' && barbershopId && (
+            <div className="space-y-4">
+              <EmailPreferencesPanel barbershopId={barbershopId} onNotify={onNotify} />
+              <EmailHistoryPanel barbershopId={barbershopId} />
+            </div>
+          )}
         </div>
-      )}
-
-      {activeSection === 'privacy' && <AccountPrivacyPanel onNotify={onNotify} />}
-
-      {activeSection === 'help' && <SupportPanel />}
-
-      {activeSection === 'email' && barbershopId && (
-        <div className="space-y-4">
-          <EmailPreferencesPanel barbershopId={barbershopId} onNotify={onNotify} />
-          <EmailHistoryPanel barbershopId={barbershopId} />
-        </div>
-      )}
+      </Tabs>
     </div>
   );
 };
-

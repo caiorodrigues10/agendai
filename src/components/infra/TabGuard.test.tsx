@@ -56,7 +56,7 @@ function renderTab(tab: string, options: RenderOptions = {}) {
           }
         />
       </Routes>
-    </MemoryRouter>,
+    </MemoryRouter>
   );
 }
 

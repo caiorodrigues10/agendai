@@ -1,18 +1,42 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useForm, Controller, useWatch, type FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { productsApi, type Product, type ProductCategory, type ProductType, type StockUnit } from '../../infra/productsApi';
-import { SmartSelect } from '../../components/ui/SmartSelect';
-import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_FOOTER, FORM_GRID, FORM_SECTION_TITLE } from '../../components/ui/Field';
+import React, { useEffect, useRef, useState } from 'react';
+import { Controller, useForm, useWatch, type FieldErrors } from 'react-hook-form';
+import { LuTrash2 as Trash2, LuUpload as Upload, LuX as X } from 'react-icons/lu';
+import { ModalShell } from '../../components/patterns';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { CurrencyInput } from '../../components/ui/CurrencyInput';
+import {
+  Field,
+  FIELD_CONTROL,
+  FIELD_CONTROL_ERROR,
+  FORM_FOOTER,
+  FORM_GRID,
+  FORM_SECTION_TITLE,
+} from '../../components/ui/Field';
+import { SmartSelect } from '../../components/ui/SmartSelect';
+import {
+  productsApi,
+  type Product,
+  type ProductCategory,
+  type ProductType,
+} from '../../infra/productsApi';
+import { ProductFormData, ProductSchema } from '../../schemas';
 import { getErrorMessage } from '../../utils/errorMessage';
-import { ProductSchema, ProductFormData } from '../../schemas';
 import { PRODUCT_PURPOSE_LABEL } from './productMoney';
 import { STOCK_UNIT_OPTIONS } from './productStock';
-import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { LuTrash2 as Trash2, LuUpload as Upload, LuX as X } from 'react-icons/lu';
 
-const TITLE_CASE_EXCEPTIONS = new Set(['de', 'do', 'da', 'dos', 'das', 'e', 'para', 'com', 'sem', 'ou']);
+const TITLE_CASE_EXCEPTIONS = new Set([
+  'de',
+  'do',
+  'da',
+  'dos',
+  'das',
+  'e',
+  'para',
+  'com',
+  'sem',
+  'ou',
+]);
 
 const toTitleCase = (text: string): string =>
   text
@@ -149,11 +173,11 @@ export const ProductFormModal: React.FC<Props> = ({
         imageUrl: data.imageUrl || null,
         type: data.type,
         unit: data.unit,
-        unitLabel: data.unit === 'OTHER' ? (data.unitLabel?.trim() || null) : undefined,
+        unitLabel: data.unit === 'OTHER' ? data.unitLabel?.trim() || null : undefined,
         minStock: data.minStock,
         trackStock: data.trackStock,
-        expirationDate: isRetail ? null : (data.expirationDate || null),
-        lotNumber: isRetail ? null : (data.lotNumber?.trim() || null),
+        expirationDate: isRetail ? null : data.expirationDate || null,
+        lotNumber: isRetail ? null : data.lotNumber?.trim() || null,
       };
       // Estoque inicial só existe no cadastro e só quando o produto controla estoque.
       if (!product && data.trackStock) {
@@ -236,9 +260,10 @@ export const ProductFormModal: React.FC<Props> = ({
       if (getValues('categoryId') === deleteCatTarget.id) {
         setValue('categoryId', '');
       }
-      const msg = result.movedProducts > 0
-        ? `Categoria excluída. ${result.movedProducts} produto(s) movido(s) para "Sem categoria".`
-        : 'Categoria excluída.';
+      const msg =
+        result.movedProducts > 0
+          ? `Categoria excluída. ${result.movedProducts} produto(s) movido(s) para "Sem categoria".`
+          : 'Categoria excluída.';
       onNotify?.(msg, 'success');
     } catch (err) {
       onNotify?.(getErrorMessage(err, 'Não foi possível excluir a categoria.'), 'error');
@@ -265,314 +290,330 @@ export const ProductFormModal: React.FC<Props> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-surface p-5 shadow-xl sm:p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-text-primary">
+    <>
+      <ModalShell
+        open={open}
+        variant="sheet"
+        loading={saving}
+        onClose={onClose}
+        titleId="product-form-title"
+        title={
+          <h2 className="text-lg font-bold">
             {readOnly ? 'Detalhes do produto' : product ? 'Editar produto' : 'Novo produto'}
-          </h3>
-          <button type="button" onClick={onClose} className="text-sm text-text-muted">Fechar</button>
-        </div>
-        <form className="space-y-5" noValidate onSubmit={handleSubmit(onSubmit, onInvalid)}>
-          <div className="space-y-4">
-            <p className={FORM_SECTION_TITLE}>Identidade</p>
-            <Field label="Nome" error={errors.name?.message}>
-              <input
-                disabled={readOnly}
-                placeholder="Ex.: Shampoo hidratante"
-                className={errors.name ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                {...register('name')}
-              />
-            </Field>
-            <Field label="Descrição" error={errors.description?.message}>
-              <textarea
-                disabled={readOnly}
-                placeholder="Detalhes opcionais do produto"
-                rows={2}
-                className={`${errors.description ? FIELD_CONTROL_ERROR : FIELD_CONTROL} resize-none`}
-                {...register('description')}
-              />
-            </Field>
-            {!readOnly && (
-              <div>
-                <label className="mb-1.5 block text-xs font-bold text-text-secondary">Imagem do produto</label>
-                {imagePreview ? (
-                  <div className="relative inline-block">
-                    <img src={imagePreview} alt="Preview" className="h-24 w-24 rounded-xl object-cover border border-border" />
+          </h2>
+        }
+        body={
+          <form className="space-y-5" noValidate onSubmit={handleSubmit(onSubmit, onInvalid)}>
+            <div className="space-y-4">
+              <p className={FORM_SECTION_TITLE}>Identidade</p>
+              <Field label="Nome" error={errors.name?.message}>
+                <input
+                  disabled={readOnly}
+                  placeholder="Ex.: Shampoo hidratante"
+                  className={errors.name ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                  {...register('name')}
+                />
+              </Field>
+              <Field label="Descrição" error={errors.description?.message}>
+                <textarea
+                  disabled={readOnly}
+                  placeholder="Detalhes opcionais do produto"
+                  rows={2}
+                  className={`${errors.description ? FIELD_CONTROL_ERROR : FIELD_CONTROL} resize-none`}
+                  {...register('description')}
+                />
+              </Field>
+              {!readOnly && (
+                <div>
+                  <label className="mb-1.5 block text-xs font-bold text-text-secondary">
+                    Imagem do produto
+                  </label>
+                  {imagePreview ? (
+                    <div className="relative inline-block">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="h-24 w-24 rounded-xl object-cover border border-border"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-danger text-danger-fg"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ) : (
                     <button
                       type="button"
-                      onClick={handleRemoveImage}
-                      className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-danger text-danger-fg"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border text-text-muted hover:border-accent/40 hover:text-accent transition-colors cursor-pointer"
                     >
-                      <X size={12} />
+                      <Upload size={18} />
+                      <span className="text-[10px] font-medium">Adicionar</span>
                     </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border text-text-muted hover:border-accent/40 hover:text-accent transition-colors cursor-pointer"
-                  >
-                    <Upload size={18} />
-                    <span className="text-[10px] font-medium">Adicionar</span>
-                  </button>
-                )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  className="hidden"
-                  onChange={handleImageSelect}
-                />
-              </div>
-            )}
-            <Controller
-              control={control}
-              name="type"
-              render={({ field }) => (
-                <SmartSelect
-                  label="Finalidade"
-                  disabled={readOnly}
-                  value={field.value}
-                  onChange={value => field.onChange(value ?? 'RETAIL')}
-                  options={[
-                    { value: 'RETAIL', label: PRODUCT_PURPOSE_LABEL.RETAIL },
-                    { value: 'CONSUMABLE', label: PRODUCT_PURPOSE_LABEL.CONSUMABLE },
-                    { value: 'BOTH', label: PRODUCT_PURPOSE_LABEL.BOTH },
-                  ]}
-                  searchable={false}
-                />
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={handleImageSelect}
+                  />
+                </div>
               )}
-            />
-            <p className="text-xs text-text-muted">
-              {stockOnly
-                ? 'Só estoque do salão — não entra no PDV.'
-                : productType === 'BOTH'
-                  ? 'Aparece na venda e no estoque de uso interno.'
-                  : 'Entra no PDV e na aba Vendas.'}
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <p className={FORM_SECTION_TITLE}>{stockOnly ? 'Cadastro' : 'Venda'}</p>
-            {!stockOnly && (
               <Controller
                 control={control}
-                name="salePrice"
-                render={({ field }) => (
-                  <Field label="Preço de venda" error={errors.salePrice?.message}>
-                    <CurrencyInput
-                      value={field.value}
-                      onChangeValue={field.onChange}
-                      disabled={readOnly}
-                      error={!!errors.salePrice}
-                      placeholder="0,00"
-                    />
-                  </Field>
-                )}
-              />
-            )}
-            <div className={FORM_GRID}>
-              <Controller
-                control={control}
-                name="unit"
+                name="type"
                 render={({ field }) => (
                   <SmartSelect
-                    label="Unidade"
+                    label="Finalidade"
                     disabled={readOnly}
                     value={field.value}
-                    onChange={value => field.onChange(value ?? 'UNIT')}
-                    options={[...STOCK_UNIT_OPTIONS]}
+                    onChange={value => field.onChange(value ?? 'RETAIL')}
+                    options={[
+                      { value: 'RETAIL', label: PRODUCT_PURPOSE_LABEL.RETAIL },
+                      { value: 'CONSUMABLE', label: PRODUCT_PURPOSE_LABEL.CONSUMABLE },
+                      { value: 'BOTH', label: PRODUCT_PURPOSE_LABEL.BOTH },
+                    ]}
                     searchable={false}
                   />
                 )}
               />
-              {unitValue === 'OTHER' && (
-                <Field label="Nome da unidade" error={errors.unitLabel?.message}>
-                  <input
-                    disabled={readOnly}
-                    placeholder="Ex: frasco"
-                    className={errors.unitLabel ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                    {...register('unitLabel')}
-                  />
-                </Field>
-              )}
-              <Controller
-                control={control}
-                name="categoryId"
-                render={({ field }) => (
-                  <SmartSelect
-                    label="Categoria"
-                    disabled={readOnly}
-                    value={field.value || null}
-                    onChange={value => field.onChange(value ?? '')}
-                    options={[{ value: '', label: 'Sem categoria' }, ...categories.map(c => ({ value: c.id, label: toTitleCase(c.name) }))]}
-                    searchable="auto"
-                  />
-                )}
-              />
+              <p className="text-xs text-text-muted">
+                {stockOnly
+                  ? 'Só estoque do salão — não entra no PDV.'
+                  : productType === 'BOTH'
+                    ? 'Aparece na venda e no estoque de uso interno.'
+                    : 'Entra no PDV e na aba Vendas.'}
+              </p>
             </div>
-            {!readOnly && (
-              <div className="space-y-2">
-                <div className="flex gap-2">
-                  <input
-                    value={newCategory}
-                    onChange={e => setNewCategory(e.target.value)}
-                    placeholder="Nova categoria"
-                    className={`${FIELD_CONTROL} flex-1`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => void addCategory()}
-                    className="min-h-11 shrink-0 rounded-lg border border-border px-3 text-xs font-bold text-text-secondary"
-                  >
-                    Adicionar
-                  </button>
-                </div>
-                {categories.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {categories.map(c => (
-                      <span
-                        key={c.id}
-                        className="inline-flex items-center gap-1 rounded-lg bg-surface-2 px-2.5 py-1 text-xs text-text-secondary"
-                      >
-                        {toTitleCase(c.name)}
-                        <button
-                          type="button"
-                          onClick={() => setDeleteCatTarget(c)}
-                          className="ml-0.5 rounded p-0.5 text-text-muted hover:bg-danger/15 hover:text-danger transition-colors"
-                          title="Excluir categoria"
-                        >
-                          <Trash2 size={11} />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
 
-          <div className="space-y-4">
-            <p className={FORM_SECTION_TITLE}>Estoque</p>
-            <Controller
-              control={control}
-              name="trackStock"
-              render={({ field }) => (
-                <label className="flex items-center gap-2 text-sm text-text-secondary">
-                  <input
-                    type="checkbox"
-                    disabled={readOnly}
-                    checked={field.value}
-                    onChange={e => field.onChange(e.target.checked)}
-                  />
-                  Controlar estoque
-                </label>
-              )}
-            />
-            <Controller
-              control={control}
-              name="trackStock"
-              render={({ field: { value: trackStock } }) =>
-                trackStock ? (
-                  <>
-                    {!product && (
-                      <Field
-                        label="Estoque inicial"
-                        hint="Quantidade que você tem agora. Depois, ajuste pela aba Estoque."
-                        error={errors.initialStock?.message}
-                      >
-                        <input
-                          disabled={readOnly}
-                          type="number"
-                          min={0}
-                          step="0.001"
-                          placeholder="0"
-                          className={errors.initialStock ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                          {...register('initialStock')}
-                        />
-                      </Field>
-                    )}
-                    {product && typeof product.stockQty === 'number' && (
-                      <Field
-                        label="Estoque atual"
-                        hint="Ao salvar, a diferença é registrada como ajuste manual no histórico do estoque."
-                        error={errors.initialStock?.message}
-                      >
-                        <input
-                          disabled={readOnly}
-                          type="number"
-                          min={0}
-                          step="0.001"
-                          placeholder="0"
-                          className={errors.initialStock ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                          {...register('initialStock')}
-                        />
-                      </Field>
-                    )}
-                    <Field
-                      label="Estoque mínimo"
-                      hint="Avisa quando o estoque chegar nesse valor ou abaixo. Não altera a quantidade."
-                      error={errors.minStock?.message}
-                    >
-                      <input
+            <div className="space-y-4">
+              <p className={FORM_SECTION_TITLE}>{stockOnly ? 'Cadastro' : 'Venda'}</p>
+              {!stockOnly && (
+                <Controller
+                  control={control}
+                  name="salePrice"
+                  render={({ field }) => (
+                    <Field label="Preço de venda" error={errors.salePrice?.message}>
+                      <CurrencyInput
+                        value={field.value}
+                        onChangeValue={field.onChange}
                         disabled={readOnly}
-                        type="number"
-                        min={0}
-                        step="0.001"
-                        placeholder="0"
-                        className={errors.minStock ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                        {...register('minStock')}
+                        error={!!errors.salePrice}
+                        placeholder="0,00"
                       />
                     </Field>
-                  </>
-                ) : null
-              }
-            />
-            {showExpiration && (
-              <>
-                <div className={FORM_GRID}>
-                  <Field label="Data de validade" error={errors.expirationDate?.message}>
+                  )}
+                />
+              )}
+              <div className={FORM_GRID}>
+                <Controller
+                  control={control}
+                  name="unit"
+                  render={({ field }) => (
+                    <SmartSelect
+                      label="Unidade"
+                      disabled={readOnly}
+                      value={field.value}
+                      onChange={value => field.onChange(value ?? 'UNIT')}
+                      options={[...STOCK_UNIT_OPTIONS]}
+                      searchable={false}
+                    />
+                  )}
+                />
+                {unitValue === 'OTHER' && (
+                  <Field label="Nome da unidade" error={errors.unitLabel?.message}>
                     <input
                       disabled={readOnly}
-                      type="date"
-                      className={errors.expirationDate ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                      {...register('expirationDate')}
+                      placeholder="Ex: frasco"
+                      className={errors.unitLabel ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                      {...register('unitLabel')}
                     />
                   </Field>
-                  <Field label="Lote" error={errors.lotNumber?.message}>
-                    <input
+                )}
+                <Controller
+                  control={control}
+                  name="categoryId"
+                  render={({ field }) => (
+                    <SmartSelect
+                      label="Categoria"
                       disabled={readOnly}
-                      placeholder="Opcional"
-                      className={errors.lotNumber ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                      {...register('lotNumber')}
+                      value={field.value || null}
+                      onChange={value => field.onChange(value ?? '')}
+                      options={[
+                        { value: '', label: 'Sem categoria' },
+                        ...categories.map(c => ({ value: c.id, label: toTitleCase(c.name) })),
+                      ]}
+                      searchable="auto"
                     />
-                  </Field>
+                  )}
+                />
+              </div>
+              {!readOnly && (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      value={newCategory}
+                      onChange={e => setNewCategory(e.target.value)}
+                      placeholder="Nova categoria"
+                      className={`${FIELD_CONTROL} flex-1`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => void addCategory()}
+                      className="min-h-11 shrink-0 rounded-lg border border-border px-3 text-xs font-bold text-text-secondary"
+                    >
+                      Adicionar
+                    </button>
+                  </div>
+                  {categories.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {categories.map(c => (
+                        <span
+                          key={c.id}
+                          className="inline-flex items-center gap-1 rounded-lg bg-surface-2 px-2.5 py-1 text-xs text-text-secondary"
+                        >
+                          {toTitleCase(c.name)}
+                          <button
+                            type="button"
+                            onClick={() => setDeleteCatTarget(c)}
+                            className="ml-0.5 rounded p-0.5 text-text-muted hover:bg-danger/15 hover:text-danger transition-colors"
+                            title="Excluir categoria"
+                          >
+                            <Trash2 size={11} />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </>
-            )}
-          </div>
-
-          {!readOnly && (
-            <div className={FORM_FOOTER}>
-              <button
-                type="button"
-                onClick={onClose}
-                className="min-h-11 flex-1 rounded-xl bg-surface-2 py-3 text-sm font-bold text-text-secondary"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="min-h-11 flex-1 rounded-xl bg-accent px-4 py-3 text-sm font-bold text-accent-fg disabled:opacity-50"
-              >
-                {saving ? 'Salvando…' : product ? 'Salvar alterações' : 'Cadastrar produto'}
-              </button>
+              )}
             </div>
-          )}
-        </form>
-      </div>
+
+            <div className="space-y-4">
+              <p className={FORM_SECTION_TITLE}>Estoque</p>
+              <Controller
+                control={control}
+                name="trackStock"
+                render={({ field }) => (
+                  <label className="flex items-center gap-2 text-sm text-text-secondary">
+                    <input
+                      type="checkbox"
+                      disabled={readOnly}
+                      checked={field.value}
+                      onChange={e => field.onChange(e.target.checked)}
+                    />
+                    Controlar estoque
+                  </label>
+                )}
+              />
+              <Controller
+                control={control}
+                name="trackStock"
+                render={({ field: { value: trackStock } }) =>
+                  trackStock ? (
+                    <>
+                      {!product && (
+                        <Field
+                          label="Estoque inicial"
+                          hint="Quantidade que você tem agora. Depois, ajuste pela aba Estoque."
+                          error={errors.initialStock?.message}
+                        >
+                          <input
+                            disabled={readOnly}
+                            type="number"
+                            min={0}
+                            step="0.001"
+                            placeholder="0"
+                            className={errors.initialStock ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                            {...register('initialStock')}
+                          />
+                        </Field>
+                      )}
+                      {product && typeof product.stockQty === 'number' && (
+                        <Field
+                          label="Estoque atual"
+                          hint="Ao salvar, a diferença é registrada como ajuste manual no histórico do estoque."
+                          error={errors.initialStock?.message}
+                        >
+                          <input
+                            disabled={readOnly}
+                            type="number"
+                            min={0}
+                            step="0.001"
+                            placeholder="0"
+                            className={errors.initialStock ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                            {...register('initialStock')}
+                          />
+                        </Field>
+                      )}
+                      <Field
+                        label="Estoque mínimo"
+                        hint="Avisa quando o estoque chegar nesse valor ou abaixo. Não altera a quantidade."
+                        error={errors.minStock?.message}
+                      >
+                        <input
+                          disabled={readOnly}
+                          type="number"
+                          min={0}
+                          step="0.001"
+                          placeholder="0"
+                          className={errors.minStock ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                          {...register('minStock')}
+                        />
+                      </Field>
+                    </>
+                  ) : null
+                }
+              />
+              {showExpiration && (
+                <>
+                  <div className={FORM_GRID}>
+                    <Field label="Data de validade" error={errors.expirationDate?.message}>
+                      <input
+                        disabled={readOnly}
+                        type="date"
+                        className={errors.expirationDate ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                        {...register('expirationDate')}
+                      />
+                    </Field>
+                    <Field label="Lote" error={errors.lotNumber?.message}>
+                      <input
+                        disabled={readOnly}
+                        placeholder="Opcional"
+                        className={errors.lotNumber ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                        {...register('lotNumber')}
+                      />
+                    </Field>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {!readOnly && (
+              <div className={FORM_FOOTER}>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={saving}
+                  className="min-h-11 flex-1 rounded-xl bg-surface-2 py-3 text-sm font-bold text-text-secondary"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="min-h-11 flex-1 rounded-xl bg-accent px-4 py-3 text-sm font-bold text-accent-fg disabled:opacity-50"
+                >
+                  {saving ? 'Salvando…' : product ? 'Salvar alterações' : 'Cadastrar produto'}
+                </button>
+              </div>
+            )}
+          </form>
+        }
+      />
       <ConfirmDialog
         open={!!deleteCatTarget}
         title="Excluir categoria"
@@ -587,6 +628,6 @@ export const ProductFormModal: React.FC<Props> = ({
         onConfirm={() => void handleDeleteCategory()}
         onCancel={() => setDeleteCatTarget(null)}
       />
-    </div>
+    </>
   );
 };

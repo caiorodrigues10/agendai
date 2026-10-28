@@ -1,12 +1,19 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { productsApi, type Product, type ProductCategory, type ProductListPurpose, type ProductType } from '../../infra/productsApi';
-import { useBarbershop } from '../../contexts/BarbershopContext';
+import { FilterToolbar } from '../../components/patterns';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { Field, FIELD_CONTROL } from '../../components/ui/Field';
 import { useAuth } from '../../contexts/AuthContext';
+import { useBarbershop } from '../../contexts/BarbershopContext';
+import {
+  productsApi,
+  type Product,
+  type ProductCategory,
+  type ProductListPurpose,
+  type ProductType,
+} from '../../infra/productsApi';
 import type { BusinessSegment } from '../../types';
 import { getSegmentConfig } from '../../shared/segments';
 import { getErrorMessage } from '../../utils/errorMessage';
-import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { ProductFormModal } from './ProductFormModal';
 import { CatalogTemplateModal } from './CatalogTemplateModal';
 import {
   CardActions,
@@ -18,6 +25,7 @@ import {
   StockBar,
   Thumb,
 } from './ProductCatalogCard';
+import { ProductFormModal } from './ProductFormModal';
 
 // Rótulo do segmento vem do config central: o mapa à mão já ficou para trás
 // (sem PETSHOP) e quebrava o Record assim que o enum cresceu.
@@ -25,7 +33,10 @@ const segmentLabel = (segment: BusinessSegment) => getSegmentConfig(segment).lab
 
 type CatalogPurpose = ProductListPurpose;
 
-const PURPOSE_META: Record<CatalogPurpose, { title: string; hint: string; defaultType: ProductType }> = {
+const PURPOSE_META: Record<
+  CatalogPurpose,
+  { title: string; hint: string; defaultType: ProductType }
+> = {
   sale: {
     title: 'Para vender',
     hint: 'Entra no PDV e na aba Vendas.',
@@ -49,7 +60,15 @@ interface Props {
   onGoReservations?: () => void;
 }
 
-export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSeeCost, loadError, onNotify, onReload, onGoReservations }) => {
+export const ProductCatalogPanel: React.FC<Props> = ({
+  canManage,
+  canView,
+  canSeeCost,
+  loadError,
+  onNotify,
+  onReload,
+  onGoReservations,
+}) => {
   const { user } = useAuth();
   const { settings } = useBarbershop();
   const barbershopId = user?.barbershopId;
@@ -101,8 +120,12 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
     }
   }, [canView, canManage, searchDebounced, page, catalogPurpose, onNotify]);
 
-  useEffect(() => { void load(); }, [load]);
-  useEffect(() => { setPage(1); }, [searchDebounced, catalogPurpose]);
+  useEffect(() => {
+    void load();
+  }, [load]);
+  useEffect(() => {
+    setPage(1);
+  }, [searchDebounced, catalogPurpose]);
 
   if (!canView && !canManage) {
     return <p className="text-sm text-text-muted">Você não tem permissão para ver o catálogo.</p>;
@@ -173,8 +196,14 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
           <p className="text-sm font-bold text-text-primary">
             Modelo sugerido para {segmentLabel(settings?.businessSegment ?? 'OTHER')}
           </p>
-          <p className="mt-1 text-xs text-text-secondary">A instalação nunca sobrescreve cadastros existentes.</p>
-          <button type="button" onClick={() => setTemplateOpen(true)} className="mt-3 rounded-xl bg-accent px-4 py-2 text-sm font-bold text-accent-fg">
+          <p className="mt-1 text-xs text-text-secondary">
+            A instalação nunca sobrescreve cadastros existentes.
+          </p>
+          <button
+            type="button"
+            onClick={() => setTemplateOpen(true)}
+            className="mt-3 rounded-xl bg-accent px-4 py-2 text-sm font-bold text-accent-fg"
+          >
             Ver sugestões
           </button>
         </div>
@@ -187,22 +216,35 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
       <p className="text-xs text-text-secondary">{purposeMeta.hint}</p>
 
       {canManage && (
-        <button type="button" onClick={openNew} className="w-full rounded-xl border border-dashed border-border bg-bg px-4 py-3 text-sm font-bold text-text-primary">
+        <button
+          type="button"
+          onClick={openNew}
+          className="w-full rounded-xl border border-dashed border-border bg-bg px-4 py-3 text-sm font-bold text-text-primary"
+        >
           + Novo produto · {purposeMeta.title}
         </button>
       )}
 
-      <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar produto…" className="w-full rounded-xl border border-input-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-focus" />
+      <FilterToolbar label="Filtros do catálogo">
+        <Field label="Buscar produto">
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Nome do produto"
+            className={FIELD_CONTROL}
+          />
+        </Field>
 
-      <label className="flex w-fit items-center gap-2 text-xs font-bold text-text-secondary">
-        <input
-          type="checkbox"
-          checked={showInactive}
-          onChange={e => setShowInactive(e.target.checked)}
-          className="h-4 w-4 accent-accent"
-        />
-        Mostrar inativos{inactiveCount > 0 ? ` (${inactiveCount})` : ''}
-      </label>
+        <label className="flex w-fit items-center gap-2 text-xs font-bold text-text-secondary">
+          <input
+            type="checkbox"
+            checked={showInactive}
+            onChange={e => setShowInactive(e.target.checked)}
+            className="h-4 w-4 accent-accent"
+          />
+          Mostrar inativos{inactiveCount > 0 ? ` (${inactiveCount})` : ''}
+        </label>
+      </FilterToolbar>
 
       {loading ? (
         <p className="text-sm text-text-muted">Carregando…</p>
@@ -236,7 +278,9 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
               <ReservationsBlock
                 product={product}
                 open={openReservations === product.id}
-                onToggle={() => setOpenReservations(prev => (prev === product.id ? null : product.id))}
+                onToggle={() =>
+                  setOpenReservations(prev => (prev === product.id ? null : product.id))
+                }
                 onGoReservations={onGoReservations}
               />
               {canManage && (
@@ -260,7 +304,11 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
       )}
 
       {total > page * limit && (
-        <button type="button" onClick={() => setPage(p => p + 1)} className="w-full rounded-xl border border-border py-2 text-sm font-bold text-text-secondary">
+        <button
+          type="button"
+          onClick={() => setPage(p => p + 1)}
+          className="w-full rounded-xl border border-border py-2 text-sm font-bold text-text-secondary"
+        >
           Carregar mais ({products.length} de {total})
         </button>
       )}
@@ -272,7 +320,10 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
         readOnly={readOnly}
         categories={categories}
         onClose={() => setModalProduct(null)}
-        onSaved={() => { void load(); onReload(); }}
+        onSaved={() => {
+          void load();
+          onReload();
+        }}
         onNotify={onNotify}
         onCategoriesChange={setCategories}
       />
@@ -282,14 +333,19 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
         barbershopId={barbershopId ?? ''}
         segment={settings?.businessSegment}
         onClose={() => setTemplateOpen(false)}
-        onInstalled={() => { void load(); onReload(); }}
+        onInstalled={() => {
+          void load();
+          onReload();
+        }}
         onNotify={onNotify}
       />
 
       <ConfirmDialog
         open={Boolean(confirmToggle)}
         title={confirmToggle?.active ? 'Inativar produto?' : 'Reativar produto?'}
-        message={confirmToggle ? `"${confirmToggle.name}" deixará de aparecer nas listas ativas.` : ''}
+        message={
+          confirmToggle ? `"${confirmToggle.name}" deixará de aparecer nas listas ativas.` : ''
+        }
         confirmLabel={confirmToggle?.active ? 'Inativar' : 'Ativar'}
         variant={confirmToggle?.active ? 'danger' : 'default'}
         onConfirm={() => void toggleActive()}
@@ -312,4 +368,3 @@ export const ProductCatalogPanel: React.FC<Props> = ({ canManage, canView, canSe
     </div>
   );
 };
-

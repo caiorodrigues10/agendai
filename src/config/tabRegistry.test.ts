@@ -14,6 +14,20 @@ describe('abas', () => {
 });
 
 describe('canAccessTab', () => {
+  it('keeps equipment owner-only, matching the equipment API (product stock is separate)', () => {
+    expect(
+      canAccessTab('equipment', 'EMPLOYEE', {
+        hasDashboard: true,
+        permissions: ['INVENTORY_MANAGE'],
+      })
+    ).toBe(false);
+    expect(
+      canAccessTab('products', 'EMPLOYEE', {
+        hasDashboard: true,
+        permissions: ['INVENTORY_MANAGE'],
+      })
+    ).toBe(true);
+  });
   it('tabs sem roles são públicas para qualquer papel logado', () => {
     expect(canAccessTab('overview', 'EMPLOYEE')).toBe(true);
     expect(canAccessTab('appointments', 'EMPLOYEE')).toBe(true);
@@ -56,7 +70,12 @@ describe('canAccessTab — products (permissão × paywall)', () => {
   it('paywall de plano sem Pro não é decisão de canAccessTab (fica no guard)', () => {
     expect(canAccessTab('products', 'OWNER', { hasDashboard: false })).toBe(true);
     expect(canAccessTab('products', 'MASTER_ADMIN', { hasDashboard: false })).toBe(true);
-    expect(canAccessTab('products', 'EMPLOYEE', { hasDashboard: false, permissions: ['PRODUCTS_MANAGE'] })).toBe(true);
+    expect(
+      canAccessTab('products', 'EMPLOYEE', {
+        hasDashboard: false,
+        permissions: ['PRODUCTS_MANAGE'],
+      })
+    ).toBe(true);
   });
 
   it('EMPLOYEE precisa de uma das permissões de produtos', () => {
@@ -71,14 +90,23 @@ describe('canAccessTab — products (permissão × paywall)', () => {
 
   it('nenhuma aba depende de extras.hasDashboard (regressão do bug do TabGuard)', () => {
     const roles = ['OWNER', 'EMPLOYEE', 'MASTER_ADMIN'];
-    const permissionSets = [undefined, [], ['PRODUCTS_MANAGE'], ['REPORTS_VIEW', 'FINANCE_VIEW', 'MARKETING_MANAGE']];
+    const permissionSets = [
+      undefined,
+      [],
+      ['PRODUCTS_MANAGE'],
+      ['REPORTS_VIEW', 'FINANCE_VIEW', 'MARKETING_MANAGE'],
+    ];
     for (const tab of ALL_TAB_IDS) {
       for (const role of roles) {
         for (const permissions of permissionSets) {
           const base = { permissions };
           const reference = canAccessTab(tab, role, base);
-          expect(canAccessTab(tab, role, { ...base, hasDashboard: true }), `${tab}/${role}`).toBe(reference);
-          expect(canAccessTab(tab, role, { ...base, hasDashboard: false }), `${tab}/${role}`).toBe(reference);
+          expect(canAccessTab(tab, role, { ...base, hasDashboard: true }), `${tab}/${role}`).toBe(
+            reference
+          );
+          expect(canAccessTab(tab, role, { ...base, hasDashboard: false }), `${tab}/${role}`).toBe(
+            reference
+          );
         }
       }
     }

@@ -1,33 +1,35 @@
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  LuBot as Bot,
+  LuCalendarDays as CalendarDays,
+  LuCircleCheck as CheckCircle,
+  LuChevronDown as ChevronDown,
+  LuChevronLeft as ChevronLeft,
+  LuChevronRight as ChevronRight,
+  LuPhone as Phone,
+  LuPlus as Plus,
+  LuTrash2 as Trash2,
+  LuUser as User,
+  LuUsers as Users,
+  LuUserX as UserX,
+} from 'react-icons/lu';
+import { ModalShell } from '../../components/patterns';
+import { Avatar } from '../../components/ui/Avatar';
+import { Button } from '../../components/ui/Button';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Appointment, Service, ShopSettings, StaffMember } from '../../types';
+import { getErrorMessage } from '../../utils/errorMessage';
 import {
   addDays,
+  AvailabilitySlot,
   formatDateISO,
   generateTimeSlots,
   getDaySchedule,
   getServiceDuration,
   getServiceName,
   getStaffName,
-  AvailabilitySlot,
 } from '../../utils/schedulingUtils';
 import { AppointmentBookingModal } from './AppointmentBookingModal';
-import {
-  LuChevronLeft as ChevronLeft,
-  LuChevronRight as ChevronRight,
-  LuPlus as Plus,
-  LuCalendarDays as CalendarDays,
-  LuUsers as Users,
-  LuUser as User,
-  LuCircleCheck as CheckCircle,
-  LuTrash2 as Trash2,
-  LuUserX as UserX,
-  LuPhone as Phone,
-  LuChevronDown as ChevronDown,
-  LuBot as Bot,
-} from 'react-icons/lu';
-import { Avatar } from '../../components/ui/Avatar';
-import { Button } from '../../components/ui/Button';
-import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 
 type AgendaView = 'salon' | 'professional';
 
@@ -64,9 +66,9 @@ interface AppointmentCalendarProps {
   currentUserRole?: StaffMember['role'];
   occupancy: AvailabilitySlot[];
   onBook: (data: any) => Promise<void>;
-  onCancel: (id: string) => void;
-  onCheckIn: (appointment: Appointment) => void;
-  onNoShow: (id: string) => void;
+  onCancel: (id: string) => void | Promise<void>;
+  onCheckIn: (appointment: Appointment) => void | Promise<void>;
+  onNoShow: (id: string) => void | Promise<void>;
   onDateChange?: (date: string) => void;
 }
 
@@ -99,6 +101,24 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   const [showBooking, setShowBooking] = useState(false);
   const [selectedAppt, setSelectedAppt] = useState<Appointment | null>(null);
   const [confirmAction, setConfirmAction] = useState<'checkin' | 'cancel' | 'noshow' | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState('');
+  const confirmAppointmentAction = async () => {
+    if (!selectedAppt || !confirmAction || actionLoading) return;
+    setActionLoading(true);
+    setActionError('');
+    try {
+      if (confirmAction === 'checkin') await onCheckIn(selectedAppt);
+      else if (confirmAction === 'cancel') await onCancel(selectedAppt.id);
+      else await onNoShow(selectedAppt.id);
+      setSelectedAppt(null);
+      setConfirmAction(null);
+    } catch (error) {
+      setActionError(getErrorMessage(error, 'Não foi possível concluir. Tente novamente.'));
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   const [showStaffDropdown, setShowStaffDropdown] = useState(false);
   const staffDropdownRef = useRef<HTMLDivElement>(null);
@@ -313,16 +333,16 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
       )}
 
       {view === 'professional' && hasMultipleStaff && (
-        <p className="text-[10px] text-text-secondary text-center -mt-2">
-          Visão por profissional
-        </p>
+        <p className="text-[10px] text-text-secondary text-center -mt-2">Visão por profissional</p>
       )}
 
       <div className="relative" ref={calendarRef}>
         <div className="flex items-center justify-between bg-surface border border-border rounded-xl p-3">
           <button
+            type="button"
+            aria-label="Dia anterior"
             onClick={() => navigateDate(-1)}
-            className="p-2 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors"
+            className="min-h-11 min-w-11 p-2 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors"
           >
             <ChevronLeft size={20} />
           </button>
@@ -346,8 +366,10 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
             </button>
           </div>
           <button
+            type="button"
+            aria-label="Próximo dia"
             onClick={() => navigateDate(1)}
-            className="p-2 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors"
+            className="min-h-11 min-w-11 p-2 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors"
           >
             <ChevronRight size={20} />
           </button>
@@ -357,8 +379,10 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
           <div className="absolute z-30 left-1/2 -translate-x-1/2 mt-2 w-72 bg-surface border border-border rounded-xl shadow-2xl p-3 animate-fade-in">
             <div className="flex items-center justify-between mb-3">
               <button
+                type="button"
+                aria-label="Mês anterior"
                 onClick={() => navigateCalendarMonth(-1)}
-                className="p-1.5 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors"
+                className="min-h-11 min-w-11 p-1.5 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors"
               >
                 <ChevronLeft size={16} />
               </button>
@@ -366,8 +390,10 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                 {MONTH_NAMES[calendarMonth]} {calendarYear}
               </span>
               <button
+                type="button"
+                aria-label="Próximo mês"
                 onClick={() => navigateCalendarMonth(1)}
-                className="p-1.5 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors"
+                className="min-h-11 min-w-11 p-1.5 text-text-secondary hover:text-text-primary hover:bg-surface-2 rounded-lg transition-colors"
               >
                 <ChevronRight size={16} />
               </button>
@@ -491,10 +517,13 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
       )}
 
       {selectedAppt && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 p-4">
-          <div className="bg-surface border border-border rounded-2xl w-full max-w-sm p-5 space-y-4 animate-fade-in">
-            <div>
-              <h4 className="text-lg font-bold text-text-primary">{selectedAppt.customerName}</h4>
+        <ModalShell
+          open
+          titleId="appointment-detail-title"
+          title={selectedAppt.customerName}
+          onClose={() => setSelectedAppt(null)}
+          body={
+            <div className="space-y-4">
               <p className="text-sm text-accent">
                 {getServiceName(selectedAppt.serviceId, services)}
               </p>
@@ -509,53 +538,63 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                   <Bot size={10} /> via WhatsApp
                 </p>
               )}
-            </div>
-            {selectedAppt.reservedProducts && selectedAppt.reservedProducts.length > 0 && (
-              <div className="rounded-xl border border-border bg-bg p-3">
-                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-text-muted">
-                  Produtos reservados
-                </p>
-                <div className="space-y-2">
-                  {selectedAppt.reservedProducts.map(item => (
-                    <div key={item.id} className="flex items-center justify-between gap-3 text-xs">
-                      <span className="font-medium text-text-primary">{item.productName}</span>
-                      <span className="shrink-0 text-text-secondary">
-                        {item.quantity}x R$ {item.unitPrice.toFixed(2)}
-                      </span>
-                    </div>
-                  ))}
+              {selectedAppt.reservedProducts && selectedAppt.reservedProducts.length > 0 && (
+                <div className="rounded-xl border border-border bg-bg p-3">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                    Produtos reservados
+                  </p>
+                  <div className="space-y-2">
+                    {selectedAppt.reservedProducts.map(item => (
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between gap-3 text-xs"
+                      >
+                        <span className="font-medium text-text-primary">{item.productName}</span>
+                        <span className="shrink-0 text-text-secondary">
+                          {item.quantity}x R$ {item.unitPrice.toFixed(2)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+              )}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setActionError('');
+                    setConfirmAction('checkin');
+                  }}
+                  className="flex-1 py-2.5 bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 rounded-xl text-xs font-bold flex items-center justify-center gap-1"
+                >
+                  <CheckCircle size={14} /> Check-in
+                </button>
+                <button
+                  aria-label="Cancelar agendamento"
+                  onClick={() => {
+                    setActionError('');
+                    setConfirmAction('cancel');
+                  }}
+                  className="px-4 py-2.5 bg-danger/10 hover:bg-danger/20 text-danger border border-danger/30 rounded-xl text-xs font-bold"
+                >
+                  <Trash2 size={14} />
+                </button>
               </div>
-            )}
-            <div className="flex gap-2">
-              <button
-                onClick={() => setConfirmAction('checkin')}
-                className="flex-1 py-2.5 bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 rounded-xl text-xs font-bold flex items-center justify-center gap-1"
-              >
-                <CheckCircle size={14} /> Check-in
-              </button>
-              <button
-                onClick={() => setConfirmAction('cancel')}
-                className="px-4 py-2.5 bg-danger/10 hover:bg-danger/20 text-danger border border-danger/30 rounded-xl text-xs font-bold"
-              >
-                <Trash2 size={14} />
-              </button>
+              {selectedAppt.status === 'confirmed' && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="w-full py-2.5"
+                  onClick={() => {
+                    setActionError('');
+                    setConfirmAction('noshow');
+                  }}
+                >
+                  <UserX size={14} /> Não compareceu
+                </Button>
+              )}
             </div>
-            {selectedAppt.status === 'confirmed' && (
-            <Button
-              variant="secondary"
-              size="sm"
-              className="w-full py-2.5"
-              onClick={() => setConfirmAction('noshow')}
-            >
-              <UserX size={14} /> Não compareceu
-            </Button>
-            )}
-            <Button variant="ghost" className="w-full py-2" onClick={() => setSelectedAppt(null)}>
-              Fechar
-            </Button>
-          </div>
-        </div>
+          }
+        />
       )}
 
       {showBooking && (
@@ -572,41 +611,36 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
       )}
 
       <ConfirmDialog
-        open={confirmAction === 'checkin'}
-        title="Check-in"
-        message="Mover para a fila de espera?"
-        confirmLabel="Check-in"
-        onConfirm={() => {
-          if (selectedAppt) onCheckIn(selectedAppt);
-          setSelectedAppt(null);
+        open={Boolean(confirmAction)}
+        title={
+          confirmAction === 'checkin'
+            ? 'Check-in'
+            : confirmAction === 'cancel'
+              ? 'Cancelar agendamento'
+              : 'Não compareceu'
+        }
+        message={
+          actionError ||
+          (confirmAction === 'checkin'
+            ? 'Mover para a fila de espera?'
+            : confirmAction === 'cancel'
+              ? 'Cancelar este agendamento?'
+              : 'Marcar este cliente como não compareceu?')
+        }
+        confirmLabel={
+          confirmAction === 'checkin'
+            ? 'Check-in'
+            : confirmAction === 'cancel'
+              ? 'Cancelar agendamento'
+              : 'Marcar'
+        }
+        variant={confirmAction === 'cancel' ? 'danger' : 'default'}
+        loading={actionLoading}
+        onConfirm={() => void confirmAppointmentAction()}
+        onCancel={() => {
           setConfirmAction(null);
+          setActionError('');
         }}
-        onCancel={() => setConfirmAction(null)}
-      />
-      <ConfirmDialog
-        open={confirmAction === 'cancel'}
-        title="Cancelar agendamento"
-        message="Cancelar agendamento?"
-        confirmLabel="Cancelar agendamento"
-        variant="danger"
-        onConfirm={() => {
-          if (selectedAppt) onCancel(selectedAppt.id);
-          setSelectedAppt(null);
-          setConfirmAction(null);
-        }}
-        onCancel={() => setConfirmAction(null)}
-      />
-      <ConfirmDialog
-        open={confirmAction === 'noshow'}
-        title="Não compareceu"
-        message="Marcar este cliente como não compareceu?"
-        confirmLabel="Marcar"
-        onConfirm={() => {
-          if (selectedAppt) onNoShow(selectedAppt.id);
-          setSelectedAppt(null);
-          setConfirmAction(null);
-        }}
-        onCancel={() => setConfirmAction(null)}
       />
     </div>
   );

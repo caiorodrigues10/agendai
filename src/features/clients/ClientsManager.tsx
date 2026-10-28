@@ -1,21 +1,21 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  RiAddLine,
-  RiLoader4Line,
-  RiSearchLine,
-  RiUserAddLine,
-} from 'react-icons/ri';
 import { LuChevronRight as ChevronRight } from 'react-icons/lu';
-import { SalonClient } from '../../types';
+import {
+  LuPlus as RiAddLine,
+  LuLoaderCircle as RiLoader4Line,
+  LuSearch as RiSearchLine,
+  LuUserPlus as RiUserAddLine,
+} from 'react-icons/lu';
+import { Avatar } from '../../components/ui/Avatar';
+import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_GRID } from '../../components/ui/Field';
+import { StatusBadge } from '../../components/ui/StatusBadge';
 import { clientsApi, ListMeta } from '../../infra/clientsApi';
+import { ClientCreateFormData, ClientCreateSchema } from '../../schemas';
+import { SalonClient } from '../../types';
 import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
 import { getErrorMessage } from '../../utils/errorMessage';
-import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_GRID } from '../../components/ui/Field';
-import { Avatar } from '../../components/ui/Avatar';
-import { StatusBadge } from '../../components/ui/StatusBadge';
-import { ClientCreateSchema, ClientCreateFormData } from '../../schemas';
 
 function clientPhoneLabel(whatsapp: string): string {
   const digits = whatsapp.replace(/\D/g, '');
@@ -182,6 +182,7 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
         />
         <input
           className="w-full rounded-xl border border-input-border bg-input-bg py-3 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-focus"
+          aria-label="Buscar por nome ou WhatsApp"
           placeholder="Buscar por nome ou WhatsApp"
           value={search}
           onChange={e => {
@@ -198,13 +199,17 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
         </div>
       ) : clients.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border py-10 text-center">
-          <p className="text-sm text-text-secondary">Nenhum cliente cadastrado.</p>
+          <p className="text-sm text-text-secondary">
+            {search.trim()
+              ? 'Nenhum cliente encontrado para esta busca.'
+              : 'Nenhum cliente cadastrado.'}
+          </p>
           <button
             type="button"
-            onClick={() => setShowCreate(true)}
-            className="mt-3 text-sm font-bold text-accent"
+            onClick={() => (search.trim() ? setSearch('') : setShowCreate(true))}
+            className="min-h-11 mt-3 text-sm font-bold text-accent"
           >
-            Cadastrar primeiro cliente
+            {search.trim() ? 'Limpar busca' : 'Cadastrar primeiro cliente'}
           </button>
         </div>
       ) : (
@@ -224,7 +229,9 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
                 <Avatar name={c.name} size="sm" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-text-primary">{c.name}</p>
-                  <p className="truncate text-xs text-text-secondary">{clientPhoneLabel(c.whatsapp)}</p>
+                  <p className="truncate text-xs text-text-secondary">
+                    {clientPhoneLabel(c.whatsapp)}
+                  </p>
                   <div className="mt-2 sm:hidden">
                     <ClientBadges sessions={c.remainingSessions} packages={c.activePackageCount} />
                   </div>

@@ -1,23 +1,45 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  RiBox3Line,
-  RiCalendarScheduleLine,
-  RiDeleteBin6Line,
-  RiEditLine,
-  RiFileTextLine,
-  RiHistoryLine,
-  RiLoader4Line,
-  RiAddLine,
-} from 'react-icons/ri';
-import {
-  LuMessageCircle as MessageCircle,
-  LuScissors as Scissors,
-  LuFlaskConical as FlaskConical,
   LuClock as Clock,
+  LuFlaskConical as FlaskConical,
+  LuMessageCircle as MessageCircle,
+  LuPlus as RiAddLine,
+  LuPackage as RiBox3Line,
+  LuCalendarDays as RiCalendarScheduleLine,
+  LuTrash2 as RiDeleteBin6Line,
+  LuPencil as RiEditLine,
+  LuFileText as RiFileTextLine,
+  LuHistory as RiHistoryLine,
+  LuLoaderCircle as RiLoader4Line,
+  LuScissors as Scissors,
 } from 'react-icons/lu';
+import { SectionError } from '../../components/patterns';
+import { ModalShell } from '../../components/patterns/ModalShell';
+import { Tabs } from '../../components/patterns/Tabs';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import {
+  Field,
+  FIELD_CONTROL,
+  FIELD_CONTROL_ERROR,
+  FORM_FOOTER,
+  FORM_GRID,
+} from '../../components/ui/Field';
+import { SmartSelect } from '../../components/ui/SmartSelect';
+import { AppointmentBookingModal, BookPackageSessionsModal } from '../../features/appointments';
+import { useSegmentLabels } from '../../hooks/useSegmentLabels';
+import { clientsApi, ProcedureRecord } from '../../infra/clientsApi';
+import { crmApi, CrmClientProfile } from '../../infra/crmApi';
+import { packagesApi } from '../../infra/packagesApi';
+import {
+  AppointmentFormData,
+  ClientEditFormData,
+  ClientEditSchema,
+  ProcedureRecordFormData,
+  ProcedureRecordSchema,
+} from '../../schemas';
 import {
   ClientPackage,
   PackagePaymentMethod,
@@ -26,14 +48,6 @@ import {
   ShopSettings,
   StaffMember,
 } from '../../types';
-import { clientsApi, ProcedureRecord } from '../../infra/clientsApi';
-import { crmApi, CrmClientProfile } from '../../infra/crmApi';
-import { packagesApi } from '../../infra/packagesApi';
-import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
-import { getErrorMessage } from '../../utils/errorMessage';
-import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_FOOTER, FORM_GRID } from '../../components/ui/Field';
-import { SmartSelect } from '../../components/ui/SmartSelect';
-import { buildWhatsAppUrl } from '../../utils/whatsappUtils';
 import {
   APPOINTMENT_STATUS_LABEL,
   APPOINTMENT_STATUS_STYLE,
@@ -41,16 +55,13 @@ import {
   PACKAGE_STATUS_LABEL,
   RISK_LABEL,
 } from '../../utils/clientLabels';
+import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
+import { getErrorMessage } from '../../utils/errorMessage';
 import { METRIC_LABEL } from '../../utils/metricLabels';
-import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { AvailabilitySlot } from '../../utils/schedulingUtils';
+import { buildWhatsAppUrl } from '../../utils/whatsappUtils';
 import { ClientPetsPanel } from './ClientPetsPanel';
 import { ClientVehiclesPanel } from './ClientVehiclesPanel';
-import { useSegmentLabels } from '../../hooks/useSegmentLabels';
-import { ModalShell } from '../../components/patterns/ModalShell';
-import { SectionError } from '../../components/patterns';
-import { BookPackageSessionsModal, AppointmentBookingModal } from '../../features/appointments';
-import { AppointmentFormData, ClientEditSchema, ClientEditFormData, ProcedureRecordSchema, ProcedureRecordFormData } from '../../schemas';
-import { AvailabilitySlot } from '../../utils/schedulingUtils';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -163,16 +174,14 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
 
   const tabs = useMemo(
     () =>
-      (
-        [
-          ['geral', 'Geral'],
-          ['pacotes', 'Pacotes'],
-          ['historico', 'Histórico'],
-          ...(showPets ? [['pets', 'Pets'] as const] : []),
-          ...(showVehicles ? [['vehicles', 'Veículos'] as const] : []),
-          ...(canAnalytics ? [['financeiro', 'Financeiro'] as const] : []),
-        ] as [ProfileTab, string][]
-      ),
+      [
+        ['geral', 'Geral'],
+        ['pacotes', 'Pacotes'],
+        ['historico', 'Histórico'],
+        ...(showPets ? [['pets', 'Pets'] as const] : []),
+        ...(showVehicles ? [['vehicles', 'Veículos'] as const] : []),
+        ...(canAnalytics ? [['financeiro', 'Financeiro'] as const] : []),
+      ] as [ProfileTab, string][],
     [canAnalytics, showPets, showVehicles]
   );
 
@@ -258,7 +267,13 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
       });
     } else {
       setEditingProcedure(null);
-      resetProcedure({ title: '', professionalName: '', formula: '', details: '', serviceName: '' });
+      resetProcedure({
+        title: '',
+        professionalName: '',
+        formula: '',
+        details: '',
+        serviceName: '',
+      });
     }
     setShowProcedureForm(true);
   };
@@ -489,25 +504,21 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
           </>
         }
         children={
-          <nav aria-label="Seções do perfil" className="mt-3 flex gap-1 overflow-x-auto">
-            {tabs.map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setTab(id)}
-                className={`min-h-9 whitespace-nowrap rounded-lg px-3 text-xs font-bold transition-colors ${
-                  tab === id
-                    ? 'bg-accent/15 text-accent'
-                    : 'text-text-muted hover:bg-bg hover:text-text-secondary'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </nav>
+          <Tabs<ProfileTab>
+            ariaLabel="Seções do perfil"
+            idPrefix="client-profile"
+            items={tabs.map(([id, label]) => ({ id, label }))}
+            value={tab}
+            onChange={setTab}
+            className="mt-3"
+          />
         }
         body={
-          <>
+          <div
+            role="tabpanel"
+            id={`client-profile-tabpanel-${tab}`}
+            aria-labelledby={`client-profile-tab-${tab}`}
+          >
             {error && <SectionError message={error} className="mb-3" />}
 
             {tab === 'geral' && detail && (
@@ -576,9 +587,13 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                       <div className="rounded-lg border border-border bg-bg p-3">
                         <div className="mb-1 flex items-center gap-1.5 text-text-muted">
                           <RiFileTextLine size={12} />
-                          <span className="text-[11px] font-bold uppercase tracking-wider">Notas</span>
+                          <span className="text-[11px] font-bold uppercase tracking-wider">
+                            Notas
+                          </span>
                         </div>
-                        <p className="whitespace-pre-wrap text-sm text-text-secondary">{detail.notes}</p>
+                        <p className="whitespace-pre-wrap text-sm text-text-secondary">
+                          {detail.notes}
+                        </p>
                       </div>
                     ) : (
                       <button
@@ -597,7 +612,9 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                         </div>
                         <div className="rounded-lg border border-border bg-bg p-3">
                           <p className="text-xs text-text-muted">{METRIC_LABEL.LTV}</p>
-                          <p className="font-bold text-text-primary">{brl.format(crmProfile.ltv)}</p>
+                          <p className="font-bold text-text-primary">
+                            {brl.format(crmProfile.ltv)}
+                          </p>
                         </div>
                         <div className="rounded-lg border border-border bg-bg p-3">
                           <p className="text-xs text-text-muted">Risco</p>
@@ -679,7 +696,8 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                           </span>
                         </div>
                         <p className="text-xs text-text-muted">
-                          {p.remainingSessions}/{p.totalSessions} sessões · {brl.format(p.pricePaid)}
+                          {p.remainingSessions}/{p.totalSessions} sessões ·{' '}
+                          {brl.format(p.pricePaid)}
                         </p>
                         {p.status === 'ACTIVE' && p.remainingSessions > 0 && (
                           <div className="flex gap-2">
@@ -735,7 +753,10 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                   </div>
 
                   {showProcedureForm && (
-                    <form onSubmit={handleSubmitProcedure(handleProcedureSubmit)} className="mb-3 space-y-2 rounded-xl border border-accent/30 bg-accent/5 p-3">
+                    <form
+                      onSubmit={handleSubmitProcedure(handleProcedureSubmit)}
+                      className="mb-3 space-y-2 rounded-xl border border-accent/30 bg-accent/5 p-3"
+                    >
                       <p className="text-xs font-bold text-text-primary">
                         {editingProcedure ? 'Editar procedimento' : 'Novo procedimento'}
                       </p>
@@ -747,9 +768,14 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                             {...registerProcedure('title')}
                           />
                         </Field>
-                        <Field label="Profissional" error={procedureErrors.professionalName?.message}>
+                        <Field
+                          label="Profissional"
+                          error={procedureErrors.professionalName?.message}
+                        >
                           <input
-                            className={procedureErrors.professionalName ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                            className={
+                              procedureErrors.professionalName ? FIELD_CONTROL_ERROR : FIELD_CONTROL
+                            }
                             placeholder="Nome do profissional"
                             {...registerProcedure('professionalName')}
                           />
@@ -780,7 +806,10 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                       <div className="flex gap-2">
                         <button
                           type="button"
-                          onClick={() => { setShowProcedureForm(false); setEditingProcedure(null); }}
+                          onClick={() => {
+                            setShowProcedureForm(false);
+                            setEditingProcedure(null);
+                          }}
                           className="flex-1 rounded-lg bg-surface-2 py-2 text-xs font-bold text-text-secondary"
                         >
                           Cancelar
@@ -790,7 +819,11 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                           disabled={procedureSaving}
                           className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-accent py-2 text-xs font-bold text-accent-fg disabled:opacity-50"
                         >
-                          {procedureSaving ? 'Salvando…' : editingProcedure ? 'Salvar' : 'Registrar'}
+                          {procedureSaving
+                            ? 'Salvando…'
+                            : editingProcedure
+                              ? 'Salvar'
+                              : 'Registrar'}
                         </button>
                       </div>
                     </form>
@@ -829,7 +862,9 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => setConfirm({ type: 'deleteProcedure', recordId: proc.id })}
+                                  onClick={() =>
+                                    setConfirm({ type: 'deleteProcedure', recordId: proc.id })
+                                  }
                                   className="rounded p-1 text-text-muted hover:text-danger"
                                   aria-label="Excluir"
                                 >
@@ -846,11 +881,17 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                               <p className="mt-1 text-xs text-text-muted">{proc.details}</p>
                             )}
                             {proc.serviceName && (
-                              <p className="mt-1 text-[10px] text-text-muted">Serviço: {proc.serviceName}</p>
+                              <p className="mt-1 text-[10px] text-text-muted">
+                                Serviço: {proc.serviceName}
+                              </p>
                             )}
                             <p className="mt-1 flex items-center gap-1 text-[10px] text-text-muted">
                               <Clock size={9} />
-                              {new Date(proc.occurredAt).toLocaleDateString('pt-BR')} {new Date(proc.occurredAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                              {new Date(proc.occurredAt).toLocaleDateString('pt-BR')}{' '}
+                              {new Date(proc.occurredAt).toLocaleTimeString('pt-BR', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
                             </p>
                           </div>
                         </div>
@@ -914,7 +955,10 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                     ['Recebido', crmProfile.receivedRevenue],
                     ['Dívida', crmProfile.outstanding],
                   ].map(([label, value]) => (
-                    <div key={label as string} className="rounded-xl border border-border bg-bg p-3">
+                    <div
+                      key={label as string}
+                      className="rounded-xl border border-border bg-bg p-3"
+                    >
                       <p className="text-xs text-text-muted">{label}</p>
                       <strong className="mt-1 block text-base text-text-primary">
                         {brl.format(Number(value))}
@@ -986,7 +1030,7 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                 </div>
               </div>
             )}
-          </>
+          </div>
         }
       />
 
@@ -1026,7 +1070,9 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
         confirmLabel="Excluir"
         variant="danger"
         loading={confirmLoading}
-        onConfirm={() => confirm?.type === 'deleteProcedure' && void handleDeleteProcedure(confirm.recordId)}
+        onConfirm={() =>
+          confirm?.type === 'deleteProcedure' && void handleDeleteProcedure(confirm.recordId)
+        }
         onCancel={() => setConfirm(null)}
       />
 

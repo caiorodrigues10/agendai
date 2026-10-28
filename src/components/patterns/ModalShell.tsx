@@ -3,6 +3,10 @@ import { createPortal } from 'react-dom';
 import FocusLock from 'react-focus-lock';
 import { LuX as X } from 'react-icons/lu';
 
+// Reference-counted so closing a nested dialog doesn't unlock the page behind it.
+const openDialogs: symbol[] = [];
+let previousBodyOverflow = '';
+
 export type ModalShellVariant = 'dialog' | 'sheet';
 
 export interface ModalShellProps {
@@ -79,7 +83,7 @@ const ShellHeader: React.FC<HeaderProps> = ({
             type="button"
             onClick={onClose}
             disabled={loading}
-            className={`rounded-lg text-text-muted hover:bg-bg disabled:opacity-50 ${sheet ? 'p-2' : 'p-1'}`}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-text-secondary hover:bg-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:opacity-50"
             aria-label="Fechar"
           >
             <X size={sheet ? 18 : 16} />
@@ -111,10 +115,29 @@ export const ModalShell: React.FC<ModalShellProps> = ({
   bodyClassName = '',
   footer,
 }) => {
+  const dialogKey = React.useRef(Symbol('dialog'));
   useEffect(() => {
-    if (!open || !closeOnEscape || loading) return;
+    if (!open) return;
+    const key = dialogKey.current;
+    if (openDialogs.length === 0) {
+      previousBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+    }
+    openDialogs.push(key);
+    return () => {
+      const index = openDialogs.indexOf(key);
+      if (index >= 0) openDialogs.splice(index, 1);
+      if (openDialogs.length === 0) document.body.style.overflow = previousBodyOverflow;
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key !== 'Escape' || e.defaultPrevented || openDialogs.at(-1) !== dialogKey.current)
+        return;
+      e.preventDefault();
+      if (closeOnEscape && !loading) onClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -122,7 +145,17 @@ export const ModalShell: React.FC<ModalShellProps> = ({
 
   if (!open) return null;
   const sheet = variant === 'sheet';
-  const headerProps = { sheet, icon, iconClassName, titleId, title, actions, loading, onClose, children };
+  const headerProps = {
+    sheet,
+    icon,
+    iconClassName,
+    titleId,
+    title,
+    actions,
+    loading,
+    onClose,
+    children,
+  };
 
   return createPortal(
     <FocusLock returnFocus>
@@ -132,6 +165,9 @@ export const ModalShell: React.FC<ModalShellProps> = ({
         <button
           type="button"
           aria-label="Fechar"
+          tabIndex={-1}
+          aria-hidden="true"
+          disabled={loading}
           onClick={onClose}
           className="absolute inset-0 cursor-default"
         />
@@ -143,7 +179,7 @@ export const ModalShell: React.FC<ModalShellProps> = ({
           className={`relative w-full border ${borderClassName} bg-surface shadow-2xl ${
             sheet
               ? 'flex max-h-[92dvh] flex-col overflow-hidden rounded-t-2xl sm:rounded-2xl max-w-2xl'
-              : 'rounded-2xl p-5 max-w-md'
+              : 'max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl p-5 max-w-md'
           } ${className}`}
         >
           {sheet ? (
@@ -155,7 +191,7 @@ export const ModalShell: React.FC<ModalShellProps> = ({
           )}
           {body && (
             <div
-              className={`${sheet ? 'flex-1 overflow-y-auto ag-scroll px-4 py-4 sm:px-5' : 'mt-4'} ${bodyClassName}`}
+              className={`${sheet ? 'min-h-0 flex-1 overflow-y-auto overscroll-contain ag-scroll px-4 py-4 sm:px-5' : 'mt-4'} ${bodyClassName}`}
             >
               {body}
             </div>

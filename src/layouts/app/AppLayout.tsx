@@ -1,7 +1,7 @@
 import React from 'react';
+import type { OperationMode, StaffMember } from '../../types';
 import { Header } from './Header';
 import { StaffNavigation } from './StaffNavigation';
-import type { OperationMode, StaffMember } from '../../types';
 
 export interface AppLayoutProps {
   user: StaffMember | null;
@@ -53,7 +53,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         onboardingCompleted={onboardingCompleted}
         onNavigate={onNavigate}
       />
-      <main id="main-content" className="min-w-0 flex-1">
+      <main id="main-content" tabIndex={-1} className="min-w-0 flex-1 space-y-6">
         {children}
       </main>
     </div>

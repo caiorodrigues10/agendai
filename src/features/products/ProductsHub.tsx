@@ -1,17 +1,20 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { productsApi } from '../../infra/productsApi';
+import { PageHeader, Tabs } from '../../components/patterns';
 import { usePermissions } from '../../hooks/usePermissions';
-import { getErrorMessage } from '../../utils/errorMessage';
+import { productsApi } from '../../infra/productsApi';
 import { addDaysISO, todayISO } from '../../utils/dateRanges';
+import { getErrorMessage } from '../../utils/errorMessage';
 import { ProductCatalogPanel } from './ProductCatalogPanel';
-import { ProductStockPanel } from './ProductStockPanel';
-import { ProductSalesPanel } from './ProductSalesPanel';
 import { ProductReportsPanel } from './ProductReportsPanel';
 import { ProductReservationsPanel } from './ProductReservationsPanel';
+import { ProductSalesPanel } from './ProductSalesPanel';
+import { ProductStockPanel } from './ProductStockPanel';
 
 type HubTab = 'catalog' | 'stock' | 'sales' | 'reports' | 'reservations';
 
-export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'success' | 'error') => void }> = ({ onNotify }) => {
+export const ProductsHub: React.FC<{
+  onNotify?: (message: string, type?: 'success' | 'error') => void;
+}> = ({ onNotify }) => {
   const { hasPermission, isOwnerOrAdmin } = usePermissions();
   const canManage = isOwnerOrAdmin || hasPermission('PRODUCTS_MANAGE');
   const canView = isOwnerOrAdmin || hasPermission('PRODUCTS_VIEW');
@@ -19,10 +22,22 @@ export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'succes
   const canSell = isOwnerOrAdmin || hasPermission('RETAIL_SELL');
   const canRefund = isOwnerOrAdmin || hasPermission('RETAIL_REFUND');
   const canReports = isOwnerOrAdmin || hasPermission('PRODUCT_REPORTS_VIEW');
-  const canSeeCost = isOwnerOrAdmin || hasPermission('PRODUCTS_MANAGE') || hasPermission('INVENTORY_MANAGE') || hasPermission('FINANCE_VIEW');
+  const canSeeCost =
+    isOwnerOrAdmin ||
+    hasPermission('PRODUCTS_MANAGE') ||
+    hasPermission('INVENTORY_MANAGE') ||
+    hasPermission('FINANCE_VIEW');
   const sellOnly = canSell && !canManage && !canInventory && !canView && !canReports;
 
-  const defaultTab: HubTab = sellOnly ? 'sales' : canView || canManage ? 'catalog' : canInventory ? 'stock' : canSell ? 'sales' : 'reports';
+  const defaultTab: HubTab = sellOnly
+    ? 'sales'
+    : canView || canManage
+      ? 'catalog'
+      : canInventory
+        ? 'stock'
+        : canSell
+          ? 'sales'
+          : 'reports';
   const [tab, setTab] = useState<HubTab>(defaultTab);
   const [error, setError] = useState<string | null>(null);
   const [lowStockCount, setLowStockCount] = useState(0);
@@ -34,7 +49,12 @@ export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'succes
   const probe = useCallback(async () => {
     try {
       setError(null);
-      const result = await productsApi.listProducts({ active: 'true', lowStock: 'true', limit: 1, page: 1 });
+      const result = await productsApi.listProducts({
+        active: 'true',
+        lowStock: 'true',
+        limit: 1,
+        page: 1,
+      });
       setLowStockCount(result.meta.total);
       if (canReports) {
         const from = addDaysISO(-29);
@@ -56,60 +76,86 @@ export const ProductsHub: React.FC<{ onNotify?: (message: string, type?: 'succes
     }
   }, [canReports]);
 
-  useEffect(() => { void probe(); }, [probe, refreshKey]);
+  useEffect(() => {
+    void probe();
+  }, [probe, refreshKey]);
 
   const reload = () => setRefreshKey(k => k + 1);
 
-  const tabBtn = (id: HubTab, label: string, visible: boolean) => visible ? (
-    <button type="button" onClick={() => setTab(id)} className={`rounded-xl border px-3 py-2 text-sm font-bold transition-colors ${tab === id ? 'border-accent/30 bg-selection text-accent' : 'border-border bg-surface text-text-secondary hover:bg-surface-2'}`}>{label}</button>
-  ) : null;
+  const tabs: { id: HubTab; label: string }[] = [
+    ...(canView || canManage
+      ? [
+          { id: 'catalog' as const, label: 'Catálogo' },
+          { id: 'reservations' as const, label: 'Reservas' },
+        ]
+      : []),
+    ...(canInventory ? [{ id: 'stock' as const, label: 'Estoque' }] : []),
+    ...(canSell ? [{ id: 'sales' as const, label: 'Vendas' }] : []),
+    ...(canReports ? [{ id: 'reports' as const, label: 'Relatórios' }] : []),
+  ];
+  const activeTab = tabs.some(item => item.id === tab) ? tab : defaultTab;
 
   const bannerParts: string[] = [];
   if (lowStockCount > 0) bannerParts.push(`${lowStockCount} abaixo do mínimo`);
   if (expiredCount > 0) bannerParts.push(`${expiredCount} vencido(s)`);
   if (expiringCount > 0) bannerParts.push(`${expiringCount} vencendo em breve`);
-  if (needsReorderCount > 0) bannerParts.push(`${needsReorderCount} vendendo bem e precisando repor`);
+  if (needsReorderCount > 0)
+    bannerParts.push(`${needsReorderCount} vendendo bem e precisando repor`);
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        {tabBtn('catalog', 'Catálogo', canView || canManage)}
-        {tabBtn('reservations', 'Reservas', canView || canManage)}
-        {tabBtn('stock', 'Estoque', canInventory)}
-        {tabBtn('sales', 'Vendas', canSell)}
-        {tabBtn('reports', 'Relatórios', canReports)}
-      </div>
+      <PageHeader title="Produtos" description="Catálogo, reservas e movimentações do salão." />
+      <Tabs<HubTab> ariaLabel="Áreas de produtos" items={tabs} value={activeTab} onChange={setTab}>
+        <div className="space-y-4">
+          {bannerParts.length > 0 && (
+            <button
+              type="button"
+              disabled={!canReports && !canInventory}
+              onClick={() =>
+                canReports ? setTab('reports') : canInventory ? setTab('stock') : undefined
+              }
+              className="w-full rounded-xl border border-warning/40 bg-warning/10 p-3 text-left text-sm text-text-primary"
+            >
+              {bannerParts.join(' · ')}. A operação continua liberada.
+              {canReports ? ' Ver atenção nos relatórios.' : ''}
+            </button>
+          )}
 
-      {bannerParts.length > 0 && (
-        <button
-          type="button"
-          onClick={() => canReports ? setTab('reports') : canInventory ? setTab('stock') : undefined}
-          className="w-full rounded-xl border border-warning/40 bg-warning/10 p-3 text-left text-sm text-text-primary"
-        >
-          {bannerParts.join(' · ')}. A operação continua liberada.
-          {canReports ? ' Ver atenção nos relatórios.' : ''}
-        </button>
-      )}
-
-      {tab === 'catalog' && (canView || canManage) && (
-        <ProductCatalogPanel canManage={canManage} canView={canView} canSeeCost={canSeeCost} loadError={error} onNotify={onNotify} onReload={reload} onGoReservations={() => setTab('reservations')} />
-      )}
-      {tab === 'stock' && canInventory && (
-        <ProductStockPanel loadError={error} onNotify={onNotify} onReload={reload} />
-      )}
-      {tab === 'reservations' && (canView || canManage) && (
-        <ProductReservationsPanel loadError={error} onNotify={onNotify} onReload={reload} />
-      )}
-      {tab === 'sales' && canSell && (
-        <ProductSalesPanel canManage={canManage} canRefund={canRefund} loadError={error} onNotify={onNotify} onReload={reload} />
-      )}
-      {tab === 'reports' && canReports && (
-        <ProductReportsPanel
-          loadError={error}
-          onNotify={onNotify}
-          onGoStock={canInventory ? () => setTab('stock') : undefined}
-        />
-      )}
+          {activeTab === 'catalog' && (canView || canManage) && (
+            <ProductCatalogPanel
+              canManage={canManage}
+              canView={canView}
+              canSeeCost={canSeeCost}
+              loadError={error}
+              onNotify={onNotify}
+              onReload={reload}
+              onGoReservations={() => setTab('reservations')}
+            />
+          )}
+          {activeTab === 'stock' && canInventory && (
+            <ProductStockPanel loadError={error} onNotify={onNotify} onReload={reload} />
+          )}
+          {activeTab === 'reservations' && (canView || canManage) && (
+            <ProductReservationsPanel loadError={error} onNotify={onNotify} onReload={reload} />
+          )}
+          {activeTab === 'sales' && canSell && (
+            <ProductSalesPanel
+              canManage={canManage}
+              canRefund={canRefund}
+              loadError={error}
+              onNotify={onNotify}
+              onReload={reload}
+            />
+          )}
+          {activeTab === 'reports' && canReports && (
+            <ProductReportsPanel
+              loadError={error}
+              onNotify={onNotify}
+              onGoStock={canInventory ? () => setTab('stock') : undefined}
+            />
+          )}
+        </div>
+      </Tabs>
     </div>
   );
 };

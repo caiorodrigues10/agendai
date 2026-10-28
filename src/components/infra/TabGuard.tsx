@@ -4,11 +4,7 @@ import { LuLoader } from 'react-icons/lu';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSubscription } from '../../contexts/SubscriptionContext';
 import { useBarbershop } from '../../contexts/BarbershopContext';
-import {
-  canAccessTab,
-  DASHBOARD_GATED_TAB_IDS,
-  getDefaultTab,
-} from '../../config/tabRegistry';
+import { canAccessTab, DASHBOARD_GATED_TAB_IDS, getDefaultTab } from '../../config/tabRegistry';
 import { AccessDeniedPage } from '../../pages/AccessDeniedPage';
 
 /**
@@ -31,25 +27,25 @@ import { AccessDeniedPage } from '../../pages/AccessDeniedPage';
  */
 export const TabGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
-  const { hasDashboard, loading: subscriptionLoading } = useSubscription();
+  const { hasDashboard, data, loading: subscriptionLoading } = useSubscription();
   const { settings } = useBarbershop();
   const { tab } = useParams<{ tab: string }>();
 
   // PrivateRoute (ancora a rota /app/:tab) já trata loading e ausência de usuário.
   if (loading || !user) return <>{children}</>;
 
-  if (subscriptionLoading) {
+  if (subscriptionLoading && !data) {
     return (
-      <div
-        role="status"
-        className="min-h-[60vh] flex items-center justify-center text-accent"
-      >
+      <div role="status" className="min-h-[60vh] flex items-center justify-center text-accent">
         <LuLoader className="animate-spin" size={40} />
       </div>
     );
   }
 
-  const canAccess = canAccessTab(tab ?? 'overview', user.role, { permissions: user.permissions });
+  const canAccess = canAccessTab(tab ?? 'overview', user.role, {
+    hasDashboard: true,
+    permissions: user.permissions,
+  });
   if (!canAccess) return <AccessDeniedPage attemptedTab={tab} />;
 
   if (tab && DASHBOARD_GATED_TAB_IDS.includes(tab) && !hasDashboard) {
