@@ -267,13 +267,6 @@ export const postsApi = {
     });
   },
 
-  /** Alterna a foto na galeria pública do perfil (limite de 30 no backend). */
-  updateMedia(id: string, data: { inGallery: boolean }) {
-    return apiClient<{ success: boolean; data: PostMedia }>(
-      `/api/posts/media/${id}`, 'PATCH', data, token()
-    ).then(r => unwrap<PostMedia>(r));
-  },
-
   deleteMedia(id: string) {
     return apiClient<{ success: boolean }>(
       `/api/posts/media/${id}`, 'DELETE', undefined, token()

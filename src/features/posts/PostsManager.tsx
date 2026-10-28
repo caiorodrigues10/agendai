@@ -1,22 +1,16 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   LuMegaphone as Megaphone,
-  LuClock3 as Clock3,
   LuTrash2 as Trash2,
   LuLoaderCircle as Loader2,
-  LuCalendarDays as CalendarDays,
   LuSparkles as Sparkles,
   LuDownload as Download,
   LuSend as Send,
-  LuImagePlus as ImagePlus,
-  LuCheck as Check,
   LuChevronRight as ChevronRight,
   LuChevronLeft as ChevronLeft,
-  LuPalette as Palette,
   LuX as X,
 } from 'react-icons/lu';
-import { postsApi, type PostStatus, type PostPaletteDef, type PostMedia } from '../../infra/postsApi';
-import { barbershopApi, PostAiSuggestion } from '../../infra/barbershopApi';
+import { postsApi, type PostPaletteDef, type PostMedia } from '../../infra/postsApi';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { getErrorMessage } from '../../utils/errorMessage';
@@ -26,9 +20,11 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Skeleton } from '../../components/patterns/skeletons';
 import { PostEditor } from './PostEditor';
 import { PostPreviewBox } from './PostPreviewBox';
+import { GalleryManager } from '../gallery';
 
 type PostTone = 'promocional' | 'informativo' | 'divertido' | null;
 type Tab = 'published' | 'scheduled' | 'draft';
+type Section = 'posts' | 'gallery';
 type EditorStep = 'goal' | 'content' | 'review';
 
 // ─── Objetivos → templates ─────────────────────────────────────
@@ -88,6 +84,7 @@ export const PostsManager: React.FC = () => {
   const userId = user?.id ?? 'anon';
 
   const [tab, setTab] = useState<Tab>('published');
+  const [section, setSection] = useState<Section>('posts');
   const [page, setPage] = useState(1);
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [total, setTotal] = useState(0);
@@ -139,7 +136,10 @@ export const PostsManager: React.FC = () => {
     setMediaLoading(true);
     setMediaError(false);
     try {
-      setMediaLibrary(await postsApi.listMedia(barbershopId));
+      // Só as fotos da biblioteca do post: as fotos da galeria do perfil
+      // (inGallery=true) são enviadas na sub-aba "Fotos do perfil" e não
+      // aparecem aqui.
+      setMediaLibrary(await postsApi.listMedia(barbershopId, { inGallery: false }));
     } catch {
       setMediaError(true);
     } finally {
@@ -242,121 +242,150 @@ export const PostsManager: React.FC = () => {
             Crie e publique artes do seu salão.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setEditingPost('new')}
-          className="flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-accent px-4 font-bold text-accent-fg hover:bg-accent-hover"
-        >
-          <Sparkles size={16} aria-hidden /> Criar post
-        </button>
+        {section === 'posts' && (
+          <button
+            type="button"
+            onClick={() => setEditingPost('new')}
+            className="flex min-h-11 shrink-0 items-center gap-2 rounded-xl bg-accent px-4 font-bold text-accent-fg hover:bg-accent-hover"
+          >
+            <Sparkles size={16} aria-hidden /> Criar post
+          </button>
+        )}
       </header>
 
-      {/* Abas */}
-      <div role="tablist" aria-label="Status dos posts" className="flex gap-1 rounded-xl border border-border bg-surface p-1">
-        {(['published', 'scheduled', 'draft'] as const).map(t => (
+      {/* Seções: publicações do salão x fotos do perfil público */}
+      <div role="tablist" aria-label="Seções de posts" className="flex gap-1 rounded-xl border border-border bg-surface p-1">
+        {([
+          { id: 'posts', label: 'Publicações' },
+          { id: 'gallery', label: 'Fotos do perfil' },
+        ] as const).map(s => (
           <button
-            key={t}
+            key={s.id}
             role="tab"
-            aria-selected={tab === t}
+            aria-selected={section === s.id}
             type="button"
-            onClick={() => { setTab(t); setPage(1); }}
+            onClick={() => setSection(s.id)}
             className={`flex-1 min-h-11 rounded-lg px-3 text-sm font-semibold transition ${
-              tab === t ? 'bg-accent/15 text-accent' : 'text-text-muted hover:text-text-primary'
+              section === s.id ? 'bg-accent/15 text-accent' : 'text-text-muted hover:text-text-primary'
             }`}
           >
-            {t === 'published' ? 'Publicados' : t === 'scheduled' ? 'Agendados' : 'Rascunhos'}
+            {s.label}
           </button>
         ))}
       </div>
 
-      {/* Lista */}
-      {loadingList ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3" aria-busy aria-label="Carregando posts">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-border bg-surface p-3 space-y-2">
-              <Skeleton variant="rounded" width="100%" height="8rem" />
-              <Skeleton width="75%" height="0.875rem" />
-              <Skeleton width="50%" height="0.625rem" />
-            </div>
-          ))}
-        </div>
-      ) : posts.length === 0 ? (
-        <div className="rounded-xl border border-border bg-surface p-10 text-center">
-          <Megaphone size={28} className="mx-auto text-text-muted" aria-hidden />
-          <p className="mt-3 text-sm font-semibold text-text-secondary">
-            {tab === 'published' && 'Nenhum post publicado ainda.'}
-            {tab === 'scheduled' && 'Nenhum post agendado.'}
-            {tab === 'draft' && 'Nenhum rascunho salvo.'}
-          </p>
-          <p className="mt-1 text-xs text-text-muted">
-            {tab === 'draft' ? 'Crie um post e salve como rascunho para continuar depois.' : 'Use “Criar post” para começar.'}
-          </p>
-        </div>
+      {section === 'gallery' ? (
+        <GalleryManager />
       ) : (
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {posts.map(post => {
-            const badge = statusBadge(post.status);
-            return (
-              <li key={post.id} className="group rounded-xl border border-border bg-surface overflow-hidden">
-                <div className="relative bg-bg">
-                  <PostPreviewBox
-                    format={(post.format as any) ?? 'square'}
-                    previewUrl={post.imageUrl ?? null}
-                    className="!rounded-none !border-0"
-                  />
-                  <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold ${badge.className}`}>
-                    {badge.label}
-                  </span>
-                  <span className="absolute right-2 bottom-2 rounded-full bg-black/50 px-1.5 py-0.5 text-[9px] font-bold text-white">
-                    {post.format === 'portrait' ? '4:5' : post.format === 'story' ? '9:16' : '1:1'}
-                  </span>
-                </div>
-                <div className="p-3 space-y-1.5">
-                  <p className="truncate text-sm font-semibold text-text-primary">{post.title || 'Sem título'}</p>
-                  <p className="text-[11px] text-text-muted">
-                    {post.status === 'scheduled' ? `Agendado: ${formatDate(post.scheduledFor)}`
-                      : post.status === 'published' ? `Publicado: ${formatDate(post.publishedAt)}`
-                      : `Editado: ${formatDate(post.createdAt)}`}
-                  </p>
-                  <PostRowActions
-                    post={post}
-                    busy={actionInFlight !== null}
-                    onEdit={() => setEditingPost(post)}
-                    onReuse={() => handleReuse(post)}
-                    onPublish={() => void handlePublish(post)}
-                    onCancelSchedule={() => void handleCancelSchedule(post)}
-                    onDelete={() => setDeletingPost(post)}
-                    onWhatsapp={() => void openWhatsappConfirm(post)}
-                    onDownload={() => post.imageUrl && downloadPostImage(post.imageUrl, `post-${post.id}.png`)}
-                  />
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+        <>
+          {/* Abas */}
+          <div role="tablist" aria-label="Status dos posts" className="flex gap-1 rounded-xl border border-border bg-surface p-1">
+            {(['published', 'scheduled', 'draft'] as const).map(t => (
+              <button
+                key={t}
+                role="tab"
+                aria-selected={tab === t}
+                type="button"
+                onClick={() => { setTab(t); setPage(1); }}
+                className={`flex-1 min-h-11 rounded-lg px-3 text-sm font-semibold transition ${
+                  tab === t ? 'bg-accent/15 text-accent' : 'text-text-muted hover:text-text-primary'
+                }`}
+              >
+                {t === 'published' ? 'Publicados' : t === 'scheduled' ? 'Agendados' : 'Rascunhos'}
+              </button>
+            ))}
+          </div>
 
-      {/* Paginação */}
-      {pageCount > 1 && (
-        <nav aria-label="Paginação de posts" className="flex items-center justify-center gap-2">
-          <button
-            type="button"
-            disabled={page <= 1}
-            onClick={() => void loadTab(tab, page - 1)}
-            className="flex min-h-11 items-center gap-1 rounded-xl border border-border px-3 text-sm font-semibold text-text-secondary disabled:opacity-40"
-          >
-            <ChevronLeft size={15} aria-hidden /> Anterior
-          </button>
-          <span className="text-xs text-text-muted" aria-current="page">{page} de {pageCount}</span>
-          <button
-            type="button"
-            disabled={page >= pageCount}
-            onClick={() => void loadTab(tab, page + 1)}
-            className="flex min-h-11 items-center gap-1 rounded-xl border border-border px-3 text-sm font-semibold text-text-secondary disabled:opacity-40"
-          >
-            Próxima <ChevronRight size={15} aria-hidden />
-          </button>
-        </nav>
+          {/* Lista */}
+          {loadingList ? (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3" aria-busy aria-label="Carregando posts">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="rounded-xl border border-border bg-surface p-3 space-y-2">
+                  <Skeleton variant="rounded" width="100%" height="8rem" />
+                  <Skeleton width="75%" height="0.875rem" />
+                  <Skeleton width="50%" height="0.625rem" />
+                </div>
+              ))}
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="rounded-xl border border-border bg-surface p-10 text-center">
+              <Megaphone size={28} className="mx-auto text-text-muted" aria-hidden />
+              <p className="mt-3 text-sm font-semibold text-text-secondary">
+                {tab === 'published' && 'Nenhum post publicado ainda.'}
+                {tab === 'scheduled' && 'Nenhum post agendado.'}
+                {tab === 'draft' && 'Nenhum rascunho salvo.'}
+              </p>
+              <p className="mt-1 text-xs text-text-muted">
+                {tab === 'draft' ? 'Crie um post e salve como rascunho para continuar depois.' : 'Use “Criar post” para começar.'}
+              </p>
+            </div>
+          ) : (
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {posts.map(post => {
+                const badge = statusBadge(post.status);
+                return (
+                  <li key={post.id} className="group rounded-xl border border-border bg-surface overflow-hidden">
+                    <div className="relative bg-bg">
+                      <PostPreviewBox
+                        format={(post.format as any) ?? 'square'}
+                        previewUrl={post.imageUrl ?? null}
+                        className="!rounded-none !border-0"
+                      />
+                      <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold ${badge.className}`}>
+                        {badge.label}
+                      </span>
+                      <span className="absolute right-2 bottom-2 rounded-full bg-black/50 px-1.5 py-0.5 text-[9px] font-bold text-white">
+                        {post.format === 'portrait' ? '4:5' : post.format === 'story' ? '9:16' : '1:1'}
+                      </span>
+                    </div>
+                    <div className="p-3 space-y-1.5">
+                      <p className="truncate text-sm font-semibold text-text-primary">{post.title || 'Sem título'}</p>
+                      <p className="text-[11px] text-text-muted">
+                        {post.status === 'scheduled' ? `Agendado: ${formatDate(post.scheduledFor)}`
+                          : post.status === 'published' ? `Publicado: ${formatDate(post.publishedAt)}`
+                          : `Editado: ${formatDate(post.createdAt)}`}
+                      </p>
+                      <PostRowActions
+                        post={post}
+                        busy={actionInFlight !== null}
+                        onEdit={() => setEditingPost(post)}
+                        onReuse={() => handleReuse(post)}
+                        onPublish={() => void handlePublish(post)}
+                        onCancelSchedule={() => void handleCancelSchedule(post)}
+                        onDelete={() => setDeletingPost(post)}
+                        onWhatsapp={() => void openWhatsappConfirm(post)}
+                        onDownload={() => post.imageUrl && downloadPostImage(post.imageUrl, `post-${post.id}.png`)}
+                      />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+
+          {/* Paginação */}
+          {pageCount > 1 && (
+            <nav aria-label="Paginação de posts" className="flex items-center justify-center gap-2">
+              <button
+                type="button"
+                disabled={page <= 1}
+                onClick={() => void loadTab(tab, page - 1)}
+                className="flex min-h-11 items-center gap-1 rounded-xl border border-border px-3 text-sm font-semibold text-text-secondary disabled:opacity-40"
+              >
+                <ChevronLeft size={15} aria-hidden /> Anterior
+              </button>
+              <span className="text-xs text-text-muted" aria-current="page">{page} de {pageCount}</span>
+              <button
+                type="button"
+                disabled={page >= pageCount}
+                onClick={() => void loadTab(tab, page + 1)}
+                className="flex min-h-11 items-center gap-1 rounded-xl border border-border px-3 text-sm font-semibold text-text-secondary disabled:opacity-40"
+              >
+                Próxima <ChevronRight size={15} aria-hidden />
+              </button>
+            </nav>
+          )}
+        </>
       )}
 
       {/* Editor */}
@@ -379,7 +408,6 @@ export const PostsManager: React.FC = () => {
           mediaError={mediaError}
           onRetryMedia={() => setMediaVersion(v => v + 1)}
           onMediaRemoved={id => setMediaLibrary(prev => prev.filter(m => m.id !== id))}
-          onMediaUpdated={m => setMediaLibrary(prev => prev.map(x => (x.id === m.id ? m : x)))}
         />
       )}
 

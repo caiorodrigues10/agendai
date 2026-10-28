@@ -22,7 +22,7 @@ import { useBarbershop } from '../contexts/BarbershopContext';
 import { useScheduling } from '../contexts/SchedulingContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
-import { ALL_TAB_IDS, getDefaultTab, canAccessTab, canAccessTabByMode, getPrimaryTabForMode, DASHBOARD_GATED_TAB_IDS } from '../config/tabRegistry';
+import { ALL_TAB_IDS, LEGACY_TAB_REDIRECTS, getDefaultTab, canAccessTab, canAccessTabByMode, getPrimaryTabForMode, DASHBOARD_GATED_TAB_IDS } from '../config/tabRegistry';
 
 import { getErrorMessage } from '../utils/errorMessage';
 import { ApiError } from '../infra/apiClient';
@@ -119,7 +119,9 @@ export const StaffDashboard: React.FC = () => {
 
   const rawTab = location.pathname.split('/')[2] || 'overview';
   const operationMode = settings?.operationMode ?? 'HYBRID';
-  const activeTab = ALL_TAB_IDS.includes(rawTab) ? rawTab : getDefaultTab(user?.role, operationMode);
+  // Abas antigas (ex.: /app/gallery) caem na aba equivalente atual.
+  const requestedTab = LEGACY_TAB_REDIRECTS[rawTab] ?? rawTab;
+  const activeTab = ALL_TAB_IDS.includes(requestedTab) ? requestedTab : getDefaultTab(user?.role, operationMode);
 
   const prevRawTab = useRef(rawTab);
   useEffect(() => {
@@ -148,7 +150,8 @@ export const StaffDashboard: React.FC = () => {
   // Redirect invalid tabs
   useEffect(() => {
     if (rawTab !== activeTab) {
-      navigate(`/app/${getDefaultTab(user?.role, operationMode)}`, { replace: true });
+      const target = LEGACY_TAB_REDIRECTS[rawTab] ?? getDefaultTab(user?.role, operationMode);
+      navigate(`/app/${target}`, { replace: true });
     }
   }, [rawTab, activeTab, user?.role, operationMode, navigate]);
 
