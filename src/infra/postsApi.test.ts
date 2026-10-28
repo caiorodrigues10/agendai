@@ -79,11 +79,4 @@ describe('postsApi — galeria (inGallery)', () => {
     expect([...form.keys()][0]).toBe('inGallery');
   });
 
-  it('updateMedia faz PATCH com a flag', async () => {
-    mockedClient.mockResolvedValueOnce({ success: true, data: { id: 'm1' } });
-    await postsApi.updateMedia('m1', { inGallery: false });
-    expect(mockedClient).toHaveBeenCalledWith(
-      '/api/posts/media/m1', 'PATCH', { inGallery: false }, 'test-token'
-    );
-  });
 });

@@ -20,7 +20,6 @@ vi.mock('../../infra/postsApi', async importOriginal => {
       uploadMedia: vi.fn(),
       deleteMedia: vi.fn(),
       listMedia: vi.fn(),
-      updateMedia: vi.fn(),
     },
   };
 });
@@ -363,7 +362,6 @@ function MediaHarness({ initial, editorProps }: { initial: PostMedia[]; editorPr
       mediaLibrary={lib}
       onMediaUploaded={m => setLib(prev => [m, ...prev])}
       onMediaRemoved={id => setLib(prev => prev.filter(x => x.id !== id))}
-      onMediaUpdated={m => setLib(prev => prev.map(x => (x.id === m.id ? m : x)))}
     />
   );
 }
@@ -468,43 +466,26 @@ describe('PostEditor — biblioteca de fotos', () => {
     expect(onRetryMedia).toHaveBeenCalled();
   });
 
-  it('filtra a biblioteca por "Galeria" no picker', async () => {
+  it('modal "Escolher foto" não tem checkbox, filtro de galeria nem estrela', async () => {
     await openImageTab({ mediaLibrary: [MEDIA_A, MEDIA_B] });
     fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
     await screen.findByRole('dialog', { name: 'Escolher foto' });
-    fireEvent.click(screen.getByRole('button', { name: 'Galeria' }));
-    // só MEDIA_B está na galeria
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Galeria' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Todas' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /galeria/i })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Foto 1' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Foto 2' })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Todas' }));
     expect(screen.getByRole('button', { name: 'Foto 2' })).toBeInTheDocument();
   });
 
-  it('mostra estado vazio próprio quando o filtro Galeria não tem fotos', async () => {
-    await openImageTab({ mediaLibrary: [MEDIA_A] });
-    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'Galeria' }));
-    expect(screen.getByText(/nenhuma foto na galeria do perfil/i)).toBeInTheDocument();
-  });
-
-  it('alterna a foto na galeria via estrela e atualiza a biblioteca', async () => {
-    mockedPostsApi.updateMedia.mockResolvedValueOnce({ ...MEDIA_A, inGallery: true });
-    const props = await openHarnessImageTab([MEDIA_A]);
-    fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
-    fireEvent.click(await screen.findByRole('button', { name: 'Publicar foto 1 na galeria' }));
-    await waitFor(() => expect(mockedPostsApi.updateMedia).toHaveBeenCalledWith('media-a', { inGallery: true }));
-    expect(await screen.findByRole('button', { name: 'Tirar foto 1 da galeria' })).toBeInTheDocument();
-    expect(props.showToast).toHaveBeenCalledWith('Foto publicada na galeria do perfil.');
-  });
-
-  it('envia "Publicar na galeria" no upload quando o toggle está marcado', async () => {
-    mockedPostsApi.uploadMedia.mockResolvedValueOnce({ ...MEDIA_A, inGallery: true });
+  it('envia inGallery: false no upload (foto do post não vai para a galeria do perfil)', async () => {
+    mockedPostsApi.uploadMedia.mockResolvedValueOnce(MEDIA_A);
     await openHarnessImageTab([]);
     fireEvent.click(screen.getByRole('button', { name: 'Foto principal' }));
-    fireEvent.click(await screen.findByRole('checkbox', { name: /publicar na galeria do perfil/i }));
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
     fireEvent.change(imageInput(), { target: { files: [pngFile()] } });
     await waitFor(() =>
-      expect(mockedPostsApi.uploadMedia).toHaveBeenCalledWith('barber1', expect.any(File), { inGallery: true })
+      expect(mockedPostsApi.uploadMedia).toHaveBeenCalledWith('barber1', expect.any(File), { inGallery: false })
     );
   });
 

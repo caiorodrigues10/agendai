@@ -126,6 +126,14 @@ export const MOBILE_PRIMARY_TAB_IDS = ['overview', 'queue', 'appointments', 'cli
 export const ALL_TAB_IDS = TAB_GROUPS.flatMap(g => g.tabs.map(t => t.id));
 
 /**
+ * Abas antigas → aba atual (link salvo/bookmark não quebra).
+ * A galeria do perfil virou a sub-aba "Fotos do perfil" dentro de Posts.
+ */
+export const LEGACY_TAB_REDIRECTS: Record<string, string> = {
+  gallery: 'posts',
+};
+
+/**
  * Abas que exigem plano com dashboard (paywall Pro). Quem não tem o plano não
  * recebe "Acesso negado": é redirecionado para o mesmo destino de upgrade —
  * tratado no `TabGuard` e reforçado no `StaffDashboard`.

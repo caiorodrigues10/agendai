@@ -1,5 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { ALL_TAB_IDS, canAccessTab, getDefaultTab } from './tabRegistry';
+import { ALL_TAB_IDS, LEGACY_TAB_REDIRECTS, canAccessTab, getDefaultTab } from './tabRegistry';
+
+describe('abas', () => {
+  it('galeria não é mais uma aba da sidebar (virou sub-aba de Posts)', () => {
+    expect(ALL_TAB_IDS).not.toContain('gallery');
+    expect(canAccessTab('gallery', 'OWNER')).toBe(false);
+  });
+
+  it('URL antiga /app/gallery aponta para Posts', () => {
+    expect(LEGACY_TAB_REDIRECTS.gallery).toBe('posts');
+    expect(ALL_TAB_IDS).toContain(LEGACY_TAB_REDIRECTS.gallery);
+  });
+});
 
 describe('canAccessTab', () => {
   it('tabs sem roles são públicas para qualquer papel logado', () => {
