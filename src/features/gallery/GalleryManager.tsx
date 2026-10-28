@@ -35,7 +35,7 @@ const GalleryPhotoGrid: React.FC<GalleryPhotoGridProps> = ({ photos, disabled, o
       <li key={photo.id} className="group relative overflow-hidden rounded-xl border border-border bg-bg">
         <img
           src={photo.url}
-          alt="Foto da galeria do salão"
+          alt="Foto da galeria do perfil"
           loading="lazy"
           className="aspect-square w-full object-cover"
         />
@@ -65,7 +65,7 @@ const GalleryEmptyState: React.FC = () => (
 );
 
 /**
- * Área exclusiva do dono para subir as fotos da galeria do salão (aba "Fotos"
+ * Área exclusiva do dono para subir as fotos da galeria do perfil (aba "Fotos"
  * do perfil público). O editor de posts é independente: as fotos dele vão com
  * `inGallery: false` e nunca aparecem no perfil.
  */
@@ -180,7 +180,7 @@ export const GalleryManager: React.FC = () => {
   return (
     <section className="space-y-4">
       <header className="space-y-1">
-        <h2 className="text-lg font-bold text-text-primary">Galeria do salão</h2>
+        <h2 className="text-lg font-bold text-text-primary">Galeria do perfil</h2>
         <p className="text-xs text-text-muted">
           As fotos enviadas aqui aparecem na aba Fotos do seu perfil.
         </p>

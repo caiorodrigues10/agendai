@@ -44,14 +44,14 @@ beforeEach(() => {
   mockedPostsApi.listMedia.mockResolvedValue([]);
 });
 
-describe('GalleryManager — galeria do salão', () => {
+describe('GalleryManager — galeria do perfil', () => {
   it('lista só as fotos da galeria (inGallery=true), mais recentes primeiro', async () => {
     mockedPostsApi.listMedia.mockResolvedValue([PHOTO_B, PHOTO_A]);
     render(<GalleryManager />);
     await waitFor(() =>
       expect(mockedPostsApi.listMedia).toHaveBeenCalledWith('shop-1', { inGallery: true })
     );
-    const images = await screen.findAllByAltText('Foto da galeria do salão');
+    const images = await screen.findAllByAltText('Foto da galeria do perfil');
     expect(images).toHaveLength(2);
     expect(images[0]).toHaveAttribute('src', PHOTO_B.url);
     expect(images[1]).toHaveAttribute('src', PHOTO_A.url);
@@ -84,7 +84,7 @@ describe('GalleryManager — galeria do salão', () => {
     await waitFor(() =>
       expect(mockedPostsApi.uploadMedia).toHaveBeenCalledWith('shop-1', expect.any(File), { inGallery: true })
     );
-    expect(await screen.findByAltText('Foto da galeria do salão')).toBeInTheDocument();
+    expect(await screen.findByAltText('Foto da galeria do perfil')).toBeInTheDocument();
     expect(screen.getByText('Foto enviada para a galeria do perfil.')).toBeInTheDocument();
   });
 

@@ -67,7 +67,7 @@ describe('PostsManager — seções Publicações / Fotos do perfil', () => {
     render(<PostsManager />);
     fireEvent.click(screen.getByRole('tab', { name: 'Fotos do perfil' }));
     expect(await screen.findByText('1 de 30 fotos')).toBeInTheDocument();
-    expect(screen.getByAltText('Foto da galeria do salão')).toBeInTheDocument();
+    expect(screen.getByAltText('Foto da galeria do perfil')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /criar post/i })).not.toBeInTheDocument();
     // A galeria lista só as fotos do perfil (inGallery=true).
     await waitFor(() =>
