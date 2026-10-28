@@ -169,8 +169,7 @@ export interface FeedPost {
   likes: number;
   commentsCount?: number;
   authorName?: string;
-  status?: 'draft' | 'scheduled' | 'published';
-  scheduledFor?: number | null;
+  status?: 'draft' | 'published';
   publishedAt?: number | null;
   postMode?: 'queue' | 'appointments' | 'both';
   ctaText?: string | null;

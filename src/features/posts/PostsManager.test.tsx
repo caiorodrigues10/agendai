@@ -1,5 +1,6 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { postsApi, type PostMedia } from '../../infra/postsApi';
+import type { FeedPost } from '../../types';
 import { PostsManager } from './PostsManager';
 
 vi.mock('../../infra/postsApi', async importOriginal => {
@@ -13,6 +14,7 @@ vi.mock('../../infra/postsApi', async importOriginal => {
       listMedia: vi.fn(),
       uploadMedia: vi.fn(),
       deleteMedia: vi.fn(),
+      remove: vi.fn(),
     },
   };
 });
@@ -49,7 +51,29 @@ beforeEach(() => {
   mockedPostsApi.list.mockResolvedValue({ data: [], meta: { total: 0, page: 1, limit: 12 } });
   mockedPostsApi.palettes.mockResolvedValue([]);
   mockedPostsApi.listMedia.mockResolvedValue([]);
+  mockedPostsApi.remove.mockResolvedValue({ success: true });
 });
+
+const DRAFT_POST: FeedPost = {
+  id: 'post-1',
+  type: 'announcement',
+  title: 'Rascunho de teste',
+  content: '',
+  createdAt: Date.parse('2026-10-01T12:00:00.000Z'),
+  likes: 0,
+  status: 'draft',
+  format: 'square',
+  templateKey: 'agenda-aberta',
+};
+
+/** list devolve o rascunho só quando a sub-aba pede status=draft. */
+function listDraftOnly() {
+  mockedPostsApi.list.mockImplementation(async (_shop: string, opts?: { status?: string }) =>
+    opts?.status === 'draft'
+      ? { data: [DRAFT_POST], meta: { total: 1, page: 1, limit: 12 } }
+      : { data: [], meta: { total: 0, page: 1, limit: 12 } }
+  );
+}
 
 describe('PostsManager — seções Publicações / Galeria do perfil', () => {
   it('mostra as abas Publicações e Galeria do perfil, começando em Publicações', async () => {
@@ -60,6 +84,47 @@ describe('PostsManager — seções Publicações / Galeria do perfil', () => {
     expect(screen.getByRole('button', { name: /criar post/i })).toBeInTheDocument();
     expect(screen.queryByText('0 de 30 fotos')).not.toBeInTheDocument();
     await waitFor(() => expect(mockedPostsApi.list).toHaveBeenCalled());
+  });
+
+  it('na aba Publicações mostra só Publicados e Rascunhos (sem Agendados)', async () => {
+    render(<PostsManager />);
+    expect(screen.getByRole('tab', { name: 'Publicados' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Rascunhos' })).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: 'Agendados' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Nenhum post agendado.')).not.toBeInTheDocument();
+    await waitFor(() => expect(mockedPostsApi.list).toHaveBeenCalledWith(
+      'shop-1', expect.objectContaining({ status: 'published' })
+    ));
+  });
+
+  it('na aba Rascunhos lista o post DRAFT com selo Rascunho e ações Publicar/Excluir', async () => {
+    listDraftOnly();
+    render(<PostsManager />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Rascunhos' }));
+
+    expect(await screen.findByText('Rascunho de teste')).toBeInTheDocument();
+    expect(screen.getByText('Rascunho')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Publicar' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Excluir rascunho' })).toBeInTheDocument();
+    expect(screen.queryByText(/Agendado:/)).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(mockedPostsApi.list).toHaveBeenCalledWith('shop-1', expect.objectContaining({ status: 'draft' }))
+    );
+  });
+
+  it('excluir rascunho pede confirmação, remove via postsApi.remove e avisa', async () => {
+    listDraftOnly();
+    render(<PostsManager />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Rascunhos' }));
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Excluir rascunho' }));
+    const dialog = await screen.findByRole('alertdialog');
+    expect(within(dialog).getByText('Excluir rascunho')).toBeInTheDocument();
+    expect(within(dialog).getByText(/será removido permanentemente/i)).toBeInTheDocument();
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Excluir' }));
+    await waitFor(() => expect(mockedPostsApi.remove).toHaveBeenCalledWith('post-1'));
+    expect(await screen.findByText('Rascunho removido.')).toBeInTheDocument();
   });
 
   it('troca para Galeria do perfil: mostra a galeria e esconde "Criar post"', async () => {
