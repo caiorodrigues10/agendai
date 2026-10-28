@@ -367,11 +367,19 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   );
 
   const persistDraft = useCallback(() => {
+    // Só post novo: a restauração usa exclusivamente a chave 'new' (acima), então
+    // gravar rascunho local sob o id de um post existente criaria entradas órfãs
+    // — nunca lidas hoje, mas capazes de sobrescrever dados do servidor se alguém
+    // passasse a ler. Ao abrir edição, limpa qualquer órfão histórico do mesmo id.
+    if (isEditing) {
+      clearDraft(userId, barbershopId, storageKey);
+      return;
+    }
     writeDraft<LocalDraftPayload>(userId, barbershopId, storageKey, DRAFT_VERSION, {
       objectiveId, templateKey, paletteKey, format, postMode, type, title, ctaText,
       content, primaryMediaId, secondaryMediaId, priceItems, businessName,
     });
-  }, [userId, barbershopId, storageKey, objectiveId, templateKey, paletteKey, format, postMode, type, title, ctaText, content, primaryMediaId, secondaryMediaId, priceItems, businessName]);
+  }, [isEditing, userId, barbershopId, storageKey, objectiveId, templateKey, paletteKey, format, postMode, type, title, ctaText, content, primaryMediaId, secondaryMediaId, priceItems, businessName]);
 
   useEffect(() => { persistDraft(); }, [persistDraft]);
 

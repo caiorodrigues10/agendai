@@ -83,7 +83,6 @@ interface CreatePostPayload {
   ctaText?: string;
   content?: string;
   imageUrl?: string;
-  scheduledFor?: string;
   templateKey?: string;
   format?: 'square' | 'portrait' | 'story';
   primaryMediaId?: string | null;
@@ -363,24 +362,6 @@ export const barbershopApi = {
       token
     ).then(res => unwrap<FeedPost>(res));
   },
-  updateScheduledPost: (id: string, payload: Partial<CreatePostPayload> & { status?: string }) => {
-    const token = authStorage.getAccessToken() || '';
-    return apiClient<{ success: boolean; data: FeedPost }>(
-      `/api/posts/${id}`,
-      'PATCH',
-      payload,
-      token
-    ).then(res => unwrap<FeedPost>(res));
-  },
-  listScheduledPosts: (barbershopId: string) => {
-    const token = authStorage.getAccessToken() || '';
-    return apiClient<{ success: boolean; data: FeedPost[] }>(
-      `/api/posts/scheduled?barbershopId=${encodeURIComponent(barbershopId)}`,
-      'GET',
-      undefined,
-      token
-    ).then(res => unwrap<FeedPost[]>(res));
-  },
   getPostConfig: (barbershopId: string) => {
     const token = authStorage.getAccessToken() || '';
     return apiClient<{ success: boolean; data: PostConfig }>(
@@ -399,11 +380,6 @@ export const barbershopApi = {
       token
     ).then(res => unwrap<PostConfig>(res));
   },
-  deleteScheduledPost: (id: string) => {
-    const token = authStorage.getAccessToken() || '';
-    return apiClient<void>(`/api/posts/${id}`, 'DELETE', undefined, token);
-  },
-
   getWeatherForecast: (barbershopId: string, days = 7) => {
     const token = authStorage.getAccessToken() || '';
     return apiClient<{ success: boolean; data: ShopWeatherForecast }>(

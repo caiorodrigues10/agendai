@@ -14,7 +14,7 @@ function unwrap<T>(res: unknown): T {
 
 // ─── Types ─────────────────────────────────────────────────────
 
-export type PostStatus = 'draft' | 'scheduled' | 'published';
+export type PostStatus = 'draft' | 'published';
 export type PostFormat = 'square' | 'portrait' | 'story';
 export type PostPhotoMode = 'none' | 'optional' | 'required';
 
@@ -142,14 +142,6 @@ export const postsApi = {
     ).then(r => ({ data: unwrap<FeedPost[]>(r), meta: (r as any).meta ?? { total: 0, page: 1, limit: 12 } }));
   },
 
-  /** Compat: lista legada de rascunhos/agendados. */
-  listScheduled(barbershopId: string) {
-    return apiClient<{ success: boolean; data: FeedPost[] }>(
-      `/api/posts/scheduled?barbershopId=${encodeURIComponent(barbershopId)}`,
-      'GET', undefined, token()
-    ).then(r => unwrap<FeedPost[]>(r));
-  },
-
   templates() {
     return apiClient<{ success: boolean; data: PostTemplateDef[] }>(
       '/api/posts/templates', 'GET', undefined, token()
@@ -192,7 +184,7 @@ export const postsApi = {
     ).then(r => unwrap<{ imageUrl: string }>(r).imageUrl);
   },
 
-  /** Cria como rascunho por padrão. Publicar/agendar usam as ações abaixo. */
+  /** Cria como rascunho por padrão. Publicar usa a ação abaixo. */
   create(payload: CreatePostPayload) {
     return apiClient<{ success: boolean; data: FeedPost }>(
       '/api/posts', 'POST', payload, token()
@@ -211,13 +203,6 @@ export const postsApi = {
   publish(id: string) {
     return apiClient<{ success: boolean; data: FeedPost }>(
       `/api/posts/${id}/publish`, 'POST', undefined, token()
-    ).then(r => unwrap<FeedPost>(r));
-  },
-
-  /** Cancela agendamento legado (post volta a rascunho). Posts já agendados no banco não ficam órfãos. */
-  cancelSchedule(id: string) {
-    return apiClient<{ success: boolean; data: FeedPost }>(
-      `/api/posts/${id}/cancel-schedule`, 'POST', undefined, token()
     ).then(r => unwrap<FeedPost>(r));
   },
 

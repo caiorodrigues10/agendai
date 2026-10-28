@@ -18,6 +18,13 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 - Modos de operação do salão controlam UI pública (`PublicHome`, `PublicLinkPanel`).
 - Booking público e staff usam `schedulingApi`; alinhamento guest vs auth depende do backend.
 
+## Publicações do feed (posts)
+
+- `PostsManager` só tem as sub-abas **Publicados** e **Rascunhos** — não existe sub-aba "Agendados", nem ação de agendar/cancelar agendamento na UI.
+- Salvar rascunho: `postsApi.create({status:'draft'})` (post novo) ou `postsApi.update` (edição); publicar: `postsApi.publish(id)`. Publicação exige modelo carregado + fotos exigidas pelo template + preço (quando o modelo usa lista de preços).
+- Rascunho local (`draftStorage`, `DRAFT_VERSION`) vale só para post **novo** (`storageKey 'new'`) e é limpo ao salvar/publicar.
+- Rotas legadas de agendamento continuam existindo no backend por compatibilidade, mas nenhum consumidor no frontend as chama.
+
 ## Pacotes / fiado / produtos
 
 - Receita de pacote na venda; consumo de sessão não deve duplicar receita na UI de insights.

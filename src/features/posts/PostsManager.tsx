@@ -23,7 +23,7 @@ import { PostPreviewBox } from './PostPreviewBox';
 import { GalleryManager } from '../gallery';
 
 type PostTone = 'promocional' | 'informativo' | 'divertido' | null;
-type Tab = 'published' | 'scheduled' | 'draft';
+type Tab = 'published' | 'draft';
 type Section = 'posts' | 'gallery';
 type EditorStep = 'goal' | 'content' | 'review';
 
@@ -62,8 +62,6 @@ function statusBadge(status?: FeedPost['status']) {
   switch (status) {
     case 'published':
       return { label: 'Publicado', className: 'bg-success/15 text-success' };
-    case 'scheduled':
-      return { label: 'Agendado', className: 'bg-warning/15 text-warning' };
     default:
       return { label: 'Rascunho', className: 'bg-bg text-text-muted' };
   }
@@ -169,21 +167,6 @@ export const PostsManager: React.FC = () => {
     }
   };
 
-  /** Posts agendados legados: cancelar o agendamento devolve o post a rascunho. */
-  const handleCancelSchedule = async (post: FeedPost) => {
-    if (actionInFlight) return;
-    setActionInFlight(`cancel-${post.id}`);
-    try {
-      await postsApi.cancelSchedule(post.id);
-      showToast('Agendamento cancelado. O post voltou a ser rascunho.');
-      void loadTab(tab, page);
-    } catch (err) {
-      showToast(getErrorMessage(err, 'Não foi possível cancelar o agendamento.'), 'error');
-    } finally {
-      setActionInFlight(null);
-    }
-  };
-
   const handleDelete = async () => {
     if (!deletingPost || deleting) return;
     setDeleting(true);
@@ -280,7 +263,7 @@ export const PostsManager: React.FC = () => {
         <>
           {/* Abas */}
           <div role="tablist" aria-label="Status dos posts" className="flex gap-1 rounded-xl border border-border bg-surface p-1">
-            {(['published', 'scheduled', 'draft'] as const).map(t => (
+            {(['published', 'draft'] as const).map(t => (
               <button
                 key={t}
                 role="tab"
@@ -291,7 +274,7 @@ export const PostsManager: React.FC = () => {
                   tab === t ? 'bg-accent/15 text-accent' : 'text-text-muted hover:text-text-primary'
                 }`}
               >
-                {t === 'published' ? 'Publicados' : t === 'scheduled' ? 'Agendados' : 'Rascunhos'}
+                {t === 'published' ? 'Publicados' : 'Rascunhos'}
               </button>
             ))}
           </div>
@@ -311,9 +294,7 @@ export const PostsManager: React.FC = () => {
             <div className="rounded-xl border border-border bg-surface p-10 text-center">
               <Megaphone size={28} className="mx-auto text-text-muted" aria-hidden />
               <p className="mt-3 text-sm font-semibold text-text-secondary">
-                {tab === 'published' && 'Nenhum post publicado ainda.'}
-                {tab === 'scheduled' && 'Nenhum post agendado.'}
-                {tab === 'draft' && 'Nenhum rascunho salvo.'}
+                {tab === 'published' ? 'Nenhum post publicado ainda.' : 'Nenhum rascunho salvo.'}
               </p>
               <p className="mt-1 text-xs text-text-muted">
                 {tab === 'draft' ? 'Crie um post e salve como rascunho para continuar depois.' : 'Use “Criar post” para começar.'}
@@ -341,8 +322,7 @@ export const PostsManager: React.FC = () => {
                     <div className="p-3 space-y-1.5">
                       <p className="truncate text-sm font-semibold text-text-primary">{post.title || 'Sem título'}</p>
                       <p className="text-[11px] text-text-muted">
-                        {post.status === 'scheduled' ? `Agendado: ${formatDate(post.scheduledFor)}`
-                          : post.status === 'published' ? `Publicado: ${formatDate(post.publishedAt)}`
+                        {post.status === 'published' ? `Publicado: ${formatDate(post.publishedAt)}`
                           : `Editado: ${formatDate(post.createdAt)}`}
                       </p>
                       <PostRowActions
@@ -351,7 +331,6 @@ export const PostsManager: React.FC = () => {
                         onEdit={() => setEditingPost(post)}
                         onReuse={() => handleReuse(post)}
                         onPublish={() => void handlePublish(post)}
-                        onCancelSchedule={() => void handleCancelSchedule(post)}
                         onDelete={() => setDeletingPost(post)}
                         onWhatsapp={() => void openWhatsappConfirm(post)}
                         onDownload={() => post.imageUrl && downloadPostImage(post.imageUrl, `post-${post.id}.png`)}
@@ -447,14 +426,13 @@ interface RowActionsProps {
   onEdit: () => void;
   onReuse: () => void;
   onPublish: () => void;
-  onCancelSchedule: () => void;
   onDelete: () => void;
   onWhatsapp: () => void;
   onDownload: () => void;
 }
 
 const PostRowActions: React.FC<RowActionsProps> = ({
-  post, busy, onEdit, onReuse, onPublish, onCancelSchedule, onDelete, onWhatsapp, onDownload,
+  post, busy, onEdit, onReuse, onPublish, onDelete, onWhatsapp, onDownload,
 }) => {
   if (post.status === 'published') {
     return (
@@ -481,21 +459,15 @@ const PostRowActions: React.FC<RowActionsProps> = ({
         className="flex-1 min-h-10 rounded-lg border border-border text-xs font-semibold text-text-secondary hover:border-accent/40 hover:text-accent disabled:opacity-40">
         Editar
       </button>
-      {post.status === 'scheduled' || post.status === 'draft' ? (
+      {post.status === 'draft' && (
         <button type="button" onClick={onPublish} disabled={busy}
           className="flex-1 min-h-10 rounded-lg bg-accent text-xs font-bold text-accent-fg hover:bg-accent-hover disabled:opacity-40">
           Publicar
         </button>
-      ) : null}
-      {post.status === 'scheduled' ? (
-        <button type="button" onClick={onCancelSchedule} disabled={busy} title="Cancelar agendamento"
-          className="min-h-10 rounded-lg border border-border px-2 text-[11px] font-semibold text-text-secondary hover:border-warning/60 hover:text-warning disabled:opacity-40">
-          Cancelar agendamento
-        </button>
-      ) : null}
+      )}
       <button type="button" onClick={onDelete} disabled={busy}
         className="min-h-10 rounded-lg border border-border px-2 text-text-muted hover:border-danger/40 hover:text-danger disabled:opacity-40"
-        aria-label={post.status === 'scheduled' ? 'Excluir post agendado' : 'Excluir rascunho'}>
+        aria-label="Excluir rascunho">
         <Trash2 size={14} aria-hidden />
       </button>
     </div>

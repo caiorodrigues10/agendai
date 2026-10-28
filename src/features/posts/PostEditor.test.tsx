@@ -167,6 +167,64 @@ describe('PostEditor — draft', () => {
     // drafts novos não persistem mais vídeo
     expect(persisted.videoUrl).toBeUndefined();
   });
+
+  it('item 2: salva rascunho incompleto sem publicar e limpa o rascunho local', async () => {
+    mockedPostsApi.create.mockResolvedValue({ id: 'p1', status: 'draft' } as any);
+    const props = await openEditor();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Rascunho' }));
+
+    await waitFor(() => expect(mockedPostsApi.create).toHaveBeenCalledTimes(1));
+    expect(mockedPostsApi.create.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ status: 'draft', barbershopId: 'barber1' })
+    );
+    expect(mockedPostsApi.publish).not.toHaveBeenCalled();
+    expect(props.onSaved).toHaveBeenCalledWith('draft');
+    expect(props.showToast).toHaveBeenCalledWith('Rascunho salvo.');
+    // salvar/publicar descarta a cópia local do rascunho 'new'
+    await waitFor(() =>
+      expect(localStorage.getItem('agendai:post-draft:user1:barber1:new')).toBeNull()
+    );
+  });
+
+  it('itens 3/6/8: editar rascunho do servidor preenche campos, usa update e não grava rascunho local órfão', async () => {
+    mockedPostsApi.update.mockResolvedValue({ id: 'p1' } as any);
+    const props = renderEditor({
+      post: {
+        id: 'p1',
+        status: 'draft',
+        title: 'Título salvo no servidor',
+        content: 'Conteúdo salvo',
+        templateKey: 'agenda-aberta',
+        paletteKey: 'brand',
+        format: 'square',
+        postMode: 'both',
+        type: 'announcement',
+        ctaText: '',
+        createdAt: Date.parse('2026-10-01T12:00:00.000Z'),
+        likes: 0,
+      } as any,
+    });
+
+    // item 3: dados do servidor chegam no formulário
+    const titleInput = (await screen.findByLabelText('Título')) as HTMLInputElement;
+    expect(titleInput.value).toBe('Título salvo no servidor');
+    // item 8: abrir edição não deixa (nem cria) entrada local sob o id do post
+    expect(localStorage.getItem('agendai:post-draft:user1:barber1:p1')).toBeNull();
+
+    fireEvent.change(titleInput, { target: { value: 'Editado agora' } });
+    // item 8: digitar durante a edição também não persiste localmente
+    expect(localStorage.getItem('agendai:post-draft:user1:barber1:p1')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Rascunho' }));
+    await waitFor(() => expect(mockedPostsApi.update).toHaveBeenCalledTimes(1));
+    // item 6: salvar edição não cria post novo nem publica
+    expect(mockedPostsApi.update.mock.calls[0][0]).toBe('p1');
+    expect(mockedPostsApi.create).not.toHaveBeenCalled();
+    expect(mockedPostsApi.publish).not.toHaveBeenCalled();
+    expect(props.onSaved).toHaveBeenCalledWith('draft');
+    expect(localStorage.getItem('agendai:post-draft:user1:barber1:p1')).toBeNull();
+  });
 });
 
 describe('PostEditor — CTA segmentado', () => {
