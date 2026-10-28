@@ -15,6 +15,8 @@ interface BarbershopContextValue {
   settings: ShopSettings | null;
   feed: FeedPost[];
   setSettings: (settings: ShopSettings) => Promise<void>;
+  /** PATCH só das redes sociais (perfil público) + refresh do estado local. */
+  setSocialLinks: (links: import('../utils/socialLinks').SocialLinks | null) => Promise<import('../utils/socialLinks').SocialLinks | null>;
   setOperationMode: (mode: OperationMode) => Promise<void>;
   setOpeningMode: (mode: OpeningMode) => Promise<void>;
   setManualStatus: (status: ManualShopStatus) => Promise<void>;
@@ -120,6 +122,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
               targetAudience?: import('../types').TargetAudience | null;
               manualStatus?: ManualShopStatus;
               openState?: ShopOpenState;
+              socialLinks?: import('../utils/socialLinks').SocialLinks | null;
             } | null>,
             'Falha ao carregar configurações do estabelecimento',
             null
@@ -169,6 +172,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
             schedule,
             logoUrl: shopData.logoUrl ?? undefined,
             googleReviewUrl: shopData.googleReviewUrl ?? undefined,
+            socialLinks: shopData.socialLinks ?? null,
           });
         } else {
           setSettingsState(null);
@@ -219,6 +223,18 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
       latitude: updated.latitude ?? undefined,
       longitude: updated.longitude ?? undefined,
     });
+  };
+
+  /**
+   * Salva só as redes sociais (PATCH dedicado) e devolve o mapa canônico que
+   * voltou do backend — o formulário e o perfil público passam a espelhá-lo.
+   */
+  const setSocialLinks = async (links: import('../utils/socialLinks').SocialLinks | null) => {
+    if (!barbershopId) return null;
+    const updated = await barbershopApi.updateBarbershop(barbershopId, { socialLinks: links });
+    const saved = updated?.socialLinks ?? null;
+    setSettingsState(prev => (prev ? { ...prev, socialLinks: saved } : prev));
+    return saved;
   };
 
   const setOperationMode = async (mode: import('../types').OperationMode) => {
@@ -382,6 +398,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
       settings,
       feed,
       setSettings,
+      setSocialLinks,
       setOperationMode,
       setOpeningMode,
       setManualStatus,

@@ -16,6 +16,7 @@ import { SalonWhatsAppConnection } from './SalonWhatsAppConnection';
 import { OwnerBotSection } from './OwnerBotSection';
 import { BusinessSegmentSection } from './BusinessSegmentSection';
 import { OperationModeSection } from './OperationModeSection';
+import { SocialLinksSection } from './SocialLinksSection';
 import { ShopFloorControls } from '../../features/shop';
 import { Field, FIELD_CONTROL } from '../../components/ui/Field';
 import { EmailPreferencesPanel } from './EmailPreferencesPanel';
@@ -30,16 +31,18 @@ import {
   LuWallet as Wallet,
   LuUserRound as UserRound,
   LuStore as Store,
+  LuAtSign as AtSign,
   LuShieldCheck as ShieldCheck,
   LuMail as Mail,
   LuCircleHelp as CircleHelp,
 } from 'react-icons/lu';
 
-type SettingsSection = 'account' | 'shop' | 'whatsapp' | 'operation' | 'email' | 'privacy' | 'help';
+type SettingsSection = 'account' | 'shop' | 'social' | 'whatsapp' | 'operation' | 'email' | 'privacy' | 'help';
 
 const SETTINGS_SECTIONS: { id: SettingsSection; label: string; icon: React.ElementType }[] = [
   { id: 'account', label: 'Conta', icon: UserRound },
   { id: 'shop', label: 'Estabelecimento', icon: Store },
+  { id: 'social', label: 'Redes sociais', icon: AtSign },
   { id: 'whatsapp', label: 'WhatsApp', icon: Smartphone },
   { id: 'operation', label: 'Funcionamento', icon: Clock },
   { id: 'email', label: 'E-mail e notificações', icon: Mail },
@@ -270,6 +273,10 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
           <BusinessSegmentSection settings={settings} onNotify={onNotify} onSave={onSave} />
           {saveButton}
         </div>
+      )}
+
+      {activeSection === 'social' && (
+        <SocialLinksSection initialLinks={settings.socialLinks} onNotify={onNotify} />
       )}
 
       {activeSection === 'whatsapp' && (

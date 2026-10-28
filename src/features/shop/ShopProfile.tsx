@@ -17,6 +17,8 @@ import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { useSegmentLabels } from '../../hooks/useSegmentLabels';
 import { AUDIENCE_OPTIONS } from '../../shared/segments';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { listSocialLinks } from '../../utils/socialLinks';
+import { SOCIAL_NETWORK_ICONS } from '../../components/domain/SocialLinks';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { Toast } from '../../components/ui/Toast';
 import { PostDetail, shareUrl, buildProfileShareUrl } from './PostDetail';
@@ -47,6 +49,9 @@ const TABS = ['Publicações', 'Fotos', 'Sobre'] as const;
 type ProfileTab = (typeof TABS)[number];
 const actionClass =
   'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm font-semibold hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent';
+/** Ícone-only das redes sociais no cabeçalho (toque ≥ 44px, alvo de 44×44). */
+const socialActionClass =
+  'inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-border px-0 text-text-secondary hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent';
 
 function ProfilePostModal({
   post,
@@ -191,6 +196,8 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
     phone.length >= 10
       ? `https://wa.me/${phone.startsWith('55') && phone.length > 11 ? phone : `55${phone}`}`
       : null;
+  // Redes com link válido: só essas viram ícone no cabeçalho e na aba Sobre.
+  const socialEntries = useMemo(() => listSocialLinks(settings.socialLinks), [settings.socialLinks]);
 
   useEffect(() => {
     setLogoUrl(settings.logoUrl);
@@ -400,6 +407,22 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
               <Share2 size={16} />
               <span className="hidden sm:inline">Compartilhar</span>
             </button>
+            {socialEntries.map(entry => {
+              const Icon = SOCIAL_NETWORK_ICONS[entry.id];
+              return (
+                <a
+                  key={entry.id}
+                  href={entry.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Abrir ${entry.label} de ${settings.shopName}`}
+                  title={entry.label}
+                  className={socialActionClass}
+                >
+                  <Icon size={16} aria-hidden />
+                </a>
+              );
+            })}
           </div>
           {canModerate && (
             <div className="mt-2">
