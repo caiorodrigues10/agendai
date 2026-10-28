@@ -110,12 +110,14 @@ export interface OwnerBotCatalogCommand {
   examples: string[];
 }
 
+export interface OwnerBotCatalogCategory {
+  id: string;
+  label: string;
+  commands: OwnerBotCatalogCommand[];
+}
+
 export interface OwnerBotCatalog {
-  categories: Array<{
-    id: string;
-    label: string;
-    commands: OwnerBotCatalogCommand[];
-  }>;
+  categories: OwnerBotCatalogCategory[];
   total: number;
 }
 
