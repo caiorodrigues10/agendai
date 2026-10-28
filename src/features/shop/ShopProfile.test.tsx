@@ -89,3 +89,49 @@ it('stories expirados não aparecem e stories ativos abrem o visualizador', asyn
   fireEvent.click(screen.getByRole('button', { name: 'Fechar story' }));
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 });
+
+it('sem redes sociais não rende espaço vazio no cabeçalho nem na aba Sobre', async () => {
+  mount();
+  await waitFor(() => expect(socialApi.stories).toHaveBeenCalled());
+  expect(screen.queryByLabelText(/^Abrir .* de /)).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('tab', { name: 'Sobre' }));
+  expect(screen.queryByText('Redes sociais')).not.toBeInTheDocument();
+});
+it('ícones das redes preenchidas aparecem no cabeçalho com link em nova aba', async () => {
+  mount({
+    settings: {
+      ...settings,
+      socialLinks: { instagram: 'https://instagram.com/estudio', x: 'https://x.com/estudio' },
+    },
+  });
+  await waitFor(() => expect(socialApi.stories).toHaveBeenCalled());
+  const instagram = screen.getByRole('link', { name: 'Abrir Instagram de Studio Teste' });
+  expect(instagram).toHaveAttribute('href', 'https://instagram.com/estudio');
+  expect(instagram).toHaveAttribute('target', '_blank');
+  expect(instagram).toHaveAttribute('rel', 'noopener noreferrer');
+  expect(screen.getByRole('link', { name: 'Abrir X de Studio Teste' })).toHaveAttribute(
+    'href',
+    'https://x.com/estudio'
+  );
+  expect(screen.queryByRole('link', { name: 'Abrir TikTok de Studio Teste' })).not.toBeInTheDocument();
+});
+it('aba Sobre lista as redes com link em nova aba', async () => {
+  mount({
+    settings: {
+      ...settings,
+      socialLinks: { youtube: '@seucanal', facebook: 'facebook.com/suapagina' },
+    },
+  });
+  await waitFor(() => expect(socialApi.stories).toHaveBeenCalled());
+  fireEvent.click(screen.getByRole('tab', { name: 'Sobre' }));
+  // Cabeçalho + Sobre: todos os alvos apontam para a URL canônica em nova aba.
+  for (const link of screen.getAllByRole('link', { name: 'Abrir YouTube de Studio Teste' })) {
+    expect(link).toHaveAttribute('href', 'https://youtube.com/@seucanal');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  }
+  expect(screen.getAllByRole('link', { name: 'Abrir Facebook de Studio Teste' }).length).toBeGreaterThan(0);
+  expect(screen.getAllByRole('link', { name: 'Abrir Facebook de Studio Teste' })[0]).toHaveAttribute(
+    'href',
+    'https://facebook.com/suapagina'
+  );
+});

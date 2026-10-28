@@ -1,6 +1,8 @@
 /* eslint-disable jsx-a11y/media-has-caption -- miniatura silenciosa; o player completo é aberto no detalhe */
-import { LuPlay as Play } from 'react-icons/lu';
+import { LuPlay as Play, LuExternalLink as ExternalLink } from 'react-icons/lu';
 import type { FeedPost, ShopSettings, Service } from '../../types';
+import { listSocialLinks } from '../../utils/socialLinks';
+import { SocialNetworkIcon } from '../../components/domain/SocialLinks';
 
 export function ProfileSkeleton() {
   return (
@@ -81,6 +83,7 @@ export function ProfileAbout({
   settings: ShopSettings;
   services: Service[];
 }) {
+  const socialEntries = listSocialLinks(settings.socialLinks);
   return (
     <div className="grid gap-5 sm:grid-cols-2">
       <section className="rounded-xl border border-border bg-bg p-4">
@@ -125,6 +128,28 @@ export function ProfileAbout({
           <p className="text-sm text-text-muted">Os serviços cadastrados aparecem aqui.</p>
         )}
       </section>
+      {socialEntries.length > 0 && (
+        <section className="rounded-xl border border-border bg-bg p-4">
+          <h2 className="mb-3 font-bold">Redes sociais</h2>
+          <ul className="space-y-1">
+            {socialEntries.map(entry => (
+              <li key={entry.id}>
+                <a
+                  href={entry.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Abrir ${entry.label} de ${settings.shopName}`}
+                  className="flex min-h-11 items-center gap-3 rounded-lg px-2 text-sm text-text-secondary hover:bg-surface-2 hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+                >
+                  <SocialNetworkIcon network={entry.id} size={16} className="text-text-muted" />
+                  <span className="font-medium">{entry.label}</span>
+                  <ExternalLink size={14} className="ml-auto text-text-muted" aria-hidden />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

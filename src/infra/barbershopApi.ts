@@ -3,6 +3,7 @@ import { API_BASE, apiClient } from './apiClient';
 import { authStorage } from './authStorage';
 import { detectImageMime } from '../shared/isSupportedImage';
 import { DaySchedule, Service, StaffMember, FeedPost, PostMode, PostConfig, OperationMode, OpeningMode, ManualShopStatus, ShopOpenState, BusinessSegment, TargetAudience } from '../types';
+import type { SocialLinks } from '../utils/socialLinks';
 import { mapScheduleToApi } from '../utils/schedulingUtils';
 
 function unwrap<T>(res: unknown): T {
@@ -27,6 +28,8 @@ interface BarbershopData {
   manualStatus?: ManualShopStatus;
   openState?: ShopOpenState;
   googleReviewUrl?: string | null;
+  /** Redes sociais do dono no perfil público: mapa rede → URL canônica. */
+  socialLinks?: SocialLinks | null;
 }
 
 export interface ShopWeatherDay {

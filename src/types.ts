@@ -96,6 +96,8 @@ export interface ShopSettings {
   manualStatus?: ManualShopStatus;
   openState?: ShopOpenState;
   googleReviewUrl?: string | null;
+  /** Redes sociais do dono no perfil público: mapa rede → URL canônica. */
+  socialLinks?: import('./utils/socialLinks').SocialLinks | null;
 }
 
 export interface AIInsight {
