@@ -16,6 +16,7 @@ import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_GRID } from '../../comp
 import { Avatar } from '../../components/ui/Avatar';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { ClientCreateSchema, ClientCreateFormData } from '../../schemas';
+import { ImportDataShortcut } from '../dataImport';
 
 function clientPhoneLabel(whatsapp: string): string {
   const digits = whatsapp.replace(/\D/g, '');
@@ -199,13 +200,16 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({
       ) : clients.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border py-10 text-center">
           <p className="text-sm text-text-secondary">Nenhum cliente cadastrado.</p>
-          <button
-            type="button"
-            onClick={() => setShowCreate(true)}
-            className="mt-3 text-sm font-bold text-accent"
-          >
-            Cadastrar primeiro cliente
-          </button>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => setShowCreate(true)}
+              className="text-sm font-bold text-accent"
+            >
+              Cadastrar primeiro cliente
+            </button>
+            <ImportDataShortcut label="Importar de uma planilha" />
+          </div>
         </div>
       ) : (
         <>

@@ -28,6 +28,7 @@ import {
 import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { ImportDataShortcut } from '../dataImport';
 
 type AgendaView = 'salon' | 'professional';
 
@@ -485,9 +486,17 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
       )}
 
       {dayAppointments.length === 0 && !isClosed && (
-        <p className="text-center text-text-muted text-sm py-2">
-          Nenhum agendamento para este dia.
-        </p>
+        <div className="py-2 text-center">
+          <p className="text-sm text-text-muted">Nenhum agendamento para este dia.</p>
+          {appointments.length === 0 ? (
+            <div className="mt-3 flex flex-col items-center gap-2">
+              <p className="text-xs text-text-muted">
+                Se você já tem uma agenda cadastrada, traga tudo de uma vez.
+              </p>
+              <ImportDataShortcut label="Importar agenda de uma planilha" />
+            </div>
+          ) : null}
+        </div>
       )}
 
       {selectedAppt && (

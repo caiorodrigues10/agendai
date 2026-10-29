@@ -44,6 +44,8 @@ agendai/
     │   ├── finance/           ← CashPanel, FinancialDashboard, OwnerFinancialPanel, ProfitEngine, Weather, DemandAlert + barrel (Etapa 5b)
     │   ├── goals/ loyalty/ waitlist/ recurring/ recommendations/ equipment/ deposits/
     │   │                      ← painéis do StaffDashboard com barrel próprio (Etapa 5b)
+    │   ├── data-import/        ← DataImportWizard + passos (upload, alvo, colunas, validação, prévia,
+    │   │                        confirmação, conclusão) e hooks do assistente de importação de planilhas
     │   ├── settings/          ← SettingsManager (+ ShopCityField, WeatherForecastCard, AppointmentPolicy,
     │   │                          SalonWhatsAppConnection, OwnerBotSection, BusinessSegmentSection,
     │   │                          OperationModeSection extraídos),
@@ -103,6 +105,6 @@ agendai/
 
 ## Wrappers HTTP (`src/infra/`)
 
-`apiClient`, `authApi`, `authStorage`, `barbershopApi`, `schedulingApi`, `clientsApi`, `crmApi`, `packagesApi`, `productsApi`, `financialApi`, `commissionsApi`, `paymentsApi`, `plansApi`, `subscriptionsApi`, `adminApi`, `usersApi`, `notificationsApi`, `referralsApi`, `contactApi`, `realtimeWs`, `clientPortalApi`, `catalogApi`, `publicProductsApi`.
+`apiClient`, `authApi`, `authStorage`, `barbershopApi`, `schedulingApi`, `clientsApi`, `crmApi`, `packagesApi`, `productsApi`, `financialApi`, `commissionsApi`, `paymentsApi`, `plansApi`, `subscriptionsApi`, `adminApi`, `usersApi`, `notificationsApi`, `referralsApi`, `contactApi`, `realtimeWs`, `clientPortalApi`, `catalogApi`, `publicProductsApi`, `dataImportApi`.
 
 **Regra:** novas chamadas HTTP só via `*Api.ts` / `apiClient` — nunca `fetch` solto nas páginas.

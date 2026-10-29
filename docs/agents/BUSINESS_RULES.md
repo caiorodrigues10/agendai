@@ -56,6 +56,16 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 - Segmento com restrição de publicidade (`advertisingRestricted`, hoje `LAW_FIRM`): o perfil público **não mostra preços** (`ProfileAbout`), e a UI avisa o dono do que fica desativado (`BusinessSegmentSection`).
 - Marketplace de marketing: página comercial do escritório (`/software-para-escritorio-de-advocacia`) com aviso de que o sistema não substitui a análise jurídica.
 
+## Importação de planilhas (assistente do dono)
+
+- A seção fica em **Configurações → Importar dados** (`DataImportWizard`): upload → alvo (clientes/serviços/agenda) → colunas → validação (dry-run) → prévia → confirmação → conclusão, com histórico de importações e botão de desfazer.
+- O assistente é do **dono**: a UI não deve sugerir importação para funcionário, e o backend exige `OWNER`/`MASTER_ADMIN`.
+- A prévia é **somente leitura**: o passo de validação mostra quantas linhas entram, quantas são ignoradas e quantas são rejeitadas, e nada é gravado antes de o dono confirmar.
+- A UI não promete Notificações: a importação **não** envia mensagem, não convida para avaliação e não mexe em comissão/financeiro. A opção "convidar para avaliação" aparece na tela, mas é **fase 2** — nada é disparado hoje.
+- Reimportar o mesmo arquivo **não duplica**: o resultado mostra `importado(s)`, `ignorado(s)` e `rejeitado(s)` separadamente.
+- "Desfazer" vale por 30 dias e remove só o que o lote criou e ninguém tocou depois — a UI mostra a mensagem do backend ("Nada foi removido: os registros foram alterados depois da importação") sem escondê-la.
+- Só uma importação ativa por salão: se já houver um lote em andamento, a UI retoma esse lote e permite cancelá-lo pelo histórico.
+
 ## Notificações
 
 - WhatsApp/e-mail são opcionais: falha de gateway não deve quebrar a UI principal; painéis de health mostram estado.

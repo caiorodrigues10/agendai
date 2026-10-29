@@ -13,7 +13,7 @@
 | `test:changed` | `NODE_OPTIONS=… vitest run --project app --changed` | testes | `npm install` + git | Só testes afetados pelos arquivos alterados — preferir durante o desenvolvimento |
 | `test:related` | `NODE_OPTIONS=… vitest related --project app` | testes | `npm install` + git | Testes relacionados aos arquivos informados (`-- <arquivos>`) — preferir durante o desenvolvimento |
 | `typecheck` | `tsc --noEmit` | leitura | `npm install` | Checagem TypeScript (incremental em `node_modules/.cache`) |
-| `test:e2e` | `playwright test` | testes | browsers Playwright instalados; specs de `e2e/master/` exigem `E2E_BASE_URL` + `E2E_MASTER_EMAIL`/`E2E_MASTER_PASSWORD` | E2E (`e2e/`). Sem `E2E_BASE_URL` o `webServer` faz `build` + `preview` em `127.0.0.1:4173`; com a env aponta para o servidor informado |
+| `test:e2e` | `playwright test` | testes | browsers Playwright instalados; specs de `e2e/master/` exigem `E2E_BASE_URL` + `E2E_MASTER_EMAIL`/`E2E_MASTER_PASSWORD`; `e2e/data-import.spec.ts` exige `E2E_BASE_URL` + `IMPORT_E2E=1` + `PANEL_EMAIL`/`PANEL_PASSWORD` (dono de um salão) | E2E (`e2e/`). Sem `E2E_BASE_URL` o `webServer` faz `build` + `preview` em `127.0.0.1:4173`; com a env aponta para o servidor informado. O spec de importação só roda com `IMPORT_E2E=1` (o `preview` não tem proxy de `/api`) |
 | `lint` | `eslint src --ext .ts,.tsx --cache --cache-location node_modules/.cache/eslint` | leitura | `npm install` | Lint com cache |
 | `lint:fix` | `eslint … --cache … --fix` | geração | `npm install` | Corrige lint autofixável |
 | `lint:changed` | `git diff --name-only \| grep .ts/.tsx` + `eslint --cache …` | leitura | git | Lint só nos `.ts`/`.tsx` alterados (não varre o projeto) |
