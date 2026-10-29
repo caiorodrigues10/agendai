@@ -30,6 +30,7 @@ const LoginPage = lazy(() => import('../pages/LoginPage'));
 const ForgotPasswordPage = lazy(() => import('../pages/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('../pages/ResetPasswordPage'));
 const PublicOwnerInvitePage = lazy(() => import('../pages/PublicOwnerInvitePage'));
+const SignContractPage = lazy(() => import('../pages/SignContractPage'));
 const EmailVerifiedPage = lazy(() => import('../pages/EmailVerifiedPage'));
 const AccessBlockedPage = lazy(() => import('../pages/AccessBlockedPage'));
 const PlansPage = lazy(() => import('../pages/PlansPage'));
@@ -91,6 +92,7 @@ const App: React.FC = () => {
             <Route path="/verificar-codigo" element={<Navigate to="/esqueci-senha" replace />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/convite/:token" element={<PublicOwnerInvitePage />} />
+          <Route path="/assinar/:token" element={<SignContractPage />} />
           <Route path="/email-verificado" element={<EmailVerifiedPage />} />
           <Route path="/bloqueado" element={<AccessBlockedPage />} />
           <Route path="/planos" element={<PlansPage />} />
@@ -103,6 +105,10 @@ const App: React.FC = () => {
           <Route path="/sistema-para-lash-designer" element={<CommercialIntentPage />} />
           <Route path="/crm-para-salao-de-beleza" element={<CommercialIntentPage />} />
           <Route path="/controle-financeiro-para-salao" element={<CommercialIntentPage />} />
+          <Route
+            path="/software-para-escritorio-de-advocacia"
+            element={<CommercialIntentPage />}
+          />
           <Route
             path="/checkout"
             element={

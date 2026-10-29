@@ -8,6 +8,8 @@ export interface Service {
   icon: string;
   barbershopId?: string;
   commissionPercent?: number;
+  /** Agendável pelo cliente na agenda pública (padrão true). */
+  publicBookable?: boolean;
 }
 
 export interface QueueItem {
@@ -98,6 +100,10 @@ export interface ShopSettings {
   googleReviewUrl?: string | null;
   /** Redes sociais do dono no perfil público: mapa rede → URL canônica. */
   socialLinks?: import('./utils/socialLinks').SocialLinks | null;
+  /** Áreas de atuação do escritório (tags) — exibidas no perfil público. */
+  practiceAreas?: string[];
+  /** Registro na OAB do estabelecimento (texto livre opcional). */
+  oabRegistration?: string | null;
 }
 
 export interface AIInsight {

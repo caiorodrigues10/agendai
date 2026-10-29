@@ -22,14 +22,18 @@ import {
   LuCircleAlert as AlertCircle,
   LuClock as Clock,
   LuPawPrint as Paw,
+  LuScale as Scale,
+  LuVideo as Video,
+  LuPhone as Phone,
+  LuMapPin as MapPin,
 } from 'react-icons/lu';
 import { Avatar } from '../../components/ui/Avatar';
 import { DynamicIcon } from '../../components/ui/DynamicIcon';
 import { ThemedCalendar, toLocalISO } from '../../components/ui/ThemedCalendar';
 import { ModalShell } from '../../components/patterns/ModalShell';
 import { formatCurrencyBRL } from '../../utils/formatters';
-import { ClientPet } from '../../infra/clientsApi';
-import { getAuxiliaryProfile } from '../../shared/segments';
+import { ClientCase, ClientPet } from '../../infra/clientsApi';
+import { getAuxiliaryProfile, isAdvertisingRestricted } from '../../shared/segments';
 
 interface AppointmentBookingModalProps {
   services: Service[];
@@ -89,6 +93,14 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
   const [selectedPetId, setSelectedPetId] = React.useState('');
   // Pet só entra na ficha dos segmentos de pet (não em "petshop" hardcodado).
   const showPetSelector = getAuxiliaryProfile(settings.businessSegment) === 'pet';
+  // Caso/processo, área de atuação e modalidade: segmentos com ficha auxiliar
+  // de caso (advocacia). O mesmo sinal do config decide o que aparece.
+  const showCaseFields = getAuxiliaryProfile(settings.businessSegment) === 'case';
+  // Segmento com restrição de publicidade não divulga valores na agenda pública.
+  const hidePrices = isAdvertisingRestricted(settings.businessSegment);
+  const [clientCases, setClientCases] = React.useState<ClientCase[]>([]);
+  const [selectedCaseId, setSelectedCaseId] = React.useState('');
+  const [modality, setModality] = React.useState<'IN_PERSON' | 'VIDEO' | 'PHONE'>('IN_PERSON');
 
   const {
     register,
@@ -105,6 +117,8 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
       time: defaultTime ?? '',
       customerName: defaultClient?.name ?? '',
       whatsapp: defaultClient?.whatsapp ? maskPhone(defaultClient.whatsapp) : '',
+      modality: 'IN_PERSON',
+      meetingLink: '',
     },
   });
 
@@ -161,6 +175,8 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
       setUsePackage(false);
       setClientPets([]);
       setSelectedPetId('');
+      setClientCases([]);
+      setSelectedCaseId('');
       return;
     }
     packagesApi
@@ -179,7 +195,19 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
       setClientPets([]);
       setSelectedPetId('');
     }
-  }, [selectedClient, showPetSelector]);
+    if (showCaseFields) {
+      clientsApi
+        .listCases(selectedClient.id)
+        .then(cases => {
+          setClientCases(cases.filter(item => item.active));
+          setSelectedCaseId('');
+        })
+        .catch(() => setClientCases([]));
+    } else {
+      setClientCases([]);
+      setSelectedCaseId('');
+    }
+  }, [selectedClient, showPetSelector, showCaseFields]);
 
   React.useEffect(() => {
     if (!matchingPackage) setUsePackage(false);
@@ -205,6 +233,12 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
         clientId: selectedClient?.id,
         clientPackageId: usePackage && matchingPackage ? matchingPackage.id : undefined,
         petId: showPetSelector && selectedPetId ? selectedPetId : undefined,
+        caseId: showCaseFields && selectedCaseId ? selectedCaseId : undefined,
+        modality: showCaseFields ? modality : undefined,
+        meetingLink:
+          showCaseFields && modality === 'VIDEO' && data.meetingLink?.trim()
+            ? data.meetingLink.trim()
+            : undefined,
       });
       onClose();
     } finally {
@@ -262,7 +296,8 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
                           {service.name}
                         </span>
                         <p className="text-xs text-text-muted mt-0.5">
-                          ~{service.avgTimeMinutes} min · {formatCurrencyBRL(service.price)}
+                          ~{service.avgTimeMinutes} min
+                          {!hidePrices && ` · ${formatCurrencyBRL(service.price)}`}
                         </p>
                       </div>
                       {selected && <CheckCircle size={16} className="text-accent shrink-0" />}
@@ -441,6 +476,93 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
                     ))}
                   </div>
                 </div>
+              )}
+              {showCaseFields && selectedClient && clientCases.length > 0 && (
+                <div className="space-y-1">
+                  <p className="flex items-center gap-1 text-[11px] text-text-secondary font-bold uppercase tracking-wider">
+                    <Scale size={12} /> Caso
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {clientCases.map(clientCase => (
+                      <button
+                        key={clientCase.id}
+                        type="button"
+                        onClick={() =>
+                          setSelectedCaseId(prev => (prev === clientCase.id ? '' : clientCase.id))
+                        }
+                        className={`rounded-xl border px-3 py-1.5 text-xs font-bold transition-colors ${
+                          selectedCaseId === clientCase.id ? selectedCard : idleCard
+                        }`}
+                      >
+                        {clientCase.nickname}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {showCaseFields && (
+                <>
+                  {(settings.practiceAreas ?? []).length > 0 && (
+                    <div className="space-y-1">
+                      <p className="flex items-center gap-1 text-[11px] text-text-secondary font-bold uppercase tracking-wider">
+                        <MapPin size={12} /> Área de atuação
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {(settings.practiceAreas ?? []).map(area => (
+                          <button
+                            key={area}
+                            type="button"
+                            onClick={() => {
+                              const current = watch('practiceArea');
+                              setValue('practiceArea', current === area ? '' : area, {
+                                shouldValidate: false,
+                              });
+                            }}
+                            className={`rounded-xl border px-3 py-1.5 text-xs font-bold transition-colors ${
+                              watch('practiceArea') === area ? selectedCard : idleCard
+                            }`}
+                          >
+                            {area}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="space-y-1">
+                    <p className="flex items-center gap-1 text-[11px] text-text-secondary font-bold uppercase tracking-wider">
+                      <Video size={12} /> Modalidade
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {(
+                        [
+                          ['IN_PERSON', 'Presencial', MapPin],
+                          ['VIDEO', 'Vídeo', Video],
+                          ['PHONE', 'Telefone', Phone],
+                        ] as const
+                      ).map(([value, label, Icon]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setModality(value)}
+                          className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition-colors ${
+                            modality === value ? selectedCard : idleCard
+                          }`}
+                        >
+                          <Icon size={12} /> {label}
+                        </button>
+                      ))}
+                    </div>
+                    {modality === 'VIDEO' && (
+                      <input
+                        type="url"
+                        placeholder="Link da reunião (opcional)"
+                        className={`${fieldClass(Boolean(errors.meetingLink))} mt-2`}
+                        {...register('meetingLink')}
+                      />
+                    )}
+                    <FieldError message={errors.meetingLink?.message} />
+                  </div>
+                </>
               )}
               {matchingPackage && (
                 <label className="flex items-center gap-2 text-sm text-text-secondary bg-accent/10 border border-accent/30 rounded-xl px-3 py-2">

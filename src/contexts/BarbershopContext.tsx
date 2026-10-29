@@ -123,6 +123,8 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
               manualStatus?: ManualShopStatus;
               openState?: ShopOpenState;
               socialLinks?: import('../utils/socialLinks').SocialLinks | null;
+              practiceAreas?: string[];
+              oabRegistration?: string | null;
             } | null>,
             'Falha ao carregar configurações do estabelecimento',
             null
@@ -173,6 +175,8 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
             logoUrl: shopData.logoUrl ?? undefined,
             googleReviewUrl: shopData.googleReviewUrl ?? undefined,
             socialLinks: shopData.socialLinks ?? null,
+            practiceAreas: shopData.practiceAreas ?? [],
+            oabRegistration: shopData.oabRegistration ?? null,
           });
         } else {
           setSettingsState(null);
@@ -192,7 +196,7 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
 
   const setSettings = async (newSettings: ShopSettings) => {
     if (!barbershopId) return;
-    const shopPayload: Record<string, string | number | null | undefined> = {
+    const shopPayload: Record<string, string | number | null | undefined | string[]> = {
       name: newSettings.shopName,
       whatsapp: newSettings.whatsapp,
       address: newSettings.address,
@@ -212,6 +216,12 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
     if (newSettings.targetAudience !== undefined) {
       shopPayload.targetAudience = newSettings.targetAudience;
     }
+    if (newSettings.practiceAreas !== undefined) {
+      shopPayload.practiceAreas = newSettings.practiceAreas;
+    }
+    if (newSettings.oabRegistration !== undefined) {
+      shopPayload.oabRegistration = newSettings.oabRegistration;
+    }
     const updated = await barbershopApi.updateBarbershop(barbershopId, shopPayload);
     await barbershopApi.updateSchedule(barbershopId, newSettings.schedule);
     setSettingsState({
@@ -219,6 +229,8 @@ export const BarbershopProvider: React.FC<{ children: ReactNode }> = ({ children
       // O backend normaliza o par (PETSHOP zera o público): o estado local
       // espelha o que voltou, não o que foi enviado.
       targetAudience: updated.targetAudience ?? null,
+      practiceAreas: updated.practiceAreas ?? newSettings.practiceAreas ?? [],
+      oabRegistration: updated.oabRegistration ?? null,
       city: updated.city ?? newSettings.city,
       latitude: updated.latitude ?? undefined,
       longitude: updated.longitude ?? undefined,

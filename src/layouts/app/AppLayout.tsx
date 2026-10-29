@@ -2,6 +2,7 @@ import React from 'react';
 import { Header } from './Header';
 import { StaffNavigation } from './StaffNavigation';
 import type { OperationMode, StaffMember } from '../../types';
+import type { BusinessSegment } from '../../shared/segments';
 
 export interface AppLayoutProps {
   user: StaffMember | null;
@@ -15,6 +16,8 @@ export interface AppLayoutProps {
   permissions?: string[];
   operationMode?: OperationMode;
   onboardingCompleted?: boolean;
+  /** Segmento do estabelecimento — usado pelo gate genérico de segmento. */
+  businessSegment?: BusinessSegment | null;
   onNavigate: (tabId: string) => void;
   children: React.ReactNode;
 }
@@ -31,6 +34,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   permissions,
   operationMode,
   onboardingCompleted,
+  businessSegment,
   onNavigate,
   children,
 }) => (
@@ -51,6 +55,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         permissions={permissions}
         operationMode={operationMode}
         onboardingCompleted={onboardingCompleted}
+        businessSegment={businessSegment}
         onNavigate={onNavigate}
       />
       <main id="main-content" className="min-w-0 flex-1">

@@ -85,6 +85,25 @@ describe('canAccessTab — products (permissão × paywall)', () => {
   });
 });
 
+describe('canAccessTab — gestão de processos (feature de segmento)', () => {
+  it('a aba Processos existe só onde o segmento tem a feature caseManagement', () => {
+    expect(canAccessTab('cases', 'OWNER', { segment: 'LAW_FIRM' })).toBe(true);
+    expect(canAccessTab('cases', 'EMPLOYEE', { segment: 'LAW_FIRM' })).toBe(true);
+    expect(canAccessTab('cases', 'OWNER', { segment: 'BARBERSHOP' })).toBe(false);
+    expect(canAccessTab('cases', 'OWNER', { segment: 'OTHER' })).toBe(false);
+  });
+
+  it('sem segmento conhecido a aba fica escondida (não há gestão de processos)', () => {
+    expect(canAccessTab('cases', 'OWNER')).toBe(false);
+    expect(canAccessTab('cases', 'OWNER', { segment: null })).toBe(false);
+  });
+
+  it('a aba Processos não existe em segmentos de gestão (products/equipment seguem ocultos)', () => {
+    expect(canAccessTab('products', 'OWNER', { segment: 'LAW_FIRM' })).toBe(false);
+    expect(canAccessTab('equipment', 'OWNER', { segment: 'LAW_FIRM' })).toBe(false);
+  });
+});
+
 describe('getDefaultTab', () => {
   it('OWNER cai no overview', () => {
     expect(getDefaultTab('OWNER')).toBe('overview');

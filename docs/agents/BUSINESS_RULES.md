@@ -36,6 +36,26 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 - A vitrine pública só lista produtos ativos, à venda e não expirados; sem produtos (ou sem estoque) a seção nem renderiza e a página nunca vira bloqueio.
 - Marcar **retirada** não baixa estoque: a reserva sai da soma de `RESERVED` e a unidade volta para a vitrine — só a venda registrada na aba **Vendas** baixa `stockQty` (o diálogo de confirmação avisa isso).
 
+## Segmentos (gate por segmento)
+
+- A configuração de cada segmento vive em `src/shared/segments/segmentConfigs.ts` (espelho do backend, conferido por `src/shared/segments/segmentParity.test.ts` + `backend/src/shared/segments/segmentParity.json`).
+- Regra: **nenhum `if (segment === ...)` espalhado**. Quem precisa de comportamento novo por segmento acrescenta entrada em `src/config/segmentGate.ts`, no helper `isAdvertisingRestricted` (`src/shared/segments`) ou no perfil do segmento.
+- Gate (`src/config/segmentGate.ts`): oculta abas/módulos e o backend nega o endpoint com **403** `SEGMENT_FEATURE_UNAVAILABLE`. `LAW_FIRM` (advocacia) esconde Produtos, Equipamento, Comissões e Gorjeta — o repository é honorários (`labels.revenue` = "Honorários").
+- `publicBookable`: serviço agendável pelo cliente na agenda pública. Default **true**; serviço interno (audiência, diligência) fica `false` e não aparece no perfil/agenda pública. O toggle vive em `ServiceForm`.
+- Ficha auxiliar por segmento (`getAuxiliaryProfile`): `pet`, `vehicle`, `case`. Em advocacia a ficha é **caso/processo** (`ClientCasesPanel` na aba "Casos" do `ClientProfileSheet`): apelido, área de atuação e nº do processo — visíveis só para a equipe.
+- Sigilo: área, nº de processo e apelido de caso não aparecem no perfil público, no booking público nem no assistente do dono.
+- Feature por segmento (`features` no `SegmentConfig`, espelhado do backend): `caseManagement` (gestão de processos) existe só no `LAW_FIRM`. A aba **Processos** aparece no menu quando o segmento tem a feature (`TabDef.segmentFeature` + `hasSegmentFeature`); sem ela a aba some e a API nega (`403 SEGMENT_FEATURE_UNAVAILABLE`).
+- Gestão de processos (aba "Processos"): pipeline por etapa, tarefas, prazos (em dias úteis, com dias restantes), andamentos, documentos, contratos, horas, intimações, honorários de êxito e NFS-e do caso. Dados **internos do escritório**: nada disso aparece para o cliente, no perfil público nem no assistente.
+- Contratos e assinaturas: a assinatura acontece na página pública `/assinar/:token` (digitando o nome ou desenhando). O link carrega o token — quem não tem o link não assina. A página **não** mostra número de processo, apelido interno, tribunal ou dados do cliente.
+- Timesheet: o valor da hora é derivado (minutos/60 × valor/hora) — a UI lança horas, não valores.
+- Honorário de êxito: a UI informa o **percentual**; o valor é recalculado pelo backend sobre o valor obtido no caso.
+- Intimações: a UI cola o texto recebido (email do tribunal/PJe) e o backend detecta o número do processo e sugere o tipo do andamento; a triagem é humana.
+- NFS-e: emissão manual (número digitado) funciona sem credenciais; os provedores externos exigem credenciais e falham com mensagem clara.
+- Portal do cliente (aba "Processos"): só aparece o caso compartilhado pelo escritório (toggle "Portal do cliente" na aba "Visão geral"), e apenas os andamentos marcados como visíveis (checkbox ao registrar o andamento) — nunca número de processo, apelido, tribunal ou observações. O portal enxerga o caso pela identidade do cliente: é preciso um vínculo confirmado entre a identidade do portal e a ficha do cliente.
+- Transferência entre unidades: só para unidade da mesma organização; a unidade de destino aceita e o caso (com tarefas, prazos, andamentos, documentos, contratos, horas, honorários, intimações e NFS-e) muda de unidade.
+- Segmento com restrição de publicidade (`advertisingRestricted`, hoje `LAW_FIRM`): o perfil público **não mostra preços** (`ProfileAbout`), e a UI avisa o dono do que fica desativado (`BusinessSegmentSection`).
+- Marketplace de marketing: página comercial do escritório (`/software-para-escritorio-de-advocacia`) com aviso de que o sistema não substitui a análise jurídica.
+
 ## Notificações
 
 - WhatsApp/e-mail são opcionais: falha de gateway não deve quebrar a UI principal; painéis de health mostram estado.

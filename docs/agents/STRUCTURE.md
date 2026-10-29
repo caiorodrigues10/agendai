@@ -31,6 +31,10 @@ agendai/
     ├── features/
     │   ├── queue/             ← piloto de feature (barrel index.ts; padrão p/ demais áreas)
     │   ├── clients/           ← AddCustomerForm, ServiceCard, ClientsTab, ClientsManager, ClientProfileSheet
+    │   ├── cases/             ← CasesHub, CaseDetail, DeadlinePanel, caseLabels (gestão de processos do escritório)
+    │   │                      + CaseContractsTab, CaseTimeEntriesTab, CaseIntimationsTab, CaseBillingTab,
+    │   │                        CaseTransfersPanel (contratos/assinaturas, horas, intimações, honorários+NFS-e,
+    │   │                        transferência entre unidades)
     │   ├── appointments/      ← Scheduler, Calendar, BookingModal, BookPackageSessionsModal
     │   ├── onboarding/        ← OnboardingChecklist, ActivationChecklist
     │   ├── crm/               ← CrmIntelligencePanel, CrmMergePanel(+test), CrmBackfillPanel(+test)
@@ -68,6 +72,7 @@ agendai/
     ├── pages/                ← rotas (StaffDashboard, Login, PublicHome, master-admin, marketing)
     ├── services/             ← geminiService (heurística local)
     ├── utils/ / lib/ / config/
+    ├── shared/segments/      ← config por segmento (espelho do backend) + paridade
     └── tests/                ← setup Vitest
 ```
 

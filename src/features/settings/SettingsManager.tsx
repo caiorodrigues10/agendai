@@ -17,6 +17,7 @@ import { OwnerBotSection } from './OwnerBotSection';
 import { BusinessSegmentSection } from './BusinessSegmentSection';
 import { OperationModeSection } from './OperationModeSection';
 import { SocialLinksSection } from './SocialLinksSection';
+import { ProfessionalProfileSection } from './ProfessionalProfileSection';
 import { ShopFloorControls } from '../../features/shop';
 import { Field, FIELD_CONTROL } from '../../components/ui/Field';
 import { EmailPreferencesPanel } from './EmailPreferencesPanel';
@@ -271,6 +272,15 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
           <WeatherForecastCard barbershopId={barbershopId} settings={settings} />
 
           <BusinessSegmentSection settings={settings} onNotify={onNotify} onSave={onSave} />
+
+          {/* Dados do escritório de advocacia: áreas de atuação e OAB. */}
+          {settings.businessSegment === 'LAW_FIRM' && (
+            <ProfessionalProfileSection
+              settings={settings}
+              onNotify={onNotify}
+              onSave={onSave}
+            />
+          )}
           {saveButton}
         </div>
       )}

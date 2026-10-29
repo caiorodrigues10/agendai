@@ -16,6 +16,7 @@ export const SEGMENT_LABEL_KEYS = [
   'queue',
   'appointment',
   'staff',
+  'revenue',
 ] as const;
 
 export type SegmentLabelKey = (typeof SEGMENT_LABEL_KEYS)[number];
@@ -42,12 +43,13 @@ export type BusinessSegment =
   | 'PRIVATE_CLASSES'
   | 'TECH_SUPPORT'
   | 'HOME_SERVICES'
+  | 'LAW_FIRM'
   | 'OTHER';
 
 export type TargetAudience = 'MASCULINO' | 'FEMININO' | 'UNISSEX';
 
 /** Grupos do cadastro, na ordem de exibição. `other` sempre por último. */
-export type SegmentGroup = 'beauty' | 'wellness' | 'health' | 'pet' | 'automotive' | 'services' | 'other';
+export type SegmentGroup = 'beauty' | 'wellness' | 'health' | 'pet' | 'automotive' | 'professional' | 'services' | 'other';
 
 export const SEGMENT_GROUP_LABELS: Record<SegmentGroup, string> = {
   beauty: 'Beleza e cabelo',
@@ -55,12 +57,19 @@ export const SEGMENT_GROUP_LABELS: Record<SegmentGroup, string> = {
   health: 'Saúde',
   pet: 'Pet',
   automotive: 'Automotivo',
+  professional: 'Serviços profissionais',
   services: 'Outros serviços',
   other: 'Outros',
 };
 
 /** Ficha auxiliar do cliente sugerida pelo segmento (pet reusa o MVP de pets). */
-export type SegmentAuxiliaryProfile = 'pet' | 'vehicle';
+/**
+ * Features opcionais do segmento — declaradas na config para que front e
+ * back decidam o mesmo por configuração (nunca por `if (segment === ...)`).
+ */
+export type SegmentFeature = 'caseManagement';
+
+export type SegmentAuxiliaryProfile = 'pet' | 'vehicle' | 'case';
 
 /**
  * Modo de atendimento que o backend já aplica na criação quando o segmento
@@ -119,6 +128,17 @@ export interface SegmentConfig {
    * Obrigatório nos três; ausente nos demais.
    */
   complianceNote?: string;
-  /** Ficha auxiliar opcional do cliente (pet/vehicle). Ausente = nenhuma. */
+  /** Ficha auxiliar opcional do cliente (pet/vehicle/case). Ausente = nenhuma. */
   auxiliaryProfile?: SegmentAuxiliaryProfile;
+  /**
+   * Features opcionais do segmento (ex.: `caseManagement` — gestão de
+   * processos do escritório). Espelha `features` do backend.
+   */
+  features?: SegmentFeature[];
+  /**
+   * O segmento tem restrição de publicidade: sem campanha, sem pedido de
+   * avaliação/nota pública, sem NPS, sem indicação, sem fidelidade e sem
+   * preços públicos. Espelha `advertisingRestricted` do backend.
+   */
+  advertisingRestricted?: boolean;
 }

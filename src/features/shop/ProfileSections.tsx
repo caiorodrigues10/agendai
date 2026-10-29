@@ -2,6 +2,8 @@
 import { LuPlay as Play, LuExternalLink as ExternalLink } from 'react-icons/lu';
 import type { FeedPost, ShopSettings, Service } from '../../types';
 import { listSocialLinks } from '../../utils/socialLinks';
+import { formatOabRegistration } from '../../utils/oabRegistration';
+import { isAdvertisingRestricted } from '../../shared/segments';
 import { SocialNetworkIcon } from '../../components/domain/SocialLinks';
 
 export function ProfileSkeleton() {
@@ -84,12 +86,38 @@ export function ProfileAbout({
   services: Service[];
 }) {
   const socialEntries = listSocialLinks(settings.socialLinks);
+  // Serviço interno (audiência, diligência, despacho) não aparece no perfil:
+  // o cliente agenda só o que é público.
+  const publicServices = services.filter(service => service.publicBookable !== false);
+  const practiceAreas = settings.practiceAreas ?? [];
+  // Segmento com restrição de publicidade (ex.: advocacia): não divulga
+  // valores no perfil público.
+  const hidePrices = isAdvertisingRestricted(settings.businessSegment);
+  const oabLabel = formatOabRegistration(settings.oabRegistration);
   return (
     <div className="grid gap-5 sm:grid-cols-2">
       <section className="rounded-xl border border-border bg-bg p-4">
         <h2 className="font-bold">Nosso espaço</h2>
         {settings.address && <p className="mt-2 text-sm text-text-secondary">{settings.address}</p>}
         {settings.city && <p className="text-sm text-text-muted">{settings.city}</p>}
+        {oabLabel && (
+          <p className="mt-2 text-sm font-semibold text-text-secondary">{oabLabel}</p>
+        )}
+        {practiceAreas.length > 0 && (
+          <>
+            <h3 className="mt-5 mb-2 text-sm font-bold">Áreas de atuação</h3>
+            <ul className="flex flex-wrap gap-1.5">
+              {practiceAreas.map(area => (
+                <li
+                  key={area}
+                  className="rounded-full border border-border bg-surface px-2.5 py-1 text-[11px] font-bold text-text-secondary"
+                >
+                  {area}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
         <h3 className="mt-5 mb-3 text-sm font-bold">Horários</h3>
         {settings.schedule.length ? (
           settings.schedule.map((day, i) => (
@@ -107,8 +135,8 @@ export function ProfileAbout({
       </section>
       <section className="rounded-xl border border-border bg-bg p-4">
         <h2 className="mb-3 font-bold">Serviços</h2>
-        {services.length ? (
-          services.map(service => (
+        {publicServices.length ? (
+          publicServices.map(service => (
             <div
               key={service.id}
               className="flex justify-between gap-3 border-b border-border py-3 text-sm"
@@ -117,11 +145,13 @@ export function ProfileAbout({
                 <p className="font-semibold">{service.name}</p>
                 <p className="text-xs text-text-muted">{service.avgTimeMinutes} min</p>
               </div>
-              <span className="shrink-0">
-                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
-                  service.price
-                )}
-              </span>
+              {!hidePrices && (
+                <span className="shrink-0">
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
+                    service.price
+                  )}
+                </span>
+              )}
             </div>
           ))
         ) : (

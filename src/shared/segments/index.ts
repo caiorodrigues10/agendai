@@ -15,6 +15,7 @@ import type {
   BusinessSegment,
   SegmentAuxiliaryProfile,
   SegmentConfig,
+  SegmentFeature,
   SegmentGroup,
   TargetAudience,
 } from './types';
@@ -50,6 +51,7 @@ export const FIRST_CLASS_SEGMENTS: BusinessSegment[] = [
   'PRIVATE_CLASSES',
   'TECH_SUPPORT',
   'HOME_SERVICES',
+  'LAW_FIRM',
   'OTHER',
 ];
 
@@ -75,6 +77,7 @@ export const ALL_SEGMENTS: BusinessSegment[] = [
   'PRIVATE_CLASSES',
   'TECH_SUPPORT',
   'HOME_SERVICES',
+  'LAW_FIRM',
   'OTHER',
 ];
 
@@ -84,6 +87,7 @@ export const SEGMENT_GROUPS: SegmentGroup[] = [
   'health',
   'pet',
   'automotive',
+  'professional',
   'services',
   'other',
 ];
@@ -164,6 +168,46 @@ export function getAuxiliaryProfile(
   segment: BusinessSegment | null | undefined
 ): SegmentAuxiliaryProfile | undefined {
   return getSegmentConfig(segment).auxiliaryProfile;
+}
+
+/**
+ * O segmento tem a feature? (ex.: `caseManagement` — gestão de processos).
+ */
+export function hasSegmentFeature(
+  segment: BusinessSegment | null | undefined,
+  feature: SegmentFeature
+): boolean {
+  if (!segment) return false;
+  return getSegmentConfig(segment).features?.includes(feature) === true;
+}
+
+/**
+ * O segmento tem restrição de publicidade? (sem campanha, avaliação pública,
+ * NPS, indicação, fidelidade e preços públicos).
+ */
+export function isAdvertisingRestricted(
+  segment: BusinessSegment | null | undefined
+): boolean {
+  if (!segment) return false;
+  return getSegmentConfig(segment).advertisingRestricted === true;
+}
+
+/**
+ * O que deixa de existir no segmento com restrição de publicidade. A lista
+ * é do front (aviso ao dono); quem bloqueia é o backend.
+ */
+export function advertisingRestrictedFeatures(
+  segment: BusinessSegment | null | undefined
+): string[] {
+  if (!isAdvertisingRestricted(segment)) return [];
+  return [
+    'Campanhas e mensagens em massa',
+    'Pedido de avaliação e nota pública',
+    'Pesquisa NPS',
+    'Programa de indicações',
+    'Fidelidade (visitas e cashback)',
+    'Preços públicos no perfil e na agenda',
+  ];
 }
 
 /**

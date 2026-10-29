@@ -30,6 +30,10 @@ interface BarbershopData {
   googleReviewUrl?: string | null;
   /** Redes sociais do dono no perfil público: mapa rede → URL canônica. */
   socialLinks?: SocialLinks | null;
+  /** Áreas de atuação do escritório (tags) — exibidas no perfil público. */
+  practiceAreas?: string[];
+  /** Registro na OAB do estabelecimento (texto livre opcional). */
+  oabRegistration?: string | null;
 }
 
 export interface ShopWeatherDay {
@@ -209,9 +213,15 @@ export const barbershopApi = {
   deleteServiceCategory: serviceCategoriesApi.delete,
   listServices: (barbershopId?: string) => {
     const qs = barbershopId ? `?barbershopId=${barbershopId}` : '';
-    return apiClient<{ success: boolean; data: Service[] }>(`/api/services${qs}`).then(res =>
-      unwrap<Service[]>(res)
-    );
+    // Com token: visão staff (lista completa, incluindo serviço interno).
+    // Sem token: visão pública (só serviços com `publicBookable`).
+    const token = authStorage.getAccessToken() || undefined;
+    return apiClient<{ success: boolean; data: Service[] }>(
+      `/api/services${qs}`,
+      'GET',
+      undefined,
+      token
+    ).then(res => unwrap<Service[]>(res));
   },
   addService: (payload: AddServicePayload) => {
     const token = authStorage.getAccessToken() || '';

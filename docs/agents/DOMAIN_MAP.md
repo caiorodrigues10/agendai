@@ -22,6 +22,11 @@ Código existente ≠ comprovadamente funcional em produção. Distinguir:
 | Fila | `QueueItemCard`, `PublicHome` | `schedulingApi` | `/api/queue` |
 | Agenda | `AppointmentScheduler`, booking modal | `schedulingApi` | `/api/appointments` |
 | Clientes CRM | `ClientsManager`, `ClientProfileSheet` | `clientsApi`, `crmApi` | `/api/clients`, `/api/crm` |
+| Casos do cliente (advocacia) | `ClientCasesPanel` (aba "Casos") | `clientsApi` (`listCases`/`createCase`/`updateCase`/`deleteCase`) | `/api/clients/:id/cases` |
+| Gestão de processos (escritório) | `CasesHub` (pipeline, lista, novo processo, transferências), `CaseDetail` (visão geral, tarefas, prazos, andamentos, documentos, contratos, horas, intimações, honorários/NFS-e, compartilhamento com o portal), `DeadlinePanel` (calendário de prazos + feriados) | `casesApi` (`list`/`pipeline`/`overview`/`listTasks`/`listDeadlines`/`listEvents`/`listDocuments`/contratos/horas/intimações/êxito/NFS-e/transferências/feriados/relatórios) | `/api/cases*` (feature `caseManagement` do segmento) |
+| Assinatura de contrato (público) | `SignContractPage` (`/assinar/:token`) | `casesApi` (`getPublicContract`/`signContract`/`declineContract`) | `/api/contracts/sign/:token` (token do signatário é a credencial) |
+| Casos no portal do cliente | `ClientPortalDashboard` (aba "Processos") | `clientPortalApi` (`getCases`) | `/api/client/portal/cases` (só o que o escritório compartilhou) |
+| Segmentos / gate | `BusinessSegmentSection`, `SegmentPicker`, `ServiceForm` | `barbershopApi.listServices` (envia token → lista interna) | `/api/services` (público com `authenticateOptional` → `publicBookable`) |
 | Pacotes | `PackageCatalog`, `BookPackageSessionsModal` | `packagesApi` | `/api/service-packages`, `/api/client-packages` |
 | Produtos / estoque / PDV | `ProductsHub`, painéis em `products/` | `productsApi` | `/api/products` (incl. `DELETE /api/products/:id`), inventory, retail |
 | Reserva de produto (público) | `PublicProductCarousel`, `PublicProductPage`, painel `ProductReservationsPanel` | `publicProductsApi`, `productsApi` | `/api/barbershops/:id/public-products*`, `/api/product-reservations` |

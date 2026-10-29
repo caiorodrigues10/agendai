@@ -22,6 +22,7 @@ import { useBarbershop } from '../contexts/BarbershopContext';
 import { useScheduling } from '../contexts/SchedulingContext';
 import { useSubscription } from '../contexts/SubscriptionContext';
 import { useBarbershopFilters } from '../contexts/BarbershopFiltersContext';
+import { CasesHub } from '../features/cases';
 import { ALL_TAB_IDS, LEGACY_TAB_REDIRECTS, getDefaultTab, canAccessTab, canAccessTabByMode, getPrimaryTabForMode, DASHBOARD_GATED_TAB_IDS } from '../config/tabRegistry';
 
 import { getErrorMessage } from '../utils/errorMessage';
@@ -119,9 +120,10 @@ export const StaffDashboard: React.FC = () => {
 
   const rawTab = location.pathname.split('/')[2] || 'overview';
   const operationMode = settings?.operationMode ?? 'HYBRID';
+  const businessSegment = settings?.businessSegment ?? null;
   // Abas antigas (ex.: /app/gallery) caem na aba equivalente atual.
   const requestedTab = LEGACY_TAB_REDIRECTS[rawTab] ?? rawTab;
-  const activeTab = ALL_TAB_IDS.includes(requestedTab) ? requestedTab : getDefaultTab(user?.role, operationMode);
+  const activeTab = ALL_TAB_IDS.includes(requestedTab) ? requestedTab : getDefaultTab(user?.role, operationMode, { segment: businessSegment });
 
   const prevRawTab = useRef(rawTab);
   useEffect(() => {
@@ -150,29 +152,29 @@ export const StaffDashboard: React.FC = () => {
   // Redirect invalid tabs
   useEffect(() => {
     if (rawTab !== activeTab) {
-      const target = LEGACY_TAB_REDIRECTS[rawTab] ?? getDefaultTab(user?.role, operationMode);
+      const target = LEGACY_TAB_REDIRECTS[rawTab] ?? getDefaultTab(user?.role, operationMode, { segment: businessSegment });
       navigate(`/app/${target}`, { replace: true });
     }
-  }, [rawTab, activeTab, user?.role, operationMode, navigate]);
+  }, [rawTab, activeTab, user?.role, operationMode, businessSegment, navigate]);
 
   // Redirect if tab not accessible by role
   useEffect(() => {
     if (!user) return;
-    if (!canAccessTab(activeTab, user.role, { hasDashboard, permissions: user.permissions })) {
-      navigate(`/app/${getDefaultTab(user.role, operationMode)}`, { replace: true });
+    if (!canAccessTab(activeTab, user.role, { hasDashboard, permissions: user.permissions, segment: businessSegment })) {
+      navigate(`/app/${getDefaultTab(user.role, operationMode, { segment: businessSegment })}`, { replace: true });
     }
-  }, [activeTab, user, hasDashboard, operationMode, navigate]);
+  }, [activeTab, user, hasDashboard, operationMode, businessSegment, navigate]);
 
   // Redirect if tab not accessible by operation mode
   useEffect(() => {
     if (!canAccessTabByMode(activeTab, operationMode)) {
       const preferred = getPrimaryTabForMode(operationMode);
-      const target = canAccessTab(preferred, user?.role, { hasDashboard, permissions: user?.permissions })
+      const target = canAccessTab(preferred, user?.role, { hasDashboard, permissions: user?.permissions, segment: businessSegment })
         ? preferred
         : getDefaultTab(user?.role, operationMode);
       navigate(`/app/${target}`, { replace: true });
     }
-  }, [activeTab, operationMode, user?.role, hasDashboard, navigate]);
+  }, [activeTab, operationMode, user?.role, hasDashboard, businessSegment, navigate]);
 
   // Re-check access including hasDashboard
   useEffect(() => {
@@ -315,6 +317,7 @@ export const StaffDashboard: React.FC = () => {
         hasDashboard={hasDashboard}
         permissions={user?.permissions}
         operationMode={operationMode}
+        businessSegment={businessSegment}
         onboardingCompleted={onboardingCompleted}
         onNavigate={tabId => navigate(`/app/${tabId}`)}
       >
@@ -532,6 +535,15 @@ export const StaffDashboard: React.FC = () => {
                   showToast('Agendamento confirmado');
                 }}
                 onNotify={showToast}
+              />
+            </ErrorBoundary>
+          )}
+
+          {activeTab === 'cases' && (
+            <ErrorBoundary variant="section">
+              <CasesHub
+                staff={staff}
+                onNotify={(message, type) => showToast(message, type === 'error' ? 'error' : 'success')}
               />
             </ErrorBoundary>
           )}

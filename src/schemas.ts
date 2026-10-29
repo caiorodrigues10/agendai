@@ -219,6 +219,8 @@ export const ServiceSchema = z.object({
   avgTimeMinutes: z.number({ invalid_type_error: 'Tempo inválido' }).min(5, 'Mínimo 5 minutos'),
   icon: z.string().min(1, 'Ícone é obrigatório'),
   commissionPercent: z.number({ invalid_type_error: 'Comissão inválida' }).min(0).max(100),
+  /** Serviço interno (audiência, diligência) não aparece na agenda pública. */
+  publicBookable: z.boolean().default(true),
 });
 
 export type ServiceFormData = z.infer<typeof ServiceSchema>;
@@ -256,6 +258,14 @@ export const AppointmentSchema = z.object({
   clientPackageId: z.string().uuid().optional(),
   /** Pet escolhido no petshop. O backend resolve o nome do pet. */
   petId: z.string().uuid().optional(),
+  /** Caso/processo escolhido (segmento LAW_FIRM). O backend resolve o apelido. */
+  caseId: z.string().uuid().optional(),
+  /** Área de atuação (tag do escritório) que classifica o atendimento. */
+  practiceArea: z.string().max(80).optional(),
+  /** Modalidade do atendimento: presencial, vídeo ou telefone. */
+  modality: z.enum(['IN_PERSON', 'VIDEO', 'PHONE']).optional(),
+  /** Link da reunião online (opcional). Entra no lembrete enviado ao cliente. */
+  meetingLink: z.string().url('Link da reunião inválido').max(500).optional().or(z.literal('')),
   reservedProducts: z
     .array(
       z.object({

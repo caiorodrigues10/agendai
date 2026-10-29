@@ -66,6 +66,7 @@ export const SEGMENT_SCHEDULE_PRESETS: Record<BusinessSegment, SegmentScheduleDa
   PRIVATE_CLASSES: PRESET_SEG_SAB_0900_1900,
   TECH_SUPPORT: PRESET_SEG_SEX_0900_1800,
   HOME_SERVICES: PRESET_SEG_SEX_0900_1800,
+  LAW_FIRM: PRESET_SEG_SEX_0900_1800,
   OTHER: PRESET_SEG_SAB_0900_1900,
 };
 
@@ -91,6 +92,7 @@ export const SEGMENT_OPERATION_MODES: Record<BusinessSegment, SegmentOperationMo
   PRIVATE_CLASSES: 'APPOINTMENTS_ONLY',
   TECH_SUPPORT: 'HYBRID',
   HOME_SERVICES: 'HYBRID',
+  LAW_FIRM: 'APPOINTMENTS_ONLY',
   OTHER: 'HYBRID',
 };
 
@@ -636,6 +638,28 @@ export const SEGMENT_CATALOGS: Record<BusinessSegment, SegmentCatalog> = {
         avgTimeMinutes: 90,
         icon: 'wrench',
         categoryName: 'Serviços',
+      },
+    ],
+  },
+  LAW_FIRM: {
+    serviceCategories: [
+      { name: 'Consultoria', icon: 'user' },
+      { name: 'Contencioso', icon: 'clipboard' },
+    ],
+    services: [
+      {
+        name: 'Consulta inicial',
+        price: 0,
+        avgTimeMinutes: 60,
+        icon: 'user',
+        categoryName: 'Consultoria',
+      },
+      {
+        name: 'Acompanhamento de processo',
+        price: 0,
+        avgTimeMinutes: 60,
+        icon: 'clipboard',
+        categoryName: 'Contencioso',
       },
     ],
   },

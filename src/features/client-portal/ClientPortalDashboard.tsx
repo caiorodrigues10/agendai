@@ -9,17 +9,20 @@ import {
   LuUnlink as Unlink,
   LuPhone as Phone,
   LuLogOut as LogOut,
+  LuFolderOpen as FolderOpen,
+  LuPenLine as PenLine,
 } from 'react-icons/lu';
-import { clientPortalApi, ClientIdentity, ClientSalonLink, ClientAppointment, ClientBenefit } from '../../infra/clientPortalApi';
+import { clientPortalApi, ClientIdentity, ClientSalonLink, ClientAppointment, ClientBenefit, ClientPortalCase } from '../../infra/clientPortalApi';
 import { SmartSelect } from '../../components/ui/SmartSelect';
 import { getErrorMessage } from '../../utils/errorMessage';
 
-type PortalTab = 'home' | 'salons' | 'appointments' | 'benefits' | 'account';
+type PortalTab = 'home' | 'salons' | 'appointments' | 'cases' | 'benefits' | 'account';
 
 const TABS: { id: PortalTab; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
   { id: 'home', label: 'Início', icon: Store },
   { id: 'salons', label: 'Meus salões', icon: Store },
   { id: 'appointments', label: 'Agenda', icon: CalendarDays },
+  { id: 'cases', label: 'Processos', icon: FolderOpen },
   { id: 'benefits', label: 'Benefícios', icon: Gift },
   { id: 'account', label: 'Conta', icon: User },
 ];
@@ -32,6 +35,7 @@ export const ClientPortalDashboard: React.FC = () => {
   const [salons, setSalons] = useState<ClientSalonLink[]>([]);
   const [appointments, setAppointments] = useState<ClientAppointment[]>([]);
   const [benefits, setBenefits] = useState<ClientBenefit[]>([]);
+  const [cases, setCases] = useState<ClientPortalCase[]>([]);
   const [selectedSalonId, setSelectedSalonId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -64,6 +68,11 @@ export const ClientPortalDashboard: React.FC = () => {
     if (!selectedSalonId || activeTab !== 'benefits') return;
     void clientPortalApi.getBenefits(selectedSalonId).then(setBenefits).catch(() => setBenefits([]));
   }, [selectedSalonId, activeTab]);
+
+  useEffect(() => {
+    if (activeTab !== 'cases') return;
+    void clientPortalApi.getCases().then(setCases).catch(() => setCases([]));
+  }, [activeTab]);
 
   const handleLogout = async () => {
     try {
@@ -226,6 +235,81 @@ export const ClientPortalDashboard: React.FC = () => {
         </div>
       )}
 
+      {/* Processos (escritório de advocacia) */}
+      {activeTab === 'cases' && (
+        <div className="space-y-3">
+          {cases.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-border bg-surface p-6 text-center">
+              <FolderOpen size={32} className="mx-auto text-text-muted" />
+              <p className="mt-2 text-sm text-text-secondary">
+                Nenhum processo disponível para acompanhamento.
+              </p>
+              <p className="mt-1 text-xs text-text-muted">
+                O escritório compartilha o andamento do processo com você quando quiser.
+              </p>
+            </div>
+          )}
+          {cases.map(theCase => (
+            <div key={theCase.id} className="space-y-2 rounded-2xl border border-border bg-surface p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="text-sm font-bold text-text-primary">{theCase.label}</p>
+                  <p className="text-xs text-text-muted">{theCase.barbershopName}</p>
+                </div>
+                <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-bold text-accent">
+                  {CASE_STATUS_LABELS[theCase.status] ?? 'Em andamento'}
+                </span>
+              </div>
+
+              {theCase.nextAppointment && (
+                <p className="text-xs text-text-secondary">
+                  Próximo compromisso: {formatPortalDate(theCase.nextAppointment.scheduledAt)}
+                  {theCase.nextAppointment.time ? ` às ${theCase.nextAppointment.time}` : ''}
+                  {theCase.nextAppointment.serviceName ? ` — ${theCase.nextAppointment.serviceName}` : ''}
+                </p>
+              )}
+
+              {theCase.pendingSignatures.length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                    Documentos para assinar
+                  </p>
+                  {theCase.pendingSignatures.map(signature => (
+                    <a
+                      key={signature.id}
+                      href={`/assinar/${signature.token}`}
+                      className="flex items-center justify-between rounded-xl border border-border px-3 py-2 text-xs font-bold text-accent"
+                    >
+                      <span className="flex items-center gap-1">
+                        <PenLine size={12} /> {signature.contractTitle}
+                      </span>
+                      <span>Assinar</span>
+                    </a>
+                  ))}
+                </div>
+              )}
+
+              {theCase.sharedEvents.length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                    Andamentos
+                  </p>
+                  <ul className="space-y-1">
+                    {theCase.sharedEvents.map(event => (
+                      <li key={event.id} className="text-xs text-text-secondary">
+                        <span className="text-text-muted">{formatPortalDate(event.occurredAt)}</span>{' '}
+                        — {event.title}
+                        {event.description ? `: ${event.description}` : ''}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Benefits */}
       {activeTab === 'benefits' && (
         <div className="space-y-3">
@@ -288,3 +372,21 @@ export const ClientPortalDashboard: React.FC = () => {
     </div>
   );
 };
+
+/** Rótulos de situação do processo mostrados ao cliente. */
+const CASE_STATUS_LABELS: Record<string, string> = {
+  LEAD: 'Em análise',
+  ACTIVE: 'Em andamento',
+  AWAITING_CLIENT: 'Aguardando você',
+  IN_COURT: 'Em fase judicial',
+  SUSPENDED: 'Suspenso',
+  CLOSED: 'Encerrado',
+  ARCHIVED: 'Arquivado',
+};
+
+/** Data curta para o portal (dd/mm). */
+function formatPortalDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(date);
+}

@@ -5,11 +5,14 @@ import {
   canAccessTab,
   canAccessTabByMode,
   MOBILE_PRIMARY_TAB_IDS,
+  resolveTabLabel,
   TAB_GROUPS,
   type TabDef,
   type TabGroup,
 } from '../../config/tabRegistry';
 import type { OperationMode } from '../../types';
+import type { BusinessSegment } from '../../shared/segments';
+import { useSegmentLabels } from '../../hooks/useSegmentLabels';
 
 interface StaffNavigationProps {
   activeTab: string;
@@ -18,6 +21,8 @@ interface StaffNavigationProps {
   permissions?: string[];
   operationMode?: OperationMode;
   onboardingCompleted?: boolean;
+  /** Segmento do estabelecimento — usado pelo gate genérico de segmento. */
+  businessSegment?: BusinessSegment | null;
   onNavigate: (tabId: string) => void;
 }
 
@@ -25,7 +30,7 @@ const visibleTabs = (
   group: TabGroup,
   userRole?: string,
   operationMode?: OperationMode,
-  extras?: { hasDashboard?: boolean; permissions?: string[] },
+  extras?: { hasDashboard?: boolean; permissions?: string[]; segment?: BusinessSegment | null },
   onboardingCompleted?: boolean
 ) =>
   group.tabs.filter(tab => {
@@ -33,16 +38,19 @@ const visibleTabs = (
     return canAccessTab(tab.id, userRole, extras) && canAccessTabByMode(tab.id, operationMode);
   });
 
-export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions, operationMode, onboardingCompleted, onNavigate }: StaffNavigationProps) {
+export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions, operationMode, onboardingCompleted, businessSegment, onNavigate }: StaffNavigationProps) {
   const [moreOpen, setMoreOpen] = useState(false);
+  const { labels } = useSegmentLabels(businessSegment ?? null);
 
   const groups = useMemo(
     () =>
       TAB_GROUPS.map(group => ({
         ...group,
-        tabs: visibleTabs(group, userRole, operationMode, { hasDashboard, permissions }, onboardingCompleted),
+        tabs: visibleTabs(group, userRole, operationMode, { hasDashboard, permissions, segment: businessSegment ?? null }, onboardingCompleted).map(
+          tab => ({ ...tab, label: resolveTabLabel(tab, labels) })
+        ),
       })).filter(group => group.tabs.length > 0),
-    [userRole, hasDashboard, permissions, operationMode, onboardingCompleted]
+    [userRole, hasDashboard, permissions, operationMode, onboardingCompleted, businessSegment, labels]
   );
 
   const primaryTabs = useMemo(() => {

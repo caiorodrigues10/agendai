@@ -45,6 +45,7 @@ import { METRIC_LABEL } from '../../utils/metricLabels';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { ClientPetsPanel } from './ClientPetsPanel';
 import { ClientVehiclesPanel } from './ClientVehiclesPanel';
+import { ClientCasesPanel } from './ClientCasesPanel';
 import { useSegmentLabels } from '../../hooks/useSegmentLabels';
 import { ModalShell } from '../../components/patterns/ModalShell';
 import { SectionError } from '../../components/patterns';
@@ -61,7 +62,7 @@ const PAYMENT_LABEL: Record<PackagePaymentMethod, string> = {
   other: 'Outro',
 };
 
-type ProfileTab = 'geral' | 'pacotes' | 'historico' | 'financeiro' | 'pets' | 'vehicles';
+type ProfileTab = 'geral' | 'pacotes' | 'historico' | 'financeiro' | 'pets' | 'vehicles' | 'cases';
 
 function clientPhoneLabel(whatsapp: string): string {
   const digits = whatsapp.replace(/\D/g, '');
@@ -114,6 +115,8 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
   // lava jato/oficina (antes era `segment === 'PETSHOP'` no código todo).
   const showPets = config.auxiliaryProfile === 'pet';
   const showVehicles = config.auxiliaryProfile === 'vehicle';
+  // Ficha de caso/processo nos segmentos de advocacia (auxiliaryProfile 'case').
+  const showCases = config.auxiliaryProfile === 'case';
 
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -170,10 +173,11 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
           ['historico', 'Histórico'],
           ...(showPets ? [['pets', 'Pets'] as const] : []),
           ...(showVehicles ? [['vehicles', 'Veículos'] as const] : []),
+          ...(showCases ? [['cases', 'Casos'] as const] : []),
           ...(canAnalytics ? [['financeiro', 'Financeiro'] as const] : []),
         ] as [ProfileTab, string][]
       ),
-    [canAnalytics, showPets, showVehicles]
+    [canAnalytics, showPets, showVehicles, showCases]
   );
 
   const loadDetail = useCallback(async () => {
@@ -903,6 +907,14 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
 
             {tab === 'vehicles' && showVehicles && clientId && (
               <ClientVehiclesPanel clientId={clientId} onChanged={() => void loadDetail()} />
+            )}
+
+            {tab === 'cases' && showCases && clientId && (
+              <ClientCasesPanel
+                clientId={clientId}
+                practiceAreas={settings.practiceAreas ?? []}
+                onChanged={() => void loadDetail()}
+              />
             )}
 
             {tab === 'financeiro' && canAnalytics && crmProfile && (

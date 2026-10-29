@@ -494,6 +494,73 @@ export const COMMERCIAL_PAGES: CommercialPageContent[] = [
     ],
   },
   {
+    path: '/software-para-escritorio-de-advocacia',
+    eyebrow: 'Advocacia',
+    h1: 'Software para escritório de advocacia',
+    h1Accent: 'que organiza agenda, clientes e honorários.',
+    description:
+      `A ${BRAND_NAME} organiza a agenda do escritório, o histórico do cliente, o acompanhamento de processo e os honorários em um só painel — sem planilha e sem lembrete perdido.`,
+    metaTitle: `Software para escritório de advocacia | ${BRAND_NAME}`,
+    metaDescription:
+      'Software para escritório de advocacia com agenda de audiências, ficha de cliente, acompanhamento de processo e controle de honorários.',
+    painTitle: 'O que trava o escritório no dia a dia',
+    pains: [
+      'Audiência e prazo anotados no caderno e no WhatsApp — e o prazo passa.',
+      'Ficha do cliente espalhada entre agenda, e-mail e pasta de rede.',
+      'Honorário combinado no verbal, sem histórico do que já foi pago.',
+      'Agenda pública mostrando o que não devia e perguntando coisas indevidas.',
+    ],
+    solutionTitle: `Como a ${BRAND_NAME} resolve no escritório`,
+    solutions: [
+      {
+        title: 'Agenda com modalidades e link',
+        body: 'Atendimento presencial, remoto ou em repartição — cada tipo com o registro do link e do horário.',
+      },
+      {
+        title: 'Ficha do cliente com caso e processo',
+        body: 'Apelido do caso, área de atuação e número do processo ficam na ficha, visíveis só para a equipe.',
+      },
+      {
+        title: 'Honorários no financeiro',
+        body: 'Valor combinado, forma de pagamento e fiado do cliente entram no mesmo controle do caixa.',
+      },
+    ],
+    featuresTitle: 'O que o escritório mais usa',
+    features: [
+      'Agenda por profissional e duração real do atendimento',
+      'Modalidade do atendimento e link da reunião',
+      'Ficha do cliente com caso, área e número do processo',
+      'Áreas de atuação e registro do escritório no perfil',
+      'Controle de honorários e de fiado',
+      'Assistente de WhatsApp com o vocabulário do escritório',
+    ],
+    proofTitle: 'Sigilo por padrão, divulgação só se você quiser',
+    proofBody:
+      `No segmento de advocacia a ${BRAND_NAME} não dispara campanhas, não pede avaliação pública e não expõe preços na agenda pública. O sistema organiza agenda, clientes e honorários — não substitui a análise jurídica. Você decide o que fica visível.`,
+    faqs: [
+      {
+        question: 'O sistema substitui a análise jurídica?',
+        answer:
+          'Não. A Agenda Já organiza agenda, clientes e honorários. Qualquer conteúdo que você decidir divulgar deve ser validado com um advogado e com as regras da OAB aplicáveis.',
+      },
+      {
+        question: 'Os dados do caso ficam visíveis para o cliente?',
+        answer:
+          'Não. Área de atuação, número de processo e apelido do caso ficam restritos à equipe do escritório, inclusive no link público de agendamento.',
+      },
+      {
+        question: 'Funciona com equipe apenas de atendimento?',
+        answer:
+          'Sim. A agenda, o cadastro do cliente e os honorários funcionam mesmo sem fila — no modo "somente agendamento".',
+      },
+    ],
+    related: [
+      { to: '/funcionalidades', label: 'Ver funcionalidades' },
+      { to: '/planos', label: 'Ver planos' },
+      { to: '/dashboard', label: 'Dashboard' },
+    ],
+  },
+  {
     path: '/crm-para-salao-de-beleza',
     eyebrow: 'CRM',
     h1: 'CRM para salão de beleza',

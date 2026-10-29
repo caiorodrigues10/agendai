@@ -106,6 +106,41 @@ export interface ClientAppointment {
   price: number;
 }
 
+/**
+ * Caso do escritório visto pelo portal do cliente.
+ *
+ * Regra de sigilo: **não** traz número de processo, apelido interno,
+ * parte adversária, tribunal nem observações — só o rótulo seguro, os
+ * andamentos marcados como visíveis, o próximo compromisso e os contratos
+ * aguardando assinatura.
+ */
+export interface ClientPortalCase {
+  id: string;
+  barbershopId: string;
+  barbershopName: string;
+  label: string;
+  status: string;
+  practiceArea: string | null;
+  nextAppointment: {
+    id: string;
+    scheduledAt: string;
+    time: string | null;
+    serviceName: string | null;
+  } | null;
+  sharedEvents: {
+    id: string;
+    type: string;
+    title: string;
+    description: string | null;
+    occurredAt: string;
+  }[];
+  pendingSignatures: {
+    id: string;
+    contractTitle: string;
+    token: string;
+  }[];
+}
+
 export interface ClientBenefit {
   type: string;
   description: string;
@@ -246,6 +281,55 @@ export const clientPortalApi = {
   },
 
   /** Agora retorna benefits reais do dashboard (membro ativo do salão). */
+  /** Casos compartilhados pelo escritório com o cliente. */
+  getCases: async (): Promise<ClientPortalCase[]> => {
+    const res = await clientFetch<{ data: unknown[] }>('/api/client/portal/cases');
+    const cases = unwrap<unknown[]>(res);
+    if (!Array.isArray(cases)) return [];
+    return cases.map((raw: unknown) => {
+      const item = (raw ?? {}) as Record<string, unknown>;
+      const next = item.nextAppointment as Record<string, unknown> | null;
+      return {
+        id: String(item.id ?? ''),
+        barbershopId: String(item.barbershopId ?? ''),
+        barbershopName: String(item.barbershopName ?? ''),
+        label: String(item.label ?? 'Processo'),
+        status: String(item.status ?? ''),
+        practiceArea: item.practiceArea ? String(item.practiceArea) : null,
+        nextAppointment: next
+          ? {
+              id: String(next.id ?? ''),
+              scheduledAt: String(next.scheduledAt ?? ''),
+              time: next.time ? String(next.time) : null,
+              serviceName: next.serviceName ? String(next.serviceName) : null,
+            }
+          : null,
+        sharedEvents: Array.isArray(item.sharedEvents)
+          ? item.sharedEvents.map((event: unknown) => {
+              const e = (event ?? {}) as Record<string, unknown>;
+              return {
+                id: String(e.id ?? ''),
+                type: String(e.type ?? 'NOTE'),
+                title: String(e.title ?? ''),
+                description: e.description ? String(e.description) : null,
+                occurredAt: String(e.occurredAt ?? ''),
+              };
+            })
+          : [],
+        pendingSignatures: Array.isArray(item.pendingSignatures)
+          ? item.pendingSignatures.map((sig: unknown) => {
+              const s2 = (sig ?? {}) as Record<string, unknown>;
+              return {
+                id: String(s2.id ?? ''),
+                contractTitle: String(s2.contractTitle ?? ''),
+                token: String(s2.token ?? ''),
+              };
+            })
+          : [],
+      };
+    });
+  },
+
   getBenefits: async (barbershopId: string): Promise<ClientBenefit[]> => {
     const dashboard = await getDashboard(barbershopId);
     const raw = (dashboard as Record<string, unknown>).benefits;
