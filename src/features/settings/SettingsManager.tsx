@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ShopSettings, DaySchedule } from '../../types';
 import { barbershopApi } from '../../infra/barbershopApi';
 import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
@@ -18,6 +18,7 @@ import { BusinessSegmentSection } from './BusinessSegmentSection';
 import { OperationModeSection } from './OperationModeSection';
 import { SocialLinksSection } from './SocialLinksSection';
 import { ProfessionalProfileSection } from './ProfessionalProfileSection';
+import { DataImportWizard } from '../dataImport';
 import { ShopFloorControls } from '../../features/shop';
 import { Field, FIELD_CONTROL } from '../../components/ui/Field';
 import { EmailPreferencesPanel } from './EmailPreferencesPanel';
@@ -36,9 +37,19 @@ import {
   LuShieldCheck as ShieldCheck,
   LuMail as Mail,
   LuCircleHelp as CircleHelp,
+  LuFileSpreadsheet as FileSpreadsheet,
 } from 'react-icons/lu';
 
-type SettingsSection = 'account' | 'shop' | 'social' | 'whatsapp' | 'operation' | 'email' | 'privacy' | 'help';
+type SettingsSection =
+  | 'account'
+  | 'shop'
+  | 'social'
+  | 'whatsapp'
+  | 'operation'
+  | 'email'
+  | 'import'
+  | 'privacy'
+  | 'help';
 
 const SETTINGS_SECTIONS: { id: SettingsSection; label: string; icon: React.ElementType }[] = [
   { id: 'account', label: 'Conta', icon: UserRound },
@@ -47,6 +58,7 @@ const SETTINGS_SECTIONS: { id: SettingsSection; label: string; icon: React.Eleme
   { id: 'whatsapp', label: 'WhatsApp', icon: Smartphone },
   { id: 'operation', label: 'Funcionamento', icon: Clock },
   { id: 'email', label: 'E-mail e notificações', icon: Mail },
+  { id: 'import', label: 'Importar dados', icon: FileSpreadsheet },
   { id: 'privacy', label: 'Privacidade', icon: ShieldCheck },
   { id: 'help', label: 'Ajuda e suporte', icon: CircleHelp },
 ];
@@ -69,7 +81,12 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
   accountSection,
 }) => {
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState<SettingsSection>('account');
+  // O atalho "Importar dados" chega por ?section=import (estado vazio, onboarding).
+  const [searchParams] = useSearchParams();
+  const [activeSection, setActiveSection] = useState<SettingsSection>(() => {
+    const requested = searchParams.get('section');
+    return requested === 'import' ? 'import' : 'account';
+  });
   const [shopName, setShopName] = useState(settings.shopName);
   const [whatsapp, setWhatsapp] = useState(() => maskPhone(settings.whatsapp || ''));
   const [schedule, setSchedule] = useState<DaySchedule[]>(settings.schedule || []);
@@ -377,6 +394,10 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
           {barbershopId && <AppointmentPolicySection barbershopId={barbershopId} onNotify={onNotify} />}
           {saveButton}
         </div>
+      )}
+
+      {activeSection === 'import' && barbershopId && (
+        <DataImportWizard barbershopId={barbershopId} onNotify={onNotify} />
       )}
 
       {activeSection === 'privacy' && <AccountPrivacyPanel onNotify={onNotify} />}

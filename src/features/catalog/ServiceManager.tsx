@@ -9,6 +9,7 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { RiAddLine, RiPencilLine, RiDeleteBin6Line } from 'react-icons/ri';
 import { PackageCatalog } from './PackageCatalog';
 import { Button } from '../../components/ui/Button';
+import { ImportDataShortcut } from '../dataImport';
 
 interface ServiceManagerProps {
   services: Service[];
@@ -43,6 +44,16 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       </div>
 
       <CategoryManager key={categoryState.barbershopId || 'global'} title="Categorias de serviços" linkedLabel="Os serviços vinculados" state={categoryState} onChanged={(id, category) => updateServiceCategory(id, category?.name ?? null)} />
+      {services.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border py-8 text-center">
+          <p className="text-sm text-text-secondary">Nenhum serviço cadastrado.</p>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
+            <span className="text-sm font-bold text-accent">Crie o primeiro serviço</span>
+            <ImportDataShortcut label="Importar de uma planilha" />
+          </div>
+        </div>
+      ) : null}
+
       <div className="space-y-3">
         {services.map(service => (
           <div

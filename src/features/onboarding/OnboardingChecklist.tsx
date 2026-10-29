@@ -194,6 +194,7 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
               { label: '🔔 Alerta de fila cheia', tab: 'settings' },
               { label: '📱 Instalar no celular', tab: 'settings' },
               { label: '👥 Cadastrar equipe', tab: 'team' },
+              { label: '📊 Importar planilha', tab: 'settings?section=import' },
               { label: '⚙️ Preferências', tab: 'settings' },
             ].map(item => (
               <button

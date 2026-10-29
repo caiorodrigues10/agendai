@@ -16,6 +16,7 @@ Código existente ≠ comprovadamente funcional em produção. Distinguir:
 | Assinatura / planos | `PlansPage`, `CheckoutPage`, `OwnerSubscriptionPanel` | `plansApi`, `subscriptionsApi`, `paymentsApi` | `/api/plans`, `/api/subscriptions`, `/api/payments` |
 | Barbearia / settings | `SettingsManager` | `barbershopApi` | `/api/barbershops` |
 | Assistente no WhatsApp (dono) | `OwnerBotSection` (Configurações → WhatsApp) | `ownerBotApi` | `/api/barbershops/:id/owner-bot/*` |
+| Importação de planilhas (dono) | `DataImportWizard` + passos em `features/dataImport/` (Configurações → Importar dados) | `dataImportApi` | `/api/barbershops/:id/imports*` (upload, alvo, colunas, dry-run, confirmar, desfazer, cancelar) |
 | Aparência da página pública | `PageAppearancePanel` (aba Link), wrapper `ShopPageTheme` no `PublicHome` | `pageThemeApi` | `/api/barbershops/:id/page-theme*` (GET/PUT + cover; Cloudinary) |
 | Serviços | `ServiceManager`, `ServiceForm` | `barbershopApi` / services | `/api/services` |
 | Equipe | `TeamManager` | `usersApi` | `/api/users` |
