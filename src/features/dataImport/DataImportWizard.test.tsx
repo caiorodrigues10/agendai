@@ -48,10 +48,30 @@ function uploadResult(): ImportUploadResult {
     headers: ['Nome', 'WhatsApp'],
     preview: [{ Nome: 'Ana', WhatsApp: '11987654321' }],
     totalRows: 1,
+    sheets: [
+      {
+        sheetName: null,
+        headers: ['Nome', 'WhatsApp'],
+        preview: [{ Nome: 'Ana', WhatsApp: '11987654321' }],
+        totalRows: 1,
+      },
+    ],
     createdAt: '2026-11-01T12:00:00.000Z',
     expiresAt: '2026-12-01T12:00:00.000Z',
   };
 }
+
+const OPTIONS_FIXTURE = {
+  updateExisting: true,
+  countFinancialValues: false,
+  sendReviewInvitations: false,
+  includeCase: false,
+  replaceExistingSchedules: false,
+  importTimeOffAsPending: false,
+  updateExistingProducts: true,
+  createProductCategories: true,
+  sendFiadoReminders: false,
+};
 
 function targetResult(): ImportTargetResult {
   return {
@@ -80,6 +100,35 @@ function targetResult(): ImportTargetResult {
     detectedColumns: { name: 0, whatsapp: 1 },
     preview: [{ Nome: 'Ana', WhatsApp: '11987654321' }],
     totalRows: 1,
+    sheets: [
+      {
+        sheetName: null,
+        targetType: 'CLIENTS',
+        fields: [
+          {
+            key: 'name',
+            label: 'cliente',
+            required: true,
+            type: 'text',
+            synonyms: ['nome'],
+          },
+          {
+            key: 'whatsapp',
+            label: 'WhatsApp',
+            required: true,
+            type: 'phone',
+            synonyms: ['whatsapp'],
+          },
+        ],
+        detectedColumns: { name: 0, whatsapp: 1 },
+        columns: { '0': 'name', '1': 'whatsapp' },
+        options: OPTIONS_FIXTURE,
+        missing: [],
+        totalRows: 1,
+        preview: [{ Nome: 'Ana', WhatsApp: '11987654321' }],
+        warnings: [],
+      },
+    ],
   };
 }
 
@@ -94,6 +143,7 @@ function validationSummary(): ImportValidationSummary {
       { rowNumber: 2, status: 'VALID' },
       { rowNumber: 3, status: 'FAILED', message: 'Telefone inválido' },
     ],
+    warnings: [],
   };
 }
 
@@ -173,7 +223,9 @@ describe('DataImportWizard', () => {
     fireEvent.click(screen.getByTestId('import-target-continue'));
 
     expect(await screen.findByTestId('import-step-mapping')).toBeInTheDocument();
-    expect(configureImportTarget).toHaveBeenCalledWith(SHOP, BATCH, 'SERVICES', null);
+    expect(configureImportTarget).toHaveBeenCalledWith(SHOP, BATCH, [
+      { sheetName: null, targetType: 'SERVICES' },
+    ]);
   });
 
   it('mostra a prévia da validação antes de confirmar', async () => {
@@ -272,5 +324,72 @@ describe('DataImportWizard', () => {
     render(<DataImportWizard barbershopId={SHOP} onNotify={vi.fn()} />);
 
     expect(await screen.findByTestId('import-step-review')).toBeInTheDocument();
+  });
+
+  it('mostra a atribuição de tipo por aba em planilha multi-aba', async () => {
+    vi.mocked(uploadImportFile).mockResolvedValue({
+      ...uploadResult(),
+      fileName: 'tudo.xlsx',
+      fileFormat: 'XLSX',
+      sheetNames: ['Clientes', 'Serviços'],
+      sheets: [
+        { sheetName: 'Clientes', headers: ['Nome'], preview: [{ Nome: 'Ana' }], totalRows: 1 },
+        { sheetName: 'Serviços', headers: ['Serviço'], preview: [{ Serviço: 'Corte' }], totalRows: 1 },
+      ],
+    });
+    vi.mocked(configureImportTarget).mockResolvedValue({
+      ...targetResult(),
+      targetType: 'MIXED',
+      sheetNames: ['Clientes', 'Serviços'],
+      sheets: [
+        {
+          sheetName: 'Clientes',
+          targetType: 'CLIENTS',
+          fields: [{ key: 'name', label: 'cliente', required: true, type: 'text', synonyms: ['nome'] }],
+          detectedColumns: { name: 0 },
+          columns: { '0': 'name' },
+          options: OPTIONS_FIXTURE,
+          missing: [],
+          totalRows: 1,
+          preview: [{ Nome: 'Ana' }],
+          warnings: [],
+        },
+        {
+          sheetName: 'Serviços',
+          targetType: 'SERVICES',
+          fields: [{ key: 'serviceName', label: 'serviço', required: true, type: 'text', synonyms: ['servico'] }],
+          detectedColumns: { serviceName: 0 },
+          columns: { '0': 'serviceName' },
+          options: OPTIONS_FIXTURE,
+          missing: [],
+          totalRows: 1,
+          preview: [{ Serviço: 'Corte' }],
+          warnings: [],
+        },
+      ],
+    });
+
+    render(<DataImportWizard barbershopId={SHOP} onNotify={vi.fn()} />);
+
+    fireEvent.change(await screen.findByTestId('import-file-input'), {
+      target: { files: [new File(['x'], 'tudo.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })] },
+    });
+
+    const assignments = await screen.findByTestId('import-sheet-assignments');
+    expect(assignments).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('import-sheet-target-Clientes-CLIENTS'));
+    fireEvent.click(screen.getByTestId('import-sheet-target-Serviços-SERVICES'));
+    fireEvent.click(screen.getByTestId('import-target-continue'));
+
+    expect(await screen.findByTestId('import-step-mapping')).toBeInTheDocument();
+    expect(configureImportTarget).toHaveBeenCalledWith(SHOP, BATCH, [
+      { sheetName: 'Clientes', targetType: 'CLIENTS' },
+      { sheetName: 'Serviços', targetType: 'SERVICES' },
+    ]);
+    // Abas com mapeamento próprio: um seletor no topo da etapa de mapa.
+    expect(screen.getByTestId('import-mapping-tabs')).toBeInTheDocument();
+    expect(screen.getByTestId('import-mapping-tab-Clientes')).toBeInTheDocument();
+    expect(screen.getByTestId('import-mapping-tab-Serviços')).toBeInTheDocument();
   });
 });

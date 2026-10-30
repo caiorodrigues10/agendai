@@ -58,12 +58,14 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 
 ## Importação de planilhas (assistente do dono)
 
-- A seção fica em **Configurações → Importar dados** (`DataImportWizard`): upload → alvo (clientes/serviços/agenda) → colunas → validação (dry-run) → prévia → confirmação → conclusão, com histórico de importações e botão de desfazer.
+- A seção fica em **Configurações → Importar dados** (`DataImportWizard`): upload → alvo → colunas → validação (dry-run) → prévia → confirmação → conclusão, com histórico de importações e botão de desfazer.
+- **Multi-aba (fase 2):** o passo de alvo mostra **um card por tipo (10 alvos)** e, em planilha com várias abas, **uma escolha de tipo por aba**; o passo de colunas tem um **seletor de abas** e as opções são **por aba** (cada tipo tem as suas). O lote misto é importado na ordem de dependência entre os tipos.
+- Modelos `.xlsx` **por tipo** (10) são baixáveis na etapa de upload.
 - O assistente é do **dono**: a UI não deve sugerir importação para funcionário, e o backend exige `OWNER`/`MASTER_ADMIN`.
-- A prévia é **somente leitura**: o passo de validação mostra quantas linhas entram, quantas são ignoradas e quantas são rejeitadas, e nada é gravado antes de o dono confirmar.
-- A UI não promete Notificações: a importação **não** envia mensagem, não convida para avaliação e não mexe em comissão/financeiro. A opção "convidar para avaliação" aparece na tela, mas é **fase 2** — nada é disparado hoje.
+- A prévia é **somente leitura**: o passo de validação mostra quantas linhas entram, quantas são ignoradas e quantas são rejeitadas (com o nome da aba quando há várias), e nada é gravado antes de o dono confirmar.
+- A UI não promete Notificações: a importação **não** envia mensagem, não convida para avaliação e não mexe em comissão/financeiro — as opções correspondentes aparecem na tela, mas **nada é disparado**.
 - Reimportar o mesmo arquivo **não duplica**: o resultado mostra `importado(s)`, `ignorado(s)` e `rejeitado(s)` separadamente.
-- "Desfazer" vale por 30 dias e remove só o que o lote criou e ninguém tocou depois — a UI mostra a mensagem do backend ("Nada foi removido: os registros foram alterados depois da importação") sem escondê-la.
+- "Desfazer" vale por 30 dias e remove só o que o lote criou e ninguém tocou depois (restaurando o que ele substituiu) — a UI mostra a mensagem do backend ("Nada foi removido: os registros foram alterados depois da importação") sem escondê-la.
 - Só uma importação ativa por salão: se já houver um lote em andamento, a UI retoma esse lote e permite cancelá-lo pelo histórico.
 
 ## Notificações

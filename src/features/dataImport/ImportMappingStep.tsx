@@ -1,34 +1,36 @@
 import React from 'react';
+import { LuTriangleAlert as TriangleAlert } from 'react-icons/lu';
 import { Button } from '../../components/ui/Button';
-import type { ImportFieldDescription, ImportFieldKey, ImportOptions } from '../../infra/dataImportApi';
+import type {
+  ImportFieldKey,
+  ImportOptions,
+  ImportSheetPlanInput,
+  ImportSheetPlanView,
+} from '../../infra/dataImportApi';
+import { sheetLabel } from './ImportTargetStep';
 
 /**
- * Etapa 3 — mapa de colunas.
+ * Etapa 3 — mapa de colunas, uma aba por vez.
  *
  * O assistente já sugeriu o mapeamento (cabeçalho que casa com o campo).
- * O dono ajusta o que quiser e vê a prévia ao lado.
+ * O dono ajusta o que quiser, escolhe as opções da aba e vê a prévia ao lado.
+ * Em planilha multi-aba, um seletor no topo alterna entre as abas.
  */
 export const ImportMappingStep: React.FC<{
-  fields: ImportFieldDescription[];
-  headers: string[];
-  mapping: Record<string, ImportFieldKey>;
-  options: ImportOptions;
-  preview: Record<string, string>[];
+  views: ImportSheetPlanView[];
+  plans: ImportSheetPlanInput[];
   busy: boolean;
-  onChangeMapping: (mapping: Record<string, ImportFieldKey>) => void;
-  onChangeOptions: (options: Partial<ImportOptions>) => void;
+  onChangePlan: (index: number, patch: Partial<ImportSheetPlanInput>) => void;
   onContinue: () => Promise<void>;
-}> = ({
-  fields,
-  headers,
-  mapping,
-  options,
-  preview,
-  busy,
-  onChangeMapping,
-  onChangeOptions,
-  onContinue,
-}) => {
+}> = ({ views, plans, busy, onChangePlan, onContinue }) => {
+  const [activeIndex, setActiveIndex] = React.useState(0);
+  const view = views[activeIndex];
+  const plan = plans[activeIndex];
+
+  if (!view || !plan) return null;
+
+  const headers = view.preview.length ? Object.keys(view.preview[0]) : [];
+  const mapping = plan.columns;
   const usedColumns = new Set(Object.keys(mapping));
 
   const assign = (field: ImportFieldKey, column: string) => {
@@ -41,7 +43,7 @@ export const ImportMappingStep: React.FC<{
       next[index] = mappedField;
     }
     if (column !== '') next[column] = field;
-    onChangeMapping(next);
+    onChangePlan(activeIndex, { columns: next });
   };
 
   const columnFor = (field: ImportFieldKey) => {
@@ -49,9 +51,7 @@ export const ImportMappingStep: React.FC<{
     return found ? found[0] : '';
   };
 
-  const missingRequired = fields.some(
-    (field) => field.required && columnFor(field.key) === ''
-  );
+  const missingRequired = view.fields.some((field) => field.required && columnFor(field.key) === '');
 
   return (
     <div className="space-y-5" data-testid="import-step-mapping">
@@ -62,8 +62,49 @@ export const ImportMappingStep: React.FC<{
         </p>
       </div>
 
+      {plans.length > 1 ? (
+        <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Abas da planilha" data-testid="import-mapping-tabs">
+          {plans.map((sheet, index) => (
+            <button
+              key={sheet.sheetName ?? index}
+              type="button"
+              role="tab"
+              aria-selected={index === activeIndex}
+              onClick={() => setActiveIndex(index)}
+              className={[
+                'rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors',
+                index === activeIndex
+                  ? 'border-accent bg-accent/10 text-text-primary'
+                  : 'border-border bg-surface-2 text-text-muted hover:border-border-strong',
+              ].join(' ')}
+              data-testid={`import-mapping-tab-${sheet.sheetName ?? index}`}
+            >
+              {sheetLabel(sheet.sheetName)}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      {view.warnings.length ? (
+        <div
+          className="rounded-xl border border-warning/40 bg-warning/5 p-3"
+          role="status"
+          data-testid="import-mapping-warnings"
+        >
+          <p className="flex items-center gap-2 text-sm font-bold text-text-primary">
+            <TriangleAlert size={16} className="text-warning" aria-hidden="true" />
+            Avisos desta aba
+          </p>
+          <ul className="mt-1 space-y-1 text-xs text-text-secondary">
+            {view.warnings.map((warning) => (
+              <li key={warning}>{warning}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
       <div className="grid gap-3 md:grid-cols-2">
-        {fields.map((field) => (
+        {view.fields.map((field) => (
           <label key={field.key} className="block text-sm text-text-primary">
             <span className="flex items-center gap-1 font-semibold">
               {field.label}
@@ -95,63 +136,13 @@ export const ImportMappingStep: React.FC<{
         ))}
       </div>
 
-      <div className="rounded-xl border border-border bg-surface-2 p-4">
-        <h4 className="text-sm font-bold text-text-primary">Opções</h4>
-        <div className="mt-2 space-y-2">
-          <label className="flex items-start gap-2 text-sm text-text-primary">
-            <input
-              type="checkbox"
-              checked={options.updateExisting}
-              onChange={(event) => onChangeOptions({ updateExisting: event.target.checked })}
-              className="mt-0.5"
-              data-testid="import-option-update-existing"
-            />
-            <span>
-              Atualizar quem já existe
-              <span className="block text-xs text-text-muted">
-                Reconhece o cliente pelo telefone. Desligado, quem já existe é ignorado.
-              </span>
-            </span>
-          </label>
+      <SheetOptions
+        view={view}
+        options={plan.options}
+        onChange={(options) => onChangePlan(activeIndex, { options })}
+      />
 
-          <label className="flex items-start gap-2 text-sm text-text-primary">
-            <input
-              type="checkbox"
-              checked={options.countFinancialValues}
-              onChange={(event) => onChangeOptions({ countFinancialValues: event.target.checked })}
-              className="mt-0.5"
-              data-testid="import-option-financial"
-            />
-            <span>
-              Contar valores no histórico financeiro
-              <span className="block text-xs text-text-muted">
-                Desligado por padrão: o histórico financeiro é alimentado pela conclusão do
-                atendimento, não pela planilha.
-              </span>
-            </span>
-          </label>
-
-          {fields.some((field) => field.key === 'caseName') ? (
-            <label className="flex items-start gap-2 text-sm text-text-primary">
-              <input
-                type="checkbox"
-                checked={options.includeCase}
-                onChange={(event) => onChangeOptions({ includeCase: event.target.checked })}
-                className="mt-0.5"
-                data-testid="import-option-case"
-              />
-              <span>
-                Criar o caso/processo
-                <span className="block text-xs text-text-muted">
-                  O caso fica restrito ao painel — nunca aparece para o cliente.
-                </span>
-              </span>
-            </label>
-          ) : null}
-        </div>
-      </div>
-
-      {preview.length ? (
+      {view.preview.length ? (
         <div>
           <h4 className="text-sm font-bold text-text-primary">Prévia das linhas</h4>
           <div className="mt-2 overflow-x-auto rounded-xl border border-border">
@@ -166,7 +157,7 @@ export const ImportMappingStep: React.FC<{
                 </tr>
               </thead>
               <tbody>
-                {preview.slice(0, 5).map((row, index) => (
+                {view.preview.slice(0, 5).map((row, index) => (
                   <tr key={index} className="border-t border-border">
                     {headers.map((header) => (
                       <td key={header} className="px-3 py-2 text-text-primary">
@@ -192,9 +183,194 @@ export const ImportMappingStep: React.FC<{
       </Button>
       {missingRequired ? (
         <p className="text-xs text-danger">
-          Mapeie as colunas obrigatórias para continuar.
+          Mapeie as colunas obrigatórias desta aba para continuar.
         </p>
       ) : null}
+    </div>
+  );
+};
+
+/** Opções específicas do tipo da aba (cada tipo tem as suas). */
+const SheetOptions: React.FC<{
+  view: ImportSheetPlanView;
+  options: ImportOptions;
+  onChange: (options: ImportOptions) => void;
+}> = ({ view, options, onChange }) => {
+  const patch = (partial: Partial<ImportOptions>) => onChange({ ...options, ...partial });
+
+  const hasCaseField = view.fields.some((field) => field.key === 'caseName');
+  const isSchedule =
+    view.targetType === 'STAFF_SCHEDULES' || view.targetType === 'SHOP_SCHEDULE';
+  const isTimeOff = view.targetType === 'TIME_OFF';
+  const isProducts = view.targetType === 'PRODUCTS';
+  const isFiado = view.targetType === 'FIADOS';
+
+  return (
+    <div className="rounded-xl border border-border bg-surface-2 p-4">
+      <h4 className="text-sm font-bold text-text-primary">Opções desta aba</h4>
+      <div className="mt-2 space-y-2">
+        <label className="flex items-start gap-2 text-sm text-text-primary">
+          <input
+            type="checkbox"
+            checked={options.updateExisting}
+            onChange={(event) => patch({ updateExisting: event.target.checked })}
+            className="mt-0.5"
+            data-testid="import-option-update-existing"
+          />
+          <span>
+            Atualizar quem já existe
+            <span className="block text-xs text-text-muted">
+              Reconhece o registro pelo identificador da aba (telefone, nome, SKU...). Desligado,
+              quem já existe é ignorado.
+            </span>
+          </span>
+        </label>
+
+        {view.targetType === 'APPOINTMENTS' ? (
+          <>
+            <label className="flex items-start gap-2 text-sm text-text-primary">
+              <input
+                type="checkbox"
+                checked={options.countFinancialValues}
+                onChange={(event) => patch({ countFinancialValues: event.target.checked })}
+                className="mt-0.5"
+                data-testid="import-option-financial"
+              />
+              <span>
+                Contar valores no histórico financeiro
+                <span className="block text-xs text-text-muted">
+                  Desligado por padrão: o histórico financeiro é alimentado pela conclusão do
+                  atendimento, não pela planilha.
+                </span>
+              </span>
+            </label>
+
+            <label className="flex items-start gap-2 text-sm text-text-primary">
+              <input
+                type="checkbox"
+                checked={options.sendReviewInvitations}
+                onChange={(event) => patch({ sendReviewInvitations: event.target.checked })}
+                className="mt-0.5"
+                data-testid="import-option-review-invitations"
+              />
+              <span>
+                Enviar convite de avaliação
+                <span className="block text-xs text-text-muted">
+                  Desligado por padrão: importar a planilha não deve disparar mensagem ao cliente.
+                </span>
+              </span>
+            </label>
+          </>
+        ) : null}
+
+        {hasCaseField ? (
+          <label className="flex items-start gap-2 text-sm text-text-primary">
+            <input
+              type="checkbox"
+              checked={options.includeCase}
+              onChange={(event) => patch({ includeCase: event.target.checked })}
+              className="mt-0.5"
+              data-testid="import-option-case"
+            />
+            <span>
+              Criar o caso/processo
+              <span className="block text-xs text-text-muted">
+                O caso fica restrito ao painel — nunca aparece para o cliente.
+              </span>
+            </span>
+          </label>
+        ) : null}
+
+        {isSchedule ? (
+          <label className="flex items-start gap-2 text-sm text-text-primary">
+            <input
+              type="checkbox"
+              checked={options.replaceExistingSchedules}
+              onChange={(event) => patch({ replaceExistingSchedules: event.target.checked })}
+              className="mt-0.5"
+              data-testid="import-option-replace-schedules"
+            />
+            <span>
+              Substituir horário já configurado
+              <span className="block text-xs text-text-muted">
+                Desligado por padrão: dias que já têm horário são mantidos como estão.
+              </span>
+            </span>
+          </label>
+        ) : null}
+
+        {isTimeOff ? (
+          <label className="flex items-start gap-2 text-sm text-text-primary">
+            <input
+              type="checkbox"
+              checked={options.importTimeOffAsPending}
+              onChange={(event) => patch({ importTimeOffAsPending: event.target.checked })}
+              className="mt-0.5"
+              data-testid="import-option-timeoff-pending"
+            />
+            <span>
+              Importar como pendente de aprovação
+              <span className="block text-xs text-text-muted">
+                Desligado por padrão: a folga entra já aprovada.
+              </span>
+            </span>
+          </label>
+        ) : null}
+
+        {isProducts ? (
+          <>
+            <label className="flex items-start gap-2 text-sm text-text-primary">
+              <input
+                type="checkbox"
+                checked={options.updateExistingProducts}
+                onChange={(event) => patch({ updateExistingProducts: event.target.checked })}
+                className="mt-0.5"
+                data-testid="import-option-update-products"
+              />
+              <span>
+                Atualizar preço e estoque mínimo de produto existente
+                <span className="block text-xs text-text-muted">
+                  O estoque atual não é sobrescrito: o estoque inicial vira um movimento de entrada.
+                </span>
+              </span>
+            </label>
+
+            <label className="flex items-start gap-2 text-sm text-text-primary">
+              <input
+                type="checkbox"
+                checked={options.createProductCategories}
+                onChange={(event) => patch({ createProductCategories: event.target.checked })}
+                className="mt-0.5"
+                data-testid="import-option-create-categories"
+              />
+              <span>
+                Criar categorias que ainda não existem
+                <span className="block text-xs text-text-muted">
+                  Categoria nova entra no catálogo de produtos.
+                </span>
+              </span>
+            </label>
+          </>
+        ) : null}
+
+        {isFiado ? (
+          <label className="flex items-start gap-2 text-sm text-text-primary">
+            <input
+              type="checkbox"
+              checked={options.sendFiadoReminders}
+              onChange={(event) => patch({ sendFiadoReminders: event.target.checked })}
+              className="mt-0.5"
+              data-testid="import-option-fiado-reminders"
+            />
+            <span>
+              Enviar lembrete de cobrança
+              <span className="block text-xs text-text-muted">
+                Desligado por padrão: importar fiado não deve disparar mensagem ao cliente.
+              </span>
+            </span>
+          </label>
+        ) : null}
+      </div>
     </div>
   );
 };

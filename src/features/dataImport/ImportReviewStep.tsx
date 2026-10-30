@@ -12,12 +12,21 @@ import type { ImportValidationSummary } from '../../infra/dataImportApi';
 export const ImportReviewStep: React.FC<{
   validation: ImportValidationSummary;
   busy: boolean;
+  /** Rótulo da aba de cada linha (quando o arquivo tem várias abas). */
+  sheetLabels?: Record<string, string>;
   onBack: () => void;
   onRevalidate: () => Promise<void>;
   onConfirm: () => Promise<void>;
-}> = ({ validation, busy, onBack, onRevalidate, onConfirm }) => {
+}> = ({ validation, busy, sheetLabels, onBack, onRevalidate, onConfirm }) => {
   const rejected = validation.results.filter((row) => row.status === 'FAILED');
   const skipped = validation.results.filter((row) => row.status === 'SKIPPED');
+
+  /** "Linha 3" ou "Aba “Clientes” · linha 3" quando há várias abas. */
+  const rowLabel = (row: { rowNumber: number; sheetName?: string | null }) => {
+    const sheet = row.sheetName ?? null;
+    if (!sheet || !sheetLabels) return `Linha ${row.rowNumber}`;
+    return `Aba “${sheetLabels[sheet] ?? sheet}” · linha ${row.rowNumber}`;
+  };
 
   return (
     <div className="space-y-4" data-testid="import-step-review">
@@ -53,8 +62,8 @@ export const ImportReviewStep: React.FC<{
           </p>
           <ul className="mt-2 max-h-52 space-y-1 overflow-y-auto text-xs text-text-secondary">
             {rejected.slice(0, 50).map((row) => (
-              <li key={row.rowNumber}>
-                Linha {row.rowNumber}: {row.message}
+              <li key={`${row.sheetName ?? ''}-${row.rowNumber}`}>
+                {rowLabel(row)}: {row.message}
               </li>
             ))}
           </ul>
@@ -74,8 +83,8 @@ export const ImportReviewStep: React.FC<{
           </p>
           <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto text-xs text-text-secondary">
             {skipped.slice(0, 20).map((row) => (
-              <li key={row.rowNumber}>
-                Linha {row.rowNumber}: {row.message}
+              <li key={`${row.sheetName ?? ''}-${row.rowNumber}`}>
+                {rowLabel(row)}: {row.message}
               </li>
             ))}
           </ul>
