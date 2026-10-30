@@ -7,11 +7,44 @@ import { authStorage } from './authStorage';
  * O fluxo é o mesmo dos 7 passos: enviar arquivo → escolher alvo → mapear
  * colunas → validar (dry-run) → confirmar → acompanhar → desfazer.
  *
+ * Uma planilha pode ter **várias abas**, cada uma com o seu tipo: o dono
+ * escolhe o tipo de cada aba e o assistente mapeia, valida e importa cada uma
+ * no seu ritmo (a ordem real é a de dependência entre os tipos).
+ *
  * O upload é multipart puro (o `apiClient` só fala JSON), então ele usa
  * `fetch` direto, no mesmo padrão do upload de logo.
  */
 
-export type ImportTargetType = 'CLIENTS' | 'SERVICES' | 'APPOINTMENTS';
+/** O que uma aba importa. */
+export type ImportTargetType =
+  | 'CLIENTS'
+  | 'SERVICES'
+  | 'APPOINTMENTS'
+  | 'STAFF_SCHEDULES'
+  | 'SHOP_SCHEDULE'
+  | 'TIME_OFF'
+  | 'PRODUCTS'
+  | 'SERVICE_PACKAGES'
+  | 'CLIENT_PACKAGES'
+  | 'FIADOS';
+
+/** Alvo gravado no lote: "MIXED" quando as abas têm tipos diferentes. */
+export type ImportBatchTargetType = ImportTargetType | 'MIXED';
+
+/** Tipo de entidade que o lote cria (usado pelo desfazer). */
+export type ImportEntityType =
+  | 'CLIENT'
+  | 'SERVICE'
+  | 'APPOINTMENT'
+  | 'CASE'
+  | 'STAFF_SCHEDULE'
+  | 'SHOP_SCHEDULE'
+  | 'TIME_OFF'
+  | 'PRODUCT'
+  | 'PRODUCT_CATEGORY'
+  | 'SERVICE_PACKAGE'
+  | 'CLIENT_PACKAGE'
+  | 'FIADO';
 
 export type ImportBatchStatus =
   | 'UPLOADED'
@@ -29,16 +62,19 @@ export type ImportBatchStatus =
 export type ImportRowStatus = 'PENDING' | 'IMPORTED' | 'SKIPPED' | 'FAILED';
 
 export type ImportFieldKey =
+  // clientes
   | 'name'
   | 'whatsapp'
   | 'email'
   | 'birthDate'
   | 'notes'
+  // serviços
   | 'serviceName'
   | 'description'
   | 'price'
   | 'durationMinutes'
   | 'category'
+  // agendamentos
   | 'clientName'
   | 'clientWhatsapp'
   | 'staffName'
@@ -49,20 +85,73 @@ export type ImportFieldKey =
   | 'paymentMethod'
   | 'modality'
   | 'caseName'
-  | 'practiceArea';
+  | 'practiceArea'
+  // horários
+  | 'dayOfWeek'
+  | 'startTime'
+  | 'endTime'
+  | 'pauseStart'
+  | 'pauseEnd'
+  | 'isOpen'
+  // folgas
+  | 'startDate'
+  | 'endDate'
+  | 'timeOffReason'
+  | 'timeOffStatus'
+  // produtos
+  | 'productName'
+  | 'productSku'
+  | 'productBarcode'
+  | 'productCategory'
+  | 'productDescription'
+  | 'productUnit'
+  | 'productUnitLabel'
+  | 'productType'
+  | 'salePrice'
+  | 'costPrice'
+  | 'stockQty'
+  | 'minStock'
+  | 'productImage'
+  // catálogo de pacotes
+  | 'packageName'
+  | 'sessionCount'
+  | 'packagePrice'
+  | 'validityDays'
+  // saldo de pacotes do cliente
+  | 'totalSessions'
+  | 'remainingSessions'
+  | 'pricePaid'
+  | 'purchasedAt'
+  | 'expiresAt'
+  // fiado
+  | 'customerName'
+  | 'fiadoDescription'
+  | 'originalAmount'
+  | 'paidAmount'
+  | 'dueDate';
 
 export interface ImportOptions {
   updateExisting: boolean;
   countFinancialValues: boolean;
   sendReviewInvitations: boolean;
   includeCase: boolean;
+  /** Substitui o horário já configurado do dia. */
+  replaceExistingSchedules: boolean;
+  /** Importa a folga como pendente de aprovação. */
+  importTimeOffAsPending: boolean;
+  /** Atualiza preço e estoque mínimo de produto que já existe. */
+  updateExistingProducts: boolean;
+  /** Cria a categoria de produto que ainda não existe. */
+  createProductCategories: boolean;
+  /** Envia o lembrete de cobrança do fiado importado. */
+  sendFiadoReminders: boolean;
 }
 
 export interface ImportFieldDescription {
   key: ImportFieldKey;
   label: string;
   required: boolean;
-  type: 'text' | 'phone' | 'email' | 'date' | 'time' | 'money' | 'number';
+  type: 'text' | 'phone' | 'email' | 'date' | 'time' | 'money' | 'number' | 'quantity' | 'weekday';
   hint?: string;
   synonyms: string[];
 }
@@ -71,7 +160,7 @@ export interface ImportBatchSummary {
   id: string;
   fileName: string;
   fileFormat: 'XLSX' | 'CSV';
-  targetType: ImportTargetType;
+  targetType: ImportBatchTargetType;
   status: ImportBatchStatus;
   sheetName: string | null;
   totalRows: number;
@@ -87,24 +176,47 @@ export interface ImportBatchSummary {
   canUndo: boolean;
 }
 
+/** Uma aba do arquivo, como o dono a vê logo depois do upload. */
+export interface ImportSheetInfo {
+  sheetName: string | null;
+  headers: string[];
+  preview: Record<string, string>[];
+  totalRows: number;
+}
+
 export interface ImportUploadResult {
   id: string;
   fileName: string;
   fileFormat: 'XLSX' | 'CSV';
-  targetType: ImportTargetType;
+  targetType: ImportBatchTargetType;
   status: ImportBatchStatus;
   sheetNames: string[];
   selectedSheet: string | null;
   headers: string[];
   preview: Record<string, string>[];
   totalRows: number;
+  sheets: ImportSheetInfo[];
   createdAt: string;
   expiresAt: string;
 }
 
+/** Uma aba do plano (mapeamento + opções + avisos), como a tela mostra. */
+export interface ImportSheetPlanView {
+  sheetName: string | null;
+  targetType: ImportTargetType;
+  fields: ImportFieldDescription[];
+  detectedColumns: Partial<Record<ImportFieldKey, number>>;
+  columns: Record<string, string>;
+  options: ImportOptions;
+  missing: string[];
+  totalRows: number;
+  preview: Record<string, string>[];
+  warnings: string[];
+}
+
 export interface ImportTargetResult {
   id: string;
-  targetType: ImportTargetType;
+  targetType: ImportBatchTargetType;
   status: ImportBatchStatus;
   sheetNames: string[];
   selectedSheet: string | null;
@@ -113,13 +225,16 @@ export interface ImportTargetResult {
   detectedColumns: Partial<Record<ImportFieldKey, number>>;
   preview: Record<string, string>[];
   totalRows: number;
+  sheets: ImportSheetPlanView[];
 }
 
 export interface ImportRowValidation {
   rowNumber: number;
+  sheetName?: string | null;
   status: 'VALID' | 'SKIPPED' | 'FAILED';
   message?: string;
   field?: ImportFieldKey;
+  warnings?: string[];
 }
 
 export interface ImportValidationSummary {
@@ -128,16 +243,26 @@ export interface ImportValidationSummary {
   skippedRows: number;
   failedRows: number;
   results: ImportRowValidation[];
+  warnings: string[];
+}
+
+/** Uma aba do plano que o dono envia (mapa + opções). */
+export interface ImportSheetPlanInput {
+  sheetName: string | null;
+  targetType: ImportTargetType;
+  columns: Record<string, ImportFieldKey>;
+  options: ImportOptions;
 }
 
 export interface ImportBatchDetail extends ImportBatchSummary {
-  mapping: { columns: Record<string, string>; options: ImportOptions } | null;
+  mapping: { version?: number; sheets?: unknown[] } | { columns: Record<string, string>; options: ImportOptions } | null;
   counts: Record<string, number>;
   rows: {
     id: string;
+    sheetName: string;
     rowNumber: number;
     status: ImportRowStatus;
-    entityType: string | null;
+    entityType: ImportEntityType | null;
     errorMessage: string | null;
   }[];
 }
@@ -146,7 +271,12 @@ export interface ImportUndoResult {
   batchId: string;
   removed: number;
   kept: number;
-  details: { entityType: string; entityId: string; action: 'removed' | 'kept'; reason?: string }[];
+  details: {
+    entityType: string;
+    entityId: string;
+    action: 'removed' | 'kept' | 'restored';
+    reason?: string;
+  }[];
 }
 
 const base = (barbershopId: string) =>
@@ -181,33 +311,58 @@ export async function uploadImportFile(
   return parsed.data;
 }
 
-/** Escolhe o que importar (e a aba da planilha). */
+/** Uma aba escolhida na etapa de alvo: nome + tipo que ela importa. */
+export interface ImportSheetTargetChoice {
+  sheetName: string | null;
+  targetType: ImportTargetType;
+}
+
+/**
+ * Escolhe o que cada aba importa.
+ *
+ * `sheets` (multi-aba) tem prioridade; `targetType`/`sheetName` atendem o
+ * arquivo de aba única.
+ */
+export async function configureImportTarget(
+  barbershopId: string,
+  batchId: string,
+  sheets: ImportSheetTargetChoice[]
+): Promise<ImportTargetResult>;
 export async function configureImportTarget(
   barbershopId: string,
   batchId: string,
   targetType: ImportTargetType,
   sheetName?: string | null
+): Promise<ImportTargetResult>;
+export async function configureImportTarget(
+  barbershopId: string,
+  batchId: string,
+  targetOrSheets: ImportTargetType | ImportSheetTargetChoice[],
+  sheetName?: string | null
 ): Promise<ImportTargetResult> {
+  const body = Array.isArray(targetOrSheets)
+    ? { sheets: targetOrSheets }
+    : { targetType: targetOrSheets, sheetName: sheetName ?? null };
+
   const res = await apiClient<{ data: ImportTargetResult }>(
     `${base(barbershopId)}/${batchId}/target`,
     'PATCH',
-    { targetType, sheetName: sheetName ?? null },
+    body,
     token()
   );
   return res.data;
 }
 
-/** Salva o mapeamento de colunas e as opções. */
+/** Salva o mapeamento de colunas e as opções de cada aba. */
 export async function saveImportMapping(
   barbershopId: string,
   batchId: string,
-  columns: Record<string, ImportFieldKey>,
-  options: Partial<ImportOptions>
+  sheets: ImportSheetPlanInput[]
 ): Promise<{ id: string; status: ImportBatchStatus }> {
   const res = await apiClient<{ data: { id: string; status: ImportBatchStatus } }>(
     `${base(barbershopId)}/${batchId}/mapping`,
     'PATCH',
-    { columns, options },
+    { sheets },
     token()
   );
   return res.data;

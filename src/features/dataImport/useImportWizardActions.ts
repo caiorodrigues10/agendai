@@ -9,8 +9,9 @@ import {
   uploadImportFile,
   validateImportBatch,
   type ImportBatchDetail,
-  type ImportFieldKey,
-  type ImportTargetType,
+  type ImportSheetPlanInput,
+  type ImportSheetTargetChoice,
+  type ImportTargetResult,
 } from '../../infra/dataImportApi';
 import type { ImportWizardStateModel } from './useImportWizardState';
 
@@ -23,7 +24,7 @@ import type { ImportWizardStateModel } from './useImportWizardState';
 
 export interface ImportWizardActions {
   upload: (file: File) => Promise<void>;
-  chooseTarget: (targetType: ImportTargetType, sheetName?: string | null) => Promise<void>;
+  chooseTargets: (choices: ImportSheetTargetChoice[]) => Promise<void>;
   saveMappingAndValidate: () => Promise<void>;
   runValidation: () => Promise<void>;
   confirm: () => Promise<void>;
@@ -44,12 +45,11 @@ export function useImportWizardActions(params: {
   const { barbershopId, onNotify, loadHistory, poll, setDetail, state } = params;
   const {
     batchId,
-    mapping,
-    options,
+    sheets,
     setBatch,
     setBatchId,
     setTarget,
-    setMapping,
+    setSheets,
     setValidation,
     setStep,
     setBusy,
@@ -75,7 +75,7 @@ export function useImportWizardActions(params: {
         setBatch(result);
         setBatchId(result.id);
         setTarget(null);
-        setMapping({});
+        setSheets([]);
         setValidation(null);
         setDetail(null);
         setStep('target');
@@ -86,19 +86,19 @@ export function useImportWizardActions(params: {
         setBusy(false);
       }
     },
-    [barbershopId, handleError, loadHistory, setBatch, setBatchId, setDetail, setError, setMapping, setStep, setTarget, setValidation, setBusy]
+    [barbershopId, handleError, loadHistory, setBatch, setBatchId, setDetail, setError, setSheets, setStep, setTarget, setValidation, setBusy]
   );
 
-  const chooseTarget = useCallback(
-    async (targetType: ImportTargetType, sheetName?: string | null) => {
-      if (!batchId) return;
+  const chooseTargets = useCallback(
+    async (choices: ImportSheetTargetChoice[]) => {
+      if (!batchId || !choices.length) return;
       setBusy(true);
       setError(null);
       try {
-        const result = await configureImportTarget(barbershopId, batchId, targetType, sheetName);
+        const result = await configureImportTarget(barbershopId, batchId, choices);
         setTarget(result);
         setBatchId(result.id);
-        setMapping(toMapping(result.detectedColumns));
+        setSheets(toSheetPlans(result));
         setStep('mapping');
       } catch (err) {
         handleError(err);
@@ -106,7 +106,7 @@ export function useImportWizardActions(params: {
         setBusy(false);
       }
     },
-    [barbershopId, batchId, handleError, setBatchId, setBusy, setError, setMapping, setStep, setTarget]
+    [barbershopId, batchId, handleError, setBatchId, setBusy, setError, setSheets, setStep, setTarget]
   );
 
   const saveMappingAndValidate = useCallback(async () => {
@@ -114,7 +114,7 @@ export function useImportWizardActions(params: {
     setBusy(true);
     setError(null);
     try {
-      await saveImportMapping(barbershopId, batchId, mapping, options);
+      await saveImportMapping(barbershopId, batchId, sheets);
       setStep('validate');
       const summary = await validateImportBatch(barbershopId, batchId);
       setValidation(summary);
@@ -124,7 +124,7 @@ export function useImportWizardActions(params: {
     } finally {
       setBusy(false);
     }
-  }, [barbershopId, batchId, handleError, mapping, options, setBusy, setError, setStep, setValidation]);
+  }, [barbershopId, batchId, handleError, sheets, setBusy, setError, setStep, setValidation]);
 
   const runValidation = useCallback(async () => {
     if (!batchId) return;
@@ -210,7 +210,7 @@ export function useImportWizardActions(params: {
 
   return {
     upload,
-    chooseTarget,
+    chooseTargets,
     saveMappingAndValidate,
     runValidation,
     confirm,
@@ -221,11 +221,25 @@ export function useImportWizardActions(params: {
   };
 }
 
-/** Converte o mapa detectado pelo servidor (campo → coluna) no formato da tela (coluna → campo). */
-function toMapping(detected: Partial<Record<ImportFieldKey, number>>): Record<string, ImportFieldKey> {
-  const mapping: Record<string, ImportFieldKey> = {};
+/**
+ * Converte as views de aba do servidor no plano de trabalho da tela:
+ * colunas detectadas (campo → índice) viram mapa (índice → campo) e as
+ * opções padrão vêm do servidor.
+ */
+function toSheetPlans(result: ImportTargetResult): ImportSheetPlanInput[] {
+  return result.sheets.map((sheet) => ({
+    sheetName: sheet.sheetName,
+    targetType: sheet.targetType,
+    columns: invertDetected(sheet.detectedColumns),
+    options: sheet.options,
+  }));
+}
+
+/** Campo → índice vira índice → campo (o formato que a tela usa no mapa). */
+function invertDetected(detected: Partial<Record<string, number>>): Record<string, ImportSheetPlanInput['columns'][string]> {
+  const columns: Record<string, ImportSheetPlanInput['columns'][string]> = {};
   for (const [field, column] of Object.entries(detected)) {
-    if (typeof column === 'number') mapping[String(column)] = field as ImportFieldKey;
+    if (typeof column === 'number') columns[String(column)] = field as ImportSheetPlanInput['columns'][string];
   }
-  return mapping;
+  return columns;
 }

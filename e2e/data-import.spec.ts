@@ -22,6 +22,7 @@ const PASSWORD = process.env.PANEL_PASSWORD ?? '';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const FIXTURE_CSV = join(HERE, 'fixtures', 'clientes-import.csv');
 const FIXTURE_XLSX = join(HERE, 'fixtures', 'clientes-import.xlsx');
+const FIXTURE_MULTI = join(HERE, 'fixtures', 'multi-aba.xlsx');
 
 test.skip(!RUN, 'Import e2e precisa de IMPORT_E2E=1 + credenciais + stack completo');
 
@@ -42,6 +43,14 @@ async function login(page: Page): Promise<void> {
 async function openWizard(page: Page): Promise<void> {
   await page.goto('/app/settings?section=import');
   await expect(page.getByTestId('data-import-wizard')).toBeVisible({ timeout: 20_000 });
+  // Lotes de execuções anteriores fazem o assistente retomar em outra etapa:
+  // cancela tudo e recarrega para começar do upload.
+  await cancelPendingBatches(page);
+  if (!(await page.getByTestId('import-file-input').isVisible().catch(() => false))) {
+    await page.reload();
+    await expect(page.getByTestId('data-import-wizard')).toBeVisible({ timeout: 20_000 });
+    await cancelPendingBatches(page);
+  }
 }
 
 /** O salão aceita uma importação ativa por vez: cancela as pendentes. */
@@ -69,7 +78,7 @@ async function importFixture(
   await page.getByTestId('import-file-input').setInputFiles(fixture);
   await expect(page.getByTestId('import-step-target')).toBeVisible({ timeout: 20_000 });
 
-  await page.getByRole('radio', { name: /Clientes/i }).check();
+  await page.getByTestId('import-target-card-CLIENTS').click();
   await page.getByTestId('import-target-continue').click();
 
   await expect(page.getByTestId('import-step-mapping')).toBeVisible({ timeout: 20_000 });
@@ -182,6 +191,42 @@ test.describe('importação de planilhas — upload, dry-run, confirmação e de
     });
 
     // Limpa o que o teste importou.
+    await page.getByTestId('import-undo-button').click();
+    await expect(page.getByText(/Importação desfeita/i).first()).toBeVisible({
+      timeout: 20_000,
+    });
+  });
+
+  test('multi-aba: escolhe o tipo de cada aba, importa e desfaz tudo', async ({ page }) => {
+    await login(page);
+    await openWizard(page);
+    await cancelPendingBatches(page);
+
+    await page.getByTestId('import-file-input').setInputFiles(FIXTURE_MULTI);
+    const assignments = await page.getByTestId('import-sheet-assignments');
+    await expect(assignments).toBeVisible({ timeout: 20_000 });
+
+    // Uma escolha por aba: Clientes → Clientes; Serviços → Serviços.
+    await page.getByTestId('import-sheet-target-Clientes-CLIENTS').click();
+    await page.getByTestId('import-sheet-target-Serviços-SERVICES').click();
+    await page.getByTestId('import-target-continue').click();
+
+    // Etapa de mapa com um seletor por aba.
+    await expect(page.getByTestId('import-step-mapping')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId('import-mapping-tabs')).toBeVisible();
+    await page.getByTestId('import-mapping-continue').click();
+
+    // Prévia: 2 clientes + 1 serviço = 3 linhas válidas.
+    await expect(page.getByTestId('import-step-review')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId('import-valid-count')).toHaveText('3');
+    await page.getByTestId('import-review-confirm').click();
+
+    await expect(page.getByTestId('import-step-done')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId('import-imported-count')).toHaveText('3', {
+      timeout: 30_000,
+    });
+
+    // Desfazer multi-tipo: remove os clientes E o serviço importados.
     await page.getByTestId('import-undo-button').click();
     await expect(page.getByText(/Importação desfeita/i).first()).toBeVisible({
       timeout: 20_000,

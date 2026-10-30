@@ -5,10 +5,9 @@ import {
   validateImportBatch,
   type ImportBatchDetail,
   type ImportBatchSummary,
-  type ImportFieldKey,
-  type ImportOptions,
+  type ImportSheetPlanInput,
+  type ImportSheetTargetChoice,
   type ImportTargetResult,
-  type ImportTargetType,
   type ImportUploadResult,
   type ImportValidationSummary,
 } from '../../infra/dataImportApi';
@@ -34,18 +33,18 @@ export interface DataImportWizardState {
   batch: ImportUploadResult | ImportBatchSummary | null;
   batchId: string | null;
   target: ImportTargetResult | null;
-  mapping: Record<string, ImportFieldKey>;
-  options: ImportOptions;
+  /** Plano de trabalho: uma entrada por aba (tipo, colunas e opções). */
+  sheets: ImportSheetPlanInput[];
   validation: ImportValidationSummary | null;
   detail: ImportBatchDetail | null;
   history: ImportBatchSummary[];
   busy: boolean;
   error: string | null;
   setStep: (step: ImportStep) => void;
-  setMapping: (mapping: Record<string, ImportFieldKey>) => void;
-  setOptions: (options: Partial<ImportOptions>) => void;
+  setSheets: (sheets: ImportSheetPlanInput[]) => void;
+  updateSheet: (index: number, patch: Partial<ImportSheetPlanInput>) => void;
   upload: (file: File) => Promise<void>;
-  chooseTarget: (targetType: ImportTargetType, sheetName?: string | null) => Promise<void>;
+  chooseTargets: (choices: ImportSheetTargetChoice[]) => Promise<void>;
   saveMappingAndValidate: () => Promise<void>;
   runValidation: () => Promise<void>;
   confirm: () => Promise<void>;
@@ -143,16 +142,15 @@ export function useDataImportWizard(
     batch: state.batch,
     batchId: state.batchId,
     target: state.target,
-    mapping: state.mapping,
-    options: state.options,
+    sheets: state.sheets,
     validation: state.validation,
     detail,
     history: state.history,
     busy: state.busy,
     error: state.error,
     setStep: state.setStep,
-    setMapping: state.setMapping,
-    setOptions: state.setOptions,
+    setSheets: state.setSheets,
+    updateSheet: state.updateSheet,
     ...actions,
     loadHistory,
   };

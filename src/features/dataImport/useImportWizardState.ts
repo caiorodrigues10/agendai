@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from 'react';
 import type {
   ImportBatchSummary,
-  ImportFieldKey,
   ImportOptions,
+  ImportSheetPlanInput,
   ImportTargetResult,
   ImportUploadResult,
   ImportValidationSummary,
@@ -15,6 +15,9 @@ import type { ImportStep } from './useDataImportWizard';
  * Fica isolado num hook próprio para que a máquina de etapas (upload → alvo →
  * mapa → validação → prévia → confirmação → conclusão) tenha um só lugar.
  * O lote em si vive no servidor: o dono pode sair da tela e voltar depois.
+ *
+ * Uma planilha pode ter várias abas; `sheets` guarda o plano de cada aba
+ * (tipo, colunas e opções) escolhido pelo dono.
  */
 
 export const DEFAULT_OPTIONS: ImportOptions = {
@@ -22,6 +25,11 @@ export const DEFAULT_OPTIONS: ImportOptions = {
   countFinancialValues: false,
   sendReviewInvitations: false,
   includeCase: false,
+  replaceExistingSchedules: false,
+  importTimeOffAsPending: false,
+  updateExistingProducts: true,
+  createProductCategories: true,
+  sendFiadoReminders: false,
 };
 
 const STEP_ORDER: ImportStep[] = [
@@ -40,7 +48,9 @@ export interface ImportWizardSetters {
   setBatch: (batch: ImportUploadResult | ImportBatchSummary | null) => void;
   setBatchId: (batchId: string | null) => void;
   setTarget: (target: ImportTargetResult | null) => void;
-  setMapping: (mapping: Record<string, ImportFieldKey>) => void;
+  setSheets: (sheets: ImportSheetPlanInput[]) => void;
+  /** Atualiza uma aba do plano (mapa de colunas e/ou opções). */
+  updateSheet: (index: number, patch: Partial<ImportSheetPlanInput>) => void;
   setValidation: (validation: ImportValidationSummary | null) => void;
   setBusy: (busy: boolean) => void;
   setError: (error: string | null) => void;
@@ -54,14 +64,12 @@ export interface ImportWizardStateModel extends ImportWizardSetters {
   batch: ImportUploadResult | ImportBatchSummary | null;
   batchId: string | null;
   target: ImportTargetResult | null;
-  mapping: Record<string, ImportFieldKey>;
-  options: ImportOptions;
+  sheets: ImportSheetPlanInput[];
   validation: ImportValidationSummary | null;
   history: ImportBatchSummary[];
   busy: boolean;
   error: string | null;
   setHistory: (history: ImportBatchSummary[]) => void;
-  setOptions: (options: Partial<ImportOptions>) => void;
 }
 
 export function useImportWizardState(): ImportWizardStateModel {
@@ -69,8 +77,7 @@ export function useImportWizardState(): ImportWizardStateModel {
   const [batch, setBatch] = useState<ImportUploadResult | ImportBatchSummary | null>(null);
   const [batchId, setBatchId] = useState<string | null>(null);
   const [target, setTarget] = useState<ImportTargetResult | null>(null);
-  const [mapping, setMapping] = useState<Record<string, ImportFieldKey>>({});
-  const [options, setOptionsState] = useState<ImportOptions>(DEFAULT_OPTIONS);
+  const [sheets, setSheets] = useState<ImportSheetPlanInput[]>([]);
   const [validation, setValidation] = useState<ImportValidationSummary | null>(null);
   const [history, setHistory] = useState<ImportBatchSummary[]>([]);
   const [busy, setBusy] = useState(false);
@@ -81,18 +88,17 @@ export function useImportWizardState(): ImportWizardStateModel {
     return STEP_ORDER.slice(0, index);
   }, [step]);
 
-  const setOptions = useCallback((partial: Partial<ImportOptions>) => {
-    setOptionsState((current) => ({ ...current, ...partial }));
+  const updateSheet = useCallback((index: number, patch: Partial<ImportSheetPlanInput>) => {
+    setSheets((current) => current.map((sheet, i) => (i === index ? { ...sheet, ...patch } : sheet)));
   }, []);
 
   const reset = useCallback(() => {
     setBatch(null);
     setBatchId(null);
     setTarget(null);
-    setMapping({});
+    setSheets([]);
     setValidation(null);
     setError(null);
-    setOptionsState(DEFAULT_OPTIONS);
     setStep('upload');
   }, []);
 
@@ -102,8 +108,7 @@ export function useImportWizardState(): ImportWizardStateModel {
     batch,
     batchId,
     target,
-    mapping,
-    options,
+    sheets,
     validation,
     history,
     busy,
@@ -112,12 +117,12 @@ export function useImportWizardState(): ImportWizardStateModel {
     setBatch,
     setBatchId,
     setTarget,
-    setMapping,
+    setSheets,
+    updateSheet,
     setValidation,
     setBusy,
     setError,
     setHistory,
-    setOptions,
     reset,
   };
 }

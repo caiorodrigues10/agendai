@@ -60,21 +60,17 @@ export const DataImportWizard: React.FC<{
         <ImportTargetStep
           busy={wizard.busy}
           fileName={wizard.batch?.fileName}
-          sheetNames={wizard.target?.sheetNames ?? uploadResult?.sheetNames}
-          onChoose={wizard.chooseTarget}
+          sheets={uploadResult?.sheets}
+          onChoose={wizard.chooseTargets}
         />
       ) : null}
 
       {wizard.step === 'mapping' && wizard.target ? (
         <ImportMappingStep
-          fields={wizard.target.fields}
-          headers={wizard.target.headers}
-          mapping={wizard.mapping}
-          options={wizard.options}
-          preview={wizard.target.preview}
+          views={wizard.target.sheets}
+          plans={wizard.sheets}
           busy={wizard.busy}
-          onChangeMapping={wizard.setMapping}
-          onChangeOptions={wizard.setOptions}
+          onChangePlan={wizard.updateSheet}
           onContinue={wizard.saveMappingAndValidate}
         />
       ) : null}
@@ -87,6 +83,7 @@ export const DataImportWizard: React.FC<{
         <ImportReviewStep
           validation={wizard.validation}
           busy={wizard.busy}
+          sheetLabels={reviewSheetLabels(wizard)}
           onBack={() => wizard.setStep('mapping')}
           onRevalidate={wizard.runValidation}
           onConfirm={wizard.confirm}
@@ -138,3 +135,12 @@ const ImportReviewUnavailable: React.FC<{
     </Button>
   </div>
 );
+
+/** Rótulo amigável de cada aba (nome real; "CSV" para arquivo de uma aba só). */
+function reviewSheetLabels(wizard: ReturnType<typeof useDataImportWizard>): Record<string, string> {
+  const labels: Record<string, string> = {};
+  for (const view of wizard.target?.sheets ?? []) {
+    if (view.sheetName) labels[view.sheetName] = view.sheetName;
+  }
+  return labels;
+}
