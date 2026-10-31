@@ -65,7 +65,7 @@ export const SystemStatePage: React.FC<SystemStatePageProps> = ({
   secondaryAction,
   footer,
 }) => (
-  <div className="relative min-h-screen overflow-hidden bg-bg text-text-primary">
+  <div className="relative min-h-dvh overflow-hidden bg-bg text-text-primary">
     <div
       className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(16,185,129,0.12),transparent_38%)]"
       aria-hidden="true"
@@ -85,7 +85,7 @@ export const SystemStatePage: React.FC<SystemStatePageProps> = ({
       </a>
     </header>
 
-    <main className="relative z-10 mx-auto flex min-h-[calc(100vh-84px)] w-full max-w-6xl items-center justify-center px-5 pb-20 pt-8 sm:px-8">
+    <main className="relative z-10 mx-auto flex min-h-[calc(100dvh-84px)] w-full max-w-6xl items-center justify-center px-5 pb-20 pt-8 sm:px-8">
       <section aria-labelledby="system-state-title" className="w-full max-w-xl text-center">
         <div className="relative mx-auto mb-7 flex h-20 w-20 items-center justify-center rounded-3xl border border-accent/25 bg-accent/10 text-accent shadow-[0_0_50px_rgba(16,185,129,0.12)]">
           {icon}

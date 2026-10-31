@@ -465,7 +465,7 @@ export const OwnerSubscriptionPanel: React.FC = () => {
         open={showCancelModal}
         title={cancelStep === 1 ? 'Sentimos muito em ver você ir' : 'Nos conte o motivo'}
         titleId="cancel-subscription-title"
-        className="max-w-lg max-h-[90vh] overflow-y-auto"
+        className="max-w-lg max-h-[90dvh] overflow-y-auto"
         onClose={closeCancelModal}
         icon={cancelStep === 1 ? <HeartHandshake size={24} /> : undefined}
         iconClassName="bg-accent/10 text-accent"

@@ -80,7 +80,7 @@ export const RefundSaleModal: React.FC<Props> = ({ open, sale, onClose, onConfir
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-surface p-5 shadow-xl sm:p-6">
+      <div className="max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-surface p-5 shadow-xl sm:p-6">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-bold text-text-primary">Estornar venda</h3>
           <button type="button" onClick={onClose} className="text-sm text-text-muted">Fechar</button>

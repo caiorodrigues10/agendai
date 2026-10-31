@@ -250,7 +250,7 @@ export function SmartSelect<T extends string = string>(props: SmartSelectProps<T
   const popup = open && (
     <FloatingPortal>
       {mobile ? (
-        <div className="fixed inset-x-0 bottom-0 z-[150] rounded-t-2xl border border-border bg-surface p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl">
+        <div ref={refs.setFloating} className="fixed inset-x-0 bottom-0 z-[150] max-h-[calc(100dvh-1rem)] overflow-y-auto overscroll-contain rounded-t-2xl border border-border bg-surface p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl">
           <PopupContent />
         </div>
       ) : (
@@ -279,7 +279,7 @@ export function SmartSelect<T extends string = string>(props: SmartSelectProps<T
             <input ref={searchRef} value={query} onChange={event => setSearch(event.target.value)} onKeyDown={handleSearchKeyDown} placeholder={searchPlaceholder} className="min-h-11 w-full rounded-lg border border-input-border bg-input-bg pl-9 pr-3 text-sm text-text-primary outline-none focus:border-focus" aria-label="Buscar opções" />
           </div>
         )}
-        <div ref={listRef} id={listId} role="listbox" aria-multiselectable={mode === 'multiple' || undefined} className="overscroll-contain">
+        <div ref={listRef} id={listId} role="listbox" aria-multiselectable={mode === 'multiple' || undefined} className="max-h-[50dvh] overflow-y-auto overscroll-contain">
           {loading ? <div className="flex items-center justify-center gap-2 p-4 text-sm text-text-muted"><Loader2 size={16} className="animate-spin" />Carregando…</div> : visibleOptions.length === 0 ? <div className="p-4 text-center text-sm text-text-muted">{options.length === 0 ? emptyMessage : noResultsMessage}</div> : visibleOptions.map((option, index) => {
             const selected = selectedValues.includes(option.value);
             return <button type="button" key={option.value} id={`${listId}-option-${option.value}`} role="option" aria-selected={selected} disabled={option.disabled} onMouseEnter={() => setActiveIndex(index)} onClick={() => choose(option)} className={`flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors ${index === activeIndex ? 'bg-surface-2' : ''} ${selected ? 'text-accent' : 'text-text-primary'} ${option.disabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-surface-2'}`}>
@@ -308,6 +308,7 @@ export function SmartSelect<T extends string = string>(props: SmartSelectProps<T
       aria-describedby={error ? errorId : undefined}
       disabled={disabled}
       onKeyDown={handleTriggerKeyDown}
+      onClick={mobile ? () => setOpen(value => !value) : undefined}
       {...(!mobile ? getReferenceProps() : {})}
       className={`flex w-full items-center gap-2 rounded-xl border border-border bg-surface text-left text-text-primary outline-none transition-colors focus:border-focus focus:ring-2 focus:ring-focus/20 disabled:cursor-not-allowed disabled:opacity-50 ${triggerSize}`}
     >

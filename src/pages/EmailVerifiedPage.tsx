@@ -18,7 +18,7 @@ export const EmailVerifiedPage: React.FC = () => {
 
   return (
     <MarketingLayout
-      wrapperClassName="min-h-screen bg-bg text-text-primary flex flex-col"
+      wrapperClassName="min-h-dvh bg-bg text-text-primary flex flex-col"
     >
       <main className="flex-1 flex items-center justify-center px-4 py-16">
         <div className="max-w-md w-full rounded-2xl border border-border bg-surface p-8 text-center space-y-4">

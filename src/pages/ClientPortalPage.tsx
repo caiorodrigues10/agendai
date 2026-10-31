@@ -6,14 +6,14 @@ const ClientPortalPage: React.FC = () => {
 
   if (!authenticated) {
     return (
-      <div className="min-h-screen bg-bg px-4">
+      <div className="min-h-dvh bg-bg px-4">
         <ClientPortalLogin onAuthenticated={() => setAuthenticated(true)} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-bg px-4">
+    <div className="min-h-dvh bg-bg px-4">
       <ClientPortalDashboard />
     </div>
   );

@@ -12,7 +12,7 @@ import { Logo } from '../../components/ui/Logo';
 /**
  * Painel de marca do `/login` e `/cadastro` (desktop, ≥ lg).
  *
- * Sticky em `h-screen`: enquanto o formulário da direita rola, o painel
+ * Sticky em `h-dvh`: enquanto o formulário da direita rola, o painel
  * permanece completo e centralizado. Os números são mockados de propósito —
  * marketing estático, sem chamada de API.
  */
@@ -289,7 +289,7 @@ export const BrandPanel: React.FC = () => {
 
   return (
     <div
-      className="relative hidden lg:flex flex-col overflow-hidden bg-bg text-white lg:sticky lg:top-0 lg:h-screen self-start"
+      className="relative hidden lg:flex flex-col overflow-hidden bg-bg text-white lg:sticky lg:top-0 lg:h-dvh self-start"
     >
       <BackgroundDecor reduceMotion={reduceMotion} />
       {/* Divisor sutil entre o painel e o formulário. */}

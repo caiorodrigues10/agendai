@@ -240,7 +240,7 @@ export const WaitlistPanel: React.FC = () => {
 
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-surface rounded-xl border border-border w-full max-w-lg max-h-[90vh] overflow-y-auto p-5 space-y-4">
+          <div className="bg-surface rounded-xl border border-border w-full max-w-lg max-h-[90dvh] overflow-y-auto p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="text-base font-bold">{editingEntry ? 'Editar entrada' : 'Nova entrada'}</h4>
               <button onClick={() => setModalOpen(false)} className="text-text-muted hover:text-text-primary">✕</button>
@@ -326,7 +326,7 @@ export const WaitlistPanel: React.FC = () => {
 
       {offerTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-surface rounded-xl border border-border w-full max-w-sm p-5 space-y-4">
+          <div className="bg-surface rounded-xl border border-border w-full max-w-sm max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain p-5 space-y-4">
             <h4 className="text-base font-bold">Oferecer vaga</h4>
             <p className="text-sm text-text-secondary">Para: {offerTarget.customerName}</p>
             <div className={FORM_GRID}>

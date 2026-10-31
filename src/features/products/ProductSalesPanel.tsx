@@ -113,7 +113,7 @@ export const ProductSalesPanel: React.FC<Props> = ({ canManage, canRefund, loadE
 
       {selectedSale && (
         <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/50 p-4 sm:items-center">
-          <div className="max-h-[80vh] w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-surface p-4">
+          <div className="max-h-[80dvh] w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-surface p-4">
             <div className="mb-3 flex justify-between">
               <h3 className="font-bold text-text-primary">Detalhe da venda</h3>
               <button type="button" onClick={() => setSelectedSale(null)} className="text-sm text-text-muted">Fechar</button>

@@ -1651,7 +1651,7 @@ export const OwnerFinancialPanel: React.FC = () => {
         titleId="fiado-modal-title"
         loading={fiadoSubmitting}
         onClose={() => setFiadoModalOpen(false)}
-        className="max-h-[90vh] overflow-y-auto"
+        className="max-h-[90dvh] overflow-y-auto"
       >
         <form onSubmit={handleFiadoSubmit(onCreateFiado)} className="space-y-3">
           <p className="text-xs text-text-muted">Preencha os dados do fiado.</p>

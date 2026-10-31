@@ -421,7 +421,7 @@ export const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
   };
 
   return (
-    <div className={`${embedded ? '' : 'min-h-screen '}bg-bg text-text-primary`}>
+    <div className={`${embedded ? '' : 'min-h-dvh '}bg-bg text-text-primary`}>
       {!embedded && (
         <header className="sticky top-0 z-50 bg-bg/95 backdrop-blur-sm border-b border-border">
           <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">

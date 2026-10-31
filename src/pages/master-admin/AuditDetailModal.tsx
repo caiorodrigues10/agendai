@@ -67,7 +67,7 @@ export const AuditDetailModal: React.FC<{ log: AuditLog | null; onClose: () => v
         role="dialog"
         aria-modal="true"
         aria-label={`Detalhes do log ${log.action}`}
-        className="relative bg-surface border border-border rounded-xl w-full max-w-2xl max-h-[80vh] overflow-auto p-4 space-y-3"
+        className="relative bg-surface border border-border rounded-xl w-full max-w-2xl max-h-[80dvh] overflow-auto p-4 space-y-3"
       >
         <div className="flex items-start justify-between gap-3">
           <div>

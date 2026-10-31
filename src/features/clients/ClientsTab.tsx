@@ -278,7 +278,7 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
       {/* Tools modals */}
       {toolsModal === 'merge' && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 sm:items-center sm:p-4">
-          <div className="w-full max-w-lg">
+          <div className="max-h-[calc(100dvh-1rem)] w-full max-w-lg overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]">
             <CrmMergePanel
               onMerged={id => {
                 setSelectedClientId(id);
@@ -293,7 +293,7 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
       )}
       {toolsModal === 'backfill' && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 sm:items-center sm:p-4">
-          <div className="w-full max-w-lg">
+          <div className="max-h-[calc(100dvh-1rem)] w-full max-w-lg overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]">
             <CrmBackfillPanel
               onUpdated={() => {
                 setListRefreshSignal(v => v + 1);

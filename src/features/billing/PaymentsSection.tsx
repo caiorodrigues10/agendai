@@ -40,7 +40,7 @@ const RefundModal: React.FC<RefundModalProps> = ({ payment, onClose, onSubmit, b
       onClick={onClose}
     >
       <div
-        className="bg-surface border border-border rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-surface border border-border rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90dvh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3 mb-4">

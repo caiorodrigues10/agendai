@@ -134,7 +134,7 @@ export const PublicHome: React.FC = () => {
   if (!barbershopId || !settings) {
     if (id) {
       return (
-        <div className="min-h-screen bg-bg text-text-primary flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <div className="min-h-dvh bg-bg text-text-primary flex flex-col items-center justify-center gap-4 px-6 text-center">
           <Store className="text-text-muted" size={40} />
           <div>
             <h1 className="text-lg font-bold">Estabelecimento não encontrado</h1>

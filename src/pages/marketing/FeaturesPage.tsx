@@ -449,7 +449,7 @@ export const FeaturesPage: React.FC = () => {
   return (
     <MarketingLayout
       ref={pageRef}
-      wrapperClassName="min-h-screen bg-black text-neutral-100 selection:bg-accent/30 font-sans overflow-x-hidden"
+      wrapperClassName="min-h-dvh bg-black text-neutral-100 selection:bg-accent/30 font-sans overflow-x-hidden"
       title="Funcionalidades — Fila, agenda, financeiro e mais | Agenda Já"
       description="Fila digital, agendamento 24/7, financeiro, equipe ilimitada, WhatsApp automático e previsão de demanda — tudo num só painel para salão e barbearia."
       path="/funcionalidades"

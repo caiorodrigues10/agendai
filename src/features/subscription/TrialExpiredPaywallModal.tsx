@@ -60,7 +60,7 @@ export const TrialExpiredPaywallModal: React.FC<TrialExpiredPaywallModalProps> =
       />
       <FocusLock returnFocus>
         <div
-          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-surface p-5 sm:p-6 shadow-xl"
+          className="relative w-full max-w-2xl max-h-[90dvh] overflow-y-auto rounded-2xl border border-border bg-surface p-5 sm:p-6 shadow-xl"
           role="dialog"
           aria-modal="true"
           aria-labelledby="trial-paywall-title"

@@ -190,7 +190,7 @@ export const PlansPage: React.FC = () => {
 
   return (
     <MarketingLayout
-      wrapperClassName="dark min-h-screen overflow-x-hidden bg-bg font-sans text-text-primary selection:bg-accent/30"
+      wrapperClassName="dark min-h-dvh overflow-x-hidden bg-bg font-sans text-text-primary selection:bg-accent/30"
       title="Planos e preços — Essencial e Pro | Agenda Já"
       description="Fila digital, agenda online e equipe ilimitada a partir de R$ 14/mês. 30 dias de Pro grátis, sem cartão. Anual com 2 meses grátis."
       path="/planos"

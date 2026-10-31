@@ -50,7 +50,7 @@ export const ShopPageTheme: React.FC<ShopPageThemeProps> = ({ barbershopId, chil
 
   if (!theme) {
     return (
-      <div className="min-h-screen pb-[max(5rem,env(safe-area-inset-bottom))] bg-bg text-text-primary">
+      <div className="min-h-dvh pb-[calc(5rem+env(safe-area-inset-bottom))] bg-bg text-text-primary">
         {children}
       </div>
     );
@@ -74,7 +74,7 @@ export const ShopPageTheme: React.FC<ShopPageThemeProps> = ({ barbershopId, chil
       data-radius={theme.radiusStyle}
       data-button-style={theme.buttonStyle}
       data-variant={variant}
-      className="min-h-screen pb-[max(5rem,env(safe-area-inset-bottom))] bg-bg text-text-primary"
+      className="min-h-dvh pb-[calc(5rem+env(safe-area-inset-bottom))] bg-bg text-text-primary"
       style={{ ...pageThemeToCssVars(colors, variant), ...radiusCssVars(theme.radiusStyle) }}
     >
       {theme.coverUrl && (

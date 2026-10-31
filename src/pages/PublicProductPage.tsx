@@ -324,7 +324,7 @@ export const PublicProductPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-bg text-text-muted">
+      <div className="flex min-h-dvh items-center justify-center bg-bg text-text-muted">
         <Loader2 className="animate-spin" size={40} aria-label="Carregando produto" />
       </div>
     );
@@ -332,7 +332,7 @@ export const PublicProductPage: React.FC = () => {
 
   if (loadError || !product || !shop) {
     return (
-      <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-4 px-6 text-center bg-bg text-text-primary">
+      <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-4 px-6 text-center bg-bg text-text-primary">
         <Package className="mx-auto text-text-muted" size={40} aria-hidden />
         <div>
           <h1 className="text-lg font-bold">{loadError ?? 'Produto não encontrado'}</h1>
@@ -353,7 +353,7 @@ export const PublicProductPage: React.FC = () => {
 
   if (reservation) {
     return (
-      <div className="min-h-screen bg-bg text-text-primary">
+      <div className="min-h-dvh bg-bg text-text-primary">
         <SuccessScreen
           shop={shop}
           reservation={reservation}
@@ -367,7 +367,7 @@ export const PublicProductPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-bg text-text-primary">
+    <div className="min-h-dvh bg-bg text-text-primary">
       <main className="mx-auto max-w-md px-4 pt-6">
         <button
           type="button"

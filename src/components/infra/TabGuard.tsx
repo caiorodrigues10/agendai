@@ -36,7 +36,7 @@ export const TabGuard: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
   if (subscriptionLoading && !data) {
     return (
-      <div role="status" className="min-h-[60vh] flex items-center justify-center text-accent">
+      <div role="status" className="min-h-[60dvh] flex items-center justify-center text-accent">
         <LuLoader className="animate-spin" size={40} />
       </div>
     );

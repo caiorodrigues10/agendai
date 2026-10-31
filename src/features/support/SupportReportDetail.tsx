@@ -193,7 +193,7 @@ export const SupportReportDetail: React.FC<SupportReportDetailProps> = ({ report
           role="dialog"
           aria-modal="true"
           aria-labelledby="support-detail-title"
-          className="relative w-full max-w-lg rounded-2xl border border-border bg-surface shadow-2xl flex flex-col max-h-[85vh] overflow-hidden"
+          className="relative w-full max-w-lg rounded-2xl border border-border bg-surface shadow-2xl flex flex-col max-h-[85dvh] overflow-hidden"
         >
           <div className="flex items-start gap-3 px-5 pt-5 pb-4 border-b border-border">
             <HeaderInfo detail={detail} loading={loading} />
@@ -207,7 +207,7 @@ export const SupportReportDetail: React.FC<SupportReportDetailProps> = ({ report
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5 space-y-4">
             {loading ? (
               <div className="flex justify-center py-8">
                 <Loader2 size={22} className="animate-spin text-accent" />

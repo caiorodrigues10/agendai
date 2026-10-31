@@ -651,7 +651,7 @@ export const LandingPage: React.FC = () => {
   return (
     <MarketingLayout
       ref={pageRef}
-      wrapperClassName="min-h-screen overflow-x-hidden bg-[#050706] font-sans text-neutral-100 selection:bg-emerald-400/30"
+      wrapperClassName="min-h-dvh overflow-x-hidden bg-[#050706] font-sans text-neutral-100 selection:bg-emerald-400/30"
       title={`${BRAND_NAME} — Fila, agenda e financeiro para salão e barbearia`}
       description="Fila digital com estimativa de espera, agendamento online 24h e financeiro no mesmo painel. 30 dias de Pro grátis, sem cartão."
       path="/"
@@ -682,7 +682,7 @@ export const LandingPage: React.FC = () => {
     >
 
       <main className="relative z-10">
-        <section className="relative flex min-h-screen items-center overflow-hidden px-5 pb-20 pt-24 sm:px-8 sm:pb-24 sm:pt-28 md:pt-32 xl:px-12 xl:pb-28 xl:pt-36">
+        <section className="relative flex min-h-dvh items-center overflow-hidden px-5 pb-20 pt-24 sm:px-8 sm:pb-24 sm:pt-28 md:pt-32 xl:px-12 xl:pb-28 xl:pt-36">
           <FloatingPathsBackground
             position={-1}
             className="pointer-events-none absolute inset-0 z-0 opacity-70"

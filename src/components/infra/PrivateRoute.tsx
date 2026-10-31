@@ -15,7 +15,7 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ roles, children, fal
   const location = useLocation();
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg flex items-center justify-center text-accent">
+      <div className="min-h-dvh bg-bg flex items-center justify-center text-accent">
         <Loader2 className="animate-spin" size={40} />
       </div>
     );

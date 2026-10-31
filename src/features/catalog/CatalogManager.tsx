@@ -324,7 +324,7 @@ export const CatalogManager: React.FC = () => {
         titleId="catalog-add-modal-title"
         loading={creatingVar || creatingAddon || creatingCombo}
         onClose={() => setAddModal(null)}
-        className="max-h-[90vh] overflow-y-auto"
+        className="max-h-[90dvh] overflow-y-auto"
       >
         <p className="mt-1 text-xs text-text-muted">
           {addModal === 'combos'

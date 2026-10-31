@@ -215,7 +215,7 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
   return (
     <div
       data-testid="preview-column"
-      className="order-first flex max-h-[calc(100vh-8rem)] flex-col gap-3 self-start overflow-y-auto lg:order-none lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)]"
+      className="order-first flex max-h-[calc(100dvh-8rem)] flex-col gap-3 self-start overflow-y-auto lg:order-none lg:sticky lg:top-24 lg:max-h-[calc(100dvh-8rem)]"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-sm font-bold text-text-primary">Prévia ao vivo</h3>

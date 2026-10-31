@@ -648,7 +648,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   if (!objectiveId && !isEditing) {
     return (
       <EditorDialog>
-        <div className="flex h-full w-full max-w-4xl flex-col overflow-hidden bg-surface sm:h-auto sm:max-h-[92vh] sm:rounded-2xl sm:border sm:border-border">
+        <div className="flex h-full w-full max-w-4xl flex-col overflow-hidden bg-surface sm:h-auto sm:max-h-[92dvh] sm:rounded-2xl sm:border sm:border-border">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <h3 className="font-bold text-text-primary">Criar post</h3>
             <button type="button" onClick={onClose} className="rounded-lg p-2 text-text-muted hover:text-text-primary" aria-label="Fechar">
@@ -681,7 +681,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
 
   return (
     <EditorDialog>
-      <div className="flex h-full w-full max-w-5xl flex-col overflow-hidden bg-surface sm:h-auto sm:max-h-[92vh] sm:rounded-2xl sm:border sm:border-border">
+      <div className="flex h-full w-full max-w-5xl flex-col overflow-hidden bg-surface sm:h-auto sm:max-h-[92dvh] sm:rounded-2xl sm:border sm:border-border">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <h3 className="font-bold text-text-primary">
@@ -1316,7 +1316,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                   ✕
                 </button>
               </div>
-              <div className="max-h-[min(70vh,28rem)] overflow-y-auto p-4">
+              <div className="max-h-[min(70dvh,28rem)] overflow-y-auto p-4">
                 {mediaLoading ? (
                   <div className="grid grid-cols-3 gap-2 sm:grid-cols-4" role="status" aria-busy="true" aria-label="Carregando fotos">
                     {Array.from({ length: 8 }).map((_, i) => (

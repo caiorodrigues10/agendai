@@ -51,7 +51,7 @@ export const AccessBlockedPage: React.FC = () => {
   const blockedAt = formatDate(blockInfo.blockedAt);
 
   return (
-    <div className="min-h-screen bg-bg text-text-primary">
+    <div className="min-h-dvh bg-bg text-text-primary">
       <header className="sticky top-0 z-50 bg-bg/95 backdrop-blur-sm border-b border-border">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
           <Logo size="sm" />

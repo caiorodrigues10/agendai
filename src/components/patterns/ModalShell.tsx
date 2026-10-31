@@ -179,7 +179,7 @@ export const ModalShell: React.FC<ModalShellProps> = ({
           className={`relative w-full border ${borderClassName} bg-surface shadow-2xl ${
             sheet
               ? 'flex max-h-[92dvh] flex-col overflow-hidden rounded-t-2xl sm:rounded-2xl max-w-2xl'
-              : 'max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl p-5 max-w-md'
+              : 'max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl p-5 max-w-md'
           } ${className}`}
         >
           {sheet ? (
@@ -191,14 +191,14 @@ export const ModalShell: React.FC<ModalShellProps> = ({
           )}
           {body && (
             <div
-              className={`${sheet ? 'min-h-0 flex-1 overflow-y-auto overscroll-contain ag-scroll px-4 py-4 sm:px-5' : 'mt-4'} ${bodyClassName}`}
+              className={`${sheet ? 'min-h-0 flex-1 overflow-y-auto overscroll-contain ag-scroll px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-5' : 'mt-4'} ${bodyClassName}`}
             >
               {body}
             </div>
           )}
           {footer && (
             <div
-              className={`flex gap-2 ${sheet ? 'shrink-0 border-t border-border px-4 py-3 sm:px-5' : 'mt-5'}`}
+              className={`flex gap-2 ${sheet ? 'shrink-0 border-t border-border px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:px-5' : 'mt-5'}`}
             >
               {footer}
             </div>

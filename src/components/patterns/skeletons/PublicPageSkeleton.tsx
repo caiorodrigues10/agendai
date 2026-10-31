@@ -5,7 +5,7 @@ import { Skeleton, CardSkeleton, ListSkeleton } from './primitives';
  * Skeleton de página pública do salão — perfil, serviços, agendamento e showcase.
  */
 export const PublicPageSkeleton: React.FC = () => (
-  <div className="min-h-screen bg-bg" aria-hidden>
+  <div className="min-h-dvh bg-bg" aria-hidden>
     {/* Hero */}
     <div className="relative h-48 w-full overflow-hidden bg-surface">
       <Skeleton className="h-full w-full" />

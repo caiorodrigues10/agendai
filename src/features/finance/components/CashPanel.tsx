@@ -290,7 +290,7 @@ export const CashPanel: React.FC = () => {
             className="absolute inset-0 bg-black/55 backdrop-blur-[2px]"
             onClick={() => setModalOpen(false)}
           />
-          <div className="relative w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
+          <div className="relative max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-2xl border border-border bg-surface p-6 shadow-2xl">
             <div className="mb-5 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-text-primary">Nova movimentação</h3>
               <button

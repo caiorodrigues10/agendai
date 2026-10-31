@@ -24,7 +24,7 @@ export const AccessDeniedPage: React.FC<AccessDeniedPageProps> = ({ reason = 'pe
   };
 
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-6 py-12 text-center">
+    <div className="flex min-h-[60dvh] flex-col items-center justify-center gap-4 px-6 py-12 text-center">
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-danger/10 text-danger">
         <ShieldAlert size={28} aria-hidden />
       </div>

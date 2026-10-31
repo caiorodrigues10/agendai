@@ -9,6 +9,26 @@ const options = [
 ];
 
 describe('SmartSelect', () => {
+  it('mantém a lista aberta ao rolar as opções no celular', () => {
+    const previousMatchMedia = window.matchMedia;
+    window.matchMedia = vi.fn().mockReturnValue({
+      matches: true,
+      media: '(max-width: 639px)',
+      onchange: null,
+      addListener: vi.fn(), removeListener: vi.fn(),
+      addEventListener: vi.fn(), removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    });
+    try {
+      render(<SmartSelect value={null} options={options} onChange={() => undefined} />);
+      fireEvent.click(screen.getByRole('combobox'));
+      fireEvent.scroll(screen.getByRole('listbox'));
+      expect(screen.getByRole('option', { name: 'Sobrancelha' })).toBeInTheDocument();
+    } finally {
+      window.matchMedia = previousMatchMedia;
+    }
+  });
+
   it('seleciona uma opção e fecha o menu', () => {
     let value: string | null = null;
     const view = render(<SmartSelect value={value} mode="single" options={options} onChange={next => { value = next; }} />);
