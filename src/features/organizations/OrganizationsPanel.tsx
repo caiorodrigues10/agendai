@@ -127,7 +127,6 @@ export function OrganizationsPanel() {
           <fieldset disabled={isSubmitting} className="grid min-w-0 gap-5 sm:grid-cols-2">
             <Field label="Nome da organização" error={errors.name?.message}>
               <input
-                autoFocus
                 autoComplete="organization"
                 placeholder="Ex.: Grupo Aurora"
                 className={errors.name ? FIELD_CONTROL_ERROR : FIELD_CONTROL}

@@ -22,6 +22,7 @@ import {
   CustomerQueueStaffFormData,
 } from '../../schemas';
 import { clientsApi, ClientPet } from '../../infra/clientsApi';
+import { useVisualViewport } from '../../hooks/useVisualViewport';
 
 /** Enviado ao backend somente quando o staff não informa WhatsApp do cliente. */
 const STAFF_PLACEHOLDER_WHATSAPP = '00000000000';
@@ -54,6 +55,7 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
   const [submitError, setSubmitError] = React.useState<string | null>(null);
   const [clientPets, setClientPets] = React.useState<ClientPet[]>([]);
   const [selectedPetId, setSelectedPetId] = React.useState('');
+  const visualViewport = useVisualViewport();
 
   const {
     register,
@@ -142,11 +144,15 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 p-3 backdrop-blur-md animate-fade-in sm:items-center sm:p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 p-3 backdrop-blur-md animate-fade-in sm:items-center sm:p-4"
+      style={visualViewport ? { top: `${visualViewport.top}px`, height: `${visualViewport.height}px` } : undefined}
+    >
       <div
-        className={`relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-[1.6rem] border bg-surface shadow-[0_24px_80px_rgba(0,0,0,0.45)] ${
+        className={`relative w-full max-w-md max-h-[90dvh] overflow-y-auto overscroll-contain rounded-[1.6rem] border bg-surface shadow-[0_24px_80px_rgba(0,0,0,0.45)] ${
           isStaffMode ? 'border-accent/50' : 'border-border'
         }`}
+        style={visualViewport ? { maxHeight: `${Math.max(160, visualViewport.height - 24)}px` } : undefined}
       >
         <div className="relative overflow-hidden border-b border-border/70 px-5 pb-4 pt-5 sm:px-6">
           <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-accent/10 via-transparent to-transparent" />
@@ -196,10 +202,9 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
             <input
               type="text"
               placeholder="Ex: João Silva"
-              className={`w-full rounded-2xl border bg-bg px-4 py-3.5 text-text-primary outline-none transition-all placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/25 ${
+                className={`w-full rounded-2xl border bg-bg px-4 py-3.5 text-base text-text-primary outline-none transition-all placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/25 ${
                 errors.name ? 'border-danger' : 'border-border'
               }`}
-              autoFocus
               {...register('name')}
             />
             {errors.name && (
@@ -216,7 +221,7 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
             <input
               type="tel"
               placeholder="(11) 99999-9999"
-              className={`w-full rounded-2xl border bg-bg px-4 py-3.5 text-text-primary outline-none transition-all placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/25 ${
+              className={`w-full rounded-2xl border bg-bg px-4 py-3.5 text-base text-text-primary outline-none transition-all placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/25 ${
                 errors.whatsapp ? 'border-danger' : 'border-border'
               }`}
               value={watch('whatsapp')}

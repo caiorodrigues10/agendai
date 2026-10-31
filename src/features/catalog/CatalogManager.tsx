@@ -343,7 +343,6 @@ export const CatalogManager: React.FC = () => {
                   placeholder="Nome da variação"
                   value={varName}
                   onChange={e => setVarName(e.target.value)}
-                  autoFocus
                   className={FIELD_CONTROL}
                 />
               </Field>
@@ -378,7 +377,6 @@ export const CatalogManager: React.FC = () => {
                   placeholder="Nome do addon"
                   value={addonName}
                   onChange={e => setAddonName(e.target.value)}
-                  autoFocus
                   className={FIELD_CONTROL}
                 />
               </Field>
@@ -413,7 +411,6 @@ export const CatalogManager: React.FC = () => {
                   placeholder="Nome do combo"
                   value={comboName}
                   onChange={e => setComboName(e.target.value)}
-                  autoFocus
                   className={FIELD_CONTROL}
                 />
               </Field>

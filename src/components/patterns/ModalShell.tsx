@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import FocusLock from 'react-focus-lock';
 import { LuX as X } from 'react-icons/lu';
+import { useVisualViewport } from '../../hooks/useVisualViewport';
 
 export type ModalShellVariant = 'dialog' | 'sheet';
 
@@ -34,6 +35,8 @@ export interface ModalShellProps {
   body?: React.ReactNode;
   /** Classes extras no container do `body` (complementa `mt-4` ou o scroller do sheet). */
   bodyClassName?: string;
+  /** Evita que o primeiro campo abra o teclado automaticamente em telas touch. */
+  initialFocus?: 'first-control' | 'close-button';
   footer?: React.ReactNode;
 }
 
@@ -46,6 +49,7 @@ interface HeaderProps {
   actions?: React.ReactNode;
   loading: boolean;
   onClose: () => void;
+  initialFocus: 'first-control' | 'close-button';
   children?: React.ReactNode;
 }
 
@@ -58,6 +62,7 @@ const ShellHeader: React.FC<HeaderProps> = ({
   actions,
   loading,
   onClose,
+  initialFocus,
   children,
 }) => (
   <div className="flex items-start gap-3">
@@ -79,6 +84,7 @@ const ShellHeader: React.FC<HeaderProps> = ({
             type="button"
             onClick={onClose}
             disabled={loading}
+            data-autofocus={initialFocus === 'close-button' ? '' : undefined}
             className={`rounded-lg text-text-muted hover:bg-bg disabled:opacity-50 ${sheet ? 'p-2' : 'p-1'}`}
             aria-label="Fechar"
           >
@@ -109,8 +115,10 @@ export const ModalShell: React.FC<ModalShellProps> = ({
   children,
   body,
   bodyClassName = '',
+  initialFocus = 'close-button',
   footer,
 }) => {
+  const visualViewport = useVisualViewport(open);
   useEffect(() => {
     if (!open || !closeOnEscape || loading) return;
     const onKey = (e: KeyboardEvent) => {
@@ -122,12 +130,19 @@ export const ModalShell: React.FC<ModalShellProps> = ({
 
   if (!open) return null;
   const sheet = variant === 'sheet';
-  const headerProps = { sheet, icon, iconClassName, titleId, title, actions, loading, onClose, children };
+  const headerProps = { sheet, icon, iconClassName, titleId, title, actions, loading, onClose, initialFocus, children };
+  const overlayStyle = visualViewport
+    ? { top: `${visualViewport.top}px`, height: `${visualViewport.height}px` }
+    : undefined;
+  const panelStyle = visualViewport
+    ? { maxHeight: `${Math.max(160, visualViewport.height - (sheet ? 8 : 32))}px` }
+    : undefined;
 
   return createPortal(
     <FocusLock returnFocus>
       <div
         className={`fixed inset-0 z-[110] flex items-end justify-center bg-black/70 ${sheet ? 'sm:p-4' : 'p-4'} sm:items-center`}
+        style={overlayStyle}
       >
         <button
           type="button"
@@ -145,6 +160,7 @@ export const ModalShell: React.FC<ModalShellProps> = ({
               ? 'flex max-h-[92dvh] flex-col overflow-hidden rounded-t-2xl sm:rounded-2xl max-w-2xl'
               : 'rounded-2xl p-5 max-w-md'
           } ${className}`}
+          style={panelStyle}
         >
           {sheet ? (
             <header className="shrink-0 border-b border-border px-4 py-4 sm:px-5">
