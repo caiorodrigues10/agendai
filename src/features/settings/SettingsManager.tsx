@@ -14,6 +14,7 @@ import { WeatherForecastCard } from './WeatherForecastCard';
 import { AppointmentPolicySection } from './AppointmentPolicySection';
 import { SalonWhatsAppConnection } from './SalonWhatsAppConnection';
 import { OwnerBotSection } from './OwnerBotSection';
+import { WhatsAppAiSection } from './WhatsAppAiSection';
 import { BusinessSegmentSection } from './BusinessSegmentSection';
 import { OperationModeSection } from './OperationModeSection';
 import { SocialLinksSection } from './SocialLinksSection';
@@ -327,6 +328,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
             </div>
           )}
           {barbershopId && <OwnerBotSection barbershopId={barbershopId} onNotify={onNotify} />}
+          {barbershopId && <WhatsAppAiSection barbershopId={barbershopId} onNotify={onNotify} />}
           {showNotifications && barbershopId && <OwnerNotificationsPanel onNotify={onNotify} />}
           {showNotifications && barbershopId && (
             <QueueAlertSettings barbershopId={barbershopId} onNotify={onNotify} />
