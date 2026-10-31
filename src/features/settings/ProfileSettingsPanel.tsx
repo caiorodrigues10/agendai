@@ -23,7 +23,6 @@ export const ProfileSettingsPanel: React.FC<{ onNotify: (message: string, type: 
   } = useForm<ProfileSettingsFormData>({
     resolver: zodResolver(ProfileSettingsSchema),
     defaultValues: {
-      name: user?.name ?? '',
       email: user?.email ?? '',
       currentPassword: '',
       newPassword: '',
@@ -34,7 +33,6 @@ export const ProfileSettingsPanel: React.FC<{ onNotify: (message: string, type: 
     setSaving(true);
     try {
       await updateUserProfile({
-        name: data.name.trim(),
         email: data.email.trim(),
         currentPassword: data.currentPassword || undefined,
         newPassword: data.newPassword || undefined,
@@ -56,10 +54,12 @@ export const ProfileSettingsPanel: React.FC<{ onNotify: (message: string, type: 
         <p className="mt-1 text-sm text-text-secondary">Atualize seus dados de acesso e sua senha.</p>
       </div>
       <div className={FORM_GRID}>
-        <Field label="Nome" error={errors.name?.message}>
+        <Field label="Nome">
           <input
-            className={errors.name ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-            {...register('name')}
+            className={FIELD_CONTROL}
+            value={user?.name ?? ''}
+            readOnly
+            disabled
           />
         </Field>
         <Field label="E-mail" error={errors.email?.message}>

@@ -24,7 +24,7 @@ interface AuthContextValue {
   logout: () => void;
   hasRole: (roles: StaffMember['role'][]) => boolean;
   updateUserAvatar: (avatarUrl: string | null) => void;
-  updateUserProfile: (payload: { name?: string; email?: string; currentPassword?: string; newPassword?: string }) => Promise<void>;
+  updateUserProfile: (payload: { email?: string; currentPassword?: string; newPassword?: string }) => Promise<void>;
   refreshUser: () => Promise<void>;
   /** Troca o salão ativo da sessão (Multiunidades → "Acessar"). */
   switchShop: (orgId: string, barbershopId: string) => Promise<AuthResult>;
@@ -327,7 +327,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   }, []);
 
-  const updateUserProfile = useCallback(async (payload: { name?: string; email?: string; currentPassword?: string; newPassword?: string }) => {
+  const updateUserProfile = useCallback(async (payload: { email?: string; currentPassword?: string; newPassword?: string }) => {
     const updated = await usersApi.updateMe(payload);
     setUser(prev => {
       if (!prev) return prev;
