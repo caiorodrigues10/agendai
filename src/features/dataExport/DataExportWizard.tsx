@@ -312,6 +312,7 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
             >
               <option value="XLSX">Excel (.xlsx)</option>
               <option value="CSV_ZIP">CSVs em .zip</option>
+              <option value="PDF">PDF (relatório)</option>
             </select>
           </label>
           <label className="flex items-center gap-2 text-sm text-text-primary">

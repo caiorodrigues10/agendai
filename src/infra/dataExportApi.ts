@@ -29,7 +29,7 @@ export type ExportModuleKey =
   | 'posts'
   | 'settings';
 
-export type ExportFormat = 'XLSX' | 'CSV_ZIP';
+export type ExportFormat = 'XLSX' | 'CSV_ZIP' | 'PDF';
 
 export type ExportJobStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'EXPIRED';
 
