@@ -1,6 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { LuSearch, LuLoader, LuTriangleAlert, LuShield, LuDownload, LuX } from 'react-icons/lu';
+import {
+  LuArrowRight,
+  LuClock3,
+  LuDownload,
+  LuHistory,
+  LuLoader,
+  LuRefreshCcw,
+  LuSearch,
+  LuShield,
+  LuTriangleAlert,
+  LuUserRound,
+} from 'react-icons/lu';
 import {
   adminAuditApi,
   AuditFacets,
@@ -8,265 +19,136 @@ import {
   AuditLogsResponse,
   buildAuditFilterParams,
 } from '../../infra/adminAuditApi';
+import { Button } from '../../components/ui/Button';
 import { PaginationBar } from '../../components/ui/PaginationBar';
 import { SectionError } from '../../components/patterns';
 import { AuditAlertsPanel, AuditSessionsPanel } from './AuditAdvancedPanels';
 import { AuditDetailModal } from './AuditDetailModal';
+import { AuditFilters } from './AuditFilters';
+import {
+  auditActorLabel,
+  auditDetailSummary,
+  auditResourceLabel,
+  describeAuditAction,
+} from './auditPresentation';
 
 const PAGE_SIZE = 25;
+const number = (value: number) => value.toLocaleString('pt-BR');
+const eventTone = {
+  neutral: 'border-border bg-surface-2 text-text-secondary',
+  info: 'border-accent/20 bg-accent/10 text-accent',
+  warning: 'border-warning/25 bg-warning/10 text-warning',
+  danger: 'border-danger/25 bg-danger/10 text-danger',
+};
+const dateParts = (iso: string) => ({
+  date: new Date(iso).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+  time: new Date(iso).toLocaleTimeString('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
+    hour: '2-digit',
+    minute: '2-digit',
+  }),
+});
 
 const AuditLogList: React.FC<{
   logs: AuditLogsResponse['data'];
-  shops: AuditFacets['shops'];
-  onSelect: (log: AuditLogsResponse['data'][number]) => void;
-}> = ({ logs, shops, onSelect }) => {
-  if (logs.length === 0) {
-    return (
-      <p className="px-4 py-8 text-center text-sm text-text-muted">Nenhum registro encontrado.</p>
-    );
-  }
-  return (
-    <>
-      {logs.map((log) => (
-        <div key={log.id} className="px-4 py-3 flex items-start gap-3">
-          <div className="w-2 h-2 rounded-full bg-accent mt-2 shrink-0" />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono text-accent font-medium min-w-0 truncate">
-                {log.action}
-              </span>
-              <span className="text-xs text-text-muted">em</span>
-              <span className="text-xs font-medium">{log.resource}</span>
-              {log.barbershopId && (
-                <span className="rounded border border-border bg-bg px-1.5 py-0.5 text-[10px] font-bold text-text-secondary min-w-0 truncate">
-                  {shops.find((shop) => shop.id === log.barbershopId)?.name ?? 'Salão'}
-                </span>
-              )}
-              {log.resourceId && (
-                <span className="text-xs text-text-muted font-mono truncate">{log.resourceId}</span>
-              )}
-            </div>
-            {log.details && <p className="text-xs text-text-muted mt-0.5 truncate">{log.details}</p>}
-          </div>
-          <button
-            type="button"
-            onClick={() => onSelect(log)}
-            className="text-xs font-bold text-accent hover:underline shrink-0"
-          >
-            Detalhes
-          </button>
-          <span className="text-[10px] text-text-muted shrink-0">
-            {new Date(log.createdAt).toLocaleString('pt-BR')}
-          </span>
-        </div>
-      ))}
-    </>
-  );
-};
-
-const FilterField: React.FC<{
-  label: string;
-  name: string;
-  type?: string;
-  placeholder?: string;
-  defaultValue?: string;
-}> = ({ label, name, type = 'text', placeholder, defaultValue }) => (
-  <label className="flex flex-col gap-1 text-xs font-medium text-text-muted min-w-0">
-    {label}
-    <input
-      type={type}
-      name={name}
-      placeholder={placeholder}
-      defaultValue={defaultValue}
-      className="bg-bg border border-border rounded-lg px-2 py-1.5 text-sm text-text-primary focus:outline-none focus:border-accent"
-    />
-  </label>
-);
-
-const SelectField: React.FC<{
-  label: string;
-  name: string;
-  options: { value: string; label: string }[];
-  defaultValue?: string;
-}> = ({ label, name, options, defaultValue }) => (
-  <label className="flex flex-col gap-1 text-xs font-medium text-text-muted min-w-0">
-    {label}
-    <select
-      name={name}
-      defaultValue={defaultValue}
-      className="bg-bg border border-border rounded-lg px-2 py-1.5 text-sm text-text-primary focus:outline-none focus:border-accent"
-    >
-      <option value="">Todos</option>
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
-  </label>
-);
-
-const AuditFilters: React.FC<{
-  signature: string;
-  values: AuditFilterValues;
-  facets: { users: AuditFacets['users']; shops: AuditFacets['shops'] };
+  facets: AuditFacets;
   hasFilters: boolean;
-  onApply: (values: AuditFilterValues) => void;
   onClear: () => void;
-}> = ({ signature, values, facets, hasFilters, onApply, onClear }) => (
-  <form
-    key={signature}
-    onSubmit={(event) => {
-      event.preventDefault();
-      const data = new FormData(event.currentTarget);
-      const read = (field: string) => {
-        const value = data.get(field);
-        return typeof value === 'string' ? value.trim() : '';
-      };
-      onApply({
-        q: read('q'),
-        action: read('action'),
-        resource: read('resource'),
-        userId: read('userId'),
-        shopId: read('shopId'),
-        from: read('from'),
-        to: read('to'),
-      });
-    }}
-    className="grid grid-cols-2 md:grid-cols-4 gap-3 items-end"
-  >
-    <div className="col-span-2 md:col-span-2">
-      <FilterField
-        label="Busca"
-        name="q"
-        placeholder="Ação, recurso ou detalhes"
-        defaultValue={values.q}
-      />
-    </div>
-    <FilterField label="Ação" name="action" placeholder="ex.: PATCH" defaultValue={values.action} />
-    <FilterField
-      label="Recurso"
-      name="resource"
-      placeholder="ex.: products"
-      defaultValue={values.resource}
-    />
-    <SelectField
-      label="Usuário"
-      name="userId"
-      defaultValue={values.userId}
-      options={facets.users.map((user) => ({
-        value: user.id,
-        label: `${user.name} (${user.email})`,
-      }))}
-    />
-    <SelectField
-      label="Salão"
-      name="shopId"
-      defaultValue={values.shopId}
-      options={facets.shops.map((shop) => ({ value: shop.id, label: shop.name }))}
-    />
-    <FilterField label="De" name="from" type="date" defaultValue={values.from} />
-    <FilterField label="Até" name="to" type="date" defaultValue={values.to} />
-    <div className="col-span-2 md:col-span-4 flex gap-2 justify-end">
-      <button
-        type="submit"
-        className="px-3 py-1.5 text-xs font-bold flex items-center gap-1 border border-border rounded-lg hover:bg-surface transition-colors"
-      >
-        <LuSearch size={14} /> Filtrar
-      </button>
-      {hasFilters && (
-        <button
-          type="button"
-          onClick={onClear}
-          className="px-3 py-1.5 text-xs font-bold flex items-center gap-1 border border-border rounded-lg hover:bg-surface transition-colors"
-        >
-          <LuX size={14} /> Limpar filtros
-        </button>
-      )}
-    </div>
-  </form>
-);
-
-const AuditHeader: React.FC<{
-  meta: AuditLogsResponse['meta'] | undefined;
-  exporting: boolean;
-  exportError: string | null;
-  onExport: () => void;
-}> = ({ meta, exporting, exportError, onExport }) => (
-  <>
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <div>
-        <h1 className="text-xl font-bold flex items-center gap-2">
-          <LuShield size={20} /> Auditoria
-        </h1>
-        {meta && (
-          <p className="text-sm text-text-muted">
-            {meta.total} registro(s) · página {meta.page} de {Math.max(meta.totalPages, 1)}
-          </p>
+  onSelect: (log: AuditLogsResponse['data'][number]) => void;
+}> = ({ logs, facets, hasFilters, onClear, onSelect }) => {
+  if (logs.length === 0)
+    return (
+      <div className="px-6 py-14 text-center">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-2 text-text-secondary">
+          <LuSearch size={22} aria-hidden="true" />
+        </div>
+        <p className="font-semibold text-text-primary">Nenhum registro encontrado.</p>
+        <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-text-secondary">
+          {hasFilters
+            ? 'Experimente outro termo ou amplie o período da busca.'
+            : 'As atividades aparecerão aqui conforme forem registradas.'}
+        </p>
+        {hasFilters && (
+          <Button variant="secondary" className="mt-5" onClick={onClear}>
+            Limpar filtros
+          </Button>
         )}
       </div>
-      <button
-        type="button"
-        onClick={onExport}
-        disabled={exporting || meta?.total === 0}
-        className="px-3 py-1.5 text-xs font-bold flex items-center gap-1 border border-border rounded-lg hover:bg-surface transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <LuDownload size={14} /> {exporting ? 'Exportando...' : 'Exportar CSV'}
-      </button>
-    </div>
-    {exportError && <SectionError message={exportError} />}
-  </>
-);
-
-const AuditBody: React.FC<{
-  loading: boolean;
-  error: string | null;
-  response: AuditLogsResponse | null;
-  shops: AuditFacets['shops'];
-  page: number;
-  onRetry: () => void;
-  onPageChange: (next: number) => void;
-  onSelect: (log: AuditLogsResponse['data'][number]) => void;
-}> = ({ loading, error, response, shops, page, onRetry, onPageChange, onSelect }) => {
-  if (loading) {
-    return (
-      <div className="flex justify-center py-20">
-        <LuLoader className="animate-spin text-accent" size={32} />
-      </div>
     );
-  }
-
-  if (error && !response) {
-    return (
-      <div className="text-center py-20">
-        <LuTriangleAlert className="mx-auto mb-3 text-warning" size={24} />
-        <p className="text-sm text-text-secondary mb-3">{error}</p>
-        <button onClick={onRetry} className="text-accent text-sm hover:underline">
-          Tentar novamente
-        </button>
-      </div>
-    );
-  }
-
-  const meta = response?.meta;
-
   return (
-    <>
-      {error && (
-        <div className="flex items-center gap-2 rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning">
-          <LuTriangleAlert size={16} />
-          {error}
-        </div>
-      )}
-      <div className="bg-surface border border-border rounded-xl overflow-hidden divide-y divide-border/50">
-        <AuditLogList logs={response?.data ?? []} shops={shops} onSelect={onSelect} />
-      </div>
-      <PaginationBar
-        page={page}
-        totalPages={meta?.totalPages ?? 0}
-        onPageChange={onPageChange}
-      />
-    </>
+    <ul className="divide-y divide-border/70" aria-label="Registros de auditoria">
+      {logs.map(log => {
+        const action = describeAuditAction(log.action, log.resource);
+        const created = dateParts(log.createdAt);
+        return (
+          <li key={log.id}>
+            <button
+              type="button"
+              onClick={() => onSelect(log)}
+              aria-label={`Detalhes: ${action.label}`}
+              className="group flex w-full min-w-0 items-start gap-3 px-4 py-5 text-left outline-none transition-colors hover:bg-surface-2/60 focus-visible:bg-surface-2 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus sm:gap-4 sm:px-6"
+            >
+              <span
+                className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${eventTone[action.tone]}`}
+              >
+                {action.tone === 'danger' || action.tone === 'warning' ? (
+                  <LuShield size={18} aria-hidden="true" />
+                ) : (
+                  <LuHistory size={18} aria-hidden="true" />
+                )}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                  <span className="text-sm font-semibold text-text-primary">{action.label}</span>
+                  <span className="rounded-md border border-border bg-bg px-2 py-0.5 text-xs text-text-secondary">
+                    {auditResourceLabel(log.resource)}
+                  </span>
+                </span>
+                <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-secondary">
+                  <span className="inline-flex items-center gap-1.5">
+                    <LuUserRound size={13} aria-hidden="true" />
+                    {auditActorLabel(log.userId, facets.users)}
+                  </span>
+                  {log.barbershopId && (
+                    <span className="min-w-0 truncate">
+                      {facets.shops.find(shop => shop.id === log.barbershopId)?.name ??
+                        'Salão não identificado'}
+                    </span>
+                  )}
+                </span>
+                {log.details && (
+                  <span className="mt-2 line-clamp-2 break-words text-sm leading-relaxed text-text-secondary">
+                    {auditDetailSummary(log.details)}
+                  </span>
+                )}
+                <span className="mt-2 block truncate font-mono text-[11px] text-text-muted">
+                  {log.action}
+                </span>
+                <time
+                  dateTime={log.createdAt}
+                  className="mt-2 block text-xs text-text-secondary sm:hidden"
+                >
+                  {created.date} às {created.time}
+                </time>
+              </span>
+              <span className="flex shrink-0 flex-col items-end gap-3 pt-0.5">
+                <time
+                  dateTime={log.createdAt}
+                  className="hidden text-right text-xs leading-relaxed text-text-secondary sm:block"
+                >
+                  <span className="block">{created.date}</span>
+                  <span className="text-text-muted">{created.time}</span>
+                </time>
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-accent">
+                  <span className="hidden sm:inline">Detalhes</span>
+                  <LuArrowRight size={16} className="shrink-0" aria-hidden="true" />
+                </span>
+              </span>
+            </button>
+          </li>
+        );
+      })}
+    </ul>
   );
 };
 
@@ -283,18 +165,22 @@ const readFilters = (params: URLSearchParams): AuditFilterValues => ({
 export const AuditPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [response, setResponse] = useState<AuditLogsResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [requestError, setRequestError] = useState<{ key: string; message: string } | null>(null);
+  const [settledKey, setSettledKey] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [facets, setFacets] = useState<AuditFacets>({ resources: [], users: [], shops: [] });
-  const [selectedLog, setSelectedLog] = useState<AuditLogsResponse['data'][number] | null>(
-    null,
-  );
-
-  const { q, action, resource, userId, shopId, from, to } = readFilters(searchParams);
+  const [selectedLog, setSelectedLog] = useState<AuditLogsResponse['data'][number] | null>(null);
+  const values = readFilters(searchParams);
+  const { q, action, resource, userId, shopId, from, to } = values;
+  const signature = JSON.stringify(values);
   const pageParam = Number(searchParams.get('page') ?? '1');
   const page = Number.isFinite(pageParam) && pageParam >= 1 ? Math.floor(pageParam) : 1;
+  const requestKey = `${signature}:${page}:${reloadKey}`;
+  const busy = settledKey !== requestKey;
+  const error = requestError?.key === requestKey ? requestError.message : null;
+  const hasFilters = Object.values(values).some(Boolean);
 
   const setParams = (patch: Record<string, string>) => {
     const next = new URLSearchParams(searchParams);
@@ -304,12 +190,15 @@ export const AuditPage: React.FC = () => {
     });
     setSearchParams(next, { replace: true });
   };
+  const apply = (filters: AuditFilterValues) => setParams({ ...filters, page: '1' });
+  const clear = () =>
+    apply({ q: '', action: '', resource: '', userId: '', shopId: '', from: '', to: '' });
 
   useEffect(() => {
     let active = true;
     adminAuditApi
       .getAuditFacets()
-      .then((res) => {
+      .then(res => {
         if (active) setFacets(res.data);
       })
       .catch(() => undefined);
@@ -317,7 +206,6 @@ export const AuditPage: React.FC = () => {
       active = false;
     };
   }, []);
-
   useEffect(() => {
     let active = true;
     adminAuditApi
@@ -326,30 +214,31 @@ export const AuditPage: React.FC = () => {
         limit: PAGE_SIZE,
         ...buildAuditFilterParams({ q, action, resource, userId, shopId, from, to }),
       })
-      .then((res) => {
+      .then(res => {
         if (!active) return;
         setResponse(res);
-        setError(null);
+        setRequestError(null);
+        setSettledKey(requestKey);
       })
       .catch(() => {
         if (!active) return;
-        setError('Não foi possível carregar os logs de auditoria.');
+        setRequestError({
+          key: requestKey,
+          message: 'Não foi possível carregar os logs de auditoria.',
+        });
+        setSettledKey(requestKey);
       });
     return () => {
       active = false;
     };
-  }, [q, action, resource, userId, shopId, from, to, page, reloadKey]);
-
-  const loading = !response && !error;
+  }, [q, action, resource, userId, shopId, from, to, page, reloadKey, requestKey]);
 
   const handleExport = () => {
     setExporting(true);
     setExportError(null);
     adminAuditApi
-      .exportAuditLogsCsv(
-        buildAuditFilterParams({ q, action, resource, userId, shopId, from, to }),
-      )
-      .then(async (res) => {
+      .exportAuditLogsCsv(buildAuditFilterParams(values))
+      .then(async res => {
         if (!res.ok) throw new Error('Falha no export');
         const blob = new Blob([await res.blob()], { type: 'text/csv;charset=utf-8' });
         const url = window.URL.createObjectURL(blob);
@@ -358,55 +247,183 @@ export const AuditPage: React.FC = () => {
         anchor.download = `auditoria-${new Date().toISOString().slice(0, 10)}.csv`;
         document.body.appendChild(anchor);
         anchor.click();
-        document.body.removeChild(anchor);
+        anchor.remove();
         window.URL.revokeObjectURL(url);
       })
       .catch(() => setExportError('Não foi possível exportar os registros.'))
       .finally(() => setExporting(false));
   };
-
-  const hasFilters = Object.values({ q, action, resource, userId, shopId, from, to }).some(
-    Boolean,
-  );
   const meta = response?.meta;
+  const first = meta?.total && response?.data.length ? (meta.page - 1) * meta.limit + 1 : 0;
+  const last =
+    meta && response?.data.length ? Math.min(first + response.data.length - 1, meta.total) : 0;
 
   return (
-    <div className="space-y-4">
-      <AuditHeader
-        meta={meta}
-        exporting={exporting}
-        exportError={exportError}
-        onExport={handleExport}
-      />
-
-      <div className="grid md:grid-cols-2 gap-4">
+    <div className="min-w-0 space-y-6">
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-text-secondary">
+            Segurança e rastreabilidade
+          </p>
+          <h1 className="flex items-center gap-2.5 text-2xl font-bold tracking-tight text-text-primary">
+            <LuShield size={25} className="text-accent" aria-hidden="true" />
+            Auditoria
+          </h1>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-text-secondary">
+            Acompanhe as atividades, investigue alterações e gerencie os acessos.
+          </p>
+        </div>
+        <div className="flex w-full gap-2 sm:w-auto">
+          <Button
+            variant="secondary"
+            onClick={() => setReloadKey(key => key + 1)}
+            disabled={busy}
+            className="flex-1 sm:flex-none"
+          >
+            <LuRefreshCcw size={16} aria-hidden="true" />
+            Atualizar registros
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={handleExport}
+            disabled={exporting || busy || !!error || !meta?.total}
+            className="flex-1 sm:flex-none"
+          >
+            <LuDownload size={16} aria-hidden="true" />
+            {exporting ? 'Exportando…' : 'Exportar CSV'}
+          </Button>
+        </div>
+      </header>
+      {exportError && <SectionError message={exportError} />}
+      <div className="grid items-start gap-4 lg:grid-cols-2">
         <AuditAlertsPanel />
         <AuditSessionsPanel />
       </div>
-
-      <AuditFilters
-        signature={`${q}|${action}|${resource}|${userId}|${shopId}|${from}|${to}`}
-        values={{ q, action, resource, userId, shopId, from, to }}
-        facets={{ users: facets.users, shops: facets.shops }}
-        hasFilters={hasFilters}
-        onApply={(values) => setParams({ ...values, page: '' })}
-        onClear={() => setSearchParams(new URLSearchParams(), { replace: true })}
-      />
-
-      <AuditBody
-        loading={loading}
-        error={error}
-        response={response}
+      <section
+        className="min-w-0 overflow-hidden rounded-2xl border border-border bg-surface shadow-card"
+        aria-labelledby="audit-history-title"
+      >
+        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border px-4 py-5 sm:px-6">
+          <div>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h2
+                id="audit-history-title"
+                className="flex items-center gap-2 text-base font-semibold text-text-primary"
+              >
+                <LuHistory size={18} className="text-text-secondary" aria-hidden="true" />
+                Histórico de atividades
+              </h2>
+              {meta && (
+                <span className="rounded-lg bg-surface-2 px-2.5 py-1 text-xs font-medium text-text-secondary">
+                  {number(meta.total)} {meta.total === 1 ? 'registro' : 'registros'}
+                </span>
+              )}
+            </div>
+            <p className="mt-1.5 text-xs leading-relaxed text-text-secondary">
+              Do mais recente ao mais antigo. Selecione um registro para investigar.
+            </p>
+          </div>
+          <span
+            role="status"
+            aria-live="polite"
+            className="inline-flex min-h-6 items-center gap-1.5 text-xs text-text-secondary"
+          >
+            {busy ? (
+              <>
+                <LuLoader
+                  size={14}
+                  className="animate-spin motion-reduce:animate-none"
+                  aria-hidden="true"
+                />
+                Atualizando registros…
+              </>
+            ) : (
+              <>
+                <LuClock3 size={14} aria-hidden="true" />
+                Horário de Brasília
+              </>
+            )}
+          </span>
+        </div>
+        <AuditFilters
+          values={values}
+          facets={facets}
+          busy={busy}
+          onApply={apply}
+          onClear={clear}
+          onRemove={key => setParams({ [key]: '', page: '1' })}
+        />
+        <div aria-busy={busy}>
+          {error && (
+            <div
+              className="m-4 space-y-2 rounded-xl border border-warning/30 bg-warning/10 p-4 text-sm text-text-primary"
+              role="alert"
+            >
+              <p className="flex items-start gap-2">
+                <LuTriangleAlert
+                  size={18}
+                  className="mt-0.5 shrink-0 text-warning"
+                  aria-hidden="true"
+                />
+                {error}
+              </p>
+              {response && (
+                <p className="text-xs text-text-secondary">
+                  Os registros abaixo são da consulta anterior.
+                </p>
+              )}
+              <Button variant="secondary" onClick={() => setReloadKey(key => key + 1)}>
+                Tentar novamente
+              </Button>
+            </div>
+          )}
+          {busy && !response ? (
+            <div className="flex items-center justify-center gap-3 px-6 py-16 text-sm text-text-secondary">
+              <LuLoader
+                size={22}
+                className="animate-spin motion-reduce:animate-none text-accent"
+                aria-hidden="true"
+              />
+              Carregando histórico…
+            </div>
+          ) : (
+            response && (
+              <div className={busy ? 'opacity-60' : ''}>
+                <AuditLogList
+                  logs={response.data}
+                  facets={facets}
+                  hasFilters={hasFilters}
+                  onClear={clear}
+                  onSelect={setSelectedLog}
+                />
+              </div>
+            )
+          )}
+        </div>
+        {meta && (
+          <footer className="space-y-4 border-t border-border bg-bg/30 px-4 py-4 sm:px-6">
+            <p className="text-xs text-text-secondary" aria-live="polite">
+              {number(first)}–{number(last)} de {number(meta.total)} registros
+              {hasFilters ? ' encontrados' : ''}
+            </p>
+            <fieldset disabled={busy} aria-label="Navegar pelo histórico" className="min-w-0">
+              <PaginationBar
+                page={meta.page}
+                totalPages={meta.totalPages}
+                onPageChange={next => setParams({ page: String(next) })}
+                className={busy ? 'opacity-50' : ''}
+              />
+            </fieldset>
+          </footer>
+        )}
+      </section>
+      <AuditDetailModal
+        log={selectedLog}
+        users={facets.users}
         shops={facets.shops}
-        page={page}
-        onRetry={() => setReloadKey((key) => key + 1)}
-        onPageChange={(next) => setParams({ page: String(next) })}
-        onSelect={setSelectedLog}
+        onClose={() => setSelectedLog(null)}
       />
-
-      <AuditDetailModal log={selectedLog} onClose={() => setSelectedLog(null)} />
     </div>
   );
 };
-
 export default AuditPage;

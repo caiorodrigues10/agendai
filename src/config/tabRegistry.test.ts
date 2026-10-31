@@ -2,6 +2,25 @@ import { describe, expect, it } from 'vitest';
 import { canAccessTab, getDefaultTab } from './tabRegistry';
 
 describe('canAccessTab', () => {
+  it('hides dashboard destinations when the current plan does not include them', () => {
+    for (const tab of ['products', 'finance', 'reports', 'profit', 'equipment', 'organizations']) {
+      expect(canAccessTab(tab, 'OWNER', { hasDashboard: false })).toBe(false);
+    }
+  });
+  it('keeps equipment owner-only, matching the equipment API (product stock is separate)', () => {
+    expect(
+      canAccessTab('equipment', 'EMPLOYEE', {
+        hasDashboard: true,
+        permissions: ['INVENTORY_MANAGE'],
+      })
+    ).toBe(false);
+    expect(
+      canAccessTab('products', 'EMPLOYEE', {
+        hasDashboard: true,
+        permissions: ['INVENTORY_MANAGE'],
+      })
+    ).toBe(true);
+  });
   it('tabs sem roles são públicas para qualquer papel logado', () => {
     expect(canAccessTab('overview', 'EMPLOYEE')).toBe(true);
     expect(canAccessTab('appointments', 'EMPLOYEE')).toBe(true);

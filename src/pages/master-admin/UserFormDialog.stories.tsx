@@ -39,7 +39,24 @@ const listOk = http.get('/api/admin/barbershops', () =>
   })
 );
 
-const mswHandlers = [listOk];
+const mswHandlers = [
+  listOk,
+  http.get('/api/admin/accounts/:id', () =>
+    HttpResponse.json({
+      success: true,
+      data: {
+        shop: { name: 'Salão Central' },
+        subscription: null,
+        access: {
+          trialDaysRemaining: 12,
+          trialEndDate: '2026-10-13T12:00:00Z',
+          planActive: false,
+          subscriptionAccessAllowed: true,
+        },
+      },
+    })
+  ),
+];
 
 /**
  * Semeia o access token (`adminApi.getAuthHeader()` lança "Não autenticado"
@@ -103,7 +120,9 @@ export const Default: Story = {
   play: async () => {
     const dialog = await openDialog();
     await dialog.findByLabelText('Nome', {}, { timeout: 10000 });
-    await dialog.findByText('Salão Central', {}, { timeout: 10000 });
+    await userEvent.click(await dialog.findByRole('combobox', { name: 'Salão' }));
+    await within(document.body).findByRole('option', { name: 'Salão Central' }, { timeout: 10000 });
+    await userEvent.keyboard('{Escape}');
   },
 };
 
@@ -130,7 +149,7 @@ export const ErroSalvar: Story = {
   },
   play: async () => {
     const dialog = await openDialog();
-    await dialog.findByText('Salão Central', {}, { timeout: 10000 });
+    await dialog.findByRole('combobox', { name: 'Salão' }, { timeout: 10000 });
     fireEvent.change(await dialog.findByLabelText('Nome', {}, { timeout: 10000 }), {
       target: { value: 'Maria Silva' },
     });
@@ -144,5 +163,111 @@ export const ErroSalvar: Story = {
       await dialog.findByRole('button', { name: 'Criar usuário' }, { timeout: 10000 })
     );
     await dialog.findByText(/Não foi possível criar o usuário/, {}, { timeout: 10000 });
+  },
+};
+
+export const EdicaoComPeriodoGratis: Story = {
+  args: {
+    mode: 'edit',
+    user: {
+      id: 'demo-user',
+      name: 'Caio',
+      email: 'caio@example.com',
+      role: 'OWNER',
+      active: true,
+      barbershopId: 'shop-1',
+      createdAt: '2026-10-01T12:00:00Z',
+      barbershop: { name: 'Salão Central' },
+    },
+  },
+  play: async () => {
+    const dialog = await openDialog();
+    await dialog.findByText('12 dias restantes', {}, { timeout: 10000 });
+    await dialog.findByText('Nenhum plano contratado');
+  },
+};
+
+export const EdicaoComPlanoAtivo: Story = {
+  args: EdicaoComPeriodoGratis.args,
+  parameters: {
+    msw: {
+      handlers: [
+        listOk,
+        http.get('/api/admin/accounts/:id', () =>
+          HttpResponse.json({
+            success: true,
+            data: {
+              shop: { name: 'Salão Central' },
+              subscription: {
+                status: 'ACTIVE',
+                endDate: '2026-11-01T12:00:00Z',
+                plan: { name: 'Profissional' },
+              },
+              access: {
+                trialDaysRemaining: 0,
+                trialEndDate: '2026-09-30T12:00:00Z',
+                planActive: true,
+                subscriptionAccessAllowed: true,
+              },
+            },
+          })
+        ),
+      ],
+    },
+  },
+  play: async () => {
+    const dialog = await openDialog();
+    await dialog.findByText('Plano ativo', {}, { timeout: 10000 });
+  },
+};
+
+let demoExtensionDays = 0;
+const demoTrialEnd = () =>
+  new Date(Date.parse('2026-10-13T12:00:00Z') + demoExtensionDays * 86400000).toISOString();
+
+export const EdicaoComExtensaoDeDias: Story = {
+  args: EdicaoComPeriodoGratis.args,
+  loaders: [
+    () => {
+      demoExtensionDays = 0;
+      return {};
+    },
+  ],
+  parameters: {
+    msw: {
+      handlers: [
+        listOk,
+        http.get('/api/admin/accounts/:id', () =>
+          HttpResponse.json({
+            success: true,
+            data: {
+              shop: { name: 'Salão Central' },
+              subscription: {
+                status: 'TRIALING',
+                endDate: demoTrialEnd(),
+                plan: { name: 'Essencial' },
+              },
+              access: {
+                trialDaysRemaining: 12 + demoExtensionDays,
+                trialEndDate: demoTrialEnd(),
+                planActive: false,
+                subscriptionAccessAllowed: true,
+              },
+            },
+          })
+        ),
+        http.post('/api/admin/accounts/:id/extend-trial', async ({ request }) => {
+          const { days } = (await request.json()) as { days: number };
+          demoExtensionDays += days;
+          return HttpResponse.json({ success: true, data: { endDate: demoTrialEnd() } });
+        }),
+      ],
+    },
+  },
+  play: async () => {
+    const dialog = await openDialog();
+    await dialog.findByText('12 dias restantes', {}, { timeout: 10000 });
+    await userEvent.click(await dialog.findByRole('button', { name: 'Adicionar dias' }));
+    await dialog.findByLabelText(/Dias para adicionar/);
   },
 };

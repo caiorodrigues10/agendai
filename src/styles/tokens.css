@@ -12,7 +12,7 @@
   --ag-border-strong: #bfcdc5;
   --ag-text-primary: #14201b;
   --ag-text-secondary: #4a5a53;
-  --ag-text-muted: #6b7a73;
+  --ag-text-muted: #56675e;
   /* Hover de card/linha e foco de borda (tokens de interação). */
   --ag-hover-bg: #f6f9f8;
   --ag-hover-border: color-mix(in srgb, var(--ag-accent) 40%, transparent);
@@ -24,17 +24,17 @@
   /* Marca e ação são papéis diferentes: marca identifica; ação confirma. */
   --ag-brand: #249b76;
   --ag-brand-hover: #1c7e61;
-  --ag-action-primary: #1c7e61;
-  --ag-action-primary-hover: #16664f;
+  --ag-action-primary: #176b52;
+  --ag-action-primary-hover: #125840;
   --ag-action-primary-fg: #ffffff;
   /* Alias idêntico de action-primary (mesma cor nos dois temas); vocabulário de facto do app: bg-accent. */
   --ag-accent: var(--ag-action-primary);
   --ag-accent-hover: var(--ag-action-primary-hover);
   --ag-accent-fg: var(--ag-action-primary-fg);
   /* Cor terciária: detalhes premium, sem competir com a marca. */
-  --ag-tertiary: #79613f;
+  --ag-tertiary: #685233;
   /* Suporte: informação, ajuda e comparativos. */
-  --ag-support: #2563eb;
+  --ag-support: #1d4ed8;
   /* Botões secundários (outlined): cor da borda/texto. */
   --ag-action-secondary: #d4d4d4;
   /* Seleção: fundo de item selecionado (baixa opacidade). */
@@ -44,8 +44,8 @@
   /* Danger: #b91c1c garante ≥4.5:1 em badges bg-danger/15 (D-005). */
   --ag-danger: #b91c1c;
   --ag-danger-fg: #ffffff;
-  --ag-success: #107836;
-  --ag-warning: #b45309;
+  --ag-success: #0e642d;
+  --ag-warning: #92400e;
   /* shadcn/recharts — séries alinhadas ao tema */
   --chart-1: #1c7e61;
   --chart-2: #7c3aed;

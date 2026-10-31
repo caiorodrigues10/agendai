@@ -1,35 +1,44 @@
-import { useCategories } from '../../../hooks/useCategories';
-import { CategoryManager } from '../../catalog/CategoryManager';
+import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import {
   LuCircleAlert as AlertCircle,
-  LuBanknote as Banknote,
   LuCheck as Check,
   LuCircleCheck as CheckCircle,
   LuCreditCard as CreditCard,
   LuDownload as Download,
   LuPencilLine as Edit3,
-  LuFilter as Filter,
   LuLoaderCircle as Loader2,
   LuPlus as Plus,
   LuReceipt as Receipt,
   LuRefreshCcw as RefreshCcw,
   LuTrash2 as Trash2,
   LuTrendingDown as TrendingDown,
-  LuUsers as Users,
   LuWallet as Wallet,
   LuX as X,
 } from 'react-icons/lu';
-import { getErrorMessage } from '../../../utils/errorMessage';
-import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
-import { ModalShell } from '../../../components/patterns/ModalShell';
 import { SectionError } from '../../../components/patterns';
+import { ModalShell } from '../../../components/patterns/ModalShell';
+import {
+  FinanceResumoSkeleton,
+  Skeleton,
+  SkeletonRegion,
+} from '../../../components/patterns/skeletons';
+import { Tabs } from '../../../components/patterns/Tabs';
+import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_GRID } from '../../../components/ui/Field';
 import { SmartSelect } from '../../../components/ui/SmartSelect';
+import { useBarbershopFilters } from '../../../contexts/BarbershopFiltersContext';
 import {
-  ExpenseCategory,
+  EXPENSE_TYPE_LABELS,
+  FiadoStatusBadge,
+  FINANCE_PAYMENT_METHODS,
+  FinanceSummaryCard,
+} from '../../../features/finance';
+import { useCategories } from '../../../hooks/useCategories';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { cashApi, CashSummary } from '../../../infra/cashApi';
+import {
   ExpenseItem,
   ExpenseSummary,
   ExpenseType,
@@ -39,20 +48,11 @@ import {
   FinancialSummary,
   ListMeta,
 } from '../../../infra/financialApi';
-import { cashApi, CashSummary } from '../../../infra/cashApi';
-import { useBarbershopFilters } from '../../../contexts/BarbershopFiltersContext';
-import { usePermissions } from '../../../hooks/usePermissions';
-import { ExpenseSchema, ExpenseFormData, FiadoSchema, FiadoFormData } from '../../../schemas';
-import { formatCurrencyBRL, formatDateBR, formatDateTimeBR } from '../../../utils/formatters';
+import { ExpenseFormData, ExpenseSchema, FiadoFormData, FiadoSchema } from '../../../schemas';
 import { todayISO } from '../../../utils/dateRanges';
-import {
-  EXPENSE_RECURRENCE_LABELS,
-  EXPENSE_TYPE_LABELS,
-  FINANCE_PAYMENT_METHODS,
-  FiadoStatusBadge,
-  FinanceSummaryCard,
-} from '../../../features/finance';
-import { FinanceResumoSkeleton, Skeleton, SkeletonRegion } from '../../../components/patterns/skeletons';
+import { getErrorMessage } from '../../../utils/errorMessage';
+import { formatCurrencyBRL, formatDateBR, formatDateTimeBR } from '../../../utils/formatters';
+import { CategoryManager } from '../../catalog/CategoryManager';
 
 const FIADO_PAYMENT_OPTIONS: { value: FiadoPaymentMethod; label: string }[] = [
   { value: 'cash', label: 'Dinheiro' },
@@ -221,7 +221,8 @@ export const OwnerFinancialPanel: React.FC = () => {
   useEffect(() => {
     if (tab !== 'resumo' || !barbershopId) return;
     setCashLoading(true);
-    cashApi.getSummary(barbershopId, todayISO())
+    cashApi
+      .getSummary(barbershopId, todayISO())
       .then(setCashSummary)
       .catch(() => setCashSummary(null))
       .finally(() => setCashLoading(false));
@@ -428,1079 +429,1216 @@ export const OwnerFinancialPanel: React.FC = () => {
         <div className="flex flex-col gap-4 bg-surface p-4 rounded-xl border border-border">
           <div className="flex justify-between items-center gap-3">
             <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
-              <Banknote size={24} className="text-accent" /> Financeiro
+              Financeiro
             </h2>
             <button
               onClick={handleRefresh}
               disabled={loading}
               title="Atualizar"
-              className="w-9 h-9 flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface-2 rounded-lg border border-border transition-all disabled:opacity-50"
+              aria-label="Atualizar financeiro"
+              className="w-11 h-11 flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface-2 rounded-lg border border-border transition-all disabled:opacity-50"
             >
               <RefreshCcw size={16} className={loading ? 'animate-spin text-accent' : ''} />
             </button>
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {TABS.map(t => (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider border transition-all whitespace-nowrap flex items-center gap-2
-                ${
-                  tab === t.id
-                    ? 'bg-accent border-accent text-accent-fg'
-                    : 'bg-bg border-border text-text-muted hover:border-border-strong'
-                }
-              `}
-              >
-                {t.icon}
-                {t.label}
-              </button>
-            ))}
-          </div>
+          <Tabs<Tab>
+            ariaLabel="Áreas do financeiro"
+            idPrefix="finance"
+            items={TABS.map(({ id, label }) => ({ id, label }))}
+            value={tab}
+            onChange={setTab}
+          />
         </div>
 
-        {error && <SectionError message={error} onRetry={handleRefresh} />}
+        <div
+          role="tabpanel"
+          id={`finance-tabpanel-${tab}`}
+          aria-labelledby={`finance-tab-${tab}`}
+          className="space-y-4"
+        >
+          {error && <SectionError message={error} onRetry={handleRefresh} />}
 
-        {tab === 'resumo' && (
-          <div className="space-y-4">
-            {loading && !summary ? (
-              <FinanceResumoSkeleton />
-            ) : summary ? (
-              <>
-                {/* ── Priority indicators ── */}
-                <SkeletonRegion loading={loading} label="Atualizando resumo">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <FinanceSummaryCard
-                      icon={<Receipt size={20} />}
-                      label="Despesas pendentes"
-                      value={formatCurrencyBRL(summary.expenses.totalPending)}
-                      hint={`${summary.expenses.count} lançamento(s) no total`}
-                    />
-                    <FinanceSummaryCard
-                      icon={<CreditCard size={20} />}
-                      label="Fiado em aberto"
-                      value={formatCurrencyBRL(summary.fiados.totalPending)}
-                      hint={`${summary.fiados.activeDebtors} devedor(es)`}
-                      tone="negative"
-                    />
-                    <FinanceSummaryCard
-                      icon={<AlertCircle size={20} />}
-                      label="Fiado vencido"
-                      value={formatCurrencyBRL(summary.fiados.overdueAmount)}
-                      hint={summary.fiados.overdueCount > 0 ? `${summary.fiados.overdueCount} fiado(s) vencido(s)` : undefined}
-                      tone={summary.fiados.overdueCount > 0 ? 'negative' : undefined}
-                    />
-                    <FinanceSummaryCard
-                      icon={<Check size={20} />}
-                      label="Despesas pagas"
-                      value={formatCurrencyBRL(summary.expenses.totalPaid)}
-                      tone="positive"
-                    />
-                  </div>
-                </SkeletonRegion>
-
-                {/* ── Caixa do dia ── */}
-                <SkeletonRegion loading={cashLoading} label="Carregando caixa do dia">
-                  <div className="rounded-xl border border-accent/20 bg-accent/5 p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-text-muted uppercase font-bold tracking-wider">Caixa do dia</p>
-                      {canCreate && (
-                        <span className="text-[10px] text-accent font-bold">Registrar movimentação</span>
-                      )}
-                    </div>
-                    {cashLoading ? (
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="rounded-lg bg-bg/60 p-3"><Skeleton width="50%" height="1rem" /><Skeleton width="70%" height="1.25rem" className="mt-1" /></div>
-                        <div className="rounded-lg bg-bg/60 p-3"><Skeleton width="50%" height="1rem" /><Skeleton width="70%" height="1.25rem" className="mt-1" /></div>
-                      </div>
-                    ) : cashSummary ? (
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="rounded-lg bg-bg/60 p-3">
-                          <p className="text-[10px] font-bold uppercase text-text-muted">Saldo do dia</p>
-                          <p className="text-lg font-bold text-text-primary">{formatCurrencyBRL(cashSummary.total ?? 0)}</p>
-                        </div>
-                        <div className="rounded-lg bg-bg/60 p-3">
-                          <p className="text-[10px] font-bold uppercase text-text-muted">Movimentações</p>
-                          <p className="text-lg font-bold text-text-primary">{Object.values(cashSummary.byMethod ?? {}).reduce((s, m) => s + (m.count ?? 0), 0)}</p>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-text-muted">Sem dados de caixa para hoje.</p>
-                    )}
-                  </div>
-                </SkeletonRegion>
-
-                {/* ── Detail blocks ── */}
-                <SkeletonRegion loading={loading} label="Carregando detalhes">
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {/* Despesas */}
-                    <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
-                      <p className="text-xs text-text-muted uppercase font-bold tracking-wider">Despesas</p>
-                      <div className="space-y-1.5 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-text-secondary">Total</span>
-                          <span className="font-bold text-text-primary">{formatCurrencyBRL(summary.expenses.total)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-text-secondary">Pagas</span>
-                          <span className="font-bold text-success">{formatCurrencyBRL(summary.expenses.totalPaid)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-text-secondary">Pendentes</span>
-                          <span className="font-bold text-text-primary">{formatCurrencyBRL(summary.expenses.totalPending)}</span>
-                        </div>
-                        {Array.isArray(summary.expenses.byType) && summary.expenses.byType.length > 0 && (
-                          <div className="pt-1.5 mt-1.5 border-t border-border">
-                            {summary.expenses.byType.map(row => (
-                              <div key={row.type} className="flex justify-between text-xs">
-                                <span className="text-text-muted">{EXPENSE_TYPE_LABELS[row.type] ?? row.type} ({row.count})</span>
-                                <span className="text-text-secondary">{formatCurrencyBRL(row.total)}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Recebimentos de fiado */}
-                    <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
-                      <p className="text-xs text-text-muted uppercase font-bold tracking-wider">Recebimentos de fiado</p>
-                      <div className="space-y-1.5 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-text-secondary">Em aberto</span>
-                          <span className="font-bold text-danger">{formatCurrencyBRL(summary.fiados.totalPending)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-text-secondary">Já recebido</span>
-                          <span className="font-bold text-success">{formatCurrencyBRL(summary.fiados.totalPaid)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-text-secondary">Devedores</span>
-                          <span className="font-bold text-text-primary">{summary.fiados.activeDebtors}</span>
-                        </div>
-                        {summary.fiados.overdueCount > 0 && (
-                          <div className="flex justify-between">
-                            <span className="text-text-secondary">Vencidos</span>
-                            <span className="font-bold text-danger">{summary.fiados.overdueCount}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Vendas de produtos e pacotes */}
-                    {(summary.products || summary.packages) && (
-                      <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
-                        <p className="text-xs text-text-muted uppercase font-bold tracking-wider">Vendas de produtos e pacotes</p>
-                        <div className="space-y-1.5 text-sm">
-                          {summary.products && (
-                            <>
-                              <div className="flex justify-between">
-                                <span className="text-text-secondary">Receita de produtos</span>
-                                <span className="font-bold text-text-primary">{formatCurrencyBRL(summary.products.netRevenue ?? summary.products.revenue)}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-text-secondary">Custo dos produtos vendidos</span>
-                                <span className="font-bold text-text-primary">{formatCurrencyBRL(summary.products.cogs)}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-text-secondary">Margem bruta</span>
-                                <span className="font-bold text-success">{formatCurrencyBRL(summary.products.margin)}</span>
-                              </div>
-                              {summary.products.refunded > 0 && (
-                                <div className="flex justify-between">
-                                  <span className="text-text-secondary">Estornos</span>
-                                  <span className="font-bold text-danger">{formatCurrencyBRL(summary.products.refunded)}</span>
-                                </div>
-                              )}
-                            </>
-                          )}
-                          {summary.packages && (
-                            <>
-                              <div className="flex justify-between">
-                                <span className="text-text-secondary">Pacotes vendidos</span>
-                                <span className="font-bold text-text-primary">{summary.packages.count}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-text-secondary">Recebido de pacotes</span>
-                                <span className="font-bold text-success">{formatCurrencyBRL(summary.packages.totalPaid)}</span>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </SkeletonRegion>
-
-                {/* ── Estoque (compact) ── */}
-                {summary.products && (
-                  <SkeletonRegion loading={loading} label="Carregando estoque">
-                    <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
-                      <p className="text-xs text-text-muted uppercase font-bold tracking-wider">Estoque</p>
-                      <div className="flex flex-wrap gap-3 text-sm">
-                        <div className="flex items-baseline gap-1.5">
-                          <span className="text-text-secondary">Valor em estoque:</span>
-                          <span className="font-bold text-text-primary">{formatCurrencyBRL(summary.products.inventoryValue)}</span>
-                        </div>
-                        <div className="flex items-baseline gap-1.5">
-                          <span className="text-text-secondary">Compras:</span>
-                          <span className="font-bold text-text-primary">{formatCurrencyBRL(summary.products.stockPurchases)}</span>
-                        </div>
-                        {summary.products.lowStockCount > 0 && (
-                          <div className="flex items-baseline gap-1.5">
-                            <span className="text-text-secondary">Abaixo do mínimo:</span>
-                            <span className="font-bold text-danger">{summary.products.lowStockCount}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </SkeletonRegion>
-                )}
-
-                {loading && summary && (
-                  <p className="text-xs text-text-muted text-center">Atualizando…</p>
-                )}
-              </>
-            ) : null}
-          </div>
-        )}
-
-        {tab === 'despesas' && (
-          <div className="space-y-4">
-            <CategoryManager key={categoryState.barbershopId || 'global'} title="Categorias de despesas" linkedLabel="Os lançamentos vinculados" state={categoryState} onChanged={(id, category) => {
-              if (!category) {
-                if (getExpenseValues('categoryId') === id) setExpenseValue('categoryId', '');
-                setExpenseFilters(filters => filters.categoryId === id ? { ...filters, categoryId: '' } : filters);
-              }
-              setEditingExpense(item => item?.categoryId === id ? { ...item, categoryId: category ? id : null, categoryName: category?.name ?? null } : item);
-              setExpenses(items => items.map(item => item.categoryId === id ? { ...item, categoryId: category ? id : null, categoryName: category?.name ?? null } : item));
-              handleRefresh();
-            }} />
-            <form
-              onSubmit={handleExpenseSubmit(onCreateExpense)}
-              className="bg-surface p-4 rounded-xl border border-border space-y-3"
-            >
-              <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-                <Plus size={16} className="text-accent" /> Nova despesa
-              </h3>
-              <div className={FORM_GRID}>
-                <Field label="Título" error={expenseErrors.title?.message}>
-                  <input
-                    type="text"
-                    placeholder="Ex.: Aluguel"
-                    className={expenseErrors.title ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                    {...registerExpense('title')}
-                  />
-                </Field>
-                <Field label="Valor (R$)" error={expenseErrors.amount?.message}>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    placeholder="0,00"
-                    className={expenseErrors.amount ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                    {...registerExpense('amount')}
-                  />
-                </Field>
-              </div>
-              <div className={FORM_GRID}>
-                <SmartSelect
-                  label="Tipo"
-                  value={watchExpense('type')}
-                  onChange={val => setExpenseValue('type', val as any)}
-                  options={[
-                    { value: 'VARIABLE', label: 'Variável' },
-                    { value: 'FIXED', label: 'Fixa' },
-                    { value: 'INVESTMENT', label: 'Investimento' },
-                  ]}
-                  clearable={false}
-                  size="sm"
-                  error={expenseErrors.type?.message}
-                />
-                <SmartSelect
-                  label="Categoria"
-                  value={watchExpense('categoryId') || null}
-                  onChange={val => setExpenseValue('categoryId', val ?? '')}
-                  options={[
-                    { value: '', label: 'Sem categoria' },
-                    ...categories.map(c => ({ value: c.id, label: c.name })),
-                  ]}
-                  size="sm"
-                  error={expenseErrors.categoryId?.message}
-                />
-              </div>
-              <div className={FORM_GRID}>
-                <Field label="Data de referência" error={expenseErrors.referenceDate?.message}>
-                  <input
-                    type="date"
-                    className={FIELD_CONTROL}
-                    {...registerExpense('referenceDate')}
-                  />
-                </Field>
-                <Field label="Vencimento" error={expenseErrors.dueDate?.message}>
-                  <input type="date" className={FIELD_CONTROL} {...registerExpense('dueDate')} />
-                </Field>
-              </div>
-              <div className={FORM_GRID}>
-                <SmartSelect
-                  label="Recorrência"
-                  value={watchExpense('recurrence')}
-                  onChange={val => setExpenseValue('recurrence', val as any)}
-                  options={[
-                    { value: 'ONCE', label: 'Única' },
-                    { value: 'DAILY', label: 'Diária' },
-                    { value: 'WEEKLY', label: 'Semanal' },
-                    { value: 'MONTHLY', label: 'Mensal' },
-                    { value: 'YEARLY', label: 'Anual' },
-                  ]}
-                  clearable={false}
-                  size="sm"
-                  error={expenseErrors.recurrence?.message}
-                />
-                <SmartSelect
-                  label="Forma de pagamento"
-                  value={watchExpense('paymentMethod') || null}
-                  onChange={val => setExpenseValue('paymentMethod', val ?? '')}
-                  options={[
-                    { value: '', label: 'Selecione' },
-                    ...FINANCE_PAYMENT_METHODS.map(m => ({ value: m, label: m })),
-                  ]}
-                  size="sm"
-                  error={expenseErrors.paymentMethod?.message}
-                />
-              </div>
-              <div className={FORM_GRID}>
-                <Field label="Fornecedor" error={expenseErrors.supplierName?.message}>
-                  <input
-                    type="text"
-                    placeholder="Nome do fornecedor"
-                    className={FIELD_CONTROL}
-                    {...registerExpense('supplierName')}
-                  />
-                </Field>
-                <Field label="Descrição" error={expenseErrors.description?.message}>
-                  <input
-                    type="text"
-                    placeholder="Detalhes da despesa"
-                    className={FIELD_CONTROL}
-                    {...registerExpense('description')}
-                  />
-                </Field>
-              </div>
-              <Field label="Observações" error={expenseErrors.notes?.message}>
-                <input
-                  type="text"
-                  placeholder="Notas adicionais"
-                  className={FIELD_CONTROL}
-                  {...registerExpense('notes')}
-                />
-              </Field>
-              <div className="flex justify-end">
-                <button
-                  type="submit"
-                  disabled={expenseSubmitting}
-                  className="min-h-11 px-4 py-2 bg-accent text-accent-fg rounded-lg text-xs font-bold uppercase tracking-wider hover:brightness-110 transition-all disabled:opacity-50 flex items-center gap-2"
-                >
-                  {expenseSubmitting ? (
-                    <Loader2 size={14} className="animate-spin" />
-                  ) : (
-                    <Plus size={14} />
-                  )}
-                  Adicionar
-                </button>
-              </div>
-            </form>
-
-            <div className="bg-surface rounded-xl border border-border overflow-hidden">
-              <div className="p-4 border-b border-border bg-surface/50 space-y-3">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-                    <Receipt size={16} className="text-accent" /> Despesas
-                  </h3>
-                  <span className="text-xs text-text-muted">{expensesMeta.total} registros</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <input
-                    type="text"
-                    placeholder="Buscar..."
-                    value={expenseFilters.search}
-                    onChange={e => setExpenseFilters(f => ({ ...f, search: e.target.value }))}
-                    className="bg-input-bg border border-input-border rounded-lg px-3 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent w-40"
-                  />
-                  <SmartSelect
-                    value={expenseFilters.categoryId || null}
-                    onChange={val => setExpenseFilters(f => ({ ...f, categoryId: val ?? '' }))}
-                    options={[
-                      { value: '', label: 'Todas categorias' },
-                      ...categories.map(c => ({ value: c.id, label: c.name })),
-                    ]}
-                    size="sm"
-                    aria-label="Filtrar por categoria"
-                  />
-                  <SmartSelect
-                    value={expenseFilters.type || null}
-                    onChange={val => setExpenseFilters(f => ({ ...f, type: val ?? '' }))}
-                    options={[
-                      { value: '', label: 'Todos tipos' },
-                      { value: 'FIXED', label: 'Fixa' },
-                      { value: 'VARIABLE', label: 'Variável' },
-                      { value: 'INVESTMENT', label: 'Investimento' },
-                    ]}
-                    size="sm"
-                    aria-label="Filtrar por tipo"
-                  />
-                  <SmartSelect
-                    value={expenseFilters.paid || null}
-                    onChange={val => setExpenseFilters(f => ({ ...f, paid: val ?? '' }))}
-                    options={[
-                      { value: '', label: 'Todos status' },
-                      { value: 'true', label: 'Pagas' },
-                      { value: 'false', label: 'Pendentes' },
-                    ]}
-                    size="sm"
-                    aria-label="Filtrar por status"
-                  />
-                  <input
-                    type="date"
-                    aria-label="Data inicial"
-                    value={expenseFilters.from}
-                    onChange={e => setExpenseFilters(f => ({ ...f, from: e.target.value }))}
-                    className="bg-bg border border-border rounded-lg px-3 py-1.5 text-xs text-text-primary focus:outline-none focus:border-accent"
-                  />
-                  <input
-                    type="date"
-                    aria-label="Data final"
-                    value={expenseFilters.to}
-                    onChange={e => setExpenseFilters(f => ({ ...f, to: e.target.value }))}
-                    className="bg-bg border border-border rounded-lg px-3 py-1.5 text-xs text-text-primary focus:outline-none focus:border-accent"
-                  />
-                  <button
-                    onClick={() =>
-                      setExpenseFilters({
-                        categoryId: '',
-                        type: '',
-                        paid: '',
-                        search: '',
-                        from: '',
-                        to: '',
-                      })
-                    }
-                    className="px-3 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary border border-border rounded-lg hover:bg-surface-2 transition-colors flex items-center gap-1"
-                  >
-                    <X size={12} /> Limpar filtros
-                  </button>
-                  <button
-                    onClick={handleExportCsv}
-                    className="px-3 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary border border-border rounded-lg hover:bg-surface-2 transition-colors flex items-center gap-1"
-                  >
-                    <Download size={12} /> CSV
-                  </button>
-                </div>
-                {expenseSummary && (
-                  <>
-                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {tab === 'resumo' && (
+            <div className="space-y-4">
+              {loading && !summary ? (
+                <FinanceResumoSkeleton />
+              ) : summary ? (
+                <>
+                  {/* ── Priority indicators ── */}
+                  <SkeletonRegion loading={loading} label="Atualizando resumo">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       <FinanceSummaryCard
-                        icon={<TrendingDown size={42} />}
-                        label="Total"
-                        value={formatCurrencyBRL(expenseSummary.totalAmount)}
+                        icon={<Receipt size={20} />}
+                        label="Despesas pendentes"
+                        value={formatCurrencyBRL(summary.expenses.totalPending)}
+                        hint={`${summary.expenses.count} lançamento(s) no total`}
+                      />
+                      <FinanceSummaryCard
+                        icon={<CreditCard size={20} />}
+                        label="Fiado em aberto"
+                        value={formatCurrencyBRL(summary.fiados.totalPending)}
+                        hint={`${summary.fiados.activeDebtors} devedor(es)`}
                         tone="negative"
                       />
                       <FinanceSummaryCard
-                        icon={<Check size={42} />}
-                        label="Pagas"
-                        value={formatCurrencyBRL(expenseSummary.totalPaid)}
+                        icon={<AlertCircle size={20} />}
+                        label="Fiado vencido"
+                        value={formatCurrencyBRL(summary.fiados.overdueAmount)}
+                        hint={
+                          summary.fiados.overdueCount > 0
+                            ? `${summary.fiados.overdueCount} fiado(s) vencido(s)`
+                            : undefined
+                        }
+                        tone={summary.fiados.overdueCount > 0 ? 'negative' : undefined}
+                      />
+                      <FinanceSummaryCard
+                        icon={<Check size={20} />}
+                        label="Despesas pagas"
+                        value={formatCurrencyBRL(summary.expenses.totalPaid)}
                         tone="positive"
                       />
-                      <FinanceSummaryCard
-                        icon={<Receipt size={42} />}
-                        label="Pendentes"
-                        value={formatCurrencyBRL(expenseSummary.totalPending)}
-                      />
-                      <FinanceSummaryCard
-                        icon={<Wallet size={42} />}
-                        label="Categorias"
-                        value={String(expenseSummary.byCategory.length)}
-                        isCount
-                      />
                     </div>
-                    {expenseSummary.byCategory.length > 0 && (
-                      <div className="mt-3 rounded-xl border border-border bg-bg p-3">
-                        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-text-muted">
-                          Por categoria
+                  </SkeletonRegion>
+
+                  {/* ── Caixa do dia ── */}
+                  <SkeletonRegion loading={cashLoading} label="Carregando caixa do dia">
+                    <div className="rounded-xl border border-accent/20 bg-accent/5 p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-text-muted uppercase font-bold tracking-wider">
+                          Caixa do dia
                         </p>
-                        <div className="grid gap-2 sm:grid-cols-2">
-                          {expenseSummary.byCategory.map(row => (
-                            <div
-                              key={row.categoryId ?? 'uncategorized'}
-                              className="flex items-center justify-between gap-2 text-xs"
-                            >
-                              <span className="text-text-secondary">
-                                {row.categoryName ?? 'Sem categoria'}{' '}
-                                <span className="text-text-muted">({row.count})</span>
+                        {canCreate && (
+                          <span className="text-[10px] text-accent font-bold">
+                            Registrar movimentação
+                          </span>
+                        )}
+                      </div>
+                      {cashLoading ? (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="rounded-lg bg-bg/60 p-3">
+                            <Skeleton width="50%" height="1rem" />
+                            <Skeleton width="70%" height="1.25rem" className="mt-1" />
+                          </div>
+                          <div className="rounded-lg bg-bg/60 p-3">
+                            <Skeleton width="50%" height="1rem" />
+                            <Skeleton width="70%" height="1.25rem" className="mt-1" />
+                          </div>
+                        </div>
+                      ) : cashSummary ? (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="rounded-lg bg-bg/60 p-3">
+                            <p className="text-[10px] font-bold uppercase text-text-muted">
+                              Saldo do dia
+                            </p>
+                            <p className="text-lg font-bold text-text-primary">
+                              {formatCurrencyBRL(cashSummary.total ?? 0)}
+                            </p>
+                          </div>
+                          <div className="rounded-lg bg-bg/60 p-3">
+                            <p className="text-[10px] font-bold uppercase text-text-muted">
+                              Movimentações
+                            </p>
+                            <p className="text-lg font-bold text-text-primary">
+                              {Object.values(cashSummary.byMethod ?? {}).reduce(
+                                (s, m) => s + (m.count ?? 0),
+                                0
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-text-muted">Sem dados de caixa para hoje.</p>
+                      )}
+                    </div>
+                  </SkeletonRegion>
+
+                  {/* ── Detail blocks ── */}
+                  <SkeletonRegion loading={loading} label="Carregando detalhes">
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      {/* Despesas */}
+                      <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
+                        <p className="text-xs text-text-muted uppercase font-bold tracking-wider">
+                          Despesas
+                        </p>
+                        <div className="space-y-1.5 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-text-secondary">Total</span>
+                            <span className="font-bold text-text-primary">
+                              {formatCurrencyBRL(summary.expenses.total)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-text-secondary">Pagas</span>
+                            <span className="font-bold text-success">
+                              {formatCurrencyBRL(summary.expenses.totalPaid)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-text-secondary">Pendentes</span>
+                            <span className="font-bold text-text-primary">
+                              {formatCurrencyBRL(summary.expenses.totalPending)}
+                            </span>
+                          </div>
+                          {Array.isArray(summary.expenses.byType) &&
+                            summary.expenses.byType.length > 0 && (
+                              <div className="pt-1.5 mt-1.5 border-t border-border">
+                                {summary.expenses.byType.map(row => (
+                                  <div key={row.type} className="flex justify-between text-xs">
+                                    <span className="text-text-muted">
+                                      {EXPENSE_TYPE_LABELS[row.type] ?? row.type} ({row.count})
+                                    </span>
+                                    <span className="text-text-secondary">
+                                      {formatCurrencyBRL(row.total)}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                        </div>
+                      </div>
+
+                      {/* Recebimentos de fiado */}
+                      <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
+                        <p className="text-xs text-text-muted uppercase font-bold tracking-wider">
+                          Recebimentos de fiado
+                        </p>
+                        <div className="space-y-1.5 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-text-secondary">Em aberto</span>
+                            <span className="font-bold text-danger">
+                              {formatCurrencyBRL(summary.fiados.totalPending)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-text-secondary">Já recebido</span>
+                            <span className="font-bold text-success">
+                              {formatCurrencyBRL(summary.fiados.totalPaid)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-text-secondary">Devedores</span>
+                            <span className="font-bold text-text-primary">
+                              {summary.fiados.activeDebtors}
+                            </span>
+                          </div>
+                          {summary.fiados.overdueCount > 0 && (
+                            <div className="flex justify-between">
+                              <span className="text-text-secondary">Vencidos</span>
+                              <span className="font-bold text-danger">
+                                {summary.fiados.overdueCount}
                               </span>
-                              <strong className="text-text-primary">
-                                {formatCurrencyBRL(row.total)}
-                              </strong>
                             </div>
-                          ))}
+                          )}
                         </div>
                       </div>
-                    )}
-                  </>
-                )}
-              </div>
-              <div className="max-h-[420px] overflow-y-auto">
-                {loading ? (
-                  <div className="p-4 space-y-2" aria-label="Carregando despesas">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <div key={i} className="flex items-center gap-3 rounded-lg border border-border bg-bg p-3">
-                        <div className="flex-1 space-y-1.5">
-                          <div className="h-3 w-1/3 rounded bg-surface-2" />
-                          <div className="h-2.5 w-1/5 rounded bg-surface-2" />
-                        </div>
-                        <div className="h-4 w-20 rounded bg-surface-2" />
-                      </div>
-                    ))}
-                  </div>
-                ) : expenses.length === 0 ? (
-                  <div className="p-8 text-center text-text-muted text-sm">
-                    Nenhuma despesa registrada.
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-[920px] w-full text-left border-collapse">
-                      <thead className="bg-bg text-text-muted text-[10px] uppercase tracking-wider sticky top-0">
-                        <tr>
-                          <th className="p-3 font-medium">Data ref.</th>
-                          <th className="p-3 font-medium">Título</th>
-                          <th className="p-3 font-medium hidden sm:table-cell">Categoria</th>
-                          <th className="p-3 font-medium">Tipo</th>
-                          <th className="p-3 font-medium text-right">Valor</th>
-                          <th className="p-3 font-medium hidden md:table-cell">Vencimento</th>
-                          <th className="p-3 font-medium hidden lg:table-cell">Status</th>
-                          <th className="p-3 font-medium hidden lg:table-cell">Pagamento</th>
-                          <th className="p-3 font-medium text-center">Ações</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border">
-                        {expenses.map(item => (
-                          <React.Fragment key={item.id}>
-                            <tr className="text-xs text-text-secondary hover:bg-surface">
-                              <td className="p-3 whitespace-nowrap">
-                                {formatDateBR(item.referenceDate)}
-                              </td>
-                              <td className="p-3">
-                                <div className="font-medium text-text-primary">{item.title}</div>
-                                {item.supplierName && (
-                                  <div className="text-text-muted text-[10px]">
-                                    {item.supplierName}
-                                  </div>
-                                )}
-                              </td>
-                              <td className="p-3 hidden sm:table-cell">
-                                {item.categoryName || <span className="text-text-muted">Sem categoria</span>}
-                              </td>
-                              <td className="p-3">{EXPENSE_TYPE_LABELS[item.type] ?? item.type}</td>
-                              <td className="p-3 text-right text-danger font-medium">
-                                {formatCurrencyBRL(item.amount)}
-                              </td>
-                              <td className="p-3 hidden md:table-cell whitespace-nowrap">
-                                {formatDateBR(item.dueDate)}
-                              </td>
-                              <td className="p-3 hidden lg:table-cell">
-                                {item.paidAt ? (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20">
-                                    Pago
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-warning/10 text-warning border border-warning/20">
-                                    Pendente
-                                  </span>
-                                )}
-                              </td>
-                              <td className="p-3 hidden lg:table-cell">
-                                {item.paymentMethod || <span className="text-text-muted">—</span>}
-                              </td>
-                              <td className="p-3 text-center">
-                                {deleteExpenseId === item.id ? (
-                                  <div className="flex items-center justify-center gap-2">
-                                    <button
-                                      onClick={() => handleDeleteExpense(item.id)}
-                                      title="Confirmar exclusão"
-                                      className="p-1 bg-danger text-danger-fg rounded"
-                                    >
-                                      <Check size={12} />
-                                    </button>
-                                    <button
-                                      onClick={() => setDeleteExpenseId(null)}
-                                      title="Cancelar exclusão"
-                                      className="p-1 bg-surface-2 text-text-secondary rounded"
-                                    >
-                                      <X size={12} />
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <div className="flex items-center justify-center gap-1.5">
-                                    {!item.paidAt && (
-                                      <button
-                                        onClick={() => handleMarkAsPaid(item.id)}
-                                        title="Marcar como pago"
-                                        disabled={expenseSubmitting}
-                                        className="text-text-muted hover:text-success disabled:opacity-30"
-                                      >
-                                        <CheckCircle size={14} />
-                                      </button>
+
+                      {/* Vendas de produtos e pacotes */}
+                      {(summary.products || summary.packages) && (
+                        <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
+                          <p className="text-xs text-text-muted uppercase font-bold tracking-wider">
+                            Vendas de produtos e pacotes
+                          </p>
+                          <div className="space-y-1.5 text-sm">
+                            {summary.products && (
+                              <>
+                                <div className="flex justify-between">
+                                  <span className="text-text-secondary">Receita de produtos</span>
+                                  <span className="font-bold text-text-primary">
+                                    {formatCurrencyBRL(
+                                      summary.products.netRevenue ?? summary.products.revenue
                                     )}
-                                    <button
-                                      onClick={() => setEditingExpense(item)}
-                                      title="Editar"
-                                      className="text-text-muted hover:text-accent"
-                                    >
-                                      <Edit3 size={14} />
-                                    </button>
-                                    <button
-                                      onClick={() => setDeleteExpenseId(item.id)}
-                                      title="Excluir despesa"
-                                      className="text-text-muted hover:text-danger"
-                                    >
-                                      <Trash2 size={14} />
-                                    </button>
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-text-secondary">
+                                    Custo dos produtos vendidos
+                                  </span>
+                                  <span className="font-bold text-text-primary">
+                                    {formatCurrencyBRL(summary.products.cogs)}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-text-secondary">Margem bruta</span>
+                                  <span className="font-bold text-success">
+                                    {formatCurrencyBRL(summary.products.margin)}
+                                  </span>
+                                </div>
+                                {summary.products.refunded > 0 && (
+                                  <div className="flex justify-between">
+                                    <span className="text-text-secondary">Estornos</span>
+                                    <span className="font-bold text-danger">
+                                      {formatCurrencyBRL(summary.products.refunded)}
+                                    </span>
                                   </div>
                                 )}
-                              </td>
-                            </tr>
-                            {editingExpense?.id === item.id && (
-                              <tr className="bg-bg/60">
-                                <td colSpan={9} className="p-3">
-                                  <div className="space-y-4">
-                                    <div className={FORM_GRID}>
-                                      <Field label="Título">
-                                        <input
-                                          type="text"
-                                          placeholder="Título"
-                                          value={editingExpense.title}
-                                          onChange={e =>
+                              </>
+                            )}
+                            {summary.packages && (
+                              <>
+                                <div className="flex justify-between">
+                                  <span className="text-text-secondary">Pacotes vendidos</span>
+                                  <span className="font-bold text-text-primary">
+                                    {summary.packages.count}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-text-secondary">Recebido de pacotes</span>
+                                  <span className="font-bold text-success">
+                                    {formatCurrencyBRL(summary.packages.totalPaid)}
+                                  </span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </SkeletonRegion>
+
+                  {/* ── Estoque (compact) ── */}
+                  {summary.products && (
+                    <SkeletonRegion loading={loading} label="Carregando estoque">
+                      <div className="rounded-xl border border-border bg-surface p-4 space-y-2">
+                        <p className="text-xs text-text-muted uppercase font-bold tracking-wider">
+                          Estoque
+                        </p>
+                        <div className="flex flex-wrap gap-3 text-sm">
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="text-text-secondary">Valor em estoque:</span>
+                            <span className="font-bold text-text-primary">
+                              {formatCurrencyBRL(summary.products.inventoryValue)}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="text-text-secondary">Compras:</span>
+                            <span className="font-bold text-text-primary">
+                              {formatCurrencyBRL(summary.products.stockPurchases)}
+                            </span>
+                          </div>
+                          {summary.products.lowStockCount > 0 && (
+                            <div className="flex items-baseline gap-1.5">
+                              <span className="text-text-secondary">Abaixo do mínimo:</span>
+                              <span className="font-bold text-danger">
+                                {summary.products.lowStockCount}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </SkeletonRegion>
+                  )}
+
+                  {loading && summary && (
+                    <p className="text-xs text-text-muted text-center">Atualizando…</p>
+                  )}
+                </>
+              ) : null}
+            </div>
+          )}
+
+          {tab === 'despesas' && (
+            <div className="space-y-4">
+              <CategoryManager
+                key={categoryState.barbershopId || 'global'}
+                title="Categorias de despesas"
+                linkedLabel="Os lançamentos vinculados"
+                state={categoryState}
+                onChanged={(id, category) => {
+                  if (!category) {
+                    if (getExpenseValues('categoryId') === id) setExpenseValue('categoryId', '');
+                    setExpenseFilters(filters =>
+                      filters.categoryId === id ? { ...filters, categoryId: '' } : filters
+                    );
+                  }
+                  setEditingExpense(item =>
+                    item?.categoryId === id
+                      ? {
+                          ...item,
+                          categoryId: category ? id : null,
+                          categoryName: category?.name ?? null,
+                        }
+                      : item
+                  );
+                  setExpenses(items =>
+                    items.map(item =>
+                      item.categoryId === id
+                        ? {
+                            ...item,
+                            categoryId: category ? id : null,
+                            categoryName: category?.name ?? null,
+                          }
+                        : item
+                    )
+                  );
+                  handleRefresh();
+                }}
+              />
+              <form
+                onSubmit={handleExpenseSubmit(onCreateExpense)}
+                className="bg-surface p-4 rounded-xl border border-border space-y-3"
+              >
+                <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
+                  <Plus size={16} className="text-accent" /> Nova despesa
+                </h3>
+                <div className={FORM_GRID}>
+                  <Field label="Título" error={expenseErrors.title?.message}>
+                    <input
+                      type="text"
+                      placeholder="Ex.: Aluguel"
+                      className={expenseErrors.title ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                      {...registerExpense('title')}
+                    />
+                  </Field>
+                  <Field label="Valor (R$)" error={expenseErrors.amount?.message}>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      placeholder="0,00"
+                      className={expenseErrors.amount ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                      {...registerExpense('amount')}
+                    />
+                  </Field>
+                </div>
+                <div className={FORM_GRID}>
+                  <SmartSelect
+                    label="Tipo"
+                    value={watchExpense('type')}
+                    onChange={val => setExpenseValue('type', val as any)}
+                    options={[
+                      { value: 'VARIABLE', label: 'Variável' },
+                      { value: 'FIXED', label: 'Fixa' },
+                      { value: 'INVESTMENT', label: 'Investimento' },
+                    ]}
+                    clearable={false}
+                    size="sm"
+                    error={expenseErrors.type?.message}
+                  />
+                  <SmartSelect
+                    label="Categoria"
+                    value={watchExpense('categoryId') || null}
+                    onChange={val => setExpenseValue('categoryId', val ?? '')}
+                    options={[
+                      { value: '', label: 'Sem categoria' },
+                      ...categories.map(c => ({ value: c.id, label: c.name })),
+                    ]}
+                    size="sm"
+                    error={expenseErrors.categoryId?.message}
+                  />
+                </div>
+                <div className={FORM_GRID}>
+                  <Field label="Data de referência" error={expenseErrors.referenceDate?.message}>
+                    <input
+                      type="date"
+                      className={FIELD_CONTROL}
+                      {...registerExpense('referenceDate')}
+                    />
+                  </Field>
+                  <Field label="Vencimento" error={expenseErrors.dueDate?.message}>
+                    <input type="date" className={FIELD_CONTROL} {...registerExpense('dueDate')} />
+                  </Field>
+                </div>
+                <div className={FORM_GRID}>
+                  <SmartSelect
+                    label="Recorrência"
+                    value={watchExpense('recurrence')}
+                    onChange={val => setExpenseValue('recurrence', val as any)}
+                    options={[
+                      { value: 'ONCE', label: 'Única' },
+                      { value: 'DAILY', label: 'Diária' },
+                      { value: 'WEEKLY', label: 'Semanal' },
+                      { value: 'MONTHLY', label: 'Mensal' },
+                      { value: 'YEARLY', label: 'Anual' },
+                    ]}
+                    clearable={false}
+                    size="sm"
+                    error={expenseErrors.recurrence?.message}
+                  />
+                  <SmartSelect
+                    label="Forma de pagamento"
+                    value={watchExpense('paymentMethod') || null}
+                    onChange={val => setExpenseValue('paymentMethod', val ?? '')}
+                    options={[
+                      { value: '', label: 'Selecione' },
+                      ...FINANCE_PAYMENT_METHODS.map(m => ({ value: m, label: m })),
+                    ]}
+                    size="sm"
+                    error={expenseErrors.paymentMethod?.message}
+                  />
+                </div>
+                <div className={FORM_GRID}>
+                  <Field label="Fornecedor" error={expenseErrors.supplierName?.message}>
+                    <input
+                      type="text"
+                      placeholder="Nome do fornecedor"
+                      className={FIELD_CONTROL}
+                      {...registerExpense('supplierName')}
+                    />
+                  </Field>
+                  <Field label="Descrição" error={expenseErrors.description?.message}>
+                    <input
+                      type="text"
+                      placeholder="Detalhes da despesa"
+                      className={FIELD_CONTROL}
+                      {...registerExpense('description')}
+                    />
+                  </Field>
+                </div>
+                <Field label="Observações" error={expenseErrors.notes?.message}>
+                  <input
+                    type="text"
+                    placeholder="Notas adicionais"
+                    className={FIELD_CONTROL}
+                    {...registerExpense('notes')}
+                  />
+                </Field>
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={expenseSubmitting}
+                    className="min-h-11 px-4 py-2 bg-accent text-accent-fg rounded-lg text-xs font-bold uppercase tracking-wider hover:brightness-110 transition-all disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {expenseSubmitting ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Plus size={14} />
+                    )}
+                    Adicionar
+                  </button>
+                </div>
+              </form>
+
+              <div className="bg-surface rounded-xl border border-border overflow-hidden">
+                <div className="p-4 border-b border-border bg-surface/50 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
+                      <Receipt size={16} className="text-accent" /> Despesas
+                    </h3>
+                    <span className="text-xs text-text-muted">{expensesMeta.total} registros</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <input
+                      type="text"
+                      placeholder="Buscar..."
+                      value={expenseFilters.search}
+                      onChange={e => setExpenseFilters(f => ({ ...f, search: e.target.value }))}
+                      className="bg-input-bg border border-input-border rounded-lg px-3 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent w-40"
+                    />
+                    <SmartSelect
+                      value={expenseFilters.categoryId || null}
+                      onChange={val => setExpenseFilters(f => ({ ...f, categoryId: val ?? '' }))}
+                      options={[
+                        { value: '', label: 'Todas categorias' },
+                        ...categories.map(c => ({ value: c.id, label: c.name })),
+                      ]}
+                      size="sm"
+                      aria-label="Filtrar por categoria"
+                    />
+                    <SmartSelect
+                      value={expenseFilters.type || null}
+                      onChange={val => setExpenseFilters(f => ({ ...f, type: val ?? '' }))}
+                      options={[
+                        { value: '', label: 'Todos tipos' },
+                        { value: 'FIXED', label: 'Fixa' },
+                        { value: 'VARIABLE', label: 'Variável' },
+                        { value: 'INVESTMENT', label: 'Investimento' },
+                      ]}
+                      size="sm"
+                      aria-label="Filtrar por tipo"
+                    />
+                    <SmartSelect
+                      value={expenseFilters.paid || null}
+                      onChange={val => setExpenseFilters(f => ({ ...f, paid: val ?? '' }))}
+                      options={[
+                        { value: '', label: 'Todos status' },
+                        { value: 'true', label: 'Pagas' },
+                        { value: 'false', label: 'Pendentes' },
+                      ]}
+                      size="sm"
+                      aria-label="Filtrar por status"
+                    />
+                    <input
+                      type="date"
+                      aria-label="Data inicial"
+                      value={expenseFilters.from}
+                      onChange={e => setExpenseFilters(f => ({ ...f, from: e.target.value }))}
+                      className="bg-bg border border-border rounded-lg px-3 py-1.5 text-xs text-text-primary focus:outline-none focus:border-accent"
+                    />
+                    <input
+                      type="date"
+                      aria-label="Data final"
+                      value={expenseFilters.to}
+                      onChange={e => setExpenseFilters(f => ({ ...f, to: e.target.value }))}
+                      className="bg-bg border border-border rounded-lg px-3 py-1.5 text-xs text-text-primary focus:outline-none focus:border-accent"
+                    />
+                    <button
+                      onClick={() =>
+                        setExpenseFilters({
+                          categoryId: '',
+                          type: '',
+                          paid: '',
+                          search: '',
+                          from: '',
+                          to: '',
+                        })
+                      }
+                      className="px-3 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary border border-border rounded-lg hover:bg-surface-2 transition-colors flex items-center gap-1"
+                    >
+                      <X size={12} /> Limpar filtros
+                    </button>
+                    <button
+                      onClick={handleExportCsv}
+                      className="px-3 py-1.5 text-xs font-bold text-text-muted hover:text-text-primary border border-border rounded-lg hover:bg-surface-2 transition-colors flex items-center gap-1"
+                    >
+                      <Download size={12} /> CSV
+                    </button>
+                  </div>
+                  {expenseSummary && (
+                    <>
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                        <FinanceSummaryCard
+                          icon={<TrendingDown size={42} />}
+                          label="Total"
+                          value={formatCurrencyBRL(expenseSummary.totalAmount)}
+                          tone="negative"
+                        />
+                        <FinanceSummaryCard
+                          icon={<Check size={42} />}
+                          label="Pagas"
+                          value={formatCurrencyBRL(expenseSummary.totalPaid)}
+                          tone="positive"
+                        />
+                        <FinanceSummaryCard
+                          icon={<Receipt size={42} />}
+                          label="Pendentes"
+                          value={formatCurrencyBRL(expenseSummary.totalPending)}
+                        />
+                        <FinanceSummaryCard
+                          icon={<Wallet size={42} />}
+                          label="Categorias"
+                          value={String(expenseSummary.byCategory.length)}
+                          isCount
+                        />
+                      </div>
+                      {expenseSummary.byCategory.length > 0 && (
+                        <div className="mt-3 rounded-xl border border-border bg-bg p-3">
+                          <p className="mb-2 text-xs font-bold uppercase tracking-wider text-text-muted">
+                            Por categoria
+                          </p>
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            {expenseSummary.byCategory.map(row => (
+                              <div
+                                key={row.categoryId ?? 'uncategorized'}
+                                className="flex items-center justify-between gap-2 text-xs"
+                              >
+                                <span className="text-text-secondary">
+                                  {row.categoryName ?? 'Sem categoria'}{' '}
+                                  <span className="text-text-muted">({row.count})</span>
+                                </span>
+                                <strong className="text-text-primary">
+                                  {formatCurrencyBRL(row.total)}
+                                </strong>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+                <div className="max-h-[420px] overflow-y-auto">
+                  {loading ? (
+                    <div className="p-4 space-y-2" aria-label="Carregando despesas">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-3 rounded-lg border border-border bg-bg p-3"
+                        >
+                          <div className="flex-1 space-y-1.5">
+                            <div className="h-3 w-1/3 rounded bg-surface-2" />
+                            <div className="h-2.5 w-1/5 rounded bg-surface-2" />
+                          </div>
+                          <div className="h-4 w-20 rounded bg-surface-2" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : expenses.length === 0 ? (
+                    <div className="p-8 text-center text-text-muted text-sm">
+                      Nenhuma despesa registrada.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-[920px] w-full text-left border-collapse">
+                        <thead className="bg-bg text-text-muted text-[10px] uppercase tracking-wider sticky top-0">
+                          <tr>
+                            <th className="p-3 font-medium">Data ref.</th>
+                            <th className="p-3 font-medium">Título</th>
+                            <th className="p-3 font-medium hidden sm:table-cell">Categoria</th>
+                            <th className="p-3 font-medium">Tipo</th>
+                            <th className="p-3 font-medium text-right">Valor</th>
+                            <th className="p-3 font-medium hidden md:table-cell">Vencimento</th>
+                            <th className="p-3 font-medium hidden lg:table-cell">Status</th>
+                            <th className="p-3 font-medium hidden lg:table-cell">Pagamento</th>
+                            <th className="p-3 font-medium text-center">Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border">
+                          {expenses.map(item => (
+                            <React.Fragment key={item.id}>
+                              <tr className="text-xs text-text-secondary hover:bg-surface">
+                                <td className="p-3 whitespace-nowrap">
+                                  {formatDateBR(item.referenceDate)}
+                                </td>
+                                <td className="p-3">
+                                  <div className="font-medium text-text-primary">{item.title}</div>
+                                  {item.supplierName && (
+                                    <div className="text-text-muted text-[10px]">
+                                      {item.supplierName}
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="p-3 hidden sm:table-cell">
+                                  {item.categoryName || (
+                                    <span className="text-text-muted">Sem categoria</span>
+                                  )}
+                                </td>
+                                <td className="p-3">
+                                  {EXPENSE_TYPE_LABELS[item.type] ?? item.type}
+                                </td>
+                                <td className="p-3 text-right text-danger font-medium">
+                                  {formatCurrencyBRL(item.amount)}
+                                </td>
+                                <td className="p-3 hidden md:table-cell whitespace-nowrap">
+                                  {formatDateBR(item.dueDate)}
+                                </td>
+                                <td className="p-3 hidden lg:table-cell">
+                                  {item.paidAt ? (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20">
+                                      Pago
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-warning/10 text-warning border border-warning/20">
+                                      Pendente
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="p-3 hidden lg:table-cell">
+                                  {item.paymentMethod || <span className="text-text-muted">—</span>}
+                                </td>
+                                <td className="p-3 text-center">
+                                  {deleteExpenseId === item.id ? (
+                                    <div className="flex items-center justify-center gap-2">
+                                      <button
+                                        onClick={() => handleDeleteExpense(item.id)}
+                                        title="Confirmar exclusão"
+                                        className="p-1 bg-danger text-danger-fg rounded"
+                                      >
+                                        <Check size={12} />
+                                      </button>
+                                      <button
+                                        onClick={() => setDeleteExpenseId(null)}
+                                        title="Cancelar exclusão"
+                                        className="p-1 bg-surface-2 text-text-secondary rounded"
+                                      >
+                                        <X size={12} />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center justify-center gap-1.5">
+                                      {!item.paidAt && (
+                                        <button
+                                          onClick={() => handleMarkAsPaid(item.id)}
+                                          title="Marcar como pago"
+                                          disabled={expenseSubmitting}
+                                          className="text-text-muted hover:text-success disabled:opacity-30"
+                                        >
+                                          <CheckCircle size={14} />
+                                        </button>
+                                      )}
+                                      <button
+                                        onClick={() => setEditingExpense(item)}
+                                        title="Editar"
+                                        className="text-text-muted hover:text-accent"
+                                      >
+                                        <Edit3 size={14} />
+                                      </button>
+                                      <button
+                                        onClick={() => setDeleteExpenseId(item.id)}
+                                        title="Excluir despesa"
+                                        className="text-text-muted hover:text-danger"
+                                      >
+                                        <Trash2 size={14} />
+                                      </button>
+                                    </div>
+                                  )}
+                                </td>
+                              </tr>
+                              {editingExpense?.id === item.id && (
+                                <tr className="bg-bg/60">
+                                  <td colSpan={9} className="p-3">
+                                    <div className="space-y-4">
+                                      <div className={FORM_GRID}>
+                                        <Field label="Título">
+                                          <input
+                                            type="text"
+                                            placeholder="Título"
+                                            value={editingExpense.title}
+                                            onChange={e =>
+                                              setEditingExpense(ex =>
+                                                ex ? { ...ex, title: e.target.value } : null
+                                              )
+                                            }
+                                            className={FIELD_CONTROL}
+                                          />
+                                        </Field>
+                                        <Field label="Valor (R$)">
+                                          <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0.01"
+                                            placeholder="0,00"
+                                            value={editingExpense.amount}
+                                            onChange={e =>
+                                              setEditingExpense(ex =>
+                                                ex
+                                                  ? {
+                                                      ...ex,
+                                                      amount: parseFloat(e.target.value) || 0,
+                                                    }
+                                                  : null
+                                              )
+                                            }
+                                            className={FIELD_CONTROL}
+                                          />
+                                        </Field>
+                                      </div>
+                                      <div className={FORM_GRID}>
+                                        <SmartSelect
+                                          label="Tipo"
+                                          value={editingExpense.type}
+                                          onChange={val =>
                                             setEditingExpense(ex =>
-                                              ex ? { ...ex, title: e.target.value } : null
+                                              ex ? { ...ex, type: val as ExpenseType } : null
                                             )
                                           }
-                                          className={FIELD_CONTROL}
+                                          options={[
+                                            { value: 'VARIABLE', label: 'Variável' },
+                                            { value: 'FIXED', label: 'Fixa' },
+                                            { value: 'INVESTMENT', label: 'Investimento' },
+                                          ]}
+                                          clearable={false}
+                                          size="sm"
                                         />
-                                      </Field>
-                                      <Field label="Valor (R$)">
+                                        <SmartSelect
+                                          label="Categoria"
+                                          value={editingExpense.categoryId || null}
+                                          onChange={val =>
+                                            setEditingExpense(ex =>
+                                              ex ? { ...ex, categoryId: val || null } : null
+                                            )
+                                          }
+                                          options={[
+                                            { value: '', label: 'Sem categoria' },
+                                            ...categories.map(c => ({
+                                              value: c.id,
+                                              label: c.name,
+                                            })),
+                                          ]}
+                                          size="sm"
+                                        />
+                                      </div>
+                                      <div className={FORM_GRID}>
+                                        <Field label="Data de referência">
+                                          <input
+                                            type="date"
+                                            value={editingExpense.referenceDate?.slice(0, 10) ?? ''}
+                                            onChange={e =>
+                                              setEditingExpense(ex =>
+                                                ex ? { ...ex, referenceDate: e.target.value } : null
+                                              )
+                                            }
+                                            className={FIELD_CONTROL}
+                                          />
+                                        </Field>
+                                        <Field label="Vencimento">
+                                          <input
+                                            type="date"
+                                            value={editingExpense.dueDate?.slice(0, 10) ?? ''}
+                                            onChange={e =>
+                                              setEditingExpense(ex =>
+                                                ex
+                                                  ? { ...ex, dueDate: e.target.value || null }
+                                                  : null
+                                              )
+                                            }
+                                            className={FIELD_CONTROL}
+                                          />
+                                        </Field>
+                                      </div>
+                                      <div className={FORM_GRID}>
+                                        <SmartSelect
+                                          label="Forma de pagamento"
+                                          value={editingExpense.paymentMethod || null}
+                                          onChange={val =>
+                                            setEditingExpense(ex =>
+                                              ex ? { ...ex, paymentMethod: val || null } : null
+                                            )
+                                          }
+                                          options={[
+                                            { value: '', label: 'Selecione' },
+                                            ...FINANCE_PAYMENT_METHODS.map(m => ({
+                                              value: m,
+                                              label: m,
+                                            })),
+                                          ]}
+                                          size="sm"
+                                        />
+                                        <Field label="Fornecedor">
+                                          <input
+                                            type="text"
+                                            placeholder="Fornecedor"
+                                            value={editingExpense.supplierName ?? ''}
+                                            onChange={e =>
+                                              setEditingExpense(ex =>
+                                                ex
+                                                  ? { ...ex, supplierName: e.target.value || null }
+                                                  : null
+                                              )
+                                            }
+                                            className={FIELD_CONTROL}
+                                          />
+                                        </Field>
+                                      </div>
+                                      <div className={FORM_GRID}>
+                                        <Field label="Descrição">
+                                          <input
+                                            type="text"
+                                            placeholder="Descrição"
+                                            value={editingExpense.description ?? ''}
+                                            onChange={e =>
+                                              setEditingExpense(ex =>
+                                                ex
+                                                  ? { ...ex, description: e.target.value || null }
+                                                  : null
+                                              )
+                                            }
+                                            className={FIELD_CONTROL}
+                                          />
+                                        </Field>
+                                        <Field label="Observações">
+                                          <input
+                                            type="text"
+                                            placeholder="Observações"
+                                            value={editingExpense.notes ?? ''}
+                                            onChange={e =>
+                                              setEditingExpense(ex =>
+                                                ex ? { ...ex, notes: e.target.value || null } : null
+                                              )
+                                            }
+                                            className={FIELD_CONTROL}
+                                          />
+                                        </Field>
+                                      </div>
+                                    </div>
+                                    <div className="flex justify-end gap-2 mt-3">
+                                      <button
+                                        onClick={() => handleUpdateExpense()}
+                                        disabled={expenseSubmitting}
+                                        className="px-3 py-1.5 bg-accent text-accent-fg rounded-lg text-xs font-bold flex items-center gap-1 disabled:opacity-50"
+                                      >
+                                        {expenseSubmitting ? (
+                                          <Loader2 size={12} className="animate-spin" />
+                                        ) : (
+                                          <Check size={12} />
+                                        )}
+                                        Salvar
+                                      </button>
+                                      <button
+                                        onClick={() => setEditingExpense(null)}
+                                        className="px-3 py-1.5 bg-surface-2 text-text-secondary rounded-lg text-xs font-bold flex items-center gap-1"
+                                      >
+                                        <X size={12} /> Cancelar
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
+                            </React.Fragment>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+                {expensesMeta.totalPages > 1 && (
+                  <PaginationBar
+                    meta={expensesMeta}
+                    page={expensesPage}
+                    loading={loading}
+                    onPageChange={setExpensesPage}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+
+          {tab === 'fiado' && (
+            <div className="space-y-4">
+              <div className="bg-surface p-4 rounded-xl border border-border flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
+                    <Plus size={16} className="text-accent" /> Novo fiado
+                  </h3>
+                  <p className="mt-1 text-xs text-text-muted">
+                    Registre um serviço fiado para um cliente.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFiadoModalOpen(true)}
+                  className="min-h-11 px-4 py-2 bg-accent text-accent-fg rounded-lg text-xs font-bold uppercase tracking-wider hover:brightness-110 transition-all flex items-center gap-2"
+                >
+                  <Plus size={14} /> Registrar fiado
+                </button>
+              </div>
+
+              <div className="bg-surface rounded-xl border border-border overflow-hidden">
+                <div className="p-4 border-b border-border flex justify-between items-center bg-surface/50">
+                  <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
+                    <CreditCard size={16} className="text-accent" /> Fiados
+                  </h3>
+                  <span className="text-xs text-text-muted">{fiadosMeta.total} registros</span>
+                </div>
+                <div className="max-h-[420px] overflow-y-auto">
+                  {loading ? (
+                    <div className="p-4 space-y-2" aria-label="Carregando fiados">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-3 rounded-lg border border-border bg-bg p-3"
+                        >
+                          <div className="flex-1 space-y-1.5">
+                            <div className="h-3 w-1/4 rounded bg-surface-2" />
+                            <div className="h-2.5 w-1/3 rounded bg-surface-2" />
+                          </div>
+                          <div className="h-4 w-16 rounded bg-surface-2" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : fiados.length === 0 ? (
+                    <div className="p-8 text-center text-text-muted text-sm">
+                      Nenhum fiado registrado.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-[980px] w-full text-left border-collapse">
+                        <thead className="bg-bg text-text-muted text-[10px] uppercase tracking-wider sticky top-0">
+                          <tr>
+                            <th className="p-3 font-medium">Cliente</th>
+                            <th className="p-3 font-medium">Descrição</th>
+                            <th className="p-3 font-medium">Registrado em</th>
+                            <th className="p-3 font-medium">Status</th>
+                            <th className="p-3 font-medium text-right">Original</th>
+                            <th className="p-3 font-medium text-right">Restante</th>
+                            <th className="p-3 font-medium text-center">Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border">
+                          {fiados.map(item => (
+                            <React.Fragment key={item.id}>
+                              <tr className="text-xs text-text-secondary hover:bg-surface">
+                                <td className="p-3">
+                                  <div className="font-medium text-text-primary">
+                                    {item.customerName}
+                                  </div>
+                                  <div className="text-text-muted">{item.whatsapp}</div>
+                                </td>
+                                <td className="p-3">{item.description}</td>
+                                <td className="p-3 whitespace-nowrap">
+                                  {formatDateTimeBR(item.createdAt)}
+                                </td>
+                                <td className="p-3">
+                                  <FiadoStatusBadge
+                                    status={item.status}
+                                    isOverdue={item.isOverdue}
+                                  />
+                                </td>
+                                <td className="p-3 text-right">
+                                  {formatCurrencyBRL(item.originalAmount)}
+                                </td>
+                                <td className="p-3 text-right font-medium text-danger">
+                                  {formatCurrencyBRL(item.remainingAmount)}
+                                </td>
+                                <td className="p-3 text-center">
+                                  {(item.status === 'PENDING' || item.status === 'PARTIAL') && (
+                                    <div className="flex justify-center gap-1.5">
+                                      <button
+                                        onClick={() => openChargeForm(item)}
+                                        className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-warning/10 text-warning border border-warning/20 rounded-lg hover:bg-warning/20 transition-colors"
+                                      >
+                                        Cobrar
+                                      </button>
+                                      <button
+                                        onClick={() => openPaymentForm(item)}
+                                        className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-accent/10 text-accent border border-accent/20 rounded-lg hover:bg-accent/20 transition-colors"
+                                      >
+                                        Pagamento
+                                      </button>
+                                      <button
+                                        onClick={() => setDeleteFiadoId(item.id)}
+                                        title="Excluir fiado"
+                                        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-text-muted hover:bg-danger/10 hover:text-danger"
+                                      >
+                                        <Trash2 size={14} />
+                                      </button>
+                                    </div>
+                                  )}
+                                </td>
+                              </tr>
+                              {paymentFiadoId === item.id && (
+                                <tr className="bg-bg/60">
+                                  <td colSpan={7} className="p-3">
+                                    <div className="flex flex-wrap items-end gap-3">
+                                      <div>
+                                        <label className="text-[10px] text-text-muted uppercase font-bold block mb-1">
+                                          Valor do pagamento
+                                        </label>
                                         <input
                                           type="number"
                                           step="0.01"
                                           min="0.01"
-                                          placeholder="0,00"
-                                          value={editingExpense.amount}
-                                          onChange={e =>
-                                            setEditingExpense(ex =>
-                                              ex
-                                                ? { ...ex, amount: parseFloat(e.target.value) || 0 }
-                                                : null
-                                            )
-                                          }
-                                          className={FIELD_CONTROL}
-                                        />
-                                      </Field>
-                                    </div>
-                                    <div className={FORM_GRID}>
-                                      <SmartSelect
-                                        label="Tipo"
-                                        value={editingExpense.type}
-                                        onChange={val => setEditingExpense(ex => ex ? { ...ex, type: val as ExpenseType } : null)}
-                                        options={[
-                                          { value: 'VARIABLE', label: 'Variável' },
-                                          { value: 'FIXED', label: 'Fixa' },
-                                          { value: 'INVESTMENT', label: 'Investimento' },
-                                        ]}
-                                        clearable={false}
-                                        size="sm"
-                                      />
-                                      <SmartSelect
-                                        label="Categoria"
-                                        value={editingExpense.categoryId || null}
-                                        onChange={val => setEditingExpense(ex => ex ? { ...ex, categoryId: val || null } : null)}
-                                        options={[
-                                          { value: '', label: 'Sem categoria' },
-                                          ...categories.map(c => ({ value: c.id, label: c.name })),
-                                        ]}
-                                        size="sm"
-                                      />
-                                    </div>
-                                    <div className={FORM_GRID}>
-                                      <Field label="Data de referência">
-                                        <input
-                                          type="date"
-                                          value={editingExpense.referenceDate?.slice(0, 10) ?? ''}
-                                          onChange={e =>
-                                            setEditingExpense(ex =>
-                                              ex ? { ...ex, referenceDate: e.target.value } : null
-                                            )
-                                          }
-                                          className={FIELD_CONTROL}
-                                        />
-                                      </Field>
-                                      <Field label="Vencimento">
-                                        <input
-                                          type="date"
-                                          value={editingExpense.dueDate?.slice(0, 10) ?? ''}
-                                          onChange={e =>
-                                            setEditingExpense(ex =>
-                                              ex ? { ...ex, dueDate: e.target.value || null } : null
-                                            )
-                                          }
-                                          className={FIELD_CONTROL}
-                                        />
-                                      </Field>
-                                    </div>
-                                    <div className={FORM_GRID}>
-                                      <SmartSelect
-                                        label="Forma de pagamento"
-                                        value={editingExpense.paymentMethod || null}
-                                        onChange={val => setEditingExpense(ex => ex ? { ...ex, paymentMethod: val || null } : null)}
-                                        options={[
-                                          { value: '', label: 'Selecione' },
-                                          ...FINANCE_PAYMENT_METHODS.map(m => ({ value: m, label: m })),
-                                        ]}
-                                        size="sm"
-                                      />
-                                      <Field label="Fornecedor">
-                                        <input
-                                          type="text"
-                                          placeholder="Fornecedor"
-                                          value={editingExpense.supplierName ?? ''}
-                                          onChange={e =>
-                                            setEditingExpense(ex =>
-                                              ex
-                                                ? { ...ex, supplierName: e.target.value || null }
-                                                : null
-                                            )
-                                          }
-                                          className={FIELD_CONTROL}
-                                        />
-                                      </Field>
-                                    </div>
-                                    <div className={FORM_GRID}>
-                                      <Field label="Descrição">
-                                        <input
-                                          type="text"
-                                          placeholder="Descrição"
-                                          value={editingExpense.description ?? ''}
-                                          onChange={e =>
-                                            setEditingExpense(ex =>
-                                              ex
-                                                ? { ...ex, description: e.target.value || null }
-                                                : null
-                                            )
-                                          }
-                                          className={FIELD_CONTROL}
-                                        />
-                                      </Field>
-                                      <Field label="Observações">
-                                        <input
-                                          type="text"
-                                          placeholder="Observações"
-                                          value={editingExpense.notes ?? ''}
-                                          onChange={e =>
-                                            setEditingExpense(ex =>
-                                              ex ? { ...ex, notes: e.target.value || null } : null
-                                            )
-                                          }
-                                          className={FIELD_CONTROL}
-                                        />
-                                      </Field>
-                                    </div>
-                                  </div>
-                                  <div className="flex justify-end gap-2 mt-3">
-                                    <button
-                                      onClick={() => handleUpdateExpense()}
-                                      disabled={expenseSubmitting}
-                                      className="px-3 py-1.5 bg-accent text-accent-fg rounded-lg text-xs font-bold flex items-center gap-1 disabled:opacity-50"
-                                    >
-                                      {expenseSubmitting ? (
-                                        <Loader2 size={12} className="animate-spin" />
-                                      ) : (
-                                        <Check size={12} />
-                                      )}
-                                      Salvar
-                                    </button>
-                                    <button
-                                      onClick={() => setEditingExpense(null)}
-                                      className="px-3 py-1.5 bg-surface-2 text-text-secondary rounded-lg text-xs font-bold flex items-center gap-1"
-                                    >
-                                      <X size={12} /> Cancelar
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
-                          </React.Fragment>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-              {expensesMeta.totalPages > 1 && (
-                <PaginationBar
-                  meta={expensesMeta}
-                  page={expensesPage}
-                  loading={loading}
-                  onPageChange={setExpensesPage}
-                />
-              )}
-            </div>
-          </div>
-        )}
-
-        {tab === 'fiado' && (
-          <div className="space-y-4">
-            <div className="bg-surface p-4 rounded-xl border border-border flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-                  <Plus size={16} className="text-accent" /> Novo fiado
-                </h3>
-                <p className="mt-1 text-xs text-text-muted">Registre um serviço fiado para um cliente.</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setFiadoModalOpen(true)}
-                className="min-h-11 px-4 py-2 bg-accent text-accent-fg rounded-lg text-xs font-bold uppercase tracking-wider hover:brightness-110 transition-all flex items-center gap-2"
-              >
-                <Plus size={14} /> Registrar fiado
-              </button>
-            </div>
-
-            <div className="bg-surface rounded-xl border border-border overflow-hidden">
-              <div className="p-4 border-b border-border flex justify-between items-center bg-surface/50">
-                <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-                  <CreditCard size={16} className="text-accent" /> Fiados
-                </h3>
-                <span className="text-xs text-text-muted">{fiadosMeta.total} registros</span>
-              </div>
-              <div className="max-h-[420px] overflow-y-auto">
-                {loading ? (
-                  <div className="p-4 space-y-2" aria-label="Carregando fiados">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <div key={i} className="flex items-center gap-3 rounded-lg border border-border bg-bg p-3">
-                        <div className="flex-1 space-y-1.5">
-                          <div className="h-3 w-1/4 rounded bg-surface-2" />
-                          <div className="h-2.5 w-1/3 rounded bg-surface-2" />
-                        </div>
-                        <div className="h-4 w-16 rounded bg-surface-2" />
-                      </div>
-                    ))}
-                  </div>
-                ) : fiados.length === 0 ? (
-                  <div className="p-8 text-center text-text-muted text-sm">
-                    Nenhum fiado registrado.
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-[980px] w-full text-left border-collapse">
-                      <thead className="bg-bg text-text-muted text-[10px] uppercase tracking-wider sticky top-0">
-                        <tr>
-                          <th className="p-3 font-medium">Cliente</th>
-                          <th className="p-3 font-medium">Descrição</th>
-                          <th className="p-3 font-medium">Registrado em</th>
-                          <th className="p-3 font-medium">Status</th>
-                          <th className="p-3 font-medium text-right">Original</th>
-                          <th className="p-3 font-medium text-right">Restante</th>
-                          <th className="p-3 font-medium text-center">Ações</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border">
-                        {fiados.map(item => (
-                          <React.Fragment key={item.id}>
-                            <tr className="text-xs text-text-secondary hover:bg-surface">
-                              <td className="p-3">
-                                <div className="font-medium text-text-primary">
-                                  {item.customerName}
-                                </div>
-                                <div className="text-text-muted">{item.whatsapp}</div>
-                              </td>
-                              <td className="p-3">{item.description}</td>
-                              <td className="p-3 whitespace-nowrap">
-                                {formatDateTimeBR(item.createdAt)}
-                              </td>
-                              <td className="p-3">
-                                <FiadoStatusBadge status={item.status} isOverdue={item.isOverdue} />
-                              </td>
-                              <td className="p-3 text-right">
-                                {formatCurrencyBRL(item.originalAmount)}
-                              </td>
-                              <td className="p-3 text-right font-medium text-danger">
-                                {formatCurrencyBRL(item.remainingAmount)}
-                              </td>
-                              <td className="p-3 text-center">
-                                {(item.status === 'PENDING' || item.status === 'PARTIAL') && (
-                                  <div className="flex justify-center gap-1.5">
-                                    <button
-                                      onClick={() => openChargeForm(item)}
-                                      className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-warning/10 text-warning border border-warning/20 rounded-lg hover:bg-warning/20 transition-colors"
-                                    >
-                                      Cobrar
-                                    </button>
-                                    <button
-                                      onClick={() => openPaymentForm(item)}
-                                      className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-accent/10 text-accent border border-accent/20 rounded-lg hover:bg-accent/20 transition-colors"
-                                    >
-                                      Pagamento
-                                    </button>
-                                    <button
-                                      onClick={() => setDeleteFiadoId(item.id)}
-                                      title="Excluir fiado"
-                                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-text-muted hover:bg-danger/10 hover:text-danger"
-                                    >
-                                      <Trash2 size={14} />
-                                    </button>
-                                  </div>
-                                )}
-                              </td>
-                            </tr>
-                            {paymentFiadoId === item.id && (
-                              <tr className="bg-bg/60">
-                                <td colSpan={7} className="p-3">
-                                  <div className="flex flex-wrap items-end gap-3">
-                                    <div>
-                                      <label className="text-[10px] text-text-muted uppercase font-bold block mb-1">
-                                        Valor do pagamento
-                                      </label>
-                                      <input
-                                        type="number"
-                                        step="0.01"
-                                        min="0.01"
-                                        aria-label="Valor do pagamento"
-                                        value={paymentAmount}
-                                        onChange={e => setPaymentAmount(e.target.value)}
-                                        className="bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary w-32 focus:outline-none focus:border-accent"
-                                      />
-                                    </div>
-                                    <div>
-                                      <label className="text-[10px] text-text-muted uppercase font-bold block mb-1">
-                                        Forma de pagamento
-                                      </label>
-                                      <SmartSelect
-                                        mode="single"
-                                        options={FIADO_PAYMENT_OPTIONS}
-                                        value={paymentMethod}
-                                        onChange={value => setPaymentMethod((value as FiadoPaymentMethod) ?? 'pix')}
-                                        clearable={false}
-                                        size="sm"
-                                        aria-label="Forma de pagamento do fiado"
-                                      />
-                                    </div>
-                                    <div className="flex-1 min-w-[160px]">
-                                      <label className="text-[10px] text-text-muted uppercase font-bold block mb-1">
-                                        Observação (opcional)
-                                      </label>
-                                      <input
-                                        type="text"
-                                        value={paymentNotes}
-                                        onChange={e => setPaymentNotes(e.target.value)}
-                                        className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
-                                        placeholder="Ex: PIX recebido"
-                                      />
-                                    </div>
-                                    <button
-                                      onClick={() => handleAddPayment(item.id)}
-                                      disabled={paymentSubmitting}
-                                      className="px-3 py-2 bg-accent text-accent-fg rounded-lg text-xs font-bold flex items-center gap-1 disabled:opacity-50"
-                                    >
-                                      {paymentSubmitting ? (
-                                        <Loader2 size={14} className="animate-spin" />
-                                      ) : (
-                                        <Check size={14} />
-                                      )}
-                                      Confirmar
-                                    </button>
-                                    <button
-                                      onClick={() => setPaymentFiadoId(null)}
-                                      className="px-3 py-2 bg-surface-2 text-text-secondary rounded-lg text-xs font-bold flex items-center gap-1"
-                                    >
-                                      <X size={14} /> Cancelar
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
-                            {chargeFiadoId === item.id && (
-                              <tr className="bg-warning/5">
-                                <td colSpan={7} className="p-3">
-                                  <div className="space-y-2">
-                                    <p className="text-xs text-text-secondary">
-                                      Será enviada uma lembrança curta e tranquila para{' '}
-                                      {item.customerName} em {item.whatsapp}.
-                                    </p>
-                                    <div className="flex flex-wrap items-end gap-3">
-                                      <div className="flex-1 min-w-[180px]">
-                                        <label className="text-[10px] text-text-muted uppercase font-bold block mb-1">
-                                          Chave PIX
-                                        </label>
-                                        <input
-                                          type="text"
-                                          value={chargePixKey}
-                                          onChange={e => setChargePixKey(e.target.value)}
-                                          placeholder="CPF, telefone, e-mail ou chave aleatória"
-                                          className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
+                                          aria-label="Valor do pagamento"
+                                          value={paymentAmount}
+                                          onChange={e => setPaymentAmount(e.target.value)}
+                                          className="bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary w-32 focus:outline-none focus:border-accent"
                                         />
                                       </div>
-                                      <div className="flex-1 min-w-[220px]">
+                                      <div>
                                         <label className="text-[10px] text-text-muted uppercase font-bold block mb-1">
-                                          Link para cartão
+                                          Forma de pagamento
+                                        </label>
+                                        <SmartSelect
+                                          mode="single"
+                                          options={FIADO_PAYMENT_OPTIONS}
+                                          value={paymentMethod}
+                                          onChange={value =>
+                                            setPaymentMethod((value as FiadoPaymentMethod) ?? 'pix')
+                                          }
+                                          clearable={false}
+                                          size="sm"
+                                          aria-label="Forma de pagamento do fiado"
+                                        />
+                                      </div>
+                                      <div className="flex-1 min-w-[160px]">
+                                        <label className="text-[10px] text-text-muted uppercase font-bold block mb-1">
+                                          Observação (opcional)
                                         </label>
                                         <input
-                                          type="url"
-                                          value={chargeCardLink}
-                                          onChange={e => setChargeCardLink(e.target.value)}
-                                          placeholder="https://..."
+                                          type="text"
+                                          value={paymentNotes}
+                                          onChange={e => setPaymentNotes(e.target.value)}
                                           className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
+                                          placeholder="Ex: PIX recebido"
                                         />
                                       </div>
                                       <button
-                                        onClick={() => handleChargeFiado(item.id)}
-                                        disabled={chargeSubmitting}
+                                        onClick={() => handleAddPayment(item.id)}
+                                        disabled={paymentSubmitting}
                                         className="px-3 py-2 bg-accent text-accent-fg rounded-lg text-xs font-bold flex items-center gap-1 disabled:opacity-50"
                                       >
-                                        {chargeSubmitting ? (
+                                        {paymentSubmitting ? (
                                           <Loader2 size={14} className="animate-spin" />
                                         ) : (
-                                          <CreditCard size={14} />
+                                          <Check size={14} />
                                         )}
-                                        Enviar cobrança
+                                        Confirmar
                                       </button>
                                       <button
-                                        onClick={() => setChargeFiadoId(null)}
-                                        className="px-3 py-2 bg-surface-2 text-text-secondary rounded-lg text-xs font-bold"
+                                        onClick={() => setPaymentFiadoId(null)}
+                                        className="px-3 py-2 bg-surface-2 text-text-secondary rounded-lg text-xs font-bold flex items-center gap-1"
                                       >
-                                        Cancelar
+                                        <X size={14} /> Cancelar
                                       </button>
                                     </div>
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
-                          </React.Fragment>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                                  </td>
+                                </tr>
+                              )}
+                              {chargeFiadoId === item.id && (
+                                <tr className="bg-warning/5">
+                                  <td colSpan={7} className="p-3">
+                                    <div className="space-y-2">
+                                      <p className="text-xs text-text-secondary">
+                                        Será enviada uma lembrança curta e tranquila para{' '}
+                                        {item.customerName} em {item.whatsapp}.
+                                      </p>
+                                      <div className="flex flex-wrap items-end gap-3">
+                                        <div className="flex-1 min-w-[180px]">
+                                          <label className="text-[10px] text-text-muted uppercase font-bold block mb-1">
+                                            Chave PIX
+                                          </label>
+                                          <input
+                                            type="text"
+                                            value={chargePixKey}
+                                            onChange={e => setChargePixKey(e.target.value)}
+                                            placeholder="CPF, telefone, e-mail ou chave aleatória"
+                                            className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
+                                          />
+                                        </div>
+                                        <div className="flex-1 min-w-[220px]">
+                                          <label className="text-[10px] text-text-muted uppercase font-bold block mb-1">
+                                            Link para cartão
+                                          </label>
+                                          <input
+                                            type="url"
+                                            value={chargeCardLink}
+                                            onChange={e => setChargeCardLink(e.target.value)}
+                                            placeholder="https://..."
+                                            className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent"
+                                          />
+                                        </div>
+                                        <button
+                                          onClick={() => handleChargeFiado(item.id)}
+                                          disabled={chargeSubmitting}
+                                          className="px-3 py-2 bg-accent text-accent-fg rounded-lg text-xs font-bold flex items-center gap-1 disabled:opacity-50"
+                                        >
+                                          {chargeSubmitting ? (
+                                            <Loader2 size={14} className="animate-spin" />
+                                          ) : (
+                                            <CreditCard size={14} />
+                                          )}
+                                          Enviar cobrança
+                                        </button>
+                                        <button
+                                          onClick={() => setChargeFiadoId(null)}
+                                          className="px-3 py-2 bg-surface-2 text-text-secondary rounded-lg text-xs font-bold"
+                                        >
+                                          Cancelar
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
+                            </React.Fragment>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+                {fiadosMeta.totalPages > 1 && (
+                  <PaginationBar
+                    meta={fiadosMeta}
+                    page={fiadosPage}
+                    loading={loading}
+                    onPageChange={setFiadosPage}
+                  />
                 )}
               </div>
-              {fiadosMeta.totalPages > 1 && (
-                <PaginationBar
-                  meta={fiadosMeta}
-                  page={fiadosPage}
-                  loading={loading}
-                  onPageChange={setFiadosPage}
-                />
-              )}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <ModalShell
@@ -1513,78 +1651,75 @@ export const OwnerFinancialPanel: React.FC = () => {
         titleId="fiado-modal-title"
         loading={fiadoSubmitting}
         onClose={() => setFiadoModalOpen(false)}
-        className="max-h-[90vh] overflow-y-auto"
+        className="max-h-[90dvh] overflow-y-auto"
       >
-          <form
-            onSubmit={handleFiadoSubmit(onCreateFiado)}
-            className="space-y-3"
-          >
-            <p className="text-xs text-text-muted">Preencha os dados do fiado.</p>
+        <form onSubmit={handleFiadoSubmit(onCreateFiado)} className="space-y-3">
+          <p className="text-xs text-text-muted">Preencha os dados do fiado.</p>
 
-            <div className={FORM_GRID}>
-              <Field label="Nome do cliente" error={fiadoErrors.customerName?.message}>
-                <input
-                  type="text"
-                  placeholder="Nome completo"
-                  className={fiadoErrors.customerName ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                  {...registerFiado('customerName')}
-                />
-              </Field>
-              <Field label="WhatsApp" error={fiadoErrors.whatsapp?.message}>
-                <input
-                  type="text"
-                  placeholder="(00) 00000-0000"
-                  className={fiadoErrors.whatsapp ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                  {...registerFiado('whatsapp')}
-                />
-              </Field>
-            </div>
-            <Field label="Descrição" error={fiadoErrors.description?.message}>
+          <div className={FORM_GRID}>
+            <Field label="Nome do cliente" error={fiadoErrors.customerName?.message}>
               <input
                 type="text"
-                placeholder="Ex.: Corte + escova"
-                className={fiadoErrors.description ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                {...registerFiado('description')}
+                placeholder="Nome completo"
+                className={fiadoErrors.customerName ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                {...registerFiado('customerName')}
               />
             </Field>
-            <div className={FORM_GRID}>
-              <Field label="Valor (R$)" error={fiadoErrors.amount?.message}>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  placeholder="0,00"
-                  className={fiadoErrors.amount ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
-                  {...registerFiado('amount')}
-                />
-              </Field>
-              <Field label="Vencimento" error={fiadoErrors.dueDate?.message}>
-                <input type="date" className={FIELD_CONTROL} {...registerFiado('dueDate')} />
-              </Field>
-            </div>
+            <Field label="WhatsApp" error={fiadoErrors.whatsapp?.message}>
+              <input
+                type="text"
+                placeholder="(00) 00000-0000"
+                className={fiadoErrors.whatsapp ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                {...registerFiado('whatsapp')}
+              />
+            </Field>
+          </div>
+          <Field label="Descrição" error={fiadoErrors.description?.message}>
+            <input
+              type="text"
+              placeholder="Ex.: Corte + escova"
+              className={fiadoErrors.description ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+              {...registerFiado('description')}
+            />
+          </Field>
+          <div className={FORM_GRID}>
+            <Field label="Valor (R$)" error={fiadoErrors.amount?.message}>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                placeholder="0,00"
+                className={fiadoErrors.amount ? FIELD_CONTROL_ERROR : FIELD_CONTROL}
+                {...registerFiado('amount')}
+              />
+            </Field>
+            <Field label="Vencimento" error={fiadoErrors.dueDate?.message}>
+              <input type="date" className={FIELD_CONTROL} {...registerFiado('dueDate')} />
+            </Field>
+          </div>
 
-            <div className="flex justify-end gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => setFiadoModalOpen(false)}
-                className="min-h-11 px-4 py-2 border border-border rounded-lg text-xs font-bold text-text-muted hover:text-text-secondary"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={fiadoSubmitting}
-                className="min-h-11 px-4 py-2 bg-accent text-accent-fg rounded-lg text-xs font-bold uppercase tracking-wider hover:brightness-110 transition-all disabled:opacity-50 flex items-center gap-2"
-              >
-                {fiadoSubmitting ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <Plus size={14} />
-                )}
-                Registrar fiado
-              </button>
-            </div>
-          </form>
+          <div className="flex justify-end gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => setFiadoModalOpen(false)}
+              className="min-h-11 px-4 py-2 border border-border rounded-lg text-xs font-bold text-text-muted hover:text-text-secondary"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={fiadoSubmitting}
+              className="min-h-11 px-4 py-2 bg-accent text-accent-fg rounded-lg text-xs font-bold uppercase tracking-wider hover:brightness-110 transition-all disabled:opacity-50 flex items-center gap-2"
+            >
+              {fiadoSubmitting ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Plus size={14} />
+              )}
+              Registrar fiado
+            </button>
+          </div>
+        </form>
       </ModalShell>
 
       <ConfirmDialog
@@ -1595,7 +1730,9 @@ export const OwnerFinancialPanel: React.FC = () => {
         variant="danger"
         loading={deleteFiadoLoading}
         onConfirm={() => void handleDeleteFiado()}
-        onCancel={() => { if (!deleteFiadoLoading) setDeleteFiadoId(null); }}
+        onCancel={() => {
+          if (!deleteFiadoLoading) setDeleteFiadoId(null);
+        }}
       />
     </>
   );

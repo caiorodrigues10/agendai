@@ -125,14 +125,14 @@ export const StoryModal: React.FC<StoryModalProps> = ({
           <span className="text-[11px] text-white/60">{formatStoryTime(story.publishedAt ?? story.createdAt)}</span>
         </div>
 
-        <div className="rounded-2xl overflow-hidden bg-black border border-white/10 max-h-[75vh] flex items-center justify-center">
+        <div className="rounded-2xl overflow-hidden bg-black border border-white/10 max-h-[75dvh] flex items-center justify-center">
           {story.videoUrl ? (
-            <video src={story.videoUrl} poster={story.imageUrl} controls preload="metadata" className="max-h-[75vh] w-auto max-w-full object-contain" />
+            <video src={story.videoUrl} poster={story.imageUrl} controls preload="metadata" className="max-h-[75dvh] w-auto max-w-full object-contain" />
           ) : story.imageUrl ? (
             <img
               src={story.imageUrl}
               alt={story.title || 'Story'}
-              className="max-h-[75vh] w-auto max-w-full object-contain"
+              className="max-h-[75dvh] w-auto max-w-full object-contain"
             />
           ) : (
             <div className="p-8 text-sm text-white/80">{story.content}</div>

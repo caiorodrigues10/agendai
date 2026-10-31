@@ -1,10 +1,10 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useMemo, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
+  LuArrowRight as ArrowRight,
   LuCheck as Check,
   LuChevronRight as ChevronRight,
   LuRocket as Rocket,
-  LuArrowRight as ArrowRight,
   LuSkipForward as SkipForward,
 } from 'react-icons/lu';
 import { SectionError } from '../../components/patterns';
@@ -78,12 +78,15 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
 
   const required = useMemo(() => steps.filter(s => s.required), [steps]);
   const completedCount = useMemo(() => required.filter(s => s.completed).length, [required]);
-  const allDone = useMemo(() => required.length > 0 && required.every(s => s.completed), [required]);
+  const allDone = useMemo(
+    () => required.length > 0 && required.every(s => s.completed),
+    [required]
+  );
   const activeStep = useMemo(() => required.find(s => !s.completed) ?? null, [required]);
   const completedSteps = useMemo(() => required.filter(s => s.completed), [required]);
   const progress = useMemo(
-    () => required.length > 0 ? Math.round((completedCount / required.length) * 100) : 0,
-    [completedCount, required.length],
+    () => (required.length > 0 ? Math.round((completedCount / required.length) * 100) : 0),
+    [completedCount, required.length]
   );
 
   const load = async () => {
@@ -178,15 +181,13 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
 
         <section className="rounded-2xl border border-border bg-surface p-5">
           <h3 className="font-bold text-text-primary">Próximos passos (opcionais)</h3>
-          <p className="mt-1 text-xs text-text-secondary">
-            Melhore sua experiência quando quiser.
-          </p>
+          <p className="mt-1 text-xs text-text-secondary">Melhore sua experiência quando quiser.</p>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             {[
-              { label: '🔔 Alerta de fila cheia', tab: 'settings' },
-              { label: '📱 Instalar no celular', tab: 'settings' },
-              { label: '👥 Cadastrar equipe', tab: 'team' },
-              { label: '⚙️ Preferências', tab: 'settings' },
+              { label: 'Alerta de fila cheia', tab: 'settings' },
+              { label: 'Instalar no celular', tab: 'settings' },
+              { label: 'Cadastrar equipe', tab: 'team' },
+              { label: 'Preferências', tab: 'settings' },
             ].map(item => (
               <button
                 key={item.label}
@@ -225,10 +226,20 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
         {/* Progress bar */}
         <div className="mt-4">
           <div className="mb-1.5 flex justify-between text-[11px] font-bold text-text-secondary">
-            <span>Etapa {completedCount + 1} de {required.length}</span>
+            <span>
+              Etapa {Math.min(completedCount + 1, required.length)} de {required.length}
+            </span>
             <span>{progress}%</span>
           </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-bg">
+          <div
+            role="progressbar"
+            aria-label="Configuração inicial"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progress}
+            aria-valuetext={`${completedCount} de ${required.length} etapas concluídas`}
+            className="h-1.5 overflow-hidden rounded-full bg-bg"
+          >
             <motion.div
               className="h-full rounded-full bg-accent"
               initial={false}
@@ -244,11 +255,7 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
             <div
               key={s.key}
               className={`h-1 flex-1 rounded-full transition-colors ${
-                s.completed
-                  ? 'bg-accent'
-                  : s.key === activeStep?.key
-                    ? 'bg-accent/40'
-                    : 'bg-border'
+                s.completed ? 'bg-accent' : s.key === activeStep?.key ? 'bg-accent/40' : 'bg-border'
               }`}
             />
           ))}
@@ -321,7 +328,10 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
               <span className="flex-1 text-sm font-medium text-text-secondary group-hover:text-text-primary transition-colors">
                 {TITLES[step.key] || step.label}
               </span>
-              <ChevronRight size={14} className="text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
+              <ChevronRight
+                size={14}
+                className="text-text-muted opacity-0 group-hover:opacity-100 transition-opacity"
+              />
             </button>
           ))}
         </section>

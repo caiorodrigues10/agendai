@@ -363,17 +363,17 @@ export const PostDetail: React.FC<PostDetailProps> = ({
       </div>
 
       {(post.imageUrl || post.videoUrl) && (
-        <div className="bg-black flex items-center justify-center max-h-[70vh] overflow-hidden">
+        <div className="bg-black flex items-center justify-center max-h-[70dvh] overflow-hidden">
           {post.videoUrl ? (
             <video
               src={post.videoUrl}
               poster={post.imageUrl}
               controls
               preload="metadata"
-              className="max-h-[70vh] w-auto max-w-full object-contain"
+              className="max-h-[70dvh] w-auto max-w-full object-contain"
             />
           ) : (
-            <img src={post.imageUrl} alt={post.title || 'Publicação'} className="max-h-[70vh] w-auto max-w-full object-contain" />
+            <img src={post.imageUrl} alt={post.title || 'Publicação'} className="max-h-[70dvh] w-auto max-w-full object-contain" />
           )}
         </div>
       )}

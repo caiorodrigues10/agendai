@@ -102,7 +102,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ plan, onClose, onSaved })
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-surface border border-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-surface border border-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl max-h-[90dvh] overflow-y-auto"
       >
         <div className="p-6 border-b border-border flex justify-between items-center">
           <h3 className="text-xl font-bold text-text-primary tracking-tight">

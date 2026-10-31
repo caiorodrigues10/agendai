@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { PostEditor } from './PostEditor';
 import { PostPreviewBox } from './PostPreviewBox';
 import { TemplateThumbnail } from './TemplateThumbnail';
@@ -17,6 +17,7 @@ vi.mock('../../infra/postsApi', async importOriginal => {
       update: vi.fn(),
       publish: vi.fn(),
       schedule: vi.fn(),
+      cancelSchedule: vi.fn(),
     },
   };
 });
@@ -107,7 +108,7 @@ describe('PostEditor — photoMode', () => {
     await openEditor(); // objetivo "Divulgar serviço" → servico-destaque? usa agenda-aberta default via draft limpo -> templateKey da objective
     // Seleciona template sem foto
     fireEvent.click(screen.getByRole('button', { name: /selecionar modelo|serviço em destaque|agenda aberta/i }));
-    fireEvent.click(await screen.findByText('Agenda aberta'));
+    fireEvent.click(await screen.findByRole('button', { name: 'Selecionar modelo Agenda aberta' }));
     fireEvent.click(screen.getByRole('button', { name: 'Imagem' }));
     expect(screen.getByText(/não usa foto/i)).toBeInTheDocument();
     expect(screen.queryByText('Foto principal')).not.toBeInTheDocument();
@@ -116,7 +117,7 @@ describe('PostEditor — photoMode', () => {
   it('optional com stockImageKey avisa que imagem ilustrativa não representa o salão', async () => {
     await openEditor();
     fireEvent.click(screen.getByRole('button', { name: /selecionar modelo|serviço em destaque|agenda aberta/i }));
-    fireEvent.click(await screen.findByText('Editorial foto'));
+    fireEvent.click(await screen.findByRole('button', { name: 'Selecionar modelo Editorial foto' }));
     fireEvent.click(screen.getByRole('button', { name: 'Imagem' }));
     expect(screen.getByText(/não representa resultados do seu salão/i)).toBeInTheDocument();
   });
@@ -124,7 +125,7 @@ describe('PostEditor — photoMode', () => {
   it('optional sem stockImageKey explica tipografia sem foto', async () => {
     await openEditor();
     fireEvent.click(screen.getByRole('button', { name: /selecionar modelo|serviço em destaque|agenda aberta/i }));
-    fireEvent.click(await screen.findByText('Tipográfico'));
+    fireEvent.click(await screen.findByRole('button', { name: 'Selecionar modelo Tipográfico' }));
     fireEvent.click(screen.getByRole('button', { name: 'Imagem' }));
     expect(screen.getByText(/funciona com tipografia, sem foto/i)).toBeInTheDocument();
     expect(screen.queryByText(/imagem ilustrativa gerada automaticamente/i)).not.toBeInTheDocument();
@@ -204,7 +205,7 @@ describe('PostEditor — publicação e modal', () => {
   it('não cria post com agendamento inválido', async () => {
     const props = await openEditor();
     fireEvent.click(screen.getByRole('button', { name: /selecionar modelo|agenda aberta/i }));
-    fireEvent.click(await screen.findByText('Agenda aberta'));
+    fireEvent.click(await screen.findByRole('button', { name: 'Selecionar modelo Agenda aberta' }));
     fireEvent.click(screen.getByRole('button', { name: 'Agendar publicação' }));
     fireEvent.change(screen.getByLabelText('Data e horário da publicação'), { target: { value: '2020-01-01T10:00' } });
     fireEvent.click(screen.getByRole('button', { name: 'Agendar' }));
@@ -215,7 +216,7 @@ describe('PostEditor — publicação e modal', () => {
   it('exige fotos reais do modelo de resultados antes de publicar', async () => {
     const props = await openEditor();
     fireEvent.click(screen.getByRole('button', { name: /selecionar modelo|agenda aberta/i }));
-    fireEvent.click(await screen.findByText('Antes e depois'));
+    fireEvent.click(await screen.findByRole('button', { name: 'Selecionar modelo Antes e depois' }));
     fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
     expect(mockedPostsApi.create).not.toHaveBeenCalled();
     expect(props.showToast).toHaveBeenCalledWith(expect.stringMatching(/fotos exigidas/), 'error');
@@ -282,6 +283,18 @@ describe('TemplateThumbnail', () => {
   });
 });
 
+describe('PostPreviewBox — falha da imagem', () => {
+  it('permite carregar a mesma URL novamente após erro de imagem', () => {
+    const retry = vi.fn();
+    render(<PostPreviewBox format="square" previewUrl="https://cdn.example.com/p.png" onRetry={retry} />);
+    fireEvent.error(screen.getByAltText('Prévia do post'));
+    expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível carregar a prévia.');
+    fireEvent.click(screen.getByRole('button', { name: 'Tentar prévia novamente' }));
+    expect(retry).toHaveBeenCalledOnce();
+    expect(screen.getByAltText('Prévia do post')).toHaveAttribute('src', 'https://cdn.example.com/p.png');
+  });
+});
+
 describe('PostPreviewBox — formato', () => {
   it('preserva aspect ratio 9:16 via maxWidth proporcional', () => {
     const { container } = render(<PostPreviewBox format="story" previewUrl={null} />);
@@ -340,4 +353,184 @@ describe('PostEditor — vídeo', () => {
     expect(mockedBarbershopApi.uploadPostVideo).not.toHaveBeenCalled();
     expect(props.showToast).toHaveBeenCalledWith(expect.stringMatching(/25 MB/), 'error');
   });
+});
+
+
+describe('PostEditor — recuperação e consistência', () => {
+  it('exibe falha da prévia no editor e permite tentar novamente', async () => {
+    mockedPostsApi.preview.mockRejectedValueOnce(new Error('Render indisponível'));
+    await openEditor();
+    expect(await screen.findAllByText('Render indisponível')).not.toHaveLength(0);
+    expect(screen.queryByText('Aguardando informações…')).not.toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole('button', { name: 'Tentar prévia novamente' })[0]);
+    await waitFor(() => expect(screen.getAllByAltText('Prévia do post')[0]).toHaveAttribute('src', 'https://cdn.example.com/preview.png'));
+    expect(screen.queryByText('Render indisponível')).not.toBeInTheDocument();
+  });
+
+  it('cancela a prévia anterior e ignora sua resposta após alterar o título', async () => {
+    let finishFirst!: (url: string) => void;
+    mockedPostsApi.preview.mockImplementationOnce(() => new Promise(resolve => { finishFirst = resolve; }));
+    await openEditor();
+    await waitFor(() => expect(mockedPostsApi.preview).toHaveBeenCalledTimes(1));
+    const signal = mockedPostsApi.preview.mock.calls[0][2]!.signal!;
+    fireEvent.change(screen.getByLabelText('Título'), { target: { value: 'Título atualizado' } });
+    expect(signal.aborted).toBe(true);
+    await waitFor(() => expect(screen.getAllByAltText('Prévia do post')[0]).toHaveAttribute('src', 'https://cdn.example.com/preview.png'));
+    await act(async () => { finishFirst('https://cdn.example.com/antiga.png'); });
+    expect(screen.getAllByAltText('Prévia do post')[0]).toHaveAttribute('src', 'https://cdn.example.com/preview.png');
+  });
+
+  it('oferece categorias e modelos visuais também na aba Formato', async () => {
+    await openEditor();
+    fireEvent.click(screen.getByRole('button', { name: 'Formato' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Editorial' }));
+    expect(screen.getByRole('button', { name: 'Selecionar modelo Editorial foto' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Selecionar modelo Agenda aberta' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Selecionar modelo Editorial foto' }));
+    expect(screen.getByRole('button', { name: 'Selecionar modelo Editorial foto' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('permite recuperar um catálogo que falhou sem reabrir o editor', async () => {
+    mockedPostsApi.templates.mockRejectedValueOnce(new Error('Catálogo indisponível'));
+    await openEditor();
+    fireEvent.click(screen.getByRole('button', { name: 'Formato' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Catálogo indisponível');
+    fireEvent.click(screen.getByRole('button', { name: 'Tentar carregar modelos novamente' }));
+    await screen.findByRole('button', { name: 'Selecionar modelo Agenda aberta' });
+    expect(mockedPostsApi.templates).toHaveBeenCalledTimes(2);
+  });
+
+  it('mostra erro de IA no modal e aplica uma sugestão na nova tentativa', async () => {
+    mockedBarbershopApi.generatePostContent.mockRejectedValueOnce(new Error('Sugestões indisponíveis'))
+      .mockResolvedValueOnce({ suggestions: [{ title: 'Agenda da semana', ctaText: 'Agendar' }], source: 'template' });
+    await openEditor();
+    fireEvent.click(screen.getByText('Sugestões por IA'));
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar sugestões' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Sugestões indisponíveis');
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar sugestões' }));
+    fireEvent.click(await screen.findByRole('button', { name: /Agenda da semana/ }));
+    expect(screen.getByLabelText('Título')).toHaveValue('Agenda da semana');
+    expect(screen.getByLabelText('Texto do botão (CTA)')).toHaveValue('Agendar');
+  });
+
+  it('retenta publicar o mesmo rascunho após falha e não cria duplicatas', async () => {
+    mockedPostsApi.create.mockResolvedValueOnce({ id: 'saved-draft' } as any);
+    mockedPostsApi.update.mockResolvedValue({ id: 'saved-draft' } as any);
+    mockedPostsApi.publish.mockRejectedValueOnce(new Error('Publicação indisponível')).mockResolvedValueOnce({ id: 'saved-draft' } as any);
+    const props = await openEditor();
+    fireEvent.click(screen.getByRole('button', { name: /selecionar modelo:/i }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Selecionar modelo Agenda aberta' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Publicação indisponível');
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
+    await waitFor(() => expect(props.onSaved).toHaveBeenCalledWith('published'));
+    expect(mockedPostsApi.create).toHaveBeenCalledTimes(1);
+    expect(mockedPostsApi.publish).toHaveBeenNthCalledWith(2, 'saved-draft');
+    expect(mockedPostsApi.update).toHaveBeenCalledWith('saved-draft', expect.any(Object));
+  });
+});
+
+
+const savedPost = (status: 'published' | 'scheduled' | 'draft'): NonNullable<Parameters<typeof PostEditor>[0]['post']> => ({
+  id: 'saved-post', barbershopId: 'barber1', type: 'haircut', title: 'Título original',
+  content: 'Legenda original', likes: 0, createdAt: Date.now(), authorName: 'Equipe',
+  status, format: 'square', templateKey: 'agenda-aberta', paletteKey: 'brand',
+  scheduledFor: status === 'scheduled' ? Date.now() + 86_400_000 : undefined,
+});
+
+describe('PostEditor — ciclo de vida de rascunhos e publicações', () => {
+  it('editar um publicado salva as alterações sem publicar novamente nem criar rascunho', async () => {
+    mockedPostsApi.update.mockResolvedValue(savedPost('published'));
+    const props = renderEditor({ post: savedPost('published') });
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Salvar alterações' })).toBeEnabled());
+    expect(screen.queryByRole('button', { name: 'Rascunho' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Agendar publicação' })).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Título'), { target: { value: 'Título atualizado' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Salvar alterações' }));
+    await waitFor(() => expect(props.onSaved).toHaveBeenCalledWith('published'));
+    expect(mockedPostsApi.update).toHaveBeenCalledWith('saved-post', expect.objectContaining({ title: 'Título atualizado' }));
+    expect(mockedPostsApi.publish).not.toHaveBeenCalled();
+    expect(mockedPostsApi.create).not.toHaveBeenCalled();
+  });
+
+  it('editar agendado mantém o horário e salvar como rascunho cancela o agendamento', async () => {
+    const post = savedPost('scheduled');
+    mockedPostsApi.update.mockResolvedValue(post);
+    mockedPostsApi.cancelSchedule.mockResolvedValue(savedPost('draft'));
+    const props = renderEditor({ post });
+    const value = new Date(post.scheduledFor!);
+    value.setMinutes(value.getMinutes() - value.getTimezoneOffset());
+    expect(screen.getByLabelText('Data e horário da publicação')).toHaveValue(value.toISOString().slice(0, 16));
+    fireEvent.click(screen.getByRole('button', { name: 'Rascunho' }));
+    await waitFor(() => expect(mockedPostsApi.cancelSchedule).toHaveBeenCalledWith('saved-post'));
+    expect(props.onSaved).toHaveBeenCalledWith('draft');
+    expect(mockedPostsApi.create).not.toHaveBeenCalled();
+    expect(mockedPostsApi.publish).not.toHaveBeenCalled();
+  });
+
+  it('reutilizar cria um novo post e mantém separado o rascunho de criação em andamento', async () => {
+    localStorage.setItem('agendai:post-draft:user1:barber1:new', JSON.stringify({ version: 2, savedAt: Date.now(), title: 'Outro rascunho' }));
+    mockedPostsApi.create.mockResolvedValue({ ...savedPost('draft'), id: 'copy-post' });
+    const props = renderEditor({ sourcePost: savedPost('published') });
+    expect(screen.getByLabelText('Título')).toHaveValue('Título original');
+    fireEvent.click(screen.getByRole('button', { name: 'Rascunho' }));
+    await waitFor(() => expect(props.onSaved).toHaveBeenCalledWith('draft'));
+    expect(mockedPostsApi.create).toHaveBeenCalledTimes(1);
+    expect(mockedPostsApi.update).not.toHaveBeenCalled();
+    expect(JSON.parse(localStorage.getItem('agendai:post-draft:user1:barber1:new')!).title).toBe('Outro rascunho');
+  });
+
+  it('reabrir após falha de publicação reutiliza o rascunho já criado no servidor', async () => {
+    mockedPostsApi.create.mockResolvedValueOnce({ ...savedPost('draft'), id: 'created-draft' });
+    mockedPostsApi.publish.mockRejectedValueOnce(new Error('Publicação indisponível')).mockResolvedValueOnce(savedPost('published'));
+    mockedPostsApi.update.mockResolvedValue(savedPost('draft'));
+    await openEditor();
+    fireEvent.click(screen.getByRole('button', { name: /Selecionar modelo:/ }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Selecionar modelo Agenda aberta' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
+    await screen.findByRole('alert');
+    expect(JSON.parse(localStorage.getItem('agendai:post-draft:user1:barber1:new')!).serverPostId).toBe('created-draft');
+    cleanup();
+    const props = renderEditor();
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Publicar' })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
+    await waitFor(() => expect(props.onSaved).toHaveBeenCalledWith('published'));
+    expect(mockedPostsApi.create).toHaveBeenCalledTimes(1);
+    expect(mockedPostsApi.publish).toHaveBeenLastCalledWith('created-draft');
+  });
+
+  it('restaura a remoção explícita de mídia em uma edição não salva', async () => {
+    const post = { ...savedPost('draft'), videoUrl: 'https://cdn.example.com/video.mp4', primaryMediaId: 'old-photo' };
+    localStorage.setItem('agendai:post-draft:user1:barber1:saved-post', JSON.stringify({
+      version: 2, savedAt: Date.now(), objectiveId: 'announce', templateKey: 'agenda-aberta',
+      paletteKey: 'brand', format: 'square', postMode: 'both', type: 'haircut', title: 'Edição não salva',
+      ctaText: 'Agendar', content: '', videoUrl: null, primaryMediaId: null, secondaryMediaId: null,
+    }));
+    mockedPostsApi.update.mockResolvedValue(savedPost('draft'));
+    renderEditor({ post });
+    expect(screen.getByLabelText('Título')).toHaveValue('Edição não salva');
+    fireEvent.click(screen.getByRole('button', { name: 'Rascunho' }));
+    await waitFor(() => expect(mockedPostsApi.update).toHaveBeenCalledWith('saved-post', expect.objectContaining({ videoUrl: null, primaryMediaId: null })));
+  });
+});
+
+
+it('exibe e recupera erro da biblioteca dentro do modal sem fechar o editor', async () => {
+  const reload = vi.fn();
+  await openEditor({ metadataErrors: ['Biblioteca indisponível'], onReloadMetadata: reload });
+  expect(screen.getByRole('alert')).toHaveTextContent('Biblioteca indisponível');
+  fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }));
+  expect(reload).toHaveBeenCalledOnce();
+});
+
+
+it('preserva a escolha de agendamento de um post novo após fechar e reabrir', async () => {
+  await openEditor();
+  fireEvent.click(screen.getByRole('button', { name: 'Agendar publicação' }));
+  const value = '2030-01-02T15:30';
+  fireEvent.change(screen.getByLabelText('Data e horário da publicação'), { target: { value } });
+  cleanup();
+  renderEditor();
+  expect(screen.getByLabelText('Data e horário da publicação')).toHaveValue(value);
+  expect(screen.getByRole('button', { name: 'Agendar' })).toBeInTheDocument();
 });

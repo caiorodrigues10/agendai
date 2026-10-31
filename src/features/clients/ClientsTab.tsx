@@ -1,34 +1,61 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
 import {
-  LuSparkles as Sparkles,
-  LuUsers as Users,
   LuChartColumn as BarChart3,
-  LuSettings2 as Settings2,
   LuLink2 as Link2,
   LuRefreshCw as RefreshCw,
+  LuSettings2 as Settings2,
+  LuSparkles as Sparkles,
+  LuUsers as Users,
 } from 'react-icons/lu';
-import { Service, ShopSettings, StaffMember } from '../../types';
-import { AppointmentFormData } from '../../schemas';
-import { AvailabilitySlot } from '../../utils/schedulingUtils';
-import { METRIC_LABEL } from '../../utils/metricLabels';
-import { addDaysISO, todayISO } from '../../utils/dateRanges';
-import { ClientsManager } from './ClientsManager';
-import { CrmIntelligencePanel } from '../crm/CrmIntelligencePanel';
-import { ClientProfileSheet } from './ClientProfileSheet';
-import { CrmMergePanel } from '../crm/CrmMergePanel';
-import { CrmBackfillPanel } from '../crm/CrmBackfillPanel';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Tabs } from '../../components/patterns';
 import { useAuth } from '../../contexts/AuthContext';
 import { crmApi } from '../../infra/crmApi';
+import { AppointmentFormData } from '../../schemas';
+import { Service, ShopSettings, StaffMember } from '../../types';
+import { addDaysISO, todayISO } from '../../utils/dateRanges';
+import { METRIC_LABEL } from '../../utils/metricLabels';
+import { AvailabilitySlot } from '../../utils/schedulingUtils';
+import { CrmBackfillPanel } from '../crm/CrmBackfillPanel';
+import { CrmIntelligencePanel } from '../crm/CrmIntelligencePanel';
+import { CrmMergePanel } from '../crm/CrmMergePanel';
+import { ClientProfileSheet } from './ClientProfileSheet';
+import { ClientsManager } from './ClientsManager';
 
 type ClientsSection = 'clientes' | 'analises' | 'organizar';
 
 const VALID_SECTIONS: ClientsSection[] = ['clientes', 'analises', 'organizar'];
 
-const SECTION_META: { id: ClientsSection; label: string; shortLabel?: string; icon: React.ReactNode; requiresAnalytics: boolean; requiresTools: boolean }[] = [
-  { id: 'clientes', label: 'Clientes', icon: <Users size={14} />, requiresAnalytics: false, requiresTools: false },
-  { id: 'analises', label: 'Análises', icon: <BarChart3 size={14} />, requiresAnalytics: true, requiresTools: false },
-  { id: 'organizar', label: 'Organizar cadastros', shortLabel: 'Organizar', icon: <Settings2 size={14} />, requiresAnalytics: true, requiresTools: true },
+const SECTION_META: {
+  id: ClientsSection;
+  label: string;
+  shortLabel?: string;
+  icon: React.ReactNode;
+  requiresAnalytics: boolean;
+  requiresTools: boolean;
+}[] = [
+  {
+    id: 'clientes',
+    label: 'Clientes',
+    icon: <Users size={14} />,
+    requiresAnalytics: false,
+    requiresTools: false,
+  },
+  {
+    id: 'analises',
+    label: 'Análises',
+    icon: <BarChart3 size={14} />,
+    requiresAnalytics: true,
+    requiresTools: false,
+  },
+  {
+    id: 'organizar',
+    label: 'Organizar cadastros',
+    shortLabel: 'Organizar',
+    icon: <Settings2 size={14} />,
+    requiresAnalytics: true,
+    requiresTools: true,
+  },
 ];
 
 interface ClientsTabProps {
@@ -69,9 +96,18 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
     ? (rawSection as ClientsSection)
     : 'clientes';
 
-  const setSection = useCallback((s: ClientsSection) => {
-    setSearchParams(prev => { prev.set('sec', s); return prev; }, { replace: true });
-  }, [setSearchParams]);
+  const setSection = useCallback(
+    (s: ClientsSection) => {
+      setSearchParams(
+        prev => {
+          prev.set('sec', s);
+          return prev;
+        },
+        { replace: true }
+      );
+    },
+    [setSearchParams]
+  );
 
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [period, setPeriod] = useState(initialPeriod);
@@ -80,33 +116,40 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
 
   // Tools modal state
   const [toolsModal, setToolsModal] = useState<'merge' | 'backfill' | null>(null);
-  const [lastBackfill, setLastBackfill] = useState<{ status: string; date: string; count: number } | null>(null);
+  const [lastBackfill, setLastBackfill] = useState<{
+    status: string;
+    date: string;
+    count: number;
+  } | null>(null);
 
   // Load last backfill run for summary
   useEffect(() => {
     if (section !== 'organizar' || !canAnalytics) return;
-    crmApi.backfillRuns().then(runs => {
-      if (runs.length > 0) {
-        const last = runs[0];
-        setLastBackfill({
-          status: last.status,
-          date: new Date(last.startedAt).toLocaleString('pt-BR'),
-          count: last.linkedRecords + last.createdEvents,
-        });
-      }
-    }).catch(() => {});
+    crmApi
+      .backfillRuns()
+      .then(runs => {
+        if (runs.length > 0) {
+          const last = runs[0];
+          setLastBackfill({
+            status: last.status,
+            date: new Date(last.startedAt).toLocaleString('pt-BR'),
+            count: last.linkedRecords + last.createdEvents,
+          });
+        }
+      })
+      .catch(() => {});
   }, [section, canAnalytics, listRefreshSignal]);
 
   // Invalidate section if no permission
   useEffect(() => {
     if (section === 'analises' && !canAnalytics) setSection('clientes');
-    if (section === 'organizar' && (!canAnalytics || (!canCampaigns && user?.role !== 'OWNER'))) setSection('clientes');
+    if (section === 'organizar' && (!canAnalytics || (!canCampaigns && user?.role !== 'OWNER')))
+      setSection('clientes');
   }, [section, canAnalytics, canCampaigns, user?.role, setSection]);
 
-  const showTabs = canAnalytics || (!canAnalytics && false);
   const visibleSections = SECTION_META.filter(s => {
     if (s.requiresAnalytics && !canAnalytics) return false;
-    if (s.requiresTools && (!canCampaigns && user?.role !== 'OWNER')) return false;
+    if (s.requiresTools && !canCampaigns && user?.role !== 'OWNER') return false;
     return true;
   });
 
@@ -119,7 +162,9 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
               <Sparkles size={18} />
             </div>
             <div>
-              <p className="text-sm font-bold text-text-primary">Inteligência de clientes no plano Pro</p>
+              <p className="text-sm font-bold text-text-primary">
+                Inteligência de clientes no plano Pro
+              </p>
               <p className="text-xs text-text-secondary">
                 {METRIC_LABEL.LTV}, segmentos, previsão de receita e campanhas WhatsApp.
               </p>
@@ -135,103 +180,105 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
       )}
 
       {visibleSections.length > 1 && (
-        <nav
-          aria-label="Áreas do CRM"
-          className="flex gap-1 rounded-xl border border-border bg-surface p-1 shadow-card"
-        >
-          {visibleSections.map(s => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => setSection(s.id)}
-              aria-current={section === s.id ? 'page' : undefined}
-              className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-1.5 text-xs font-bold transition-colors sm:px-3 ${
-                section === s.id
-                  ? 'bg-accent text-accent-fg'
-                  : 'text-text-secondary hover:bg-bg hover:text-text-primary'
-              }`}
-            >
-              <span className="shrink-0 inline-flex">{s.icon}</span>
-              <span className="sm:hidden">{s.shortLabel ?? s.label}</span>
-              <span className="hidden sm:inline">{s.label}</span>
-            </button>
-          ))}
-        </nav>
+        <Tabs
+          ariaLabel="Áreas do CRM"
+          idPrefix="clients"
+          items={visibleSections.map(({ id, label }) => ({ id, label }))}
+          value={section}
+          onChange={setSection}
+        />
       )}
 
       {operationMessage && (
-        <p role="status" className="rounded-lg bg-success/10 p-3 text-sm text-success">{operationMessage}</p>
+        <p role="status" className="rounded-lg bg-success/10 p-3 text-sm text-success">
+          {operationMessage}
+        </p>
       )}
 
-      {section === 'clientes' || !canAnalytics ? (
-        <ClientsManager
-          selectedId={selectedClientId}
-          onSelectClient={setSelectedClientId}
-          refreshSignal={listRefreshSignal}
-        />
-      ) : section === 'analises' ? (
-        <CrmIntelligencePanel
-          canAnalytics={canAnalytics}
-          canCampaigns={canCampaigns}
-          period={period}
-          onPeriodChange={setPeriod}
-          onOpenClient={setSelectedClientId}
-          onNotify={onNotify}
-        />
-      ) : (
-        /* Organizar cadastros */
-        <div className="space-y-4">
-          <p className="text-xs text-text-secondary">
-            Ferramentas para manter a base de clientes limpa e atualizada.
-          </p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {canCampaigns && (
-              <button
-                type="button"
-                onClick={() => setToolsModal('merge')}
-                className="flex flex-col items-start gap-2 rounded-xl border border-border bg-surface p-4 text-left transition hover:border-accent/40"
-              >
-                <div className="flex items-center gap-2">
-                  <Link2 size={16} className="text-accent" />
-                  <span className="text-sm font-bold text-text-primary">Unir clientes duplicados</span>
-                </div>
-                <p className="text-xs leading-relaxed text-text-secondary">
-                  Junte cadastros da mesma pessoa e mantenha seu histórico em um só lugar.
-                </p>
-                <span className="mt-auto text-xs font-bold text-accent">Revisar cadastros</span>
-              </button>
-            )}
-            {user?.role === 'OWNER' && (
-              <button
-                type="button"
-                onClick={() => setToolsModal('backfill')}
-                className="flex flex-col items-start gap-2 rounded-xl border border-border bg-surface p-4 text-left transition hover:border-accent/40"
-              >
-                <div className="flex items-center gap-2">
-                  <RefreshCw size={16} className="text-accent" />
-                  <span className="text-sm font-bold text-text-primary">Atualizar histórico dos clientes</span>
-                </div>
-                <p className="text-xs leading-relaxed text-text-secondary">
-                  Recalcule os vínculos e indicadores a partir dos registros existentes do salão.
-                </p>
-                <span className="mt-auto text-xs font-bold text-accent">Ver atualização do histórico</span>
-              </button>
+      <div
+        role={visibleSections.length > 1 ? 'tabpanel' : undefined}
+        id={`clients-tabpanel-${section}`}
+        aria-labelledby={visibleSections.length > 1 ? `clients-tab-${section}` : undefined}
+      >
+        {section === 'clientes' || !canAnalytics ? (
+          <ClientsManager
+            selectedId={selectedClientId}
+            onSelectClient={setSelectedClientId}
+            refreshSignal={listRefreshSignal}
+          />
+        ) : section === 'analises' ? (
+          <CrmIntelligencePanel
+            canAnalytics={canAnalytics}
+            canCampaigns={canCampaigns}
+            period={period}
+            onPeriodChange={setPeriod}
+            onOpenClient={setSelectedClientId}
+            onNotify={onNotify}
+          />
+        ) : (
+          /* Organizar cadastros */
+          <div className="space-y-4">
+            <p className="text-xs text-text-secondary">
+              Ferramentas para manter a base de clientes limpa e atualizada.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {canCampaigns && (
+                <button
+                  type="button"
+                  onClick={() => setToolsModal('merge')}
+                  className="flex flex-col items-start gap-2 rounded-xl border border-border bg-surface p-4 text-left transition hover:border-accent/40"
+                >
+                  <div className="flex items-center gap-2">
+                    <Link2 size={16} className="text-accent" />
+                    <span className="text-sm font-bold text-text-primary">
+                      Unir clientes duplicados
+                    </span>
+                  </div>
+                  <p className="text-xs leading-relaxed text-text-secondary">
+                    Junte cadastros da mesma pessoa e mantenha seu histórico em um só lugar.
+                  </p>
+                  <span className="mt-auto text-xs font-bold text-accent">Revisar cadastros</span>
+                </button>
+              )}
+              {user?.role === 'OWNER' && (
+                <button
+                  type="button"
+                  onClick={() => setToolsModal('backfill')}
+                  className="flex flex-col items-start gap-2 rounded-xl border border-border bg-surface p-4 text-left transition hover:border-accent/40"
+                >
+                  <div className="flex items-center gap-2">
+                    <RefreshCw size={16} className="text-accent" />
+                    <span className="text-sm font-bold text-text-primary">
+                      Atualizar histórico dos clientes
+                    </span>
+                  </div>
+                  <p className="text-xs leading-relaxed text-text-secondary">
+                    Recalcule os vínculos e indicadores a partir dos registros existentes do salão.
+                  </p>
+                  <span className="mt-auto text-xs font-bold text-accent">
+                    Ver atualização do histórico
+                  </span>
+                </button>
+              )}
+            </div>
+            {lastBackfill && (
+              <p className="text-xs text-text-muted">
+                Último reprocessamento: {lastBackfill.date} — {lastBackfill.count} registros
+                {lastBackfill.status === 'SUCCEEDED'
+                  ? ' atualizados com sucesso.'
+                  : lastBackfill.status === 'FAILED'
+                    ? ' com falha.'
+                    : ' em andamento.'}
+              </p>
             )}
           </div>
-          {lastBackfill && (
-            <p className="text-xs text-text-muted">
-              Último reprocessamento: {lastBackfill.date} — {lastBackfill.count} registros
-              {lastBackfill.status === 'SUCCEEDED' ? ' atualizados com sucesso.' :
-               lastBackfill.status === 'FAILED' ? ' com falha.' : ' em andamento.'}
-            </p>
-          )}
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Tools modals */}
       {toolsModal === 'merge' && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 sm:items-center sm:p-4">
-          <div className="w-full max-w-lg">
+          <div className="max-h-[calc(100dvh-1rem)] w-full max-w-lg overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]">
             <CrmMergePanel
               onMerged={id => {
                 setSelectedClientId(id);
@@ -246,7 +293,7 @@ export const ClientsTab: React.FC<ClientsTabProps> = ({
       )}
       {toolsModal === 'backfill' && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 sm:items-center sm:p-4">
-          <div className="w-full max-w-lg">
+          <div className="max-h-[calc(100dvh-1rem)] w-full max-w-lg overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]">
             <CrmBackfillPanel
               onUpdated={() => {
                 setListRefreshSignal(v => v + 1);

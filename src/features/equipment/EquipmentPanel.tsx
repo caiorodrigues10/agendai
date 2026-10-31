@@ -1,24 +1,28 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  LuLoaderCircle as Loader2,
-  LuPlus as Plus,
-  LuTrash2 as Trash2,
-  LuPencilLine as Edit3,
-  LuPackage as Package,
   LuCircleArrowDown as ArrowDownCircle,
   LuCircleArrowUp as ArrowUpCircle,
-  LuTriangleAlert as AlertTriangle,
-  LuWrench as Wrench,
+  LuPencilLine as Edit3,
+  LuLoaderCircle as Loader2,
+  LuPackage as Package,
+  LuPlus as Plus,
   LuSearch as SearchIcon,
+  LuTrash2 as Trash2,
+  LuWrench as Wrench,
 } from 'react-icons/lu';
-import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
-import { equipmentApi, Equipment, EquipmentMovement, EquipmentNeed } from '../../infra/equipmentApi';
-import { getErrorMessage } from '../../utils/errorMessage';
-import { Field, FIELD_CONTROL, FORM_FOOTER, FORM_GRID } from '../../components/ui/Field';
+import { ModalShell, SectionError, Tabs } from '../../components/patterns';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { Field, FIELD_CONTROL, FORM_FOOTER, FORM_GRID } from '../../components/ui/Field';
 import { SmartSelect } from '../../components/ui/SmartSelect';
-import { SectionError } from '../../components/patterns';
+import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
+import {
+  Equipment,
+  equipmentApi,
+  EquipmentMovement,
+  EquipmentNeed,
+} from '../../infra/equipmentApi';
+import { getErrorMessage } from '../../utils/errorMessage';
 
 type HubTab = 'estoque' | 'movimentacoes' | 'necessidades';
 
@@ -173,7 +177,9 @@ export const EquipmentPanel: React.FC = () => {
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [movements, setMovements] = useState<EquipmentMovement[]>([]);
   const [needs, setNeeds] = useState<EquipmentNeed[]>([]);
-  const [dashboard, setDashboard] = useState<Awaited<ReturnType<typeof equipmentApi.dashboard>> | null>(null);
+  const [dashboard, setDashboard] = useState<Awaited<
+    ReturnType<typeof equipmentApi.dashboard>
+  > | null>(null);
 
   // Equipment modal
   const [equipModalOpen, setEquipModalOpen] = useState(false);
@@ -199,11 +205,29 @@ export const EquipmentPanel: React.FC = () => {
   // Search
   const [search, setSearch] = useState('');
 
-  const categoryOptions = Object.entries(CATEGORY_LABELS).map(([value, label]) => ({ value, label }));
-  const conditionOptions = Object.entries(CONDITION_LABELS).map(([value, label]) => ({ value, label }));
-  const movementTypeOptions = Object.entries(MOVEMENT_TYPE_LABELS).map(([value, label]) => ({ value, label }));
-  const priorityOptions = Object.entries(PRIORITY_LABELS).map(([value, label]) => ({ value, label }));
-  const equipSelectOptions = equipment.filter(e => e.isActive).map(e => ({ value: e.id, label: e.name, description: CATEGORY_LABELS[e.category] ?? e.category }));
+  const categoryOptions = Object.entries(CATEGORY_LABELS).map(([value, label]) => ({
+    value,
+    label,
+  }));
+  const conditionOptions = Object.entries(CONDITION_LABELS).map(([value, label]) => ({
+    value,
+    label,
+  }));
+  const movementTypeOptions = Object.entries(MOVEMENT_TYPE_LABELS).map(([value, label]) => ({
+    value,
+    label,
+  }));
+  const priorityOptions = Object.entries(PRIORITY_LABELS).map(([value, label]) => ({
+    value,
+    label,
+  }));
+  const equipSelectOptions = equipment
+    .filter(e => e.isActive)
+    .map(e => ({
+      value: e.id,
+      label: e.name,
+      description: CATEGORY_LABELS[e.category] ?? e.category,
+    }));
 
   // ─── Loaders ──────────────────────────────────────────────
 
@@ -251,10 +275,18 @@ export const EquipmentPanel: React.FC = () => {
     }
   }, [barbershopId]);
 
-  useEffect(() => { loadEquipment(); }, [loadEquipment]);
-  useEffect(() => { if (tab === 'movimentacoes') loadMovements(); }, [tab, loadMovements]);
-  useEffect(() => { if (tab === 'necessidades') loadNeeds(); }, [tab, loadNeeds]);
-  useEffect(() => { loadDashboard(); }, [loadDashboard]);
+  useEffect(() => {
+    loadEquipment();
+  }, [loadEquipment]);
+  useEffect(() => {
+    if (tab === 'movimentacoes') loadMovements();
+  }, [tab, loadMovements]);
+  useEffect(() => {
+    if (tab === 'necessidades') loadNeeds();
+  }, [tab, loadNeeds]);
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
 
   // ─── Equipment handlers ──────────────────────────────────
 
@@ -439,13 +471,17 @@ export const EquipmentPanel: React.FC = () => {
               <p className="text-xs text-text-muted">Ativos</p>
             </div>
             <div className="rounded-xl border border-border bg-bg p-3 text-center">
-              <p className={`text-2xl font-bold ${dashboard.lowStockCount > 0 ? 'text-warning' : 'text-text-muted'}`}>
+              <p
+                className={`text-2xl font-bold ${dashboard.lowStockCount > 0 ? 'text-warning' : 'text-text-muted'}`}
+              >
                 {dashboard.lowStockCount}
               </p>
               <p className="text-xs text-text-muted">Estoque baixo</p>
             </div>
             <div className="rounded-xl border border-border bg-bg p-3 text-center">
-              <p className={`text-2xl font-bold ${dashboard.pendingNeeds > 0 ? 'text-accent' : 'text-text-muted'}`}>
+              <p
+                className={`text-2xl font-bold ${dashboard.pendingNeeds > 0 ? 'text-accent' : 'text-text-muted'}`}
+              >
                 {dashboard.pendingNeeds}
               </p>
               <p className="text-xs text-text-muted">Necessidades</p>
@@ -456,380 +492,592 @@ export const EquipmentPanel: React.FC = () => {
 
       {error && <SectionError message={error} onRetry={loadEquipment} />}
 
-      {/* Tab selector */}
-      <div className="rounded-2xl border border-border bg-surface p-2 shadow-[0_18px_44px_-32px_rgba(0,0,0,0.7)]">
-        <div className="grid grid-cols-3 gap-2">
-          {([
-            ['estoque', 'Estoque', <Package size={24} className="h-4 w-4" />],
-            ['movimentacoes', 'Movimentacoes', <ArrowUpCircle size={24} className="h-4 w-4" />],
-            ['necessidades', 'Necessidades', <AlertTriangle size={24} className="h-4 w-4" />],
-          ] as const).map(([id, label, icon]) => (
-            <button
-              key={id}
-              onClick={() => setTab(id)}
-              className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-sm font-bold transition-colors ${
-                tab === id
-                  ? 'bg-accent text-accent-fg shadow-md shadow-accent/15'
-                  : 'text-text-secondary hover:bg-surface-2 hover:text-text-primary'
-              }`}
-            >
-              {icon}
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ═══ Tab: Estoque ═══════════════════════════════════ */}
-      {tab === 'estoque' && (
-        <div className="space-y-3">
-          {/* Search bar */}
-          <div className="relative">
-            <SearchIcon size={24} className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar equipamento..."
-              className="w-full rounded-xl border border-border bg-surface py-3 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-focus"
-            />
-          </div>
-
-          {filteredEquipment.length === 0 ? (
-            <EmptyState
-              title="Nenhum equipamento cadastrado"
-              description="Cadastre equipamentos para controlar estoque e movimentacoes."
-            />
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredEquipment.map((equip) => (
-                <div
-                  key={equip.id}
-                  className="rounded-xl border border-border bg-surface p-4 shadow-[0_16px_36px_-30px_rgba(0,0,0,0.75)] transition-colors hover:border-accent/40"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="min-w-0">
-                      <h3 className="truncate text-sm font-bold text-text-primary">{equip.name}</h3>
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        <span className="inline-flex rounded-full border border-border bg-bg px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-text-secondary">
-                          {CATEGORY_LABELS[equip.category] ?? equip.category}
-                        </span>
-                        <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${CONDITION_STYLES[equip.condition] ?? ''}`}>
-                          {CONDITION_LABELS[equip.condition] ?? equip.condition}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => openEditEquip(equip)}
-                        className="rounded-lg p-2 text-text-muted hover:bg-surface-2 hover:text-text-primary"
-                        title="Editar"
-                      >
-                        <Edit3 size={24} className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => setDeleteTarget(equip)}
-                        className="rounded p-1 text-danger hover:bg-danger/10"
-                        title="Remover"
-                      >
-                        <Trash2 size={24} className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 flex items-center gap-2 text-sm">
-                    <span className={`font-bold ${equip.quantityAvailable <= equip.minQuantity && equip.minQuantity > 0 ? 'text-warning' : 'text-text-primary'}`}>
-                      {equip.quantityAvailable}
-                    </span>
-                    <span className="text-text-muted">de</span>
-                    <span className="font-medium text-text-primary">{equip.quantityTotal}</span>
-                    <span className="text-text-muted">em estoque</span>
-                  </div>
-
-                  {equip.brand && (
-                    <p className="mt-1 text-xs text-text-muted">
-                      {equip.brand}{equip.model ? ` ${equip.model}` : ''}
-                    </p>
-                  )}
-                  {equip.serialNumber && (
-                    <p className="mt-0.5 font-mono text-xs text-text-muted">SN: {equip.serialNumber}</p>
-                  )}
-                </div>
-              ))}
+      <Tabs<'estoque' | 'movimentacoes' | 'necessidades'>
+        ariaLabel="Áreas de estoque"
+        value={tab}
+        onChange={setTab}
+        items={[
+          { id: 'estoque', label: 'Estoque' },
+          { id: 'movimentacoes', label: 'Movimentações' },
+          { id: 'necessidades', label: 'Necessidades' },
+        ]}
+      >
+        {/* ═══ Tab: Estoque ═══════════════════════════════════ */}
+        {tab === 'estoque' && (
+          <div className="space-y-3">
+            {/* Search bar */}
+            <div className="relative">
+              <SearchIcon
+                size={24}
+                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted"
+              />
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                aria-label="Buscar equipamento"
+                placeholder="Buscar equipamento..."
+                className="w-full rounded-xl border border-border bg-surface py-3 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-focus"
+              />
             </div>
-          )}
-        </div>
-      )}
 
-      {/* ═══ Tab: Movimentacoes ═════════════════════════════ */}
-      {tab === 'movimentacoes' && (
-        <div className="space-y-3">
-          <div className="flex justify-end">
-            <button
-              onClick={() => { setMovForm(INITIAL_MOVEMENT_FORM); setMovSubmitError(null); setMovModalOpen(true); }}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-accent-fg shadow-lg shadow-accent/15 transition hover:bg-accent-hover"
-            >
-              <Plus size={24} className="h-4 w-4" />
-              Nova movimentacao
-            </button>
-          </div>
-
-          {movements.length === 0 ? (
-            <EmptyState
-              title="Nenhuma movimentacao registrada"
-              description="Registre entradas, saidas e manutencoes de equipamentos."
-            />
-          ) : (
-            <div className="space-y-2">
-              {movements.map((mov) => (
-                <div
-                  key={mov.id}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3"
-                >
-                  <div className="shrink-0">
-                    {MOVEMENT_TYPE_ICONS[mov.type] ?? <Package size={24} className="h-4 w-4 text-text-muted" />}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-text-primary">{mov.equipment?.name ?? 'Equipamento'}</span>
-                      <span className="text-xs text-text-muted">{MOVEMENT_TYPE_LABELS[mov.type] ?? mov.type}</span>
-                    </div>
-                    <div className="text-sm text-text-secondary">
-                      Qtd: {mov.quantity}
-                      {mov.reason && <span className="ml-2 text-text-muted">- {mov.reason}</span>}
-                    </div>
-                    {mov.staff && (
-                      <p className="text-xs text-text-muted">por {mov.staff.name}</p>
-                    )}
-                  </div>
-                  <span className="shrink-0 text-xs text-text-muted">
-                    {new Date(mov.createdAt).toLocaleDateString('pt-BR')}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ═══ Tab: Necessidades ══════════════════════════════ */}
-      {tab === 'necessidades' && (
-        <div className="space-y-3">
-          <div className="flex justify-end">
-            <button
-              onClick={() => { setNeedForm(INITIAL_NEED_FORM); setNeedSubmitError(null); setNeedModalOpen(true); }}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-accent-fg shadow-lg shadow-accent/15 transition hover:bg-accent-hover"
-            >
-              <Plus size={24} className="h-4 w-4" />
-              Nova necessidade
-            </button>
-          </div>
-
-          {needs.length === 0 ? (
-            <EmptyState
-              title="Nenhuma necessidade registrada"
-              description="Registre necessidades de compra de equipamentos."
-            />
-          ) : (
-            <div className="space-y-2">
-              {needs.map((need) => (
-                <div
-                  key={need.id}
-                  className="rounded-xl border border-border bg-surface p-4"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-text-primary">{need.name}</span>
-                        <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold ${PRIORITY_STYLES[need.priority] ?? ''}`}>
-                          {PRIORITY_LABELS[need.priority] ?? need.priority}
-                        </span>
-                        <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold ${STATUS_STYLES[need.status] ?? ''}`}>
-                          {STATUS_LABELS[need.status] ?? need.status}
-                        </span>
+            {filteredEquipment.length === 0 ? (
+              <EmptyState
+                title="Nenhum equipamento cadastrado"
+                description="Cadastre equipamentos para controlar estoque e movimentacoes."
+              />
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredEquipment.map(equip => (
+                  <div
+                    key={equip.id}
+                    className="rounded-xl border border-border bg-surface p-4 shadow-[0_16px_36px_-30px_rgba(0,0,0,0.75)] transition-colors hover:border-accent/40"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="min-w-0">
+                        <h3 className="truncate text-sm font-bold text-text-primary">
+                          {equip.name}
+                        </h3>
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          <span className="inline-flex rounded-full border border-border bg-bg px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-text-secondary">
+                            {CATEGORY_LABELS[equip.category] ?? equip.category}
+                          </span>
+                          <span
+                            className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${CONDITION_STYLES[equip.condition] ?? ''}`}
+                          >
+                            {CONDITION_LABELS[equip.condition] ?? equip.condition}
+                          </span>
+                        </div>
                       </div>
-                      <div className="mt-1 text-sm text-text-secondary">
-                        Qtd: {need.quantityNeeded}
-                        {need.estimatedCost && (
-                          <span className="ml-2">R$ {Number(need.estimatedCost).toFixed(2)}</span>
-                        )}
-                      </div>
-                      {need.reason && (
-                        <p className="mt-1 text-xs text-text-muted">{need.reason}</p>
-                      )}
-                      {need.requester && (
-                        <p className="mt-0.5 text-xs text-text-muted">Solicitado por {need.requester.name}</p>
-                      )}
-                    </div>
-                    {need.status === 'REQUESTED' && (
                       <div className="flex gap-1">
                         <button
-                          onClick={() => handleUpdateNeedStatus(need.id, 'approved')}
-                          className="rounded-lg px-2 py-1 text-xs font-bold text-success hover:bg-success/10"
+                          onClick={() => openEditEquip(equip)}
+                          className="rounded-lg p-2 text-text-muted hover:bg-surface-2 hover:text-text-primary"
+                          title="Editar"
                         >
-                          Aprovar
+                          <Edit3 size={24} className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleUpdateNeedStatus(need.id, 'rejected')}
-                          className="rounded-lg px-2 py-1 text-xs font-bold text-danger hover:bg-danger/10"
+                          onClick={() => setDeleteTarget(equip)}
+                          className="rounded p-1 text-danger hover:bg-danger/10"
+                          title="Remover"
                         >
-                          Rejeitar
+                          <Trash2 size={24} className="h-4 w-4" />
                         </button>
                       </div>
-                    )}
-                    {need.status === 'APPROVED' && (
-                      <button
-                        onClick={() => handleUpdateNeedStatus(need.id, 'received')}
-                        className="rounded-lg px-2 py-1 text-xs font-bold text-accent hover:bg-accent/10"
+                    </div>
+
+                    <div className="mt-3 flex items-center gap-2 text-sm">
+                      <span
+                        className={`font-bold ${equip.quantityAvailable <= equip.minQuantity && equip.minQuantity > 0 ? 'text-warning' : 'text-text-primary'}`}
                       >
-                        Recebido
-                      </button>
+                        {equip.quantityAvailable}
+                      </span>
+                      <span className="text-text-muted">de</span>
+                      <span className="font-medium text-text-primary">{equip.quantityTotal}</span>
+                      <span className="text-text-muted">em estoque</span>
+                    </div>
+
+                    {equip.brand && (
+                      <p className="mt-1 text-xs text-text-muted">
+                        {equip.brand}
+                        {equip.model ? ` ${equip.model}` : ''}
+                      </p>
+                    )}
+                    {equip.serialNumber && (
+                      <p className="mt-0.5 font-mono text-xs text-text-muted">
+                        SN: {equip.serialNumber}
+                      </p>
                     )}
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ═══ Tab: Movimentacoes ═════════════════════════════ */}
+        {tab === 'movimentacoes' && (
+          <div className="space-y-3">
+            <div className="flex justify-end">
+              <button
+                onClick={() => {
+                  setMovForm(INITIAL_MOVEMENT_FORM);
+                  setMovSubmitError(null);
+                  setMovModalOpen(true);
+                }}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-accent-fg shadow-lg shadow-accent/15 transition hover:bg-accent-hover"
+              >
+                <Plus size={24} className="h-4 w-4" />
+                Nova movimentacao
+              </button>
             </div>
-          )}
-        </div>
-      )}
+
+            {movements.length === 0 ? (
+              <EmptyState
+                title="Nenhuma movimentacao registrada"
+                description="Registre entradas, saidas e manutencoes de equipamentos."
+              />
+            ) : (
+              <div className="space-y-2">
+                {movements.map(mov => (
+                  <div
+                    key={mov.id}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3"
+                  >
+                    <div className="shrink-0">
+                      {MOVEMENT_TYPE_ICONS[mov.type] ?? (
+                        <Package size={24} className="h-4 w-4 text-text-muted" />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-text-primary">
+                          {mov.equipment?.name ?? 'Equipamento'}
+                        </span>
+                        <span className="text-xs text-text-muted">
+                          {MOVEMENT_TYPE_LABELS[mov.type] ?? mov.type}
+                        </span>
+                      </div>
+                      <div className="text-sm text-text-secondary">
+                        Qtd: {mov.quantity}
+                        {mov.reason && <span className="ml-2 text-text-muted">- {mov.reason}</span>}
+                      </div>
+                      {mov.staff && <p className="text-xs text-text-muted">por {mov.staff.name}</p>}
+                    </div>
+                    <span className="shrink-0 text-xs text-text-muted">
+                      {new Date(mov.createdAt).toLocaleDateString('pt-BR')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ═══ Tab: Necessidades ══════════════════════════════ */}
+        {tab === 'necessidades' && (
+          <div className="space-y-3">
+            <div className="flex justify-end">
+              <button
+                onClick={() => {
+                  setNeedForm(INITIAL_NEED_FORM);
+                  setNeedSubmitError(null);
+                  setNeedModalOpen(true);
+                }}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-bold text-accent-fg shadow-lg shadow-accent/15 transition hover:bg-accent-hover"
+              >
+                <Plus size={24} className="h-4 w-4" />
+                Nova necessidade
+              </button>
+            </div>
+
+            {needs.length === 0 ? (
+              <EmptyState
+                title="Nenhuma necessidade registrada"
+                description="Registre necessidades de compra de equipamentos."
+              />
+            ) : (
+              <div className="space-y-2">
+                {needs.map(need => (
+                  <div key={need.id} className="rounded-xl border border-border bg-surface p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-text-primary">{need.name}</span>
+                          <span
+                            className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold ${PRIORITY_STYLES[need.priority] ?? ''}`}
+                          >
+                            {PRIORITY_LABELS[need.priority] ?? need.priority}
+                          </span>
+                          <span
+                            className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold ${STATUS_STYLES[need.status] ?? ''}`}
+                          >
+                            {STATUS_LABELS[need.status] ?? need.status}
+                          </span>
+                        </div>
+                        <div className="mt-1 text-sm text-text-secondary">
+                          Qtd: {need.quantityNeeded}
+                          {need.estimatedCost && (
+                            <span className="ml-2">R$ {Number(need.estimatedCost).toFixed(2)}</span>
+                          )}
+                        </div>
+                        {need.reason && (
+                          <p className="mt-1 text-xs text-text-muted">{need.reason}</p>
+                        )}
+                        {need.requester && (
+                          <p className="mt-0.5 text-xs text-text-muted">
+                            Solicitado por {need.requester.name}
+                          </p>
+                        )}
+                      </div>
+                      {need.status === 'REQUESTED' && (
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => handleUpdateNeedStatus(need.id, 'approved')}
+                            className="rounded-lg px-2 py-1 text-xs font-bold text-success hover:bg-success/10"
+                          >
+                            Aprovar
+                          </button>
+                          <button
+                            onClick={() => handleUpdateNeedStatus(need.id, 'rejected')}
+                            className="rounded-lg px-2 py-1 text-xs font-bold text-danger hover:bg-danger/10"
+                          >
+                            Rejeitar
+                          </button>
+                        </div>
+                      )}
+                      {need.status === 'APPROVED' && (
+                        <button
+                          onClick={() => handleUpdateNeedStatus(need.id, 'received')}
+                          className="rounded-lg px-2 py-1 text-xs font-bold text-accent hover:bg-accent/10"
+                        >
+                          Recebido
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </Tabs>
 
       {/* ═══ Modals ═════════════════════════════════════════ */}
 
       {/* Equipment create/edit modal */}
       {equipModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-surface p-6 shadow-2xl">
-            <h3 className="mb-4 text-lg font-semibold text-text-primary">
-              {editingEquip ? 'Editar equipamento' : 'Novo equipamento'}
-            </h3>
+        <ModalShell
+          open
+          titleId="equipment-equipModalOpen-title"
+          title={editingEquip ? 'Editar equipamento' : 'Novo equipamento'}
+          loading={equipSubmitting}
+          onClose={() => setEquipModalOpen(false)}
+          className="max-w-lg"
+          body={
             <form onSubmit={handleEquipSubmit} className="space-y-3">
-                {equipSubmitError && <SectionError message={equipSubmitError} />}
+              {equipSubmitError && <SectionError message={equipSubmitError} />}
               <Field label="Nome">
-                <input type="text" value={equipForm.name} onChange={(e) => setEquipForm(p => ({ ...p, name: e.target.value }))} className={FIELD_CONTROL} required maxLength={150} />
+                <input
+                  type="text"
+                  value={equipForm.name}
+                  onChange={e => setEquipForm(p => ({ ...p, name: e.target.value }))}
+                  className={FIELD_CONTROL}
+                  required
+                  maxLength={150}
+                />
               </Field>
               <div className={FORM_GRID}>
                 <Field label="Categoria">
-                  <SmartSelect value={equipForm.category} onChange={(v) => setEquipForm(p => ({ ...p, category: v ?? 'OTHER' }))} options={categoryOptions} placeholder="Buscar" searchable clearable={false} />
+                  <SmartSelect
+                    value={equipForm.category}
+                    onChange={v => setEquipForm(p => ({ ...p, category: v ?? 'OTHER' }))}
+                    options={categoryOptions}
+                    placeholder="Buscar"
+                    searchable
+                    clearable={false}
+                  />
                 </Field>
                 <Field label="Condicao">
-                  <SmartSelect value={equipForm.condition} onChange={(v) => setEquipForm(p => ({ ...p, condition: v ?? 'NEW' }))} options={conditionOptions} placeholder="Buscar" searchable clearable={false} />
+                  <SmartSelect
+                    value={equipForm.condition}
+                    onChange={v => setEquipForm(p => ({ ...p, condition: v ?? 'NEW' }))}
+                    options={conditionOptions}
+                    placeholder="Buscar"
+                    searchable
+                    clearable={false}
+                  />
                 </Field>
               </div>
               <div className={FORM_GRID}>
                 <Field label="Marca">
-                  <input type="text" value={equipForm.brand} onChange={(e) => setEquipForm(p => ({ ...p, brand: e.target.value }))} className={FIELD_CONTROL} maxLength={100} />
+                  <input
+                    type="text"
+                    value={equipForm.brand}
+                    onChange={e => setEquipForm(p => ({ ...p, brand: e.target.value }))}
+                    className={FIELD_CONTROL}
+                    maxLength={100}
+                  />
                 </Field>
                 <Field label="Modelo">
-                  <input type="text" value={equipForm.model} onChange={(e) => setEquipForm(p => ({ ...p, model: e.target.value }))} className={FIELD_CONTROL} maxLength={100} />
+                  <input
+                    type="text"
+                    value={equipForm.model}
+                    onChange={e => setEquipForm(p => ({ ...p, model: e.target.value }))}
+                    className={FIELD_CONTROL}
+                    maxLength={100}
+                  />
                 </Field>
               </div>
               <Field label="Numero de serie">
-                <input type="text" value={equipForm.serialNumber} onChange={(e) => setEquipForm(p => ({ ...p, serialNumber: e.target.value }))} className={FIELD_CONTROL} maxLength={100} />
+                <input
+                  type="text"
+                  value={equipForm.serialNumber}
+                  onChange={e => setEquipForm(p => ({ ...p, serialNumber: e.target.value }))}
+                  className={FIELD_CONTROL}
+                  maxLength={100}
+                />
               </Field>
               <div className={FORM_GRID}>
                 <Field label="Qtd total">
-                  <input type="number" value={equipForm.quantityTotal} onChange={(e) => setEquipForm(p => ({ ...p, quantityTotal: Number(e.target.value) }))} className={FIELD_CONTROL} min={0} />
+                  <input
+                    type="number"
+                    value={equipForm.quantityTotal}
+                    onChange={e =>
+                      setEquipForm(p => ({ ...p, quantityTotal: Number(e.target.value) }))
+                    }
+                    className={FIELD_CONTROL}
+                    min={0}
+                  />
                 </Field>
                 <Field label="Qtd disponivel">
-                  <input type="number" value={equipForm.quantityAvailable} onChange={(e) => setEquipForm(p => ({ ...p, quantityAvailable: Number(e.target.value) }))} className={FIELD_CONTROL} min={0} />
+                  <input
+                    type="number"
+                    value={equipForm.quantityAvailable}
+                    onChange={e =>
+                      setEquipForm(p => ({ ...p, quantityAvailable: Number(e.target.value) }))
+                    }
+                    className={FIELD_CONTROL}
+                    min={0}
+                  />
                 </Field>
               </div>
               <div className={FORM_GRID}>
                 <Field label="Estoque minimo">
-                  <input type="number" value={equipForm.minQuantity} onChange={(e) => setEquipForm(p => ({ ...p, minQuantity: Number(e.target.value) }))} className={FIELD_CONTROL} min={0} />
+                  <input
+                    type="number"
+                    value={equipForm.minQuantity}
+                    onChange={e =>
+                      setEquipForm(p => ({ ...p, minQuantity: Number(e.target.value) }))
+                    }
+                    className={FIELD_CONTROL}
+                    min={0}
+                  />
                 </Field>
                 <Field label="Custo unitario (R$)">
-                  <input type="number" value={equipForm.unitCost} onChange={(e) => setEquipForm(p => ({ ...p, unitCost: e.target.value }))} className={FIELD_CONTROL} min={0} step="0.01" />
+                  <input
+                    type="number"
+                    value={equipForm.unitCost}
+                    onChange={e => setEquipForm(p => ({ ...p, unitCost: e.target.value }))}
+                    className={FIELD_CONTROL}
+                    min={0}
+                    step="0.01"
+                  />
                 </Field>
               </div>
               <Field label="Fornecedor">
-                <input type="text" value={equipForm.supplier} onChange={(e) => setEquipForm(p => ({ ...p, supplier: e.target.value }))} className={FIELD_CONTROL} maxLength={150} />
+                <input
+                  type="text"
+                  value={equipForm.supplier}
+                  onChange={e => setEquipForm(p => ({ ...p, supplier: e.target.value }))}
+                  className={FIELD_CONTROL}
+                  maxLength={150}
+                />
               </Field>
               <Field label="Observacoes">
-                <textarea value={equipForm.notes} onChange={(e) => setEquipForm(p => ({ ...p, notes: e.target.value }))} className={FIELD_CONTROL} rows={2} maxLength={500} />
+                <textarea
+                  value={equipForm.notes}
+                  onChange={e => setEquipForm(p => ({ ...p, notes: e.target.value }))}
+                  className={FIELD_CONTROL}
+                  rows={2}
+                  maxLength={500}
+                />
               </Field>
               <div className={FORM_FOOTER}>
-                <button type="button" onClick={() => setEquipModalOpen(false)} className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted">Cancelar</button>
-                <button type="submit" disabled={equipSubmitting} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
+                <button
+                  type="button"
+                  disabled={equipSubmitting}
+                  onClick={() => setEquipModalOpen(false)}
+                  className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-surface-2"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={equipSubmitting}
+                  className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-accent-fg hover:bg-accent-hover disabled:opacity-50"
+                >
                   {equipSubmitting && <Loader2 size={24} className="h-4 w-4 animate-spin" />}
                   {editingEquip ? 'Salvar' : 'Criar'}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          }
+        />
       )}
 
       {/* Movement create modal */}
       {movModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
-            <h3 className="mb-4 text-lg font-semibold text-text-primary">Nova movimentacao</h3>
+        <ModalShell
+          open
+          titleId="equipment-movModalOpen-title"
+          title={'Nova movimentação'}
+          loading={movSubmitting}
+          onClose={() => setMovModalOpen(false)}
+          className="max-w-lg"
+          body={
             <form onSubmit={handleMovSubmit} className="space-y-3">
-                {movSubmitError && <SectionError message={movSubmitError} />}
+              {movSubmitError && <SectionError message={movSubmitError} />}
               <Field label="Equipamento">
-                <SmartSelect value={movForm.equipmentId} onChange={(v) => setMovForm(p => ({ ...p, equipmentId: v ?? '' }))} options={equipSelectOptions} placeholder="Buscar equipamento" searchable required />
+                <SmartSelect
+                  value={movForm.equipmentId}
+                  onChange={v => setMovForm(p => ({ ...p, equipmentId: v ?? '' }))}
+                  options={equipSelectOptions}
+                  placeholder="Buscar equipamento"
+                  searchable
+                  required
+                />
               </Field>
               <div className={FORM_GRID}>
                 <Field label="Tipo">
-                  <SmartSelect value={movForm.type} onChange={(v) => setMovForm(p => ({ ...p, type: v ?? 'IN' }))} options={movementTypeOptions} placeholder="Buscar" searchable clearable={false} />
+                  <SmartSelect
+                    value={movForm.type}
+                    onChange={v => setMovForm(p => ({ ...p, type: v ?? 'IN' }))}
+                    options={movementTypeOptions}
+                    placeholder="Buscar"
+                    searchable
+                    clearable={false}
+                  />
                 </Field>
                 <Field label="Quantidade">
-                  <input type="number" value={movForm.quantity} onChange={(e) => setMovForm(p => ({ ...p, quantity: Number(e.target.value) }))} className={FIELD_CONTROL} min={1} required />
+                  <input
+                    type="number"
+                    value={movForm.quantity}
+                    onChange={e => setMovForm(p => ({ ...p, quantity: Number(e.target.value) }))}
+                    className={FIELD_CONTROL}
+                    min={1}
+                    required
+                  />
                 </Field>
               </div>
               <Field label="Motivo">
-                <textarea value={movForm.reason} onChange={(e) => setMovForm(p => ({ ...p, reason: e.target.value }))} className={FIELD_CONTROL} rows={2} maxLength={300} />
+                <textarea
+                  value={movForm.reason}
+                  onChange={e => setMovForm(p => ({ ...p, reason: e.target.value }))}
+                  className={FIELD_CONTROL}
+                  rows={2}
+                  maxLength={300}
+                />
               </Field>
               <div className={FORM_FOOTER}>
-                <button type="button" onClick={() => setMovModalOpen(false)} className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted">Cancelar</button>
-                <button type="submit" disabled={movSubmitting} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
+                <button
+                  type="button"
+                  disabled={movSubmitting}
+                  onClick={() => setMovModalOpen(false)}
+                  className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-surface-2"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={movSubmitting}
+                  className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-accent-fg hover:bg-accent-hover disabled:opacity-50"
+                >
                   {movSubmitting && <Loader2 size={24} className="h-4 w-4 animate-spin" />}
                   Registrar
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          }
+        />
       )}
 
       {/* Need create modal */}
       {needModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-2xl">
-            <h3 className="mb-4 text-lg font-semibold text-text-primary">Nova necessidade</h3>
+        <ModalShell
+          open
+          titleId="equipment-needModalOpen-title"
+          title={'Nova necessidade'}
+          loading={needSubmitting}
+          onClose={() => setNeedModalOpen(false)}
+          className="max-w-lg"
+          body={
             <form onSubmit={handleNeedSubmit} className="space-y-3">
-                {needSubmitError && <SectionError message={needSubmitError} />}
+              {needSubmitError && <SectionError message={needSubmitError} />}
               <Field label="Nome">
-                <input type="text" value={needForm.name} onChange={(e) => setNeedForm(p => ({ ...p, name: e.target.value }))} className={FIELD_CONTROL} required maxLength={150} />
+                <input
+                  type="text"
+                  value={needForm.name}
+                  onChange={e => setNeedForm(p => ({ ...p, name: e.target.value }))}
+                  className={FIELD_CONTROL}
+                  required
+                  maxLength={150}
+                />
               </Field>
               <Field label="Equipamento associado (opcional)">
-                <SmartSelect value={needForm.equipmentId} onChange={(v) => setNeedForm(p => ({ ...p, equipmentId: v ?? '' }))} options={equipSelectOptions} placeholder="Buscar equipamento" searchable />
+                <SmartSelect
+                  value={needForm.equipmentId}
+                  onChange={v => setNeedForm(p => ({ ...p, equipmentId: v ?? '' }))}
+                  options={equipSelectOptions}
+                  placeholder="Buscar equipamento"
+                  searchable
+                />
               </Field>
               <div className={FORM_GRID}>
                 <Field label="Quantidade">
-                  <input type="number" value={needForm.quantityNeeded} onChange={(e) => setNeedForm(p => ({ ...p, quantityNeeded: Number(e.target.value) }))} className={FIELD_CONTROL} min={1} required />
+                  <input
+                    type="number"
+                    value={needForm.quantityNeeded}
+                    onChange={e =>
+                      setNeedForm(p => ({ ...p, quantityNeeded: Number(e.target.value) }))
+                    }
+                    className={FIELD_CONTROL}
+                    min={1}
+                    required
+                  />
                 </Field>
                 <Field label="Prioridade">
-                  <SmartSelect value={needForm.priority} onChange={(v) => setNeedForm(p => ({ ...p, priority: v ?? 'MEDIUM' }))} options={priorityOptions} placeholder="Buscar" searchable clearable={false} />
+                  <SmartSelect
+                    value={needForm.priority}
+                    onChange={v => setNeedForm(p => ({ ...p, priority: v ?? 'MEDIUM' }))}
+                    options={priorityOptions}
+                    placeholder="Buscar"
+                    searchable
+                    clearable={false}
+                  />
                 </Field>
               </div>
               <Field label="Custo estimado (R$)">
-                <input type="number" value={needForm.estimatedCost} onChange={(e) => setNeedForm(p => ({ ...p, estimatedCost: e.target.value }))} className={FIELD_CONTROL} min={0} step="0.01" />
+                <input
+                  type="number"
+                  value={needForm.estimatedCost}
+                  onChange={e => setNeedForm(p => ({ ...p, estimatedCost: e.target.value }))}
+                  className={FIELD_CONTROL}
+                  min={0}
+                  step="0.01"
+                />
               </Field>
               <Field label="Motivo">
-                <textarea value={needForm.reason} onChange={(e) => setNeedForm(p => ({ ...p, reason: e.target.value }))} className={FIELD_CONTROL} rows={2} maxLength={500} />
+                <textarea
+                  value={needForm.reason}
+                  onChange={e => setNeedForm(p => ({ ...p, reason: e.target.value }))}
+                  className={FIELD_CONTROL}
+                  rows={2}
+                  maxLength={500}
+                />
               </Field>
               <div className={FORM_FOOTER}>
-                <button type="button" onClick={() => setNeedModalOpen(false)} className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted">Cancelar</button>
-                <button type="submit" disabled={needSubmitting} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
+                <button
+                  type="button"
+                  disabled={needSubmitting}
+                  onClick={() => setNeedModalOpen(false)}
+                  className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-surface-2"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={needSubmitting}
+                  className="inline-flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-accent-fg hover:bg-accent-hover disabled:opacity-50"
+                >
                   {needSubmitting && <Loader2 size={24} className="h-4 w-4 animate-spin" />}
                   Criar
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          }
+        />
       )}
 
       {/* Delete confirmation */}

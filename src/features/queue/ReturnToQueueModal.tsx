@@ -51,7 +51,7 @@ export const ReturnToQueueModal: React.FC<ReturnToQueueModalProps> = ({
       onClose={() => {
         if (!submitting) onClose();
       }}
-      className="max-h-[90vh] overflow-y-auto"
+      className="max-h-[90dvh] overflow-y-auto"
       body={
         <>
           {waiting.length > 0 && (

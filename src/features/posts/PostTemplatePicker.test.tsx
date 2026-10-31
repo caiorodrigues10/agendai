@@ -1,0 +1,22 @@
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { afterEach, it, expect, vi } from 'vitest';
+import { PostTemplatePicker } from './PostTemplatePicker';
+import type { PostTemplateDef } from '../../infra/postsApi';
+vi.mock('./TemplateThumbnail', () => ({ TemplateThumbnail: ({ alt }: { alt: string }) => <span>{alt}</span> }));
+afterEach(cleanup);
+it('prioriza o segmento cadastrado e permite comparar dez modelos de cada categoria', () => {
+  const onSelect = vi.fn();
+  const templates: PostTemplateDef[] = (['barbearia', 'salao', 'beleza'] as const).flatMap(businessCategory => Array.from({ length: 10 }, (_, index) => ({ key: `${businessCategory}-${index}`, name: `${businessCategory} ${index}`, description: 'Foto e texto separados', requiredMedia: 0, photoMode: 'optional', group: 'editorial', formats: ['square'], previewUrl: '', businessCategory, recommended: businessCategory === 'salao', contextLabel: 'Salões · Público: UNISSEX' })));
+  render(<PostTemplatePicker templates={templates} selectedKey="salao-0" barbershopId="qa" format="square" paletteKey="brand" onRetry={vi.fn()} onSelect={onSelect} />);
+  expect(screen.getByRole('button', { name: 'Para meu negócio' })).toHaveAttribute('aria-pressed', 'true');
+  expect(screen.getAllByRole('button', { name: /Selecionar modelo/ })).toHaveLength(10);
+  expect(screen.queryByRole('button', { name: 'Selecionar modelo barbearia 0' })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Barbearias' }));
+  expect(screen.getAllByRole('button', { name: /Selecionar modelo/ })).toHaveLength(10);
+  fireEvent.click(screen.getByRole('button', { name: 'Selecionar modelo barbearia 0' }));
+  expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ key: 'barbearia-0' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Beleza e estética' }));
+  expect(screen.getAllByRole('button', { name: /Selecionar modelo/ })).toHaveLength(10);
+  fireEvent.click(screen.getByRole('button', { name: 'Todos os negócios' }));
+  expect(screen.getAllByRole('button', { name: /Selecionar modelo/ })).toHaveLength(30);
+});

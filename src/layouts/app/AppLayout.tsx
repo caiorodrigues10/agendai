@@ -1,7 +1,7 @@
 import React from 'react';
+import type { OperationMode, StaffMember } from '../../types';
 import { Header } from './Header';
 import { StaffNavigation } from './StaffNavigation';
-import type { OperationMode, StaffMember } from '../../types';
 
 export interface AppLayoutProps {
   user: StaffMember | null;
@@ -34,7 +34,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   onNavigate,
   children,
 }) => (
-  <div className="min-h-screen bg-bg pb-[max(5.5rem,env(safe-area-inset-bottom))] text-text-primary lg:pb-0">
+  <div className="min-h-dvh bg-bg pb-[calc(5.5rem+env(safe-area-inset-bottom))] text-text-primary lg:pb-0">
     <a
       href="#main-content"
       className="sr-only fixed left-4 top-4 z-[90] rounded-lg bg-accent px-4 py-2 text-sm font-bold text-accent-fg focus:not-sr-only"
@@ -53,7 +53,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         onboardingCompleted={onboardingCompleted}
         onNavigate={onNavigate}
       />
-      <main id="main-content" className="min-w-0 flex-1">
+      <main id="main-content" tabIndex={-1} className="min-w-0 flex-1 space-y-6">
         {children}
       </main>
     </div>

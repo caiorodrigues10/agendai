@@ -1,25 +1,21 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import {
-  LuChartColumn as BarChart3,
-  LuBrainCircuit as BrainCircuit,
   LuChevronLeft as ChevronLeft,
   LuChevronRight as ChevronRight,
-  LuMegaphone as Megaphone,
   LuRefreshCw as RefreshCw,
   LuSearch as Search,
-  LuUsers as Users,
 } from 'react-icons/lu';
+import { useSearchParams } from 'react-router-dom';
+import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
+import { ModalShell, SectionError, Tabs } from '../../components/patterns';
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Line,
-  LineChart,
-  XAxis,
-  YAxis,
-} from 'recharts';
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '../../components/ui/chart';
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from '../../components/ui/chart';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { SmartSelect } from '../../components/ui/SmartSelect';
 import {
   crmApi,
   CrmCampaign,
@@ -28,12 +24,9 @@ import {
   CrmOverview,
   CrmSegment,
 } from '../../infra/crmApi';
-import { SmartSelect } from '../../components/ui/SmartSelect';
-import { SectionError } from '../../components/patterns';
-import { getErrorMessage } from '../../utils/errorMessage';
 import { CRM_SEGMENT_LABEL } from '../../utils/clientLabels';
+import { getErrorMessage } from '../../utils/errorMessage';
 import { METRIC_LABEL, SORT_BY_LTV_LABEL } from '../../utils/metricLabels';
-import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 
 interface Props {
   canAnalytics: boolean;
@@ -125,13 +118,7 @@ function Empty({ children }: React.PropsWithChildren) {
   );
 }
 
-function ClientCard({
-  client,
-  onOpen,
-}: {
-  client: CrmClientMetric;
-  onOpen: () => void;
-}) {
+function ClientCard({ client, onOpen }: { client: CrmClientMetric; onOpen: () => void }) {
   const segment =
     CRM_SEGMENT_LABEL[client.segment] ??
     segmentOptions.find(item => item.value === client.segment)?.label ??
@@ -172,13 +159,7 @@ function ClientCard({
   );
 }
 
-function ClientTableRow({
-  client,
-  onOpen,
-}: {
-  client: CrmClientMetric;
-  onOpen: () => void;
-}) {
+function ClientTableRow({ client, onOpen }: { client: CrmClientMetric; onOpen: () => void }) {
   const segment =
     CRM_SEGMENT_LABEL[client.segment] ??
     segmentOptions.find(item => item.value === client.segment)?.label ??
@@ -219,12 +200,22 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const rawTab = searchParams.get('tab');
   const validTabs: IntelTab[] = ['resumo', 'segmentos', 'previsoes', 'campanhas'];
-  const tab: IntelTab = validTabs.includes(rawTab as IntelTab) && (rawTab !== 'campanhas' || canCampaigns)
-    ? (rawTab as IntelTab)
-    : 'resumo';
-  const setTab = useCallback((t: IntelTab) => {
-    setSearchParams(prev => { prev.set('tab', t); return prev; }, { replace: true });
-  }, [setSearchParams]);
+  const tab: IntelTab =
+    validTabs.includes(rawTab as IntelTab) && (rawTab !== 'campanhas' || canCampaigns)
+      ? (rawTab as IntelTab)
+      : 'resumo';
+  const setTab = useCallback(
+    (t: IntelTab) => {
+      setSearchParams(
+        prev => {
+          prev.set('tab', t);
+          return prev;
+        },
+        { replace: true }
+      );
+    },
+    [setSearchParams]
+  );
   const [overview, setOverview] = useState<CrmOverview | null>(null);
   const [overviewState, setOverviewState] = useState<'idle' | 'loading' | 'error'>('idle');
   const [overviewError, setOverviewError] = useState('');
@@ -370,7 +361,10 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
     try {
       setSelectedCampaign(await crmApi.campaign(item.id));
     } catch (error) {
-      onNotify?.(getErrorMessage(error, 'Não foi possível carregar os detalhes da campanha.'), 'error');
+      onNotify?.(
+        getErrorMessage(error, 'Não foi possível carregar os detalhes da campanha.'),
+        'error'
+      );
     } finally {
       setCampaignDetailLoading(false);
     }
@@ -390,9 +384,7 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
         <header className="flex flex-col gap-3 border-b border-border p-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[.18em] text-accent">Super CRM</p>
-            <h2 className="text-lg font-bold text-text-primary">
-              Receita, segmentos e previsão
-            </h2>
+            <h2 className="text-lg font-bold text-text-primary">Receita, segmentos e previsão</h2>
           </div>
           <div className="flex flex-wrap items-end gap-2">
             <label className="text-xs text-text-muted">
@@ -401,9 +393,7 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
                 type="date"
                 value={period.from}
                 max={period.to}
-                onChange={event =>
-                  onPeriodChange({ ...period, from: event.target.value })
-                }
+                onChange={event => onPeriodChange({ ...period, from: event.target.value })}
                 className="mt-1 block min-h-10 rounded-lg border border-border bg-bg px-2 text-text-primary"
               />
             </label>
@@ -429,455 +419,528 @@ export const CrmIntelligencePanel: React.FC<Props> = ({
           </div>
         </header>
 
-        <nav aria-label="Áreas do CRM" className="flex overflow-x-auto border-b border-border px-2">
-          {(
-            [
-              ['resumo', 'Resumo', BarChart3],
-              ['segmentos', 'Segmentos', Users],
-              ['previsoes', 'Previsões', BrainCircuit],
-              ...(canCampaigns ? [['campanhas', 'Campanhas', Megaphone] as const] : []),
-            ] as [IntelTab, string, React.ComponentType<{ size?: number; className?: string }>][]
-          ).map(([id, label, Icon]) => (
-            <button
-              type="button"
-              key={id}
-              onClick={() => setTab(id)}
-              className={`min-h-11 whitespace-nowrap px-3 text-xs font-bold ${
-                tab === id ? 'border-b-2 border-accent text-accent' : 'text-text-muted'
-              }`}
-            >
-              <Icon className="mr-1 inline" size={14} />
-              {label}
-            </button>
-          ))}
-        </nav>
-
-        {tab === 'resumo' && (
-          <div className="space-y-4 p-4">
-            {overviewError && <SectionError message={overviewError} />}
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-              <Kpi label="Faturamento bruto" value={kpis.grossRevenue} />
-              <Kpi label="Recebido" value={kpis.receivedRevenue} />
-              <Kpi label="Fiado em aberto" value={kpis.outstanding} />
-              <Kpi label="Ticket médio" value={kpis.avgTicket} />
-              <Kpi label="Clientes recorrentes" value={kpis.recurringCustomers} moneyValue={false} />
-              <Kpi label="Receita em risco" value={kpis.revenueAtRisk} />
-              <Kpi label="Não compareceram" value={kpis.noShows} moneyValue={false} />
-              <Kpi label="Comparecimento" value={`${kpis.attendanceRate ?? 0}%`} moneyValue={false} />
-            </div>
-            <div className="rounded-xl border border-border p-3">
-              <h3 className="mb-3 text-sm font-bold text-text-primary">
-                Receita e recebimento por dia
-              </h3>
-              {chartData.length ? (
-                <div className="h-64 w-full">
-                  <ChartContainer config={crmChartConfig} className="h-full w-full">
-                    <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                      <XAxis dataKey="label" fontSize={11} tick={{ fill: 'var(--color-text-muted)' }} />
-                      <YAxis fontSize={11} tick={{ fill: 'var(--color-text-muted)' }} />
-                      <ChartTooltip content={<ChartTooltipContent formatter={v => money(v)} />} />
-                      <Line
-                        type="monotone"
-                        dataKey="grossRevenue"
-                        name="Bruto"
-                        stroke="var(--color-chart-1)"
-                        strokeWidth={2}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="receivedRevenue"
-                        name="Recebido"
-                        stroke="var(--color-chart-2)"
-                        strokeWidth={2}
-                      />
-                    </LineChart>
-                  </ChartContainer>
-                </div>
-              ) : (
-                <Empty>Ainda não há lançamentos neste período.</Empty>
-              )}
-            </div>
-            <div className="grid gap-4 xl:grid-cols-3">
-              {(
-                [
-                  ['Serviços', overview?.byService],
-                  ['Categorias', overview?.byCategory],
-                  ['Profissionais', overview?.byProfessional],
-                ] as const
-              ).map(([label, values]) => (
-                <div key={label} className="rounded-xl border border-border p-3">
-                  <h3 className="mb-3 text-sm font-bold text-text-primary">
-                    Receita por {label.toLowerCase()}
-                  </h3>
-                  {values?.length ? (
-                    <div className="h-52">
-                      <ChartContainer config={crmChartConfig} className="h-full w-full">
-                        <BarChart data={values.slice(0, 8)} layout="vertical">
-                          <CartesianGrid horizontal={false} strokeDasharray="3 3" stroke="var(--color-border)" />
-                          <XAxis type="number" hide />
-                          <YAxis dataKey="name" type="category" width={85} fontSize={10} tick={{ fill: 'var(--color-text-muted)' }} />
-                          <ChartTooltip content={<ChartTooltipContent formatter={v => money(v)} />} />
-                          <Bar
-                            dataKey="revenue"
-                            fill="var(--color-chart-1)"
-                            radius={[0, 5, 5, 0]}
-                          />
-                        </BarChart>
-                      </ChartContainer>
-                    </div>
-                  ) : (
-                    <Empty>Sem dados.</Empty>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="grid gap-3 lg:grid-cols-2">
-              <div className="rounded-xl border border-border p-3">
-                <h3 className="mb-2 text-sm font-bold text-text-primary">Clientes de maior valor</h3>
-                {overview?.topClients.length ? (
-                  overview.topClients.slice(0, 6).map(client => (
-                    <button
-                      type="button"
-                      key={client.clientId}
-                      onClick={() => onOpenClient(client.clientId)}
-                      className="flex w-full justify-between border-t border-border py-2 text-left text-sm"
-                    >
-                      <span>
-                        {client.name}
-                        <small className="ml-2 text-text-muted">{client.visits} visitas</small>
-                      </span>
-                      <strong>{money(client.ltv)}</strong>
-                    </button>
-                  ))
-                ) : (
-                  <Empty>Sem clientes no período.</Empty>
-                )}
-              </div>
-              <div className="rounded-xl border border-border p-3">
-                <h3 className="mb-2 text-sm font-bold text-text-primary">Segmentos acionáveis</h3>
-                {overview?.segments.map(item => (
-                  <div
-                    key={item.segment}
-                    className="flex justify-between border-t border-border py-2 text-sm"
-                  >
-                    <span>{item.label}</span>
-                    <span className="text-text-muted">
-                      {item.count} · {money(item.potential)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {tab === 'segmentos' && (
-          <div className="space-y-4 p-4">
-            <div className="grid gap-2 md:grid-cols-[1fr_auto_auto]">
-              <label className="relative">
-                <Search size={16} className="absolute left-3 top-3 text-text-muted" />
-                <input
-                  aria-label="Buscar cliente"
-                  value={search}
-                  onChange={event => setSearch(event.target.value)}
-                  className="min-h-11 w-full rounded-lg border border-input-border bg-input-bg pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-focus"
-                  placeholder="Buscar cliente ou WhatsApp"
+        <Tabs<IntelTab>
+          ariaLabel="Análises de clientes"
+          items={[
+            { id: 'resumo', label: 'Resumo' },
+            { id: 'segmentos', label: 'Segmentos' },
+            { id: 'previsoes', label: 'Previsões' },
+            ...(canCampaigns ? [{ id: 'campanhas' as const, label: 'Campanhas' }] : []),
+          ]}
+          value={tab}
+          onChange={setTab}
+          className="mx-4"
+        >
+          {tab === 'resumo' && (
+            <div className="space-y-4 p-4">
+              {overviewError && <SectionError message={overviewError} />}
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <Kpi label="Faturamento bruto" value={kpis.grossRevenue} />
+                <Kpi label="Recebido" value={kpis.receivedRevenue} />
+                <Kpi label="Fiado em aberto" value={kpis.outstanding} />
+                <Kpi label="Ticket médio" value={kpis.avgTicket} />
+                <Kpi
+                  label="Clientes recorrentes"
+                  value={kpis.recurringCustomers}
+                  moneyValue={false}
                 />
-              </label>
-              <SmartSelect
-                mode="single"
-                options={segmentOptions}
-                aria-label="Filtrar segmento"
-                value={segment}
-                onChange={value => setSegment(value as CrmSegment)}
-                searchable="auto"
-              />
-              <SmartSelect
-                mode="single"
-                options={[{ value: 'ltv', label: SORT_BY_LTV_LABEL }, { value: 'lastVisit', label: 'Visita recente' }, { value: 'outstanding', label: 'Maior dívida' }]}
-                aria-label="Ordenar clientes"
-                value={sort}
-                onChange={value => setSort(value as typeof sort)}
-                searchable={false}
-              />
-            </div>
-            {clientsError && <SectionError message={clientsError} />}
-            {clientsLoading ? (
-              <Empty>Carregando clientes…</Empty>
-            ) : clients.length ? (
-              <>
-                <div className="space-y-2 md:hidden">
-                  {clients.map(client => (
-                    <ClientCard
-                      key={client.clientId}
-                      client={client}
-                      onOpen={() => onOpenClient(client.clientId)}
-                    />
-                  ))}
-                </div>
-                <div className="hidden overflow-x-auto rounded-xl border border-border md:block">
-                  <table className="w-full min-w-[680px] text-sm">
-                    <thead className="bg-bg text-left text-xs text-text-muted">
-                      <tr>
-                        <th className="p-3">Cliente</th>
-                        <th className="p-3">Segmento</th>
-                        <th className="p-3">Visitas</th>
-                        <th className="p-3">{METRIC_LABEL.LTV}</th>
-                        <th className="p-3">Dívida</th>
-                        <th className="p-3">Última visita</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {clients.map(client => (
-                        <ClientTableRow
-                          key={client.clientId}
-                          client={client}
-                          onOpen={() => onOpenClient(client.clientId)}
-                        />
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            ) : (
-              <Empty>Nenhum cliente encontrado.</Empty>
-            )}
-            <div className="flex items-center justify-between text-sm text-text-muted">
-              <span>{clientsMeta.total} cliente(s)</span>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  aria-label="Página anterior"
-                  disabled={clientsMeta.page <= 1}
-                  onClick={() => void loadClients(clientsMeta.page - 1)}
-                  className="rounded-lg border border-border p-2 disabled:opacity-40"
-                >
-                  <ChevronLeft size={16} />
-                </button>
-                <span>
-                  {clientsMeta.page}/{clientsMeta.totalPages}
-                </span>
-                <button
-                  type="button"
-                  aria-label="Próxima página"
-                  disabled={clientsMeta.page >= clientsMeta.totalPages}
-                  onClick={() => void loadClients(clientsMeta.page + 1)}
-                  className="rounded-lg border border-border p-2 disabled:opacity-40"
-                >
-                  <ChevronRight size={16} />
-                </button>
+                <Kpi label="Receita em risco" value={kpis.revenueAtRisk} />
+                <Kpi label="Não compareceram" value={kpis.noShows} moneyValue={false} />
+                <Kpi
+                  label="Comparecimento"
+                  value={`${kpis.attendanceRate ?? 0}%`}
+                  moneyValue={false}
+                />
               </div>
-            </div>
-          </div>
-        )}
-
-        {tab === 'previsoes' && (
-          <div className="space-y-4 p-4">
-            <div className="flex flex-wrap gap-2">
-              {([7, 30, 90] as const).map(horizon => (
-                <button
-                  type="button"
-                  key={horizon}
-                  onClick={() => setForecastHorizon(horizon)}
-                  className={`min-h-10 rounded-lg px-4 text-sm font-bold ${
-                    forecastHorizon === horizon
-                      ? 'bg-accent text-accent-fg'
-                      : 'border border-border text-text-secondary'
-                  }`}
-                >
-                  {horizon} dias
-                </button>
-              ))}
-            </div>
-            {forecastError && <SectionError message={forecastError} />}
-            {forecastLoading ? (
-              <Empty>Calculando previsão…</Empty>
-            ) : (
-              forecast && (
-                <>
-                  <div className="rounded-xl bg-accent/10 p-3 text-sm text-text-secondary">
-                    <strong>
-                      Modelo{' '}
-                      {forecast.maturity === 'trained'
-                        ? 'treinado'
-                        : forecast.maturity === 'preliminary'
-                          ? 'preliminar'
-                          : 'com dados insuficientes'}
-                      .
-                    </strong>{' '}
-                    {forecast.historicalDays || 0} dias analisados. {METRIC_LABEL.MAE}:{' '}
-                    {Number(forecast.backtest.mae) > 0 ? money(forecast.backtest.mae) : 'indisponível'}{' '}
-                    · {METRIC_LABEL.MAPE}:{' '}
-                    {Number(forecast.backtest.mape) > 0
-                      ? `${Number(forecast.backtest.mape).toFixed(1)}%`
-                      : 'indisponível'}
-                    .
-                  </div>
-                  <div className="h-64 rounded-xl border border-border p-3">
+              <div className="rounded-xl border border-border p-3">
+                <h3 className="mb-3 text-sm font-bold text-text-primary">
+                  Receita e recebimento por dia
+                </h3>
+                {chartData.length ? (
+                  <div className="h-64 w-full">
                     <ChartContainer config={crmChartConfig} className="h-full w-full">
-                      <LineChart
-                        data={forecast.predictions.map(item => ({
-                          ...item,
-                          label: shortDate(item.date),
-                        }))}
-                      >
+                      <LineChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                        <XAxis dataKey="label" fontSize={10} tick={{ fill: 'var(--color-text-muted)' }} />
+                        <XAxis
+                          dataKey="label"
+                          fontSize={11}
+                          tick={{ fill: 'var(--color-text-muted)' }}
+                        />
                         <YAxis fontSize={11} tick={{ fill: 'var(--color-text-muted)' }} />
                         <ChartTooltip content={<ChartTooltipContent formatter={v => money(v)} />} />
                         <Line
                           type="monotone"
-                          dataKey="predictedRevenue"
-                          name="Previsão"
-                          stroke="var(--color-chart-3)"
+                          dataKey="grossRevenue"
+                          name="Bruto"
+                          stroke="var(--color-chart-1)"
                           strokeWidth={2}
                         />
                         <Line
                           type="monotone"
-                          dataKey="confidenceLow"
-                          name="Mínimo"
-                          stroke="var(--color-chart-4)"
-                          strokeDasharray="4 4"
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="confidenceHigh"
-                          name="Máximo"
-                          stroke="var(--color-chart-5)"
-                          strokeDasharray="4 4"
+                          dataKey="receivedRevenue"
+                          name="Recebido"
+                          stroke="var(--color-chart-2)"
+                          strokeWidth={2}
                         />
                       </LineChart>
                     </ChartContainer>
                   </div>
-                  <div className="grid gap-2 lg:grid-cols-2">
-                    {forecast.predictions.map(item => (
-                      <div key={item.date} className="rounded-xl border border-border p-3">
-                        <div className="flex justify-between gap-2">
-                          <strong>{shortDate(item.date)}</strong>
-                          <strong>{money(item.predictedRevenue)}</strong>
-                        </div>
-                        <p className="mt-1 text-xs text-text-muted">
-                          {Number(item.predictedVisits) || 0} atendimentos · {item.factors.map(formatFactor).join(' · ')}
-                        </p>
+                ) : (
+                  <Empty>Ainda não há lançamentos neste período.</Empty>
+                )}
+              </div>
+              <div className="grid gap-4 xl:grid-cols-3">
+                {(
+                  [
+                    ['Serviços', overview?.byService],
+                    ['Categorias', overview?.byCategory],
+                    ['Profissionais', overview?.byProfessional],
+                  ] as const
+                ).map(([label, values]) => (
+                  <div key={label} className="rounded-xl border border-border p-3">
+                    <h3 className="mb-3 text-sm font-bold text-text-primary">
+                      Receita por {label.toLowerCase()}
+                    </h3>
+                    {values?.length ? (
+                      <div className="h-52">
+                        <ChartContainer config={crmChartConfig} className="h-full w-full">
+                          <BarChart data={values.slice(0, 8)} layout="vertical">
+                            <CartesianGrid
+                              horizontal={false}
+                              strokeDasharray="3 3"
+                              stroke="var(--color-border)"
+                            />
+                            <XAxis type="number" hide />
+                            <YAxis
+                              dataKey="name"
+                              type="category"
+                              width={85}
+                              fontSize={10}
+                              tick={{ fill: 'var(--color-text-muted)' }}
+                            />
+                            <ChartTooltip
+                              content={<ChartTooltipContent formatter={v => money(v)} />}
+                            />
+                            <Bar
+                              dataKey="revenue"
+                              fill="var(--color-chart-1)"
+                              radius={[0, 5, 5, 0]}
+                            />
+                          </BarChart>
+                        </ChartContainer>
                       </div>
-                    ))}
+                    ) : (
+                      <Empty>Sem dados.</Empty>
+                    )}
                   </div>
-                </>
-              )
-            )}
-          </div>
-        )}
-
-        {tab === 'campanhas' && canCampaigns && (
-          <div className="grid gap-4 p-4 xl:grid-cols-2">
-            <div className="space-y-3 rounded-xl border border-border p-4">
-              <h3 className="font-bold text-text-primary">Preparar campanha</h3>
-              <p className="text-sm text-text-secondary">
-                Somente clientes com consentimento e WhatsApp válido entram no público.
-              </p>
-              <input
-                aria-label="Nome da campanha"
-                value={campaign.name}
-                onChange={event => setCampaign(current => ({ ...current, name: event.target.value }))}
-                className="min-h-11 w-full rounded-lg border border-border bg-bg p-3 text-sm"
-                placeholder="Nome da campanha"
-              />
-              <SmartSelect
-                mode="single"
-                options={segmentOptions}
-                aria-label="Segmento da campanha"
-                value={campaign.segment}
-                onChange={value => setCampaign(current => ({ ...current, segment: value as CrmSegment }))}
-                searchable="auto"
-              />
-              <textarea
-                aria-label="Mensagem da campanha"
-                value={campaign.message}
-                onChange={event =>
-                  setCampaign(current => ({ ...current, message: event.target.value }))
-                }
-                className="min-h-28 w-full rounded-lg border border-border bg-bg p-3 text-sm"
-              />
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => void calculateAudience()}
-                  className="min-h-11 rounded-lg border border-accent px-4 text-sm font-bold text-accent"
-                >
-                  Calcular público
-                </button>
-                {preview && (
-                  <button
-                    type="button"
-                    onClick={() => setConfirmCampaignOpen(true)}
-                    className="min-h-11 rounded-lg bg-accent px-4 text-sm font-bold text-accent-fg"
-                  >
-                    Confirmar para {preview.eligibleCount}
-                  </button>
-                )}
+                ))}
               </div>
-              {preview && (
-                <div className="rounded-lg bg-bg p-3 text-sm">
-                  <strong>{preview.eligibleCount} elegíveis.</strong>
-                  <p className="mt-1 text-text-muted">
-                    Amostra:{' '}
-                    {preview.sample.map(item => item.name).join(', ') || 'nenhum cliente'}
-                  </p>
-                </div>
-              )}
-            </div>
-            <div className="rounded-xl border border-border p-4">
-              <div className="mb-3 flex items-center justify-between">
-                <h3 className="font-bold text-text-primary">Histórico</h3>
-                {campaignsLoading && (
-                  <RefreshCw size={15} className="animate-spin text-text-muted" />
-                )}
-              </div>
-              {campaigns.length ? (
-                <div className="space-y-2">
-                  {campaigns.map(item => (
-                    <button key={item.id} type="button" onClick={() => void openCampaignDetail(item)} className="w-full rounded-lg border border-border bg-bg p-3 text-left transition hover:border-accent/40">
-                      <div className="flex justify-between gap-2">
-                        <strong className="text-sm">{item.name}</strong>
-                        <span className="text-xs font-bold text-accent">
-                          {statusLabel[item.status]}
+              <div className="grid gap-3 lg:grid-cols-2">
+                <div className="rounded-xl border border-border p-3">
+                  <h3 className="mb-2 text-sm font-bold text-text-primary">
+                    Clientes de maior valor
+                  </h3>
+                  {overview?.topClients.length ? (
+                    overview.topClients.slice(0, 6).map(client => (
+                      <button
+                        type="button"
+                        key={client.clientId}
+                        onClick={() => onOpenClient(client.clientId)}
+                        className="flex w-full justify-between border-t border-border py-2 text-left text-sm"
+                      >
+                        <span>
+                          {client.name}
+                          <small className="ml-2 text-text-muted">{client.visits} visitas</small>
                         </span>
-                      </div>
-                      <p className="mt-1 text-xs text-text-muted">
-                        {item.recipientCount} destinatários · {item.sentCount} enviados ·{' '}
-                        {item.failedCount} falhas · {item.skippedCount} ignorados
-                      </p>
-                    </button>
+                        <strong>{money(client.ltv)}</strong>
+                      </button>
+                    ))
+                  ) : (
+                    <Empty>Sem clientes no período.</Empty>
+                  )}
+                </div>
+                <div className="rounded-xl border border-border p-3">
+                  <h3 className="mb-2 text-sm font-bold text-text-primary">Segmentos acionáveis</h3>
+                  {overview?.segments.map(item => (
+                    <div
+                      key={item.segment}
+                      className="flex justify-between border-t border-border py-2 text-sm"
+                    >
+                      <span>{item.label}</span>
+                      <span className="text-text-muted">
+                        {item.count} · {money(item.potential)}
+                      </span>
+                    </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {tab === 'segmentos' && (
+            <div className="space-y-4 p-4">
+              <div className="grid gap-2 md:grid-cols-[1fr_auto_auto]">
+                <label className="relative">
+                  <Search size={16} className="absolute left-3 top-3 text-text-muted" />
+                  <input
+                    aria-label="Buscar cliente"
+                    value={search}
+                    onChange={event => setSearch(event.target.value)}
+                    className="min-h-11 w-full rounded-lg border border-input-border bg-input-bg pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-focus"
+                    placeholder="Buscar cliente ou WhatsApp"
+                  />
+                </label>
+                <SmartSelect
+                  mode="single"
+                  options={segmentOptions}
+                  aria-label="Filtrar segmento"
+                  value={segment}
+                  onChange={value => setSegment(value as CrmSegment)}
+                  searchable="auto"
+                />
+                <SmartSelect
+                  mode="single"
+                  options={[
+                    { value: 'ltv', label: SORT_BY_LTV_LABEL },
+                    { value: 'lastVisit', label: 'Visita recente' },
+                    { value: 'outstanding', label: 'Maior dívida' },
+                  ]}
+                  aria-label="Ordenar clientes"
+                  value={sort}
+                  onChange={value => setSort(value as typeof sort)}
+                  searchable={false}
+                />
+              </div>
+              {clientsError && <SectionError message={clientsError} />}
+              {clientsLoading ? (
+                <Empty>Carregando clientes…</Empty>
+              ) : clients.length ? (
+                <>
+                  <div className="space-y-2 md:hidden">
+                    {clients.map(client => (
+                      <ClientCard
+                        key={client.clientId}
+                        client={client}
+                        onOpen={() => onOpenClient(client.clientId)}
+                      />
+                    ))}
+                  </div>
+                  <div className="hidden overflow-x-auto rounded-xl border border-border md:block">
+                    <table className="w-full min-w-[680px] text-sm">
+                      <thead className="bg-bg text-left text-xs text-text-muted">
+                        <tr>
+                          <th className="p-3">Cliente</th>
+                          <th className="p-3">Segmento</th>
+                          <th className="p-3">Visitas</th>
+                          <th className="p-3">{METRIC_LABEL.LTV}</th>
+                          <th className="p-3">Dívida</th>
+                          <th className="p-3">Última visita</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {clients.map(client => (
+                          <ClientTableRow
+                            key={client.clientId}
+                            client={client}
+                            onOpen={() => onOpenClient(client.clientId)}
+                          />
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               ) : (
-                <Empty>Nenhuma campanha no período.</Empty>
+                <Empty>Nenhum cliente encontrado.</Empty>
+              )}
+              <div className="flex items-center justify-between text-sm text-text-muted">
+                <span>{clientsMeta.total} cliente(s)</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    aria-label="Página anterior"
+                    disabled={clientsMeta.page <= 1}
+                    onClick={() => void loadClients(clientsMeta.page - 1)}
+                    className="rounded-lg border border-border p-2 disabled:opacity-40"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <span>
+                    {clientsMeta.page}/{clientsMeta.totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label="Próxima página"
+                    disabled={clientsMeta.page >= clientsMeta.totalPages}
+                    onClick={() => void loadClients(clientsMeta.page + 1)}
+                    className="rounded-lg border border-border p-2 disabled:opacity-40"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {tab === 'previsoes' && (
+            <div className="space-y-4 p-4">
+              <div className="flex flex-wrap gap-2">
+                {([7, 30, 90] as const).map(horizon => (
+                  <button
+                    type="button"
+                    key={horizon}
+                    onClick={() => setForecastHorizon(horizon)}
+                    className={`min-h-10 rounded-lg px-4 text-sm font-bold ${
+                      forecastHorizon === horizon
+                        ? 'bg-accent text-accent-fg'
+                        : 'border border-border text-text-secondary'
+                    }`}
+                  >
+                    {horizon} dias
+                  </button>
+                ))}
+              </div>
+              {forecastError && <SectionError message={forecastError} />}
+              {forecastLoading ? (
+                <Empty>Calculando previsão…</Empty>
+              ) : (
+                forecast && (
+                  <>
+                    <div className="rounded-xl bg-accent/10 p-3 text-sm text-text-secondary">
+                      <strong>
+                        Modelo{' '}
+                        {forecast.maturity === 'trained'
+                          ? 'treinado'
+                          : forecast.maturity === 'preliminary'
+                            ? 'preliminar'
+                            : 'com dados insuficientes'}
+                        .
+                      </strong>{' '}
+                      {forecast.historicalDays || 0} dias analisados. {METRIC_LABEL.MAE}:{' '}
+                      {Number(forecast.backtest.mae) > 0
+                        ? money(forecast.backtest.mae)
+                        : 'indisponível'}{' '}
+                      · {METRIC_LABEL.MAPE}:{' '}
+                      {Number(forecast.backtest.mape) > 0
+                        ? `${Number(forecast.backtest.mape).toFixed(1)}%`
+                        : 'indisponível'}
+                      .
+                    </div>
+                    <div className="h-64 rounded-xl border border-border p-3">
+                      <ChartContainer config={crmChartConfig} className="h-full w-full">
+                        <LineChart
+                          data={forecast.predictions.map(item => ({
+                            ...item,
+                            label: shortDate(item.date),
+                          }))}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                          <XAxis
+                            dataKey="label"
+                            fontSize={10}
+                            tick={{ fill: 'var(--color-text-muted)' }}
+                          />
+                          <YAxis fontSize={11} tick={{ fill: 'var(--color-text-muted)' }} />
+                          <ChartTooltip
+                            content={<ChartTooltipContent formatter={v => money(v)} />}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="predictedRevenue"
+                            name="Previsão"
+                            stroke="var(--color-chart-3)"
+                            strokeWidth={2}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="confidenceLow"
+                            name="Mínimo"
+                            stroke="var(--color-chart-4)"
+                            strokeDasharray="4 4"
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="confidenceHigh"
+                            name="Máximo"
+                            stroke="var(--color-chart-5)"
+                            strokeDasharray="4 4"
+                          />
+                        </LineChart>
+                      </ChartContainer>
+                    </div>
+                    <div className="grid gap-2 lg:grid-cols-2">
+                      {forecast.predictions.map(item => (
+                        <div key={item.date} className="rounded-xl border border-border p-3">
+                          <div className="flex justify-between gap-2">
+                            <strong>{shortDate(item.date)}</strong>
+                            <strong>{money(item.predictedRevenue)}</strong>
+                          </div>
+                          <p className="mt-1 text-xs text-text-muted">
+                            {Number(item.predictedVisits) || 0} atendimentos ·{' '}
+                            {item.factors.map(formatFactor).join(' · ')}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )
               )}
             </div>
-          </div>
-        )}
+          )}
+
+          {tab === 'campanhas' && canCampaigns && (
+            <div className="grid gap-4 p-4 xl:grid-cols-2">
+              <div className="space-y-3 rounded-xl border border-border p-4">
+                <h3 className="font-bold text-text-primary">Preparar campanha</h3>
+                <p className="text-sm text-text-secondary">
+                  Somente clientes com consentimento e WhatsApp válido entram no público.
+                </p>
+                <input
+                  aria-label="Nome da campanha"
+                  value={campaign.name}
+                  onChange={event =>
+                    setCampaign(current => ({ ...current, name: event.target.value }))
+                  }
+                  className="min-h-11 w-full rounded-lg border border-border bg-bg p-3 text-sm"
+                  placeholder="Nome da campanha"
+                />
+                <SmartSelect
+                  mode="single"
+                  options={segmentOptions}
+                  aria-label="Segmento da campanha"
+                  value={campaign.segment}
+                  onChange={value =>
+                    setCampaign(current => ({ ...current, segment: value as CrmSegment }))
+                  }
+                  searchable="auto"
+                />
+                <textarea
+                  aria-label="Mensagem da campanha"
+                  value={campaign.message}
+                  onChange={event =>
+                    setCampaign(current => ({ ...current, message: event.target.value }))
+                  }
+                  className="min-h-28 w-full rounded-lg border border-border bg-bg p-3 text-sm"
+                />
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void calculateAudience()}
+                    className="min-h-11 rounded-lg border border-accent px-4 text-sm font-bold text-accent"
+                  >
+                    Calcular público
+                  </button>
+                  {preview && (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmCampaignOpen(true)}
+                      className="min-h-11 rounded-lg bg-accent px-4 text-sm font-bold text-accent-fg"
+                    >
+                      Confirmar para {preview.eligibleCount}
+                    </button>
+                  )}
+                </div>
+                {preview && (
+                  <div className="rounded-lg bg-bg p-3 text-sm">
+                    <strong>{preview.eligibleCount} elegíveis.</strong>
+                    <p className="mt-1 text-text-muted">
+                      Amostra:{' '}
+                      {preview.sample.map(item => item.name).join(', ') || 'nenhum cliente'}
+                    </p>
+                  </div>
+                )}
+              </div>
+              <div className="rounded-xl border border-border p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="font-bold text-text-primary">Histórico</h3>
+                  {campaignsLoading && (
+                    <RefreshCw size={15} className="animate-spin text-text-muted" />
+                  )}
+                </div>
+                {campaigns.length ? (
+                  <div className="space-y-2">
+                    {campaigns.map(item => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => void openCampaignDetail(item)}
+                        className="w-full rounded-lg border border-border bg-bg p-3 text-left transition hover:border-accent/40"
+                      >
+                        <div className="flex justify-between gap-2">
+                          <strong className="text-sm">{item.name}</strong>
+                          <span className="text-xs font-bold text-accent">
+                            {statusLabel[item.status]}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-text-muted">
+                          {item.recipientCount} destinatários · {item.sentCount} enviados ·{' '}
+                          {item.failedCount} falhas · {item.skippedCount} ignorados
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <Empty>Nenhuma campanha no período.</Empty>
+                )}
+              </div>
+            </div>
+          )}
+        </Tabs>
       </section>
 
       {selectedCampaign && (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 p-4 sm:items-center" role="dialog" aria-modal="true" aria-label="Detalhes da campanha">
-          <button type="button" aria-label="Fechar detalhes" onClick={() => setSelectedCampaign(null)} className="absolute inset-0" />
-          <div className="relative max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-surface p-5 shadow-2xl">
-            <div className="flex items-start justify-between gap-3">
-              <div><p className="text-xs font-bold uppercase tracking-wider text-accent">Campanha</p><h3 className="mt-1 text-lg font-bold text-text-primary">{selectedCampaign.name}</h3></div>
-              <button type="button" onClick={() => setSelectedCampaign(null)} className="min-h-11 min-w-11 rounded-xl text-text-muted hover:bg-bg" aria-label="Fechar">×</button>
-            </div>
-            <p className="mt-3 rounded-xl bg-bg p-3 text-sm text-text-secondary">{selectedCampaign.message}</p>
-            {campaignDetailLoading ? <div className="py-8 text-center text-sm text-text-muted"><RefreshCw size={18} className="mx-auto mb-2 animate-spin" />Carregando destinatários...</div> : (
-              <div className="mt-4 space-y-2">
-                <p className="text-xs font-bold uppercase tracking-wider text-text-muted">Destinatários</p>
-                {(selectedCampaign.recipients ?? []).length === 0 ? <Empty>Detalhes de destinatários ainda não disponíveis.</Empty> : selectedCampaign.recipients?.map(recipient => (
-                  <div key={recipient.id} className="flex items-start justify-between gap-3 rounded-xl border border-border bg-bg p-3 text-sm"><div><p className="font-semibold text-text-primary">{recipient.client?.name ?? 'Cliente'}</p><p className="text-xs text-text-muted">{recipient.client?.whatsapp ?? 'Sem WhatsApp'}</p></div><div className="text-right"><p className="font-bold text-text-primary">{recipient.status}</p>{recipient.error && <p className="mt-1 max-w-[180px] text-xs text-danger">{recipient.error}</p>}</div></div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        <ModalShell
+          open
+          titleId="campaign-detail-title"
+          title={selectedCampaign.name}
+          onClose={() => setSelectedCampaign(null)}
+          className="max-w-lg"
+          body={
+            <>
+              <p className="mt-3 rounded-xl bg-bg p-3 text-sm text-text-secondary">
+                {selectedCampaign.message}
+              </p>
+              {campaignDetailLoading ? (
+                <div className="py-8 text-center text-sm text-text-muted">
+                  <RefreshCw size={18} className="mx-auto mb-2 animate-spin" />
+                  Carregando destinatários...
+                </div>
+              ) : (
+                <div className="mt-4 space-y-2">
+                  <p className="text-xs font-bold uppercase tracking-wider text-text-muted">
+                    Destinatários
+                  </p>
+                  {(selectedCampaign.recipients ?? []).length === 0 ? (
+                    <Empty>Detalhes de destinatários ainda não disponíveis.</Empty>
+                  ) : (
+                    selectedCampaign.recipients?.map(recipient => (
+                      <div
+                        key={recipient.id}
+                        className="flex items-start justify-between gap-3 rounded-xl border border-border bg-bg p-3 text-sm"
+                      >
+                        <div>
+                          <p className="font-semibold text-text-primary">
+                            {recipient.client?.name ?? 'Cliente'}
+                          </p>
+                          <p className="text-xs text-text-muted">
+                            {recipient.client?.whatsapp ?? 'Sem WhatsApp'}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-text-primary">{recipient.status}</p>
+                          {recipient.error && (
+                            <p className="mt-1 max-w-[180px] text-xs text-danger">
+                              {recipient.error}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </>
+          }
+        />
       )}
 
       <ConfirmDialog

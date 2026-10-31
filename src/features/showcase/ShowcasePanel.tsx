@@ -1,24 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import {
-  LuPlus as Plus,
-  LuGripVertical as GripVertical,
   LuEye as Eye,
   LuEyeOff as EyeOff,
-  LuTrash2 as Trash2,
-  LuLoaderCircle as Loader2,
-  LuImage as ImageIcon,
   LuFilm as Film,
+  LuGripVertical as GripVertical,
+  LuImage as ImageIcon,
+  LuLoaderCircle as Loader2,
+  LuPlus as Plus,
+  LuTrash2 as Trash2,
 } from 'react-icons/lu';
+import { PageHeader } from '../../components/patterns/PageHeader';
+import { SmartSelect } from '../../components/ui/SmartSelect';
+import { useBarbershop } from '../../contexts/BarbershopContext';
+import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import {
   showcaseApi,
   ShowcaseEntry,
   ShowcaseImageAuthorization,
   ShowcaseMode,
 } from '../../infra/showcaseApi';
-import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
-import { useBarbershop } from '../../contexts/BarbershopContext';
 import { getErrorMessage } from '../../utils/errorMessage';
-import { SmartSelect } from '../../components/ui/SmartSelect';
 
 export const ShowcasePanel: React.FC = () => {
   const { barbershopId } = useBarbershopFilters();
@@ -36,7 +37,8 @@ export const ShowcasePanel: React.FC = () => {
   const [newDescription, setNewDescription] = useState('');
   const [newPostId, setNewPostId] = useState('');
   const [newMode, setNewMode] = useState<ShowcaseMode>('direct_service');
-  const [newAuthorization, setNewAuthorization] = useState<ShowcaseImageAuthorization>('team_confirmed');
+  const [newAuthorization, setNewAuthorization] =
+    useState<ShowcaseImageAuthorization>('team_confirmed');
   const [newServiceId, setNewServiceId] = useState('');
   const [newStaffId, setNewStaffId] = useState('');
 
@@ -136,16 +138,20 @@ export const ShowcasePanel: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="text-lg font-bold text-text-primary">Showcase / Resultados</h3>
-        <button
-          onClick={() => setShowCreate(!showCreate)}
-          className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-xs font-bold text-accent-fg"
-        >
-          <Plus size={16} />
-          Criar resultado
-        </button>
-      </div>
+      <PageHeader
+        title="Showcase / Resultados"
+        description="Apresente os trabalhos do salão."
+        actions={
+          <button
+            onClick={() => setShowCreate(!showCreate)}
+            type="button"
+            aria-expanded={showCreate}
+            className="min-h-11 inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-xs font-bold text-accent-fg"
+          >
+            {showCreate ? 'Fechar cadastro' : 'Criar resultado'}
+          </button>
+        }
+      />
 
       {error && <p className="text-xs text-error">{error}</p>}
 
@@ -191,7 +197,9 @@ export const ShowcasePanel: React.FC = () => {
             />
             <SmartSelect
               value={newAuthorization}
-              onChange={val => setNewAuthorization((val as ShowcaseImageAuthorization) ?? 'team_confirmed')}
+              onChange={val =>
+                setNewAuthorization((val as ShowcaseImageAuthorization) ?? 'team_confirmed')
+              }
               options={[
                 { value: 'team_confirmed', label: 'Autorizada pela equipe' },
                 { value: 'no_identifiable_client', label: 'Sem cliente identificável' },
@@ -247,7 +255,9 @@ export const ShowcasePanel: React.FC = () => {
             key={s}
             onClick={() => setFilter(s)}
             className={`rounded-lg px-3 py-1.5 text-xs font-bold whitespace-nowrap ${
-              filter === s ? 'bg-accent text-accent-fg' : 'bg-surface text-text-secondary hover:bg-surface-2'
+              filter === s
+                ? 'bg-accent text-accent-fg'
+                : 'bg-surface text-text-secondary hover:bg-surface-2'
             }`}
           >
             {s === 'ALL' ? 'Todos' : s}
@@ -278,11 +288,23 @@ export const ShowcasePanel: React.FC = () => {
 
               <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-surface-2">
                 {entry.mediaType?.startsWith('video') ? (
-                  <div className="flex h-full items-center justify-center"><Film size={16} className="text-text-muted" /></div>
+                  <div className="flex h-full items-center justify-center">
+                    <Film size={16} className="text-text-muted" />
+                  </div>
                 ) : entry.mediaUrl ? (
-                  <img src={entry.mediaUrl} alt={entry.altText || entry.title} loading="lazy" decoding="async" width={48} height={48} className="h-full w-full object-cover" />
+                  <img
+                    src={entry.mediaUrl}
+                    alt={entry.altText || entry.title}
+                    loading="lazy"
+                    decoding="async"
+                    width={48}
+                    height={48}
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
-                  <div className="flex h-full items-center justify-center"><ImageIcon size={16} className="text-text-muted" /></div>
+                  <div className="flex h-full items-center justify-center">
+                    <ImageIcon size={16} className="text-text-muted" />
+                  </div>
                 )}
               </div>
 
@@ -293,11 +315,15 @@ export const ShowcasePanel: React.FC = () => {
                 </p>
               </div>
 
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                entry.status === 'PUBLISHED' ? 'bg-success/15 text-success' :
-                entry.status === 'DRAFT' ? 'bg-warning/15 text-warning' :
-                'bg-surface-2 text-text-muted'
-              }`}>
+              <span
+                className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                  entry.status === 'PUBLISHED'
+                    ? 'bg-success/15 text-success'
+                    : entry.status === 'DRAFT'
+                      ? 'bg-warning/15 text-warning'
+                      : 'bg-surface-2 text-text-muted'
+                }`}
+              >
                 {entry.status}
               </span>
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import FocusLock from 'react-focus-lock';
-import { RiCloseLine, RiMore2Line } from 'react-icons/ri';
+import { LuEllipsis, LuX } from 'react-icons/lu';
 import {
   canAccessTab,
   canAccessTabByMode,
@@ -33,14 +33,28 @@ const visibleTabs = (
     return canAccessTab(tab.id, userRole, extras) && canAccessTabByMode(tab.id, operationMode);
   });
 
-export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions, operationMode, onboardingCompleted, onNavigate }: StaffNavigationProps) {
+export function StaffNavigation({
+  activeTab,
+  userRole,
+  hasDashboard,
+  permissions,
+  operationMode,
+  onboardingCompleted,
+  onNavigate,
+}: StaffNavigationProps) {
   const [moreOpen, setMoreOpen] = useState(false);
 
   const groups = useMemo(
     () =>
       TAB_GROUPS.map(group => ({
         ...group,
-        tabs: visibleTabs(group, userRole, operationMode, { hasDashboard, permissions }, onboardingCompleted),
+        tabs: visibleTabs(
+          group,
+          userRole,
+          operationMode,
+          { hasDashboard, permissions },
+          onboardingCompleted
+        ),
       })).filter(group => group.tabs.length > 0),
     [userRole, hasDashboard, permissions, operationMode, onboardingCompleted]
   );
@@ -102,19 +116,15 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
           aria-label="Navegação do painel"
           className="sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-2xl border border-border bg-surface p-3 shadow-card"
         >
-          <div className="mb-3 border-b border-border px-2 pb-3">
-            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-text-muted">
-              Navegação
-            </p>
-            <p className="mt-1 font-display text-sm font-bold tracking-wide text-text-primary">Áreas do salão</p>
-          </div>
-
+          <p className="mb-4 px-2 font-display text-sm font-bold text-text-primary">
+            Áreas do salão
+          </p>
           <div className="space-y-4">
             {groups.map(group => (
               <section key={group.id} aria-labelledby={`desktop-nav-${group.id}`}>
                 <p
                   id={`desktop-nav-${group.id}`}
-                  className="mb-1.5 px-2 font-display text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted"
+                  className="mb-1.5 px-2 font-display text-xs font-bold uppercase tracking-[0.14em] text-text-muted"
                 >
                   {group.label}
                 </p>
@@ -138,7 +148,10 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
         aria-label="Navegação compacta do painel"
         className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface/95 backdrop-blur-xl lg:hidden"
       >
-        <div className="mx-auto grid max-w-lg grid-cols-5 gap-1 px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2">
+        <div
+          className="mx-auto grid max-w-lg gap-1 px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2"
+          style={{ gridTemplateColumns: `repeat(${primaryTabs.length + 1}, minmax(0, 1fr))` }}
+        >
           {primaryTabs.map(tab => (
             <MobileNavigationItem
               key={tab.id}
@@ -153,13 +166,13 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
             aria-controls="staff-navigation-more"
             aria-current={moreIsActive ? 'page' : undefined}
             onClick={() => setMoreOpen(open => !open)}
-            className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-[10px] font-semibold transition-colors ${
+            className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border px-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface ${
               moreIsActive || moreOpen
-                ? 'border-accent/30 bg-selection text-accent'
-                : 'text-text-muted hover:bg-bg hover:text-text-primary'
+                ? 'border-accent bg-accent text-accent-fg'
+                : 'border-accent/40 bg-selection text-accent hover:border-accent hover:bg-accent/20'
             }`}
           >
-            <RiMore2Line size={20} />
+            <LuEllipsis size={20} aria-hidden="true" />
             <span className="font-display font-semibold">Mais</span>
           </button>
         </div>
@@ -170,6 +183,7 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
           <button
             type="button"
             aria-label="Fechar menu de mais opções"
+            tabIndex={-1}
             className="absolute inset-0 bg-black/55 backdrop-blur-[2px]"
             onClick={() => setMoreOpen(false)}
           />
@@ -184,7 +198,7 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
               <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-border-strong" />
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
-                  <p className="font-display text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">
+                  <p className="font-display text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
                     Navegação
                   </p>
                   <h2
@@ -200,7 +214,7 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
                   className="flex h-11 w-11 items-center justify-center rounded-xl border border-border text-text-secondary transition-colors hover:bg-bg hover:text-text-primary"
                   aria-label="Fechar"
                 >
-                  <RiCloseLine size={21} />
+                  <LuX size={21} />
                 </button>
               </div>
 
@@ -209,7 +223,7 @@ export function StaffNavigation({ activeTab, userRole, hasDashboard, permissions
                   <section key={group.id} aria-labelledby={`mobile-nav-${group.id}`}>
                     <p
                       id={`mobile-nav-${group.id}`}
-                      className="mb-2 font-display text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted"
+                      className="mb-2 font-display text-xs font-bold uppercase tracking-[0.14em] text-text-muted"
                     >
                       {group.label}
                     </p>
@@ -262,12 +276,12 @@ function DesktopNavigationItem({
       )}
       <span
         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-          active ? 'bg-accent/15 text-accent' : 'bg-surface-2 text-text-muted group-hover:text-accent'
+          active ? 'text-accent' : 'text-text-muted group-hover:text-accent'
         }`}
       >
-        <tab.icon size={17} />
+        <tab.icon size={19} aria-hidden="true" />
       </span>
-      <span className="font-display truncate text-[13px] font-semibold">{tab.label}</span>
+      <span className="font-display text-sm font-semibold">{tab.label}</span>
     </button>
   );
 }
@@ -286,7 +300,7 @@ function MobileNavigationItem({
       type="button"
       onClick={() => onNavigate(tab.id)}
       aria-current={active ? 'page' : undefined}
-      className={`group flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-[10px] font-semibold transition-colors ${
+      className={`group flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-xs font-semibold transition-colors ${
         active
           ? 'border-accent/30 bg-selection text-accent'
           : 'text-text-muted hover:bg-bg hover:text-text-primary'
@@ -294,12 +308,10 @@ function MobileNavigationItem({
     >
       <span
         className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-          active
-            ? 'bg-accent/15 text-accent'
-            : 'bg-surface-2 text-text-muted group-hover:text-accent'
+          active ? 'text-accent' : 'text-text-muted group-hover:text-accent'
         }`}
       >
-        <tab.icon size={18} />
+        <tab.icon size={20} aria-hidden="true" />
       </span>
       <span className="max-w-full truncate leading-tight">{tab.label}</span>
     </button>
@@ -328,12 +340,14 @@ function MoreNavigationItem({
     >
       <span
         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
-          active ? 'bg-accent/15 text-accent' : 'bg-surface-2 text-text-muted'
+          active ? 'text-accent' : 'text-text-muted'
         }`}
       >
-        <tab.icon size={18} />
+        <tab.icon size={20} aria-hidden="true" />
       </span>
-      <span className="min-w-0 truncate font-display text-sm font-bold">{tab.label}</span>
+      <span className="min-w-0 font-display text-sm font-semibold [overflow-wrap:anywhere]">
+        {tab.label}
+      </span>
     </button>
   );
 }

@@ -401,7 +401,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
 
       {showPaymentPicker && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-surface p-5 shadow-2xl">
+          <div className="w-full max-w-sm max-h-[90dvh] overflow-y-auto rounded-2xl border border-border bg-surface p-5 shadow-2xl">
             <h3 className="text-lg font-bold text-text-primary">Como foi o pagamento?</h3>
             <p className="mt-1 text-sm text-text-secondary">
               Selecione a forma usada para concluir este atendimento.

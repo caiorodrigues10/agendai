@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { Logo } from '../../components/ui/Logo';
-import { Avatar } from '../../components/ui/Avatar';
 import {
   LuClock3 as Clock3,
   LuLock as Lock,
@@ -8,12 +6,14 @@ import {
   LuStore as Store,
   LuWallet as Wallet,
 } from 'react-icons/lu';
-import { StaffMember } from '../../types';
-import { ThemeToggle } from '../../components/infra/ThemeToggle';
 import { Link } from 'react-router-dom';
-import { useSubscription } from '../../contexts/SubscriptionContext';
+import { ThemeToggle } from '../../components/infra/ThemeToggle';
+import { Avatar } from '../../components/ui/Avatar';
+import { Logo } from '../../components/ui/Logo';
 import { useAuth } from '../../contexts/AuthContext';
 import { useBarbershop } from '../../contexts/BarbershopContext';
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import { StaffMember } from '../../types';
 
 interface HeaderProps {
   currentUser: StaffMember | null;
@@ -30,17 +30,25 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
   const [switchBackError, setSwitchBackError] = useState('');
   const trial = subscriptionData?.trial;
   const trialDays = trial?.daysRemainingInTrial;
-  const isTrialActive = Boolean(trial?.isInTrial && !trial.isExpired && typeof trialDays === 'number');
-  const trialLabel = trialDays === 0 ? 'Trial termina hoje' : `${trialDays} ${trialDays === 1 ? 'dia' : 'dias'} de trial`;
-  const trialTone = trialDays != null && trialDays <= 3
-    ? 'border-danger/30 bg-danger/10 text-danger'
-    : trialDays != null && trialDays <= 7
-      ? 'border-warning/30 bg-warning/10 text-warning'
-      : 'border-accent/30 bg-accent/10 text-accent';
+  const isTrialActive = Boolean(
+    trial?.isInTrial && !trial.isExpired && typeof trialDays === 'number'
+  );
+  const trialLabel =
+    trialDays === 0
+      ? 'Trial termina hoje'
+      : `${trialDays} ${trialDays === 1 ? 'dia' : 'dias'} de trial`;
+  const trialTone =
+    trialDays != null && trialDays <= 3
+      ? 'border-danger/30 bg-danger/10 text-danger'
+      : trialDays != null && trialDays <= 7
+        ? 'border-warning/30 bg-warning/10 text-warning'
+        : 'border-accent/30 bg-accent/10 text-accent';
 
   // Sessão em outro salão (troca via Multiunidades) ≠ salão de origem.
   const isSwitched = Boolean(
-    switchOrigin && currentUser?.barbershopId && currentUser.barbershopId !== switchOrigin.barbershopId,
+    switchOrigin &&
+    currentUser?.barbershopId &&
+    currentUser.barbershopId !== switchOrigin.barbershopId
   );
   const activeShopName = settings?.shopName?.trim() || 'outro salão';
 
@@ -121,7 +129,9 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
               </span>
               <button
                 onClick={onLogout}
-                className="ml-2 text-text-muted hover:text-danger transition-colors"
+                className="ml-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-text-secondary hover:bg-danger/10 hover:text-danger transition-colors"
+                type="button"
+                aria-label="Sair da conta"
                 title="Sair"
               >
                 <LogOut size={16} />

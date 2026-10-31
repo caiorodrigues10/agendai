@@ -775,7 +775,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     'relative w-full min-h-12 px-5 bg-accent text-accent-fg hover:bg-accent-hover shadow-[0_8px_24px_color-mix(in_srgb,var(--ag-accent)_12%,transparent)] rounded-xl font-black text-xs uppercase tracking-[0.16em] flex items-center justify-center gap-3 transition-all duration-300 disabled:opacity-60 overflow-hidden group/btn active:scale-[0.98] cursor-pointer';
 
   return (
-    <div className="min-h-screen bg-bg grid lg:grid-cols-2">
+    <div className="min-h-dvh bg-bg grid lg:grid-cols-2">
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <BrandPanel />
 

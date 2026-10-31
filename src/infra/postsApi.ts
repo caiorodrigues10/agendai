@@ -1,4 +1,4 @@
-import { apiClient, apiFetch } from './apiClient';
+import { apiClient, apiFetch, ApiError, ACCESS_BLOCKED_EVENT } from './apiClient';
 import { authStorage } from './authStorage';
 import type { FeedPost, PostMode } from '../types';
 
@@ -61,6 +61,10 @@ export interface PostListResponse {
 }
 
 export interface PostTemplateDef {
+  businessCategory?: 'barbearia' | 'salao' | 'beleza';
+  sampleTitle?: string;
+  recommended?: boolean;
+  contextLabel?: string;
   key: string;
   name: string;
   description: string;
@@ -116,9 +120,15 @@ export const postsApi = {
     ).then(r => unwrap<FeedPost[]>(r));
   },
 
-  templates() {
+  templates(barbershopId?: string) {
+    if (!barbershopId) {
+      return apiClient<{ success: boolean; data: PostTemplateDef[] }>(
+        '/api/posts/templates', 'GET', undefined, token()
+      ).then(r => unwrap<PostTemplateDef[]>(r));
+    }
+    const params = new URLSearchParams({ barbershopId });
     return apiClient<{ success: boolean; data: PostTemplateDef[] }>(
-      '/api/posts/templates', 'GET', undefined, token()
+      `/api/posts/templates?${params.toString()}`, 'GET', undefined, token()
     ).then(r => unwrap<PostTemplateDef[]>(r));
   },
 
@@ -129,7 +139,7 @@ export const postsApi = {
   },
 
   /** Preview com debounce/cache do lado do componente. */
-  preview(barbershopId: string, opts: {
+  async preview(barbershopId: string, opts: {
     postMode?: PostMode;
     type?: 'haircut' | 'beard' | 'announcement';
     title?: string;
@@ -139,7 +149,7 @@ export const postsApi = {
     paletteKey?: string;
     primaryMediaId?: string | null;
     secondaryMediaId?: string | null;
-  }) {
+  }, options: { signal?: AbortSignal } = {}) {
     const params = new URLSearchParams({ barbershopId });
     if (opts.postMode) params.set('postMode', opts.postMode);
     if (opts.type) params.set('type', opts.type);
@@ -150,9 +160,31 @@ export const postsApi = {
     if (opts.paletteKey) params.set('paletteKey', opts.paletteKey);
     if (opts.primaryMediaId) params.set('primaryMediaId', opts.primaryMediaId);
     if (opts.secondaryMediaId) params.set('secondaryMediaId', opts.secondaryMediaId);
-    return apiClient<{ success: boolean; data: { imageUrl: string } }>(
-      `/api/posts/preview?${params.toString()}`, 'GET', undefined, token()
-    ).then(r => unwrap<{ imageUrl: string }>(r).imageUrl);
+    const controller = new AbortController();
+    const cancel = () => controller.abort();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const deadline = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => {
+        reject(new ApiError('A prévia demorou demais para carregar. Tente novamente.', 504, 'POST_PREVIEW_TIMEOUT'));
+        controller.abort();
+      }, 30_000);
+    });
+    options.signal?.addEventListener('abort', cancel, { once: true });
+    if (options.signal?.aborted) cancel();
+    try {
+      const response = await Promise.race([
+        apiClient<{ success: boolean; data: { imageUrl: string } }>(
+          `/api/posts/preview?${params.toString()}`, 'GET', undefined, token(), { signal: controller.signal }
+        ),
+        deadline,
+      ]);
+      const imageUrl = unwrap<{ imageUrl?: string }>(response)?.imageUrl;
+      if (typeof imageUrl !== 'string' || !imageUrl) throw new ApiError('A API não retornou a imagem da prévia. Tente novamente.', 502, 'INVALID_RESPONSE');
+      return imageUrl;
+    } finally {
+      clearTimeout(timer);
+      options.signal?.removeEventListener('abort', cancel);
+    }
   },
 
   /** Cria como rascunho por padrão. Publicar/agendar usam as ações abaixo. */
@@ -215,7 +247,11 @@ export const postsApi = {
     return apiClient<{ success: boolean; data: PostMedia[] }>(
       `/api/posts/media?barbershopId=${encodeURIComponent(barbershopId)}`,
       'GET', undefined, token()
-    ).then(r => unwrap<PostMedia[]>(r));
+    ).then(r => {
+      const media = unwrap<PostMedia[]>(r);
+      if (!Array.isArray(media)) throw new ApiError('A API retornou uma biblioteca de imagens inválida. Tente novamente.', 502, 'INVALID_RESPONSE');
+      return media;
+    });
   },
 
   uploadMedia(barbershopId: string, file: File) {
@@ -225,9 +261,19 @@ export const postsApi = {
       method: 'POST',
       body: form,
     }, token()).then(async (res) => {
-      if (!res.ok) throw new Error(await res.text());
-      const json = await res.json();
-      return unwrap<PostMedia>(json);
+      const json: unknown = await res.json().catch(() => null);
+      if (!res.ok) {
+        const body = json && typeof json === 'object' ? json as Record<string, unknown> : null;
+        const fallback = res.status === 413 ? 'A imagem deve ter no máximo 5 MB. Envie um arquivo menor.' : 'Não foi possível enviar a imagem. Tente novamente.';
+        const error = new ApiError(typeof body?.message === 'string' ? body.message : fallback, res.status, typeof body?.code === 'string' ? body.code : undefined, body ?? undefined);
+        if (error.isAccessBlocked) {
+          window.dispatchEvent(new CustomEvent(ACCESS_BLOCKED_EVENT, { detail: { ...body, code: error.code, statusCode: error.statusCode, message: error.message } }));
+        }
+        throw error;
+      }
+      const media = unwrap<PostMedia | null>(json);
+      if (!media?.id || !media.url) throw new ApiError('A API não confirmou o envio da imagem. Tente novamente.', 502, 'INVALID_RESPONSE');
+      return media;
     });
   },
 

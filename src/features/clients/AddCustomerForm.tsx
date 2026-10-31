@@ -1,25 +1,22 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Service } from '../../types';
-import { ServiceCard } from './ServiceCard';
-import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
-import { getErrorMessage } from '../../utils/errorMessage';
 import {
-  LuX as X,
-  LuLoaderCircle as Loader2,
-  LuUserCheck as UserCheck,
   LuCircleAlert as AlertCircle,
-  LuSparkles as Sparkles,
-  LuMessageCircle as MessageCircle,
+  LuLoaderCircle as Loader2,
   LuScissors as Scissors,
 } from 'react-icons/lu';
+import { ModalShell } from '../../components/patterns';
 import {
-  CustomerQueueSchema,
-  CustomerQueueStaffSchema,
   CustomerQueueFormData,
+  CustomerQueueSchema,
   CustomerQueueStaffFormData,
+  CustomerQueueStaffSchema,
 } from '../../schemas';
+import { Service } from '../../types';
+import { maskPhone, normalizePhoneBR } from '../../utils/documentUtils';
+import { getErrorMessage } from '../../utils/errorMessage';
+import { ServiceCard } from './ServiceCard';
 
 /** Enviado ao backend somente quando o staff não informa WhatsApp do cliente. */
 const STAFF_PLACEHOLDER_WHATSAPP = '00000000000';
@@ -95,64 +92,40 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 p-3 backdrop-blur-md animate-fade-in sm:items-center sm:p-4">
-      <div
-        className={`relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-[1.6rem] border bg-surface shadow-[0_24px_80px_rgba(0,0,0,0.45)] ${
-          isStaffMode ? 'border-accent/50' : 'border-border'
-        }`}
-      >
-        <div className="relative overflow-hidden border-b border-border/70 px-5 pb-4 pt-5 sm:px-6">
-          <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-accent/10 via-transparent to-transparent" />
-          <div className="relative flex items-start justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <div
-                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${
-                  isStaffMode ? 'bg-accent/15 text-accent' : 'bg-surface-2 text-text-secondary'
-                }`}
-              >
-                {isStaffMode ? <UserCheck size={22} /> : <MessageCircle size={20} />}
-              </div>
-              <div>
-                <div className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-border bg-bg px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
-                  {isStaffMode ? 'Ação rápida da equipe' : 'Fluxo da fila'}
-                </div>
-                <h2 className="text-[1.45rem] font-black tracking-tight text-text-primary">
-                  {isStaffMode
-                    ? 'Adicionar Cliente Manual'
-                    : isAdditionalPerson
-                      ? 'Adicionar dependente'
-                      : 'Entrar na Fila'}
-                </h2>
-                <p className="mt-1 text-sm leading-relaxed text-text-secondary">
-                  {isStaffMode
-                    ? 'Registre um cliente direto na operação com poucos toques.'
-                    : isAdditionalPerson
-                      ? 'Adicione outra pessoa ao atendimento rapidamente.'
-                      : 'Preencha os dados e escolha o serviço desejado.'}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={onCancel}
-              className="rounded-full border border-border bg-bg p-2 text-text-muted transition-colors hover:border-border-strong hover:text-text-primary"
-            >
-              <X size={20} />
-            </button>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 px-5 py-5 sm:px-6">
+    <ModalShell
+      open
+      titleId="join-queue-title"
+      variant="sheet"
+      initialFocus="close-button"
+      loading={loading}
+      onClose={onCancel}
+      title={
+        <h2 className="text-lg font-bold text-text-primary">
+          {isStaffMode
+            ? 'Adicionar cliente'
+            : isAdditionalPerson
+              ? 'Adicionar dependente'
+              : 'Entrar na fila'}
+        </h2>
+      }
+      body={
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div>
-            <label className="mb-2 block text-sm font-semibold text-text-secondary">
+            <label
+              htmlFor="queue-client-name"
+              className="mb-2 block text-sm font-semibold text-text-secondary"
+            >
               {isAdditionalPerson ? 'Nome do dependente' : 'Nome do Cliente'}
             </label>
             <input
+              id="queue-client-name"
+              autoComplete="name"
               type="text"
+              aria-invalid={Boolean(errors.name)}
               placeholder="Ex: João Silva"
-              className={`w-full rounded-2xl border bg-bg px-4 py-3.5 text-text-primary outline-none transition-all placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/25 ${
+              className={`w-full rounded-2xl border bg-bg px-4 py-3.5 text-base text-text-primary outline-none transition-all placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/25 ${
                 errors.name ? 'border-danger' : 'border-border'
               }`}
-              autoFocus
               {...register('name')}
             />
             {errors.name && (
@@ -163,13 +136,19 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-semibold text-text-secondary">
+            <label
+              htmlFor="queue-client-phone"
+              className="mb-2 block text-sm font-semibold text-text-secondary"
+            >
               WhatsApp {isStaffMode || isAdditionalPerson ? '(opcional)' : '(para aviso)'}
             </label>
             <input
+              id="queue-client-phone"
+              autoComplete="tel-national"
               type="tel"
+              aria-invalid={Boolean(errors.whatsapp)}
               placeholder="(11) 99999-9999"
-              className={`w-full rounded-2xl border bg-bg px-4 py-3.5 text-text-primary outline-none transition-all placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/25 ${
+              className={`w-full rounded-2xl border bg-bg px-4 py-3.5 text-base text-text-primary outline-none transition-all placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/25 ${
                 errors.whatsapp ? 'border-danger' : 'border-border'
               }`}
               value={watch('whatsapp')}
@@ -219,13 +198,13 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
 
           <div className="pt-2">
             {submitError && (
-              <p className="mb-3 flex items-center gap-1 text-xs text-danger">
+              <p role="alert" className="mb-3 flex items-center gap-1 text-sm text-danger">
                 <AlertCircle size={12} /> {submitError}
               </p>
             )}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || services.length === 0}
               className={`flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-base font-black tracking-wide shadow-lg transition-all ${
                 loading
                   ? 'cursor-not-allowed bg-surface-2 text-text-muted'
@@ -238,12 +217,9 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
                   Processando...
                 </>
               ) : isStaffMode || isAdditionalPerson ? (
-                <>
-                  <Sparkles size={18} />
-                  Adicionar à Fila
-                </>
+                <>Adicionar à Fila</>
               ) : (
-                'Confirmar e Avisar Dono'
+                'Entrar na fila'
               )}
             </button>
             {!isStaffMode && !isAdditionalPerson && (
@@ -253,7 +229,7 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
             )}
           </div>
         </form>
-      </div>
-    </div>
+      }
+    />
   );
 };

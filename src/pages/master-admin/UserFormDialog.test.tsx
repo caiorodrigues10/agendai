@@ -4,6 +4,24 @@ import type { ComponentProps } from 'react';
 import { UserFormDialog } from './UserFormDialog';
 import { adminApi, BarbershopListItem, UserListItem } from '../../infra/adminApi';
 
+vi.mock('../../infra/adminInternalApi', () => ({
+  adminInternalApi: {
+    getAccount: vi.fn().mockResolvedValue({
+      success: true,
+      data: {
+        shop: { name: 'Salão Central' },
+        subscription: null,
+        access: {
+          trialDaysRemaining: 5,
+          trialEndDate: '2026-10-31T12:00:00Z',
+          planActive: false,
+          subscriptionAccessAllowed: true,
+        },
+      },
+    }),
+  },
+}));
+
 vi.mock('../../infra/adminApi', () => ({
   adminApi: {
     listUsers: vi.fn(),
@@ -53,14 +71,18 @@ function setup(props: Partial<ComponentProps<typeof UserFormDialog>> = {}) {
       onClose={onClose}
       onSaved={onSaved}
       {...props}
-    />,
+    />
   );
   return { onClose, onSaved };
 }
 
 beforeEach(() => {
   vi.clearAllMocks();
-  listBarbershops.mockResolvedValue({ success: true, data: [shop], meta: { total: 1, page: 1, limit: 100, totalPages: 1 } });
+  listBarbershops.mockResolvedValue({
+    success: true,
+    data: [shop],
+    meta: { total: 1, page: 1, limit: 100, totalPages: 1 },
+  });
 });
 
 describe('UserFormDialog', () => {
@@ -74,8 +96,8 @@ describe('UserFormDialog', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Criar usuário' }));
     await waitFor(() =>
       expect(createUser).toHaveBeenCalledWith(
-        expect.objectContaining({ name: 'Maria Silva', email: 'maria@x.com', password: '123456' }),
-      ),
+        expect.objectContaining({ name: 'Maria Silva', email: 'maria@x.com', password: '123456' })
+      )
     );
     expect(onSaved).toHaveBeenCalled();
   });
@@ -87,7 +109,9 @@ describe('UserFormDialog', () => {
     fireEvent.change(within(dialog).getByLabelText('E-mail'), { target: { value: 'maria@x.com' } });
     fireEvent.change(within(dialog).getByLabelText(/^Senha/), { target: { value: '123' } });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Criar usuário' }));
-    await waitFor(() => expect(within(dialog).getByText('Mínimo de 6 caracteres.')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(within(dialog).getByText('Mínimo de 6 caracteres.')).toBeInTheDocument()
+    );
     expect(createUser).not.toHaveBeenCalled();
     expect(onSaved).not.toHaveBeenCalled();
   });

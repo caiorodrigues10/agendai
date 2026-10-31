@@ -45,7 +45,7 @@ export const AdminLayout: React.FC = () => {
   }, [sidebarOpen]);
 
   return (
-    <div className="flex h-screen bg-bg text-text-primary overflow-hidden">
+    <div className="flex h-dvh bg-bg text-text-primary overflow-hidden">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <button
@@ -59,7 +59,7 @@ export const AdminLayout: React.FC = () => {
       {/* Sidebar */}
       <aside
         className={`
-          fixed z-50 inset-y-0 left-0 w-60 bg-surface border-r border-border
+          fixed z-50 top-0 left-0 h-dvh w-60 bg-surface border-r border-border
           transform transition-transform duration-200 ease-in-out
           md:relative md:translate-x-0
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -67,7 +67,7 @@ export const AdminLayout: React.FC = () => {
       >
         <div className="flex flex-col h-full">
           {/* Brand */}
-          <div className="flex items-center justify-between h-14 px-4 border-b border-border">
+          <div className="flex shrink-0 items-center justify-between h-14 px-4 border-b border-border">
             <NavLink to="/master/work" className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-accent-fg font-bold text-sm">
                 A
@@ -85,7 +85,7 @@ export const AdminLayout: React.FC = () => {
           </div>
 
           {/* Nav */}
-          <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
+          <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain py-3 px-3 space-y-0.5">
             {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
               <NavLink
                 key={to}
@@ -105,7 +105,7 @@ export const AdminLayout: React.FC = () => {
           </nav>
 
           {/* User footer */}
-          <div className="border-t border-border p-3">
+          <div className="shrink-0 border-t border-border p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent font-bold text-xs">
                 {user?.name?.charAt(0)?.toUpperCase() ?? 'A'}
@@ -130,7 +130,7 @@ export const AdminLayout: React.FC = () => {
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0 min-w-0 overflow-hidden">
         {/* Top bar */}
         <header className="flex items-center h-12 px-4 border-b border-border bg-surface/50 backdrop-blur-sm shrink-0">
           <button
@@ -148,8 +148,8 @@ export const AdminLayout: React.FC = () => {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-4 md:p-6 max-w-7xl mx-auto">
+        <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:p-6 md:pb-[calc(1.5rem+env(safe-area-inset-bottom))] max-w-7xl mx-auto">
             <Outlet />
           </div>
         </main>

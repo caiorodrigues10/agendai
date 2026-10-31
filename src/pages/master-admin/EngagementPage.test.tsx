@@ -1,11 +1,27 @@
 /// <reference types="vitest/globals" />
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EngagementPage } from './EngagementPage';
-import { adminEngagementApi, EngagementSummary } from '../../infra/adminEngagementApi';
+import { adminEngagementApi, type EngagementBilling, type EngagementSummary } from '../../infra/adminEngagementApi';
 
 vi.mock('../../infra/adminEngagementApi', () => ({
-  adminEngagementApi: { getEngagementSummary: vi.fn() },
+  adminEngagementApi: { getEngagementSummary: vi.fn(), getBilling: vi.fn() },
 }));
+
+const billing: EngagementBilling = {
+  generatedAt: '2026-10-03T12:00:00.000Z',
+  summary: {
+    registered: 10, paying: 3, trial: 2, late: 1, pending: 1, canceled: 1,
+    activeWithoutPaidInvoice: 1, withoutSubscription: 1, collected30d: 340, overdueAmount: 80,
+  },
+  monthly: [{ month: '2026-10', amount: 340, invoices: 3, shops: 2 }],
+  shops: [{
+    id: 'b1', name: 'Barbearia Central', active: true, createdAt: '2026-01-01T12:00:00Z',
+    subscriptionStatus: 'ACTIVE', planName: 'Pro anual', billingCycle: 'YEARLY', endDate: null,
+    paidInvoices: 1, paidMonthsEquivalent: 12, totalPaid: 340,
+    lastPaidAt: '2026-10-01T12:00:00Z', overdueAmount: 0, nextDueAt: null,
+  }],
+  matching: 1, nextCursor: null,
+};
 
 const summary: EngagementSummary = {
   generatedAt: '2026-10-03T12:00:00.000Z',
@@ -52,6 +68,9 @@ const summary: EngagementSummary = {
 };
 
 describe('EngagementPage', () => {
+  beforeEach(() => {
+    vi.mocked(adminEngagementApi.getBilling).mockResolvedValue({ success: true, data: billing });
+  });
   afterEach(() => vi.clearAllMocks());
 
   it('carrega e exibe funil, adoção, NPS, suporte e churn', async () => {
@@ -76,8 +95,11 @@ describe('EngagementPage', () => {
     expect(screen.getByText('1,5 h')).toBeInTheDocument();
 
     expect(screen.getByText('Risco de churn')).toBeInTheDocument();
-    expect(screen.getByText('Barbearia Central')).toBeInTheDocument();
+    expect(screen.getAllByText('Barbearia Central').length).toBeGreaterThan(0);
     expect(screen.getByText('Assinatura em atraso')).toBeInTheDocument();
+    expect(screen.getByText('Assinaturas e pagamentos')).toBeInTheDocument();
+    expect(screen.getAllByText('Pro anual').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('12').length).toBeGreaterThan(0);
   });
 
   it('mostra erro e recarrega ao tentar novamente', async () => {
@@ -125,5 +147,13 @@ describe('EngagementPage', () => {
     expect(
       await screen.findByText('Nenhum salão em risco no momento.'),
     ).toBeInTheDocument();
+  });
+
+  it('mantém as métricas de uso quando o acesso financeiro é negado', async () => {
+    vi.mocked(adminEngagementApi.getBilling).mockRejectedValue(new (await import('../../infra/apiClient')).ApiError('Negado', 403));
+    vi.mocked(adminEngagementApi.getEngagementSummary).mockResolvedValue({ success: true, data: summary });
+    render(<EngagementPage />);
+    expect(await screen.findByText(/exigem permissão de leitura do faturamento/)).toBeInTheDocument();
+    expect(screen.getByText('Funil de ativação')).toBeInTheDocument();
   });
 });

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ModalShell } from '../../components/patterns/ModalShell';
+import { AdminFormShell as ModalShell } from './AdminFormShell';
 import { Plan, plansApi } from '../../infra/plansApi';
 
 export type ActionExtra = 'days' | 'plans';

@@ -29,6 +29,15 @@ Código existente ≠ comprovadamente funcional em produção. Distinguir:
 | Posts / feed / perfil social | `PostsManager`, `ShopProfile`, `PublicPostPage` | `postsApi`, `barbershopApi`, `socialApi` | `/api/feed`, `/api/posts`, `/api/salons/:salonId/*`; link direto `/saloes/:salonId/posts/:postId` |
 | Indicações | `OwnerReferralsPanel` | `referralsApi` | `/api/referrals` |
 | Master admin | `BillingTab` + 13 páginas de `pages/master-admin/` | `adminApi` | `/api/admin/*` |
+
+Na edição de usuários, `UserSubscriptionSummary` consulta `adminInternalApi.getAccount`
+para o salão selecionado. O objeto `access` da resposta informa os dias grátis,
+se o plano está ativo e se a assinatura libera acesso, calculados no backend.
+O formulário não altera plano/prazo; falhas nessa consulta não impedem editar o usuário.
+Os formulários do master compartilham `AdminFormShell` (corpo rolável e rodapé fixo).
+O resumo permite adicionar 1–90 dias a assinaturas `TRIALING`, com motivo de auditoria,
+via `adminAccountActionsApi.accountAction(id, 'extend-trial', ...)`. A operação é
+independente de salvar o usuário e recarrega o resumo depois da confirmação.
 | Contato público | `ContactPage` | `contactApi` | `/api/contact` |
 | Realtime | polling + `realtimeWs` | `realtimeWs` | `/ws` (quando habilitado) |
 

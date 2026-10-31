@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MemoryRouter } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
-import { userEvent, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import { AuditPage } from './AuditPage';
 import type { AuditAlerts, AuditFacets, AuditLogsResponse } from '../../infra/adminAuditApi';
 import type { AdminSession } from '../../infra/adminSessionsApi';
 
 const facets: AuditFacets = {
-  resources: ['products', 'auth'],
+  resources: ['products', 'auth', 'BlockedEntity', 'users'],
   users: [{ id: 'user-1', name: 'Administrador', email: 'admin@agendai.local' }],
   shops: [{ id: 'b1', name: 'Barbearia Central' }],
 };
@@ -33,7 +33,11 @@ const alerts: AuditAlerts = {
   ],
 };
 
-const sessions: { success: true; data: AdminSession[]; meta: { total: number; page: number; limit: number; totalPages: number } } = {
+const sessions: {
+  success: true;
+  data: AdminSession[];
+  meta: { total: number; page: number; limit: number; totalPages: number };
+} = {
   success: true,
   data: [
     {
@@ -61,6 +65,22 @@ const sessions: { success: true; data: AdminSession[]; meta: { total: number; pa
 const auditLogs: AuditLogsResponse = {
   success: true,
   data: [
+    {
+      id: 'log-block',
+      userId: '00000000-0000-0000-0000-000000000000',
+      action: 'BLOCK_ENTITY',
+      resource: 'BlockedEntity',
+      resourceId: 'block-synthetic',
+      details: JSON.stringify({
+        type: 'CPF',
+        value: '12345678909',
+        reason: 'Assinatura encerrada sem renovação. Bloqueio preventivo registrado pelo sistema.',
+        barbershopId: 'b1',
+      }),
+      ipAddress: null,
+      barbershopId: 'b1',
+      createdAt: '2026-10-01T10:38:56.000Z',
+    },
     {
       id: 'log-1',
       userId: 'user-1',
@@ -113,9 +133,11 @@ const meta = {
   component: AuditPage,
   tags: ['autodocs', 'test'],
   decorators: [
-    Story => (
-      <MemoryRouter initialEntries={['/master/audit']}>
-        <Story />
+    (Story, context) => (
+      <MemoryRouter initialEntries={[context.parameters.auditUrl ?? '/master/audit']}>
+        <div className="mx-auto max-w-7xl p-4 sm:p-6">
+          <Story />
+        </div>
       </MemoryRouter>
     ),
   ],
@@ -133,9 +155,11 @@ export const Default: Story = {
     const canvas = within(canvasElement);
     await canvas.findByText('PATCH /api/products/abc', {}, { timeout: 10000 });
     await canvas.findByText('POST /api/auth/login', {}, { timeout: 10000 });
-    await canvas.findByText('40 registro(s) · página 1 de 2', {}, { timeout: 10000 });
-    await canvas.findByText('ação(ões) sensível(is)', {}, { timeout: 10000 });
+    await canvas.findByText('40 registros', {}, { timeout: 10000 });
+    await canvas.findByText('ações sensíveis', {}, { timeout: 10000 });
     await canvas.findByText('Chrome em macOS', {}, { timeout: 10000 });
+    await canvas.findByRole('button', { name: 'Detalhes: Bloqueio registrado' });
+    await expect(canvasElement).not.toHaveTextContent('12345678909');
   },
 };
 
@@ -164,10 +188,71 @@ export const ErroExportar: Story = {
     await userEvent.click(
       await canvas.findByRole('button', { name: /Exportar CSV/ }, { timeout: 10000 })
     );
-    await canvas.findByText(
-      /Não foi possível exportar os registros/,
-      {},
-      { timeout: 10000 }
-    );
+    await canvas.findByText(/Não foi possível exportar os registros/, {}, { timeout: 10000 });
+  },
+};
+
+/** O estado sem alertas não ocupa a tela com blocos vazios. */
+export const SemAlertas: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.get('/api/admin/audit-logs/alerts', () =>
+          HttpResponse.json({
+            success: true,
+            data: {
+              ...alerts,
+              total: 0,
+              recent: [],
+              byGroup: [
+                { key: 'impersonation', label: 'Impersonation', count: 0 },
+                { key: 'accounts', label: 'Contas', count: 0 },
+                { key: 'deletions', label: 'Exclusões', count: 0 },
+                { key: 'blocks', label: 'Bloqueios', count: 0 },
+              ],
+            },
+          })
+        ),
+        ...mswHandlers,
+      ],
+    },
+  },
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText('Nenhuma ação sensível nas últimas 24 horas.');
+  },
+};
+
+/** Um resultado vazio filtrado oferece orientação e uma saída visível. */
+export const SemResultados: Story = {
+  parameters: {
+    auditUrl: '/master/audit?q=nenhum-evento',
+    msw: {
+      handlers: [
+        http.get('/api/admin/audit-logs', () =>
+          HttpResponse.json({
+            ...auditLogs,
+            data: [],
+            meta: { total: 0, page: 1, limit: 25, totalPages: 0 },
+          })
+        ),
+        ...mswHandlers,
+      ],
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText('Nenhum registro encontrado.');
+    await canvas.findByRole('button', { name: 'Remover filtro Busca: nenhum-evento' });
+  },
+};
+
+/** Filtros previamente aplicados ficam identificados e podem ser removidos individualmente. */
+export const FiltrosAplicados: Story = {
+  parameters: { auditUrl: '/master/audit?action=PATCH&shopId=b1' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByRole('button', { name: 'Remover filtro Ação: PATCH' });
+    await canvas.findByRole('button', { name: 'Remover filtro Salão: Barbearia Central' });
+    await expect(canvas.getByRole('combobox', { name: 'Salão' })).toBeVisible();
   },
 };

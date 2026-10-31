@@ -3,6 +3,10 @@ import { createPortal } from 'react-dom';
 import FocusLock from 'react-focus-lock';
 import { LuX as X } from 'react-icons/lu';
 
+// Reference-counted so closing a nested dialog doesn't unlock the page behind it.
+const openDialogs: symbol[] = [];
+let previousBodyOverflow = '';
+
 export type ModalShellVariant = 'dialog' | 'sheet';
 
 export interface ModalShellProps {
@@ -34,6 +38,8 @@ export interface ModalShellProps {
   body?: React.ReactNode;
   /** Classes extras no container do `body` (complementa `mt-4` ou o scroller do sheet). */
   bodyClassName?: string;
+  /** Onde iniciar o foco sem abrir o teclado móvel automaticamente. */
+  initialFocus?: 'first-control' | 'close-button';
   footer?: React.ReactNode;
 }
 
@@ -46,6 +52,7 @@ interface HeaderProps {
   actions?: React.ReactNode;
   loading: boolean;
   onClose: () => void;
+  initialFocus: 'first-control' | 'close-button';
   children?: React.ReactNode;
 }
 
@@ -58,6 +65,7 @@ const ShellHeader: React.FC<HeaderProps> = ({
   actions,
   loading,
   onClose,
+  initialFocus,
   children,
 }) => (
   <div className="flex items-start gap-3">
@@ -79,7 +87,8 @@ const ShellHeader: React.FC<HeaderProps> = ({
             type="button"
             onClick={onClose}
             disabled={loading}
-            className={`rounded-lg text-text-muted hover:bg-bg disabled:opacity-50 ${sheet ? 'p-2' : 'p-1'}`}
+            data-autofocus={initialFocus === 'close-button' ? '' : undefined}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-text-secondary hover:bg-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:opacity-50"
             aria-label="Fechar"
           >
             <X size={sheet ? 18 : 16} />
@@ -109,12 +118,47 @@ export const ModalShell: React.FC<ModalShellProps> = ({
   children,
   body,
   bodyClassName = '',
+  initialFocus = 'close-button',
   footer,
 }) => {
+  const [visualViewportRect, setVisualViewportRect] = React.useState<{ top: number; height: number } | null>(null);
+  const dialogKey = React.useRef(Symbol('dialog'));
   useEffect(() => {
-    if (!open || !closeOnEscape || loading) return;
+    if (!open) return;
+    const key = dialogKey.current;
+    if (openDialogs.length === 0) {
+      previousBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+    }
+    openDialogs.push(key);
+    return () => {
+      const index = openDialogs.indexOf(key);
+      if (index >= 0) openDialogs.splice(index, 1);
+      if (openDialogs.length === 0) document.body.style.overflow = previousBodyOverflow;
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const updateViewport = () => setVisualViewportRect({ top: viewport.offsetTop, height: viewport.height });
+    updateViewport();
+    viewport.addEventListener('resize', updateViewport);
+    viewport.addEventListener('scroll', updateViewport);
+    return () => {
+      viewport.removeEventListener('resize', updateViewport);
+      viewport.removeEventListener('scroll', updateViewport);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key !== 'Escape' || e.defaultPrevented || openDialogs.at(-1) !== dialogKey.current)
+        return;
+      e.preventDefault();
+      if (closeOnEscape && !loading) onClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -122,16 +166,37 @@ export const ModalShell: React.FC<ModalShellProps> = ({
 
   if (!open) return null;
   const sheet = variant === 'sheet';
-  const headerProps = { sheet, icon, iconClassName, titleId, title, actions, loading, onClose, children };
+  const headerProps = {
+    sheet,
+    icon,
+    iconClassName,
+    titleId,
+    title,
+    actions,
+    loading,
+    onClose,
+    initialFocus,
+    children,
+  };
+  const viewportStyle = visualViewportRect
+    ? { top: `${visualViewportRect.top}px`, height: `${visualViewportRect.height}px` }
+    : undefined;
+  const panelStyle = visualViewportRect
+    ? { maxHeight: `${Math.max(160, visualViewportRect.height - (sheet ? 8 : 32))}px` }
+    : undefined;
 
   return createPortal(
     <FocusLock returnFocus>
       <div
         className={`fixed inset-0 z-[110] flex items-end justify-center bg-black/70 ${sheet ? 'sm:p-4' : 'p-4'} sm:items-center`}
+        style={viewportStyle}
       >
         <button
           type="button"
           aria-label="Fechar"
+          tabIndex={-1}
+          aria-hidden="true"
+          disabled={loading}
           onClick={onClose}
           className="absolute inset-0 cursor-default"
         />
@@ -143,8 +208,9 @@ export const ModalShell: React.FC<ModalShellProps> = ({
           className={`relative w-full border ${borderClassName} bg-surface shadow-2xl ${
             sheet
               ? 'flex max-h-[92dvh] flex-col overflow-hidden rounded-t-2xl sm:rounded-2xl max-w-2xl'
-              : 'rounded-2xl p-5 max-w-md'
+              : 'max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl p-5 max-w-md'
           } ${className}`}
+          style={panelStyle}
         >
           {sheet ? (
             <header className="shrink-0 border-b border-border px-4 py-4 sm:px-5">
@@ -155,14 +221,14 @@ export const ModalShell: React.FC<ModalShellProps> = ({
           )}
           {body && (
             <div
-              className={`${sheet ? 'flex-1 overflow-y-auto ag-scroll px-4 py-4 sm:px-5' : 'mt-4'} ${bodyClassName}`}
+              className={`${sheet ? 'min-h-0 flex-1 overflow-y-auto overscroll-contain ag-scroll px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-5' : 'mt-4'} ${bodyClassName}`}
             >
               {body}
             </div>
           )}
           {footer && (
             <div
-              className={`flex gap-2 ${sheet ? 'shrink-0 border-t border-border px-4 py-3 sm:px-5' : 'mt-5'}`}
+              className={`flex gap-2 ${sheet ? 'shrink-0 border-t border-border px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:px-5' : 'mt-5'}`}
             >
               {footer}
             </div>

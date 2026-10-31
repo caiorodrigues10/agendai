@@ -1,4 +1,5 @@
 import React from 'react';
+import { LuLoaderCircle } from 'react-icons/lu';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type ButtonSize = 'sm' | 'md' | 'icon';
@@ -10,8 +11,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const variants: Record<ButtonVariant, string> = {
-  primary:
-    'bg-accent text-accent-fg shadow-sm shadow-black/10 hover:bg-accent-hover',
+  primary: 'bg-accent text-accent-fg shadow-sm shadow-black/10 hover:bg-accent-hover',
   secondary:
     'border border-border bg-surface text-text-primary hover:border-border-strong hover:bg-surface-2',
   ghost: 'text-text-secondary hover:bg-surface-2 hover:text-text-primary',
@@ -19,7 +19,7 @@ const variants: Record<ButtonVariant, string> = {
 };
 
 const sizes: Record<ButtonSize, string> = {
-  sm: 'min-h-9 px-3 text-xs',
+  sm: 'min-h-11 px-3 text-sm',
   md: 'min-h-11 px-4 text-sm',
   icon: 'h-11 w-11 p-0',
 };
@@ -42,10 +42,18 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       ref={ref}
       type={type}
       disabled={disabled || loading}
+      aria-busy={loading || undefined}
       className={`inline-flex items-center justify-center gap-2 rounded-xl font-bold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${sizes[size]} ${className}`}
       {...props}
     >
-      {loading ? 'Carregando…' : children}
+      {loading && (
+        <LuLoaderCircle
+          aria-hidden="true"
+          className="shrink-0 animate-spin motion-reduce:animate-none"
+          size={16}
+        />
+      )}
+      {children}
     </button>
   )
 );

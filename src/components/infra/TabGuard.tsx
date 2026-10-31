@@ -1,7 +1,8 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
 import { canAccessTab } from '../../config/tabRegistry';
+import { useAuth } from '../../contexts/AuthContext';
+import { useSubscription } from '../../contexts/SubscriptionContext';
 import { AccessDeniedPage } from '../../pages/AccessDeniedPage';
 
 /**
@@ -15,13 +16,35 @@ import { AccessDeniedPage } from '../../pages/AccessDeniedPage';
  */
 export const TabGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
+  const { hasDashboard, data, loading: subscriptionLoading } = useSubscription();
   const { tab } = useParams<{ tab: string }>();
 
   // PrivateRoute (ancora a rota /app/:tab) já trata loading e ausência de usuário.
   if (loading || !user) return <>{children}</>;
 
-  const canAccess = canAccessTab(tab ?? 'overview', user.role, { permissions: user.permissions });
-  if (!canAccess) return <AccessDeniedPage attemptedTab={tab} />;
+  if (subscriptionLoading && !data)
+    return (
+      <p role="status" className="p-6 text-sm text-text-secondary">
+        Carregando acesso ao painel…
+      </p>
+    );
+
+  const canAccess = canAccessTab(tab ?? 'overview', user.role, {
+    hasDashboard,
+    permissions: user.permissions,
+  });
+  if (!canAccess) {
+    const permittedWithDashboard = canAccessTab(tab ?? 'overview', user.role, {
+      hasDashboard: true,
+      permissions: user.permissions,
+    });
+    return (
+      <AccessDeniedPage
+        attemptedTab={tab}
+        reason={!hasDashboard && permittedWithDashboard ? 'plan' : 'permission'}
+      />
+    );
+  }
 
   return <>{children}</>;
 };

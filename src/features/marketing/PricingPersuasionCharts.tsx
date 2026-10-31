@@ -1,9 +1,19 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '../../components/ui/chart';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from '../../components/ui/chart';
 import { trialCampaign } from '../../marketing/trialCampaign';
-import { ESSENTIAL_MONTHLY, PRO_MONTHLY, ESSENTIAL_YEARLY, PRO_YEARLY } from '../../marketing/planPrices';
+import {
+  ESSENTIAL_MONTHLY,
+  PRO_MONTHLY,
+  ESSENTIAL_YEARLY,
+  PRO_YEARLY,
+} from '../../marketing/planPrices';
 
 const AVG_TICKET = 55;
 const LOST_NOSHOWS_MONTH = 3;
@@ -21,7 +31,7 @@ export const PricingPersuasionCharts: React.FC<PricingPersuasionChartsProps> = (
     : 'border-border bg-surface';
   const title = isDark ? 'text-white' : 'text-text-primary';
   const muted = isDark ? 'text-neutral-300' : 'text-text-secondary';
-  const faint = isDark ? 'text-neutral-500' : 'text-text-muted';
+  const faint = isDark ? 'text-neutral-400' : 'text-text-muted';
   const shell = isDark ? 'border-white/10 bg-white/5' : 'border-border bg-bg';
 
   const accent = isDark ? '#34d399' : 'var(--chart-1)';

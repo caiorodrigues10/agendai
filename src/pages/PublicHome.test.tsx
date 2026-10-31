@@ -1,8 +1,6 @@
 /// <reference types="vitest/globals" />
-import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { render, fireEvent } from '@testing-library/react';
 import { PublicHome } from './PublicHome';
 
 const { mockJoinQueue, mockOperationMode, mockPublicProducts } = vi.hoisted(() => ({
@@ -135,7 +133,9 @@ describe('PublicHome smoke', () => {
     fireEvent.click(screen.getByRole('button', { name: /adicionar à fila/i }));
 
     await waitFor(() => {
-      expect(mockJoinQueue).toHaveBeenCalledWith('Maria Silva', '', 's1', { additionalPerson: true });
+      expect(mockJoinQueue).toHaveBeenCalledWith('Maria Silva', '', 's1', {
+        additionalPerson: true,
+      });
     });
   });
 });
@@ -170,13 +170,13 @@ describe('PublicHome — carrossel de produtos', () => {
 
     expect(screen.queryByRole('region', { name: 'Produtos para reserva' })).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Agenda' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Agenda' }));
     expect(
       await screen.findByRole('region', { name: 'Produtos para reserva' })
     ).toBeInTheDocument();
     expect(screen.getByText('Pomada modeladora')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Perfil' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Perfil' }));
     expect(
       await screen.findByRole('region', { name: 'Produtos para reserva' })
     ).toBeInTheDocument();
@@ -190,7 +190,7 @@ describe('PublicHome — carrossel de produtos', () => {
     expect(screen.queryByRole('button', { name: 'Agenda' })).toBeNull();
     expect(screen.queryByRole('region', { name: 'Produtos para reserva' })).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Perfil' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Perfil' }));
     expect(
       await screen.findByRole('region', { name: 'Produtos para reserva' })
     ).toBeInTheDocument();

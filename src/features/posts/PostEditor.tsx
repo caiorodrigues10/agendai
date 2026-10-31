@@ -5,7 +5,6 @@ import FocusLock from 'react-focus-lock';
 import {
   LuLoaderCircle as Loader2,
   LuChevronRight as ChevronRight,
-  LuChevronLeft as ChevronLeft,
   LuClock3 as Clock3,
   LuSparkles as Sparkles,
   LuDownload as Download,
@@ -13,7 +12,6 @@ import {
   LuCheck as Check,
   LuPalette as Palette,
   LuCalendarClock as CalendarClock,
-  LuMegaphone as Megaphone,
   LuRectangleHorizontal as RectangleHorizontal,
   LuRectangleVertical as RectangleVertical,
   LuSmartphone as Smartphone,
@@ -23,8 +21,9 @@ import { barbershopApi, PostAiSuggestion } from '../../infra/barbershopApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { FeedPost, PostFormat, PostMode } from '../../types';
 import { Button } from '../../components/ui/Button';
+import { SectionError } from '../../components/patterns/states/SectionError';
 import { PostPreviewBox } from './PostPreviewBox';
-import { TemplateThumbnail } from './TemplateThumbnail';
+import { PostTemplatePicker } from './PostTemplatePicker';
 import { OBJECTIVES, type PostType, type ObjectiveId } from './objectives';
 import { readDraft, writeDraft, clearDraft } from './draftStorage';
 
@@ -32,24 +31,10 @@ type PostTone = 'promocional' | 'informativo' | 'divertido' | null;
 type EditorTab = 'content' | 'image' | 'format' | 'identity';
 
 /** Agora + offset em minutos, formatado no fuso LOCAL (datetime-local não usa UTC). */
-function localDateTime(offsetMinutes = 0): string {
-  const d = new Date(Date.now() + offsetMinutes * 60_000);
+function localDateTime(offsetMinutes = 0, date = new Date()): string {
+  const d = new Date(date.getTime() + offsetMinutes * 60_000);
   const local = new Date(d.getTime() - d.getTimezoneOffset() * 60_000);
   return local.toISOString().slice(0, 16);
-}
-
-const GROUP_LABELS: Record<string, string> = {
-  agenda: 'Agenda',
-  ofertas: 'Ofertas',
-  resultados: 'Resultados',
-  equipe: 'Equipe',
-  depoimentos: 'Depoimentos',
-  editorial: 'Editorial',
-  tipografia: 'Tipografia',
-};
-
-function groupLabel(key: string) {
-  return GROUP_LABELS[key] ?? key.charAt(0).toUpperCase() + key.slice(1);
 }
 
 /** Deriva photoMode de templates antigos que ainda não expõem o campo. */
@@ -100,6 +85,9 @@ function downloadImage(imageUrl: string, filename: string) {
 interface LocalDraftPayload {
   version: number;
   savedAt: number;
+  serverPostId?: string | null;
+  scheduledFor?: string;
+  publishMode?: 'now' | 'schedule';
   objectiveId: ObjectiveId | null;
   templateKey: string;
   paletteKey: string;
@@ -118,10 +106,14 @@ interface LocalDraftPayload {
 
 export interface PostEditorProps {
   post: FeedPost | null;
+  sourcePost?: FeedPost | null;
   barbershopId: string;
   userId: string;
   palettes: PostPaletteDef[];
   mediaLibrary: PostMedia[];
+  metadataErrors?: string[];
+  metadataLoading?: boolean;
+  onReloadMetadata?: () => void;
   onClose: () => void;
   onSaved: (status: 'draft' | 'scheduled' | 'published') => void;
   showToast: (msg: string, type?: 'success' | 'error') => void;
@@ -132,41 +124,54 @@ export interface PostEditorProps {
 
 export const PostEditor: React.FC<PostEditorProps> = ({
   post,
+  sourcePost,
   barbershopId,
   userId,
   palettes,
   mediaLibrary,
+  metadataErrors = [],
+  metadataLoading = false,
+  onReloadMetadata,
   onClose,
   onSaved,
-  showToast,
+  showToast: onToast,
   onMediaUploaded,
 }) => {
   const isEditing = !!post;
-  const storageKey = post?.id ?? 'new';
+  const isPublished = post?.status === 'published';
+  const basePost = post ?? sourcePost;
+  const storageKey = post?.id ?? (sourcePost ? `copy-${sourcePost.id}` : 'new');
+  const [editorError, setEditorError] = useState<string | null>(null);
+  const showToast = useCallback((message: string, kind: 'success' | 'error' = 'success') => {
+    setEditorError(kind === 'error' ? message : null);
+    onToast(message, kind);
+  }, [onToast]);
 
   // Restaura o rascunho local ANTES do primeiro render dos estados, para que o
   // efeito de persistência nunca sobrescreva o rascunho salvo com valores vazios.
   const [initialDraft] = useState<LocalDraftPayload | null>(() =>
-    post ? null : readDraft<LocalDraftPayload>(userId, barbershopId, 'new', DRAFT_VERSION)
+    readDraft<LocalDraftPayload>(userId, barbershopId, storageKey, DRAFT_VERSION)
   );
-  const draft = !isEditing ? initialDraft : null;
+  const draft = initialDraft;
 
   const [tab, setTab] = useState<EditorTab>('content');
-  const [objectiveId, setObjectiveId] = useState<ObjectiveId | null>(draft?.objectiveId ?? null);
-  const [templateKey, setTemplateKey] = useState(draft?.templateKey ?? post?.templateKey ?? 'agenda-aberta');
-  const [paletteKey, setPaletteKey] = useState(draft?.paletteKey ?? post?.paletteKey ?? 'brand');
-  const [format, setFormat] = useState<PostFormat>(draft?.format ?? post?.format ?? 'square');
-  const [postMode, setPostMode] = useState<PostMode>(draft?.postMode ?? post?.postMode ?? 'both');
-  const [type, setType] = useState<PostType>(draft?.type ?? post?.type ?? 'haircut');
-  const [title, setTitle] = useState(draft?.title ?? post?.title ?? '');
-  const [ctaText, setCtaText] = useState(draft?.ctaText ?? post?.ctaText ?? '');
-  const [content, setContent] = useState(draft?.content ?? post?.content ?? '');
-  const [videoUrl, setVideoUrl] = useState<string | null>(draft?.videoUrl ?? post?.videoUrl ?? null);
-  const [primaryMediaId, setPrimaryMediaId] = useState<string | null>(draft?.primaryMediaId ?? post?.primaryMediaId ?? null);
-  const [secondaryMediaId, setSecondaryMediaId] = useState<string | null>(draft?.secondaryMediaId ?? post?.secondaryMediaId ?? null);
+  const [objectiveId, setObjectiveId] = useState<ObjectiveId | null>(draft?.objectiveId ?? (sourcePost ? OBJECTIVES.find(item => item.templateKey === sourcePost.templateKey)?.id ?? 'announce' : null));
+  const [templateKey, setTemplateKey] = useState(draft?.templateKey ?? basePost?.templateKey ?? 'agenda-aberta');
+  const [paletteKey, setPaletteKey] = useState(draft?.paletteKey ?? basePost?.paletteKey ?? 'brand');
+  const [format, setFormat] = useState<PostFormat>(draft?.format ?? basePost?.format ?? 'square');
+  const [postMode, setPostMode] = useState<PostMode>(draft?.postMode ?? basePost?.postMode ?? 'both');
+  const [type, setType] = useState<PostType>(draft?.type ?? basePost?.type ?? 'haircut');
+  const [title, setTitle] = useState(draft?.title ?? basePost?.title ?? '');
+  const [ctaText, setCtaText] = useState(draft?.ctaText ?? basePost?.ctaText ?? '');
+  const [content, setContent] = useState(draft?.content ?? basePost?.content ?? '');
+  const [videoUrl, setVideoUrl] = useState<string | null>(draft ? draft.videoUrl : basePost?.videoUrl ?? null);
+  const [primaryMediaId, setPrimaryMediaId] = useState<string | null>(draft ? draft.primaryMediaId : basePost?.primaryMediaId ?? null);
+  const [secondaryMediaId, setSecondaryMediaId] = useState<string | null>(draft ? draft.secondaryMediaId : basePost?.secondaryMediaId ?? null);
 
   const [templates, setTemplates] = useState<PostTemplateDef[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(true);
+  const [templatesError, setTemplatesError] = useState<string | null>(null);
+  const [templatesAttempt, setTemplatesAttempt] = useState(0);
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
@@ -175,19 +180,21 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   const [suggestions, setSuggestions] = useState<PostAiSuggestion[]>([]);
   const [generatingSuggestions, setGeneratingSuggestions] = useState(false);
 
-  const [scheduledFor, setScheduledFor] = useState(() => localDateTime(3 * 60));
+  const [scheduledFor, setScheduledFor] = useState(() => draft?.scheduledFor ?? (post?.scheduledFor ? localDateTime(0, new Date(post.scheduledFor)) : localDateTime(3 * 60)));
   const scheduleMin = useMemo(() => localDateTime(5), []);
-  const [publishMode, setPublishMode] = useState<'now' | 'schedule'>('now');
+  const [publishMode, setPublishMode] = useState<'now' | 'schedule'>(draft?.publishMode ?? (post?.status === 'scheduled' ? 'schedule' : 'now'));
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(post?.imageUrl ?? null);
   const [previewStale, setPreviewStale] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [previewAttempt, setPreviewAttempt] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const savedPostId = useRef<string | null>(post?.id ?? draft?.serverPostId ?? null);
   const mediaBusy = uploadingPhoto || uploadingVideo;
 
   const [showMediaPicker, setShowMediaPicker] = useState<'primary' | 'secondary' | null>(null);
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
-  const [templateFilter, setTemplateFilter] = useState<'all' | 'with-photo' | 'no-photo'>('all');
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -206,110 +213,79 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   }, [onClose, showMediaPicker, showTemplatePicker, submitting, mediaBusy]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previewSeqRef = useRef(0);
-  const liveRef = useRef<{ templateKey: string; paletteKey: string; format: PostFormat; title: string; ctaText: string; primaryMediaId: string | null; secondaryMediaId: string | null; postMode: PostMode; type: PostType }>({
-    templateKey, paletteKey, format, title, ctaText, primaryMediaId, secondaryMediaId, postMode, type,
-  });
 
-  // Catálogo de modelos: postsApi.templates() é a fonte única.
+  // O catálogo continua vindo exclusivamente da API, com recuperação no editor.
   useEffect(() => {
     let cancelled = false;
     setTemplatesLoading(true);
-    postsApi.templates()
+    setTemplatesError(null);
+    postsApi.templates(barbershopId)
       .then(list => { if (!cancelled) setTemplates(list); })
-      .catch(() => { if (!cancelled) showToast('Não foi possível carregar os modelos.', 'error'); })
+      .catch(error => {
+        if (!cancelled) setTemplatesError(getErrorMessage(error, 'Não foi possível carregar os modelos.'));
+      })
       .finally(() => { if (!cancelled) setTemplatesLoading(false); });
     return () => { cancelled = true; };
-  }, [showToast]);
+  }, [templatesAttempt, barbershopId]);
 
   const selectedTemplate = useMemo(() => templates.find(t => t.key === templateKey), [templates, templateKey]);
   const selectedPhotoMode = templatePhotoMode(selectedTemplate);
-
-  const templateGroups = useMemo(() => {
-    const seen = new Map<string, string>();
-    for (const t of templates) {
-      const g = t.group ?? 'outros';
-      if (!seen.has(g)) seen.set(g, groupLabel(g));
-    }
-    return Array.from(seen, ([key, label]) => ({ key, label }));
-  }, [templates]);
-
-  const filteredTemplates = useMemo(() => {
-    if (templateFilter === 'all') return templates;
-    return templates.filter(t =>
-      templateFilter === 'with-photo' ? templatePhotoMode(t) !== 'none' : templatePhotoMode(t) === 'none'
-    );
-  }, [templates, templateFilter]);
+  const recommendedTemplateKey = OBJECTIVES.find(objective => objective.id === objectiveId)?.templateKey;
 
   const persistDraft = useCallback(() => {
     writeDraft<LocalDraftPayload>(userId, barbershopId, storageKey, DRAFT_VERSION, {
+      serverPostId: savedPostId.current, scheduledFor, publishMode,
       objectiveId, templateKey, paletteKey, format, postMode, type, title, ctaText,
       content, videoUrl, primaryMediaId, secondaryMediaId,
     });
-  }, [userId, barbershopId, storageKey, objectiveId, templateKey, paletteKey, format, postMode, type, title, ctaText, content, videoUrl, primaryMediaId, secondaryMediaId]);
+  }, [userId, barbershopId, storageKey, objectiveId, templateKey, paletteKey, format, postMode, type, title, ctaText, content, videoUrl, primaryMediaId, secondaryMediaId, scheduledFor, publishMode]);
 
   useEffect(() => { persistDraft(); }, [persistDraft]);
 
-  const triggerPreview = useCallback(() => {
+  useEffect(() => {
     if (!barbershopId) return;
+    const seq = ++previewSeqRef.current;
+    const controller = new AbortController();
     setPreviewStale(true);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(async () => {
-      const snap = liveRef.current;
-      const seq = ++previewSeqRef.current;
-      setPreviewLoading(true);
+    setPreviewLoading(true);
+    setPreviewError(null);
+    const timer = setTimeout(async () => {
       try {
         const url = await postsApi.preview(barbershopId, {
-          postMode: snap.postMode,
-          type: snap.type,
-          title: snap.title || undefined,
-          ctaText: snap.ctaText || undefined,
-          templateKey: snap.templateKey,
-          format: snap.format,
-          paletteKey: snap.paletteKey,
-          primaryMediaId: snap.primaryMediaId,
-          secondaryMediaId: snap.secondaryMediaId,
-        });
-        const cur = liveRef.current;
-        // Ignora respostas fora de ordem e qualquer mudança de estado posterior,
-        // incluindo postMode/type.
-        if (
-          seq !== previewSeqRef.current ||
-          cur.templateKey !== snap.templateKey ||
-          cur.paletteKey !== snap.paletteKey ||
-          cur.format !== snap.format ||
-          cur.title !== snap.title ||
-          cur.ctaText !== snap.ctaText ||
-          cur.primaryMediaId !== snap.primaryMediaId ||
-          cur.secondaryMediaId !== snap.secondaryMediaId ||
-          cur.postMode !== snap.postMode ||
-          cur.type !== snap.type
-        ) {
-          return;
-        }
+          postMode, type, title: title || undefined, ctaText: ctaText || undefined,
+          templateKey, format, paletteKey, primaryMediaId, secondaryMediaId,
+        }, { signal: controller.signal });
+        if (controller.signal.aborted || seq !== previewSeqRef.current) return;
         setPreviewUrl(url);
         setPreviewStale(false);
-      } catch {
-        if (seq !== previewSeqRef.current) return;
-        showToast('Não foi possível gerar a prévia.', 'error');
-        setPreviewStale(true);
+      } catch (error) {
+        if (controller.signal.aborted || seq !== previewSeqRef.current) return;
+        setPreviewError(getErrorMessage(error, 'Não foi possível gerar a prévia.'));
       } finally {
-        if (seq === previewSeqRef.current) setPreviewLoading(false);
+        if (!controller.signal.aborted && seq === previewSeqRef.current) setPreviewLoading(false);
       }
     }, 500);
-  }, [barbershopId, showToast]);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [barbershopId, templateKey, paletteKey, format, title, ctaText, primaryMediaId, secondaryMediaId, postMode, type, previewAttempt]);
 
-  useEffect(() => {
-    liveRef.current = { templateKey, paletteKey, format, title, ctaText, primaryMediaId, secondaryMediaId, postMode, type };
-    triggerPreview();
-  }, [templateKey, paletteKey, format, title, ctaText, primaryMediaId, secondaryMediaId, postMode, type, triggerPreview]);
-
-  useEffect(() => () => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    // Invalida qualquer preview em voo ao desmontar.
-    previewSeqRef.current += 1;
-  }, []);
+  const retryPreview = () => {
+    setPreviewUrl(null);
+    setPreviewAttempt(attempt => attempt + 1);
+  };
+  const previewProps = {
+    format, previewUrl, loading: previewLoading, stale: previewStale,
+    error: previewError, onRetry: retryPreview,
+  };
+  const templatePickerProps = {
+    templates, selectedKey: templateKey, barbershopId, format, paletteKey,
+    loading: templatesLoading, error: templatesError,
+    onRetry: () => setTemplatesAttempt(attempt => attempt + 1),
+    recommendedTemplateKey,
+  };
 
   const pickObjective = (id: ObjectiveId) => {
     const obj = OBJECTIVES.find(o => o.id === id);
@@ -321,6 +297,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   };
 
   const handleGenerate = async () => {
+    setEditorError(null);
     setGeneratingSuggestions(true);
     setSuggestions([]);
     try {
@@ -330,6 +307,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
         extra: extra.trim() || undefined,
         count: 3,
       });
+      if (!res.suggestions?.length) throw new Error('Nenhuma sugestão foi retornada. Tente novamente.');
       setSuggestions(res.suggestions);
     } catch (err: any) {
       showToast(getErrorMessage(err, 'Não foi possível gerar sugestões.'), 'error');
@@ -378,11 +356,11 @@ export const PostEditor: React.FC<PostEditorProps> = ({
 
   const handleSave = async (action: 'draft' | 'publish' | 'schedule') => {
     if (!barbershopId || submitting || mediaBusy) return;
-    if (action !== 'draft' && (!selectedTemplate || templatesLoading)) {
+    if ((action !== 'draft' || isPublished) && (!selectedTemplate || templatesLoading)) {
       showToast('Aguarde o carregamento e selecione um modelo.', 'error');
       return;
     }
-    if (action !== 'draft' && selectedTemplate && (
+    if ((action !== 'draft' || isPublished) && selectedTemplate && (
       (selectedTemplate.requiredMedia >= 1 && !primaryMediaId) ||
       (selectedTemplate.requiredMedia >= 2 && !secondaryMediaId)
     )) {
@@ -394,14 +372,15 @@ export const PostEditor: React.FC<PostEditorProps> = ({
       showToast('Escolha um horário com pelo menos 5 minutos de antecedência.', 'error');
       return;
     }
+    setEditorError(null);
     setSubmitting(true);
     try {
-      let targetId = post?.id;
+      let targetId = savedPostId.current;
 
-      if (isEditing) {
+      if (targetId) {
         await postsApi.update(targetId!, {
-          title: title || undefined,
-          ctaText: ctaText || undefined,
+          title: title || null,
+          ctaText: ctaText || null,
           content,
           postMode, templateKey, format, paletteKey,
           primaryMediaId, secondaryMediaId,
@@ -419,9 +398,15 @@ export const PostEditor: React.FC<PostEditorProps> = ({
           status: 'draft',
         });
         targetId = created.id;
+        savedPostId.current = created.id;
+        persistDraft();
       }
 
-      if (action === 'publish') {
+      if (isPublished) {
+        clearDraft(userId, barbershopId, storageKey);
+        onSaved('published');
+        showToast('Alterações do post salvas.');
+      } else if (action === 'publish') {
         await postsApi.publish(targetId!);
         clearDraft(userId, barbershopId, storageKey);
         onSaved('published');
@@ -432,6 +417,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
         onSaved('scheduled');
         showToast('Post agendado para publicação.');
       } else {
+        if (post?.status === 'scheduled') await postsApi.cancelSchedule(targetId!);
         clearDraft(userId, barbershopId, storageKey);
         onSaved('draft');
         showToast('Rascunho salvo.');
@@ -445,13 +431,21 @@ export const PostEditor: React.FC<PostEditorProps> = ({
 
   const handleSelectTemplate = (key: string) => {
     setTemplateKey(key);
+    const sampleTitle = templates.find(template => template.key === key)?.sampleTitle;
+    if (!title.trim() && sampleTitle) setTitle(sampleTitle);
     setShowTemplatePicker(false);
   };
+
+  const metadataFeedback = metadataLoading ? (
+    <p role="status" className="flex items-center gap-2 p-4 text-sm text-text-muted"><Loader2 size={16} className="animate-spin" aria-hidden />Carregando paletas e fotos…</p>
+  ) : metadataErrors.length > 0 ? (
+    <SectionError message={metadataErrors.join(' ')} onRetry={onReloadMetadata} className="m-4" />
+  ) : null;
 
   if (!objectiveId && !isEditing) {
     return (
       <EditorDialog>
-        <div className="flex h-full w-full max-w-4xl flex-col overflow-hidden bg-surface sm:h-auto sm:max-h-[92vh] sm:rounded-2xl sm:border sm:border-border">
+        <div className="flex h-full w-full max-w-4xl flex-col overflow-hidden bg-surface sm:h-auto sm:max-h-[92dvh] sm:rounded-2xl sm:border sm:border-border">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <h3 className="font-bold text-text-primary">Criar post</h3>
             <button type="button" onClick={onClose} className="rounded-lg p-2 text-text-muted hover:text-text-primary" aria-label="Fechar">
@@ -459,6 +453,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
             </button>
           </div>
           <div className="flex-1 overflow-y-auto p-4">
+            {metadataFeedback}
             <p className="mb-3 text-xs font-bold text-text-secondary">Qual o objetivo do post?</p>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {OBJECTIVES.map(obj => (
@@ -484,7 +479,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
 
   return (
     <EditorDialog>
-      <div className="flex h-full w-full max-w-5xl flex-col overflow-hidden bg-surface sm:h-auto sm:max-h-[92vh] sm:rounded-2xl sm:border sm:border-border">
+      <div className="flex h-full w-full max-w-5xl flex-col overflow-hidden bg-surface sm:h-auto sm:max-h-[92dvh] sm:rounded-2xl sm:border sm:border-border">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <h3 className="font-bold text-text-primary">
@@ -515,10 +510,11 @@ export const PostEditor: React.FC<PostEditorProps> = ({
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto">
+          {metadataFeedback}
           <details className="border-b border-border p-4 lg:hidden">
             <summary className="cursor-pointer text-sm font-semibold text-accent">Ver prévia do post</summary>
             <div className="mt-4">
-              <PostPreviewBox format={format} previewUrl={previewUrl} loading={previewLoading} stale={previewStale} />
+              <PostPreviewBox {...previewProps} />
             </div>
           </details>
           {/* Tab: Conteúdo */}
@@ -530,6 +526,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                   <label htmlFor="post-title" className="mb-1 block text-xs font-bold text-text-secondary">Título</label>
                   <input
                     id="post-title"
+                    aria-describedby="post-title-help"
                     type="text"
                     maxLength={80}
                     value={title}
@@ -537,6 +534,9 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                     placeholder="Ex.: Corte + barba por R$ 45"
                     className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm focus:border-accent focus:outline-none"
                   />
+                  <p id="post-title-help" className={`mt-1 text-xs ${title.length > 48 ? 'text-warning' : 'text-text-muted'}`}>
+                    {title.length > 48 ? 'O título será resumido na arte. Encurte para até 48 caracteres e confira a prévia.' : 'Título na imagem. Use uma frase curta; deixe os detalhes na legenda.'} ({title.length}/48)
+                  </p>
                 </div>
 
                 {/* CTA */}
@@ -544,6 +544,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                   <label htmlFor="post-cta" className="mb-1 block text-xs font-bold text-text-secondary">Texto do botão (CTA)</label>
                   <input
                     id="post-cta"
+                    aria-describedby="post-cta-help"
                     type="text"
                     maxLength={40}
                     value={ctaText}
@@ -551,6 +552,9 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                     placeholder="Ex.: Agendar horário"
                     className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm focus:border-accent focus:outline-none"
                   />
+                  <p id="post-cta-help" className={`mt-1 text-xs ${ctaText.length > 32 ? 'text-warning' : 'text-text-muted'}`}>
+                    {ctaText.length > 32 ? 'O botão será resumido na arte. Use até 32 caracteres.' : 'Uma ação curta e clara para quem vê o post.'}
+                  </p>
                 </div>
 
                 {/* Legenda */}
@@ -608,6 +612,8 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                     <label htmlFor="post-template" className="mb-1 block text-xs font-bold text-text-secondary">Modelo</label>
                     <button
                       type="button"
+                      id="post-template"
+                      aria-label={`Selecionar modelo: ${selectedTemplate?.name ?? 'carregar modelos'}`}
                       onClick={() => setShowTemplatePicker(true)}
                       className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-left text-sm hover:border-accent/50 focus:border-accent focus:outline-none"
                     >
@@ -666,12 +672,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
               {/* Preview lateral */}
               <div className="hidden lg:block">
                 <div className="sticky top-0">
-                  <PostPreviewBox
-                    format={format}
-                    previewUrl={previewUrl}
-                    loading={previewLoading}
-                    stale={previewStale}
-                  />
+                  <PostPreviewBox {...previewProps} />
                 </div>
               </div>
             </div>
@@ -690,8 +691,9 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                       const media = mediaLibrary.find(m => m.id === mediaId);
                       const required = selectedPhotoMode === 'required' && (selectedTemplate?.requiredMedia ?? 0) >= (slot === 'primary' ? 1 : 2);
                       return (
-                        <button key={slot} type="button"
-                          onClick={() => setShowMediaPicker(slot)}
+                        <div key={slot} className="space-y-1">
+                        <button type="button"
+                          onClick={() => { setEditorError(null); setShowMediaPicker(slot); }}
                           className={`relative flex h-36 w-40 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed ${
                             media ? 'border-accent bg-accent/5' : required ? 'border-warning bg-warning/5' : 'border-border bg-bg'
                           } p-2 text-center transition hover:border-accent/50`}
@@ -713,6 +715,10 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                             </>
                           )}
                         </button>
+                        {mediaId && <button type="button" onClick={() => slot === 'primary' ? setPrimaryMediaId(null) : setSecondaryMediaId(null)} className="min-h-11 w-40 rounded-lg text-xs font-semibold text-danger hover:bg-danger/10">
+                          Remover foto {slot === 'primary' ? 'principal' : 'secundária'}
+                        </button>}
+                        </div>
                       );
                     })}
                   </div>
@@ -771,12 +777,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
 
               <div className="hidden lg:block">
                 <div className="sticky top-0">
-                  <PostPreviewBox
-                    format={format}
-                    previewUrl={previewUrl}
-                    loading={previewLoading}
-                    stale={previewStale}
-                  />
+                  <PostPreviewBox {...previewProps} />
                 </div>
               </div>
             </div>
@@ -836,50 +837,16 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                 {/* Modelo */}
                 <div>
                   <p className="mb-2 text-xs font-bold text-text-secondary">Modelo</p>
-                  {templatesLoading ? (
-                    <div className="flex items-center gap-2 text-xs text-text-muted">
-                      <Loader2 size={13} className="animate-spin" aria-hidden /> Carregando modelos…
-                    </div>
-                  ) : (
-                    <div className="space-y-1.5">
-                      {templateGroups.map(group => {
-                        const items = templates.filter(t => (t.group ?? 'outros') === group.key);
-                        if (items.length === 0) return null;
-                        return (
-                          <div key={group.key}>
-                            <p className="mb-1 text-[10px] font-bold uppercase text-text-muted">{group.label}</p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {items.map(t => (
-                                <button
-                                  key={t.key}
-                                  type="button"
-                                  onClick={() => setTemplateKey(t.key)}
-                                  className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition ${
-                                    templateKey === t.key
-                                      ? 'bg-accent text-accent-fg'
-                                      : 'bg-surface text-text-secondary hover:bg-bg'
-                                  }`}
-                                >
-                                  {t.name}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                  <PostTemplatePicker {...templatePickerProps} onSelect={template => {
+                    setTemplateKey(template.key);
+                    if (!title.trim() && template.sampleTitle) setTitle(template.sampleTitle);
+                  }} />
                 </div>
               </div>
 
               <div className="hidden lg:block">
                 <div className="sticky top-0">
-                  <PostPreviewBox
-                    format={format}
-                    previewUrl={previewUrl}
-                    loading={previewLoading}
-                    stale={previewStale}
-                  />
+                  <PostPreviewBox {...previewProps} />
                 </div>
               </div>
             </div>
@@ -930,21 +897,21 @@ export const PostEditor: React.FC<PostEditorProps> = ({
 
               <div className="hidden lg:block">
                 <div className="sticky top-0">
-                  <PostPreviewBox
-                    format={format}
-                    previewUrl={previewUrl}
-                    loading={previewLoading}
-                    stale={previewStale}
-                  />
+                  <PostPreviewBox {...previewProps} />
                 </div>
               </div>
             </div>
           )}
         </div>
 
+        {editorError && !showMediaPicker && (
+          <div role="alert" className="mx-4 mb-3 rounded-xl border border-danger/40 bg-danger/10 p-3 text-sm text-danger">
+            {editorError}
+          </div>
+        )}
         {/* Footer — actions */}
         <div className="border-t border-border bg-surface px-4 py-3">
-          <div className="mb-3 flex flex-wrap items-center gap-2">
+          {!isPublished && <div className="mb-3 flex flex-wrap items-center gap-2">
             <div className="flex gap-1 rounded-xl border border-border p-1" aria-label="Quando publicar">
               {(['now', 'schedule'] as const).map(mode => (
                 <button key={mode} type="button" aria-pressed={publishMode === mode} onClick={() => setPublishMode(mode)} disabled={submitting || mediaBusy}
@@ -961,7 +928,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                   className="min-w-0 rounded-xl border border-border bg-bg px-2.5 py-2 text-xs focus:border-accent focus:outline-none" />
               </label>
             )}
-          </div>
+          </div>}
           <div className="flex items-center justify-between gap-2">
             <Button variant="secondary" onClick={onClose} disabled={submitting || mediaBusy}
               className="gap-1.5"
@@ -969,14 +936,14 @@ export const PostEditor: React.FC<PostEditorProps> = ({
               Cancelar
             </Button>
             <div className="flex items-center gap-2">
-              <Button variant="secondary" onClick={() => void handleSave('draft')} disabled={submitting || mediaBusy}
+              {!isPublished && <Button variant="secondary" onClick={() => void handleSave('draft')} disabled={submitting || mediaBusy}
                 className="gap-1.5"
               >
                 {submitting ? <Loader2 size={14} className="animate-spin" aria-hidden /> : null}
                 Rascunho
-              </Button>
+              </Button>}
               <Button variant="primary"
-                onClick={() => publishMode === 'schedule' ? void handleSave('schedule') : void handleSave('publish')}
+                onClick={() => isPublished ? void handleSave('draft') : publishMode === 'schedule' ? void handleSave('schedule') : void handleSave('publish')}
                 disabled={submitting || mediaBusy || templatesLoading || (publishMode === 'schedule' && !scheduledFor)}
                 className="gap-2 px-5"
               >
@@ -985,7 +952,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                     ? <CalendarClock size={14} aria-hidden />
                     : <Check size={14} aria-hidden />
                 )}
-                {publishMode === 'schedule' ? 'Agendar' : 'Publicar'}
+                {isPublished ? 'Salvar alterações' : publishMode === 'schedule' ? 'Agendar' : 'Publicar'}
               </Button>
             </div>
           </div>
@@ -1004,6 +971,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
               </button>
             </div>
             <div className="max-h-80 overflow-y-auto p-4">
+              {editorError && <SectionError message={editorError} className="mb-3" />}
               <div className="grid grid-cols-3 gap-2">
                 {mediaLibrary.map(m => (
                   <button key={m.id} type="button" disabled={uploadingPhoto}
@@ -1042,79 +1010,16 @@ export const PostEditor: React.FC<PostEditorProps> = ({
       {/* Template Picker Overlay */}
       {showTemplatePicker && (
         <div className="absolute inset-0 z-[110] flex items-end justify-center bg-black/80 sm:items-center sm:p-4">
-          <FocusLock returnFocus className="w-full max-w-lg">
-          <div className="w-full max-w-lg rounded-2xl bg-surface border border-border">
+          <FocusLock returnFocus className="w-full max-w-3xl">
+          <div className="w-full rounded-2xl bg-surface border border-border">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <h4 className="text-sm font-bold text-text-primary">Escolher modelo</h4>
               <button type="button" onClick={() => setShowTemplatePicker(false)} className="rounded-lg p-1 text-text-muted hover:bg-bg" aria-label="Fechar">
                 ✕
               </button>
             </div>
-            <div className="flex gap-1.5 border-b border-border px-4 pt-3 pb-2 overflow-x-auto">
-              {([
-                { id: 'all', label: 'Todos' },
-                { id: 'with-photo', label: 'Com foto' },
-                { id: 'no-photo', label: 'Sem foto' },
-              ] as const).map(f => (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => setTemplateFilter(f.id)}
-                  className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                    templateFilter === f.id ? 'bg-accent text-accent-fg' : 'text-text-muted hover:bg-bg'
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-            <div className="max-h-96 overflow-y-auto p-4">
-              {templatesLoading ? (
-                <div className="flex items-center justify-center gap-2 py-10 text-xs text-text-muted">
-                  <Loader2 size={14} className="animate-spin" aria-hidden /> Carregando modelos…
-                </div>
-              ) : filteredTemplates.length === 0 ? (
-                <p className="py-8 text-center text-xs text-text-muted">Nenhum modelo neste filtro.</p>
-              ) : (
-                <div className="grid grid-cols-2 gap-2.5">
-                  {filteredTemplates.map(t => {
-                    const photoMode = templatePhotoMode(t);
-                    return (
-                      <div
-                        key={t.key}
-                        className={`overflow-hidden rounded-xl border text-left transition ${
-                          templateKey === t.key
-                            ? 'border-accent bg-accent/10'
-                            : 'border-border hover:border-accent/40'
-                        }`}
-                      >
-                        <div className="relative">
-                          <TemplateThumbnail
-                            barbershopId={barbershopId}
-                            templateKey={t.key}
-                            format={format}
-                            paletteKey={paletteKey}
-                            alt={`Prévia do modelo ${t.name}`}
-                          />
-                          <button type="button" onClick={() => handleSelectTemplate(t.key)} aria-label={`Selecionar modelo ${t.name}`} className="absolute inset-0 z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent" />
-                          {templateKey === t.key && (
-                            <span className="pointer-events-none absolute right-1.5 top-1.5 z-10 rounded-full bg-accent p-1 text-accent-fg">
-                              <Check size={11} aria-hidden />
-                            </span>
-                          )}
-                        </div>
-                        <button type="button" onClick={() => handleSelectTemplate(t.key)} className="w-full space-y-0.5 p-2.5 text-left">
-                          <p className="text-xs font-bold text-text-primary">{t.name}</p>
-                          {t.description && <p className="text-[10px] leading-snug text-text-muted">{t.description}</p>}
-                          <span className="inline-block rounded bg-bg px-1.5 py-0.5 text-[9px] font-bold uppercase text-text-muted">
-                            {photoMode === 'none' ? 'Sem foto' : photoMode === 'required' ? `Requer ${t.requiredMedia} foto(s)` : 'Foto opcional'}
-                          </span>
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+            <div className="max-h-[70dvh] overflow-y-auto p-4">
+              <PostTemplatePicker {...templatePickerProps} onSelect={template => handleSelectTemplate(template.key)} />
             </div>
           </div>
           </FocusLock>

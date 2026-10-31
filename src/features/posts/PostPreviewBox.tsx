@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LuLoaderCircle as Loader2, LuMegaphone as Megaphone } from 'react-icons/lu';
 import type { PostFormat } from '../../types';
 
@@ -27,7 +27,8 @@ interface PostPreviewBoxProps {
   previewUrl: string | null;
   loading?: boolean;
   stale?: boolean;
-  error?: boolean;
+  error?: boolean | string | null;
+  onRetry?: () => void;
   emptyLabel?: string;
   className?: string;
 }
@@ -38,9 +39,15 @@ export const PostPreviewBox: React.FC<PostPreviewBoxProps> = ({
   loading = false,
   stale = false,
   error = false,
+  onRetry,
   emptyLabel = 'Aguardando informações…',
   className = '',
 }) => {
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const imageFailed = Boolean(previewUrl && failedUrl === previewUrl);
+  const retry = () => { setFailedUrl(null); onRetry?.(); };
+  const message = typeof error === 'string' ? error : 'Não foi possível carregar a prévia.';
+  const hasError = Boolean(error) || imageFailed;
   const aspectClass = FORMAT_ASPECT[format] ?? FORMAT_ASPECT.square;
   const maxW = FORMAT_MAX_WIDTH[format] ?? FORMAT_MAX_WIDTH.square;
   const maxH = FORMAT_MAX_HEIGHT[format] ?? FORMAT_MAX_HEIGHT.square;
@@ -49,15 +56,18 @@ export const PostPreviewBox: React.FC<PostPreviewBoxProps> = ({
     <div
       className={`${aspectClass} mx-auto w-full overflow-hidden rounded-2xl border border-border bg-bg ${className}`}
       style={{ maxWidth: maxW, maxHeight: maxH }}
+      aria-busy={loading}
     >
       {loading && !previewUrl ? (
         <div className="flex h-full items-center justify-center">
           <Loader2 size={28} className="animate-spin text-accent" aria-hidden />
+          <span role="status" className="sr-only">Gerando prévia…</span>
         </div>
-      ) : error && !previewUrl ? (
+      ) : hasError && (!previewUrl || imageFailed) ? (
         <div className="flex h-full flex-col items-center justify-center gap-2 p-4 text-center text-text-muted">
           <Megaphone size={28} aria-hidden />
-          <p className="text-xs">Erro ao gerar prévia.</p>
+          <p role="alert" className="text-sm">{message}</p>
+          {onRetry && <button type="button" onClick={retry} className="min-h-11 rounded-lg border border-border px-3 text-sm font-semibold text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent">Tentar prévia novamente</button>}
         </div>
       ) : previewUrl ? (
         <div className="relative h-full w-full">
@@ -65,11 +75,19 @@ export const PostPreviewBox: React.FC<PostPreviewBoxProps> = ({
             src={previewUrl}
             alt="Prévia do post"
             className="h-full w-full object-contain"
+            onError={() => setFailedUrl(previewUrl)}
           />
-          {stale && (
-            <span className="absolute right-2 top-2 rounded-full bg-warning/20 px-2 py-0.5 text-[10px] font-bold text-warning">
-              Desatualizada
+          {(stale || loading) && (
+            <span role="status" className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-surface px-2 py-1 text-xs font-bold text-warning">
+              {loading && <Loader2 size={12} className="animate-spin" aria-hidden />}
+              {loading ? 'Atualizando prévia…' : 'Desatualizada'}
             </span>
+          )}
+          {hasError && (
+            <div className="absolute inset-x-2 bottom-2 rounded-xl border border-danger/40 bg-surface p-3 text-sm text-text-primary">
+              <p role="alert">{message}</p>
+              {onRetry && <button type="button" onClick={retry} disabled={loading} className="mt-1 min-h-11 text-sm font-semibold text-accent disabled:opacity-50">Tentar prévia novamente</button>}
+            </div>
           )}
         </div>
       ) : (

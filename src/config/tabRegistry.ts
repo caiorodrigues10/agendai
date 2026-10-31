@@ -1,25 +1,25 @@
 import type { IconType } from 'react-icons';
 import {
-  RiDashboardLine,
-  RiListCheck2,
-  RiCalendarScheduleLine,
-  RiContactsLine,
-  RiScissorsLine,
-  RiTeamLine,
-  RiBarChartBoxLine,
-  RiBankCardLine,
-  RiWalletLine,
-  RiGiftLine,
-  RiMegaphoneLine,
-  RiLinkM,
-  RiSettings4Line,
-  RiStore2Line,
-  RiRocketLine,
-  RiShoppingBag3Line,
-  RiImageLine,
-  RiApps2Line,
-  RiQuestionLine,
-} from 'react-icons/ri';
+  LuBuilding2,
+  LuCalendarDays,
+  LuChartColumn,
+  LuCircleHelp,
+  LuContact,
+  LuCreditCard,
+  LuGift,
+  LuImage,
+  LuLayoutDashboard,
+  LuLink,
+  LuListChecks,
+  LuMegaphone,
+  LuRocket,
+  LuScissors,
+  LuSettings,
+  LuShoppingBag,
+  LuStore,
+  LuUsers,
+  LuWallet,
+} from 'react-icons/lu';
 import type { OperationMode } from '../types';
 
 export type TabRole = 'OWNER' | 'EMPLOYEE' | 'MASTER_ADMIN';
@@ -53,57 +53,84 @@ export const TAB_GROUPS: TabGroup[] = [
     id: 'operacao',
     label: 'Operação',
     tabs: [
-      { id: 'overview', label: 'Hoje', icon: RiDashboardLine },
-      { id: 'onboarding', label: 'Configuração inicial', icon: RiRocketLine, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'queue', label: 'Fila', icon: RiListCheck2, modes: ['HYBRID', 'QUEUE_ONLY'] },
-      { id: 'appointments', label: 'Agenda', icon: RiCalendarScheduleLine, modes: ['HYBRID', 'APPOINTMENTS_ONLY'] },
-      { id: 'clients', label: 'Clientes', icon: RiContactsLine },
-      { id: 'products', label: 'Produtos', icon: RiShoppingBag3Line },
+      { id: 'overview', label: 'Hoje', icon: LuLayoutDashboard },
+      {
+        id: 'onboarding',
+        label: 'Configuração inicial',
+        icon: LuRocket,
+        roles: ['OWNER', 'MASTER_ADMIN'],
+      },
+      { id: 'queue', label: 'Fila', icon: LuListChecks, modes: ['HYBRID', 'QUEUE_ONLY'] },
+      {
+        id: 'appointments',
+        label: 'Agenda',
+        icon: LuCalendarDays,
+        modes: ['HYBRID', 'APPOINTMENTS_ONLY'],
+      },
+      { id: 'clients', label: 'Clientes', icon: LuContact },
+      { id: 'products', label: 'Produtos', icon: LuShoppingBag },
     ],
   },
   {
     id: 'gestao',
     label: 'Gestão',
     tabs: [
-      { id: 'services', label: 'Serviços', icon: RiScissorsLine, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'team', label: 'Equipe', icon: RiTeamLine, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'services', label: 'Serviços', icon: LuScissors, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'team', label: 'Equipe', icon: LuUsers, roles: ['OWNER', 'MASTER_ADMIN'] },
       {
         id: 'reports',
         label: 'Relatórios',
-        icon: RiBarChartBoxLine,
+        icon: LuChartColumn,
         roles: ['OWNER', 'MASTER_ADMIN', 'EMPLOYEE'],
         permissions: ['REPORTS_VIEW'],
       },
       {
         id: 'finance',
         label: 'Financeiro',
-        icon: RiBankCardLine,
+        icon: LuCreditCard,
         roles: ['OWNER', 'MASTER_ADMIN', 'EMPLOYEE'],
         permissions: ['FINANCE_VIEW', 'FINANCE_MANAGE'],
       },
-      { id: 'profit', label: 'Rentabilidade', icon: RiBarChartBoxLine, roles: ['OWNER', 'MASTER_ADMIN', 'EMPLOYEE'], permissions: ['REPORTS_VIEW'] },
-      { id: 'equipment', label: 'Estoque', icon: RiStore2Line, roles: ['OWNER', 'MASTER_ADMIN', 'EMPLOYEE'], permissions: ['INVENTORY_MANAGE', 'PRODUCTS_MANAGE'] },
+      {
+        id: 'profit',
+        label: 'Rentabilidade',
+        icon: LuChartColumn,
+        roles: ['OWNER', 'MASTER_ADMIN', 'EMPLOYEE'],
+        permissions: ['REPORTS_VIEW'],
+      },
+      { id: 'equipment', label: 'Estoque', icon: LuStore, roles: ['OWNER', 'MASTER_ADMIN'] },
     ],
   },
   {
     id: 'crescimento',
     label: 'Divulgação',
     tabs: [
-      { id: 'posts', label: 'Posts', icon: RiMegaphoneLine, roles: ['OWNER', 'MASTER_ADMIN', 'EMPLOYEE'], permissions: ['MARKETING_MANAGE'] },
-      { id: 'showcase', label: 'Showcase', icon: RiImageLine, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'link', label: 'Link Público', icon: RiLinkM, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'referrals', label: 'Indicações', icon: RiGiftLine, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'organizations', label: 'Multiunidades', icon: RiApps2Line, roles: ['OWNER', 'MASTER_ADMIN'] },
+      {
+        id: 'posts',
+        label: 'Posts',
+        icon: LuMegaphone,
+        roles: ['OWNER', 'MASTER_ADMIN', 'EMPLOYEE'],
+        permissions: ['MARKETING_MANAGE'],
+      },
+      { id: 'showcase', label: 'Showcase', icon: LuImage, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'link', label: 'Link Público', icon: LuLink, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'referrals', label: 'Indicações', icon: LuGift, roles: ['OWNER', 'MASTER_ADMIN'] },
+      {
+        id: 'organizations',
+        label: 'Multiunidades',
+        icon: LuBuilding2,
+        roles: ['OWNER', 'MASTER_ADMIN'],
+      },
     ],
   },
   {
     id: 'conta',
     label: 'Conta',
     tabs: [
-      { id: 'settings', label: 'Configurações', icon: RiSettings4Line },
-      { id: 'support', label: 'Ajuda', icon: RiQuestionLine },
-      { id: 'subscription', label: 'Plano', icon: RiWalletLine, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'profile', label: 'Perfil', icon: RiStore2Line },
+      { id: 'settings', label: 'Configurações', icon: LuSettings },
+      { id: 'support', label: 'Ajuda', icon: LuCircleHelp },
+      { id: 'subscription', label: 'Plano', icon: LuWallet, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'profile', label: 'Perfil', icon: LuStore },
     ],
   },
 ];
@@ -124,6 +151,11 @@ export function canAccessTab(
   for (const group of TAB_GROUPS) {
     const tab = group.tabs.find(t => t.id === tabId);
     if (!tab) continue;
+    if (
+      extras?.hasDashboard === false &&
+      ['reports', 'finance', 'products', 'profit', 'equipment', 'organizations'].includes(tabId)
+    )
+      return false;
     if (tabId === 'products') {
       const permitted = extras?.permissions?.some(perm =>
         ['RETAIL_SELL', 'PRODUCTS_VIEW', 'PRODUCTS_MANAGE', 'INVENTORY_MANAGE'].includes(perm)

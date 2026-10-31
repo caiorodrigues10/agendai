@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import {
-  LuLoaderCircle as Loader2,
-  LuPhone as Phone,
-  LuKeyRound as KeyRound,
   LuArrowRight as ArrowRight,
+  LuKeyRound as KeyRound,
+  LuLoaderCircle as Loader2,
   LuLogOut as LogOut,
+  LuPhone as Phone,
 } from 'react-icons/lu';
 import { clientPortalApi } from '../../infra/clientPortalApi';
 import { getErrorMessage } from '../../utils/errorMessage';
@@ -69,78 +69,138 @@ export const ClientPortalLogin: React.FC<ClientPortalLoginProps> = ({ onAuthenti
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/12 text-accent">
           <Phone size={28} />
         </div>
-        <h2 className="mt-4 text-xl font-bold text-text-primary">Minha Conta</h2>
+        <h1 className="mt-4 text-xl font-bold text-text-primary">Minha conta</h1>
         <p className="mt-1 text-sm text-text-secondary">
           Acesse seus agendamentos, benefícios e histórico.
         </p>
       </div>
 
       {step === 'phone' && (
-        <div className="space-y-4 rounded-2xl border border-border bg-surface p-5">
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            if (!loading) void handleRequestCode();
+          }}
+          className="space-y-4 rounded-2xl border border-border bg-surface p-5"
+        >
           <div>
-            <label className="mb-1 block text-xs font-bold text-text-secondary">Nome</label>
+            <label
+              htmlFor="portal-name"
+              className="mb-1 block text-sm font-medium text-text-secondary"
+            >
+              Nome (opcional)
+            </label>
             <input
+              id="portal-name"
+              autoComplete="name"
               type="text"
               value={name}
-              onChange={e => { setName(e.target.value); setError(''); }}
+              onChange={e => {
+                setName(e.target.value);
+                setError('');
+              }}
               placeholder="Como o salão deve te chamar"
               className="w-full rounded-xl border border-border bg-bg py-3 px-4 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-bold text-text-secondary">Telefone (WhatsApp)</label>
+            <label
+              htmlFor="portal-phone"
+              className="mb-1 block text-sm font-medium text-text-secondary"
+            >
+              Telefone (WhatsApp)
+            </label>
             <div className="relative">
-              <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+              <Phone
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+              />
               <input
+                id="portal-phone"
+                autoComplete="tel-national"
                 type="tel"
+                aria-describedby={error ? 'portal-error' : undefined}
+                aria-invalid={Boolean(error)}
                 value={phone}
-                onChange={e => { setPhone(formatPhone(e.target.value)); setError(''); }}
+                onChange={e => {
+                  setPhone(formatPhone(e.target.value));
+                  setError('');
+                }}
                 placeholder="(11) 99999-9999"
                 className="w-full rounded-xl border border-border bg-bg py-3 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
               />
             </div>
           </div>
 
-          {error && <p className="text-xs text-error">{error}</p>}
+          {error && (
+            <p id="portal-error" role="alert" className="text-sm text-danger">
+              {error}
+            </p>
+          )}
 
           <button
-            onClick={() => void handleRequestCode()}
+            type="submit"
             disabled={loading || !phone}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent py-3 text-sm font-bold text-accent-fg disabled:opacity-50"
           >
             {loading ? <Loader2 className="animate-spin" size={16} /> : <ArrowRight size={16} />}
             Enviar código
           </button>
-        </div>
+        </form>
       )}
 
       {step === 'code' && (
-        <div className="space-y-4 rounded-2xl border border-border bg-surface p-5">
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            if (!loading) void handleVerifyCode();
+          }}
+          className="space-y-4 rounded-2xl border border-border bg-surface p-5"
+        >
           <p className="text-xs text-text-secondary">
             Código enviado para <span className="font-bold text-text-primary">{phone}</span>
           </p>
 
           <div>
-            <label className="mb-1 block text-xs font-bold text-text-secondary">Código de 6 dígitos</label>
+            <label
+              htmlFor="portal-code"
+              className="mb-1 block text-sm font-medium text-text-secondary"
+            >
+              Código de 6 dígitos
+            </label>
             <div className="relative">
-              <KeyRound size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+              <KeyRound
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
+              />
               <input
                 type="text"
+                id="portal-code"
+                autoComplete="one-time-code"
                 inputMode="numeric"
+                aria-describedby={error ? 'portal-error' : undefined}
+                aria-invalid={Boolean(error)}
                 maxLength={6}
                 value={code}
-                onChange={e => { setCode(e.target.value.replace(/\D/g, '')); setError(''); }}
+                onChange={e => {
+                  setCode(e.target.value.replace(/\D/g, ''));
+                  setError('');
+                }}
                 placeholder="000000"
                 className="w-full rounded-xl border border-border bg-bg py-3 pl-10 pr-4 text-center text-lg tracking-[0.3em] text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
               />
             </div>
           </div>
 
-          {error && <p className="text-xs text-error">{error}</p>}
+          {error && (
+            <p id="portal-error" role="alert" className="text-sm text-danger">
+              {error}
+            </p>
+          )}
 
           <button
-            onClick={() => void handleVerifyCode()}
+            type="submit"
             disabled={loading || code.length !== 6}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent py-3 text-sm font-bold text-accent-fg disabled:opacity-50"
           >
@@ -149,13 +209,19 @@ export const ClientPortalLogin: React.FC<ClientPortalLoginProps> = ({ onAuthenti
           </button>
 
           <button
-            onClick={() => { setStep('phone'); setCode(''); setError(''); }}
+            type="button"
+            disabled={loading}
+            onClick={() => {
+              setStep('phone');
+              setCode('');
+              setError('');
+            }}
             className="flex w-full items-center justify-center gap-2 rounded-xl border border-border py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-2"
           >
             <LogOut size={14} />
-            Voltar
+            Alterar telefone
           </button>
-        </div>
+        </form>
       )}
     </div>
   );

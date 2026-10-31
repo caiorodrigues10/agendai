@@ -83,7 +83,7 @@ export const TemplateThumbnail: React.FC<TemplateThumbnailProps> = ({
   return (
     <div ref={rootRef} className={`relative ${format === 'story' ? 'aspect-[9/16]' : format === 'square' ? 'aspect-square' : 'aspect-[4/5]'} w-full overflow-hidden bg-bg ${className}`}>
       {status === 'loaded' && url ? (
-        <img src={url} alt={alt} className="h-full w-full object-contain" loading="lazy" />
+        <img src={url} alt={alt} className="h-full w-full object-contain" loading="lazy" onError={() => setStatus('error')} />
       ) : status === 'error' ? (
         <button
           type="button"

@@ -313,6 +313,13 @@ export interface AccountAttentionItem {
 }
 
 export interface AccountDetail {
+  access?: {
+    evaluatedAt: string;
+    trialEndDate: string;
+    trialDaysRemaining: number;
+    planActive: boolean;
+    subscriptionAccessAllowed: boolean;
+  };
   shop: {
     id: string;
     name: string;

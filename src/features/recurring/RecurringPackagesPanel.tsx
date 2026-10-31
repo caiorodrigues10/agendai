@@ -1,24 +1,29 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  LuLoaderCircle as Loader2,
-  LuPlus as Plus,
+  LuTriangleAlert as AlertTriangle,
+  LuCreditCard as CreditCard,
   LuPencilLine as Edit3,
+  LuLoaderCircle as Loader2,
   LuPause as Pause,
   LuPlay as Play,
-  LuCircleX as XCircle,
-  LuCreditCard as CreditCard,
-  LuTriangleAlert as AlertTriangle,
+  LuPlus as Plus,
   LuRefreshCcw as RefreshCcw,
+  LuCircleX as XCircle,
 } from 'react-icons/lu';
-import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
-import { recurringPackagesApi, RecurringPackagePlan, ClientRecurringPackage } from '../../infra/recurringPackagesApi';
-import { getErrorMessage } from '../../utils/errorMessage';
-import { formatCurrencyBRL, formatDateBR } from '../../utils/formatters';
-import { Field, FIELD_CONTROL, FORM_FOOTER, FORM_GRID } from '../../components/ui/Field';
-import { SmartSelect } from '../../components/ui/SmartSelect';
+import { SectionError } from '../../components/patterns';
+import { ModalShell } from '../../components/patterns/ModalShell';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { EmptyState } from '../../components/ui/EmptyState';
-import { SectionError } from '../../components/patterns';
+import { Field, FIELD_CONTROL, FORM_FOOTER, FORM_GRID } from '../../components/ui/Field';
+import { SmartSelect } from '../../components/ui/SmartSelect';
+import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
+import {
+  ClientRecurringPackage,
+  RecurringPackagePlan,
+  recurringPackagesApi,
+} from '../../infra/recurringPackagesApi';
+import { getErrorMessage } from '../../utils/errorMessage';
+import { formatCurrencyBRL, formatDateBR } from '../../utils/formatters';
 
 type Tab = 'plans' | 'memberships';
 
@@ -47,7 +52,13 @@ interface PlanFormData {
   description: string;
   price: string;
   billingCycle: string;
-  benefits: { serviceId: string; type: string; quantity: string; discountPercent: string; description: string }[];
+  benefits: {
+    serviceId: string;
+    type: string;
+    quantity: string;
+    discountPercent: string;
+    description: string;
+  }[];
 }
 
 const INITIAL_PLAN_FORM: PlanFormData = {
@@ -77,10 +88,16 @@ export const RecurringPackagesPanel: React.FC = () => {
   const [selectedClientId, setSelectedClientId] = useState('');
   const [newMembershipSubmitting, setNewMembershipSubmitting] = useState(false);
 
-  const [actionTarget, setActionTarget] = useState<{ membership: ClientRecurringPackage; action: 'activate' | 'pause' | 'resume' | 'cancel' } | null>(null);
+  const [actionTarget, setActionTarget] = useState<{
+    membership: ClientRecurringPackage;
+    action: 'activate' | 'pause' | 'resume' | 'cancel';
+  } | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const [paymentTarget, setPaymentTarget] = useState<{ membership: ClientRecurringPackage; cycleId: string } | null>(null);
+  const [paymentTarget, setPaymentTarget] = useState<{
+    membership: ClientRecurringPackage;
+    cycleId: string;
+  } | null>(null);
   const [paymentMethod, setPaymentMethod] = useState('PIX');
   const [paymentLoading, setPaymentLoading] = useState(false);
 
@@ -102,7 +119,9 @@ export const RecurringPackagesPanel: React.FC = () => {
     }
   }, [barbershopId]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const openPlanCreate = () => {
     setEditingPlan(null);
@@ -166,7 +185,10 @@ export const RecurringPackagesPanel: React.FC = () => {
     if (!barbershopId || !selectedPlanId || !selectedClientId) return;
     setNewMembershipSubmitting(true);
     try {
-      await recurringPackagesApi.createMembership(barbershopId, { planId: selectedPlanId, clientId: selectedClientId });
+      await recurringPackagesApi.createMembership(barbershopId, {
+        planId: selectedPlanId,
+        clientId: selectedClientId,
+      });
       setNewMembershipOpen(false);
       setSelectedPlanId('');
       setSelectedClientId('');
@@ -203,7 +225,12 @@ export const RecurringPackagesPanel: React.FC = () => {
     if (!barbershopId || !paymentTarget) return;
     setPaymentLoading(true);
     try {
-      await recurringPackagesApi.recordPayment(barbershopId, paymentTarget.membership.id, paymentTarget.cycleId, { paymentMethod });
+      await recurringPackagesApi.recordPayment(
+        barbershopId,
+        paymentTarget.membership.id,
+        paymentTarget.cycleId,
+        { paymentMethod }
+      );
       setPaymentTarget(null);
       await load();
     } catch (err) {
@@ -227,7 +254,9 @@ export const RecurringPackagesPanel: React.FC = () => {
         <div className="flex items-center gap-2 text-danger text-sm">
           <AlertTriangle size={16} />
           <span>{error}</span>
-          <button onClick={load} className="ml-auto text-accent text-xs underline">Tentar novamente</button>
+          <button onClick={load} className="ml-auto text-accent text-xs underline">
+            Tentar novamente
+          </button>
         </div>
       </div>
     );
@@ -256,12 +285,18 @@ export const RecurringPackagesPanel: React.FC = () => {
       {tab === 'plans' && (
         <>
           <div className="flex justify-end">
-            <button onClick={openPlanCreate} className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-xs font-bold text-accent-fg">
+            <button
+              onClick={openPlanCreate}
+              className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-xs font-bold text-accent-fg"
+            >
               <Plus size={14} /> Criar modelo
             </button>
           </div>
           {plans.length === 0 ? (
-            <EmptyState title="Nenhum modelo criado" description="Crie modelos de pacote para oferecer benefícios recorrentes." />
+            <EmptyState
+              title="Nenhum modelo criado"
+              description="Crie modelos de pacote para oferecer benefícios recorrentes."
+            />
           ) : (
             <div className="space-y-2">
               {plans.map(plan => (
@@ -269,10 +304,14 @@ export const RecurringPackagesPanel: React.FC = () => {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="font-medium text-sm">{plan.name}</p>
-                      {plan.description && <p className="text-xs text-text-muted">{plan.description}</p>}
+                      {plan.description && (
+                        <p className="text-xs text-text-muted">{plan.description}</p>
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-accent">{formatCurrencyBRL(plan.price)}</span>
+                      <span className="text-sm font-bold text-accent">
+                        {formatCurrencyBRL(plan.price)}
+                      </span>
                       <span className="text-xs text-text-muted bg-surface rounded-full px-2 py-0.5">
                         {CYCLE_LABELS[plan.billingCycle] ?? plan.billingCycle}
                       </span>
@@ -281,17 +320,25 @@ export const RecurringPackagesPanel: React.FC = () => {
                   {Array.isArray(plan.benefits) && plan.benefits.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {plan.benefits.map(b => (
-                        <span key={b.id} className="inline-flex rounded bg-surface px-2 py-0.5 text-[10px] text-text-muted">
+                        <span
+                          key={b.id}
+                          className="inline-flex rounded bg-surface px-2 py-0.5 text-[10px] text-text-muted"
+                        >
                           {b.description}
                         </span>
                       ))}
                     </div>
                   )}
                   <div className="flex items-center gap-2">
-                    <button onClick={() => openPlanEdit(plan)} className="flex items-center gap-1 rounded-md bg-surface px-2 py-1 text-xs font-medium text-text-secondary hover:bg-surface-2">
+                    <button
+                      onClick={() => openPlanEdit(plan)}
+                      className="flex items-center gap-1 rounded-md bg-surface px-2 py-1 text-xs font-medium text-text-secondary hover:bg-surface-2"
+                    >
                       <Edit3 size={12} /> Editar
                     </button>
-                    <span className={`text-xs font-medium ${plan.isActive ? 'text-success' : 'text-text-muted'}`}>
+                    <span
+                      className={`text-xs font-medium ${plan.isActive ? 'text-success' : 'text-text-muted'}`}
+                    >
                       {plan.isActive ? 'Ativo' : 'Inativo'}
                     </span>
                   </div>
@@ -305,12 +352,18 @@ export const RecurringPackagesPanel: React.FC = () => {
       {tab === 'memberships' && (
         <>
           <div className="flex justify-end">
-            <button onClick={() => setNewMembershipOpen(true)} className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-xs font-bold text-accent-fg">
+            <button
+              onClick={() => setNewMembershipOpen(true)}
+              className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-xs font-bold text-accent-fg"
+            >
               <Plus size={14} /> Novo pacote
             </button>
           </div>
           {memberships.length === 0 ? (
-            <EmptyState title="Nenhum pacote de cliente" description="Associe clientes a modelos para gerenciar pacotes recorrentes." />
+            <EmptyState
+              title="Nenhum pacote de cliente"
+              description="Associe clientes a modelos para gerenciar pacotes recorrentes."
+            />
           ) : (
             <div className="space-y-2">
               {memberships.map(m => (
@@ -320,7 +373,9 @@ export const RecurringPackagesPanel: React.FC = () => {
                       <p className="font-medium text-sm">{m.clientName ?? m.clientId}</p>
                       <p className="text-xs text-accent">{m.planName ?? m.planId}</p>
                     </div>
-                    <span className={`shrink-0 inline-flex rounded-full border px-2 py-0.5 text-xs font-medium ${MEMBERSHIP_STATUS_STYLES[m.status] ?? 'border-border bg-surface text-text-muted'}`}>
+                    <span
+                      className={`shrink-0 inline-flex rounded-full border px-2 py-0.5 text-xs font-medium ${MEMBERSHIP_STATUS_STYLES[m.status] ?? 'border-border bg-surface text-text-muted'}`}
+                    >
                       {MEMBERSHIP_STATUS_LABELS[m.status] ?? m.status}
                     </span>
                   </div>
@@ -330,7 +385,10 @@ export const RecurringPackagesPanel: React.FC = () => {
                   {Array.isArray(m.usageSummary) && m.usageSummary.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {m.usageSummary.map(u => (
-                        <span key={u.benefitId} className="inline-flex rounded bg-surface px-2 py-0.5 text-[10px] text-text-muted">
+                        <span
+                          key={u.benefitId}
+                          className="inline-flex rounded bg-surface px-2 py-0.5 text-[10px] text-text-muted"
+                        >
                           {u.used}/{u.total} usos
                         </span>
                       ))}
@@ -338,34 +396,48 @@ export const RecurringPackagesPanel: React.FC = () => {
                   )}
                   <div className="flex items-center gap-2 flex-wrap">
                     {m.status === 'PENDING' && (
-                      <button onClick={() => setActionTarget({ membership: m, action: 'activate' })} className="flex items-center gap-1 rounded-md bg-success/10 px-2 py-1 text-xs font-medium text-success hover:bg-success/20">
+                      <button
+                        onClick={() => setActionTarget({ membership: m, action: 'activate' })}
+                        className="flex items-center gap-1 rounded-md bg-success/10 px-2 py-1 text-xs font-medium text-success hover:bg-success/20"
+                      >
                         <Play size={12} /> Ativar
                       </button>
                     )}
                     {m.status === 'ACTIVE' && (
-                      <button onClick={() => setActionTarget({ membership: m, action: 'pause' })} className="flex items-center gap-1 rounded-md bg-warning/10 px-2 py-1 text-xs font-medium text-warning hover:bg-warning/20">
+                      <button
+                        onClick={() => setActionTarget({ membership: m, action: 'pause' })}
+                        className="flex items-center gap-1 rounded-md bg-warning/10 px-2 py-1 text-xs font-medium text-warning hover:bg-warning/20"
+                      >
                         <Pause size={12} /> Pausar
                       </button>
                     )}
                     {m.status === 'PAUSED' && (
-                      <button onClick={() => setActionTarget({ membership: m, action: 'resume' })} className="flex items-center gap-1 rounded-md bg-success/10 px-2 py-1 text-xs font-medium text-success hover:bg-success/20">
+                      <button
+                        onClick={() => setActionTarget({ membership: m, action: 'resume' })}
+                        className="flex items-center gap-1 rounded-md bg-success/10 px-2 py-1 text-xs font-medium text-success hover:bg-success/20"
+                      >
                         <RefreshCcw size={12} /> Retomar
                       </button>
                     )}
                     {m.status !== 'CANCELLED' && (
-                      <button onClick={() => setActionTarget({ membership: m, action: 'cancel' })} className="flex items-center gap-1 rounded-md bg-danger/10 px-2 py-1 text-xs font-medium text-danger hover:bg-danger/20">
+                      <button
+                        onClick={() => setActionTarget({ membership: m, action: 'cancel' })}
+                        className="flex items-center gap-1 rounded-md bg-danger/10 px-2 py-1 text-xs font-medium text-danger hover:bg-danger/20"
+                      >
                         <XCircle size={12} /> Cancelar
                       </button>
                     )}
-                    {(m.cycles ?? []).filter(c => c.status !== 'PAID').map(c => (
-                      <button
-                        key={c.id}
-                        onClick={() => setPaymentTarget({ membership: m, cycleId: c.id })}
-                        className="flex items-center gap-1 rounded-md bg-accent/10 px-2 py-1 text-xs font-medium text-accent hover:bg-accent/20"
-                      >
-                        <CreditCard size={12} /> Registrar pagamento
-                      </button>
-                    ))}
+                    {(m.cycles ?? [])
+                      .filter(c => c.status !== 'PAID')
+                      .map(c => (
+                        <button
+                          key={c.id}
+                          onClick={() => setPaymentTarget({ membership: m, cycleId: c.id })}
+                          className="flex items-center gap-1 rounded-md bg-accent/10 px-2 py-1 text-xs font-medium text-accent hover:bg-accent/20"
+                        >
+                          <CreditCard size={12} /> Registrar pagamento
+                        </button>
+                      ))}
                   </div>
                 </div>
               ))}
@@ -375,72 +447,131 @@ export const RecurringPackagesPanel: React.FC = () => {
       )}
 
       {planModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-surface rounded-xl border border-border w-full max-w-lg max-h-[90vh] overflow-y-auto p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <h4 className="text-base font-bold">{editingPlan ? 'Editar modelo' : 'Criar modelo'}</h4>
-              <button onClick={() => setPlanModalOpen(false)} className="text-text-muted hover:text-text-primary">✕</button>
-            </div>
+        <ModalShell
+          open
+          titleId="recurring-planModalOpen-title"
+          title={editingPlan ? 'Editar modelo' : 'Criar modelo'}
+          loading={planSubmitting}
+          onClose={() => setPlanModalOpen(false)}
+          className="max-w-lg"
+          body={
+            <div className="space-y-4">
+              {planSubmitError && <SectionError message={planSubmitError} />}
 
-            {planSubmitError && <SectionError message={planSubmitError} />}
-
-            <Field label="Nome do modelo">
-              <input className={FIELD_CONTROL} value={planForm.name} onChange={e => setPlanForm(f => ({ ...f, name: e.target.value }))} />
-            </Field>
-
-            <Field label="Descrição">
-              <textarea className={FIELD_CONTROL} rows={2} value={planForm.description} onChange={e => setPlanForm(f => ({ ...f, description: e.target.value }))} />
-            </Field>
-
-            <div className={FORM_GRID}>
-              <Field label="Preço (R$)">
-                <input type="number" min={0} step={0.01} className={FIELD_CONTROL} value={planForm.price} onChange={e => setPlanForm(f => ({ ...f, price: e.target.value }))} />
-              </Field>
-              <Field label="Ciclo">
-                <SmartSelect
-                  value={planForm.billingCycle}
-                  onChange={val => setPlanForm(f => ({ ...f, billingCycle: val ?? 'MONTHLY' }))}
-                  options={Object.entries(CYCLE_LABELS).map(([value, label]) => ({ value, label }))}
-                  clearable={false}
+              <Field label="Nome do modelo">
+                <input
+                  className={FIELD_CONTROL}
+                  value={planForm.name}
+                  onChange={e => setPlanForm(f => ({ ...f, name: e.target.value }))}
                 />
               </Field>
-            </div>
 
-            <div className={FORM_FOOTER}>
-              <button onClick={handlePlanSubmit} disabled={planSubmitting || !planForm.name || !planForm.price} className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-bold text-accent-fg disabled:opacity-60">
-                {planSubmitting ? <Loader2 className="animate-spin" size={16} /> : null}
-                {editingPlan ? 'Salvar' : 'Criar'}
-              </button>
-              <button onClick={() => setPlanModalOpen(false)} className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-secondary hover:bg-surface-2">Cancelar</button>
+              <Field label="Descrição">
+                <textarea
+                  className={FIELD_CONTROL}
+                  rows={2}
+                  value={planForm.description}
+                  onChange={e => setPlanForm(f => ({ ...f, description: e.target.value }))}
+                />
+              </Field>
+
+              <div className={FORM_GRID}>
+                <Field label="Preço (R$)">
+                  <input
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    className={FIELD_CONTROL}
+                    value={planForm.price}
+                    onChange={e => setPlanForm(f => ({ ...f, price: e.target.value }))}
+                  />
+                </Field>
+                <Field label="Ciclo">
+                  <SmartSelect
+                    value={planForm.billingCycle}
+                    onChange={val => setPlanForm(f => ({ ...f, billingCycle: val ?? 'MONTHLY' }))}
+                    options={Object.entries(CYCLE_LABELS).map(([value, label]) => ({
+                      value,
+                      label,
+                    }))}
+                    clearable={false}
+                  />
+                </Field>
+              </div>
+
+              <div className={FORM_FOOTER}>
+                <button
+                  onClick={handlePlanSubmit}
+                  disabled={planSubmitting || !planForm.name || !planForm.price}
+                  className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-bold text-accent-fg disabled:opacity-60"
+                >
+                  {planSubmitting ? <Loader2 className="animate-spin" size={16} /> : null}
+                  {editingPlan ? 'Salvar' : 'Criar'}
+                </button>
+                <button
+                  disabled={planSubmitting}
+                  onClick={() => setPlanModalOpen(false)}
+                  className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-secondary hover:bg-surface-2"
+                >
+                  Cancelar
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
+          }
+        />
       )}
 
       {newMembershipOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-surface rounded-xl border border-border w-full max-w-sm p-5 space-y-4">
-            <h4 className="text-base font-bold">Novo pacote</h4>
-            <Field label="Modelo">
-              <SmartSelect
-                value={selectedPlanId || null}
-                onChange={val => setSelectedPlanId(val ?? '')}
-                options={plans.filter(p => p.isActive).map(p => ({ value: p.id, label: `${p.name} — ${formatCurrencyBRL(p.price)}` }))}
-                placeholder="Selecione..."
-              />
-            </Field>
-            <Field label="ID do cliente">
-              <input className={FIELD_CONTROL} value={selectedClientId} onChange={e => setSelectedClientId(e.target.value)} placeholder="UUID do cliente" />
-            </Field>
-            <div className={FORM_FOOTER}>
-              <button onClick={handleNewMembership} disabled={newMembershipSubmitting || !selectedPlanId || !selectedClientId} className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-bold text-accent-fg disabled:opacity-60">
-                {newMembershipSubmitting ? <Loader2 className="animate-spin" size={16} /> : null}
-                Criar pacote
-              </button>
-              <button onClick={() => setNewMembershipOpen(false)} className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-secondary hover:bg-surface-2">Cancelar</button>
+        <ModalShell
+          open
+          titleId="recurring-newMembershipOpen-title"
+          title={'Novo pacote'}
+          loading={newMembershipSubmitting}
+          onClose={() => setNewMembershipOpen(false)}
+          className="max-w-lg"
+          body={
+            <div className="space-y-4">
+              <Field label="Modelo">
+                <SmartSelect
+                  value={selectedPlanId || null}
+                  onChange={val => setSelectedPlanId(val ?? '')}
+                  options={plans
+                    .filter(p => p.isActive)
+                    .map(p => ({
+                      value: p.id,
+                      label: `${p.name} — ${formatCurrencyBRL(p.price)}`,
+                    }))}
+                  placeholder="Selecione..."
+                />
+              </Field>
+              <Field label="ID do cliente">
+                <input
+                  className={FIELD_CONTROL}
+                  value={selectedClientId}
+                  onChange={e => setSelectedClientId(e.target.value)}
+                  placeholder="UUID do cliente"
+                />
+              </Field>
+              <div className={FORM_FOOTER}>
+                <button
+                  onClick={handleNewMembership}
+                  disabled={newMembershipSubmitting || !selectedPlanId || !selectedClientId}
+                  className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-bold text-accent-fg disabled:opacity-60"
+                >
+                  {newMembershipSubmitting ? <Loader2 className="animate-spin" size={16} /> : null}
+                  Criar pacote
+                </button>
+                <button
+                  disabled={newMembershipSubmitting}
+                  onClick={() => setNewMembershipOpen(false)}
+                  className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-secondary hover:bg-surface-2"
+                >
+                  Cancelar
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
+          }
+        />
       )}
 
       {actionTarget && (
@@ -457,31 +588,52 @@ export const RecurringPackagesPanel: React.FC = () => {
       )}
 
       {paymentTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-surface rounded-xl border border-border w-full max-w-sm p-5 space-y-4">
-            <h4 className="text-base font-bold">Registrar pagamento</h4>
-            <Field label="Método de pagamento">
-              <SmartSelect
-                value={paymentMethod}
-                onChange={val => setPaymentMethod(val ?? 'PIX')}
-                options={[
-                  { value: 'PIX', label: 'PIX' },
-                  { value: 'CASH', label: 'Dinheiro' },
-                  { value: 'CREDIT_CARD', label: 'Cartão de Crédito' },
-                  { value: 'DEBIT_CARD', label: 'Cartão de Débito' },
-                ]}
-                clearable={false}
-              />
-            </Field>
-            <div className={FORM_FOOTER}>
-              <button onClick={handlePayment} disabled={paymentLoading} className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-bold text-accent-fg disabled:opacity-60">
-                {paymentLoading ? <Loader2 className="animate-spin" size={16} /> : <CreditCard size={16} />}
-                Confirmar
-              </button>
-              <button onClick={() => setPaymentTarget(null)} className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-secondary hover:bg-surface-2">Cancelar</button>
+        <ModalShell
+          open
+          titleId="recurring-paymentTarget-title"
+          title={'Registrar pagamento'}
+          loading={paymentLoading}
+          onClose={() => setPaymentTarget(null)}
+          className="max-w-lg"
+          body={
+            <div className="space-y-4">
+              <Field label="Método de pagamento">
+                <SmartSelect
+                  value={paymentMethod}
+                  onChange={val => setPaymentMethod(val ?? 'PIX')}
+                  options={[
+                    { value: 'PIX', label: 'PIX' },
+                    { value: 'CASH', label: 'Dinheiro' },
+                    { value: 'CREDIT_CARD', label: 'Cartão de Crédito' },
+                    { value: 'DEBIT_CARD', label: 'Cartão de Débito' },
+                  ]}
+                  clearable={false}
+                />
+              </Field>
+              <div className={FORM_FOOTER}>
+                <button
+                  onClick={handlePayment}
+                  disabled={paymentLoading}
+                  className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-bold text-accent-fg disabled:opacity-60"
+                >
+                  {paymentLoading ? (
+                    <Loader2 className="animate-spin" size={16} />
+                  ) : (
+                    <CreditCard size={16} />
+                  )}
+                  Confirmar
+                </button>
+                <button
+                  disabled={paymentLoading}
+                  onClick={() => setPaymentTarget(null)}
+                  className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-secondary hover:bg-surface-2"
+                >
+                  Cancelar
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
+          }
+        />
       )}
     </div>
   );

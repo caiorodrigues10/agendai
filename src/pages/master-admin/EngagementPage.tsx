@@ -1,6 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { LuLoader, LuRefreshCcw, LuTriangleAlert } from 'react-icons/lu';
-import { adminEngagementApi, EngagementSummary } from '../../infra/adminEngagementApi';
+import { LuRefreshCcw } from 'react-icons/lu';
+import { ApiError } from '../../infra/apiClient';
+import { adminEngagementApi, type EngagementBilling, type EngagementBillingFilter, type EngagementSummary } from '../../infra/adminEngagementApi';
+import { CardSkeleton } from '../../components/patterns/skeletons/CardSkeleton';
+import { SectionError } from '../../components/patterns/states/SectionError';
+import { EngagementBillingPanel } from './EngagementBillingPanel';
 import {
   FunnelCard,
   FeaturesCard,
@@ -14,11 +18,27 @@ export const EngagementPage: React.FC = () => {
   const [summary, setSummary] = useState<EngagementSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [billing, setBilling] = useState<EngagementBilling | null>(null);
+  const [billingError, setBillingError] = useState<'forbidden' | 'error' | null>(null);
+  const [billingLoading, setBillingLoading] = useState(true);
+  const [loadedBillingQuery, setLoadedBillingQuery] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [moreError, setMoreError] = useState(false);
+  const [filter, setFilter] = useState<EngagementBillingFilter>('all');
+  const [search, setSearch] = useState('');
+  const [querySearch, setQuerySearch] = useState('');
+  const billingQuery = `${filter}:${querySearch}`;
 
   const reload = useCallback(() => {
     setError(null);
+    setBillingError(null);
     setReloadKey((key) => key + 1);
   }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setQuerySearch(search.trim()), 300);
+    return () => window.clearTimeout(timer);
+  }, [search]);
 
   useEffect(() => {
     let active = true;
@@ -37,40 +57,49 @@ export const EngagementPage: React.FC = () => {
     };
   }, [reloadKey]);
 
-  if (!summary && !error) {
-    return (
-      <div className="flex justify-center py-16">
-        <LuLoader className="animate-spin text-accent" size={28} />
-      </div>
-    );
-  }
+  useEffect(() => {
+    let active = true;
+    setBillingLoading(true);
+    setMoreError(false);
+    adminEngagementApi.getBilling({ search: querySearch, filter })
+      .then((res) => {
+        if (!active) return;
+        setBilling(res.data);
+        setLoadedBillingQuery(billingQuery);
+        setBillingError(null);
+      })
+      .catch((cause: unknown) => {
+        if (!active) return;
+        setBillingError(cause instanceof ApiError && cause.statusCode === 403 ? 'forbidden' : 'error');
+      })
+      .finally(() => { if (active) setBillingLoading(false); });
+    return () => { active = false; };
+  }, [reloadKey, filter, querySearch, billingQuery]);
 
-  if (error && !summary) {
-    return (
-      <div className="text-center py-16">
-        <LuTriangleAlert className="mx-auto mb-2 text-warning" size={22} />
-        <p className="text-sm text-text-secondary">{error}</p>
-        <button
-          type="button"
-          onClick={reload}
-          className="mt-2 inline-flex items-center gap-1 text-accent text-sm font-bold hover:underline"
-        >
-          <LuRefreshCcw size={14} /> Tentar novamente
-        </button>
-      </div>
-    );
-  }
-
-  if (!summary) return null;
+  const loadMore = useCallback(async () => {
+    if (!billing?.nextCursor || loadingMore || loadedBillingQuery !== billingQuery) return;
+    setLoadingMore(true);
+    setMoreError(false);
+    try {
+      const res = await adminEngagementApi.getBilling({ search: querySearch, filter, cursor: billing.nextCursor });
+      setBilling((current) => current?.nextCursor === billing.nextCursor
+        ? { ...res.data, shops: [...current.shops, ...res.data.shops] }
+        : current);
+    } catch {
+      setMoreError(true);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [billing, billingQuery, filter, loadedBillingQuery, loadingMore, querySearch]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-text-primary">Engajamento</h1>
           <p className="text-xs text-text-muted">
-            Visão de funil, adoção, NPS, suporte e churn · atualizado em{' '}
-            {new Date(summary.generatedAt).toLocaleString('pt-BR', {
+            Assinaturas, pagamentos e uso da plataforma{summary ? ' · atualizado em ' : ''}
+            {summary && new Date(summary.generatedAt).toLocaleString('pt-BR', {
               dateStyle: 'short',
               timeStyle: 'short',
               timeZone: 'America/Sao_Paulo',
@@ -80,23 +109,65 @@ export const EngagementPage: React.FC = () => {
         <button
           type="button"
           onClick={reload}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-bold text-text-secondary hover:bg-bg"
+          disabled={billingLoading}
+          className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-bold text-text-secondary hover:bg-bg disabled:opacity-50"
         >
-          <LuRefreshCcw size={14} /> Atualizar
+          <LuRefreshCcw size={14} aria-hidden="true" /> Atualizar
         </button>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
-        <FunnelCard funnel={summary.funnel} />
-        <SupportCard support={summary.support} />
-      </div>
+      {billingError === 'forbidden' ? (
+        <div className="rounded-xl border border-border bg-surface p-4 text-sm text-text-secondary">
+          Os dados financeiros exigem permissão de leitura do faturamento.
+        </div>
+      ) : billingError === 'error' && (!billing || loadedBillingQuery !== billingQuery) ? (
+        <SectionError message="Não foi possível carregar os dados de assinaturas e pagamentos." onRetry={reload} />
+      ) : billing && loadedBillingQuery === billingQuery ? (
+        <>
+          {billingError === 'error' && <SectionError message="Falha ao atualizar os dados financeiros. Os números abaixo podem estar desatualizados." onRetry={reload} />}
+          <EngagementBillingPanel
+            data={billing}
+            filter={filter}
+            onFilterChange={setFilter}
+            search={search}
+            onSearchChange={setSearch}
+            refreshing={billingLoading}
+            loadingMore={loadingMore}
+            onLoadMore={() => void loadMore()}
+            moreError={moreError}
+          />
+        </>
+      ) : (
+        <div aria-label="Carregando dados financeiros" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }, (_, index) => <CardSkeleton key={index} variant="stat" />)}
+        </div>
+      )}
 
-      <div className="grid md:grid-cols-2 gap-4">
-        <FeaturesCard features={summary.features} />
-        <NpsCard nps={summary.nps} />
-      </div>
+      <section className="space-y-4" aria-label="Uso e experiência dos salões">
+        <div>
+          <h2 className="text-lg font-bold text-text-primary">Uso e experiência</h2>
+          <p className="text-sm text-text-muted">Ativação, adoção, suporte e satisfação dos salões.</p>
+        </div>
+        {error && <SectionError message={error} onRetry={reload} />}
+        {summary ? (
+          <>
+            <div className="grid gap-4 md:grid-cols-2">
+              <FunnelCard funnel={summary.funnel} />
+              <SupportCard support={summary.support} />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <FeaturesCard features={summary.features} />
+              <NpsCard nps={summary.nps} />
+            </div>
+            <ChurnRiskCard churnRisk={summary.churnRisk} />
+          </>
+        ) : !error ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            <CardSkeleton /><CardSkeleton />
+          </div>
+        ) : null}
+      </section>
 
-      <ChurnRiskCard churnRisk={summary.churnRisk} />
     </div>
   );
 };

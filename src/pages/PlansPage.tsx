@@ -19,7 +19,12 @@ import { getErrorMessage } from '../utils/errorMessage';
 import { trialCampaign } from '../marketing/trialCampaign';
 import { isPaidSubscription, staffHomePath } from '../utils/subscriptionPaywall';
 import { formatCurrencyBRL } from '../utils/formatters';
-import { ESSENTIAL_MONTHLY, PRO_MONTHLY, ESSENTIAL_YEARLY, PRO_YEARLY } from '../marketing/planPrices';
+import {
+  ESSENTIAL_MONTHLY,
+  PRO_MONTHLY,
+  ESSENTIAL_YEARLY,
+  PRO_YEARLY,
+} from '../marketing/planPrices';
 
 const matrix = [
   { label: 'Fila digital + agenda online', essential: true, pro: true },
@@ -81,14 +86,14 @@ function FeatureList({
           key={row.label}
           aria-label={`${row.included ? 'Inclui' : 'Não inclui'} ${row.label}`}
           className={`flex items-start gap-2.5 text-sm ${
-            row.included ? 'text-neutral-200' : 'text-text-muted'
+            row.included ? 'text-text-primary' : 'text-text-muted'
           }`}
         >
           <span className="mt-0.5 shrink-0" aria-hidden>
             {row.included ? (
-              <Check size={16} className={accent ? 'text-accent' : 'text-neutral-400'} />
+              <Check size={16} className={accent ? 'text-accent' : 'text-text-secondary'} />
             ) : (
-              <X size={16} className="text-neutral-600" />
+              <X size={16} className="text-text-muted" />
             )}
           </span>
           <span>{row.label}</span>
@@ -171,7 +176,9 @@ export const PlansPage: React.FC = () => {
 
   const essentialPrice = tierAmounts('essential', essentialPlan, isYearly);
   const proPrice = tierAmounts('pro', proPlan, isYearly);
-  const essentialCurrent = Boolean(alreadyPaid && essentialPlan && essentialPlan.id === currentPlanId);
+  const essentialCurrent = Boolean(
+    alreadyPaid && essentialPlan && essentialPlan.id === currentPlanId
+  );
   const proCurrent = Boolean(alreadyPaid && proPlan && proPlan.id === currentPlanId);
 
   const trialRows = [
@@ -183,42 +190,42 @@ export const PlansPage: React.FC = () => {
 
   return (
     <MarketingLayout
+      wrapperClassName="dark min-h-dvh overflow-x-hidden bg-bg font-sans text-text-primary selection:bg-accent/30"
       title="Planos e preços — Essencial e Pro | Agenda Já"
       description="Fila digital, agenda online e equipe ilimitada a partir de R$ 14/mês. 30 dias de Pro grátis, sem cartão. Anual com 2 meses grátis."
       path="/planos"
       jsonLd={softwareApplicationLd('/planos')}
       background={
         <>
-    <div className="pointer-events-none fixed inset-0 z-0">
-      <div className="absolute -left-[15%] top-[-12%] h-[55%] w-[55%] rounded-full bg-accent/25 blur-[140px]" />
-      <div className="absolute -right-[10%] top-[18%] h-[40%] w-[40%] rounded-full bg-teal-900/15 blur-[120px]" />
-    </div>
+          <div className="pointer-events-none fixed inset-0 z-0">
+            <div className="absolute -left-[15%] top-[-12%] h-[55%] w-[55%] rounded-full bg-accent/25 blur-[140px]" />
+            <div className="absolute -right-[10%] top-[18%] h-[40%] w-[40%] rounded-full bg-teal-900/15 blur-[120px]" />
+          </div>
         </>
       }
       afterFooter={
         <>
-    <div
-      className={`fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 transition duration-300 md:justify-end md:px-8 md:pb-6 ${
-        stickyVisible
-          ? 'translate-y-0 opacity-100'
-          : 'pointer-events-none translate-y-4 opacity-0'
-      }`}
-      aria-hidden={!stickyVisible}
-    >
-      <button
-        type="button"
-        tabIndex={stickyVisible ? 0 : -1}
-        onClick={startTrial}
-        className="group inline-flex items-center gap-2.5 rounded-full bg-accent px-6 py-3.5 text-sm font-black text-black shadow-[0_16px_50px_rgba(16,185,129,0.45)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-accent-light md:px-7 md:text-base"
-      >
-        {trialCta}
-        <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-      </button>
-    </div>
+          <div
+            className={`fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 transition duration-300 md:justify-end md:px-8 md:pb-6 ${
+              stickyVisible
+                ? 'translate-y-0 opacity-100'
+                : 'pointer-events-none translate-y-4 opacity-0'
+            }`}
+            aria-hidden={!stickyVisible}
+          >
+            <button
+              type="button"
+              tabIndex={stickyVisible ? 0 : -1}
+              onClick={startTrial}
+              className="group inline-flex items-center gap-2.5 rounded-full bg-accent px-6 py-3.5 text-sm font-black text-accent-fg shadow-[0_16px_50px_rgba(16,185,129,0.45)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-accent-hover md:px-7 md:text-base"
+            >
+              {trialCta}
+              <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+            </button>
+          </div>
         </>
       }
     >
-
       <main className="relative z-10">
         <section id="precos" className="px-6 pb-16 pt-32 md:px-10 md:pb-20 md:pt-40 xl:px-12">
           <div className="mx-auto max-w-6xl">
@@ -226,7 +233,7 @@ export const PlansPage: React.FC = () => {
               <motion.h1
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl md:text-6xl"
+                className="text-4xl font-black tracking-[-0.04em] text-text-primary sm:text-5xl md:text-6xl"
               >
                 Teste grátis ou escolha o plano
               </motion.h1>
@@ -234,7 +241,7 @@ export const PlansPage: React.FC = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.05 }}
-                className="mx-auto mt-4 max-w-xl text-base font-medium leading-relaxed text-neutral-400 md:text-lg"
+                className="mx-auto mt-4 max-w-xl text-base font-medium leading-relaxed text-text-secondary md:text-lg"
               >
                 {trialCampaign.body} {trialCampaign.afterTrial}
               </motion.p>
@@ -246,13 +253,15 @@ export const PlansPage: React.FC = () => {
               transition={{ delay: 0.1 }}
               className="mt-8 flex justify-center"
             >
-              <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1">
+              <div className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-2 p-1">
                 <button
                   type="button"
                   aria-pressed={!isYearly}
                   onClick={() => setIsYearly(false)}
                   className={`rounded-full px-5 py-2.5 text-sm font-bold transition ${
-                    !isYearly ? 'bg-white text-black' : 'text-neutral-400 hover:text-white'
+                    !isYearly
+                      ? 'bg-surface text-text-primary'
+                      : 'text-text-secondary hover:text-text-primary'
                   }`}
                 >
                   Mensal
@@ -262,12 +271,14 @@ export const PlansPage: React.FC = () => {
                   aria-pressed={isYearly}
                   onClick={() => setIsYearly(true)}
                   className={`rounded-full px-5 py-2.5 text-sm font-bold transition ${
-                    isYearly ? 'bg-white text-black' : 'text-neutral-400 hover:text-white'
+                    isYearly
+                      ? 'bg-surface text-text-primary'
+                      : 'text-text-secondary hover:text-text-primary'
                   }`}
                 >
                   Anual
                 </button>
-                <span className="rounded-full bg-accent px-3 py-2 text-[10px] font-black uppercase tracking-wider text-black">
+                <span className="rounded-full bg-accent px-3 py-2 text-xs font-black uppercase tracking-wider text-accent-fg">
                   2 meses grátis
                 </span>
               </div>
@@ -284,34 +295,34 @@ export const PlansPage: React.FC = () => {
                 <motion.article
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-col rounded-[1.75rem] border border-white/10 bg-surface p-6 md:p-7"
+                  className="flex flex-col rounded-[1.75rem] border border-border bg-surface p-6 md:p-7"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <h2 className="text-sm font-black uppercase tracking-[0.18em] text-white">
+                    <h2 className="text-sm font-black uppercase tracking-[0.18em] text-text-primary">
                       Teste grátis
                     </h2>
-                    <span className="rounded-full border border-white/15 bg-white/8 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-neutral-200">
+                    <span className="rounded-full border border-border bg-surface-2 px-2.5 py-1 text-xs font-black uppercase tracking-wider text-text-primary">
                       30 dias
                     </span>
                   </div>
-                  <p className="mt-3 text-sm font-medium leading-relaxed text-neutral-400">
+                  <p className="mt-3 text-sm font-medium leading-relaxed text-text-secondary">
                     Para quem quer ver o Pro antes de pagar. Fila, agenda, dashboard e financeiro,
                     sem cartão.
                   </p>
                   <div className="mt-5" data-testid="plan-price-trial">
-                    <span className="text-4xl font-black tracking-tight text-white sm:text-5xl">
+                    <span className="text-4xl font-black tracking-tight text-text-primary sm:text-5xl">
                       R$ 0
                     </span>
-                    <p className="mt-1 text-xs font-medium text-neutral-400">por 30 dias</p>
+                    <p className="mt-1 text-xs font-medium text-text-secondary">por 30 dias</p>
                   </div>
                   <button
                     type="button"
                     onClick={startTrial}
-                    className="mt-5 w-full rounded-2xl bg-white py-3.5 text-sm font-black text-black transition hover:bg-neutral-200"
+                    className="mt-5 w-full rounded-2xl bg-surface-2 py-3.5 text-sm font-bold text-text-primary transition hover:bg-border"
                   >
                     {trialCta}
                   </button>
-                  <p className="mt-2 text-center text-[11px] text-text-muted">
+                  <p className="mt-2 text-center text-xs text-text-muted">
                     Sem cartão, sem cobrança automática
                   </p>
                   <FeatureList rows={trialRows} />
@@ -321,19 +332,19 @@ export const PlansPage: React.FC = () => {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.05 }}
-                  className="flex flex-col rounded-[1.75rem] border border-white/10 bg-linear-to-b from-accent/10 to-surface p-6 md:p-7"
+                  className="flex flex-col rounded-[1.75rem] border border-border bg-linear-to-b from-accent/10 to-surface p-6 md:p-7"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <h2 className="text-sm font-black uppercase tracking-[0.18em] text-white">
+                    <h2 className="text-sm font-black uppercase tracking-[0.18em] text-text-primary">
                       Essencial
                     </h2>
                     {essentialCurrent && (
-                      <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-accent">
+                      <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-accent">
                         Atual
                       </span>
                     )}
                   </div>
-                  <p className="mt-3 text-sm font-medium leading-relaxed text-neutral-400">
+                  <p className="mt-3 text-sm font-medium leading-relaxed text-text-secondary">
                     Fila, agenda e equipe ilimitada, sem taxa por cadeira.
                   </p>
                   <div className="mt-5">
@@ -345,16 +356,16 @@ export const PlansPage: React.FC = () => {
                     <div className="flex items-baseline gap-1.5">
                       <span
                         data-testid="plan-price-essential"
-                        className="text-4xl font-black tracking-tight text-white sm:text-5xl"
+                        className="text-4xl font-black tracking-tight text-text-primary sm:text-5xl"
                       >
                         {formatCurrencyBRL(essentialPrice.amount)}
                       </span>
-                      <span className="text-sm text-neutral-400">/mês</span>
+                      <span className="text-sm text-text-secondary">/mês</span>
                     </div>
                     {essentialPrice.billedYearly != null && (
                       <p
                         data-testid="plan-billed-essential"
-                        className="mt-1 text-xs font-medium text-neutral-400"
+                        className="mt-1 text-xs font-medium text-text-secondary"
                       >
                         cobrado {formatCurrencyBRL(essentialPrice.billedYearly)}/ano
                       </p>
@@ -366,14 +377,14 @@ export const PlansPage: React.FC = () => {
                     disabled={!essentialPlan || essentialCurrent}
                     className={`mt-5 w-full rounded-2xl border py-3.5 text-sm font-black transition ${
                       !essentialPlan || essentialCurrent
-                        ? 'cursor-not-allowed border-white/10 bg-white/5 text-text-muted'
-                        : 'border-white/20 bg-transparent text-white hover:bg-white/10'
+                        ? 'cursor-not-allowed border-border bg-surface-2 text-text-muted'
+                        : 'border-border bg-transparent text-text-primary hover:bg-surface-2'
                     }`}
                   >
                     {essentialPlan ? paidCta('Essencial', essentialCurrent) : 'Indisponível'}
                   </button>
                   {!essentialCurrent && (
-                    <p className="mt-2 text-center text-[11px] text-text-muted">
+                    <p className="mt-2 text-center text-xs text-text-muted">
                       {trialCampaign.afterTrialThenEssential}
                     </p>
                   )}
@@ -384,29 +395,29 @@ export const PlansPage: React.FC = () => {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="relative z-10 flex flex-col rounded-[1.75rem] border border-accent/50 bg-linear-to-b from-accent/25 to-[#07140f] p-6 shadow-[0_0_80px_rgba(52,211,153,0.16)] md:p-7 lg:scale-[1.02]"
+                  className="relative z-10 flex flex-col rounded-[1.75rem] border border-accent/50 bg-linear-to-b from-accent/10 to-surface p-6 shadow-[0_0_80px_rgba(52,211,153,0.16)] md:p-7 "
                 >
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-1 text-[10px] font-black uppercase tracking-widest text-black">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-1 text-xs font-black uppercase tracking-widest text-accent-fg">
                     Mais escolhido
                   </div>
                   <div className="flex items-start justify-between gap-3">
-                    <h2 className="text-sm font-black uppercase tracking-[0.18em] text-white">
+                    <h2 className="text-sm font-black uppercase tracking-[0.18em] text-text-primary">
                       Pro
                     </h2>
                     <div className="flex flex-wrap justify-end gap-1.5">
                       {isYearly && (
-                        <span className="rounded-full bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-black">
+                        <span className="rounded-full bg-surface-2 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-text-primary">
                           2 meses grátis
                         </span>
                       )}
                       {proCurrent && (
-                        <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-accent">
+                        <span className="rounded-full border border-accent/25 bg-accent/10 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-accent">
                           Atual
                         </span>
                       )}
                     </div>
                   </div>
-                  <p className="mt-3 text-sm font-medium leading-relaxed text-neutral-300">
+                  <p className="mt-3 text-sm font-medium leading-relaxed text-text-secondary">
                     Para quem quer enxergar o caixa: dashboard, financeiro, fiado e insights.
                   </p>
                   <div className="mt-5">
@@ -422,10 +433,13 @@ export const PlansPage: React.FC = () => {
                       >
                         {formatCurrencyBRL(proPrice.amount)}
                       </span>
-                      <span className="text-sm text-neutral-400">/mês</span>
+                      <span className="text-sm text-text-secondary">/mês</span>
                     </div>
                     {proPrice.billedYearly != null && (
-                      <p data-testid="plan-billed-pro" className="mt-1 text-xs font-medium text-neutral-300">
+                      <p
+                        data-testid="plan-billed-pro"
+                        className="mt-1 text-xs font-medium text-text-secondary"
+                      >
                         cobrado {formatCurrencyBRL(proPrice.billedYearly)}/ano
                       </p>
                     )}
@@ -436,14 +450,14 @@ export const PlansPage: React.FC = () => {
                     disabled={!proPlan || proCurrent}
                     className={`mt-5 w-full rounded-2xl py-3.5 text-sm font-black transition ${
                       !proPlan || proCurrent
-                        ? 'cursor-not-allowed bg-white/10 text-text-muted'
-                        : 'bg-accent text-black hover:-translate-y-0.5 hover:bg-accent-light'
+                        ? 'cursor-not-allowed bg-surface-2 text-text-muted'
+                        : 'bg-accent text-accent-fg hover:-translate-y-0.5 hover:bg-accent-hover'
                     }`}
                   >
                     {proPlan ? paidCta('Pro', proCurrent) : 'Indisponível'}
                   </button>
                   {!proCurrent && (
-                    <p className="mt-2 text-center text-[11px] text-neutral-400">
+                    <p className="mt-2 text-center text-xs text-text-secondary">
                       {trialCampaign.afterTrialThenPro}
                     </p>
                   )}
@@ -471,7 +485,7 @@ export const PlansPage: React.FC = () => {
           </div>
         </section>
 
-        <section className="border-y border-white/8 bg-white/1.5 px-6 py-20 md:px-10 md:py-28 xl:px-12">
+        <section className="border-y border-border bg-surface-2 px-6 py-20 md:px-10 md:py-28 xl:px-12">
           <div className="mx-auto max-w-6xl">
             <PricingPersuasionCharts variant="dark" />
           </div>
@@ -483,14 +497,14 @@ export const PlansPage: React.FC = () => {
               <p className="text-xs font-bold uppercase tracking-[0.28em] text-accent/90">
                 Comparativo
               </p>
-              <h2 className="mt-3 text-4xl font-black tracking-tight text-white md:text-5xl">
+              <h2 className="mt-3 text-4xl font-black tracking-tight text-text-primary md:text-5xl">
                 Essencial opera. Pro enxerga.
               </h2>
             </div>
 
-            <div className="overflow-hidden rounded-4xl border border-white/10 bg-surface">
+            <div className="overflow-hidden rounded-4xl border border-border bg-surface">
               <div className="overflow-x-auto">
-                <div className="grid grid-cols-[1.5fr_0.75fr_0.75fr] border-b border-white/8 px-5 py-4 text-[10px] font-black uppercase tracking-wider text-text-muted md:px-8 md:text-xs">
+                <div className="grid grid-cols-[1.5fr_0.75fr_0.75fr] border-b border-border px-5 py-4 text-xs font-black uppercase tracking-wider text-text-muted md:px-8 md:text-xs">
                   <span>Recurso</span>
                   <span className="text-center">Essencial</span>
                   <span className="text-center text-accent">Pro</span>
@@ -498,21 +512,21 @@ export const PlansPage: React.FC = () => {
                 {matrix.map(row => (
                   <div
                     key={row.label}
-                    className="grid grid-cols-[1.5fr_0.75fr_0.75fr] items-center border-b border-white/6 px-5 py-4 last:border-b-0 md:px-8"
+                    className="grid grid-cols-[1.5fr_0.75fr_0.75fr] items-center border-b border-border px-5 py-4 last:border-b-0 md:px-8"
                   >
-                    <span className="text-sm font-semibold text-neutral-200">{row.label}</span>
+                    <span className="text-sm font-semibold text-text-primary">{row.label}</span>
                     <span className="flex justify-center">
                       {row.essential ? (
-                        <CheckCircle2 size={24} className="h-5 w-5 text-neutral-400" />
+                        <CheckCircle2 size={24} className="h-5 w-5 text-text-secondary" />
                       ) : (
-                        <X size={24} className="h-5 w-5 text-neutral-700" />
+                        <X size={24} className="h-5 w-5 text-text-muted" />
                       )}
                     </span>
                     <span className="flex justify-center">
                       {row.pro ? (
                         <CheckCircle2 size={24} className="h-5 w-5 text-accent" />
                       ) : (
-                        <X size={24} className="h-5 w-5 text-neutral-700" />
+                        <X size={24} className="h-5 w-5 text-text-muted" />
                       )}
                     </span>
                   </div>
@@ -522,9 +536,9 @@ export const PlansPage: React.FC = () => {
           </div>
         </section>
 
-        <section className="border-y border-white/8 bg-white/2 px-6 py-20 md:px-10 xl:px-12">
+        <section className="border-y border-border bg-surface-2 px-6 py-20 md:px-10 xl:px-12">
           <div className="mx-auto max-w-4xl">
-            <h2 className="mb-10 text-3xl font-black tracking-tight text-white md:text-4xl">
+            <h2 className="mb-10 text-3xl font-black tracking-tight text-text-primary md:text-4xl">
               Objeções que a gente já ouviu
             </h2>
             <div className="grid gap-4 md:grid-cols-2">
@@ -535,10 +549,10 @@ export const PlansPage: React.FC = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.04 }}
-                  className="rounded-3xl border border-white/8 bg-surface p-6"
+                  className="rounded-3xl border border-border bg-surface p-6"
                 >
-                  <p className="text-base font-black text-white">{item.q}</p>
-                  <p className="mt-3 text-sm font-medium leading-relaxed text-neutral-400">
+                  <p className="text-base font-black text-text-primary">{item.q}</p>
+                  <p className="mt-3 text-sm font-medium leading-relaxed text-text-secondary">
                     {item.a}
                   </p>
                 </motion.div>
@@ -547,7 +561,6 @@ export const PlansPage: React.FC = () => {
           </div>
         </section>
       </main>
-
     </MarketingLayout>
   );
 };

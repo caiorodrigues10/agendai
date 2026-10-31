@@ -1,26 +1,33 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { LuChevronDown as ChevronDown } from 'react-icons/lu';
-import { Link } from 'react-router-dom';
-import { StaffMember, EmployeePermission } from '../../types';
-import { TeamMemberSchema, TeamMemberFormData } from '../../schemas';
 import {
-  RiAddLine,
-  RiDeleteBin6Line,
-  RiCloseLine,
-  RiCheckLine,
-  RiCameraLine,
-  RiLoader4Line,
-  RiShieldLine,
-} from 'react-icons/ri';
-import { Avatar } from '../../components/ui/Avatar';
-import { usersApi } from '../../infra/usersApi';
-import { getErrorMessage } from '../../utils/errorMessage';
-import { ALL_PERMISSIONS, PERMISSION_LABELS } from '../../hooks/usePermissions';
-import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_FOOTER, FORM_GRID } from '../../components/ui/Field';
-import { Button } from '../../components/ui/Button';
+  LuPlus as RiAddLine,
+  LuCamera as RiCameraLine,
+  LuCheck as RiCheckLine,
+  LuX as RiCloseLine,
+  LuTrash2 as RiDeleteBin6Line,
+  LuLoaderCircle as RiLoader4Line,
+  LuShield as RiShieldLine,
+} from 'react-icons/lu';
+import { Link } from 'react-router-dom';
 import { SectionError } from '../../components/patterns';
+import { PageHeader } from '../../components/patterns/PageHeader';
+import { Avatar } from '../../components/ui/Avatar';
+import { Button } from '../../components/ui/Button';
+import {
+  Field,
+  FIELD_CONTROL,
+  FIELD_CONTROL_ERROR,
+  FORM_FOOTER,
+  FORM_GRID,
+} from '../../components/ui/Field';
+import { ALL_PERMISSIONS, PERMISSION_LABELS } from '../../hooks/usePermissions';
+import { usersApi } from '../../infra/usersApi';
+import { TeamMemberFormData, TeamMemberSchema } from '../../schemas';
+import { EmployeePermission, StaffMember } from '../../types';
+import { getErrorMessage } from '../../utils/errorMessage';
 
 interface TeamManagerProps {
   staff: StaffMember[];
@@ -71,7 +78,8 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
       reset();
       setIsAdding(false);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Não foi possível cadastrar o funcionário';
+      const message =
+        err instanceof Error ? err.message : 'Não foi possível cadastrar o funcionário';
       setFormError(message);
     } finally {
       setSaving(false);
@@ -108,7 +116,9 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
       });
       if (!putRes.ok) throw new Error('Falha ao enviar arquivo');
       await usersApi.confirmAvatar(avatarTargetId, publicUrl);
-      const updated = staff.map(m => (m.id === avatarTargetId ? { ...m, avatarUrl: publicUrl } : m));
+      const updated = staff.map(m =>
+        m.id === avatarTargetId ? { ...m, avatarUrl: publicUrl } : m
+      );
       await onUpdateTeam(updated);
     } catch (err) {
       setFormError(getErrorMessage(err, 'Erro ao enviar foto'));
@@ -145,17 +155,21 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
         className="hidden"
       />
 
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h3 className="text-lg font-bold text-text-primary">Equipe & Acessos</h3>
-        <Button
-          onClick={() => {
-            setIsAdding(!isAdding);
-            setFormError(null);
-          }}
-        >
-          <RiAddLine size={16} /> Adicionar
-        </Button>
-      </div>
+      <PageHeader
+        title="Equipe & Acessos"
+        description="Profissionais e permissões do salão."
+        className="mb-4"
+        actions={
+          <Button
+            onClick={() => {
+              setIsAdding(!isAdding);
+              setFormError(null);
+            }}
+          >
+            <RiAddLine size={16} /> Adicionar
+          </Button>
+        }
+      />
 
       {formError && !isAdding && <SectionError message={formError} className="mb-3" />}
 
@@ -214,11 +228,7 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
               >
                 Cancelar
               </Button>
-              <Button
-                type="submit"
-                loading={saving}
-                className="flex-1"
-              >
+              <Button type="submit" loading={saving} className="flex-1">
                 Cadastrar
               </Button>
             </div>
@@ -242,7 +252,10 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
           };
 
           return (
-            <div key={member.id} className="overflow-hidden rounded-lg border border-border bg-surface">
+            <div
+              key={member.id}
+              className="overflow-hidden rounded-lg border border-border bg-surface"
+            >
               <div
                 className={`flex items-center justify-between gap-3 p-3 ${
                   !isEmployee ? 'cursor-pointer hover:bg-bg/50' : ''
@@ -300,14 +313,14 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
                 <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                   {isEmployee && member.id !== currentAdminId && (
                     <>
-                        <button
-                          type="button"
-                          onClick={togglePermissions}
-                          className={`flex items-center justify-center rounded-lg p-2 min-h-10 min-w-10 transition-colors ${isPermissionsExpanded ? 'bg-accent/10 text-accent' : 'text-text-muted hover:bg-accent/10 hover:text-accent'}`}
-                          title="Gerenciar permissões"
-                        >
+                      <button
+                        type="button"
+                        onClick={togglePermissions}
+                        className={`flex items-center justify-center rounded-lg p-2 min-h-10 min-w-10 transition-colors ${isPermissionsExpanded ? 'bg-accent/10 text-accent' : 'text-text-muted hover:bg-accent/10 hover:text-accent'}`}
+                        title="Gerenciar permissões"
+                      >
                         <RiShieldLine size={16} />
-                        </button>
+                      </button>
                       {deleteConfirmId === member.id ? (
                         <div className="flex items-center gap-1">
                           <button
@@ -400,7 +413,9 @@ export const TeamManager: React.FC<TeamManagerProps> = ({
                         <div
                           className={`flex h-3 w-3 flex-shrink-0 items-center justify-center rounded border ${memberPerms.includes(perm) ? 'border-accent bg-accent' : 'border-border'}`}
                         >
-                          {memberPerms.includes(perm) && <RiCheckLine size={10} className="text-accent-fg" />}
+                          {memberPerms.includes(perm) && (
+                            <RiCheckLine size={10} className="text-accent-fg" />
+                          )}
                         </div>
                         <span className="leading-tight">{PERMISSION_LABELS[perm]}</span>
                       </label>
