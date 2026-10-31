@@ -22,6 +22,15 @@ textarea {
   touch-action: manipulation;
 }
 
+@media (max-width: 639px) {
+  /* Safari iOS zooms the page when a focused form control is smaller than 16px. */
+  input:not([type='checkbox']):not([type='radio']),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 button:not([disabled]),
 a[href],
 [role="button"] {

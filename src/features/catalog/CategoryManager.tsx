@@ -81,7 +81,7 @@ export function CategoryManager({ title, linkedLabel, state, onChanged }: Props)
       {error && <SectionError message={error} />}
       {editing && <form onSubmit={handleSubmit(save)} className="space-y-3 border-t border-border pt-3">
         <fieldset disabled={busy} className="flex flex-wrap items-start gap-3">
-          <Field label="Nome da categoria" error={errors.name?.message} className="min-w-0 flex-1"><input autoFocus className={FIELD_CONTROL} {...register('name')} /></Field>
+          <Field label="Nome da categoria" error={errors.name?.message} className="min-w-0 flex-1"><input className={FIELD_CONTROL} {...register('name')} /></Field>
           <Field label="Cor" error={errors.color?.message}><input type="color" className="h-11 w-16 rounded border border-border bg-bg" {...register('color')} /></Field>
           <button type="button" className={button} onClick={() => setValue('color', '')}>Sem cor</button>
         </fieldset>

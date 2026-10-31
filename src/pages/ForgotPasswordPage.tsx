@@ -133,7 +133,6 @@ export const ForgotPasswordPage: React.FC = () => {
                       className={inputClass(false)}
                       placeholder="seu@email.com"
                       autoComplete="email"
-                      autoFocus
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                     />
