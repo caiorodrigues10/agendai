@@ -19,6 +19,7 @@ import { OperationModeSection } from './OperationModeSection';
 import { SocialLinksSection } from './SocialLinksSection';
 import { ProfessionalProfileSection } from './ProfessionalProfileSection';
 import { DataImportWizard } from '../dataImport';
+import { DataExportWizard } from '../dataExport/DataExportWizard';
 import { ShopFloorControls } from '../../features/shop';
 import { Field, FIELD_CONTROL } from '../../components/ui/Field';
 import { EmailPreferencesPanel } from './EmailPreferencesPanel';
@@ -38,6 +39,7 @@ import {
   LuMail as Mail,
   LuCircleHelp as CircleHelp,
   LuFileSpreadsheet as FileSpreadsheet,
+  LuDownload as Download,
 } from 'react-icons/lu';
 
 type SettingsSection =
@@ -48,6 +50,7 @@ type SettingsSection =
   | 'operation'
   | 'email'
   | 'import'
+  | 'export'
   | 'privacy'
   | 'help';
 
@@ -59,6 +62,7 @@ const SETTINGS_SECTIONS: { id: SettingsSection; label: string; icon: React.Eleme
   { id: 'operation', label: 'Funcionamento', icon: Clock },
   { id: 'email', label: 'E-mail e notificações', icon: Mail },
   { id: 'import', label: 'Importar dados', icon: FileSpreadsheet },
+  { id: 'export', label: 'Exportar dados', icon: Download },
   { id: 'privacy', label: 'Privacidade', icon: ShieldCheck },
   { id: 'help', label: 'Ajuda e suporte', icon: CircleHelp },
 ];
@@ -398,6 +402,10 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
 
       {activeSection === 'import' && barbershopId && (
         <DataImportWizard barbershopId={barbershopId} onNotify={onNotify} />
+      )}
+
+      {activeSection === 'export' && barbershopId && (
+        <DataExportWizard barbershopId={barbershopId} onNotify={onNotify} />
       )}
 
       {activeSection === 'privacy' && <AccountPrivacyPanel onNotify={onNotify} />}
