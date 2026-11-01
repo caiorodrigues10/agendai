@@ -13,7 +13,7 @@ function unwrap<T>(res: unknown): T {
 }
 
 export const usersApi = {
-  updateMe: (payload: { name?: string; email?: string; currentPassword?: string; newPassword?: string }) =>
+  updateMe: (payload: { email?: string; currentPassword?: string; newPassword?: string }) =>
     apiClient<{ success: boolean; data: { id: string; name: string; email: string; role: string; barbershopId?: string; avatarUrl?: string | null; permissions?: string[] } }>(
       '/api/users/me', 'PATCH', payload, token()
     ).then(res => unwrap<{ id: string; name: string; email: string; role: string; barbershopId?: string; avatarUrl?: string | null; permissions?: string[] }>(res)),

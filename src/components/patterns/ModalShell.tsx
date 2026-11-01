@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import FocusLock from 'react-focus-lock';
 import { LuX as X } from 'react-icons/lu';
+import { useVisualViewport } from '../../hooks/useVisualViewport';
 
 // Reference-counted so closing a nested dialog doesn't unlock the page behind it.
 const openDialogs: symbol[] = [];
@@ -38,6 +39,8 @@ export interface ModalShellProps {
   body?: React.ReactNode;
   /** Classes extras no container do `body` (complementa `mt-4` ou o scroller do sheet). */
   bodyClassName?: string;
+  /** Evita que o primeiro campo abra o teclado automaticamente em telas touch. */
+  initialFocus?: 'first-control' | 'close-button';
   footer?: React.ReactNode;
 }
 
@@ -50,6 +53,7 @@ interface HeaderProps {
   actions?: React.ReactNode;
   loading: boolean;
   onClose: () => void;
+  initialFocus: 'first-control' | 'close-button';
   children?: React.ReactNode;
 }
 
@@ -62,6 +66,7 @@ const ShellHeader: React.FC<HeaderProps> = ({
   actions,
   loading,
   onClose,
+  initialFocus,
   children,
 }) => (
   <div className="flex items-start gap-3">
@@ -113,6 +118,7 @@ export const ModalShell: React.FC<ModalShellProps> = ({
   children,
   body,
   bodyClassName = '',
+  initialFocus = 'close-button',
   footer,
 }) => {
   const dialogKey = React.useRef(Symbol('dialog'));
@@ -143,6 +149,7 @@ export const ModalShell: React.FC<ModalShellProps> = ({
     return () => window.removeEventListener('keydown', onKey);
   }, [open, closeOnEscape, loading, onClose]);
 
+  const visualViewport = useVisualViewport(open);
   if (!open) return null;
   const sheet = variant === 'sheet';
   const headerProps = {
@@ -154,13 +161,21 @@ export const ModalShell: React.FC<ModalShellProps> = ({
     actions,
     loading,
     onClose,
+    initialFocus,
     children,
   };
+  const overlayStyle = visualViewport
+    ? { top: `${visualViewport.top}px`, height: `${visualViewport.height}px` }
+    : undefined;
+  const panelStyle = visualViewport
+    ? { maxHeight: `${Math.max(160, visualViewport.height - (sheet ? 8 : 32))}px` }
+    : undefined;
 
   return createPortal(
     <FocusLock returnFocus>
       <div
         className={`fixed inset-0 z-[110] flex items-end justify-center bg-black/70 ${sheet ? 'sm:p-4' : 'p-4'} sm:items-center`}
+        style={overlayStyle}
       >
         <button
           type="button"
@@ -181,6 +196,7 @@ export const ModalShell: React.FC<ModalShellProps> = ({
               ? 'flex max-h-[92dvh] flex-col overflow-hidden rounded-t-2xl sm:rounded-2xl max-w-2xl'
               : 'max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-2xl p-5 max-w-md'
           } ${className}`}
+          style={panelStyle}
         >
           {sheet ? (
             <header className="shrink-0 border-b border-border px-4 py-4 sm:px-5">

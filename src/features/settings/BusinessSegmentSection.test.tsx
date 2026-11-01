@@ -69,6 +69,24 @@ describe('BusinessSegmentSection', () => {
     expect(screen.getByRole('note')).toHaveTextContent(/não é prontuário/i);
   });
 
+  it('mostra o aviso de conformidade da advocacia (OAB)', () => {
+    setup(baseSettings({ businessSegment: 'LAW_FIRM', targetAudience: null }));
+    expect(screen.getByText(/regras da OAB/i)).toBeInTheDocument();
+  });
+
+  it('lista o que fica desativado no segmento com restrição de publicidade', () => {
+    setup(baseSettings({ businessSegment: 'LAW_FIRM', targetAudience: null }));
+    expect(screen.getByText(/não divulga comercialmente/i)).toBeInTheDocument();
+    expect(screen.getByText(/Campanhas e mensagens em massa/)).toBeInTheDocument();
+    expect(screen.getByText(/Pesquisa NPS/)).toBeInTheDocument();
+    expect(screen.getByText(/Preços públicos/)).toBeInTheDocument();
+  });
+
+  it('não mostra a lista de desativados em segmento sem restrição', () => {
+    setup(baseSettings());
+    expect(screen.queryByText(/não divulga comercialmente/i)).toBeNull();
+  });
+
   it('não mostra o aviso fora dos segmentos de saúde', () => {
     setup(baseSettings());
     expect(screen.queryByRole('note')).toBeNull();

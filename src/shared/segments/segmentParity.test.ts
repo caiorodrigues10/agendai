@@ -15,6 +15,7 @@ import {
   audienceAppliesTo,
   getAuxiliaryProfile,
   getSegmentConfig,
+  hasSegmentFeature,
   segmentSearchText,
 } from './index';
 import { ICON_OPTIONS, normalizeIconName } from '../../components/ui/DynamicIcon';
@@ -42,6 +43,8 @@ interface ParitySegment {
   suggestedOperationMode: string;
   complianceNote: string | null;
   auxiliaryProfile: string | null;
+  advertisingRestricted: boolean;
+  features: string[];
   catalog: {
     serviceCategories: { name: string; icon: string }[];
     services: {
@@ -118,6 +121,27 @@ describe('paridade com o backend', () => {
     }
   });
 
+  it('advertisingRestricted espelhado do backend', () => {
+    const parity = readParity();
+    for (const segment of ALL_SEGMENTS) {
+      const mirror = parity.segments[segment];
+      expect(
+        getSegmentConfig(segment).advertisingRestricted === true,
+        `advertisingRestricted de ${segment}`
+      ).toBe(mirror.advertisingRestricted);
+    }
+  });
+
+  it('features espelhadas do backend (vazio = segmento sem feature)', () => {
+    const parity = readParity();
+    for (const segment of ALL_SEGMENTS) {
+      const mirror = parity.segments[segment];
+      expect(getSegmentConfig(segment).features ?? [], `features de ${segment}`).toEqual(
+        mirror.features ?? []
+      );
+    }
+  });
+
   it('complianceNote e auxiliaryProfile espelhados do backend (null = sem)', () => {
     const parity = readParity();
     for (const segment of ALL_SEGMENTS) {
@@ -181,12 +205,12 @@ describe('paridade com o backend', () => {
 });
 
 describe('config de segmento no frontend', () => {
-  it('todos os 22 segmentos são oferecidos no cadastro, agrupados', () => {
-    expect(FIRST_CLASS_SEGMENTS).toHaveLength(22);
+  it('todos os 23 segmentos são oferecidos no cadastro, agrupados', () => {
+    expect(FIRST_CLASS_SEGMENTS).toHaveLength(23);
     expect(new Set(FIRST_CLASS_SEGMENTS)).toEqual(new Set(ALL_SEGMENTS));
     // Cada segmento aparece em exatamente um grupo, e `other` é o último.
     const grouped = SEGMENTS_BY_GROUP.flatMap((g) => g.segments);
-    expect(grouped).toHaveLength(22);
+    expect(grouped).toHaveLength(23);
     expect(new Set(grouped)).toEqual(new Set(ALL_SEGMENTS));
     expect(SEGMENTS_BY_GROUP[SEGMENTS_BY_GROUP.length - 1].group).toBe('other');
   });
@@ -254,6 +278,20 @@ describe('config de segmento no frontend', () => {
     for (const s of ['PHYSIOTHERAPY', 'NUTRITION', 'PSYCHOTHERAPY'] as const) {
       expect(getSegmentConfig(s).complianceNote, `${s}: complianceNote`).toBeTruthy();
     }
+  });
+
+  it('gestão de processos (caseManagement) só no escritório de advocacia', () => {
+    expect(hasSegmentFeature('LAW_FIRM', 'caseManagement')).toBe(true);
+    expect(getSegmentConfig('LAW_FIRM').features).toEqual(['caseManagement']);
+    for (const segment of ALL_SEGMENTS) {
+      if (segment === 'LAW_FIRM') continue;
+      expect(
+        hasSegmentFeature(segment, 'caseManagement'),
+        `${segment} não deveria ter caseManagement`
+      ).toBe(false);
+    }
+    expect(hasSegmentFeature(null, 'caseManagement')).toBe(false);
+    expect(hasSegmentFeature(undefined, 'caseManagement')).toBe(false);
   });
 
   it('ficha auxiliar: pet em veterinária; veículo em automotivo; nenhum em OTHER', () => {

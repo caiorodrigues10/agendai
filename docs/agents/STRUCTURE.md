@@ -31,6 +31,10 @@ agendai/
     ├── features/
     │   ├── queue/             ← piloto de feature (barrel index.ts; padrão p/ demais áreas)
     │   ├── clients/           ← AddCustomerForm, ServiceCard, ClientsTab, ClientsManager, ClientProfileSheet
+    │   ├── cases/             ← CasesHub, CaseDetail, DeadlinePanel, caseLabels (gestão de processos do escritório)
+    │   │                      + CaseContractsTab, CaseTimeEntriesTab, CaseIntimationsTab, CaseBillingTab,
+    │   │                        CaseTransfersPanel (contratos/assinaturas, horas, intimações, honorários+NFS-e,
+    │   │                        transferência entre unidades)
     │   ├── appointments/      ← Scheduler, Calendar, BookingModal, BookPackageSessionsModal
     │   ├── onboarding/        ← OnboardingChecklist, ActivationChecklist
     │   ├── crm/               ← CrmIntelligencePanel, CrmMergePanel(+test), CrmBackfillPanel(+test)
@@ -40,6 +44,8 @@ agendai/
     │   ├── finance/           ← CashPanel, FinancialDashboard, OwnerFinancialPanel, ProfitEngine, Weather, DemandAlert + barrel (Etapa 5b)
     │   ├── goals/ loyalty/ waitlist/ recurring/ recommendations/ equipment/ deposits/
     │   │                      ← painéis do StaffDashboard com barrel próprio (Etapa 5b)
+    │   ├── data-import/        ← DataImportWizard + passos (upload, alvo, colunas, validação, prévia,
+    │   │                        confirmação, conclusão) e hooks do assistente de importação de planilhas
     │   ├── settings/          ← SettingsManager (+ ShopCityField, WeatherForecastCard, AppointmentPolicy,
     │   │                          SalonWhatsAppConnection, OwnerBotSection, BusinessSegmentSection,
     │   │                          OperationModeSection extraídos),
@@ -68,6 +74,7 @@ agendai/
     ├── pages/                ← rotas (StaffDashboard, Login, PublicHome, master-admin, marketing)
     ├── services/             ← geminiService (heurística local)
     ├── utils/ / lib/ / config/
+    ├── shared/segments/      ← config por segmento (espelho do backend) + paridade
     └── tests/                ← setup Vitest
 ```
 
@@ -98,6 +105,6 @@ agendai/
 
 ## Wrappers HTTP (`src/infra/`)
 
-`apiClient`, `authApi`, `authStorage`, `barbershopApi`, `schedulingApi`, `clientsApi`, `crmApi`, `packagesApi`, `productsApi`, `financialApi`, `commissionsApi`, `paymentsApi`, `plansApi`, `subscriptionsApi`, `adminApi`, `usersApi`, `notificationsApi`, `referralsApi`, `contactApi`, `realtimeWs`, `clientPortalApi`, `catalogApi`, `publicProductsApi`.
+`apiClient`, `authApi`, `authStorage`, `barbershopApi`, `schedulingApi`, `clientsApi`, `crmApi`, `packagesApi`, `productsApi`, `financialApi`, `commissionsApi`, `paymentsApi`, `plansApi`, `subscriptionsApi`, `adminApi`, `usersApi`, `notificationsApi`, `referralsApi`, `contactApi`, `realtimeWs`, `clientPortalApi`, `catalogApi`, `publicProductsApi`, `dataImportApi`.
 
 **Regra:** novas chamadas HTTP só via `*Api.ts` / `apiClient` — nunca `fetch` solto nas páginas.

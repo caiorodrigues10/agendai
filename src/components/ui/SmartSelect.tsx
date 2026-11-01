@@ -296,26 +296,37 @@ export function SmartSelect<T extends string = string>(props: SmartSelectProps<T
 
   return <div className={`relative ${className}`}>
     {label && <label htmlFor={id} className="mb-1.5 block text-xs font-semibold text-text-secondary">{label}{required && <span className="text-danger"> *</span>}</label>}
-    <button
-      ref={mobile ? triggerRef : refs.setReference}
-      id={id}
-      type="button"
-      role="combobox"
-      aria-label={accessibleName}
-      aria-expanded={open}
-      aria-controls={listId}
-      aria-haspopup="listbox"
-      aria-describedby={error ? errorId : undefined}
-      disabled={disabled}
-      onKeyDown={handleTriggerKeyDown}
-      onClick={mobile ? () => setOpen(value => !value) : undefined}
-      {...(!mobile ? getReferenceProps() : {})}
-      className={`flex w-full items-center gap-2 rounded-xl border border-border bg-surface text-left text-text-primary outline-none transition-colors focus:border-focus focus:ring-2 focus:ring-focus/20 disabled:cursor-not-allowed disabled:opacity-50 ${triggerSize}`}
-    >
-      {multipleProps ? <span className="flex min-w-0 flex-1 flex-wrap gap-1">{selectedOptions.length ? selectedOptions.slice(0, 3).map(option => <span key={option.value} className="inline-flex items-center gap-1 rounded-md bg-selection px-2 py-1 text-xs text-accent">{option.label}<button type="button" aria-label={`Remover ${option.label}`} onClick={event => { event.stopPropagation(); multipleProps.onChange(multipleProps.value.filter(value => value !== option.value)); }}><X size={12} /></button></span>) : <span className="text-text-muted">{placeholder}</span>}{selectedOptions.length > 3 && <span className="rounded-md bg-surface-2 px-2 py-1 text-xs text-text-secondary">{selectedOptions.length} selecionados</span>}</span> : <span className={`min-w-0 flex-1 truncate ${selectedLabel ? '' : 'text-text-muted'}`}>{selectedLabel ?? placeholder}</span>}
-      {clearable && selectedValues.length > 0 && !required && <span role="button" tabIndex={0} aria-label="Limpar seleção" onClick={clear} className="rounded p-1 text-text-muted hover:bg-surface-2"><X size={15} /></span>}
-      <ChevronDown size={17} className={`shrink-0 text-text-muted transition-transform ${open ? 'rotate-180' : ''}`} />
-    </button>
+    <div className="flex items-stretch gap-1">
+      <button
+        ref={mobile ? triggerRef : refs.setReference}
+        id={id}
+        type="button"
+        role="combobox"
+        aria-label={accessibleName}
+        aria-expanded={open}
+        aria-controls={listId}
+        aria-haspopup="listbox"
+        aria-describedby={error ? errorId : undefined}
+        disabled={disabled}
+        onKeyDown={handleTriggerKeyDown}
+        onClick={mobile ? () => setOpen(value => !value) : undefined}
+        {...(!mobile ? getReferenceProps() : {})}
+        className={`flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-border bg-surface text-left text-text-primary outline-none transition-colors focus:border-focus focus:ring-2 focus:ring-focus/20 disabled:cursor-not-allowed disabled:opacity-50 ${triggerSize}`}
+      >
+        {multipleProps ? <span className="flex min-w-0 flex-1 flex-wrap gap-1">{selectedOptions.length ? selectedOptions.slice(0, 3).map(option => <span key={option.value} className="inline-flex items-center gap-1 rounded-md bg-selection px-2 py-1 text-xs text-accent">{option.label}</span>) : <span className="text-text-muted">{placeholder}</span>}{selectedOptions.length > 3 && <span className="rounded-md bg-surface-2 px-2 py-1 text-xs text-text-secondary">{selectedOptions.length} selecionados</span>}</span> : <span className={`min-w-0 flex-1 truncate ${selectedLabel ? '' : 'text-text-muted'}`}>{selectedLabel ?? placeholder}</span>}
+        <ChevronDown size={17} className={`shrink-0 text-text-muted transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {clearable && selectedValues.length > 0 && !required && (
+        <button
+          type="button"
+          aria-label="Limpar seleção"
+          onClick={clear}
+          className="min-h-11 min-w-11 shrink-0 rounded-xl border border-border bg-surface text-text-muted hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+        >
+          <X size={15} className="mx-auto" />
+        </button>
+      )}
+    </div>
     {error && <p id={errorId} className="mt-1 text-xs text-danger">{error}</p>}
     {popup}
   </div>;

@@ -5,6 +5,7 @@ import { getErrorMessage } from '../../utils/errorMessage';
 import {
   ALL_SEGMENTS,
   AUDIENCE_OPTIONS,
+  advertisingRestrictedFeatures,
   audienceAppliesTo,
   getSegmentConfig,
   type BusinessSegment,
@@ -36,6 +37,7 @@ export const BusinessSegmentSection: React.FC<{
   const audienceApplies = audienceAppliesTo(current);
   const currentAudience = audienceApplies ? (settings.targetAudience ?? null) : null;
   const complianceNote = getSegmentConfig(current).complianceNote;
+  const restrictedFeatures = advertisingRestrictedFeatures(current);
 
   const save = async (patch: Partial<ShopSettings>, successMessage: string) => {
     setSaving(true);
@@ -108,6 +110,22 @@ export const BusinessSegmentSection: React.FC<{
         <p className="mt-4 rounded-lg bg-warning/10 px-3 py-2 text-xs text-warning" role="note">
           {complianceNote}
         </p>
+      )}
+
+      {/* Segmento sem divulgação comercial: avisa o que deixa de existir. */}
+      {restrictedFeatures.length > 0 && (
+        <div className="mt-3 rounded-lg bg-surface-2 px-3 py-2 text-xs text-text-secondary" role="note">
+          <p className="font-bold text-text-primary">Este segmento não divulga comercialmente.</p>
+          <p className="mt-1">Ficam desativados:</p>
+          <ul className="mt-1 list-disc pl-4 space-y-0.5">
+            {restrictedFeatures.map(feature => (
+              <li key={feature}>{feature}</li>
+            ))}
+          </ul>
+          <p className="mt-2 text-text-muted">
+            A agenda, os clientes e os honorários continuam funcionando normalmente.
+          </p>
+        </div>
       )}
     </div>
   );

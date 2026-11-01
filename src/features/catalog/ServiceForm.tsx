@@ -51,6 +51,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
       avgTimeMinutes: initialService?.avgTimeMinutes || 30,
       icon: initialService?.icon || 'Scissors',
       commissionPercent: initialService?.commissionPercent ?? 0,
+      publicBookable: initialService?.publicBookable ?? true,
     },
   });
 
@@ -143,6 +144,21 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
               {...register('commissionPercent', { valueAsNumber: true })}
             />
           </Field>
+
+          <label className="flex items-start gap-3 rounded-xl border border-border bg-bg px-4 py-3">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 accent-[var(--color-accent)]"
+              {...register('publicBookable')}
+            />
+            <span className="flex-1">
+              <span className="block text-sm font-medium text-text-primary">Agendamento público</span>
+              <span className="block text-xs text-text-secondary">
+                Desmarque para serviços internos (audiência, diligência, despacho): eles somem da agenda
+                pública e não podem ser marcados pelo cliente.
+              </span>
+            </span>
+          </label>
 
           <div>
             <label className="block text-sm font-medium text-text-secondary mb-2">Ícone</label>

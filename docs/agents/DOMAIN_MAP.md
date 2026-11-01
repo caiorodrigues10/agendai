@@ -16,12 +16,19 @@ Código existente ≠ comprovadamente funcional em produção. Distinguir:
 | Assinatura / planos | `PlansPage`, `CheckoutPage`, `OwnerSubscriptionPanel` | `plansApi`, `subscriptionsApi`, `paymentsApi` | `/api/plans`, `/api/subscriptions`, `/api/payments` |
 | Barbearia / settings | `SettingsManager` | `barbershopApi` | `/api/barbershops` |
 | Assistente no WhatsApp (dono) | `OwnerBotSection` (Configurações → WhatsApp) | `ownerBotApi` | `/api/barbershops/:id/owner-bot/*` |
+| Atendente de IA no WhatsApp (cliente final) | `WhatsAppAiSection` (Configurações → WhatsApp) — liga/desliga por salão, conversas, logs, analytics e teste de mensagem | `whatsappAiApi` | `/api/barbershops/:id/ai/*` (settings, conversations, intent-logs, stats, process) |
+| Importação de planilhas (dono) | `DataImportWizard` + passos em `features/dataImport/` (Configurações → Importar dados) — multi-aba: 10 tipos, atribuição de tipo por aba, mapa/opções por aba | `dataImportApi` | `/api/barbershops/:id/imports*` (upload, alvo, colunas, dry-run, confirmar, desfazer, cancelar, template por tipo) |
 | Aparência da página pública | `PageAppearancePanel` (aba Link), wrapper `ShopPageTheme` no `PublicHome` | `pageThemeApi` | `/api/barbershops/:id/page-theme*` (GET/PUT + cover; Cloudinary) |
 | Serviços | `ServiceManager`, `ServiceForm` | `barbershopApi` / services | `/api/services` |
 | Equipe | `TeamManager` | `usersApi` | `/api/users` |
 | Fila | `QueueItemCard`, `PublicHome` | `schedulingApi` | `/api/queue` |
 | Agenda | `AppointmentScheduler`, booking modal | `schedulingApi` | `/api/appointments` |
 | Clientes CRM | `ClientsManager`, `ClientProfileSheet` | `clientsApi`, `crmApi` | `/api/clients`, `/api/crm` |
+| Casos do cliente (advocacia) | `ClientCasesPanel` (aba "Casos") | `clientsApi` (`listCases`/`createCase`/`updateCase`/`deleteCase`) | `/api/clients/:id/cases` |
+| Gestão de processos (escritório) | `CasesHub` (pipeline, lista, novo processo, transferências), `CaseDetail` (visão geral, tarefas, prazos, andamentos, documentos, contratos, horas, intimações, honorários/NFS-e, compartilhamento com o portal), `DeadlinePanel` (calendário de prazos + feriados) | `casesApi` (`list`/`pipeline`/`overview`/`listTasks`/`listDeadlines`/`listEvents`/`listDocuments`/contratos/horas/intimações/êxito/NFS-e/transferências/feriados/relatórios) | `/api/cases*` (feature `caseManagement` do segmento) |
+| Assinatura de contrato (público) | `SignContractPage` (`/assinar/:token`) | `casesApi` (`getPublicContract`/`signContract`/`declineContract`) | `/api/contracts/sign/:token` (token do signatário é a credencial) |
+| Casos no portal do cliente | `ClientPortalDashboard` (aba "Processos") | `clientPortalApi` (`getCases`) | `/api/client/portal/cases` (só o que o escritório compartilhou) |
+| Segmentos / gate | `BusinessSegmentSection`, `SegmentPicker`, `ServiceForm` | `barbershopApi.listServices` (envia token → lista interna) | `/api/services` (público com `authenticateOptional` → `publicBookable`) |
 | Pacotes | `PackageCatalog`, `BookPackageSessionsModal` | `packagesApi` | `/api/service-packages`, `/api/client-packages` |
 | Produtos / estoque / PDV | `ProductsHub`, painéis em `products/` | `productsApi` | `/api/products` (incl. `DELETE /api/products/:id`), inventory, retail |
 | Reserva de produto (público) | `PublicProductCarousel`, `PublicProductPage`, painel `ProductReservationsPanel` | `publicProductsApi`, `productsApi` | `/api/barbershops/:id/public-products*`, `/api/product-reservations` |

@@ -10,7 +10,7 @@ export function softwareApplicationLd(path = '/') {
     operatingSystem: 'Web',
     url: canonicalUrl(path),
     description:
-      'Fila digital, agenda, CRM e financeiro para salões de beleza, barbearias e studios.',
+      'Fila digital, agenda, CRM e financeiro para salões de beleza, barbearias, studios e escritórios de advocacia.',
     offers: {
       '@type': 'Offer',
       price: '0',

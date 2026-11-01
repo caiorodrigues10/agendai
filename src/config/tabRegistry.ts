@@ -7,6 +7,7 @@ import {
   LuContact,
   LuCreditCard,
   LuGift,
+  LuFolderOpen,
   LuImage,
   LuLayoutDashboard,
   LuLink,
@@ -21,6 +22,9 @@ import {
   LuWallet,
 } from 'react-icons/lu';
 import type { OperationMode } from '../types';
+import type { BusinessSegment, SegmentFeature, SegmentLabelKey } from '../shared/segments';
+import { isTabEnabled } from './segmentGate';
+import { hasSegmentFeature } from '../shared/segments';
 
 export type TabRole = 'OWNER' | 'EMPLOYEE' | 'MASTER_ADMIN';
 
@@ -32,8 +36,16 @@ export interface TabDef {
   roles?: TabRole[];
   /** If empty → visible in all operation modes */
   modes?: OperationMode[];
-  /** Optional capability required (future use) */
-  requires?: string;
+  /**
+   * Chave de vocabulário do segmento para o rótulo da aba (ex.: 'servicePlural'
+   * → "Atendimentos" no segmento LAW_FIRM). Sem esta chave, usa `label`.
+   */
+  labelKey?: SegmentLabelKey;
+  /**
+   * Feature de segmento exigida para a aba existir (ex.: `caseManagement` —
+   * gestão de processos do escritório). Segmento sem a feature esconde a aba.
+   */
+  segmentFeature?: SegmentFeature;
   /**
    * Permissões que habilitam a tab para EMPLOYEE (OWNER/MASTER_ADMIN passam
    * pelo papel, como sempre). Deve espelhar a permissão exigida pela rota do
@@ -51,6 +63,12 @@ export interface TabAccessExtras {
    */
   hasDashboard?: boolean;
   permissions?: string[];
+  /**
+   * Segmento do estabelecimento: usado pelo gate genérico de segmento
+   * (`config/segmentGate`) para esconder abas que não existem naquele tipo de
+   * negócio. A API nega os endpoints dedicados correspondentes.
+   */
+  segment?: BusinessSegment | null;
 }
 
 export interface TabGroup {
@@ -79,6 +97,13 @@ export const TAB_GROUPS: TabGroup[] = [
         modes: ['HYBRID', 'APPOINTMENTS_ONLY'],
       },
       { id: 'clients', label: 'Clientes', icon: LuContact },
+      {
+        id: 'cases',
+        label: 'Processos',
+        icon: LuFolderOpen,
+        roles: ['OWNER', 'MASTER_ADMIN', 'EMPLOYEE'],
+        segmentFeature: 'caseManagement',
+      },
       { id: 'products', label: 'Produtos', icon: LuShoppingBag },
     ],
   },
@@ -188,6 +213,12 @@ export function canAccessTab(tabId: string, userRole?: string, extras?: TabAcces
   for (const group of TAB_GROUPS) {
     const tab = group.tabs.find(t => t.id === tabId);
     if (!tab) continue;
+    // Gate de segmento: aba que não existe naquele tipo de negócio.
+    if (!isTabEnabled(extras?.segment ?? null, tabId)) return false;
+    // Feature de segmento: a aba só existe onde o segmento declara a feature.
+    if (tab.segmentFeature && !hasSegmentFeature(extras?.segment ?? null, tab.segmentFeature)) {
+      return false;
+    }
     if (tabId === 'products') {
       const permitted = extras?.permissions?.some(perm => PRODUCTS_TAB_PERMISSIONS.includes(perm));
       return Boolean(privileged || permitted);
@@ -236,4 +267,16 @@ export function getPrimaryTabForMode(mode?: OperationMode): string {
   if (mode === 'QUEUE_ONLY') return 'queue';
   if (mode === 'APPOINTMENTS_ONLY') return 'appointments';
   return 'overview';
+}
+
+/**
+ * Rótulo da aba resolvido pelo vocabulário do segmento.
+ * Sem `labelKey`, usa o rótulo fixo do registry.
+ */
+export function resolveTabLabel(
+  tab: TabDef,
+  labels?: Partial<Record<SegmentLabelKey, string>>
+): string {
+  if (!tab.labelKey || !labels) return tab.label;
+  return labels[tab.labelKey] ?? tab.label;
 }

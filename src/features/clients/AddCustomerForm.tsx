@@ -8,6 +8,7 @@ import {
   LuScissors as Scissors,
 } from 'react-icons/lu';
 import { ModalShell } from '../../components/patterns';
+import { useVisualViewport } from '../../hooks/useVisualViewport';
 import { ClientPet, clientsApi } from '../../infra/clientsApi';
 import {
   CustomerQueueFormData,
@@ -51,6 +52,7 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
   const [submitError, setSubmitError] = React.useState<string | null>(null);
   const [clientPets, setClientPets] = React.useState<ClientPet[]>([]);
   const [selectedPetId, setSelectedPetId] = React.useState('');
+  const visualViewport = useVisualViewport();
 
   const {
     register,
@@ -169,10 +171,9 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
               type="text"
               aria-invalid={Boolean(errors.name)}
               placeholder="Ex: João Silva"
-              className={`w-full rounded-2xl border bg-bg px-4 py-3.5 text-text-primary outline-none transition-all placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/25 ${
+                className={`w-full rounded-2xl border bg-bg px-4 py-3.5 text-base text-text-primary outline-none transition-all placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/25 ${
                 errors.name ? 'border-danger' : 'border-border'
               }`}
-              autoFocus
               {...register('name')}
             />
             {errors.name && (
@@ -195,7 +196,7 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
               type="tel"
               aria-invalid={Boolean(errors.whatsapp)}
               placeholder="(11) 99999-9999"
-              className={`w-full rounded-2xl border bg-bg px-4 py-3.5 text-text-primary outline-none transition-all placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/25 ${
+              className={`w-full rounded-2xl border bg-bg px-4 py-3.5 text-base text-text-primary outline-none transition-all placeholder:text-text-muted focus:border-accent focus:ring-2 focus:ring-accent/25 ${
                 errors.whatsapp ? 'border-danger' : 'border-border'
               }`}
               value={watch('whatsapp')}

@@ -62,6 +62,7 @@ import { AvailabilitySlot } from '../../utils/schedulingUtils';
 import { buildWhatsAppUrl } from '../../utils/whatsappUtils';
 import { ClientPetsPanel } from './ClientPetsPanel';
 import { ClientVehiclesPanel } from './ClientVehiclesPanel';
+import { ClientCasesPanel } from './ClientCasesPanel';
 
 const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -72,7 +73,7 @@ const PAYMENT_LABEL: Record<PackagePaymentMethod, string> = {
   other: 'Outro',
 };
 
-type ProfileTab = 'geral' | 'pacotes' | 'historico' | 'financeiro' | 'pets' | 'vehicles';
+type ProfileTab = 'geral' | 'pacotes' | 'historico' | 'financeiro' | 'pets' | 'vehicles' | 'cases';
 
 function clientPhoneLabel(whatsapp: string): string {
   const digits = whatsapp.replace(/\D/g, '');
@@ -125,6 +126,8 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
   // lava jato/oficina (antes era `segment === 'PETSHOP'` no código todo).
   const showPets = config.auxiliaryProfile === 'pet';
   const showVehicles = config.auxiliaryProfile === 'vehicle';
+  // Ficha de caso/processo nos segmentos de advocacia (auxiliaryProfile 'case').
+  const showCases = config.auxiliaryProfile === 'case';
 
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -944,6 +947,14 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
 
             {tab === 'vehicles' && showVehicles && clientId && (
               <ClientVehiclesPanel clientId={clientId} onChanged={() => void loadDetail()} />
+            )}
+
+            {tab === 'cases' && showCases && clientId && (
+              <ClientCasesPanel
+                clientId={clientId}
+                practiceAreas={settings.practiceAreas ?? []}
+                onChanged={() => void loadDetail()}
+              />
             )}
 
             {tab === 'financeiro' && canAnalytics && crmProfile && (

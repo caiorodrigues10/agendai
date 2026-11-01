@@ -47,6 +47,7 @@ import {
   LuBrain as Brain,
   LuTarget as Target,
   LuLaptop as Laptop,
+  LuScale as Scale,
 } from 'react-icons/lu';
 
 export const ICON_OPTIONS = [
@@ -97,6 +98,7 @@ export const ICON_OPTIONS = [
   'Brain',
   'Target',
   'Laptop',
+  'Scale',
 ];
 
 interface DynamicIconProps {
@@ -209,6 +211,8 @@ export const DynamicIcon: React.FC<DynamicIconProps> = ({ name, className, size 
       return <Target className={className} size={size} />;
     case 'Laptop':
       return <Laptop className={className} size={size} />;
+    case 'Scale':
+      return <Scale className={className} size={size} />;
     default:
       return <Scissors className={className} size={size} />;
   }

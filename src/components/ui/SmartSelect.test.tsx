@@ -1,4 +1,5 @@
 /// <reference types="vitest/globals" />
+import React, { useState } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { SmartSelect } from './SmartSelect';
 
@@ -48,11 +49,16 @@ describe('SmartSelect', () => {
   });
 
   it('permite selecionar e remover vários valores', () => {
-    let values: string[] = [];
-    const view = render(<SmartSelect value={values} mode="multiple" options={options} onChange={next => { values = next; view.rerender(<SmartSelect value={values} mode="multiple" options={options} onChange={nextValue => { values = nextValue; }} />); }} />);
+    const Harness = () => {
+      const [values, setValues] = useState<string[]>([]);
+      return <SmartSelect value={values} mode="multiple" options={options} onChange={setValues} />;
+    };
+    render(<Harness />);
     fireEvent.click(screen.getByRole('combobox'));
     fireEvent.click(screen.getByRole('option', { name: 'Barba' }));
     fireEvent.click(screen.getByRole('option', { name: 'Sobrancelha' }));
-    expect(values).toEqual(['barba', 'sobrancelha']);
+    expect(screen.getByRole('option', { name: 'Barba' })).toHaveAttribute('aria-selected', 'true');
+    fireEvent.click(screen.getByRole('option', { name: 'Barba' }));
+    expect(screen.getByRole('option', { name: 'Barba' })).toHaveAttribute('aria-selected', 'false');
   });
 });

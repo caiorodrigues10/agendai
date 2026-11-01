@@ -60,11 +60,11 @@ function renderSheet(businessSegment?: BusinessSegment) {
 }
 
 async function assertTabs(hasPets: boolean, hasVehicles: boolean) {
-  await waitFor(() => expect(screen.getByRole('button', { name: 'Geral' })).toBeVisible());
-  expect(screen.getByRole('button', { name: 'Pacotes' })).toBeVisible();
-  expect(screen.getByRole('button', { name: 'Histórico' })).toBeVisible();
-  expect(Boolean(screen.queryByRole('button', { name: 'Pets' }))).toBe(hasPets);
-  expect(Boolean(screen.queryByRole('button', { name: 'Veículos' }))).toBe(hasVehicles);
+  await waitFor(() => expect(screen.getByRole('tab', { name: 'Geral' })).toBeVisible());
+  expect(screen.getByRole('tab', { name: 'Pacotes' })).toBeVisible();
+  expect(screen.getByRole('tab', { name: 'Histórico' })).toBeVisible();
+  expect(Boolean(screen.queryByRole('tab', { name: 'Pets' }))).toBe(hasPets);
+  expect(Boolean(screen.queryByRole('tab', { name: 'Veículos' }))).toBe(hasVehicles);
 }
 
 it('app genérico (OTHER, sem salão no contexto) não mostra aba Pets nem Veículos', async () => {

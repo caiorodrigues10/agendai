@@ -3,7 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   LuBriefcase, LuTicket, LuListTodo, LuUsers, LuBuilding2, LuActivity,
   LuShield, LuCreditCard, LuGift, LuRefreshCcw, LuChevronLeft, LuMenu, LuLogOut,
-  LuLayoutDashboard, LuTarget, LuUserCog
+  LuLayoutDashboard, LuTarget, LuUserCog, LuMessageCircle
 } from 'react-icons/lu';
 import { useAuth } from '../../contexts/AuthContext';
 import { ThemeToggle } from '../../components/infra/ThemeToggle';
@@ -22,6 +22,7 @@ const NAV_ITEMS = [
   { to: '/master/referrals', icon: LuGift, label: 'Indicações' },
   { to: '/master/crm', icon: LuRefreshCcw, label: 'CRM' },
   { to: '/master/engagement', icon: LuTarget, label: 'Engajamento' },
+  { to: '/master/whatsapp', icon: LuMessageCircle, label: 'WhatsApp' },
 ];
 
 export const AdminLayout: React.FC = () => {

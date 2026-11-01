@@ -33,6 +33,8 @@ import { Avatar } from '../../../components/ui/Avatar';
 import { commissionsApi, type CommissionOrigin, type CommissionSummary } from '../../../infra/commissionsApi';
 import { finiteNumber } from '../../../utils/weatherVisuals';
 import { SectionError } from '../../../components/patterns';
+import { useSegmentLabels } from '../../../hooks/useSegmentLabels';
+import { isModuleEnabled } from '../../../config/segmentGate';
 
 interface FinancialDashboardProps {
   queueHistory: QueueItem[];
@@ -62,6 +64,10 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
   const owner = isOwnerLike(currentUser.role);
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<'personal' | 'shop'>(owner ? 'shop' : 'personal');
+  // Gate por segmento: comissões e gorjeta não existem em escritórios
+  // (o repository é honorários) — mesma configuração usada pelas abas.
+  const { segment, labels } = useSegmentLabels();
+  const commissionsEnabled = isModuleEnabled(segment, 'commissions');
   const [timeFilter, setTimeFilter] = useState<'today' | 'week' | 'month' | 'all'>('month');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [period, setPeriod] = useState<InsightsPeriod>('30d');
@@ -114,7 +120,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
   }, [owner, viewMode, period]);
 
   useEffect(() => {
-    if (!owner || viewMode !== 'shop') return;
+    if (!owner || viewMode !== 'shop' || !commissionsEnabled) return;
     let cancelled = false;
     const today = new Date();
     const from = new Date(today);
@@ -159,7 +165,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [owner, viewMode, period, commissionProfessionalId, commissionOrigin]);
+  }, [owner, viewMode, period, commissionProfessionalId, commissionOrigin, commissionsEnabled]);
 
   const getStaffName = (id?: string) => allStaff.find(s => s.id === id)?.name || 'Desconhecido';
   const getServiceName = (id: string) =>
@@ -293,7 +299,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
         )}
       </div>
 
-      {owner && viewMode === 'shop' && (
+      {owner && viewMode === 'shop' && commissionsEnabled && (
         <>
           <div className="bg-surface p-5 rounded-xl border border-border">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -432,7 +438,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {[
                   {
-                    label: 'Faturamento',
+                    label: labels.revenue,
                     value: brl(kpis!.revenue),
                     icon: DollarSign,
                     tone: 'text-success',
@@ -684,7 +690,7 @@ export const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
               <div className="absolute -right-2 -top-2 text-border opacity-20">
                 <DollarSign size={64} />
               </div>
-              <p className="text-xs text-text-muted uppercase font-bold mb-1">Faturamento</p>
+              <p className="text-xs text-text-muted uppercase font-bold mb-1">{labels.revenue}</p>
               <h3 className="text-lg sm:text-xl font-bold text-success truncate">
                 R$ {localStats.totalRevenue.toFixed(0)}
               </h3>

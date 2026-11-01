@@ -56,6 +56,12 @@ export const PublicHome: React.FC = () => {
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [joinMode, setJoinMode] = useState<'self' | 'dependent'>('self');
   const operationMode = settings?.operationMode ?? 'HYBRID';
+  // Serviço interno (audiência, diligência, despacho) não é agendável pelo
+  // cliente: sai da agenda pública.
+  const publicServices = React.useMemo(
+    () => services.filter(service => service.publicBookable !== false),
+    [services]
+  );
   const tabs = React.useMemo(() => visiblePublicTabs(operationMode), [operationMode]);
   const [activeTab, setActiveTab] = useState<PublicTab>(tabs[0]);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'bot' } | null>(null);

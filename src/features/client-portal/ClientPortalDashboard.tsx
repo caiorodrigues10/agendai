@@ -3,6 +3,7 @@ import {
   LuCalendarDays as CalendarDays,
   LuClock as Clock,
   LuGift as Gift,
+  LuFolderOpen as FolderOpen,
   LuLoaderCircle as Loader2,
   LuLogOut as LogOut,
   LuPhone as Phone,
@@ -16,13 +17,14 @@ import { SmartSelect } from '../../components/ui/SmartSelect';
 import {
   ClientAppointment,
   ClientBenefit,
+  ClientPortalCase,
   ClientIdentity,
   clientPortalApi,
   ClientSalonLink,
 } from '../../infra/clientPortalApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 
-type PortalTab = 'home' | 'salons' | 'appointments' | 'benefits' | 'account';
+type PortalTab = 'home' | 'salons' | 'appointments' | 'cases' | 'benefits' | 'account';
 
 const TABS: {
   id: PortalTab;
@@ -32,6 +34,7 @@ const TABS: {
   { id: 'home', label: 'Início', icon: Store },
   { id: 'salons', label: 'Meus salões', icon: Store },
   { id: 'appointments', label: 'Agenda', icon: CalendarDays },
+  { id: 'cases', label: 'Processos', icon: FolderOpen },
   { id: 'benefits', label: 'Benefícios', icon: Gift },
   { id: 'account', label: 'Conta', icon: User },
 ];
@@ -44,6 +47,7 @@ export const ClientPortalDashboard: React.FC = () => {
   const [salons, setSalons] = useState<ClientSalonLink[]>([]);
   const [appointments, setAppointments] = useState<ClientAppointment[]>([]);
   const [benefits, setBenefits] = useState<ClientBenefit[]>([]);
+  const [cases, setCases] = useState<ClientPortalCase[]>([]);
   const [retry, setRetry] = useState(0);
   const [listRetry, setListRetry] = useState(0);
   const [listLoading, setListLoading] = useState(false);
@@ -110,6 +114,11 @@ export const ClientPortalDashboard: React.FC = () => {
       cancelled = true;
     };
   }, [selectedSalonId, activeTab, listRetry]);
+
+  useEffect(() => {
+    if (activeTab !== 'cases') return;
+    void clientPortalApi.getCases().then(setCases).catch(() => setCases([]));
+  }, [activeTab]);
 
   const handleLogout = async () => {
     try {

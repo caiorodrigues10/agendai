@@ -149,6 +149,7 @@ export const StaffDashboard: React.FC = () => {
 
   const rawTab = location.pathname.split('/')[2] || 'overview';
   const operationMode = settings?.operationMode ?? 'HYBRID';
+  const businessSegment = settings?.businessSegment ?? null;
   // Abas antigas (ex.: /app/gallery) caem na aba equivalente atual.
   const requestedTab = LEGACY_TAB_REDIRECTS[rawTab] ?? rawTab;
   const activeTab = ALL_TAB_IDS.includes(requestedTab)
@@ -204,18 +205,18 @@ export const StaffDashboard: React.FC = () => {
   // Redirect invalid tabs
   useEffect(() => {
     if (rawTab !== activeTab) {
-      const target = LEGACY_TAB_REDIRECTS[rawTab] ?? getDefaultTab(user?.role, operationMode);
+      const target = LEGACY_TAB_REDIRECTS[rawTab] ?? getDefaultTab(user?.role, operationMode, { segment: businessSegment });
       navigate(`/app/${target}`, { replace: true });
     }
-  }, [rawTab, activeTab, user?.role, operationMode, navigate]);
+  }, [rawTab, activeTab, user?.role, operationMode, businessSegment, navigate]);
 
   // Redirect if tab not accessible by role
   useEffect(() => {
     if (!user) return;
-    if (!canAccessTab(activeTab, user.role, { hasDashboard, permissions: user.permissions })) {
-      navigate(`/app/${getDefaultTab(user.role, operationMode)}`, { replace: true });
+    if (!canAccessTab(activeTab, user.role, { hasDashboard, permissions: user.permissions, segment: businessSegment })) {
+      navigate(`/app/${getDefaultTab(user.role, operationMode, { segment: businessSegment })}`, { replace: true });
     }
-  }, [activeTab, user, hasDashboard, operationMode, navigate]);
+  }, [activeTab, user, hasDashboard, operationMode, businessSegment, navigate]);
 
   // Redirect if tab not accessible by operation mode
   useEffect(() => {
@@ -229,7 +230,7 @@ export const StaffDashboard: React.FC = () => {
         : getDefaultTab(user?.role, operationMode);
       navigate(`/app/${target}`, { replace: true });
     }
-  }, [activeTab, operationMode, user?.role, hasDashboard, navigate]);
+  }, [activeTab, operationMode, user?.role, hasDashboard, businessSegment, navigate]);
 
   // Re-check access including hasDashboard
   useEffect(() => {
@@ -383,6 +384,7 @@ export const StaffDashboard: React.FC = () => {
         hasDashboard={hasDashboard}
         permissions={user?.permissions}
         operationMode={operationMode}
+        businessSegment={businessSegment}
         onboardingCompleted={onboardingCompleted}
         onNavigate={tabId => navigate(`/app/${tabId}`)}
       >

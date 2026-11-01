@@ -24,11 +24,16 @@ import { AccessDeniedPage } from '../../pages/AccessDeniedPage';
  * 3. Paywall (aba de `DASHBOARD_GATED_TAB_IDS` sem plano Pro) → redireciona
  *    para o mesmo destino de upgrade do StaffDashboard, sem a mensagem de
  *    "fale com o dono do salão".
+ *
+ * O gate de segmento entra junto do papel/permissão: uma aba que não existe
+ * para aquele tipo de negócio (config/segmentGate) também é negada aqui — a
+ * API nega os endpoints dedicados correspondentes.
  */
 export const TabGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
   const { hasDashboard, data, loading: subscriptionLoading } = useSubscription();
   const { settings } = useBarbershop();
+  const segment = settings?.businessSegment ?? null;
   const { tab } = useParams<{ tab: string }>();
 
   // PrivateRoute (ancora a rota /app/:tab) já trata loading e ausência de usuário.
@@ -50,7 +55,7 @@ export const TabGuard: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
   if (tab && DASHBOARD_GATED_TAB_IDS.includes(tab) && !hasDashboard) {
     const operationMode = settings?.operationMode ?? 'HYBRID';
-    return <Navigate to={`/app/${getDefaultTab(user.role, operationMode)}`} replace />;
+    return <Navigate to={`/app/${getDefaultTab(user.role, operationMode, { segment })}`} replace />;
   }
 
   return <>{children}</>;

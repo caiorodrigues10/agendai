@@ -30,6 +30,7 @@ const LoginPage = lazy(() => import('../pages/LoginPage'));
 const ForgotPasswordPage = lazy(() => import('../pages/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('../pages/ResetPasswordPage'));
 const PublicOwnerInvitePage = lazy(() => import('../pages/PublicOwnerInvitePage'));
+const SignContractPage = lazy(() => import('../pages/SignContractPage'));
 const EmailVerifiedPage = lazy(() => import('../pages/EmailVerifiedPage'));
 const AccessBlockedPage = lazy(() => import('../pages/AccessBlockedPage'));
 const PlansPage = lazy(() => import('../pages/PlansPage'));
@@ -51,6 +52,10 @@ const BillingPage = lazy(() => import('../pages/master-admin/BillingPage'));
 const ReferralsPage = lazy(() => import('../pages/master-admin/ReferralsPage'));
 const CrmMaintenancePage = lazy(() => import('../pages/master-admin/CrmMaintenancePage'));
 const EngagementPage = lazy(() => import('../pages/master-admin/EngagementPage'));
+const WhatsAppOverviewPage = lazy(() => import('../pages/master-admin/WhatsAppOverviewPage'));
+const WhatsAppShopsPage = lazy(() => import('../pages/master-admin/WhatsAppShopsPage'));
+const WhatsAppQueuesPage = lazy(() => import('../pages/master-admin/WhatsAppQueuesPage'));
+const WhatsAppConversationsPage = lazy(() => import('../pages/master-admin/WhatsAppConversationsPage'));
 const StaffDashboard = lazy(() => import('../pages/StaffDashboard'));
 const ClientPortalPage = lazy(() => import('../pages/ClientPortalPage'));
 const ShowcasePage = lazy(() => import('../pages/ShowcasePage'));
@@ -91,6 +96,7 @@ const App: React.FC = () => {
             <Route path="/verificar-codigo" element={<Navigate to="/esqueci-senha" replace />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/convite/:token" element={<PublicOwnerInvitePage />} />
+          <Route path="/assinar/:token" element={<SignContractPage />} />
           <Route path="/email-verificado" element={<EmailVerifiedPage />} />
           <Route path="/bloqueado" element={<AccessBlockedPage />} />
           <Route path="/planos" element={<PlansPage />} />
@@ -103,6 +109,10 @@ const App: React.FC = () => {
           <Route path="/sistema-para-lash-designer" element={<CommercialIntentPage />} />
           <Route path="/crm-para-salao-de-beleza" element={<CommercialIntentPage />} />
           <Route path="/controle-financeiro-para-salao" element={<CommercialIntentPage />} />
+          <Route
+            path="/software-para-escritorio-de-advocacia"
+            element={<CommercialIntentPage />}
+          />
           <Route
             path="/checkout"
             element={
@@ -139,6 +149,10 @@ const App: React.FC = () => {
             <Route path="referrals" element={<ReferralsPage />} />
             <Route path="crm" element={<CrmMaintenancePage />} />
             <Route path="engagement" element={<EngagementPage />} />
+            <Route path="whatsapp" element={<WhatsAppOverviewPage />} />
+            <Route path="whatsapp/shops" element={<WhatsAppShopsPage />} />
+            <Route path="whatsapp/queues" element={<WhatsAppQueuesPage />} />
+            <Route path="whatsapp/conversations" element={<WhatsAppConversationsPage />} />
           </Route>
           <Route path="/app/account" element={<Navigate to="/app/settings" replace />} />
           <Route

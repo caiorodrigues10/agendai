@@ -20,6 +20,9 @@ import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 import { SmartSelect } from '../../../components/ui/SmartSelect';
 import { Button } from '../../../components/ui/Button';
 import { SectionError } from '../../../components/patterns';
+import { useSegmentLabels } from '../../../hooks/useSegmentLabels';
+import { isModuleEnabled } from '../../../config/segmentGate';
+import type { BusinessSegment } from '../../../shared/segments';
 
 type MovementType = 'SERVICE_SALE' | 'PRODUCT_SALE' | 'TIP' | 'EXPENSE' | 'OTHER';
 type PaymentMethod = 'CASH' | 'PIX' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'FIADO';
@@ -72,10 +75,18 @@ const INITIAL_FORM: MovementFormData = {
   description: '',
 };
 
-const movementTypeOptions = (Object.keys(MOVEMENT_TYPE_LABELS) as MovementType[]).map(value => ({
-  value,
-  label: MOVEMENT_TYPE_LABELS[value],
-}));
+/**
+ * Tipos de movimento permitidos no segmento: gorjeta e venda de produto
+ * somem onde o gate do segmento diz que o módulo não existe.
+ */
+const movementTypeOptions = (segment: BusinessSegment | null): { value: MovementType; label: string }[] =>
+  (Object.keys(MOVEMENT_TYPE_LABELS) as MovementType[])
+    .filter(value => {
+      if (value === 'TIP') return isModuleEnabled(segment, 'tip');
+      if (value === 'PRODUCT_SALE') return isModuleEnabled(segment, 'products');
+      return true;
+    })
+    .map(value => ({ value, label: MOVEMENT_TYPE_LABELS[value] }));
 
 const paymentMethodOptions = (Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map(value => ({
   value,
@@ -90,6 +101,7 @@ const paymentMethodFilterOptions = [
 export const CashPanel: React.FC = () => {
   const { barbershopId } = useBarbershopFilters();
   const { user } = useAuth();
+  const { segment } = useSegmentLabels();
 
   const [summary, setSummary] = useState<CashSummary | null>(null);
   const [movements, setMovements] = useState<CashMovement[]>([]);
@@ -307,7 +319,7 @@ export const CashPanel: React.FC = () => {
                 <SmartSelect
                   value={form.type}
                   onChange={value => setForm(f => ({ ...f, type: value ?? 'OTHER' }))}
-                  options={movementTypeOptions}
+                  options={movementTypeOptions(segment)}
                   clearable={false}
                   searchable
                 />

@@ -92,6 +92,59 @@ export interface ClientVehicleBody {
   notes?: string | null;
 }
 
+/** Situação do caso no pipeline do escritório. */
+export type ClientCaseStatus =
+  | 'LEAD'
+  | 'ACTIVE'
+  | 'AWAITING_CLIENT'
+  | 'IN_COURT'
+  | 'SUSPENDED'
+  | 'CLOSED'
+  | 'ARCHIVED';
+
+export type CasePriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+
+/** Caso/processo do cliente (segmento LAW_FIRM) — dados internos do escritório. */
+export interface ClientCase {
+  id: string;
+  barbershopId: string;
+  clientId: string;
+  nickname: string;
+  practiceArea: string | null;
+  caseNumber: string | null;
+  notes: string | null;
+  active: boolean;
+  status: ClientCaseStatus;
+  priority: CasePriority;
+  title: string | null;
+  courtName: string | null;
+  opponent: string | null;
+  claimedAmount: number | null;
+  awardedAmount: number | null;
+  responsibleStaffId: string | null;
+  shareWithClient: boolean;
+  openedAt: string;
+  closedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ClientCaseBody {
+  nickname: string;
+  practiceArea?: string | null;
+  caseNumber?: string | null;
+  notes?: string | null;
+  status?: ClientCaseStatus;
+  priority?: CasePriority;
+  title?: string | null;
+  courtName?: string | null;
+  opponent?: string | null;
+  claimedAmount?: number | null;
+  awardedAmount?: number | null;
+  responsibleStaffId?: string | null;
+  shareWithClient?: boolean;
+}
+
 export const clientsApi = {
   list: async (params?: { search?: string; page?: number; limit?: number }) => {
     const res = await apiClient<{ success: boolean; data: SalonClient[]; meta: ListMeta }>(
@@ -288,6 +341,49 @@ export const clientsApi = {
   deleteVehicle: async (clientId: string, vehicleId: string) => {
     await apiClient<void>(
       `/api/clients/${clientId}/vehicles/${vehicleId}`,
+      'DELETE',
+      undefined,
+      token()
+    );
+  },
+
+  listCases: async (clientId: string) => {
+    const res = await apiClient<{ success: boolean; data: ClientCase[] }>(
+      `/api/clients/${clientId}/cases`,
+      'GET',
+      undefined,
+      token()
+    );
+    return unwrap<ClientCase[]>(res);
+  },
+
+  createCase: async (clientId: string, body: ClientCaseBody) => {
+    const res = await apiClient<{ success: boolean; data: ClientCase }>(
+      `/api/clients/${clientId}/cases`,
+      'POST',
+      body,
+      token()
+    );
+    return unwrap<ClientCase>(res);
+  },
+
+  updateCase: async (
+    clientId: string,
+    caseId: string,
+    body: Partial<ClientCaseBody> & { active?: boolean }
+  ) => {
+    const res = await apiClient<{ success: boolean; data: ClientCase }>(
+      `/api/clients/${clientId}/cases/${caseId}`,
+      'PATCH',
+      body,
+      token()
+    );
+    return unwrap<ClientCase>(res);
+  },
+
+  deleteCase: async (clientId: string, caseId: string) => {
+    await apiClient<void>(
+      `/api/clients/${clientId}/cases/${caseId}`,
       'DELETE',
       undefined,
       token()
