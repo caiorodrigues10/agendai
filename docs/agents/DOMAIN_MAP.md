@@ -37,7 +37,8 @@ Código existente ≠ comprovadamente funcional em produção. Distinguir:
 | Notificações | `OwnerNotificationsPanel`, health | `notificationsApi` | `/api/notifications` |
 | Posts / feed / perfil social | `PostsManager`, `ShopProfile`, `PublicPostPage` | `postsApi`, `barbershopApi`, `socialApi` | `/api/feed`, `/api/posts`, `/api/salons/:salonId/*`; link direto `/saloes/:salonId/posts/:postId`; sem agendamento na UI (rotas legadas `POST /api/posts/:id/schedule*` e `GET /api/posts/scheduled` sem consumo no front) |
 | Indicações | `OwnerReferralsPanel` | `referralsApi` | `/api/referrals` |
-| Master admin | `BillingTab` + 13 páginas de `pages/master-admin/` | `adminApi` | `/api/admin/*` |
+| Master admin | `BillingTab` + páginas de `pages/master-admin/` | `adminApi` | `/api/admin/*` |
+| Controle master do WhatsApp | `WhatsAppOverviewPage`, `WhatsAppShopsPage` (lote), `WhatsAppConversationsPage`, `WhatsAppQueuesPage`, `WhatsAppInstancesPage` (reconectar/deslogar + QR), `WhatsAppFailuresPage` (reenvio), `WhatsAppOwnerLogsPage` | `adminWhatsappApi` | `/api/admin/whatsapp/*` (`overview`, `instances`, `platform-settings`, `shops*`, `notifications*`, `outbox*`, `queues*`, `ai/conversations*`, `owner-bot/action-logs`) |
 | Contato público | `ContactPage` | `contactApi` | `/api/contact` |
 | Realtime | polling + `realtimeWs` | `realtimeWs` | `/ws` (quando habilitado) |
 

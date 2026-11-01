@@ -12,6 +12,8 @@ export interface AuthUser {
   createdAt?: string;
   /** Permissões de funcionário (EMPLOYEE). OWNER/MASTER_ADMIN: indefinido (acesso total implícito). */
   permissions?: string[];
+  /** Permissões internas do painel master (MASTER_ADMIN). Vazio = acesso total. */
+  internalPermissions?: string[];
 }
 
 export interface AuthResponse {

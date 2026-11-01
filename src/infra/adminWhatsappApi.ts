@@ -16,8 +16,8 @@ export interface WhatsAppOverview {
     updatedAt: string;
   };
   instances: {
-    ai: { name: string | null; state: string | null };
-    platform: { name: string | null; state: string | null };
+    ai: { name: string | null; state: WhatsAppInstanceState | null; error?: string };
+    platform: { name: string | null; state: WhatsAppInstanceState | null; error?: string };
   };
   counts: {
     shopsWithAiEnabled: number;
@@ -26,15 +26,31 @@ export interface WhatsAppOverview {
     aiMessages24h: number;
     ownerBotActions24h: number;
   };
-  queues: Record<string, any>;
+  queues: Record<string, WhatsAppQueueCounts>;
 }
 
+export type WhatsAppInstanceKind = 'ai' | 'platform' | 'shop';
+
+export type WhatsAppInstanceState = 'open' | 'connecting' | 'close' | 'unreachable';
+
 export interface WhatsAppInstance {
-  kind: string;
+  kind: WhatsAppInstanceKind;
   name: string;
-  state: string | null;
+  state: WhatsAppInstanceState;
+  error?: string;
   shopId?: string;
   shopName?: string;
+}
+
+export interface WhatsAppInstanceReconnectResult {
+  instanceName: string;
+  state: string;
+  qrcodeBase64: string | null;
+}
+
+export interface WhatsAppInstanceLogoutResult {
+  instanceName: string;
+  state: string;
 }
 
 export interface WhatsAppShop {
@@ -67,11 +83,65 @@ export interface AiConversationDetail {
   barbershopName?: string;
   phoneMasked: string | null;
   status: string;
-  context: any;
+  context: unknown;
   startedAt: string;
   lastMessageAt: string;
   endedAt: string | null;
   messages: { id: string; direction: string; content: string; messageType: string; intent: string | null; confidence: number | null; sentAt: string }[];
+}
+
+export interface FailedWhatsAppDelivery {
+  id: string;
+  barbershopId: string | null;
+  channel: string;
+  type: string;
+  status: string;
+  errorCode: string | null;
+  errorMessage: string | null;
+  createdAt: string;
+  retryable: boolean;
+  notRetryableReason?: string;
+}
+
+export interface FailedWhatsAppOutbox {
+  id: string;
+  deliveryId: string | null;
+  status: string;
+  lastError: string | null;
+  publishAttempts: number;
+  createdAt: string;
+  retryable: boolean;
+  notRetryableReason?: string;
+}
+
+export interface WhatsAppQueueCounts {
+  available: boolean;
+  error?: string;
+  wait?: number;
+  active?: number;
+  completed?: number;
+  failed?: number;
+  delayed?: number;
+}
+
+export interface WhatsAppFailedJob {
+  id: string | undefined;
+  name: string;
+  failedReason: string;
+  attemptsMade: number;
+  timestamp: number;
+  phoneMasked: string | null;
+}
+
+export interface WhatsAppQueueJobs {
+  available: boolean;
+  error?: string;
+  jobs?: WhatsAppFailedJob[];
+}
+
+export interface WhatsAppQueuesData {
+  counts: Record<string, WhatsAppQueueCounts>;
+  failed: Record<string, WhatsAppQueueJobs>;
 }
 
 export interface OwnerBotActionLog {
@@ -92,8 +162,16 @@ export const adminWhatsappApi = {
   overview() {
     return apiClient<{ success: boolean; data: WhatsAppOverview }>('/api/admin/whatsapp/overview', 'GET', undefined, token());
   },
-  instances() {
-    return apiClient<{ success: boolean; data: WhatsAppInstance[] }>('/api/admin/whatsapp/instances', 'GET', undefined, token());
+  instances(params?: { page?: number; limit?: number }) {
+    const qs = new URLSearchParams();
+    if (params?.page) qs.set('page', String(params.page));
+    if (params?.limit) qs.set('limit', String(params.limit));
+    const queryString = qs.toString() ? `?${qs.toString()}` : '';
+    return apiClient<{
+      success: boolean;
+      data: WhatsAppInstance[];
+      meta: { total: number; page: number; limit: number; totalPages: number };
+    }>(`/api/admin/whatsapp/instances${queryString}`, 'GET', undefined, token());
   },
   platformSettingsGet() {
     return apiClient<{ success: boolean; data: WhatsAppOverview['globalSettings'] }>('/api/admin/whatsapp/platform-settings', 'GET', undefined, token());
@@ -127,7 +205,10 @@ export const adminWhatsappApi = {
     return apiClient<{ success: boolean; data: { updated: number } }>('/api/admin/whatsapp/shops/batch/owner-bot', 'POST', { ids, ...patch, reason }, token());
   },
   failedNotifications() {
-    return apiClient<{ success: boolean; data: { deliveries: any[]; outbox: any[] } }>('/api/admin/whatsapp/notifications/failed', 'GET', undefined, token());
+    return apiClient<{
+      success: boolean;
+      data: { deliveries: FailedWhatsAppDelivery[]; outbox: FailedWhatsAppOutbox[] };
+    }>('/api/admin/whatsapp/notifications/failed', 'GET', undefined, token());
   },
   retryDelivery(id: string, reason: string) {
     return apiClient<{ success: boolean; data: unknown }>(`/api/admin/whatsapp/notifications/${id}/retry`, 'POST', { reason }, token());
@@ -136,10 +217,10 @@ export const adminWhatsappApi = {
     return apiClient<{ success: boolean; data: unknown }>(`/api/admin/whatsapp/outbox/${id}/retry`, 'POST', { reason }, token());
   },
   reconnect(id: string, reason: string) {
-    return apiClient<{ success: boolean; data: unknown }>(`/api/admin/whatsapp/shops/${id}/instance/reconnect`, 'POST', { reason }, token());
+    return apiClient<{ success: boolean; data: WhatsAppInstanceReconnectResult }>(`/api/admin/whatsapp/shops/${id}/instance/reconnect`, 'POST', { reason }, token());
   },
   logout(id: string, reason: string) {
-    return apiClient<{ success: boolean; data: unknown }>(`/api/admin/whatsapp/shops/${id}/instance/logout`, 'POST', { reason }, token());
+    return apiClient<{ success: boolean; data: WhatsAppInstanceLogoutResult }>(`/api/admin/whatsapp/shops/${id}/instance/logout`, 'POST', { reason }, token());
   },
   aiConversations(params?: { page?: number; limit?: number; barbershopId?: string; status?: string }) {
     const qs = new URLSearchParams();
@@ -175,7 +256,7 @@ export const adminWhatsappApi = {
     );
   },
   queues() {
-    return apiClient<{ success: boolean; data: { counts: Record<string, any>; failed: Record<string, any[]> } }>('/api/admin/whatsapp/queues', 'GET', undefined, token());
+    return apiClient<{ success: boolean; data: WhatsAppQueuesData }>('/api/admin/whatsapp/queues', 'GET', undefined, token());
   },
   reprocessJob(queue: string, jobId: string, reason: string) {
     return apiClient<{ success: boolean; data: unknown }>(`/api/admin/whatsapp/queues/${queue}/${jobId}/reprocess`, 'POST', { reason }, token());

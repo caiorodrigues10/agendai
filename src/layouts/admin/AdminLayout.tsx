@@ -7,28 +7,37 @@ import {
 } from 'react-icons/lu';
 import { useAuth } from '../../contexts/AuthContext';
 import { ThemeToggle } from '../../components/infra/ThemeToggle';
+import { INTERNAL_PERMISSIONS, hasInternalPermission, type InternalPermission } from '../../utils/internalPermissions';
 
-const NAV_ITEMS = [
-  { to: '/master/overview', icon: LuLayoutDashboard, label: 'Visão geral' },
-  { to: '/master/work', icon: LuBriefcase, label: 'Meu trabalho' },
-  { to: '/master/tickets', icon: LuTicket, label: 'Atendimento' },
-  { to: '/master/tasks', icon: LuListTodo, label: 'Tarefas' },
-  { to: '/master/team', icon: LuUsers, label: 'Equipe' },
-  { to: '/master/users', icon: LuUserCog, label: 'Usuários' },
-  { to: '/master/accounts', icon: LuBuilding2, label: 'Contas' },
-  { to: '/master/operations', icon: LuActivity, label: 'Operação' },
-  { to: '/master/audit', icon: LuShield, label: 'Auditoria' },
-  { to: '/master/billing', icon: LuCreditCard, label: 'Faturamento' },
-  { to: '/master/referrals', icon: LuGift, label: 'Indicações' },
-  { to: '/master/crm', icon: LuRefreshCcw, label: 'CRM' },
-  { to: '/master/engagement', icon: LuTarget, label: 'Engajamento' },
-  { to: '/master/whatsapp', icon: LuMessageCircle, label: 'WhatsApp' },
+const NAV_ITEMS: {
+  to: string;
+  icon: React.ComponentType<{ size?: number }>;
+  label: string;
+  permission: InternalPermission;
+}[] = [
+  { to: '/master/overview', icon: LuLayoutDashboard, label: 'Visão geral', permission: INTERNAL_PERMISSIONS.DASHBOARD_READ },
+  { to: '/master/work', icon: LuBriefcase, label: 'Meu trabalho', permission: INTERNAL_PERMISSIONS.DASHBOARD_READ },
+  { to: '/master/tickets', icon: LuTicket, label: 'Atendimento', permission: INTERNAL_PERMISSIONS.SUPPORT_MANAGE },
+  { to: '/master/tasks', icon: LuListTodo, label: 'Tarefas', permission: INTERNAL_PERMISSIONS.SUPPORT_MANAGE },
+  { to: '/master/team', icon: LuUsers, label: 'Equipe', permission: INTERNAL_PERMISSIONS.TEAM_MANAGE },
+  { to: '/master/users', icon: LuUserCog, label: 'Usuários', permission: INTERNAL_PERMISSIONS.USERS_MANAGE },
+  { to: '/master/accounts', icon: LuBuilding2, label: 'Contas', permission: INTERNAL_PERMISSIONS.ACCOUNTS_MANAGE },
+  { to: '/master/operations', icon: LuActivity, label: 'Operação', permission: INTERNAL_PERMISSIONS.OPERATIONS_READ },
+  { to: '/master/audit', icon: LuShield, label: 'Auditoria', permission: INTERNAL_PERMISSIONS.AUDIT_READ },
+  { to: '/master/billing', icon: LuCreditCard, label: 'Faturamento', permission: INTERNAL_PERMISSIONS.FINANCE_READ },
+  { to: '/master/referrals', icon: LuGift, label: 'Indicações', permission: INTERNAL_PERMISSIONS.REFERRALS_READ },
+  { to: '/master/crm', icon: LuRefreshCcw, label: 'CRM', permission: INTERNAL_PERMISSIONS.DASHBOARD_READ },
+  { to: '/master/engagement', icon: LuTarget, label: 'Engajamento', permission: INTERNAL_PERMISSIONS.DASHBOARD_READ },
+  { to: '/master/whatsapp', icon: LuMessageCircle, label: 'WhatsApp', permission: INTERNAL_PERMISSIONS.WHATSAPP_READ },
 ];
 
 export const AdminLayout: React.FC = () => {
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navItems = NAV_ITEMS.filter((item) =>
+    hasInternalPermission(user?.internalPermissions, item.permission),
+  );
 
   useEffect(() => {
     setSidebarOpen(false);

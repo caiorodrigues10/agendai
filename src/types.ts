@@ -146,6 +146,8 @@ export interface StaffMember {
   emailVerified?: boolean;
   avatarUrl?: string | null;
   permissions?: EmployeePermission[];
+  /** Permissões internas do painel master (MASTER_ADMIN). Vazio = acesso total. */
+  internalPermissions?: string[];
 }
 
 /** Item da lista de preços do modelo price-split (o backend normaliza o preço). */
