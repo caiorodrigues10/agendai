@@ -82,6 +82,19 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 - **Auditoria** (`ActionLogsPanel`): `GET .../owner-bot/action-logs` com filtros (`limit` ≤ 100, `from`, `to`, `commandId`, `riskClass`, `status`); rótulos via `ownerBotActionLabel`.
 - **Bloquear/desbloquear**: ação sensível com modal de confirmação; altera `blocked` nas preferências e o painel passa a exibir o selo bloqueado com botão "Desbloquear".
 
+## Controle master do WhatsApp
+
+- O menu e as ações de mutação usam `internalPermissions` devolvido pelo `/auth/me` para `MASTER_ADMIN` (`utils/internalPermissions.ts`). Lista vazia = acesso total, mesma regra do backend; o backend continua sendo a fonte de verdade (403).
+- **Pausar envios** (`outboundPaused`) é global: bloqueia todos os envios, inclusive OTP de login. O botão do overview só altera a configuração.
+- **Instâncias**: só instâncias de salão têm **Reconectar** e **Deslogar**; reconexão exibe o QR code devolvido (`qrcodeBase64`). Erros de ação aparecem no diálogo, sem derrubar a tabela. A lista é paginada (`PaginationBar`, 20 por página) e mostra **Atualizar**; o estado `unreachable` (Evolution inacessível ou timeout) tem badge próprio, distinto de `close`, e tooltip com o motivo curto.
+- **Filas**: contagens e jobs falhos por fila; fila indisponível (`available: false`) aparece como "fila indisponível" — nunca como zeros. Reprocessar/limpar exigem motivo e só valem para os estados permitidos pelo backend (reprocessar: `failed`; limpar: `failed`/`completed`).
+- **Conversas**: filtro por salão e status, paginação e erro de ação inline (a tabela, os filtros e o diálogo continuam). "Transferir para humano" só aparece com `WHATSAPP_MANAGE` e usa o diálogo de motivo. Telefone sempre mascarado e o `context` cru da conversa nunca é exibido.
+- **Logs do assistente**: filtro por salão, risco e status, com paginação; telefone sempre mascarado.
+- **Falhas**: itens não reenviáveis (`retryable: false`) mostram botão **Reenviar** desabilitado, com tooltip do motivo (`notRetryableReason`) e selo "Não reenviável".
+- **Salões**: seleção múltipla (até 50) com ações em lote de IA/assistente, sempre com motivo ≥10 caracteres; ações individuais também exigem motivo.
+- **Falhas**: entregas e itens de outbox podem ser reenviados com motivo; entrega suprimida, de outro canal ou em estado terminal é recusada pelo backend (409/400).
+- **Filas**: telefone aparece mascarado; reprocessar/limpar exige `WHATSAPP_MANAGE` e motivo.
+
 ## Aparência da página pública (tema)
 
 - Tema via CSS vars escopadas no wrapper `[data-ag-shop-theme]`: família canônica `--shop-*` (por variante) + espelho legado `--ag-*`; as utilities do Tailwind resolvem `var(--shop-x, var(--ag-x))` (`styles/tokens.css`). Variantes `light`/`dark` por salão (`darkColors`/`lightColors` no payload; `lightColors` nula é gerada no cliente via `generateVariantColors`, mesmo gerador do back) e `mode` do dono (`AUTO` segue `prefers-color-scheme`; `LIGHT`/`DARK` força). Padrão sem tema salvo = visual dark atual (`PAGE_THEME_DEFAULTS` em `src/shared/pageThemeDefaults.ts`, espelho do backend via `npm run theme:mirror`).

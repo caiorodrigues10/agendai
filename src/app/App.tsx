@@ -56,6 +56,9 @@ const WhatsAppOverviewPage = lazy(() => import('../pages/master-admin/WhatsAppOv
 const WhatsAppShopsPage = lazy(() => import('../pages/master-admin/WhatsAppShopsPage'));
 const WhatsAppQueuesPage = lazy(() => import('../pages/master-admin/WhatsAppQueuesPage'));
 const WhatsAppConversationsPage = lazy(() => import('../pages/master-admin/WhatsAppConversationsPage'));
+const WhatsAppInstancesPage = lazy(() => import('../pages/master-admin/WhatsAppInstancesPage'));
+const WhatsAppFailuresPage = lazy(() => import('../pages/master-admin/WhatsAppFailuresPage'));
+const WhatsAppOwnerLogsPage = lazy(() => import('../pages/master-admin/WhatsAppOwnerLogsPage'));
 const StaffDashboard = lazy(() => import('../pages/StaffDashboard'));
 const ClientPortalPage = lazy(() => import('../pages/ClientPortalPage'));
 const ShowcasePage = lazy(() => import('../pages/ShowcasePage'));
@@ -153,6 +156,9 @@ const App: React.FC = () => {
             <Route path="whatsapp/shops" element={<WhatsAppShopsPage />} />
             <Route path="whatsapp/queues" element={<WhatsAppQueuesPage />} />
             <Route path="whatsapp/conversations" element={<WhatsAppConversationsPage />} />
+            <Route path="whatsapp/instances" element={<WhatsAppInstancesPage />} />
+            <Route path="whatsapp/failures" element={<WhatsAppFailuresPage />} />
+            <Route path="whatsapp/owner-logs" element={<WhatsAppOwnerLogsPage />} />
           </Route>
           <Route path="/app/account" element={<Navigate to="/app/settings" replace />} />
           <Route

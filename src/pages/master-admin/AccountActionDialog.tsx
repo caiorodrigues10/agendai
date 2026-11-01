@@ -180,7 +180,7 @@ export const AccountActionDialog: React.FC<AccountActionDialogProps> = ({
           </span>
         </label>
 
-        {error && <p className="text-sm text-danger">{error}</p>}
+        {error && <p role="alert" className="text-sm text-danger">{error}</p>}
       </div>
     </ModalShell>
   );
