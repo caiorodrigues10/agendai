@@ -60,6 +60,7 @@ describe('App route table (contrato)', () => {
         "team",
         "users",
         "accounts",
+        "segments",
         "accounts/:id",
         "operations",
         "audit",

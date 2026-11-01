@@ -278,6 +278,7 @@ export interface AccountRow {
   city: string | null;
   active: boolean;
   approvalStatus: AccountsApprovalFilter;
+  businessSegment: string;
   createdAt: string;
   counts: { users: number; appointments: number; tickets: number; queue: number };
   subscription: AccountSubscription | null;
@@ -289,6 +290,7 @@ export interface AccountsListParams {
   search?: string;
   status?: AccountsStatusFilter;
   approval?: AccountsApprovalFilter;
+  segment?: string;
   sort?: AccountsSort;
 }
 
@@ -375,6 +377,49 @@ export interface ProductAdoption {
   topCategories: { categoryId: string | null; name: string; products: number }[];
 }
 
+// ── Segmentos (catálogo versionado no backend; troca pelo master) ────────────
+
+export type SegmentGatedModule = 'products' | 'equipment' | 'commissions' | 'tip';
+
+export interface SegmentCatalogItem {
+  segment: string;
+  group: string;
+  label: string;
+  features: string[];
+  advertisingRestricted: boolean;
+  auxiliaryProfile: string | null;
+  hiddenModules: SegmentGatedModule[];
+  visibleModules: SegmentGatedModule[];
+  hiddenTabs: string[];
+  shops: number;
+}
+
+export interface SegmentImpact {
+  from: string;
+  to: string;
+  hiddenModules: SegmentGatedModule[];
+  shownModules: SegmentGatedModule[];
+  hiddenTabs: string[];
+  shownTabs: string[];
+  lostFeatures: string[];
+  gainedFeatures: string[];
+  advertisingChange: 'restricted' | 'unrestricted' | 'none';
+}
+
+export interface SegmentConflict {
+  code: string;
+  message: string;
+  count: number;
+}
+
+export interface SegmentChangeResponse {
+  id: string;
+  segment: string;
+  previousSegment: string;
+  impact: SegmentImpact;
+  conflicts: SegmentConflict[];
+}
+
 // ── Operations ────────────────────────────────────────────────────────────────
 
 export type OperationsStatus = 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY';
@@ -428,6 +473,7 @@ export const adminInternalApi = {
     if (params.search) q.set('search', params.search);
     if (params.status) q.set('status', params.status);
     if (params.approval) q.set('approval', params.approval);
+    if (params.segment) q.set('segment', params.segment);
     if (params.sort) q.set('sort', params.sort);
     const query = q.toString();
     return apiClient<AccountsListResponse>(
@@ -438,6 +484,20 @@ export const adminInternalApi = {
   getAccount(id: string) {
     return apiClient<{ success: boolean; data: AccountDetail }>(
       `/api/admin/accounts/${id}`, 'GET', undefined, token()
+    );
+  },
+
+  // Segments
+  getSegments() {
+    return apiClient<{ success: boolean; data: SegmentCatalogItem[]; meta: { total: number; shops: number } }>(
+      '/api/admin/segments', 'GET', undefined, token()
+    );
+  },
+
+  /** Troca o segmento do salão. `confirm` libera quando há dados incompatíveis. */
+  updateAccountSegment(id: string, body: { segment: string; reason: string; confirm?: boolean }) {
+    return apiClient<{ success: boolean; data: SegmentChangeResponse }>(
+      `/api/admin/barbershops/${id}/segment`, 'PATCH', body, token()
     );
   },
 

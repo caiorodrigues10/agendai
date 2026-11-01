@@ -306,6 +306,94 @@ export interface BillingStatementParams {
   status?: 'PENDING' | 'PAID' | 'OVERDUE' | 'CANCELLED';
   from?: string;
   to?: string;
+  barbershopId?: string;
+}
+
+// ─── Faturamento: drill-down por salão ───────────────────────────────────────
+
+export interface FinancialBarbershopRow {
+  id: string;
+  name: string;
+  whatsapp: string;
+  active: boolean;
+  approvalStatus: string;
+  createdAt: string;
+  expenses: { total: number; count: number };
+  fiados: { activeCount: number; totalDebt: number; overdueCount: number };
+}
+
+export interface FinancialBarbershopDetail {
+  barbershop: {
+    id: string;
+    name: string;
+    whatsapp: string;
+    active: boolean;
+    approvalStatus: string;
+    createdAt: string;
+    subscription: {
+      status: string;
+      endDate: string | null;
+      plan: { name: string; price: number };
+    } | null;
+  };
+  invoices: {
+    summary: {
+      total: number;
+      paid: number;
+      pending: number;
+      overdue: number;
+      cancelled: number;
+      sumPaid: number;
+      sumOverdue: number;
+    };
+    records: {
+      id: string;
+      amount: number;
+      status: string;
+      dueDate: string;
+      paidAt: string | null;
+      createdAt: string;
+      planName: string | null;
+    }[];
+  };
+  payments: { count: number; total: number };
+  refunds: { count: number; total: number };
+  expenses: {
+    summary: { total: number; totalPaid: number; totalPending: number; count: number };
+    byType: { type: string; total: number; count: number }[];
+    byCategory: { category: string; total: number; count: number }[];
+    records: {
+      id: string;
+      title: string;
+      amount: number;
+      type: string;
+      recurrence: string | null;
+      referenceDate: string;
+      paidAt: string | null;
+      categoryName: string | null;
+    }[];
+  };
+  fiados: {
+    summary: {
+      activeDebtors: number;
+      totalDebt: number;
+      overdueCount: number;
+      overdueAmount: number;
+    };
+    records: {
+      id: string;
+      customerName: string;
+      whatsapp: string;
+      description: string | null;
+      originalAmount: number;
+      paidAmount: number;
+      remainingAmount: number;
+      status: string;
+      dueDate: string | null;
+      isOverdue: boolean;
+      paymentsCount: number;
+    }[];
+  };
 }
 
 export const adminApi = {
@@ -479,6 +567,34 @@ export const adminApi = {
     );
   },
 
+  /** Lista de salões com despesas e fiados (ordenável). */
+  getFinancialBarbershops: (params: { page?: number; limit?: number; sort?: 'debt' | 'expenses' } = {}) => {
+    const query = buildQuery({
+      page: params.page,
+      limit: params.limit,
+      sort: params.sort,
+    });
+    return apiClient<{
+      success: boolean;
+      data: FinancialBarbershopRow[];
+      meta: { total: number; page: number; limit: number; totalPages: number };
+    }>(`/api/admin/financial/barbershops${query}`, 'GET', undefined, getAuthHeader());
+  },
+
+  /** Detalhe financeiro de um salão (assinatura, faturas, despesas e fiados). */
+  getFinancialBarbershopDetail: (
+    barbershopId: string,
+    params: { from?: string; to?: string } = {},
+  ) => {
+    const query = buildQuery({ from: params.from, to: params.to });
+    return apiClient<{ success: boolean; data: FinancialBarbershopDetail }>(
+      `/api/admin/financial/barbershops/${barbershopId}${query}`,
+      'GET',
+      undefined,
+      getAuthHeader(),
+    );
+  },
+
   // ─── Faturamento: resumo de cobrança da plataforma ──────────────────────
 
   getBillingInsights: () =>
@@ -492,7 +608,7 @@ export const adminApi = {
   /** Extrato de faturas em CSV (streaming no backend). */
   exportBillingStatementCsv: (params: BillingStatementParams = {}) =>
     apiFetch(
-      `/api/admin/billing/statement.csv${buildQuery({ status: params.status, from: params.from, to: params.to })}`,
+      `/api/admin/billing/statement.csv${buildQuery({ status: params.status, from: params.from, to: params.to, barbershopId: params.barbershopId })}`,
       { method: 'GET' },
       getAuthHeader()
     ),

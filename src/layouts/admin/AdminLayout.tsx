@@ -3,7 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   LuBriefcase, LuTicket, LuListTodo, LuUsers, LuBuilding2, LuActivity,
   LuShield, LuCreditCard, LuGift, LuRefreshCcw, LuChevronLeft, LuMenu, LuLogOut,
-  LuLayoutDashboard, LuTarget, LuUserCog, LuMessageCircle
+  LuLayoutDashboard, LuTarget, LuUserCog, LuMessageCircle, LuLayers
 } from 'react-icons/lu';
 import { useAuth } from '../../contexts/AuthContext';
 import { ThemeToggle } from '../../components/infra/ThemeToggle';
@@ -22,6 +22,7 @@ const NAV_ITEMS: {
   { to: '/master/team', icon: LuUsers, label: 'Equipe', permission: INTERNAL_PERMISSIONS.TEAM_MANAGE },
   { to: '/master/users', icon: LuUserCog, label: 'Usuários', permission: INTERNAL_PERMISSIONS.USERS_MANAGE },
   { to: '/master/accounts', icon: LuBuilding2, label: 'Contas', permission: INTERNAL_PERMISSIONS.ACCOUNTS_MANAGE },
+  { to: '/master/segments', icon: LuLayers, label: 'Segmentos', permission: INTERNAL_PERMISSIONS.DASHBOARD_READ },
   { to: '/master/operations', icon: LuActivity, label: 'Operação', permission: INTERNAL_PERMISSIONS.OPERATIONS_READ },
   { to: '/master/audit', icon: LuShield, label: 'Auditoria', permission: INTERNAL_PERMISSIONS.AUDIT_READ },
   { to: '/master/billing', icon: LuCreditCard, label: 'Faturamento', permission: INTERNAL_PERMISSIONS.FINANCE_READ },

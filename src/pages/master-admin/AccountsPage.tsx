@@ -14,10 +14,12 @@ import {
   AccountsApprovalFilter,
   AccountsSort,
   AccountsStatusFilter,
+  SegmentCatalogItem,
 } from '../../infra/adminInternalApi';
 import { PaginationBar } from '../../components/ui/PaginationBar';
 import { Button } from '../../components/ui/Button';
 import { ShopCreateWizard } from './ShopCreateWizard';
+import { getSegmentConfig } from '../../shared/segments';
 
 const PAGE_SIZE = 20;
 
@@ -80,12 +82,15 @@ export const AccountsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [segments, setSegments] = useState<SegmentCatalogItem[]>([]);
 
   const q = searchParams.get('q') ?? '';
   const statusParam = searchParams.get('status') as AccountsStatusFilter | null;
   const status = statusParam && VALID_STATUS.includes(statusParam) ? statusParam : undefined;
   const approvalParam = searchParams.get('approval') as AccountsApprovalFilter | null;
   const approval = approvalParam && VALID_APPROVAL.includes(approvalParam) ? approvalParam : undefined;
+  const segmentParam = searchParams.get('segment');
+  const segment = segmentParam || undefined;
   const sortParam = searchParams.get('sort') as AccountsSort | null;
   const sort: AccountsSort = sortParam && VALID_SORT.includes(sortParam) ? sortParam : 'recent';
   const pageParam = Number(searchParams.get('page') ?? '1');
@@ -109,6 +114,7 @@ export const AccountsPage: React.FC = () => {
         search: q || undefined,
         status,
         approval,
+        segment,
         sort,
       })
       .then((res) => {
@@ -123,7 +129,24 @@ export const AccountsPage: React.FC = () => {
     return () => {
       active = false;
     };
-  }, [q, status, approval, sort, page, reloadKey]);
+  }, [q, status, approval, segment, sort, page, reloadKey]);
+
+  useEffect(() => {
+    let active = true;
+    adminInternalApi
+      .getSegments()
+      .then((res) => {
+        if (!active) return;
+        setSegments(res.data);
+      })
+      .catch(() => {
+        if (!active) return;
+        setSegments([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const loading = !response && !error;
 
@@ -137,7 +160,17 @@ export const AccountsPage: React.FC = () => {
     setSearchParams(new URLSearchParams(), { replace: true });
   };
 
-  const hasFilters = Boolean(q || status || approval || sort !== 'recent');
+  const hasFilters = Boolean(q || status || approval || segment || sort !== 'recent');
+
+  const segmentLabel = (value: string): string => {
+    const fromCatalog = segments.find((item) => item.segment === value);
+    if (fromCatalog) return fromCatalog.label;
+    try {
+      return getSegmentConfig(value as never).labels.segmentLabel;
+    } catch {
+      return value;
+    }
+  };
 
   if (loading) {
     return (
@@ -232,6 +265,20 @@ export const AccountsPage: React.FC = () => {
         </select>
 
         <select
+          aria-label="Segmento"
+          value={segment ?? ''}
+          onChange={(e) => setParams({ segment: e.target.value || null, page: null })}
+          className="px-3 py-2 bg-surface border border-border rounded-lg text-sm text-text-secondary focus:outline-none focus:border-accent"
+        >
+          <option value="">Todos os segmentos</option>
+          {segments.map((item) => (
+            <option key={item.segment} value={item.segment}>
+              {item.label}
+            </option>
+          ))}
+        </select>
+
+        <select
           aria-label="Ordenação"
           value={sort}
           onChange={(e) => setParams({ sort: e.target.value === 'recent' ? null : e.target.value, page: null })}
@@ -285,9 +332,12 @@ export const AccountsPage: React.FC = () => {
                   {account.city ? ` · ${account.city}` : ''} · criada em {formatDate(account.createdAt)}
                 </p>
               </div>
-              <div className="hidden sm:flex items-center gap-3 text-xs text-text-muted shrink-0">
+              <div className="hidden lg:flex items-center gap-3 text-xs text-text-muted shrink-0">
                 <span>{account.counts.users} membros</span>
                 <span>{account.counts.appointments} agendamentos</span>
+                <span className="px-2 py-0.5 rounded bg-hover-bg text-text-muted">
+                  {segmentLabel(account.businessSegment)}
+                </span>
               </div>
               <div className="shrink-0 text-xs">
                 {account.subscription ? (

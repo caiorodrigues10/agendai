@@ -6,11 +6,22 @@ import { adminInternalApi, AccountDetail } from '../../infra/adminInternalApi';
 import { adminApi } from '../../infra/adminApi';
 
 vi.mock('../../infra/adminInternalApi', () => ({
-  adminInternalApi: { getAccounts: vi.fn(), getAccount: vi.fn(), accountAction: vi.fn(), impersonate: vi.fn() },
+  adminInternalApi: {
+    getAccounts: vi.fn(),
+    getAccount: vi.fn(),
+    accountAction: vi.fn(),
+    impersonate: vi.fn(),
+    getSegments: vi.fn(),
+    updateAccountSegment: vi.fn(),
+  },
 }));
 
 vi.mock('../../infra/adminApi', () => ({
-  adminApi: { resendOwnerInvite: vi.fn() },
+  adminApi: {
+    resendOwnerInvite: vi.fn(),
+    getFinancialBarbershopDetail: vi.fn(),
+    exportBillingStatementCsv: vi.fn(),
+  },
 }));
 
 vi.mock('../../contexts/AuthContext', () => ({
@@ -100,6 +111,46 @@ describe('AccountDetailPage', () => {
       success: true,
       data: detail,
     } as never);
+    vi.mocked(adminInternalApi.getSegments).mockResolvedValue({
+      success: true,
+      data: [
+        {
+          segment: 'OTHER',
+          group: 'other',
+          label: 'Outro',
+          features: [],
+          advertisingRestricted: false,
+          auxiliaryProfile: null,
+          hiddenModules: [],
+          visibleModules: ['products', 'equipment', 'commissions', 'tip'],
+          hiddenTabs: [],
+          shops: 1,
+        },
+      ],
+      meta: { total: 1, shops: 1 },
+    } as never);
+    vi.mocked(adminApi.getFinancialBarbershopDetail).mockResolvedValue({
+      success: true,
+      data: {
+        barbershop: { ...detail.shop, subscription: null },
+        invoices: {
+          summary: { total: 0, paid: 0, pending: 0, overdue: 0, cancelled: 0, sumPaid: 0, sumOverdue: 0 },
+          records: [],
+        },
+        payments: { count: 0, total: 0 },
+        refunds: { count: 0, total: 0 },
+        expenses: {
+          summary: { total: 0, totalPaid: 0, totalPending: 0, count: 0 },
+          byType: [],
+          byCategory: [],
+          records: [],
+        },
+        fiados: {
+          summary: { activeDebtors: 0, totalDebt: 0, overdueCount: 0, overdueAmount: 0 },
+          records: [],
+        },
+      },
+    } as never);
   });
 
   afterEach(() => {
@@ -175,6 +226,25 @@ describe('AccountDetailPage', () => {
       expect(adminInternalApi.getAccount).toHaveBeenCalledTimes(2);
     });
     expect(await screen.findByText(/Convite reenviado/)).toBeInTheDocument();
+  });
+
+  it('exibe o card de segmento e abre o detalhe financeiro do salão', async () => {
+    renderPage();
+
+    await screen.findByRole('heading', { name: 'Barbearia Central' });
+
+    expect(await screen.findByText('Segmento atual')).toBeInTheDocument();
+    expect(screen.getByText('Outro')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Ver detalhe financeiro do salão/ }));
+
+    await waitFor(() => {
+      expect(adminApi.getFinancialBarbershopDetail).toHaveBeenCalledWith(
+        'acc-1',
+        expect.objectContaining({ from: expect.any(String), to: expect.any(String) }),
+      );
+    });
+    expect(await screen.findByRole('button', { name: /Exportar CSV/ })).toBeInTheDocument();
   });
 
   it('oculta o reenvio quando o convite já foi aceito', async () => {

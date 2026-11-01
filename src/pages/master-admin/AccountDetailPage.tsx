@@ -14,6 +14,8 @@ import {
 import { adminInternalApi, AccountDetail } from '../../infra/adminInternalApi';
 import { AccountActionsPanel } from './AccountActionsPanel';
 import { OwnerInvitePanel } from './OwnerInvitePanel';
+import { AccountSegmentCard } from './AccountSegmentCard';
+import { FinancialDrilldown } from '../../features/billing/FinancialDrilldown';
 
 const brl = (value: number): string =>
   value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -88,6 +90,7 @@ export const AccountDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [financialOpen, setFinancialOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -269,6 +272,14 @@ export const AccountDetailPage: React.FC = () => {
           onReload={() => setReloadKey((key) => key + 1)}
         />
 
+        <AccountSegmentCard
+          shop={{ id: shop.id, name: shop.name, businessSegment: shop.businessSegment }}
+          onChanged={() => {
+            setSuccess('Segmento atualizado com sucesso.');
+            setReloadKey((key) => key + 1);
+          }}
+        />
+
         <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
           <h2 className="text-sm font-bold flex items-center gap-2">
             <LuCreditCard size={16} className="text-accent" /> Assinatura
@@ -333,9 +344,23 @@ export const AccountDetailPage: React.FC = () => {
               <span className="text-text-muted">Total recebido</span>
               <span className="font-medium">{brl(billing.sumPaid)}</span>
             </div>
+            <button
+              type="button"
+              onClick={() => setFinancialOpen(true)}
+              className="mt-1 text-xs font-medium text-accent hover:underline"
+            >
+              Ver detalhe financeiro do salão
+            </button>
           </div>
         </div>
       </div>
+
+      <FinancialDrilldown
+        open={financialOpen}
+        barbershopId={shop.id}
+        barbershopName={shop.name}
+        onClose={() => setFinancialOpen(false)}
+      />
 
       <div className="bg-surface border border-border rounded-xl p-4 space-y-3">
         <h2 className="text-sm font-bold flex items-center gap-2">

@@ -26,6 +26,9 @@
 | Configurações / Ajuda / Perfil | todo staff | — | — |
 | Plano (subscription) | OWNER/MASTER_ADMIN | — | `plans.routes.ts` |
 | Master Admin (/master/*) | MASTER_ADMIN | — | `verifyInternalAdmin` + `requireInternalPermission` |
+| Master — Segmentos (`/master/segments`, card na conta) | `DASHBOARD_READ` (leitura do catálogo) | trocar segmento: `ACCOUNTS_MANAGE` (+ `AuditLog` `ACCOUNT_CHANGE_SEGMENT`) | `admin.routes.ts` (`GET /admin/segments`, `PATCH /admin/barbershops/:id/segment`) |
+| Master — Financeiro por salão (faturamento/detalhe da conta) | `FINANCE_READ` | leitura + CSV | `admin.routes.ts` (`/admin/financial/barbershops*`, `/admin/billing/statement.csv`) |
+| Master — CRM (`/master/crm`) | `DASHBOARD_READ` (histórico de execuções) | disparar lote: `MASTER_ADMIN` (rota `/crm/backfill/all`) | `admin.routes.ts` (`GET /admin/crm/backfill/runs`) |
 
 ## Divergência histórica corrigida nesta rodada (estabilização)
 
