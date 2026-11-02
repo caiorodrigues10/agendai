@@ -377,6 +377,26 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
             </div>
           )}
 
+          {activeSection === 'import' && barbershopId && (
+            <div className="bg-surface border border-border rounded-xl p-5">
+              <h3 className="text-lg font-bold text-text-primary mb-1">Importar dados</h3>
+              <p className="text-xs text-text-muted mb-4">
+                Envie uma planilha (.xlsx/.csv) para importar clientes, serviços, agenda e outros dados do seu estabelecimento.
+              </p>
+              <DataImportWizard barbershopId={barbershopId} onNotify={onNotify} />
+            </div>
+          )}
+
+          {activeSection === 'export' && barbershopId && (
+            <div className="bg-surface border border-border rounded-xl p-5">
+              <h3 className="text-lg font-bold text-text-primary mb-1">Exportar dados</h3>
+              <p className="text-xs text-text-muted mb-4">
+                Gere um arquivo com os dados do seu estabelecimento no período escolhido.
+              </p>
+              <DataExportWizard barbershopId={barbershopId} onNotify={onNotify} />
+            </div>
+          )}
+
           {activeSection === 'privacy' && <AccountPrivacyPanel onNotify={onNotify} />}
 
           {activeSection === 'help' && <SupportPanel />}

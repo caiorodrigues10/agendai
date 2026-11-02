@@ -188,7 +188,7 @@ export const CaseBillingTab: React.FC<CaseBillingTabProps> = ({
                     {fee.dueDate ? ` · vence ${formatDate(fee.dueDate)}` : ''}
                   </p>
                 </div>
-                {fee.status !== 'PAID' && (
+                {fee.status !== 'PAID' && fee.status !== 'CANCELED' && (
                   <button
                     type="button"
                     onClick={() => void markFeePaid(fee)}

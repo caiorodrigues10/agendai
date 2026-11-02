@@ -54,7 +54,14 @@ export const ImportHistory: React.FC<{
             className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-surface-2 px-3 py-2"
           >
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-text-primary">{batch.fileName}</p>
+              <p className="truncate text-sm font-semibold text-text-primary">
+                {batch.fileName}
+                {batch.source === 'WHATSAPP_OWNER_BOT' && (
+                  <span className="ml-2 rounded bg-accent/10 px-1.5 py-0.5 text-[10px] font-bold text-accent">
+                    via WhatsApp
+                  </span>
+                )}
+              </p>
               <p className="text-xs text-text-muted">
                 <span className={STATUS_TONE[batch.status] ?? 'text-text-secondary'}>
                   {STATUS_LABEL[batch.status] ?? batch.status}

@@ -40,6 +40,7 @@ vi.mock('../../infra/casesApi', () => ({
     listSuccessFees: vi.fn(),
     createSuccessFee: vi.fn(),
     updateSuccessFee: vi.fn(),
+    successFeesReport: vi.fn(),
     listIntimations: vi.fn(),
     createIntimation: vi.fn(),
     importIntimations: vi.fn(),
@@ -122,6 +123,23 @@ beforeEach(() => {
   });
   vi.mocked(casesApi.listIntimations).mockResolvedValue([]);
   vi.mocked(casesApi.listSuccessFees).mockResolvedValue([]);
+  vi.mocked(casesApi.successFeesReport).mockResolvedValue({
+    summary: {
+      totalAmount: 0,
+      totalCount: 0,
+      pendingAmount: 0,
+      pendingCount: 0,
+      invoicedAmount: 0,
+      invoicedCount: 0,
+      paidAmount: 0,
+      paidCount: 0,
+      canceledAmount: 0,
+      canceledCount: 0,
+      receivableAmount: 0,
+    },
+    rows: [],
+    generatedAt: '2026-11-02T12:00:00.000Z',
+  });
   vi.mocked(casesApi.listFeeInvoices).mockResolvedValue([]);
   vi.mocked(casesApi.listTransfers).mockResolvedValue([]);
   vi.mocked(casesApi.listSiblingShops).mockResolvedValue([]);
@@ -197,4 +215,52 @@ it('cria um processo para o cliente escolhido', async () => {
       expect.objectContaining({ nickname: 'Averbação' })
     )
   );
+});
+
+it('mostra o relatório de honorários separado das receitas', async () => {
+  vi.mocked(casesApi.successFeesReport).mockResolvedValue({
+    summary: {
+      totalAmount: 2000,
+      totalCount: 1,
+      pendingAmount: 2000,
+      pendingCount: 1,
+      invoicedAmount: 0,
+      invoicedCount: 0,
+      paidAmount: 0,
+      paidCount: 0,
+      canceledAmount: 0,
+      canceledCount: 0,
+      receivableAmount: 2000,
+    },
+    rows: [
+      {
+        id: 'fee-1',
+        barbershopId: 'shop-1',
+        caseId: 'case-1',
+        caseName: 'Ação de cobrança',
+        caseNumber: '1024127-78.2020.8.26.0100',
+        clientName: 'Maria Souza',
+        percent: 20,
+        baseAmount: 10000,
+        amount: 2000,
+        installments: 2,
+        status: 'PENDING',
+        dueDate: null,
+        paidAt: null,
+        notes: null,
+        createdAt: '2026-11-02T12:00:00.000Z',
+        updatedAt: '2026-11-02T12:00:00.000Z',
+      },
+    ],
+    generatedAt: '2026-11-02T12:00:00.000Z',
+  });
+
+  render(<CasesHub />);
+  await screen.findByText('Ação de cobrança');
+
+  fireEvent.click(screen.getByRole('button', { name: /Honorários/ }));
+
+  expect(await screen.findByRole('region', { name: 'Relatório de honorários' })).toBeVisible();
+  expect(screen.getByText(/não entra no caixa nem nas receitas/i)).toBeVisible();
+  expect(screen.getByText(/2x — sem parcelas reais/i)).toBeVisible();
 });

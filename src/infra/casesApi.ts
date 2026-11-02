@@ -269,6 +269,31 @@ export interface CaseSuccessFee {
   updatedAt: string;
 }
 
+export interface CaseFeesReportSummary {
+  totalAmount: number;
+  totalCount: number;
+  pendingAmount: number;
+  pendingCount: number;
+  invoicedAmount: number;
+  invoicedCount: number;
+  paidAmount: number;
+  paidCount: number;
+  canceledAmount: number;
+  canceledCount: number;
+  receivableAmount: number;
+}
+
+export interface CaseFeesReportRow extends CaseSuccessFee {
+  caseNumber: string | null;
+  clientName: string | null;
+}
+
+export interface CaseFeesReport {
+  summary: CaseFeesReportSummary;
+  rows: CaseFeesReportRow[];
+  generatedAt: string;
+}
+
 // ─── Intimações ────────────────────────────────────────────────────────────
 
 export type IntimationSource = 'EMAIL' | 'WHATSAPP' | 'MANUAL' | 'IMPORT';
@@ -846,6 +871,16 @@ export const casesApi = {
       token()
     );
     return unwrap<CaseSuccessFee[]>(res);
+  },
+
+  successFeesReport: async () => {
+    const res = await apiClient<{ success: boolean; data: CaseFeesReport }>(
+      '/api/cases/reports/fees',
+      'GET',
+      undefined,
+      token()
+    );
+    return unwrap<CaseFeesReport>(res);
   },
 
   createSuccessFee: async (

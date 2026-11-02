@@ -1,6 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { LuFileSpreadsheet as FileSpreadsheet } from 'react-icons/lu';
 import { importTemplateUrl, type ImportTargetType } from '../../infra/dataImportApi';
+import { hasSegmentFeature } from '../../shared/segments';
+import { useSegmentLabels } from '../../hooks/useSegmentLabels';
 
 const TEMPLATE_TARGETS: { id: ImportTargetType; label: string }[] = [
   { id: 'CLIENTS', label: 'Clientes' },
@@ -13,13 +15,16 @@ const TEMPLATE_TARGETS: { id: ImportTargetType; label: string }[] = [
   { id: 'SERVICE_PACKAGES', label: 'Catálogo de pacotes' },
   { id: 'CLIENT_PACKAGES', label: 'Pacotes dos clientes' },
   { id: 'FIADOS', label: 'Fiados' },
+  { id: 'CASES', label: 'Processos' },
 ];
 
 /**
  * Etapa 1 — envio do arquivo.
  *
- * Aceita .xlsx e .csv (até 10 MB). Os modelos por tipo trazem os cabeçalhos
- * certos e duas linhas de exemplo — o dono baixa o modelo do que quer importar.
+ * Aceita .xlsx, .xlsm, .xls, .ods, PDF com texto e .csv/.tsv/.txt (até 10 MB).
+ * O backend identifica o formato pelo **conteúdo** do arquivo, então o nome
+ * não precisa estar certo. Os modelos por tipo trazem os cabeçalhos certos e
+ * duas linhas de exemplo — o dono baixa o modelo do que quer importar.
  */
 export const ImportUploadStep: React.FC<{
   barbershopId: string;
@@ -27,6 +32,11 @@ export const ImportUploadStep: React.FC<{
   onUpload: (file: File) => Promise<void>;
 }> = ({ barbershopId, busy, onUpload }) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const { rawSegment } = useSegmentLabels();
+  const hasCases = hasSegmentFeature(rawSegment, 'caseManagement');
+  const templateTargets = TEMPLATE_TARGETS.filter(
+    (target) => target.id !== 'CASES' || hasCases,
+  );
   const [fileName, setFileName] = useState<string | null>(null);
   const [showTemplates, setShowTemplates] = useState(false);
 
@@ -41,9 +51,10 @@ export const ImportUploadStep: React.FC<{
       <div>
         <h3 className="text-base font-bold text-text-primary">Envie sua planilha</h3>
         <p className="mt-1 text-sm text-text-muted">
-          Arquivo .xlsx ou .csv, até 10 MB e 20.000 linhas. Nada é importado antes de você
-          revisar a prévia. Uma planilha com várias abas também funciona: escolha o tipo de
-          cada aba no passo seguinte.
+          Planilha .xlsx, .xlsm, .xls, .ods, PDF com texto ou .csv/.tsv/.txt, até 10 MB e 20.000
+          linhas. O sistema olha o conteúdo do arquivo, então o nome pode estar errado. Nada é
+          importado antes de você revisar a prévia. Uma planilha com várias abas também funciona:
+          escolha o tipo de cada aba no passo seguinte.
         </p>
       </div>
 
@@ -56,7 +67,7 @@ export const ImportUploadStep: React.FC<{
         <input
           ref={inputRef}
           type="file"
-          accept=".xlsx,.csv"
+          accept=".xlsx,.xlsm,.xls,.ods,.pdf,.csv,.tsv,.txt"
           className="sr-only"
           disabled={busy}
           data-testid="import-file-input"
@@ -76,7 +87,7 @@ export const ImportUploadStep: React.FC<{
         </button>
         {showTemplates ? (
           <ul className="mt-2 grid gap-1 sm:grid-cols-2" data-testid="import-templates-list">
-            {TEMPLATE_TARGETS.map((target) => (
+            {templateTargets.map((target) => (
               <li key={target.id}>
                 <a
                   href={importTemplateUrl(barbershopId, target.id)}

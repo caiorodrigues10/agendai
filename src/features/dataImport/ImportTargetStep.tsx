@@ -5,6 +5,8 @@ import type {
   ImportSheetTargetChoice,
   ImportTargetType,
 } from '../../infra/dataImportApi';
+import { hasSegmentFeature } from '../../shared/segments';
+import { useSegmentLabels } from '../../hooks/useSegmentLabels';
 
 const TARGETS: {
   id: ImportTargetType;
@@ -61,6 +63,11 @@ const TARGETS: {
     title: 'Fiados',
     description: 'Importa fiados por telefone. Não cria cliente novo.',
   },
+  {
+    id: 'CASES',
+    title: 'Processos',
+    description: 'Abre processos por cliente, com número CNJ, área, status e valores. Não lança caixa.',
+  },
 ];
 
 const TARGET_TITLE: Record<ImportTargetType, string> = TARGETS.reduce(
@@ -86,14 +93,22 @@ export const ImportTargetStep: React.FC<{
 }> = ({ busy, fileName, sheets, onChoose }) => {
   const sheetList = sheets ?? [];
   const multiple = sheetList.length > 1;
+  const { rawSegment } = useSegmentLabels();
+  const hasCases = hasSegmentFeature(rawSegment, 'caseManagement');
+  const targets = React.useMemo(
+    () => TARGETS.filter((target) => target.id !== 'CASES' || hasCases),
+    [hasCases]
+  );
+  const defaultTarget: ImportTargetType = hasCases ? 'CASES' : 'CLIENTS';
 
-  // Uma escolha por aba; o padrão é CLIENTS (ou "sem tipo" quando há várias abas).
+  // Uma escolha por aba; o padrão é o alvo principal do segmento (ou "sem
+  // tipo" quando há várias abas).
   const [assignments, setAssignments] = React.useState<Record<string, ImportTargetType>>(() =>
     Object.fromEntries(
-      sheetList.map((sheet) => [sheet.sheetName ?? '', multiple ? ('' as unknown as ImportTargetType) : 'CLIENTS'])
+      sheetList.map((sheet) => [sheet.sheetName ?? '', multiple ? ('' as unknown as ImportTargetType) : defaultTarget])
     )
   );
-  const [singleTarget, setSingleTarget] = React.useState<ImportTargetType>('CLIENTS');
+  const [singleTarget, setSingleTarget] = React.useState<ImportTargetType>(defaultTarget);
 
   const assign = (sheetKey: string, targetType: ImportTargetType) => {
     setAssignments((current) => ({ ...current, [sheetKey]: targetType }));
@@ -136,7 +151,7 @@ export const ImportTargetStep: React.FC<{
 
       {!multiple ? (
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3" role="radiogroup" aria-label="Tipo de importação">
-          {TARGETS.map((option) => (
+          {targets.map((option) => (
             <button
               key={option.id}
               type="button"
@@ -174,7 +189,7 @@ export const ImportTargetStep: React.FC<{
                   </span>
                 </p>
                 <div className="mt-2 flex flex-wrap gap-1.5" role="radiogroup" aria-label={`Tipo da aba ${sheetLabel(sheet.sheetName)}`}>
-                  {TARGETS.map((option) => (
+                  {targets.map((option) => (
                     <button
                       key={option.id}
                       type="button"

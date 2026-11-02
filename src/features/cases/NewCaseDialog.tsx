@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { LuArrowLeft as ArrowLeft } from 'react-icons/lu';
-import { clientsApi } from '../../infra/clientsApi';
+import { clientsApi, type CaseCreationWarning } from '../../infra/clientsApi';
 import { getErrorMessage } from '../../utils/errorMessage';
 import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR } from '../../components/ui/Field';
 
@@ -19,7 +19,7 @@ type NewCaseData = z.infer<typeof NewCaseSchema>;
 interface NewCaseDialogProps {
   practiceAreas: string[];
   onClose: () => void;
-  onCreated: () => void | Promise<void>;
+  onCreated: (warnings?: CaseCreationWarning[]) => void | Promise<void>;
 }
 
 /** Diálogo de criação de processo: escolhe o cliente e os dados do processo. */
@@ -74,12 +74,12 @@ export const NewCaseDialog: React.FC<NewCaseDialogProps> = ({
     setSaving(true);
     setFormError(null);
     try {
-      await clientsApi.createCase(data.clientId, {
+      const created = await clientsApi.createCase(data.clientId, {
         nickname: data.nickname.trim(),
         practiceArea: data.practiceArea?.trim() || null,
         caseNumber: data.caseNumber?.trim() || null,
       });
-      await onCreated();
+      await onCreated(created.warnings);
     } catch (err) {
       setFormError(getErrorMessage(err));
     } finally {

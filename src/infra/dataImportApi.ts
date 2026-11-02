@@ -26,7 +26,8 @@ export type ImportTargetType =
   | 'PRODUCTS'
   | 'SERVICE_PACKAGES'
   | 'CLIENT_PACKAGES'
-  | 'FIADOS';
+  | 'FIADOS'
+  | 'CASES';
 
 /** Alvo gravado no lote: "MIXED" quando as abas têm tipos diferentes. */
 export type ImportBatchTargetType = ImportTargetType | 'MIXED';
@@ -86,6 +87,16 @@ export type ImportFieldKey =
   | 'modality'
   | 'caseName'
   | 'practiceArea'
+  // processos
+  | 'caseNumber'
+  | 'caseStatus'
+  | 'casePriority'
+  | 'caseTitle'
+  | 'courtName'
+  | 'opponent'
+  | 'claimedAmount'
+  | 'awardedAmount'
+  | 'openedAt'
   // horários
   | 'dayOfWeek'
   | 'startTime'
@@ -174,6 +185,7 @@ export interface ImportBatchSummary {
   undoneAt: string | null;
   expiresAt: string;
   canUndo: boolean;
+  source?: 'WEB' | 'WHATSAPP_OWNER_BOT';
 }
 
 /** Uma aba do arquivo, como o dono a vê logo depois do upload. */

@@ -74,6 +74,7 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
   ]);
   const [format, setFormat] = React.useState<ExportFormat>('XLSX');
   const [anonymize, setAnonymize] = React.useState(false);
+  const [includeCase, setIncludeCase] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
   const [currentJob, setCurrentJob] = React.useState<ExportJob | null>(null);
   const [history, setHistory] = React.useState<ExportJob[]>([]);
@@ -150,7 +151,7 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
         dateTo: preset === 'CUSTOM' ? dateTo : undefined,
         modules,
         format,
-        options: { anonymize },
+        options: { anonymize, includeCase: anonymize ? false : includeCase },
       });
       setCurrentJob(job);
       onNotify('Exportação enfileirada. Acompanhe o progresso abaixo.', 'success');
@@ -323,6 +324,16 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
               data-testid="export-anonymize"
             />
             Anonimizar dados pessoais (relatório para contador)
+          </label>
+          <label className="flex items-center gap-2 text-sm text-text-primary">
+            <input
+              type="checkbox"
+              checked={includeCase && !anonymize}
+              disabled={anonymize}
+              onChange={(event) => setIncludeCase(event.target.checked)}
+              data-testid="export-include-case"
+            />
+            Incluir caso/processo (dados internos do escritório)
           </label>
         </div>
       </section>

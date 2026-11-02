@@ -4,6 +4,7 @@ import {
   LuCalendarClock as CalendarClock,
   LuArrowRightLeft as ArrowRightLeft,
   LuPlus as Plus,
+  LuWallet as Wallet,
 } from 'react-icons/lu';
 import { casesApi, type CaseSummary, type PracticeAreaReportRow } from '../../infra/casesApi';
 import type { CasePriority, ClientCaseStatus } from '../../infra/clientsApi';
@@ -15,9 +16,10 @@ import { DeadlinePanel } from './DeadlinePanel';
 import { NewCaseDialog } from './NewCaseDialog';
 import { PipelineStrip } from './PipelineStrip';
 import { CaseTransfersPanel } from './CaseTransfersPanel';
+import { CaseFeesReportPanel } from './CaseFeesReportPanel';
 import { formatCurrency } from './caseLabels';
 
-type HubView = 'cases' | 'deadlines' | 'transfers';
+type HubView = 'cases' | 'deadlines' | 'transfers' | 'fees';
 
 interface CasesHubProps {
   staff?: StaffMember[];
@@ -27,7 +29,7 @@ interface CasesHubProps {
 /**
  * Gestão de processos do escritório (segmento LAW_FIRM).
  *
- * Duas visões: o pipeline de processos e o calendário de prazos do
+ * Visões: pipeline de processos, prazos, transferências e honorários do
  * escritório. Tudo é interno — nada aqui aparece para o cliente.
  */
 export const CasesHub: React.FC<CasesHubProps> = ({ staff = [], onNotify }) => {
@@ -117,6 +119,8 @@ export const CasesHub: React.FC<CasesHubProps> = ({ staff = [], onNotify }) => {
 
       {view === 'transfers' ? (
         <CaseTransfersPanel onNotify={onNotify} />
+      ) : view === 'fees' ? (
+        <CaseFeesReportPanel />
       ) : view === 'cases' ? (
         <>
           <PipelineStrip
@@ -175,10 +179,14 @@ export const CasesHub: React.FC<CasesHubProps> = ({ staff = [], onNotify }) => {
         <NewCaseDialog
           practiceAreas={areas}
           onClose={() => setShowNewCase(false)}
-          onCreated={async () => {
+          onCreated={async warnings => {
             setShowNewCase(false);
             await load();
-            onNotify?.('Processo criado.');
+            if (warnings && warnings.length > 0) {
+              onNotify?.(`Processo criado. ${warnings.map(item => item.message).join(' ')}`);
+            } else {
+              onNotify?.('Processo criado.');
+            }
           }}
         />
       )}
@@ -199,7 +207,7 @@ const CasesHubHeader: React.FC<CasesHubHeaderProps> = ({ view, onViewChange, onN
         Gestão de processos
       </h2>
       <p className="text-xs text-text-muted">
-        Pipeline, prazos e andamentos do escritório (uso interno).
+        Pipeline, prazos, andamentos e honorários do escritório (uso interno).
       </p>
     </div>
     <div className="flex items-center gap-2">
@@ -233,6 +241,16 @@ const CasesHubHeader: React.FC<CasesHubHeaderProps> = ({ view, onViewChange, onN
           }`}
         >
           <ArrowRightLeft size={13} /> Transferências
+        </button>
+        <button
+          type="button"
+          onClick={() => onViewChange('fees')}
+          aria-pressed={view === 'fees'}
+          className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
+            view === 'fees' ? 'bg-accent text-accent-fg' : 'text-text-muted hover:text-text-primary'
+          }`}
+        >
+          <Wallet size={13} /> Honorários
         </button>
       </div>
       <button

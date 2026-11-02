@@ -105,6 +105,11 @@ export type ClientCaseStatus =
 export type CasePriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
 
 /** Caso/processo do cliente (segmento LAW_FIRM) — dados internos do escritório. */
+export interface CaseCreationWarning {
+  code: 'DUPLICATE_CASE_NUMBER' | 'CNJ_CHECK_DIGIT';
+  message: string;
+}
+
 export interface ClientCase {
   id: string;
   barbershopId: string;
@@ -127,6 +132,7 @@ export interface ClientCase {
   closedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  warnings?: CaseCreationWarning[];
 }
 
 export interface ClientCaseBody {
