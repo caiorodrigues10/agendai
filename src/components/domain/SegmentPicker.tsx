@@ -175,8 +175,11 @@ export const SegmentPicker: React.FC<{
     >
       <legend className="text-sm font-bold text-text-primary mb-3">{legend}</legend>
 
-      {/* Busca sticky: a lista de grupos é longa; o campo acompanha a rolagem. */}
-      <div className="sticky top-0 z-20 mb-4 bg-bg/80 pb-2 backdrop-blur">
+      {/* Busca sticky: a lista de grupos é longa; o campo acompanha a rolagem.
+         Fundo opaco igual ao pai (sem alpha nem backdrop-blur) para não criar
+         faixa de tom diferente em repouso nem deixar cards aparecerem por
+         baixo ao rolar. */}
+      <div className="sticky top-0 z-20 mb-4 bg-bg">
         <div className="relative">
           <label htmlFor={`${groupId}-search`} className="sr-only">
             Buscar segmento
