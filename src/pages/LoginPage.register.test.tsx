@@ -373,6 +373,20 @@ describe('Cadastro em 3 etapas (wizard)', () => {
     expect(screen.getByRole('button', { name: 'Entrar agora?' })).toBeInTheDocument();
   });
 
+  it('CPF e nome do titular não conferem: erro inline no campo CPF e volta para a etapa 1', async () => {
+    registerMock.mockResolvedValue({ ok: false, message: 'CPF e nome do titular não conferem' });
+    renderWithProviders(<LoginPage mode="register" />, { route: '/cadastro' });
+
+    await goToStep3(/barbearia/i);
+    fillStep3();
+    submitFinal();
+
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: 'Comece pelo seu acesso' })).toBeInTheDocument()
+    );
+    expect(screen.getByText('CPF e nome do titular não conferem.')).toBeInTheDocument();
+  });
+
   it('check-cpf no blur: CPF ocupado mostra erro inline e o Continuar não avança', async () => {
     checkCpfMock.mockResolvedValue({ success: true, data: { available: false } });
     renderWithProviders(<LoginPage mode="register" />, { route: '/cadastro' });

@@ -690,7 +690,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     if (result.ok === false) {
       // Erro de conta (e-mail/CPF duplicado) volta para a etapa 1; erro de
       // estabelecimento (nome/WhatsApp/cidade) fica na etapa 3.
-      if (/e-?mail já cadastrado|cpf já cadastrado/i.test(result.message)) {
+      if (/CPF e nome do titular não conferem/i.test(result.message)) {
+        setRegisterStep(1);
+        registerForm.setError('cpf', { type: 'server', message: 'CPF e nome do titular não conferem.' });
+      } else if (/e-?mail já cadastrado|cpf já cadastrado/i.test(result.message)) {
         setRegisterStep(1);
         if (/cpf já cadastrado/i.test(result.message)) {
           registerForm.setError('cpf', { type: 'server', message: CPF_TAKEN_MESSAGE });
