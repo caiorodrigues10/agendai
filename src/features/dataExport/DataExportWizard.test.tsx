@@ -80,78 +80,20 @@ describe('DataExportWizard', () => {
     expect(screen.getByTestId('export-module-caseFees')).toBeChecked();
   });
 
-  it('envia includeCase=true na API com cases em modules ao clicar em Exportar com toggle ligado', async () => {
+  // ── (a) Processos é opt-in ────────────────────────────────────────────────
+
+  it('(a) LAW_FIRM no estado inicial: cases não vem marcado e nenhum aviso aparece', () => {
     segment.rawSegment = 'LAW_FIRM';
     render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
 
-    // cases já vem marcado por padrão para LAW_FIRM; só liga o toggle
-    fireEvent.click(screen.getByTestId('export-include-case'));
-
-    fireEvent.click(screen.getByTestId('export-generate'));
-
-    await waitFor(() => {
-      expect(vi.mocked(dataExportApi.dataExportApi.create)).toHaveBeenCalledTimes(1);
-    });
-
-    const callArg = vi.mocked(dataExportApi.dataExportApi.create).mock.calls[0][1];
-    expect(callArg.modules).toContain('cases');
-    expect(callArg.options.includeCase).toBe(true);
-  });
-
-  it('envia includeCase=false na API com cases em modules quando toggle está desligado', async () => {
-    segment.rawSegment = 'LAW_FIRM';
-    render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
-
-    // cases já vem marcado; não ativa o toggle includeCase
-    fireEvent.click(screen.getByTestId('export-generate'));
-
-    await waitFor(() => {
-      expect(vi.mocked(dataExportApi.dataExportApi.create)).toHaveBeenCalledTimes(1);
-    });
-
-    const callArg = vi.mocked(dataExportApi.dataExportApi.create).mock.calls[0][1];
-    expect(callArg.modules).toContain('cases');
-    expect(callArg.options.includeCase).toBe(false);
-  });
-
-  it('mostra aviso de erro quando includeCase está ligado sem módulo Processos', () => {
-    segment.rawSegment = 'LAW_FIRM';
-    render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
-
-    // interage para ativar o aviso (desmarca cases e liga includeCase)
-    fireEvent.click(screen.getByTestId('export-module-cases'));
-    fireEvent.click(screen.getByTestId('export-include-case'));
-
-    const warning = screen.getByTestId('export-case-warning');
-    expect(warning).toHaveTextContent(
-      'Incluir caso/processo requer o módulo Processos selecionado.',
-    );
-    expect(warning).toHaveClass('text-danger');
-  });
-
-  it('desabilita "Gerar planilha" quando o aviso de erro está ativo', () => {
-    segment.rawSegment = 'LAW_FIRM';
-    render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
-
-    fireEvent.click(screen.getByTestId('export-module-cases'));
-    fireEvent.click(screen.getByTestId('export-include-case'));
-
-    expect(screen.getByTestId('export-generate')).toBeDisabled();
-  });
-
-  it('não mostra aviso no estado inicial para LAW_FIRM (sem interação)', () => {
-    segment.rawSegment = 'LAW_FIRM';
-    render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
-
+    expect(screen.getByTestId('export-module-cases')).not.toBeChecked();
     expect(screen.queryByTestId('export-case-warning')).not.toBeInTheDocument();
   });
 
-  it('mostra aviso de warning quando Processos está marcado sem includeCase', () => {
+  it('(a) marcar cases sem includeCase mostra o aviso', () => {
     segment.rawSegment = 'LAW_FIRM';
     render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
 
-    // interage para ativar o aviso sem alterar cases/includeCase
-    fireEvent.click(screen.getByTestId('export-module-cases'));
     fireEvent.click(screen.getByTestId('export-module-cases'));
 
     const warning = screen.getByTestId('export-case-warning');
@@ -159,5 +101,118 @@ describe('DataExportWizard', () => {
       'O módulo Processos está selecionado, mas “Incluir caso/processo” está desligado',
     );
     expect(warning).toHaveClass('text-accent');
+  });
+
+  it('(a) marcar cases + includeCase: sem aviso e API recebe cases em modules e includeCase=true', async () => {
+    segment.rawSegment = 'LAW_FIRM';
+    render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
+
+    fireEvent.click(screen.getByTestId('export-module-cases'));
+    fireEvent.click(screen.getByTestId('export-include-case'));
+
+    expect(screen.queryByTestId('export-case-warning')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('export-generate'));
+
+    await waitFor(() => {
+      expect(vi.mocked(dataExportApi.dataExportApi.create)).toHaveBeenCalledTimes(1);
+    });
+
+    const callArg = vi.mocked(dataExportApi.dataExportApi.create).mock.calls[0][1];
+    expect(callArg.modules).toContain('cases');
+    expect(callArg.options?.includeCase).toBe(true);
+  });
+
+  it('(a) includeCase ligado sem cases mostra aviso de erro e desabilita Gerar planilha', () => {
+    segment.rawSegment = 'LAW_FIRM';
+    render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
+
+    fireEvent.click(screen.getByTestId('export-include-case'));
+
+    const warning = screen.getByTestId('export-case-warning');
+    expect(warning).toHaveTextContent(
+      'Incluir caso/processo requer o módulo Processos selecionado.',
+    );
+    expect(warning).toHaveClass('text-danger');
+    expect(screen.getByTestId('export-generate')).toBeDisabled();
+  });
+
+  // ── (b) anonymize + Processos ─────────────────────────────────────────────
+
+  it('(b) anonymize ligado + cases marcado: includeCase continua habilitado', () => {
+    segment.rawSegment = 'LAW_FIRM';
+    render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
+
+    fireEvent.click(screen.getByTestId('export-module-cases'));
+    fireEvent.click(screen.getByTestId('export-anonymize'));
+
+    const toggle = screen.getByTestId('export-include-case');
+    expect(toggle).toBeEnabled();
+    expect(toggle).not.toBeChecked();
+  });
+
+  it('(b) anonymize ligado + cases + includeCase: API recebe anonymize=true e includeCase=true', async () => {
+    segment.rawSegment = 'LAW_FIRM';
+    render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
+
+    fireEvent.click(screen.getByTestId('export-module-cases'));
+    fireEvent.click(screen.getByTestId('export-include-case'));
+    fireEvent.click(screen.getByTestId('export-anonymize'));
+
+    expect(screen.queryByTestId('export-case-warning')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('export-generate'));
+
+    await waitFor(() => {
+      expect(vi.mocked(dataExportApi.dataExportApi.create)).toHaveBeenCalledTimes(1);
+    });
+
+    const callArg = vi.mocked(dataExportApi.dataExportApi.create).mock.calls[0][1];
+    expect(callArg.modules).toContain('cases');
+    expect(callArg.options?.anonymize).toBe(true);
+    expect(callArg.options?.includeCase).toBe(true);
+  });
+
+  it('(b) o aviso não diz que includeCase está desativado pela anonimização', () => {
+    segment.rawSegment = 'LAW_FIRM';
+    render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
+
+    fireEvent.click(screen.getByTestId('export-module-cases'));
+    fireEvent.click(screen.getByTestId('export-anonymize'));
+
+    const warning = screen.getByTestId('export-case-warning');
+    expect(warning).not.toHaveTextContent('anonimização');
+    expect(warning).not.toHaveTextContent('desativado');
+  });
+
+  // ── (c) preset BACKUP ─────────────────────────────────────────────────────
+
+  it('(c) preset BACKUP em LAW_FIRM: cases e caseFees marcados e includeCase ligado', () => {
+    segment.rawSegment = 'LAW_FIRM';
+    render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
+
+    fireEvent.click(screen.getByTestId('export-preset-backup'));
+
+    expect(screen.getByTestId('export-module-cases')).toBeChecked();
+    expect(screen.getByTestId('export-module-caseFees')).toBeChecked();
+    expect(screen.getByTestId('export-include-case')).toBeChecked();
+    expect(screen.queryByTestId('export-case-warning')).not.toBeInTheDocument();
+  });
+
+  it('(c) preset BACKUP em LAW_FIRM envia cases em modules e includeCase=true', async () => {
+    segment.rawSegment = 'LAW_FIRM';
+    render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
+
+    fireEvent.click(screen.getByTestId('export-preset-backup'));
+    fireEvent.click(screen.getByTestId('export-generate'));
+
+    await waitFor(() => {
+      expect(vi.mocked(dataExportApi.dataExportApi.create)).toHaveBeenCalledTimes(1);
+    });
+
+    const callArg = vi.mocked(dataExportApi.dataExportApi.create).mock.calls[0][1];
+    expect(callArg.modules).toContain('cases');
+    expect(callArg.modules).toContain('caseFees');
+    expect(callArg.options?.includeCase).toBe(true);
   });
 });

@@ -87,7 +87,9 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
     'team',
     'financial',
     'commissions',
-    ...(isLegal ? (['cases', 'caseFees'] as const) : []),
+    // Processos é opt-in (dado sigiloso): nunca vem marcado por padrão,
+    // nem para LAW_FIRM. Honorários de êxito seguem disponíveis no padrão.
+    ...(isLegal ? (['caseFees'] as const) : []),
   ]);
   const [format, setFormat] = React.useState<ExportFormat>('XLSX');
   const [anonymize, setAnonymize] = React.useState(false);
@@ -136,34 +138,32 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
     );
   };
 
-  // includeCase só tem efeito quando anonimização está desligada.
-  const includeCaseActive = includeCase && !anonymize;
-
+  // includeCase não depende de anonymize: Processos pode ser exportado
+  // anonimizado (o backend mascara os campos pessoais da aba).
   const caseWarning = React.useMemo(() => {
     if (!userInteracted) return null;
-    if (includeCaseActive && !modules.includes('cases')) {
+    if (includeCase && !modules.includes('cases')) {
       return {
         message:
           'Incluir caso/processo requer o módulo Processos selecionado. Marque “Processos” ou desligue “Incluir caso/processo”.',
         type: 'error' as const,
       };
     }
-    if (modules.includes('cases') && !includeCaseActive) {
+    if (modules.includes('cases') && !includeCase) {
       return {
         message:
-          anonymize
-            ? 'O módulo Processos está selecionado, mas “Incluir caso/processo” está desativado pela anonimização — dados internos do processo não serão exportados.'
-            : 'O módulo Processos está selecionado, mas “Incluir caso/processo” está desligado — dados internos do processo não serão exportados.',
+          'O módulo Processos está selecionado, mas “Incluir caso/processo” está desligado — dados internos do processo não serão exportados.',
         type: 'warning' as const,
       };
     }
     return null;
-  }, [includeCaseActive, anonymize, modules, userInteracted]);
+  }, [includeCase, modules, userInteracted]);
 
   const applyPreset = (presetName: 'GERENTIAL' | 'BACKUP'): void => {
     setUserInteracted(true);
     if (presetName === 'GERENTIAL') {
       setModules(['financial', 'commissions', 'services', 'team']);
+      setIncludeCase(false);
     } else {
       setModules([
         'appointments',
@@ -184,6 +184,9 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
         'settings',
         ...(isLegal ? (['cases', 'caseFees'] as const) : []),
       ]);
+      // O backup completo marca Processos, então liga includeCase junto:
+      // sem isso o backend descartaria a aba e o backup sairia sem Processos.
+      setIncludeCase(isLegal);
     }
   };
 
@@ -197,7 +200,7 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
         dateTo: preset === 'CUSTOM' ? dateTo : undefined,
         modules,
         format,
-        options: { anonymize, includeCase: anonymize ? false : includeCase },
+        options: { anonymize, includeCase },
       });
       setCurrentJob(job);
       onNotify('Exportação enfileirada. Acompanhe o progresso abaixo.', 'success');
@@ -378,17 +381,22 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
             <label className="flex items-center gap-2 text-sm text-text-primary">
               <input
                 type="checkbox"
-                checked={includeCase && !anonymize}
-                disabled={anonymize}
+                checked={includeCase}
                 onChange={(event) => {
-                setUserInteracted(true);
-                setIncludeCase(event.target.checked);
-              }}
+                  setUserInteracted(true);
+                  setIncludeCase(event.target.checked);
+                }}
                 data-testid="export-include-case"
               />
               Incluir caso/processo (dados internos do escritório)
             </label>
           )}
+          {isLegal && anonymize ? (
+            <p className="col-span-2 text-xs text-text-secondary" data-testid="export-case-anonymize-hint">
+              Com “Anonimizar dados pessoais” ligado, a aba Processos sai com nome, WhatsApp, número do processo,
+              apelido, parte adversária, título e advogado mascarados. Valores e datas permanecem.
+            </p>
+          ) : null}
         </div>
       </section>
 
