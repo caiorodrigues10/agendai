@@ -27,7 +27,8 @@ export type ImportTargetType =
   | 'SERVICE_PACKAGES'
   | 'CLIENT_PACKAGES'
   | 'FIADOS'
-  | 'CASES';
+  | 'CASES'
+  | 'CASE_FEES';
 
 /** Alvo gravado no lote: "MIXED" quando as abas têm tipos diferentes. */
 export type ImportBatchTargetType = ImportTargetType | 'MIXED';
@@ -45,7 +46,8 @@ export type ImportEntityType =
   | 'PRODUCT_CATEGORY'
   | 'SERVICE_PACKAGE'
   | 'CLIENT_PACKAGE'
-  | 'FIADO';
+  | 'FIADO'
+  | 'CASE_FEE';
 
 export type ImportBatchStatus =
   | 'UPLOADED'
@@ -139,7 +141,13 @@ export type ImportFieldKey =
   | 'fiadoDescription'
   | 'originalAmount'
   | 'paidAmount'
-  | 'dueDate';
+  | 'dueDate'
+  // honorários de êxito de processos
+  | 'percent'
+  | 'feeStatus'
+  | 'feeDueDate'
+  | 'feeInstallments'
+  | 'feeNotes';
 
 export interface ImportOptions {
   updateExisting: boolean;

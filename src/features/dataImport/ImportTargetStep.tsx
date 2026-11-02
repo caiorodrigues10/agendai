@@ -68,6 +68,11 @@ const TARGETS: {
     title: 'Processos',
     description: 'Abre processos por cliente, com número CNJ, área, status e valores. Não lança caixa.',
   },
+  {
+    id: 'CASE_FEES',
+    title: 'Honorários de êxito',
+    description: 'Importa percentual de honorário sobre processo existente. Só 1 parcela.',
+  },
 ];
 
 const TARGET_TITLE: Record<ImportTargetType, string> = TARGETS.reduce(
@@ -96,7 +101,7 @@ export const ImportTargetStep: React.FC<{
   const { rawSegment } = useSegmentLabels();
   const hasCases = hasSegmentFeature(rawSegment, 'caseManagement');
   const targets = React.useMemo(
-    () => TARGETS.filter((target) => target.id !== 'CASES' || hasCases),
+    () => TARGETS.filter((target) => target.id !== 'CASES' && target.id !== 'CASE_FEES' || hasCases),
     [hasCases]
   );
   const defaultTarget: ImportTargetType = hasCases ? 'CASES' : 'CLIENTS';

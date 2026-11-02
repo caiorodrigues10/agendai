@@ -16,6 +16,7 @@ const TEMPLATE_TARGETS: { id: ImportTargetType; label: string }[] = [
   { id: 'CLIENT_PACKAGES', label: 'Pacotes dos clientes' },
   { id: 'FIADOS', label: 'Fiados' },
   { id: 'CASES', label: 'Processos' },
+  { id: 'CASE_FEES', label: 'Honorários de êxito' },
 ];
 
 /**
@@ -35,7 +36,8 @@ export const ImportUploadStep: React.FC<{
   const { rawSegment } = useSegmentLabels();
   const hasCases = hasSegmentFeature(rawSegment, 'caseManagement');
   const templateTargets = TEMPLATE_TARGETS.filter(
-    (target) => target.id !== 'CASES' || hasCases,
+    (target) =>
+      target.id !== 'CASES' && target.id !== 'CASE_FEES' || hasCases,
   );
   const [fileName, setFileName] = useState<string | null>(null);
   const [showTemplates, setShowTemplates] = useState(false);
