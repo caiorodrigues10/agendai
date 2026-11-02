@@ -343,16 +343,18 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
             />
             Anonimizar dados pessoais (relatório para contador)
           </label>
-          <label className="flex items-center gap-2 text-sm text-text-primary">
-            <input
-              type="checkbox"
-              checked={includeCase && !anonymize}
-              disabled={anonymize}
-              onChange={(event) => setIncludeCase(event.target.checked)}
-              data-testid="export-include-case"
-            />
-            Incluir caso/processo (dados internos do escritório)
-          </label>
+          {isLegal && (
+            <label className="flex items-center gap-2 text-sm text-text-primary">
+              <input
+                type="checkbox"
+                checked={includeCase && !anonymize}
+                disabled={anonymize}
+                onChange={(event) => setIncludeCase(event.target.checked)}
+                data-testid="export-include-case"
+              />
+              Incluir caso/processo (dados internos do escritório)
+            </label>
+          )}
         </div>
       </section>
 
