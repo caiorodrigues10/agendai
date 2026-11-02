@@ -3,6 +3,8 @@ import { Button } from '../../components/ui/Button';
 import { LuDownload as Download, LuTrash2 as Trash2, LuFileSpreadsheet as FileSpreadsheet, LuCheck as Check } from 'react-icons/lu';
 import { dataExportApi, type ExportJob, type ExportPeriodPreset, type ExportModuleKey, type ExportFormat } from '../../infra/dataExportApi';
 import { authStorage } from '../../infra/authStorage';
+import { hasSegmentFeature } from '../../shared/segments';
+import { useSegmentLabels } from '../../hooks/useSegmentLabels';
 
 const PERIOD_CARDS: { preset: ExportPeriodPreset; label: string; description: string }[] = [
   { preset: 'TODAY', label: 'Hoje', description: 'O dia inteiro' },
@@ -15,7 +17,7 @@ const PERIOD_CARDS: { preset: ExportPeriodPreset; label: string; description: st
   { preset: 'ALL', label: 'Tudo', description: 'Backup completo' },
 ];
 
-const MODULE_GROUPS: { group: string; modules: { key: ExportModuleKey; label: string }[] }[] = [
+const MODULE_GROUPS_BASE: { group: string; modules: { key: ExportModuleKey; label: string }[] }[] = [
   {
     group: 'Essencial',
     modules: [
@@ -57,10 +59,24 @@ const MODULE_GROUPS: { group: string; modules: { key: ExportModuleKey; label: st
   },
 ];
 
+const LEGAL_MODULE_GROUP: { group: string; modules: { key: ExportModuleKey; label: string }[] } = {
+  group: 'Escritório',
+  modules: [
+    { key: 'cases', label: 'Processos (sigilo profissional)' },
+    { key: 'caseFees', label: 'Honorários de êxito' },
+  ],
+};
+
 export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (message: string, type: 'success' | 'error') => void }> = ({
   barbershopId,
   onNotify,
 }) => {
+  const { rawSegment } = useSegmentLabels();
+  const isLegal = hasSegmentFeature(rawSegment, 'caseManagement');
+  const moduleGroups = React.useMemo(
+    () => [...MODULE_GROUPS_BASE, ...(isLegal ? [LEGAL_MODULE_GROUP] : [])],
+    [isLegal]
+  );
   const [preset, setPreset] = React.useState<ExportPeriodPreset>('THIS_MONTH');
   const [dateFrom, setDateFrom] = React.useState('');
   const [dateTo, setDateTo] = React.useState('');
@@ -71,6 +87,7 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
     'team',
     'financial',
     'commissions',
+    ...(isLegal ? (['cases', 'caseFees'] as const) : []),
   ]);
   const [format, setFormat] = React.useState<ExportFormat>('XLSX');
   const [anonymize, setAnonymize] = React.useState(false);
@@ -138,6 +155,7 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
         'loyalty',
         'posts',
         'settings',
+        ...(isLegal ? (['cases', 'caseFees'] as const) : []),
       ]);
     }
   };
@@ -276,7 +294,7 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
           </div>
         </div>
         <div className="space-y-3">
-          {MODULE_GROUPS.map((group) => (
+          {moduleGroups.map((group) => (
             <div key={group.group}>
               <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-text-muted">{group.group}</div>
               <div className="flex flex-wrap gap-2">
