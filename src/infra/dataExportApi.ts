@@ -27,7 +27,9 @@ export type ExportModuleKey =
   | 'reviews'
   | 'loyalty'
   | 'posts'
-  | 'settings';
+  | 'settings'
+  | 'cases'
+  | 'caseFees';
 
 export type ExportFormat = 'XLSX' | 'CSV_ZIP' | 'PDF';
 
