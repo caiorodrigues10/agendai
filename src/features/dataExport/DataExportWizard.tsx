@@ -95,6 +95,7 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
   const [busy, setBusy] = React.useState(false);
   const [currentJob, setCurrentJob] = React.useState<ExportJob | null>(null);
   const [history, setHistory] = React.useState<ExportJob[]>([]);
+  const [userInteracted, setUserInteracted] = React.useState(false);
 
   const loadHistory = React.useCallback(async () => {
     try {
@@ -129,6 +130,7 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
   }, [currentJob, barbershopId, loadHistory]);
 
   const toggleModule = (key: ExportModuleKey): void => {
+    setUserInteracted(true);
     setModules((current) =>
       current.includes(key) ? current.filter((item) => item !== key) : [...current, key],
     );
@@ -138,6 +140,7 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
   const includeCaseActive = includeCase && !anonymize;
 
   const caseWarning = React.useMemo(() => {
+    if (!userInteracted) return null;
     if (includeCaseActive && !modules.includes('cases')) {
       return {
         message:
@@ -148,14 +151,17 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
     if (modules.includes('cases') && !includeCaseActive) {
       return {
         message:
-          'O módulo Processos está selecionado, mas “Incluir caso/processo” está desligado — dados internos do processo não serão exportados.',
+          anonymize
+            ? 'O módulo Processos está selecionado, mas “Incluir caso/processo” está desativado pela anonimização — dados internos do processo não serão exportados.'
+            : 'O módulo Processos está selecionado, mas “Incluir caso/processo” está desligado — dados internos do processo não serão exportados.',
         type: 'warning' as const,
       };
     }
     return null;
-  }, [includeCaseActive, anonymize, modules]);
+  }, [includeCaseActive, anonymize, modules, userInteracted]);
 
   const applyPreset = (presetName: 'GERENTIAL' | 'BACKUP'): void => {
+    setUserInteracted(true);
     if (presetName === 'GERENTIAL') {
       setModules(['financial', 'commissions', 'services', 'team']);
     } else {
@@ -182,6 +188,7 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
   };
 
   const handleGenerate = async (): Promise<void> => {
+    if (caseWarning?.type === 'error') return;
     setBusy(true);
     try {
       const job = await dataExportApi.create(barbershopId, {
@@ -359,7 +366,10 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
             <input
               type="checkbox"
               checked={anonymize}
-              onChange={(event) => setAnonymize(event.target.checked)}
+              onChange={(event) => {
+                setUserInteracted(true);
+                setAnonymize(event.target.checked);
+              }}
               data-testid="export-anonymize"
             />
             Anonimizar dados pessoais (relatório para contador)
@@ -370,7 +380,10 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
                 type="checkbox"
                 checked={includeCase && !anonymize}
                 disabled={anonymize}
-                onChange={(event) => setIncludeCase(event.target.checked)}
+                onChange={(event) => {
+                setUserInteracted(true);
+                setIncludeCase(event.target.checked);
+              }}
                 data-testid="export-include-case"
               />
               Incluir caso/processo (dados internos do escritório)
@@ -394,7 +407,7 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
 
       <Button
         onClick={() => void handleGenerate()}
-        disabled={busy || modules.length === 0}
+        disabled={busy || modules.length === 0 || caseWarning?.type === 'error'}
         data-testid="export-generate"
       >
         {busy ? 'Gerando...' : 'Gerar planilha'}

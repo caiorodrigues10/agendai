@@ -3,8 +3,28 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DataExportWizard } from './DataExportWizard';
 import * as dataExportApi from '../../infra/dataExportApi';
+import type { ExportJob } from '../../infra/dataExportApi';
 
 const segment = { rawSegment: null as string | null };
+
+const exportJobFixture: ExportJob = {
+  id: 'export-1',
+  periodPreset: 'THIS_MONTH',
+  periodFrom: null,
+  periodTo: null,
+  timezone: 'America/Sao_Paulo',
+  modules: ['appointments', 'clients', 'services', 'team', 'financial', 'commissions'],
+  options: { anonymize: false, includeCase: false },
+  format: 'XLSX',
+  status: 'PENDING',
+  progress: null,
+  fileSizeBytes: null,
+  fileName: null,
+  errorMessage: null,
+  createdAt: '2026-01-01T00:00:00Z',
+  finishedAt: null,
+  expiresAt: null,
+};
 
 vi.mock('../../hooks/useSegmentLabels', () => ({
   useSegmentLabels: () => ({ rawSegment: segment.rawSegment }),
@@ -13,7 +33,7 @@ vi.mock('../../hooks/useSegmentLabels', () => ({
 describe('DataExportWizard', () => {
   beforeEach(() => {
     segment.rawSegment = null;
-    vi.spyOn(dataExportApi.dataExportApi, 'create').mockResolvedValue({ id: 'export-1' });
+    vi.spyOn(dataExportApi.dataExportApi, 'create').mockResolvedValue(exportJobFixture);
   });
 
   afterEach(() => {
@@ -70,10 +90,10 @@ describe('DataExportWizard', () => {
     fireEvent.click(screen.getByTestId('export-generate'));
 
     await waitFor(() => {
-      expect(dataExportApi.dataExportApi.create).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(dataExportApi.dataExportApi.create)).toHaveBeenCalledTimes(1);
     });
 
-    const callArg = dataExportApi.dataExportApi.create.mock.calls[0][1];
+    const callArg = vi.mocked(dataExportApi.dataExportApi.create).mock.calls[0][1];
     expect(callArg.modules).toContain('cases');
     expect(callArg.options.includeCase).toBe(true);
   });
@@ -86,10 +106,10 @@ describe('DataExportWizard', () => {
     fireEvent.click(screen.getByTestId('export-generate'));
 
     await waitFor(() => {
-      expect(dataExportApi.dataExportApi.create).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(dataExportApi.dataExportApi.create)).toHaveBeenCalledTimes(1);
     });
 
-    const callArg = dataExportApi.dataExportApi.create.mock.calls[0][1];
+    const callArg = vi.mocked(dataExportApi.dataExportApi.create).mock.calls[0][1];
     expect(callArg.modules).toContain('cases');
     expect(callArg.options.includeCase).toBe(false);
   });
@@ -98,22 +118,46 @@ describe('DataExportWizard', () => {
     segment.rawSegment = 'LAW_FIRM';
     render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
 
-    // cases vem marcado; desmarca para simular includeCase sem cases
+    // interage para ativar o aviso (desmarca cases e liga includeCase)
     fireEvent.click(screen.getByTestId('export-module-cases'));
     fireEvent.click(screen.getByTestId('export-include-case'));
 
-    expect(screen.getByTestId('export-case-warning')).toHaveTextContent(
+    const warning = screen.getByTestId('export-case-warning');
+    expect(warning).toHaveTextContent(
       'Incluir caso/processo requer o módulo Processos selecionado.',
     );
+    expect(warning).toHaveClass('text-danger');
+  });
+
+  it('desabilita "Gerar planilha" quando o aviso de erro está ativo', () => {
+    segment.rawSegment = 'LAW_FIRM';
+    render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
+
+    fireEvent.click(screen.getByTestId('export-module-cases'));
+    fireEvent.click(screen.getByTestId('export-include-case'));
+
+    expect(screen.getByTestId('export-generate')).toBeDisabled();
+  });
+
+  it('não mostra aviso no estado inicial para LAW_FIRM (sem interação)', () => {
+    segment.rawSegment = 'LAW_FIRM';
+    render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
+
+    expect(screen.queryByTestId('export-case-warning')).not.toBeInTheDocument();
   });
 
   it('mostra aviso de warning quando Processos está marcado sem includeCase', () => {
     segment.rawSegment = 'LAW_FIRM';
     render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
 
-    // cases vem marcado por padrão e includeCase está desligado
-    expect(screen.getByTestId('export-case-warning')).toHaveTextContent(
+    // interage para ativar o aviso sem alterar cases/includeCase
+    fireEvent.click(screen.getByTestId('export-module-cases'));
+    fireEvent.click(screen.getByTestId('export-module-cases'));
+
+    const warning = screen.getByTestId('export-case-warning');
+    expect(warning).toHaveTextContent(
       'O módulo Processos está selecionado, mas “Incluir caso/processo” está desligado',
     );
+    expect(warning).toHaveClass('text-accent');
   });
 });
