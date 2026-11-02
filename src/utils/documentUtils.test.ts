@@ -1,5 +1,5 @@
 /// <reference types="vitest/globals" />
-import { isValidPhoneBR, maskPhone, normalizePhoneBR } from './documentUtils';
+import { isValidPhoneBR, maskPhone, normalizePhoneBR, isValidCpf, maskCpf } from './documentUtils';
 import { CustomerQueueSchema } from '../schemas';
 
 describe('maskPhone', () => {
@@ -31,6 +31,44 @@ describe('maskPhone', () => {
   it('não trata DDD 55 como DDI em celular de 11 dígitos', () => {
     expect(normalizePhoneBR('55987654321')).toBe('55987654321');
     expect(maskPhone('55987654321')).toBe('(55) 98765-4321');
+  });
+});
+
+describe('isValidCpf', () => {
+  it('aceita CPF válido sem máscara', () => {
+    expect(isValidCpf('52998224725')).toBe(true);
+    expect(isValidCpf('16899535009')).toBe(true);
+  });
+
+  it('aceita CPF válido com máscara', () => {
+    expect(isValidCpf('529.982.247-25')).toBe(true);
+  });
+
+  it('rejeita sequência repetida (111.111.111-11)', () => {
+    expect(isValidCpf('11111111111')).toBe(false);
+    expect(isValidCpf('111.111.111-11')).toBe(false);
+    expect(isValidCpf('00000000000')).toBe(false);
+  });
+
+  it('rejeita dígitos verificadores incorretos', () => {
+    expect(isValidCpf('52998224726')).toBe(false);
+    expect(isValidCpf('12345678900')).toBe(false);
+  });
+
+  it('rejeita CPF com tamanho errado', () => {
+    expect(isValidCpf('1234567890')).toBe(false);
+    expect(isValidCpf('123456789012')).toBe(false);
+    expect(isValidCpf('')).toBe(false);
+  });
+});
+
+describe('maskCpf', () => {
+  it('formata corretamente', () => {
+    expect(maskCpf('52998224725')).toBe('529.982.247-25');
+  });
+
+  it('funciona com CPF já mascarado', () => {
+    expect(maskCpf('529.982.247-25')).toBe('529.982.247-25');
   });
 });
 
