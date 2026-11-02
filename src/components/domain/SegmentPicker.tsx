@@ -176,10 +176,10 @@ export const SegmentPicker: React.FC<{
       <legend className="text-sm font-bold text-text-primary mb-3">{legend}</legend>
 
       {/* Busca sticky: a lista de grupos é longa; o campo acompanha a rolagem.
-         Sem fundo próprio (bg-transparent), sem backdrop-blur e sem pb-2 para
-         não criar faixa de tom diferente em repouso. Usa bg-surface (cor do
-         painel, --ag-surface) para esconder os cards que passam por trás ao
-         rolar; nunca usa bg-bg (#0f1110), que é mais escuro que o painel. */}
+         Sem fundo próprio (usa bg-surface, cor do painel --ag-surface),
+         sem backdrop-blur e sem pb-2 para não criar faixa de tom diferente
+         em repouso. Nunca usa bg-bg (#0f1110), que é mais escuro que o
+         painel. Mantém top-0 e z-20 para continuar funcionando ao rolar. */}
       <div className="sticky top-0 z-20 mb-4 bg-surface">
         <div className="relative">
           <label htmlFor={`${groupId}-search`} className="sr-only">
