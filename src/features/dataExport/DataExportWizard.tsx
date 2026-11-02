@@ -134,6 +134,27 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
     );
   };
 
+  // includeCase só tem efeito quando anonimização está desligada.
+  const includeCaseActive = includeCase && !anonymize;
+
+  const caseWarning = React.useMemo(() => {
+    if (includeCaseActive && !modules.includes('cases')) {
+      return {
+        message:
+          'Incluir caso/processo requer o módulo Processos selecionado. Marque “Processos” ou desligue “Incluir caso/processo”.',
+        type: 'error' as const,
+      };
+    }
+    if (modules.includes('cases') && !includeCaseActive) {
+      return {
+        message:
+          'O módulo Processos está selecionado, mas “Incluir caso/processo” está desligado — dados internos do processo não serão exportados.',
+        type: 'warning' as const,
+      };
+    }
+    return null;
+  }, [includeCaseActive, anonymize, modules]);
+
   const applyPreset = (presetName: 'GERENTIAL' | 'BACKUP'): void => {
     if (presetName === 'GERENTIAL') {
       setModules(['financial', 'commissions', 'services', 'team']);
@@ -357,6 +378,19 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
           )}
         </div>
       </section>
+
+      {caseWarning && (
+        <p
+          className={`mb-3 text-xs rounded-lg border px-3 py-2 ${
+            caseWarning.type === 'error'
+              ? 'border-danger bg-danger/10 text-danger'
+              : 'border-accent bg-accent/10 text-accent'
+          }`}
+          data-testid="export-case-warning"
+        >
+          {caseWarning.message}
+        </p>
+      )}
 
       <Button
         onClick={() => void handleGenerate()}

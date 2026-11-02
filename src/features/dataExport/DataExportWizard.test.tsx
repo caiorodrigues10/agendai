@@ -60,11 +60,11 @@ describe('DataExportWizard', () => {
     expect(screen.getByTestId('export-module-caseFees')).toBeChecked();
   });
 
-  it('envia includeCase=true na API ao clicar em Exportar com toggle ligado', async () => {
+  it('envia includeCase=true na API com cases em modules ao clicar em Exportar com toggle ligado', async () => {
     segment.rawSegment = 'LAW_FIRM';
     render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
 
-    fireEvent.click(screen.getByTestId('export-module-cases'));
+    // cases já vem marcado por padrão para LAW_FIRM; só liga o toggle
     fireEvent.click(screen.getByTestId('export-include-case'));
 
     fireEvent.click(screen.getByTestId('export-generate'));
@@ -74,16 +74,15 @@ describe('DataExportWizard', () => {
     });
 
     const callArg = dataExportApi.dataExportApi.create.mock.calls[0][1];
+    expect(callArg.modules).toContain('cases');
     expect(callArg.options.includeCase).toBe(true);
   });
 
-  it('envia includeCase=false quando toggle está desligado', async () => {
+  it('envia includeCase=false na API com cases em modules quando toggle está desligado', async () => {
     segment.rawSegment = 'LAW_FIRM';
     render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
 
-    fireEvent.click(screen.getByTestId('export-module-cases'));
-    // não ativa o toggle includeCase
-
+    // cases já vem marcado; não ativa o toggle includeCase
     fireEvent.click(screen.getByTestId('export-generate'));
 
     await waitFor(() => {
@@ -91,6 +90,30 @@ describe('DataExportWizard', () => {
     });
 
     const callArg = dataExportApi.dataExportApi.create.mock.calls[0][1];
+    expect(callArg.modules).toContain('cases');
     expect(callArg.options.includeCase).toBe(false);
+  });
+
+  it('mostra aviso de erro quando includeCase está ligado sem módulo Processos', () => {
+    segment.rawSegment = 'LAW_FIRM';
+    render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
+
+    // cases vem marcado; desmarca para simular includeCase sem cases
+    fireEvent.click(screen.getByTestId('export-module-cases'));
+    fireEvent.click(screen.getByTestId('export-include-case'));
+
+    expect(screen.getByTestId('export-case-warning')).toHaveTextContent(
+      'Incluir caso/processo requer o módulo Processos selecionado.',
+    );
+  });
+
+  it('mostra aviso de warning quando Processos está marcado sem includeCase', () => {
+    segment.rawSegment = 'LAW_FIRM';
+    render(<DataExportWizard barbershopId="shop-1" onNotify={vi.fn()} />);
+
+    // cases vem marcado por padrão e includeCase está desligado
+    expect(screen.getByTestId('export-case-warning')).toHaveTextContent(
+      'O módulo Processos está selecionado, mas “Incluir caso/processo” está desligado',
+    );
   });
 });
