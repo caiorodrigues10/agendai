@@ -15,14 +15,19 @@ import { sheetLabel } from './ImportTargetStep';
  * O assistente já sugeriu o mapeamento (cabeçalho que casa com o campo).
  * O dono ajusta o que quiser, escolhe as opções da aba e vê a prévia ao lado.
  * Em planilha multi-aba, um seletor no topo alterna entre as abas.
+ *
+ * Quando a origem é uma **imagem**, as colunas são genéricas ("Coluna 1"…):
+ * quem decide o que cada coluna significa é o dono.
  */
 export const ImportMappingStep: React.FC<{
   views: ImportSheetPlanView[];
   plans: ImportSheetPlanInput[];
   busy: boolean;
+  /** "IMAGEM" quando a tabela veio de uma foto lida por OCR. */
+  origem?: 'IMAGEM';
   onChangePlan: (index: number, patch: Partial<ImportSheetPlanInput>) => void;
   onContinue: () => Promise<void>;
-}> = ({ views, plans, busy, onChangePlan, onContinue }) => {
+}> = ({ views, plans, busy, origem, onChangePlan, onContinue }) => {
   const [activeIndex, setActiveIndex] = React.useState(0);
   const view = views[activeIndex];
   const plan = plans[activeIndex];
@@ -58,7 +63,9 @@ export const ImportMappingStep: React.FC<{
       <div>
         <h3 className="text-base font-bold text-text-primary">Confira as colunas</h3>
         <p className="mt-1 text-sm text-text-muted">
-          O assistente já reconheceu as colunas. Ajuste o que estiver errado.
+          {origem === 'IMAGEM'
+            ? 'A foto foi lida por OCR e as colunas ainda não têm nome. Diga qual coluna é qual campo.'
+            : 'O assistente já reconheceu as colunas. Ajuste o que estiver errado.'}
         </p>
       </div>
 
@@ -179,7 +186,7 @@ export const ImportMappingStep: React.FC<{
         onClick={() => void onContinue()}
         data-testid="import-mapping-continue"
       >
-        Validar planilha
+        {origem === 'IMAGEM' ? 'Validar a leitura da foto' : 'Validar planilha'}
       </Button>
       {missingRequired ? (
         <p className="text-xs text-danger">
