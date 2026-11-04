@@ -1,4 +1,4 @@
-import { apiClient, API_BASE } from './apiClient';
+import { apiClient, API_BASE, ApiError } from './apiClient';
 import { authStorage } from './authStorage';
 
 /**
@@ -54,7 +54,6 @@ export type ImportBatchStatus =
   | 'MAPPING'
   | 'VALIDATING'
   | 'AWAITING_CONFIRMATION'
-  | 'AWAITING_REVIEW'
   | 'PROCESSING'
   | 'COMPLETED'
   | 'COMPLETED_WITH_ERRORS'
@@ -198,6 +197,44 @@ export interface ImportBatchSummary {
   avisoQualidade?: string;
 }
 
+/**
+ * Uma célula lida por OCR que o dono precisa conferir.
+ *
+ * Vem do gate de confiança do backend: `pendente` é a fila de trabalho do
+ * dono (corrigir ou aceitar); `aceito`/`editado` dizem como a célula foi
+ * resolvida.
+ */
+export interface OcrCelulaRevisar {
+  /** Linha da tabela lida (1-based). */
+  linha: number;
+  /** Coluna (0-based). */
+  coluna: number;
+  /** Campo de destino escolhido pelo dono (ou "Coluna N"). */
+  campo: string;
+  /** Valor lido (ou já corrigido). */
+  valor: string;
+  /** Confiança da leitura (0-100). */
+  confianca: number | null;
+  /** Por que a célula foi marcada. */
+  motivo: string | null;
+  /** Ainda espera o dono? */
+  pendente: boolean;
+  /** O dono aceitou o valor como está. */
+  aceito: boolean;
+  /** O dono corrigiu o valor. */
+  editado: boolean;
+}
+
+/** Destino possível para uma imagem, com o que a foto precisa mostrar. */
+export interface OcrDestino {
+  targetType: ImportTargetType;
+  rotulo: string;
+  /** Campos obrigatórios do destino. */
+  obrigatorios: ImportFieldKey[];
+  /** O que a leitura por foto não garante neste destino. */
+  observacao: string;
+}
+
 /** Uma aba do arquivo, como o dono a vê logo depois do upload. */
 export interface ImportSheetInfo {
   sheetName: string | null;
@@ -221,6 +258,10 @@ export interface ImportUploadResult {
   createdAt: string;
   expiresAt: string;
   avisoQualidade?: string;
+  /** "IMAGEM" quando o lote veio de uma foto lida por OCR. */
+  origem?: 'IMAGEM';
+  /** Destinos possíveis para a imagem (só quando `origem` é "IMAGEM"). */
+  destinos?: OcrDestino[];
 }
 
 /** Uma aba do plano (mapeamento + opções + avisos), como a tela mostra. */
@@ -261,6 +302,9 @@ export interface ImportRowValidation {
   /** Célula lida por OCR que passa nos normalizadores mas pode ser falso
    * confiante: o dono deve revisar antes de confirmar. */
   revisar?: boolean;
+  /** Células da linha que o dono precisa conferir (quando a origem é uma
+   * imagem). */
+  celulasRevisar?: OcrCelulaRevisar[];
 }
 
 export interface ImportValidationSummary {
@@ -329,7 +373,7 @@ export async function uploadImportFile(
 
   const bodyText = await response.text();
   if (!response.ok) {
-    throw new Error(extractErrorMessage(bodyText, response.status));
+    throw erroDeUpload(bodyText, response.status);
   }
 
   const parsed = JSON.parse(bodyText) as { data?: ImportUploadResult };
@@ -403,6 +447,37 @@ export async function validateImportBatch(
     `${base(barbershopId)}/${batchId}/validate`,
     'POST',
     {},
+    token()
+  );
+  return res.data;
+}
+
+/** O que o dono faz com uma célula lida por OCR. */
+export interface OcrCelulaRevisao {
+  linha: number;
+  coluna: number;
+  /** Valor corrigido pelo dono (omitido quando ele só aceita o que leu). */
+  valor?: string;
+  /** Aceita o valor lido como está. */
+  aceitar?: boolean;
+}
+
+/**
+ * Corrige (ou aceita) uma célula lida por OCR.
+ *
+ * O backend reescreve o CSV do lote a partir do valor novo e **revalida** o
+ * lote inteiro: a resposta é a nova prévia, com a célula já fora da fila de
+ * revisão.
+ */
+export async function reviewImportCell(
+  barbershopId: string,
+  batchId: string,
+  revisao: OcrCelulaRevisao
+): Promise<ImportValidationSummary> {
+  const res = await apiClient<{ data: ImportValidationSummary }>(
+    `${base(barbershopId)}/${batchId}/review`,
+    'PATCH',
+    revisao,
     token()
   );
   return res.data;
@@ -497,15 +572,27 @@ export function importErrorsCsvUrl(barbershopId: string, batchId: string): strin
   return `${API_BASE}${base(barbershopId)}/${batchId}/errors.csv`;
 }
 
-/** Extrai a mensagem de erro do corpo da resposta. */
-function extractErrorMessage(bodyText: string, status: number): string {
-  if (bodyText) {
-    try {
-      const parsed = JSON.parse(bodyText) as { message?: string; errors?: unknown };
-      if (parsed.message) return parsed.message;
-    } catch {
-      /* corpo não-JSON: cai na mensagem genérica */
+/**
+ * Erro do upload (multipart) como `ApiError`.
+ *
+ * O upload não passa pelo `apiClient` (que só fala JSON), então o corpo da
+ * resposta é interpretado aqui — e o `code` do backend é preservado: é ele
+ * que permite dizer "a imagem é grande demais" em vez de "algo deu errado".
+ */
+function erroDeUpload(bodyText: string, status: number): ApiError {
+  let body: Record<string, unknown> | null = null;
+  try {
+    const parsed = JSON.parse(bodyText) as unknown;
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      body = parsed as Record<string, unknown>;
     }
+  } catch {
+    /* corpo não-JSON: a mensagem genérica abaixo cobre */
   }
-  return `Falha ao enviar o arquivo (${status}).`;
+  const message =
+    body && typeof body.message === 'string'
+      ? body.message
+      : `Falha ao enviar o arquivo (${status}).`;
+  const code = body && typeof body.code === 'string' ? body.code : undefined;
+  return new ApiError(message, status, code, body ?? undefined);
 }
