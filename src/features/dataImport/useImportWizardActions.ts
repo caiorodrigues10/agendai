@@ -15,6 +15,7 @@ import {
   type ImportTargetResult,
   type OcrCelulaRevisao,
 } from '../../infra/dataImportApi';
+import { importErrorMessage } from './importErrorMessages';
 import type { ImportWizardStateModel } from './useImportWizardState';
 
 /**
@@ -62,7 +63,7 @@ export function useImportWizardActions(params: {
 
   const handleError = useCallback(
     (err: unknown) => {
-      const message = err instanceof Error ? err.message : 'Não foi possível concluir a importação.';
+      const message = importErrorMessage(err);
       setError(message);
       onNotify(message, 'error');
     },
