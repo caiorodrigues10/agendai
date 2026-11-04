@@ -86,6 +86,7 @@ export const DataImportWizard: React.FC<{
           sheetLabels={reviewSheetLabels(wizard)}
           onBack={() => wizard.setStep('mapping')}
           onRevalidate={wizard.runValidation}
+          onReviewCell={wizard.reviewCell}
           onConfirm={wizard.confirm}
         />
       ) : null}

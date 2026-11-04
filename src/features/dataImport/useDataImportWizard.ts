@@ -10,6 +10,7 @@ import {
   type ImportTargetResult,
   type ImportUploadResult,
   type ImportValidationSummary,
+  type OcrCelulaRevisao,
 } from '../../infra/dataImportApi';
 import { useImportBatchPolling } from './useImportBatchPolling';
 import { useImportWizardActions } from './useImportWizardActions';
@@ -47,6 +48,7 @@ export interface DataImportWizardState {
   chooseTargets: (choices: ImportSheetTargetChoice[]) => Promise<void>;
   saveMappingAndValidate: () => Promise<void>;
   runValidation: () => Promise<void>;
+  reviewCell: (revisao: OcrCelulaRevisao) => Promise<void>;
   confirm: () => Promise<void>;
   refresh: () => Promise<void>;
   undo: (batchId: string) => Promise<void>;
@@ -115,9 +117,6 @@ export function useDataImportWizard(
             setValidation(null);
           }
           setStep('review');
-        } else if (active.status === 'AWAITING_REVIEW') {
-          // Imagem via OCR: o dono ainda precisa mapear as colunas extraídas.
-          setStep('target');
         } else if (active.status === 'PROCESSING') {
           setStep('done');
           void poll(active.id);

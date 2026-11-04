@@ -4,6 +4,7 @@ import {
   configureImportTarget,
   confirmImportBatch,
   getImportBatch,
+  reviewImportCell,
   saveImportMapping,
   undoImportBatch,
   uploadImportFile,
@@ -12,6 +13,7 @@ import {
   type ImportSheetPlanInput,
   type ImportSheetTargetChoice,
   type ImportTargetResult,
+  type OcrCelulaRevisao,
 } from '../../infra/dataImportApi';
 import type { ImportWizardStateModel } from './useImportWizardState';
 
@@ -27,6 +29,7 @@ export interface ImportWizardActions {
   chooseTargets: (choices: ImportSheetTargetChoice[]) => Promise<void>;
   saveMappingAndValidate: () => Promise<void>;
   runValidation: () => Promise<void>;
+  reviewCell: (revisao: OcrCelulaRevisao) => Promise<void>;
   confirm: () => Promise<void>;
   refresh: () => Promise<void>;
   undo: (batchId: string) => Promise<void>;
@@ -141,6 +144,22 @@ export function useImportWizardActions(params: {
     }
   }, [barbershopId, batchId, handleError, setBusy, setError, setStep, setValidation]);
 
+  const reviewCell = useCallback(async (revisao: OcrCelulaRevisao) => {
+    if (!batchId) return;
+    setBusy(true);
+    setError(null);
+    try {
+      // O backend revalida o lote e devolve a prévia nova: a célula corrigida
+      // (ou aceita) já sai da fila de revisão.
+      const summary = await reviewImportCell(barbershopId, batchId, revisao);
+      setValidation(summary);
+    } catch (err) {
+      handleError(err);
+    } finally {
+      setBusy(false);
+    }
+  }, [barbershopId, batchId, handleError, setBusy, setError, setValidation]);
+
   const confirm = useCallback(async () => {
     if (!batchId) return;
     setBusy(true);
@@ -213,6 +232,7 @@ export function useImportWizardActions(params: {
     chooseTargets,
     saveMappingAndValidate,
     runValidation,
+    reviewCell,
     confirm,
     refresh,
     undo,
