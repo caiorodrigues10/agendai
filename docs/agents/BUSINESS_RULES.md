@@ -68,6 +68,15 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 - "Desfazer" vale por 30 dias e remove só o que o lote criou e ninguém tocou depois (restaurando o que ele substituiu) — a UI mostra a mensagem do backend ("Nada foi removido: os registros foram alterados depois da importação") sem escondê-la.
 - Só uma importação ativa por salão: se já houver um lote em andamento, a UI retoma esse lote e permite cancelá-lo pelo histórico.
 
+## Importação por imagem (OCR)
+
+- A foto entra pelo mesmo assistente de importação (upload → alvo → colunas → validação → prévia → confirmação). O backend lê o texto localmente (sem rede) e grava a tabela como o CSV do lote; **a imagem não é enviada para fora**.
+- **Destino e mapeamento são do dono:** a foto não tem cabeçalho, então o passo de alvo mostra só os destinos que a foto pode atender (o servidor manda a lista, respeitando o segmento) e diz o que cada um exige da foto; no passo de colunas o dono diz qual coluna é qual campo.
+- **Célula com leitura duvidosa vira "revisar":** o backend marca a célula pela confiança da leitura, a tela mostra o valor lido com a confiança e o motivo, e o dono **corrige o texto** ou **aceita como está**. A correção vai para o servidor (`PATCH /imports/:batchId/review`), que revalida o lote.
+- **Confirmar só é liberado sem pendência:** enquanto houver célula pendente, o botão fica desabilitado e a tela diz quantas faltam — o backend também recusa a confirmação (409 `OCR_REVIEW_PENDING`).
+- O badge da célula mostra o estado com **ícone e texto** ("revisar", "aceito", "corrigido"), porque a cor sozinha não diz o que aconteceu.
+- Erro de importação é **específico**: a tela traduz o `code` do servidor (`OCR_DISABLED`, `OCR_QUEUE_FULL`, `OCR_IMAGE_TOO_LARGE`, `OCR_IMAGE_FORMAT_INVALID`, `OCR_IMAGE_LOW_RESOLUTION`, `OCR_TRAINEDDATA_MISSING`, `OCR_NO_TABLE`, `OCR_REVIEW_PENDING`) em uma mensagem que diz o que fazer; sem código conhecido vale a mensagem do servidor.
+
 ## Notificações
 
 - WhatsApp/e-mail são opcionais: falha de gateway não deve quebrar a UI principal; painéis de health mostram estado.
