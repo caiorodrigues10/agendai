@@ -22,10 +22,13 @@ const TEMPLATE_TARGETS: { id: ImportTargetType; label: string }[] = [
 /**
  * Etapa 1 — envio do arquivo.
  *
- * Aceita .xlsx, .xlsm, .xls, .ods, PDF com texto e .csv/.tsv/.txt (até 10 MB).
- * O backend identifica o formato pelo **conteúdo** do arquivo, então o nome
- * não precisa estar certo. Os modelos por tipo trazem os cabeçalhos certos e
- * duas linhas de exemplo — o dono baixa o modelo do que quer importar.
+ * Aceita .xlsx, .xlsm, .xls, .ods, PDF com texto, .csv/.tsv/.txt e imagens
+ * .png/.jpg/.jpeg/.webp (até 10 MB). O backend identifica o formato pelo
+ * **conteúdo** do arquivo, então o nome não precisa estar certo. Quando o
+ * arquivo é uma imagem, ele é lido por OCR local e o dono revisa as células
+ * extraídas antes de importar. Os modelos por tipo trazem os cabeçalhos
+ * certos e duas linhas de exemplo — o dono baixa o modelo do que quer
+ * importar.
  */
 export const ImportUploadStep: React.FC<{
   barbershopId: string;
@@ -41,22 +44,28 @@ export const ImportUploadStep: React.FC<{
   );
   const [fileName, setFileName] = useState<string | null>(null);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [isImage, setIsImage] = useState<boolean>(false);
+
+  const IMAGE_EXT = '.png,.jpg,.jpeg,.webp';
+  const ALL_EXT = `.xlsx,.xlsm,.xls,.ods,.pdf,.csv,.tsv,.txt,${IMAGE_EXT}`;
 
   const handleFile = async (file: File | undefined) => {
     if (!file) return;
     setFileName(file.name);
+    setIsImage(IMAGE_EXT.split(',').some((ext) => file.name.toLowerCase().endsWith(ext)));
     await onUpload(file);
   };
 
   return (
     <div className="space-y-4" data-testid="import-step-upload">
       <div>
-        <h3 className="text-base font-bold text-text-primary">Envie sua planilha</h3>
+        <h3 className="text-base font-bold text-text-primary">
+          {isImage ? 'Envie uma foto da planilha' : 'Envie sua planilha'}
+        </h3>
         <p className="mt-1 text-sm text-text-muted">
-          Planilha .xlsx, .xlsm, .xls, .ods, PDF com texto ou .csv/.tsv/.txt, até 10 MB e 20.000
-          linhas. O sistema olha o conteúdo do arquivo, então o nome pode estar errado. Nada é
-          importado antes de você revisar a prévia. Uma planilha com várias abas também funciona:
-          escolha o tipo de cada aba no passo seguinte.
+          {isImage
+            ? 'Foto da planilha (PNG, JPG ou WEBP), até 10 MB. O texto será lido por OCR local e você revisará cada célula antes de importar. Nada é gravado antes da sua confirmação.'
+            : 'Planilha .xlsx, .xlsm, .xls, .ods, PDF com texto ou .csv/.tsv/.txt, até 10 MB e 20.000 linhas. O sistema olha o conteúdo do arquivo, então o nome pode estar errado. Nada é importado antes de você revisar a prévia. Uma planilha com várias abas também funciona: escolha o tipo de cada aba no passo seguinte.'}
         </p>
       </div>
 
@@ -65,11 +74,13 @@ export const ImportUploadStep: React.FC<{
         <span className="text-sm font-semibold text-text-primary">
           {busy ? 'Enviando…' : (fileName ?? 'Escolher arquivo')}
         </span>
-        <span className="text-xs text-text-muted">Clique para selecionar a planilha</span>
+        <span className="text-xs text-text-muted">
+          {isImage ? 'Clique para selecionar a foto' : 'Clique para selecionar a planilha'}
+        </span>
         <input
           ref={inputRef}
           type="file"
-          accept=".xlsx,.xlsm,.xls,.ods,.pdf,.csv,.tsv,.txt"
+          accept={ALL_EXT}
           className="sr-only"
           disabled={busy}
           data-testid="import-file-input"
@@ -84,10 +95,11 @@ export const ImportUploadStep: React.FC<{
           onClick={() => setShowTemplates((current) => !current)}
           aria-expanded={showTemplates}
           data-testid="import-templates-toggle"
+          disabled={isImage}
         >
           {showTemplates ? 'Esconder modelos' : 'Baixar modelo (.xlsx)'}
         </button>
-        {showTemplates ? (
+        {showTemplates && !isImage ? (
           <ul className="mt-2 grid gap-1 sm:grid-cols-2" data-testid="import-templates-list">
             {templateTargets.map((target) => (
               <li key={target.id}>
@@ -102,6 +114,12 @@ export const ImportUploadStep: React.FC<{
               </li>
             ))}
           </ul>
+        ) : null}
+        {isImage ? (
+          <p className="mt-2 text-xs text-text-muted" data-testid="import-image-hint">
+            A foto é lida por OCR local (sem enviar a imagem para fora). Revise
+            as células extraídas antes de confirmar a importação.
+          </p>
         ) : null}
       </div>
     </div>

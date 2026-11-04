@@ -115,6 +115,9 @@ export function useDataImportWizard(
             setValidation(null);
           }
           setStep('review');
+        } else if (active.status === 'AWAITING_REVIEW') {
+          // Imagem via OCR: o dono ainda precisa mapear as colunas extraídas.
+          setStep('target');
         } else if (active.status === 'PROCESSING') {
           setStep('done');
           void poll(active.id);

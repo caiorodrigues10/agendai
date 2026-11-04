@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LuCircleAlert as CircleAlert, LuCircleCheck as CircleCheck } from 'react-icons/lu';
 import { Button } from '../../components/ui/Button';
 import type { ImportValidationSummary } from '../../infra/dataImportApi';
@@ -8,6 +8,10 @@ import type { ImportValidationSummary } from '../../infra/dataImportApi';
  *
  * Mostra quantas linhas entram, quantas são ignoradas e por que cada linha
  * foi rejeitada. Nada foi gravado ainda: o dono decide aqui.
+ *
+ * Quando a origem é uma imagem (OCR), algumas células podem vir marcadas com
+ * `revisar: true`: passam nos normalizadores mas podem ser falso confiante.
+ * O botão Confirmar fica desabilitado até que todas sejam revisadas.
  */
 export const ImportReviewStep: React.FC<{
   validation: ImportValidationSummary;
@@ -20,6 +24,8 @@ export const ImportReviewStep: React.FC<{
 }> = ({ validation, busy, sheetLabels, onBack, onRevalidate, onConfirm }) => {
   const rejected = validation.results.filter((row) => row.status === 'FAILED');
   const skipped = validation.results.filter((row) => row.status === 'SKIPPED');
+  const paraRevisar = validation.results.filter((row) => row.revisar);
+  const [revisados, setRevisados] = useState<Set<string>>(new Set());
 
   /** "Linha 3" ou "Aba “Clientes” · linha 3" quando há várias abas. */
   const rowLabel = (row: { rowNumber: number; sheetName?: string | null }) => {
@@ -27,6 +33,22 @@ export const ImportReviewStep: React.FC<{
     if (!sheet || !sheetLabels) return `Linha ${row.rowNumber}`;
     return `Aba “${sheetLabels[sheet] ?? sheet}” · linha ${row.rowNumber}`;
   };
+
+  const chaveRevisar = (row: { rowNumber: number; sheetName?: string | null }) =>
+    `${row.sheetName ?? ''}-${row.rowNumber}`;
+
+  const revisarToggle = (row: { rowNumber: number; sheetName?: string | null }) => {
+    const chave = chaveRevisar(row);
+    setRevisados((prev) => {
+      const next = new Set(prev);
+      if (next.has(chave)) next.delete(chave);
+      else next.add(chave);
+      return next;
+    });
+  };
+
+  const todasRevisadas = paraRevisar.length > 0 && paraRevisar.every((r) => revisados.has(chaveRevisar(r)));
+  const confirmDisabled = busy || validation.validRows === 0 || (paraRevisar.length > 0 && !todasRevisadas);
 
   return (
     <div className="space-y-4" data-testid="import-step-review">
@@ -75,6 +97,61 @@ export const ImportReviewStep: React.FC<{
         </div>
       ) : null}
 
+      {paraRevisar.length ? (
+        <div className="rounded-xl border border-warning/40 bg-warning/5 p-3">
+          <p className="flex items-center gap-2 text-sm font-bold text-text-primary">
+            <CircleAlert size={16} className="text-warning" aria-hidden="true" />
+            Células para revisar (OCR)
+          </p>
+          <p className="mt-1 text-xs text-text-muted">
+            Estas células foram lidas pela foto e podem estar erradas mesmo
+            parecendo válidas. Revise cada uma antes de confirmar.
+          </p>
+          <ul className="mt-2 max-h-40 space-y-1 overflow-y-auto text-xs text-text-secondary">
+            {paraRevisar.slice(0, 30).map((row) => (
+              <li
+                key={`${row.sheetName ?? ''}-${row.rowNumber}`}
+                className="flex items-center gap-2"
+              >
+                <button
+                  type="button"
+                  className="flex items-center gap-1 p-1 rounded border border-transparent hover:bg-surface-2 transition-colors"
+                  onClick={() => void revisarToggle(row)}
+                  aria-pressed={revisados.has(chaveRevisar(row))}
+                  data-testid={`import-review-toggle-${row.sheetName ?? ''}-${row.rowNumber}`}
+                >
+                  {revisados.has(chaveRevisar(row)) ? (
+                    <CircleCheck size={14} className="text-success" aria-hidden="true" />
+                  ) : (
+                    <CircleAlert size={14} className="text-warning" aria-hidden="true" />
+                  )}
+                </button>
+                <span className="flex-1">
+                  {rowLabel(row)}{row.field ? ` · campo: ${row.field}` : ''}
+                </span>
+                <span className="text-xs text-text-muted">
+                  {row.revisar ? 'revisar' : ''}
+                </span>
+              </li>
+            ))}
+          </ul>
+          {paraRevisar.length > 30 ? (
+            <p className="mt-1 text-xs text-text-muted">
+              Mostrando 30 de {paraRevisar.length}.
+            </p>
+          ) : null}
+          {!todasRevisadas ? (
+            <p className="mt-1 text-xs text-warning font-medium" data-testid="import-review-pending">
+              Revise todas as células marcadas antes de confirmar.
+            </p>
+          ) : (
+            <p className="mt-1 text-xs text-success" data-testid="import-review-all-done">
+              Todas as células para revisar foram conferidas.
+            </p>
+          )}
+        </div>
+      ) : null}
+
       {skipped.length ? (
         <div className="rounded-xl border border-border bg-surface-2 p-3">
           <p className="flex items-center gap-2 text-sm font-bold text-text-primary">
@@ -101,7 +178,7 @@ export const ImportReviewStep: React.FC<{
         <Button
           variant="primary"
           loading={busy}
-          disabled={validation.validRows === 0}
+          disabled={confirmDisabled}
           onClick={() => void onConfirm()}
           data-testid="import-review-confirm"
         >

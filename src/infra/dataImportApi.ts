@@ -54,6 +54,7 @@ export type ImportBatchStatus =
   | 'MAPPING'
   | 'VALIDATING'
   | 'AWAITING_CONFIRMATION'
+  | 'AWAITING_REVIEW'
   | 'PROCESSING'
   | 'COMPLETED'
   | 'COMPLETED_WITH_ERRORS'
@@ -194,6 +195,7 @@ export interface ImportBatchSummary {
   expiresAt: string;
   canUndo: boolean;
   source?: 'WEB' | 'WHATSAPP_OWNER_BOT';
+  avisoQualidade?: string;
 }
 
 /** Uma aba do arquivo, como o dono a vê logo depois do upload. */
@@ -218,6 +220,7 @@ export interface ImportUploadResult {
   sheets: ImportSheetInfo[];
   createdAt: string;
   expiresAt: string;
+  avisoQualidade?: string;
 }
 
 /** Uma aba do plano (mapeamento + opções + avisos), como a tela mostra. */
@@ -255,6 +258,9 @@ export interface ImportRowValidation {
   message?: string;
   field?: ImportFieldKey;
   warnings?: string[];
+  /** Célula lida por OCR que passa nos normalizadores mas pode ser falso
+   * confiante: o dono deve revisar antes de confirmar. */
+  revisar?: boolean;
 }
 
 export interface ImportValidationSummary {
