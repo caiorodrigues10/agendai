@@ -3,6 +3,13 @@ import { LuFileSpreadsheet as FileSpreadsheet } from 'react-icons/lu';
 import { importTemplateUrl, type ImportTargetType } from '../../infra/dataImportApi';
 import { hasSegmentFeature } from '../../shared/segments';
 import { useSegmentLabels } from '../../hooks/useSegmentLabels';
+import {
+  AVISO_MANUSCRITO,
+  DICAS_CAPTURA,
+  lerDimensoesImagem,
+  mensagemAbaixoDoPiso,
+  OCR_MIN_TABLE_WIDTH_PX,
+} from './ocrCaptura';
 
 const TEMPLATE_TARGETS: { id: ImportTargetType; label: string }[] = [
   { id: 'CLIENTS', label: 'Clientes' },
@@ -45,6 +52,7 @@ export const ImportUploadStep: React.FC<{
   const [fileName, setFileName] = useState<string | null>(null);
   const [showTemplates, setShowTemplates] = useState(false);
   const [isImage, setIsImage] = useState<boolean>(false);
+  const [larguraImagemPx, setLarguraImagemPx] = useState<number | null>(null);
 
   const IMAGE_EXT = '.png,.jpg,.jpeg,.webp';
   const ALL_EXT = `.xlsx,.xlsm,.xls,.ods,.pdf,.csv,.tsv,.txt,${IMAGE_EXT}`;
@@ -52,7 +60,19 @@ export const ImportUploadStep: React.FC<{
   const handleFile = async (file: File | undefined) => {
     if (!file) return;
     setFileName(file.name);
-    setIsImage(IMAGE_EXT.split(',').some((ext) => file.name.toLowerCase().endsWith(ext)));
+    const ehImagem = IMAGE_EXT.split(',').some((ext) =>
+      file.name.toLowerCase().endsWith(ext),
+    );
+    setIsImage(ehImagem);
+    setLarguraImagemPx(null);
+
+    if (ehImagem) {
+      // Aviso antecipado de foto baixa: com menos de 693 px de largura a
+      // tabela necessariamente fica abaixo do piso do servidor.
+      const dimensoes = await lerDimensoesImagem(file);
+      if (dimensoes) setLarguraImagemPx(dimensoes.larguraPx);
+    }
+
     await onUpload(file);
   };
 
@@ -116,10 +136,27 @@ export const ImportUploadStep: React.FC<{
           </ul>
         ) : null}
         {isImage ? (
-          <p className="mt-2 text-xs text-text-muted" data-testid="import-image-hint">
-            A foto é lida por OCR local (sem enviar a imagem para fora). Revise
-            as células extraídas antes de confirmar a importação.
-          </p>
+          <div className="mt-2 space-y-2" data-testid="import-image-hint">
+            <p className="text-xs text-text-muted">
+              A foto é lida por OCR local (sem enviar a imagem para fora). Revise
+              as células extraídas antes de confirmar a importação.
+            </p>
+            <p className="text-xs text-text-muted">{AVISO_MANUSCRITO}</p>
+            <ul className="list-disc space-y-1 pl-4 text-xs text-text-muted" data-testid="import-image-dicas">
+              {DICAS_CAPTURA.map((dica) => (
+                <li key={dica}>{dica}</li>
+              ))}
+            </ul>
+            {larguraImagemPx !== null && larguraImagemPx < OCR_MIN_TABLE_WIDTH_PX ? (
+              <p
+                role="alert"
+                className="rounded-lg bg-warning/10 px-3 py-2 text-xs text-warning"
+                data-testid="import-image-baixo-piso"
+              >
+                {mensagemAbaixoDoPiso(larguraImagemPx)}
+              </p>
+            ) : null}
+          </div>
         ) : null}
       </div>
     </div>
