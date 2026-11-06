@@ -57,7 +57,7 @@ async function stubLoginCapture(page: Page) {
 async function dismissConsent(page: Page) {
   const dialog = page.getByRole('dialog', { name: /consentimento de cookies/i });
   try {
-    await dialog.waitFor({ state: 'visible', timeout: 5000 });
+    await dialog.waitFor({ state: 'visible', timeout: 2000 });
   } catch {
     return; // sem banner de cookies nesta build/sessão
   }
@@ -74,6 +74,16 @@ async function fillLoginForm(page: Page) {
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(disableIdleApi);
+  // Consentimento de cookies já registrado: o banner é `fixed bottom-0` e
+  // pode cobrir o botão do Google quando aparece depois do clique (runner
+  // lento). O spec não é sobre cookies — dispensa o banner.
+  await page.addInitScript(() => {
+    try {
+      localStorage.setItem('agendai:cookie-consent-v2', 'essential');
+    } catch {
+      /* modo privado */
+    }
+  });
 });
 
 test('sem requestIdleCallback: login com reCAPTCHA envia o token no corpo e navega', async ({ page }) => {

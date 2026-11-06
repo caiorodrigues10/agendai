@@ -60,8 +60,13 @@ jobs:
           # Chave de teste pública do Google reCAPTCHA (documentada em
           # developers.google.com/recaptcha/docs/faq) — não é segredo.
           VITE_RECAPTCHA_SITE_KEY: 6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
+          # O botão "Entrar com Google" só renderiza com VITE_GOOGLE_CLIENT_ID
+          # (src/pages/LoginPage.tsx). O script do GIS é interceptado pelo
+          # spec, então este id fictício nunca chega ao Google.
+          VITE_GOOGLE_CLIENT_ID: 000000000000-e2e-fake.apps.googleusercontent.com
         run: |
           set -o pipefail
+          npm run build
           npx playwright test --project=webkit-iphone --reporter=line 2>&1 | tee /tmp/webkit-e2e.log
           if grep -qE '[1-9][0-9]* skipped' /tmp/webkit-e2e.log; then
             echo '::error::webkit-iphone skippou — test.skip ativo (VITE_RECAPTCHA_SITE_KEY ausente no build?)'
