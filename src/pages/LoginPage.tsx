@@ -855,7 +855,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
           initial={{ opacity: 0, y: 24, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="relative w-full max-w-lg bg-surface/92 backdrop-blur-2xl border border-border rounded-[2rem] shadow-[0_28px_90px_rgba(0,0,0,0.32)] overflow-hidden"
+          className="relative w-full min-w-0 max-w-lg bg-surface/92 backdrop-blur-2xl border border-border rounded-[2rem] shadow-[0_28px_90px_rgba(0,0,0,0.32)] overflow-hidden"
         >
           <div
             className="h-1 w-full"
@@ -864,7 +864,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
             }}
           />
 
-          <div className="p-5 sm:p-8 flex flex-col items-center">
+          <div className="p-5 sm:p-8 flex min-w-0 flex-col items-center">
             <div className="mb-6 flex w-full flex-col items-center">
               <button
                 type="button"

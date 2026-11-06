@@ -42,7 +42,7 @@ export const RegisterStepper: React.FC<RegisterStepperProps> = ({
         className="absolute left-[12%] top-4 h-px bg-accent transition-all duration-500"
         style={{ width: `calc((100% - 24%) * ${progress})` }}
       />
-      <ol className="relative flex items-start justify-between">
+      <ol className="relative flex flex-wrap items-start justify-between">
         {steps.map(item => {
           const complete = current > item.step;
           const active = current === item.step;
@@ -59,7 +59,7 @@ export const RegisterStepper: React.FC<RegisterStepperProps> = ({
                 {complete ? <Check size={14} /> : item.step}
               </div>
               <span
-                className={`text-xs font-bold uppercase tracking-wider ${
+                className={`max-w-full break-words text-center text-xs font-bold uppercase tracking-wider ${
                   active ? 'text-text-primary' : 'text-text-muted'
                 }`}
               >
@@ -72,18 +72,18 @@ export const RegisterStepper: React.FC<RegisterStepperProps> = ({
             <li
               key={item.step}
               aria-current={active ? 'step' : undefined}
-              className="flex w-1/3 flex-col items-center gap-2"
+              className="flex w-1/3 min-w-0 flex-col items-center gap-2"
             >
               {clickable ? (
                 <button
                   type="button"
                   onClick={() => onStepClick?.(item.step)}
-                  className="flex flex-col items-center gap-2 rounded-lg px-2 py-1 transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 cursor-pointer"
+                  className="flex min-w-0 max-w-full flex-col items-center gap-2 rounded-lg px-2 py-1 transition-colors hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 cursor-pointer"
                 >
                   {body}
                 </button>
               ) : (
-                <div className="flex flex-col items-center gap-2 px-2 py-1">{body}</div>
+                <div className="flex min-w-0 max-w-full flex-col items-center gap-2 px-2 py-1">{body}</div>
               )}
             </li>
           );
