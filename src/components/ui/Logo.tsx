@@ -1,4 +1,5 @@
 import React from 'react';
+import { useOptionalTheme } from '../../contexts/ThemeContext';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -33,6 +34,7 @@ export const Logo: React.FC<LogoProps> = ({
   className,
 }) => {
   const s = sizeMap[size];
+  const theme = useOptionalTheme();
 
   if (customImageUrl) {
     return (
@@ -49,15 +51,29 @@ export const Logo: React.FC<LogoProps> = ({
       <img
         src="/favicon.png"
         alt="Agenda Já"
+        width={128}
+        height={128}
+        loading="lazy"
+        decoding="async"
         className={`${s.iconOnly} select-none object-contain`}
       />
     );
   }
 
+  const logoSrc = theme === 'light' ? '/brand/agendai-logo.webp' : '/brand/agendai-logo-dark.webp';
+
   return (
     <span className={`inline-flex select-none ${className ?? ''}`}>
-      <img src="/brand/agendai-logo.png" alt="Agenda Já" className={`${s.img} object-contain dark:hidden`} />
-      <img src="/brand/agendai-logo-dark.png" alt="Agenda Já" className={`${s.img} hidden object-contain dark:block`} />
+      <img
+        src={logoSrc}
+        alt="Agenda Já"
+        width={700}
+        height={145}
+        loading="eager"
+        fetchPriority="high"
+        decoding="async"
+        className={`${s.img} w-auto object-contain`}
+      />
     </span>
   );
 };

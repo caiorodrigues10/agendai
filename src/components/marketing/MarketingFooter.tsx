@@ -36,7 +36,7 @@ function FooterColumn({
 }) {
   return (
     <div>
-      <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-text-muted">
+      <h3 className="text-2xs font-black uppercase tracking-[0.2em] text-text-muted">
         {title}
       </h3>
       <ul className="mt-5 space-y-3">
@@ -45,14 +45,14 @@ function FooterColumn({
             {link.to ? (
               <Link
                 to={link.to}
-                className="text-[13px] font-medium leading-snug text-neutral-400 transition-colors hover:text-white"
+                className="-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading-snug text-neutral-400 transition-colors hover:text-white lg:mx-0 lg:inline lg:min-h-0 lg:px-0"
               >
                 {link.label}
               </Link>
             ) : (
               <a
                 href={link.href}
-                className="text-[13px] font-medium leading-snug text-neutral-400 transition-colors hover:text-white"
+                className="-mx-1.5 inline-flex min-h-11 items-center px-1.5 text-[13px] font-medium leading-snug text-neutral-400 transition-colors hover:text-white lg:mx-0 lg:inline lg:min-h-0 lg:px-0"
               >
                 {link.label}
               </a>
@@ -73,12 +73,15 @@ export const MarketingFooter: React.FC = () => {
       <div className="mx-auto max-w-375">
         <div className="border-b border-white/10 pb-12 md:pb-14">
           <nav
-            className="mb-10 text-[11px] font-medium uppercase tracking-[0.16em] text-text-muted"
+            className="mb-10 text-2xs font-medium uppercase tracking-[0.16em] text-text-muted"
             aria-label="Breadcrumb"
           >
             <ol className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
               <li>
-                <Link to="/" className="transition-colors hover:text-neutral-300">
+                <Link
+                  to="/"
+                  className="-my-[15px] inline-flex min-h-11 items-center transition-colors hover:text-neutral-300 lg:my-0 lg:inline lg:min-h-0"
+                >
                   {BRAND_NAME}
                 </Link>
               </li>
@@ -110,7 +113,7 @@ export const MarketingFooter: React.FC = () => {
                 </p>
               </div>
 
-              <p className="mt-6 text-[10px] font-black uppercase tracking-[0.22em] text-accent/90">
+              <p className="mt-6 text-2xs font-black uppercase tracking-[0.22em] text-accent/90">
                 {trialCampaign.eyebrow}
               </p>
             </div>
@@ -124,7 +127,7 @@ export const MarketingFooter: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 pt-7 text-[11px] font-medium leading-relaxed text-text-muted md:flex-row md:items-center md:justify-between md:text-[12px]">
+        <div className="flex flex-col gap-4 pt-7 text-2xs font-medium leading-relaxed text-text-muted md:flex-row md:items-center md:justify-between md:text-[12px]">
           <p>Copyright © {year} {BRAND_NAME}. Todos os direitos reservados.</p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <span>Brasil</span>
@@ -135,16 +138,28 @@ export const MarketingFooter: React.FC = () => {
             <span className="hidden text-neutral-700 sm:inline" aria-hidden>
               |
             </span>
-            <Link to="/contato" className="transition-colors hover:text-white">
+            <Link
+              to="/contato"
+              className="-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-white lg:mx-0 lg:min-h-0 lg:px-0"
+            >
               Contato
             </Link>
-            <Link to="/privacidade" className="transition-colors hover:text-white">
+            <Link
+              to="/privacidade"
+              className="-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-white lg:mx-0 lg:min-h-0 lg:px-0"
+            >
               Privacidade
             </Link>
-            <Link to="/termos" className="transition-colors hover:text-white">
+            <Link
+              to="/termos"
+              className="-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-white lg:mx-0 lg:min-h-0 lg:px-0"
+            >
               Termos
             </Link>
-            <Link to="/planos" className="transition-colors hover:text-white">
+            <Link
+              to="/planos"
+              className="-mx-1.5 inline-flex min-h-11 items-center px-1.5 transition-colors hover:text-white lg:mx-0 lg:min-h-0 lg:px-0"
+            >
               Planos
             </Link>
           </div>

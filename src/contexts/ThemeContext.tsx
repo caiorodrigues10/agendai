@@ -61,3 +61,9 @@ export const useTheme = () => {
  * `undefined` em vez de lançar — quem chama decide o fallback.
  */
 export const useThemeOptional = () => useContext(ThemeContext);
+
+/** Tema efetivo sem exigir ThemeProvider (fallback dark = política pública). */
+export const useOptionalTheme = (): Theme => {
+  const ctx = useContext(ThemeContext);
+  return ctx ? ctx.resolvedTheme : 'dark';
+};

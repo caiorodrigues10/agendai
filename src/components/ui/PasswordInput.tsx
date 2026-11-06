@@ -113,7 +113,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
                   ))}
                 </div>
                 <span
-                  className={`text-[10px] font-bold uppercase tracking-wide shrink-0 ${STRENGTH_TEXT[strength.level]}`}
+                  className={`text-2xs font-bold uppercase tracking-wide shrink-0 ${STRENGTH_TEXT[strength.level]}`}
                 >
                   {strength.label}
                 </span>
@@ -131,7 +131,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
                   return (
                     <li
                       key={key}
-                      className={`flex items-center gap-1 text-[10px] transition-colors ${
+                      className={`flex items-center gap-1 text-2xs transition-colors ${
                         met ? 'text-success' : 'text-text-muted'
                       }`}
                     >
@@ -150,7 +150,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
         </div>
 
         {error && (
-          <span className="text-[10px] font-medium text-danger flex items-center gap-1">
+          <span className="text-2xs font-medium text-danger flex items-center gap-1">
             <AlertCircle size={10} /> {error}
           </span>
         )}

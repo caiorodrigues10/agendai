@@ -72,24 +72,24 @@ export const WeatherForecastCard: React.FC<{
         Clima previsto para os próximos 7 dias — usado para prever demanda.
       </p>
       {!forecast && !weatherFailed && (
-        <p className="text-[11px] text-text-muted flex items-center gap-1.5">
+        <p className="text-2xs text-text-muted flex items-center gap-1.5">
           <Loader2 size={12} className="animate-spin" /> Carregando clima...
         </p>
       )}
       {weatherFailed && (
-        <p className="text-[11px] text-text-muted">Não foi possível carregar a previsão do tempo.</p>
+        <p className="text-2xs text-text-muted">Não foi possível carregar a previsão do tempo.</p>
       )}
       {forecast && forecast.length > 0 && (
         <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
           {forecast.slice(0, 7).map(day => (
             <div key={day.date} className="rounded-lg border border-border bg-bg p-2 text-center">
-              <p className="text-[10px] font-bold text-text-muted">{weatherDayLabel(day.date)}</p>
+              <p className="text-2xs font-bold text-text-muted">{weatherDayLabel(day.date)}</p>
               <div className="my-1 flex justify-center">{weatherIcon(day.weatherCode)}</div>
-              <p className="text-[11px] font-bold text-text-primary">{Math.round(finiteNumber(day.tempMax))}°</p>
-              <p className="text-[10px] text-text-muted">{Math.round(finiteNumber(day.tempMin))}°</p>
-              <p className="mt-1 text-[10px] text-text-secondary leading-tight line-clamp-2">{day.condition}</p>
+              <p className="text-2xs font-bold text-text-primary">{Math.round(finiteNumber(day.tempMax))}°</p>
+              <p className="text-2xs text-text-muted">{Math.round(finiteNumber(day.tempMin))}°</p>
+              <p className="mt-1 text-2xs text-text-secondary leading-tight line-clamp-2">{day.condition}</p>
               {finiteNumber(day.precipProbability) > 0 && (
-                <p className="mt-0.5 text-[10px] text-support">{Math.round(finiteNumber(day.precipProbability))}%</p>
+                <p className="mt-0.5 text-2xs text-support">{Math.round(finiteNumber(day.precipProbability))}%</p>
               )}
             </div>
           ))}

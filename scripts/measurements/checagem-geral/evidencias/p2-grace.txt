@@ -1,0 +1,5 @@
+refresh -> 200 | rotacionou: true
+reuse dentro da janela de 15s -> 200 (esperado 200)
+esperando 16s...
+reuse apos 16s -> 401 {"message":"Refresh token inválido"} (esperado 401)
+token atual continua valido -> 200

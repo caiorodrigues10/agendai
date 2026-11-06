@@ -70,6 +70,7 @@ export function backendRoutes(base) {
     for (const node of ast.statements) {
       if (!ts.isImportDeclaration(node)) continue;
       const source = literal(node.moduleSpecifier);
+      if (node.importClause?.name) imports.set(node.importClause.name.text, source);
       for (const binding of node.importClause?.namedBindings?.elements || []) {
         imports.set(binding.name.text, source);
       }
@@ -123,7 +124,23 @@ export function backendRoutes(base) {
       }
       if (!ts.isPropertyAccessExpression(node.expression) || node.expression.expression.getText() !== 'app') return;
       const method = node.expression.name.text;
-      if (method === 'register' || method === 'route') throw new Error(`Registro não suportado em ${file}: ${node.getText()}`);
+      if (method === 'register' || method === 'route') {
+        // `app.register(middleware)` (ex.: `cors` de @fastify/cors) não declara
+        // rotas; módulos locais registrados são seguidos como delegação. Qualquer
+        // outra forma falha fechada — registro não suportado nunca some em silêncio.
+        const first = node.arguments[0];
+        if (method === 'register' && ts.isIdentifier(first)) {
+          const source = imports.get(first.getText());
+          if (source && (source.startsWith('.') || source.startsWith('@/'))) {
+            const target = resolveImport(source, file);
+            if (!fs.existsSync(target)) throw new Error(`Registro não suportado em ${file}: ${node.getText()}`);
+            delegated += visit(target, false);
+            return;
+          }
+          if (source) return; // pacote npm: plugin de middleware, sem rotas próprias
+        }
+        throw new Error(`Registro não suportado em ${file}: ${node.getText()}`);
+      }
       if (!methods.has(method)) return;
       const url = resolveUrl(node.arguments[0], file, consts);
       routes.add(`${method.toUpperCase()} ${normalize(prefix + url)}`);

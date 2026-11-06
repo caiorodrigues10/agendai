@@ -271,7 +271,7 @@ export const QueueItemCard: React.FC<QueueItemCardProps> = ({
                     <FlaskConical size={9} /> {lastProcedure.formula}
                   </p>
                 )}
-                <p className="text-[10px] text-text-muted">
+                <p className="text-2xs text-text-muted">
                   {new Date(lastProcedure.occurredAt).toLocaleDateString('pt-BR')}
                 </p>
               </div>

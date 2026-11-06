@@ -51,7 +51,7 @@ import {
 } from '../utils/documentUtils';
 import { referralStorage } from '../utils/referralStorage';
 import { decodeGoogleCredential } from '../utils/googleCredential';
-import { getRecaptchaToken, useRecaptchaBadge } from '../utils/recaptcha';
+import { getRecaptchaToken, useRecaptchaBadge, RECAPTCHA_ERROR_MESSAGE } from '../utils/recaptcha';
 import { plansApi, Plan } from '../infra/plansApi';
 import { subscriptionsApi } from '../infra/subscriptionsApi';
 import { needsPaywallAfterAuth } from '../utils/subscriptionPaywall';
@@ -123,7 +123,7 @@ const Field: React.FC<FieldProps> = ({ label, icon: Icon, error, optional, child
     : generatedId;
   return (
     <div className="space-y-1">
-      <label htmlFor={childId} className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+      <label htmlFor={childId} className="text-2xs font-bold uppercase tracking-wider text-text-secondary">
         {label}
         {optional && <span className="text-text-muted font-normal normal-case"> (opcional)</span>}
       </label>
@@ -144,7 +144,7 @@ const Field: React.FC<FieldProps> = ({ label, icon: Icon, error, optional, child
           : children}
       </div>
       {error && (
-        <span className="text-[10px] font-medium text-danger flex items-center gap-1">
+        <span className="text-2xs font-medium text-danger flex items-center gap-1">
           <AlertCircle size={10} /> {error}
         </span>
       )}
@@ -157,6 +157,37 @@ const getPanelPathForRole = (role?: StaffMember['role'] | string | null) => {
   return normalizedRole === 'MASTER_ADMIN' || normalizedRole === 'ADMIN'
     ? '/master/work'
     : '/app/queue';
+};
+
+/**
+ * Carrega o GIS (Google Identity Services) sob demanda — hover/foco/clique no
+ * botão Google — em vez de no mount, para não disputar banda com o LCP.
+ * Módulo compartilhado: a promessa evita múltiplas injeções entre montagens.
+ */
+let gsiPromise: Promise<void> | null = null;
+const ensureGis = (): Promise<void> => {
+  if (gsiPromise) return gsiPromise;
+  gsiPromise = new Promise<void>((resolve, reject) => {
+    const w = window as Window & { google?: { accounts?: { id?: unknown } } };
+    if (w.google?.accounts?.id) {
+      resolve();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = () => {
+      // Reseta para permitir retry: antes, a promessa rejeitada ficava presa e
+      // todo clique seguinte falhava sem chance de recarregar o script.
+      gsiPromise = null;
+      script.remove();
+      reject(new Error('Falha ao carregar script do Google.'));
+    };
+    document.head.appendChild(script);
+  });
+  return gsiPromise;
 };
 
 export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
@@ -224,7 +255,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
   const [googleError, setGoogleError] = useState<string | null>(null);
   const googleRenderedRef = useRef(false);
-  const [googleLoaded, setGoogleLoaded] = useState(false);
   const [googleRegisterError, setGoogleRegisterError] = useState<string | null>(null);
   const [googleEmailLocked, setGoogleEmailLocked] = useState(false);
   const googleAuthModeRef = useRef<Tab>(mode);
@@ -241,28 +271,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     }
   };
 
-  useEffect(() => {
-    if (!googleClientId) return;
-    if ((window as Window & { google?: { accounts?: { id?: unknown } } }).google?.accounts?.id) {
-      setGoogleLoaded(true);
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      if ((window as Window & { google?: { accounts?: { id?: unknown } } }).google?.accounts?.id) setGoogleLoaded(true);
-    };
-    script.onerror = () => setGoogleError('Falha ao carregar script do Google.');
-    document.head.appendChild(script);
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, [googleClientId]);
-
-  useEffect(() => {
-    if (!googleClientId || !googleLoaded || googleRenderedRef.current) return;
+  const initializeGoogle = () => {
+    if (!googleClientId || googleRenderedRef.current) return;
     try {
       const google = (window as unknown as { google: { accounts: { id: { initialize: (opts: Record<string, unknown>) => void } } } }).google;
       google.accounts.id.initialize({
@@ -282,11 +292,34 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     } catch {
       setGoogleError('Erro ao inicializar botão Google.');
     }
-  }, [googleClientId, googleLoaded]);
+  };
 
-  const handleGoogleClick = () => {
-    const w = window as unknown as { google: { accounts: { id: { prompt: (cb: (notification: { isNotDisplayed: () => boolean; isSkippedMoment: () => boolean }) => void) => void } } } };
-    if (!w.google?.accounts?.id) return;
+  /** Pré-carrega o GIS quando o usuário demonstra intenção (hover/foco no botão). */
+  const prefetchGoogle = () => {
+    if (!googleClientId) return;
+    void ensureGis()
+      .then(initializeGoogle)
+      .catch(() => undefined);
+  };
+
+  const handleGoogleClick = async () => {
+    if (!googleClientId) return;
+    try {
+      await ensureGis();
+    } catch {
+      setGoogleError('Falha ao carregar script do Google.');
+      return;
+    }
+    // Garante initialize antes do prompt mesmo que o prefetch ainda não tenha resolvido.
+    initializeGoogle();
+    const w = window as unknown as { google?: { accounts?: { id?: { prompt: (cb: (notification: { isNotDisplayed: () => boolean; isSkippedMoment: () => boolean }) => void) => void } } } };
+    if (!w.google?.accounts?.id) {
+      // Retorno silencioso confundia o usuário (clique "não fazia nada").
+      const message = 'Não foi possível carregar o Google. Tente novamente.';
+      if (googleAuthModeRef.current === 'register') setGoogleRegisterError(message);
+      else setGoogleError(message);
+      return;
+    }
     w.google.accounts.id.prompt(notification => {
       if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
         const message = 'Não foi possível continuar com o Google. Tente novamente.';
@@ -506,11 +539,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
   const handleLogin = async (data: LoginFormData) => {
     setPaywallDismissed(false);
     setSubmitting(true);
-    const token = await getRecaptchaToken('login');
-    const result = await login(data.email, data.password, token, rememberMe);
-    setSubmitting(false);
-    if (result.ok === false) {
-      showErrorToast(result.message);
+    try {
+      const token = await getRecaptchaToken('login');
+      const result = await login(data.email, data.password, token, rememberMe);
+      if (result.ok === false) {
+        showErrorToast(result.message);
+      }
+    } catch (err) {
+      showErrorToast(err instanceof Error && err.message ? err.message : RECAPTCHA_ERROR_MESSAGE);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -621,93 +659,98 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
     }
     setPaywallDismissed(false);
     setSubmitting(true);
-    const referralCode = referralStorage.get() ?? undefined;
-    const token = await getRecaptchaToken('register');
-    const schedule = [0, 1, 2, 3, 4, 5, 6].map(dayOfWeek => ({
-      dayOfWeek,
-      isOpen: scheduleDays[dayOfWeek].isOpen,
-      openTime: scheduleDays[dayOfWeek].openTime,
-      closeTime: scheduleDays[dayOfWeek].closeTime,
-    }));
-    // Só OTHER leva o texto livre; nos demais segmentos o campo é ignorado.
-    const businessSegmentOther =
-      data.businessSegment === 'OTHER' ? data.businessSegmentOther?.trim() || undefined : undefined;
-    const result =
-      data.authMethod === 'google'
-        ? await registerWithGoogle({
-            ownerName: data.ownerName.trim(),
-            idToken: data.googleIdToken ?? '',
-            cpf,
-            barbershopName: data.barbershopName.trim(),
-            whatsapp: normalizePhoneBR(data.whatsapp),
-            businessSegment: data.businessSegment,
-            businessSegmentOther,
-            targetAudience: data.targetAudience,
-            address:
-              [
+    try {
+      const referralCode = referralStorage.get() ?? undefined;
+      const token = await getRecaptchaToken('register');
+      const schedule = [0, 1, 2, 3, 4, 5, 6].map(dayOfWeek => ({
+        dayOfWeek,
+        isOpen: scheduleDays[dayOfWeek].isOpen,
+        openTime: scheduleDays[dayOfWeek].openTime,
+        closeTime: scheduleDays[dayOfWeek].closeTime,
+      }));
+      // Só OTHER leva o texto livre; nos demais segmentos o campo é ignorado.
+      const businessSegmentOther =
+        data.businessSegment === 'OTHER' ? data.businessSegmentOther?.trim() || undefined : undefined;
+      const result =
+        data.authMethod === 'google'
+          ? await registerWithGoogle({
+              ownerName: data.ownerName.trim(),
+              idToken: data.googleIdToken ?? '',
+              cpf,
+              barbershopName: data.barbershopName.trim(),
+              whatsapp: normalizePhoneBR(data.whatsapp),
+              businessSegment: data.businessSegment,
+              businessSegmentOther,
+              targetAudience: data.targetAudience,
+              address:
+                [
+                  data.address?.trim(),
+                  data.addressNumber?.trim() ? `nº ${data.addressNumber.trim()}` : null,
+                  data.addressComplement?.trim(),
+                ]
+                  .filter(Boolean)
+                  .join(', ') || undefined,
+              city: data.city.trim(),
+              cnpj: data.cnpj ? normalizeDocument(data.cnpj) : undefined,
+              referralCode,
+              termsVersion: data.termsVersion,
+              termsAccepted: data.termsAccepted,
+              marketingOptIn: data.marketingOptIn,
+              lgpdConsent: data.lgpdConsent,
+              schedule,
+              recaptchaToken: token,
+            })
+          : await registerUser({
+              ownerName: data.ownerName.trim(),
+              email: data.email.trim(),
+              password: data.password ?? '',
+              cpf,
+              barbershopName: data.barbershopName.trim(),
+              whatsapp: normalizePhoneBR(data.whatsapp),
+              businessSegment: data.businessSegment,
+              businessSegmentOther,
+              targetAudience: data.targetAudience,
+              address: [
                 data.address?.trim(),
                 data.addressNumber?.trim() ? `nº ${data.addressNumber.trim()}` : null,
                 data.addressComplement?.trim(),
-              ]
-                .filter(Boolean)
-                .join(', ') || undefined,
-            city: data.city.trim(),
-            cnpj: data.cnpj ? normalizeDocument(data.cnpj) : undefined,
-            referralCode,
-            termsVersion: data.termsVersion,
-            termsAccepted: data.termsAccepted,
-            marketingOptIn: data.marketingOptIn,
-            lgpdConsent: data.lgpdConsent,
-            schedule,
-            recaptchaToken: token,
-          })
-        : await registerUser({
-            ownerName: data.ownerName.trim(),
-            email: data.email.trim(),
-            password: data.password ?? '',
-            cpf,
-            barbershopName: data.barbershopName.trim(),
-            whatsapp: normalizePhoneBR(data.whatsapp),
-            businessSegment: data.businessSegment,
-            businessSegmentOther,
-            targetAudience: data.targetAudience,
-            address: [
-              data.address?.trim(),
-              data.addressNumber?.trim() ? `nº ${data.addressNumber.trim()}` : null,
-              data.addressComplement?.trim(),
-            ].filter(Boolean).join(', ') || undefined,
-            city: data.city.trim(),
-            cnpj: data.cnpj ? normalizeDocument(data.cnpj) : undefined,
-            referralCode,
-            termsVersion: data.termsVersion,
-            termsAccepted: data.termsAccepted,
-            marketingOptIn: data.marketingOptIn,
-            lgpdConsent: data.lgpdConsent,
-            schedule,
-            recaptchaToken: token,
-          });
-    setSubmitting(false);
-    if (result.ok === false) {
-      // Erro de conta (e-mail/CPF duplicado) volta para a etapa 1; erro de
-      // estabelecimento (nome/WhatsApp/cidade) fica na etapa 3.
-      if (/CPF e nome do titular não conferem/i.test(result.message)) {
-        setRegisterStep(1);
-        registerForm.setError('cpf', { type: 'server', message: 'CPF e nome do titular não conferem.' });
-      } else if (/e-?mail já cadastrado|cpf já cadastrado/i.test(result.message)) {
-        setRegisterStep(1);
-        if (/cpf já cadastrado/i.test(result.message)) {
-          registerForm.setError('cpf', { type: 'server', message: CPF_TAKEN_MESSAGE });
+              ].filter(Boolean).join(', ') || undefined,
+              city: data.city.trim(),
+              cnpj: data.cnpj ? normalizeDocument(data.cnpj) : undefined,
+              referralCode,
+              termsVersion: data.termsVersion,
+              termsAccepted: data.termsAccepted,
+              marketingOptIn: data.marketingOptIn,
+              lgpdConsent: data.lgpdConsent,
+              schedule,
+              recaptchaToken: token,
+            });
+      if (result.ok === false) {
+        // Erro de conta (e-mail/CPF duplicado) volta para a etapa 1; erro de
+        // estabelecimento (nome/WhatsApp/cidade) fica na etapa 3.
+        if (/CPF e nome do titular não conferem/i.test(result.message)) {
+          setRegisterStep(1);
+          registerForm.setError('cpf', { type: 'server', message: 'CPF e nome do titular não conferem.' });
+        } else if (/e-?mail já cadastrado|cpf já cadastrado/i.test(result.message)) {
+          setRegisterStep(1);
+          if (/cpf já cadastrado/i.test(result.message)) {
+            registerForm.setError('cpf', { type: 'server', message: CPF_TAKEN_MESSAGE });
+          }
+        } else if (/nome do salão|whatsapp|cidade|cnpj/i.test(result.message)) {
+          setRegisterStep(3);
         }
-      } else if (/nome do salão|whatsapp|cidade|cnpj/i.test(result.message)) {
-        setRegisterStep(3);
+        showErrorToast(result.message);
+        return;
       }
-      showErrorToast(result.message);
-      return;
-    }
-    referralStorage.clear();
-    if (data.authMethod !== 'google') {
-      setResendVerificationStatus('idle');
-      setRegisterVerificationEmail(data.email.trim());
+      referralStorage.clear();
+      if (data.authMethod !== 'google') {
+        setResendVerificationStatus('idle');
+        setRegisterVerificationEmail(data.email.trim());
+      }
+    } catch (err) {
+      showErrorToast(err instanceof Error && err.message ? err.message : RECAPTCHA_ERROR_MESSAGE);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -826,13 +869,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
               <button
                 type="button"
                 onClick={handleLogoClick}
-                className="cursor-pointer transition-transform hover:scale-105"
+                className="min-h-11 cursor-pointer transition-transform hover:scale-105 lg:min-h-0"
               >
                 <Logo size="md" />
               </button>
               {registerVerificationEmail ? (
                 <>
-                  <span className="mt-5 inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-accent">
+                  <span className="mt-5 inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-3 py-1.5 text-2xs font-bold uppercase tracking-[0.16em] text-accent">
                     <Mail size={12} /> Confirmação de e-mail
                   </span>
                   <h1 className="mt-4 text-center text-2xl font-black tracking-tight text-text-primary sm:text-3xl">
@@ -846,7 +889,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                 </>
               ) : tab === 'register' ? (
                 <>
-                  <span className="mt-5 inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-accent">
+                  <span className="mt-5 inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-3 py-1.5 text-2xs font-bold uppercase tracking-[0.16em] text-accent">
                     <Sparkles size={12} /> 30 dias grátis no Pro
                   </span>
                   <h1
@@ -886,7 +929,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
             )}
 
             {tab === 'register' && !registerVerificationEmail && pendingReferral && (
-              <p className="w-full mb-3 text-[11px] text-center text-accent bg-accent/10 border border-accent/20 rounded-lg px-3 py-2">
+              <p className="w-full mb-3 text-2xs text-center text-accent bg-accent/10 border border-accent/20 rounded-lg px-3 py-2">
                 Indicação ativa · código{' '}
                 <strong className="tracking-wider">{pendingReferral}</strong>
               </p>
@@ -950,7 +993,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                   transition={{ duration: 0.2 }}
                   className="w-full space-y-3"
                 >
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                  <p className="text-2xs font-bold uppercase tracking-wider text-text-secondary">
                     Contas salvas
                   </p>
                   <AnimatePresence>
@@ -981,7 +1024,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                           <Avatar name={account.name} src={account.avatarUrl} size="sm" />
                           <div className="flex-1 text-left min-w-0">
                             <p className="text-[12px] font-semibold text-text-primary truncate">{account.name}</p>
-                            <p className="text-[10px] text-text-muted truncate">{account.email}</p>
+                            <p className="text-2xs text-text-muted truncate">{account.email}</p>
                           </div>
                           {switchingAccountId === account.id ? (
                             <Loader2 size={14} className="animate-spin text-text-muted shrink-0" />
@@ -1003,7 +1046,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                   <button
                     type="button"
                     onClick={() => setShowManualLoginForm(true)}
-                    className="w-full text-[11px] text-text-muted hover:text-accent transition-colors py-2"
+                    className="w-full text-2xs text-text-muted hover:text-accent transition-colors py-2"
                   >
                     + Usar outra conta
                   </button>
@@ -1033,7 +1076,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                   </Field>
 
                   <div className="space-y-1">
-                    <label htmlFor="login-password" className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                    <label htmlFor="login-password" className="text-2xs font-bold uppercase tracking-wider text-text-secondary">
                       Senha
                     </label>
                     <PasswordInput
@@ -1057,7 +1100,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                     <button
                       type="button"
                       onClick={() => navigate('/esqueci-senha')}
-                      className="inline-flex min-h-11 items-center text-[11px] text-text-muted hover:text-accent transition-colors shrink-0"
+                      className="inline-flex min-h-11 items-center text-2xs text-text-muted hover:text-accent transition-colors shrink-0"
                     >
                       Esqueci minha senha
                     </button>
@@ -1109,7 +1152,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                         {['Sem cartão', 'Acesso Pro', 'Cancele quando quiser'].map(item => (
                           <div key={item} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-border bg-bg/55 px-2 text-center">
                             <Check size={13} className="text-accent" />
-                            <span className="text-[9px] font-semibold leading-tight text-text-secondary sm:text-[10px]">{item}</span>
+                            <span className="text-2xs font-semibold leading-tight text-text-secondary sm:text-2xs">{item}</span>
                           </div>
                         ))}
                       </div>
@@ -1185,7 +1228,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
 
                       {!googleRegisterMode ? (
                         <div className="space-y-1">
-                          <label htmlFor="register-password" className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                          <label htmlFor="register-password" className="text-2xs font-bold uppercase tracking-wider text-text-secondary">
                             Senha
                           </label>
                           <PasswordInput
@@ -1205,13 +1248,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                           />
                         </div>
                       ) : (
-                        <p className="text-[11px] text-text-muted bg-bg/60 border border-border rounded-lg px-3 py-2">
+                        <p className="text-2xs text-text-muted bg-bg/60 border border-border rounded-lg px-3 py-2">
                           Continuando com Google — a senha será gerada automaticamente.
                         </p>
                       )}
 
                       <div className="space-y-3 pt-2 border-t border-border">
-                        <p className="text-[11px] text-text-muted text-center">
+                        <p className="text-2xs text-text-muted text-center">
                           Ao criar sua conta, você concorda com nossos termos e políticas.
                         </p>
                         <ConsentCheckbox
@@ -1298,7 +1341,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                     </>
                   ) : (
                     <>
-                      <p className="text-[11px] text-text-muted text-center leading-relaxed pb-1">
+                      <p className="text-2xs text-text-muted text-center leading-relaxed pb-1">
                         {registerSegmentConfig.pickSummary}
                       </p>
 
@@ -1391,10 +1434,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
 
                       <div className="space-y-2 pt-2 border-t border-border">
                         <div className="flex items-center justify-between">
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                          <p className="text-2xs font-bold uppercase tracking-wider text-text-secondary">
                             Horário de funcionamento
                           </p>
-                          <span className="text-[10px] text-text-muted">
+                          <span className="text-2xs text-text-muted">
                             Aberto {Object.values(scheduleDays).filter(d => d.isOpen).length} dias por semana
                           </span>
                         </div>
@@ -1412,7 +1455,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                                 return next;
                               });
                             }}
-                            className="text-[10px] px-2 py-1 rounded-md border border-border bg-bg text-text-secondary hover:border-accent/40 transition-colors cursor-pointer"
+                            className="text-2xs px-2 py-1 rounded-md border border-border bg-bg text-text-secondary hover:border-accent/40 transition-colors cursor-pointer"
                           >
                             Seg a Sex
                           </button>
@@ -1428,7 +1471,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                                 return next;
                               });
                             }}
-                            className="text-[10px] px-2 py-1 rounded-md border border-border bg-bg text-text-secondary hover:border-accent/40 transition-colors cursor-pointer"
+                            className="text-2xs px-2 py-1 rounded-md border border-border bg-bg text-text-secondary hover:border-accent/40 transition-colors cursor-pointer"
                           >
                             Todos os dias
                           </button>
@@ -1470,7 +1513,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                                     />
                                   </button>
                                   <span
-                                    className={`text-[11px] font-bold w-8 shrink-0 ${
+                                    className={`text-2xs font-bold w-8 shrink-0 ${
                                       day.isOpen ? 'text-text-primary' : 'text-text-muted'
                                     }`}
                                   >
@@ -1495,9 +1538,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                                               [i]: { ...prev[i], openTime: e.target.value },
                                             }))
                                           }
-                                          className="flex-1 min-w-0 bg-bg border border-border rounded-md px-2 py-1 text-text-primary text-[11px] outline-none focus:ring-1 focus:ring-accent"
+                                          className="flex-1 min-w-0 bg-bg border border-border rounded-md px-2 py-1 text-text-primary text-2xs outline-none focus:ring-1 focus:ring-accent"
                                         />
-                                        <span className="text-[10px] text-text-muted">até</span>
+                                        <span className="text-2xs text-text-muted">até</span>
                                         <input
                                           type="time"
                                           value={day.closeTime}
@@ -1507,7 +1550,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                                               [i]: { ...prev[i], closeTime: e.target.value },
                                             }))
                                           }
-                                          className="flex-1 min-w-0 bg-bg border border-border rounded-md px-2 py-1 text-text-primary text-[11px] outline-none focus:ring-1 focus:ring-accent"
+                                          className="flex-1 min-w-0 bg-bg border border-border rounded-md px-2 py-1 text-text-primary text-2xs outline-none focus:ring-1 focus:ring-accent"
                                         />
                                       </motion.div>
                                     ) : (
@@ -1515,7 +1558,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                                         key="closed"
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
-                                        className="flex-1 text-[11px] text-text-muted italic"
+                                        className="flex-1 text-2xs text-text-muted italic"
                                       >
                                         Fechado
                                       </motion.span>
@@ -1527,7 +1570,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                           )}
                         </div>
                         {!Object.values(scheduleDays).some(d => d.isOpen) && (
-                          <p className="text-[11px] text-danger">Selecione pelo menos 1 dia</p>
+                          <p className="text-2xs text-danger">Selecione pelo menos 1 dia</p>
                         )}
                       </div>
 
@@ -1569,12 +1612,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
               <div className="w-full mt-4">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex-1 h-px bg-border" />
-                  <span className="text-[10px] text-text-muted uppercase">ou</span>
+                  <span className="text-2xs text-text-muted uppercase">ou</span>
                   <div className="flex-1 h-px bg-border" />
                 </div>
                 <button
                   type="button"
                   onClick={handleGoogleClick}
+                  onPointerDown={prefetchGoogle}
+                  onPointerEnter={prefetchGoogle}
+                  onFocus={prefetchGoogle}
                   disabled={submitting}
                   className="w-full py-3 rounded-xl border border-border bg-bg hover:bg-surface hover:border-border-strong text-text-primary text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-200 disabled:opacity-60 cursor-pointer"
                 >
@@ -1604,7 +1650,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                   Cadastrar com Google
                 </button>
                 {googleRegisterError && (
-                  <p className="text-[11px] text-center text-danger mt-2">{googleRegisterError}</p>
+                  <p className="text-2xs text-center text-danger mt-2">{googleRegisterError}</p>
                 )}
                 {googleRegisterMode && (
                   <button
@@ -1613,7 +1659,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                       resetGoogleRegisterMode();
                       setRegisterFieldsUnlocked(false);
                     }}
-                    className="w-full mt-2 text-[11px] text-text-muted hover:text-accent transition-colors py-1"
+                    className="w-full mt-2 text-2xs text-text-muted hover:text-accent transition-colors py-1"
                   >
                     Usar e-mail e senha
                   </button>
@@ -1625,12 +1671,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
               <div className="w-full mt-4">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex-1 h-px bg-border" />
-                  <span className="text-[10px] text-text-muted uppercase">ou</span>
+                  <span className="text-2xs text-text-muted uppercase">ou</span>
                   <div className="flex-1 h-px bg-border" />
                 </div>
                 <button
                   type="button"
                   onClick={handleGoogleClick}
+                  onPointerDown={prefetchGoogle}
+                  onPointerEnter={prefetchGoogle}
+                  onFocus={prefetchGoogle}
                   disabled={submitting}
                   className="w-full py-3 rounded-xl border border-border bg-bg hover:bg-surface hover:border-border-strong text-text-primary text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-200 disabled:opacity-60 cursor-pointer"
                 >
@@ -1660,12 +1709,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                   Entrar com Google
                 </button>
                 {googleError && (
-                  <p className="text-[11px] text-center text-danger mt-2">{googleError}</p>
+                  <p className="text-2xs text-center text-danger mt-2">{googleError}</p>
                 )}
               </div>
             )}
 
-            <div className="mt-6 flex items-center gap-2 rounded-full border border-border/80 bg-bg/50 px-3 py-1.5 text-[10px] text-text-muted">
+            <div className="mt-6 flex items-center gap-2 rounded-full border border-border/80 bg-bg/50 px-3 py-1.5 text-2xs text-text-muted">
               <ShieldCheck size={12} className="text-accent" />
               Ambiente seguro e dados protegidos
             </div>

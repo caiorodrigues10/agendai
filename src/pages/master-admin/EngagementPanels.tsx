@@ -28,7 +28,7 @@ const Tile: React.FC<{ label: string; value: string; tone?: string }> = ({
   tone,
 }) => (
   <div className="bg-bg border border-border rounded-lg p-3">
-    <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">{label}</p>
+    <p className="text-2xs font-bold uppercase tracking-widest text-text-muted">{label}</p>
     <p className={`text-lg font-bold mt-1 ${tone ?? 'text-text-primary'}`}>{value}</p>
   </div>
 );
@@ -171,7 +171,7 @@ const ChurnRiskCard: React.FC<{ churnRisk: EngagementChurnRisk[] }> = ({ churnRi
                     {shop.reasons.map((reason) => (
                       <span
                         key={reason}
-                        className="rounded-full bg-bg border border-border px-2 py-0.5 text-[10px] text-text-secondary"
+                        className="rounded-full bg-bg border border-border px-2 py-0.5 text-2xs text-text-secondary"
                       >
                         {reason}
                       </span>

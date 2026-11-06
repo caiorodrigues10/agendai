@@ -130,3 +130,37 @@ test('follows nested route delegations and const-string template URLs', t => {
   assert.ok(routes.has('GET /api/salons/{}/posts/{}'));
   assert.ok(routes.has('POST /api/salons/{}/stories'));
 });
+
+test('ignora app.register de middleware npm e segue módulos locais registrados', t => {
+  const root = fixture(t, {
+    'src/shared/infra/http/app.ts': 'app.register(apiRoutes, { prefix: "/api" });',
+    'src/shared/infra/http/routes/api.ts': [
+      'import cors from "@fastify/cors";',
+      'import { corsOptions } from "../corsOptions";',
+      'import { sessionRoutes } from "./session.routes";',
+      'async function apiRoutes(app) {',
+      '  await app.register(cors, corsOptions);',
+      '  app.get("/health", handler);',
+      '  await app.register(sessionRoutes, { prefix: "/session" });',
+      '}',
+    ].join('\n'),
+    'src/shared/infra/http/routes/session.routes.ts':
+      'export async function sessionRoutes(app) { app.post("/session/refresh", handler); }',
+    'src/shared/infra/corsOptions.ts': 'export const corsOptions = {};',
+    'wrapper.ts': 'apiClient("/api/health"); apiClient("/api/session/refresh", "POST");',
+  });
+  const routes = backendRoutes(root);
+  const requests = frontendRequests(path.join(root, 'wrapper.ts'));
+  assert.deepEqual(requests.map(request => routes.has(request.key)), [true, true]);
+});
+
+test('app.register relativo sem arquivo correspondente falha fechado', t => {
+  const root = fixture(t, {
+    'src/shared/infra/http/app.ts': 'app.register(apiRoutes, { prefix: "/api" });',
+    'src/shared/infra/http/routes/api.ts': [
+      'import { missingRoutes } from "./missing.routes";',
+      'async function apiRoutes(app) { await app.register(missingRoutes); }',
+    ].join('\n'),
+  });
+  assert.throws(() => backendRoutes(root), /Registro não suportado/);
+});

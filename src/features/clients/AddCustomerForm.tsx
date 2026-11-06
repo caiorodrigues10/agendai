@@ -54,6 +54,14 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
   const [selectedPetId, setSelectedPetId] = React.useState('');
   const visualViewport = useVisualViewport();
 
+  // A API de serviços devolve também os inativos (o painel do dono precisa
+  // reativá-los), mas escolher um inativo na fila faz o backend recusar com
+  // 400 "Serviço inválido para este estabelecimento".
+  const availableServices = React.useMemo(
+    () => services.filter(service => service.active !== false),
+    [services]
+  );
+
   const {
     register,
     handleSubmit,
@@ -66,7 +74,7 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
     ),
     defaultValues: {
       whatsapp: '',
-      serviceId: services.length > 0 ? services[0].id : '',
+      serviceId: availableServices.length > 0 ? availableServices[0].id : '',
     },
   });
 
@@ -74,10 +82,10 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
   const whatsappValue = watch('whatsapp') ?? '';
 
   useEffect(() => {
-    if (services.length > 0 && !selectedServiceId) {
-      setValue('serviceId', services[0].id);
+    if (availableServices.length > 0 && !selectedServiceId) {
+      setValue('serviceId', availableServices[0].id);
     }
-  }, [services, setValue, selectedServiceId]);
+  }, [availableServices, setValue, selectedServiceId]);
 
   // Petshop: quando o WhatsApp digitado casa com um cliente que tem pets
   // ativos, oferece o seletor de pet (o backend grava o snapshot na fila).
@@ -220,18 +228,18 @@ export const AddCustomerForm: React.FC<AddCustomerFormProps> = ({
           <div>
             <div className="mb-3 flex items-center justify-between gap-3">
               <label className="block text-sm font-semibold text-text-secondary">Serviço</label>
-              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-bg px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-text-muted">
+              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-bg px-2.5 py-1 text-2xs font-bold uppercase tracking-[0.16em] text-text-muted">
                 <Scissors size={11} />
                 Escolha 1
               </span>
             </div>
-            {services.length === 0 ? (
+            {availableServices.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-border bg-bg p-4 text-center text-text-muted">
                 Nenhum serviço disponível no momento.
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-3">
-                {services.map(service => (
+                {availableServices.map(service => (
                   <ServiceCard
                     key={service.id}
                     service={service}

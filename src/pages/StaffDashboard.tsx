@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppLayout } from '../layouts/app/AppLayout';
 import {
@@ -20,16 +20,8 @@ import {
 } from '../features/settings';
 import { SupportPanel } from '../features/support';
 import { TeamManager } from '../features/team';
-import {
-  CashPanel,
-  DemandAlertBanner,
-  FinancialDashboard,
-  OwnerFinancialPanel,
-  ProfitEnginePanel,
-} from '../features/finance';
+import { DemandAlertBanner } from '../features/finance';
 import { OwnerReferralsPanel } from '../features/referrals';
-import { OwnerSubscriptionPanel } from '../features/subscription';
-import { PostsManager } from '../features/posts';
 import { ShowcasePanel, PublicLinkPanel } from '../features/showcase';
 import { PageAppearancePanel } from '../features/appearance';
 import { AppointmentCalendar } from '../features/appointments';
@@ -62,7 +54,6 @@ import { todayISO } from '../utils/dateRanges';
 import { usePermissions } from '../hooks/usePermissions';
 import { ActivationChecklist, OnboardingChecklist } from '../features/onboarding';
 import { useOnboardingStatus } from '../hooks/useOnboardingStatus';
-import { ProductsHub } from '../features/products';
 import { productsApi } from '../infra/productsApi';
 import { GoalsPanel } from '../features/goals';
 import { LoyaltyPanel } from '../features/loyalty';
@@ -72,8 +63,39 @@ import { WaitlistPanel } from '../features/waitlist';
 import { RecurringPackagesPanel } from '../features/recurring';
 import { OrganizationsPanel } from '../features/organizations';
 import { ErrorBoundary } from '../components/infra/ErrorBoundary';
-import { EquipmentPanel } from '../features/equipment';
 import { getAuxiliaryProfile } from '../shared/segments';
+
+/**
+ * Painéis pesados de abas ficam em chunks próprios: importados de forma
+ * síncrona eles levavam o bundle do dashboard a 588KB (auditoria R7, alvo
+ * 500KB). Os arquivos são importados direto (e não pelo barrel) para o
+ * barrel continuar enxuto no chunk inicial — ele só precisa do banner do
+ * overview.
+ */
+const CashPanel = lazy(() =>
+  import('../features/finance/components/CashPanel').then(m => ({ default: m.CashPanel })),
+);
+const FinancialDashboard = lazy(() =>
+  import('../features/finance/components/FinancialDashboard').then(m => ({ default: m.FinancialDashboard })),
+);
+const OwnerFinancialPanel = lazy(() =>
+  import('../features/finance/components/OwnerFinancialPanel').then(m => ({ default: m.OwnerFinancialPanel })),
+);
+const ProfitEnginePanel = lazy(() =>
+  import('../features/finance/components/ProfitEnginePanel').then(m => ({ default: m.ProfitEnginePanel })),
+);
+const OwnerSubscriptionPanel = lazy(() =>
+  import('../features/subscription/OwnerSubscriptionPanel').then(m => ({ default: m.OwnerSubscriptionPanel })),
+);
+const PostsManager = lazy(() =>
+  import('../features/posts/PostsManager').then(m => ({ default: m.PostsManager })),
+);
+const ProductsHub = lazy(() =>
+  import('../features/products/ProductsHub').then(m => ({ default: m.ProductsHub })),
+);
+const EquipmentPanel = lazy(() =>
+  import('../features/equipment/EquipmentPanel').then(m => ({ default: m.EquipmentPanel })),
+);
 
 export const StaffDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -388,20 +410,14 @@ export const StaffDashboard: React.FC = () => {
         onboardingCompleted={onboardingCompleted}
         onNavigate={tabId => navigate(`/app/${tabId}`)}
       >
-        {/* Tab Content */}
-        {activeTab === 'overview' && (
-          <div className="space-y-4">
-            {supportsQueue(operationMode) && (
-              <QueueCapacityBanner
-                barbershopId={barbershopId}
-                waiting={peopleWaiting}
-                onNavigate={tab => navigate(`/app/${tab}`)}
-                canConfigure={user?.role === 'OWNER' || user?.role === 'MASTER_ADMIN'}
-              />
-            )}
-            {(user?.role === 'OWNER' || user?.role === 'MASTER_ADMIN') &&
-              settings &&
-              barbershopId && (
+          {/* Tab Content */}
+          <Suspense fallback={<ListSkeleton rows={5} hasIcon />}>
+          {activeTab === 'overview' && (
+            <div className="space-y-4">
+              {supportsQueue(operationMode) && (
+                <QueueCapacityBanner barbershopId={barbershopId} waiting={peopleWaiting} onNavigate={tab => navigate(`/app/${tab}`)} canConfigure={user?.role === 'OWNER' || user?.role === 'MASTER_ADMIN'} />
+              )}
+              {(user?.role === 'OWNER' || user?.role === 'MASTER_ADMIN') && settings && barbershopId && (
                 <ActivationChecklist
                   barbershopId={barbershopId}
                   onNavigate={tab => navigate(`/app/${tab}`)}
@@ -798,17 +814,18 @@ export const StaffDashboard: React.FC = () => {
 
         {activeTab === 'support' && <SupportPanel />}
 
-        {activeTab === 'profile' && settings && (
-          <ShopProfile
-            settings={settings}
-            posts={feed}
-            currentUser={user}
-            audience="staff"
-            onDeletePost={deletePost}
-            onLikePost={likePost}
-            onNotify={showToast}
-          />
-        )}
+          {activeTab === 'profile' && settings && (
+            <ShopProfile
+              settings={settings}
+              posts={feed}
+              currentUser={user}
+              audience="staff"
+              onDeletePost={deletePost}
+              onLikePost={likePost}
+              onNotify={showToast}
+            />
+          )}
+          </Suspense>
       </AppLayout>
 
       {showJoinForm && (

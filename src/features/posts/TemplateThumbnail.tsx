@@ -92,7 +92,7 @@ export const TemplateThumbnail: React.FC<TemplateThumbnailProps> = ({
           aria-label="Tentar carregar prévia novamente"
         >
           <RefreshCw size={16} aria-hidden />
-          <span className="text-[9px] font-semibold">Tentar novamente</span>
+          <span className="text-2xs font-semibold">Tentar novamente</span>
         </button>
       ) : (
         <div className="h-full animate-pulse bg-surface-2 p-4">

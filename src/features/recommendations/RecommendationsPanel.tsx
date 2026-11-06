@@ -103,7 +103,7 @@ export const RecommendationsPanel: React.FC = () => {
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-lg font-bold text-text-primary">Próximas oportunidades</h2>
-              <span className="rounded-full border border-border bg-bg/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+              <span className="rounded-full border border-border bg-bg/70 px-2.5 py-1 text-2xs font-bold uppercase tracking-wider text-text-muted">
                 {recommendations.length} {recommendations.length === 1 ? 'sugestão' : 'sugestões'}
               </span>
             </div>
@@ -157,10 +157,10 @@ export const RecommendationsPanel: React.FC = () => {
                     </span>
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-accent">
+                        <span className="text-2xs font-bold uppercase tracking-wider text-accent">
                           {type.label}
                         </span>
-                        <span className={`rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${priority.className}`}>
+                        <span className={`rounded-full border px-2 py-0.5 text-2xs font-bold uppercase tracking-wider ${priority.className}`}>
                           {priority.label}
                         </span>
                       </div>
@@ -179,19 +179,19 @@ export const RecommendationsPanel: React.FC = () => {
 
                 <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_1fr_1.35fr]">
                   <div className="rounded-xl border border-border/70 bg-surface/55 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                    <p className="text-2xs font-bold uppercase tracking-wider text-text-muted">
                       Motivo
                     </p>
                     <p className="mt-0.5 text-sm text-text-secondary">{rec.reason}</p>
                   </div>
                   <div className="rounded-xl border border-border/70 bg-surface/55 p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                    <p className="text-2xs font-bold uppercase tracking-wider text-text-muted">
                       Impacto esperado
                     </p>
                     <p className="mt-0.5 text-sm text-text-secondary">{rec.impact}</p>
                   </div>
                   <div className="rounded-xl border border-accent/20 bg-accent/8 p-3">
-                    <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-accent">
+                    <p className="flex items-center gap-1.5 text-2xs font-bold uppercase tracking-wider text-accent">
                       <ArrowUpRight size={12} />
                       Ação sugerida
                     </p>

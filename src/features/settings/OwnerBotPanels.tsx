@@ -69,7 +69,7 @@ export const LinkedPanel: React.FC<{
         <a
           href={botLink}
           target="_blank"
-          rel="noreferrer"
+          rel="noreferrer noopener"
           className="inline-flex items-center gap-2 mt-3 text-sm font-bold text-accent hover:text-accent-hover"
         >
           <MessageCircle size={16} /> Conversar com o assistente

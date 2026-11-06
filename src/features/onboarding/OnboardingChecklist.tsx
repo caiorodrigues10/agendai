@@ -222,7 +222,7 @@ export const OnboardingChecklist: React.FC<OnboardingChecklistProps> = ({
             <Rocket size={22} />
           </span>
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[.2em] text-accent">
+            <p className="text-2xs font-bold uppercase tracking-[.2em] text-accent">
               Primeiro acesso
             </p>
             <h1 className="mt-1 text-xl font-black text-text-primary">

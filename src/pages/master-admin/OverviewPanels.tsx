@@ -98,7 +98,7 @@ const axisProps = {
   tickMargin: 8,
   interval: 'preserveStartEnd' as const,
   minTickGap: 24,
-  className: 'text-[10px]',
+  className: 'text-2xs',
 };
 
 const EmptyChart: React.FC = () => (
@@ -190,7 +190,7 @@ export const OverviewCharts: React.FC<{ rows: ChartRow[] }> = ({ rows }) => {
           <RechartsBarChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis dataKey="label" {...axisProps} />
-            <YAxis tickLine={false} axisLine={false} width={48} className="text-[10px]" />
+            <YAxis tickLine={false} axisLine={false} width={48} className="text-2xs" />
             <ChartTooltip content={<ChartTooltipContent />} />
             <Bar dataKey="revenue" fill="var(--color-revenue)" radius={[4, 4, 0, 0]} maxBarSize={28} />
           </RechartsBarChart>
@@ -208,7 +208,7 @@ export const OverviewCharts: React.FC<{ rows: ChartRow[] }> = ({ rows }) => {
             </defs>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis dataKey="label" {...axisProps} />
-            <YAxis tickLine={false} axisLine={false} width={48} className="text-[10px]" />
+            <YAxis tickLine={false} axisLine={false} width={48} className="text-2xs" />
             <ChartTooltip content={<ChartTooltipContent />} />
             <Area
               type="monotone"
@@ -227,7 +227,7 @@ export const OverviewCharts: React.FC<{ rows: ChartRow[] }> = ({ rows }) => {
           <RechartsBarChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis dataKey="label" {...axisProps} />
-            <YAxis tickLine={false} axisLine={false} width={36} allowDecimals={false} className="text-[10px]" />
+            <YAxis tickLine={false} axisLine={false} width={36} allowDecimals={false} className="text-2xs" />
             <ChartTooltip content={<ChartTooltipContent />} />
             <Bar dataKey="newShops" fill="var(--color-newShops)" radius={[4, 4, 0, 0]} maxBarSize={28} />
           </RechartsBarChart>
@@ -239,7 +239,7 @@ export const OverviewCharts: React.FC<{ rows: ChartRow[] }> = ({ rows }) => {
           <RechartsBarChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis dataKey="label" {...axisProps} />
-            <YAxis tickLine={false} axisLine={false} width={36} allowDecimals={false} className="text-[10px]" />
+            <YAxis tickLine={false} axisLine={false} width={36} allowDecimals={false} className="text-2xs" />
             <ChartTooltip content={<ChartTooltipContent />} />
             <Bar dataKey="created" fill="var(--color-created)" radius={[4, 4, 0, 0]} maxBarSize={18} />
             <Bar dataKey="completed" fill="var(--color-completed)" radius={[4, 4, 0, 0]} maxBarSize={18} />
@@ -406,7 +406,7 @@ export const OverviewHealth: React.FC<{ data: AdminOverview }> = ({ data }) => {
               {healthStatusIcon(item.status)}
             </div>
             <p className="mt-1 text-lg font-bold">{item.value}</p>
-            <p className="text-[11px] text-text-muted">{item.extra}</p>
+            <p className="text-2xs text-text-muted">{item.extra}</p>
           </div>
         ))}
       </div>
@@ -439,7 +439,7 @@ export const OverviewAttention: React.FC<{ attention: OverviewAttentionItem[] }>
             className="flex items-center gap-3 py-3 hover:bg-hover-bg transition-colors rounded-lg px-2 -mx-2 focus:outline-none focus:ring-2 focus:ring-focus"
           >
             <span
-              className={`px-2 py-0.5 rounded text-[10px] font-bold shrink-0 ${SEVERITY_STYLES[item.severity]}`}
+              className={`px-2 py-0.5 rounded text-2xs font-bold shrink-0 ${SEVERITY_STYLES[item.severity]}`}
             >
               {item.count}
             </span>

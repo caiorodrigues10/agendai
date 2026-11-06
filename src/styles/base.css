@@ -8,7 +8,6 @@ body {
   font-family: var(--font-sans);
   background-color: var(--ag-bg);
   color: var(--ag-text-primary);
-  min-width: 320px;
   min-height: 100dvh;
   overscroll-behavior-y: none;
   -webkit-tap-highlight-color: transparent;

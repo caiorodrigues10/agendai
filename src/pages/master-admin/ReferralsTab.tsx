@@ -84,7 +84,7 @@ export const ReferralsTab: React.FC = () => {
           <div key={kpi.label} className="rounded-xl border border-border bg-surface px-4 py-3">
             <kpi.icon size={14} className="text-accent mb-2" />
             <p className="text-2xl font-black text-text-primary">{kpi.value}</p>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mt-1">
+            <p className="text-2xs font-bold uppercase tracking-wider text-text-muted mt-1">
               {kpi.label}
             </p>
           </div>
@@ -111,7 +111,7 @@ export const ReferralsTab: React.FC = () => {
                     <p className="text-sm font-semibold text-text-primary truncate">
                       {r.barbershopName}
                     </p>
-                    <p className="text-[11px] text-text-muted">
+                    <p className="text-2xs text-text-muted">
                       {r.totalReferrals} convertida
                       {r.totalReferrals !== 1 ? 's' : ''}
                     </p>
@@ -137,19 +137,19 @@ export const ReferralsTab: React.FC = () => {
                   className="flex-1 flex flex-col items-center gap-1 min-w-0"
                   title={`${m.month}: ${m.count}`}
                 >
-                  <span className="text-[9px] text-text-muted">{m.count}</span>
+                  <span className="text-2xs text-text-muted">{m.count}</span>
                   <div
                     className="w-full rounded-t bg-chart-2/70 min-h-[2px]"
                     style={{ height: `${(m.count / maxMonth) * 100}%` }}
                   />
-                  <span className="text-[8px] text-text-muted truncate w-full text-center">
+                  <span className="text-2xs text-text-muted truncate w-full text-center">
                     {m.month.slice(5)}
                   </span>
                 </div>
               ))}
             </div>
           )}
-          <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[11px]">
+          <div className="mt-4 grid grid-cols-3 gap-2 text-center text-2xs">
             <div className="rounded-lg bg-bg border border-border py-2">
               <p className="font-bold text-text-primary">{data.pending}</p>
               <p className="text-text-muted">Pendentes</p>

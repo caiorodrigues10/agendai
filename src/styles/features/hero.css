@@ -1,0 +1,72 @@
+/*
+ * Item C — animações decorativas restauradas nas rotas de topo.
+ *
+ * Regras da rodada: o conteúdo nasce visível na 1ª pintura — nada de
+ * opacity/autoAlpha inicial; a animação é só deslocamento (transform não
+ * gera CLS nem reordena o LCP); roda em @keyframes puro, sem depender de
+ * JS; e some por completo em prefers-reduced-motion.
+ *
+ * "/" — hero-line-rise nas três linhas do H1: implementada no Item C,
+ * revertida por piora de LCP em off@1440 (6 sessões: com 2184/2288/2360 ms
+ * vs sem 2032/2032/2104 ms, ~+220 ms) e REAVALIADA no Item 3 desta rodada:
+ * A/B intercalado de 6 sessões na build atual com delta +20 ms em off@1440
+ * (2008/1988/2012 sem vs 2028/2028/2020 com; off@375 neutro), dentro do
+ * critério ≤ +100 ms — animação MANTIDA (scripts/measurements/item3-ab/).
+ */
+@keyframes hero-line-rise {
+  from {
+    transform: translateY(0.75rem);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.hero-line-rise {
+  animation: hero-line-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-line-rise-2 {
+  animation-delay: 0.08s;
+}
+
+.hero-line-rise-3 {
+  animation-delay: 0.16s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-line-rise {
+    animation: none;
+  }
+}
+
+/* "/planos" — título, subtítulo e alternador mensal/anual. O L2 removeu o
+   motion.* (opacity inicial 0 que empurrava o LCP); aqui só deslocamento
+   leve, com stagger. Medição: custo ~0 (com animação 1980-2036 ms vs sem
+   1964-2004 ms nas células de /planos — dentro do ruído da sessão). */
+@keyframes planos-hero-rise {
+  from {
+    transform: translateY(0.75rem);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.planos-hero-rise {
+  animation: planos-hero-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.planos-hero-rise-2 {
+  animation-delay: 0.08s;
+}
+
+.planos-hero-rise-3 {
+  animation-delay: 0.16s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .planos-hero-rise {
+    animation: none;
+  }
+}

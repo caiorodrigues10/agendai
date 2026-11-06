@@ -539,11 +539,11 @@ export const EquipmentPanel: React.FC = () => {
                           {equip.name}
                         </h3>
                         <div className="mt-2 flex flex-wrap gap-1">
-                          <span className="inline-flex rounded-full border border-border bg-bg px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-text-secondary">
+                          <span className="inline-flex rounded-full border border-border bg-bg px-2 py-0.5 text-2xs font-bold uppercase tracking-wide text-text-secondary">
                             {CATEGORY_LABELS[equip.category] ?? equip.category}
                           </span>
                           <span
-                            className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${CONDITION_STYLES[equip.condition] ?? ''}`}
+                            className={`inline-flex rounded-full border px-2 py-0.5 text-2xs font-bold uppercase tracking-wide ${CONDITION_STYLES[equip.condition] ?? ''}`}
                           >
                             {CONDITION_LABELS[equip.condition] ?? equip.condition}
                           </span>
@@ -686,12 +686,12 @@ export const EquipmentPanel: React.FC = () => {
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-text-primary">{need.name}</span>
                           <span
-                            className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold ${PRIORITY_STYLES[need.priority] ?? ''}`}
+                            className={`inline-flex rounded-full border px-2 py-0.5 text-2xs font-bold ${PRIORITY_STYLES[need.priority] ?? ''}`}
                           >
                             {PRIORITY_LABELS[need.priority] ?? need.priority}
                           </span>
                           <span
-                            className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-bold ${STATUS_STYLES[need.status] ?? ''}`}
+                            className={`inline-flex rounded-full border px-2 py-0.5 text-2xs font-bold ${STATUS_STYLES[need.status] ?? ''}`}
                           >
                             {STATUS_LABELS[need.status] ?? need.status}
                           </span>

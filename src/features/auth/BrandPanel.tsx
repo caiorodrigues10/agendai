@@ -55,13 +55,13 @@ function BackgroundDecor({ reduceMotion }: { reduceMotion: boolean | null }) {
     <>
       <motion.div
         aria-hidden
-        className="absolute -top-28 -left-28 w-[520px] h-[520px] rounded-full blur-[130px] pointer-events-none"
+        className="absolute -top-28 -left-28 w-[560px] h-[560px] rounded-full blur-[130px] pointer-events-none"
         style={{ background: 'rgba(16,185,129,0.18)' }}
         {...drift(22, [0, 60, -25, 0], [0, -35, 40, 0])}
       />
       <motion.div
         aria-hidden
-        className="absolute -bottom-40 -right-24 w-[480px] h-[480px] rounded-full blur-[130px] pointer-events-none"
+        className="absolute -bottom-40 -right-24 w-[520px] h-[520px] rounded-full blur-[130px] pointer-events-none"
         style={{ background: 'color-mix(in srgb, var(--ag-tertiary) 15%, transparent)' }}
         {...drift(26, [0, -50, 35, 0], [0, 40, -25, 0])}
       />

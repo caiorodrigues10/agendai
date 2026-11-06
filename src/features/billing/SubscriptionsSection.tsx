@@ -98,47 +98,47 @@ export const SubscriptionsSection: React.FC = () => {
       {economics && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <div className="bg-surface border border-border rounded-2xl p-4">
-            <p className="text-[10px] uppercase tracking-wider text-text-muted font-bold">
+            <p className="text-2xs uppercase tracking-wider text-text-muted font-bold">
               Economia dos salões (acumulada)
             </p>
             <p className="text-xl font-bold text-success mt-1">
               {brl.format(economics.totalTenantSavingsSoFar)}
             </p>
-            <p className="text-[11px] text-text-muted mt-1">
+            <p className="text-2xs text-text-muted mt-1">
               Desconto do anual vs mensal até agora ({economics.activeYearlySubscriptions}{' '}
               anual(is))
             </p>
           </div>
           <div className="bg-surface border border-border rounded-2xl p-4">
-            <p className="text-[10px] uppercase tracking-wider text-text-muted font-bold">
+            <p className="text-2xs uppercase tracking-wider text-text-muted font-bold">
               Receita deixada de ganhar
             </p>
             <p className="text-xl font-bold text-warning mt-1">
               {brl.format(economics.totalPlatformForegoneSoFar)}
             </p>
-            <p className="text-[11px] text-text-muted mt-1">
+            <p className="text-2xs text-text-muted mt-1">
               Mesmo desconto, na visão da plataforma
             </p>
           </div>
           <div className="bg-surface border border-border rounded-2xl p-4">
-            <p className="text-[10px] uppercase tracking-wider text-text-muted font-bold">
+            <p className="text-2xs uppercase tracking-wider text-text-muted font-bold">
               Desconto projetado / ano
             </p>
             <p className="text-xl font-bold text-text-primary mt-1">
               {brl.format(economics.projectedAnnualDiscount)}
             </p>
-            <p className="text-[11px] text-text-muted mt-1">
+            <p className="text-2xs text-text-muted mt-1">
               {brl.format(economics.yearlySavingsPerYear)} por assinatura anual
             </p>
           </div>
           <div className="bg-surface border border-border rounded-2xl p-4">
-            <p className="text-[10px] uppercase tracking-wider text-text-muted font-bold">
+            <p className="text-2xs uppercase tracking-wider text-text-muted font-bold">
               Mix ativo
             </p>
             <p className="text-xl font-bold text-text-primary mt-1">
               {economics.activeMonthlySubscriptions}m / {economics.activeYearlySubscriptions}a
             </p>
-            <p className="text-[11px] text-text-muted mt-1">
+            <p className="text-2xs text-text-muted mt-1">
               Mensal{' '}
               {economics.monthlyPlanPrice != null ? brl.format(economics.monthlyPlanPrice) : '—'} ·
               Anual{' '}
@@ -170,7 +170,7 @@ export const SubscriptionsSection: React.FC = () => {
                 setStatusFilter(s);
                 setPage(1);
               }}
-              className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-lg text-2xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
                 statusFilter === s
                   ? 'bg-accent text-accent-fg'
                   : 'text-text-muted hover:text-text-primary hover:bg-surface-2'
@@ -195,7 +195,7 @@ export const SubscriptionsSection: React.FC = () => {
         <div className="bg-surface border border-border rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-bg text-text-muted uppercase text-[10px] font-bold tracking-widest border-b border-border">
+              <thead className="bg-bg text-text-muted uppercase text-2xs font-bold tracking-widest border-b border-border">
                 <tr>
                   <th className="px-6 py-3.5">Salão</th>
                   <th className="px-6 py-3.5">Plano</th>
@@ -219,7 +219,7 @@ export const SubscriptionsSection: React.FC = () => {
                           {s.planName ?? '—'}
                         </div>
                         {s.planPrice != null && (
-                          <div className="text-[10px] text-text-muted">
+                          <div className="text-2xs text-text-muted">
                             {brl.format(s.planPrice)}
                             {s.planBillingCycle === 'YEARLY' ? '/ano' : '/mês'}
                           </div>
@@ -228,7 +228,7 @@ export const SubscriptionsSection: React.FC = () => {
                       <td className="px-6 py-4">
                         <SubscriptionStatusBadge status={s.status} />
                         {s.cancelReason && (
-                          <div className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border border-warning/20 bg-warning/10 text-warning">
+                          <div className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-bold uppercase tracking-widest border border-warning/20 bg-warning/10 text-warning">
                             Motivo: {CANCEL_REASON_LABELS[s.cancelReason] ?? s.cancelReason}
                           </div>
                         )}
@@ -251,12 +251,12 @@ export const SubscriptionsSection: React.FC = () => {
                           <button
                             onClick={() => setConfirmCancel({ id: s.barbershopId, name: s.barbershopName })}
                             disabled={cancellingId === s.barbershopId}
-                            className="text-[10px] font-bold uppercase tracking-wider text-danger hover:underline disabled:opacity-50"
+                            className="text-2xs font-bold uppercase tracking-wider text-danger hover:underline disabled:opacity-50"
                           >
                             {cancellingId === s.barbershopId ? '…' : 'Cancelar'}
                           </button>
                         ) : (
-                          <span className="text-[10px] text-text-muted">—</span>
+                          <span className="text-2xs text-text-muted">—</span>
                         )}
                       </td>
                     </tr>

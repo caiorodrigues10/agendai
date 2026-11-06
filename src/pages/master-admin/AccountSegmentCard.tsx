@@ -33,13 +33,13 @@ interface AccountSegmentCardProps {
   onChanged: () => void;
 }
 
-type Preview = {
+interface Preview {
   hiddenModules: string[];
   shownModules: string[];
   lostFeatures: string[];
   gainedFeatures: string[];
   advertisingChange: 'restricted' | 'unrestricted' | 'none';
-};
+}
 
 const emptyPreview: Preview = {
   hiddenModules: [],

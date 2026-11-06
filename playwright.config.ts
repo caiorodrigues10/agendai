@@ -20,7 +20,8 @@ export default defineConfig({
   use: {
     baseURL: process.env.E2E_BASE_URL || 'http://127.0.0.1:4173',
     trace: 'retain-on-failure',
-    screenshot: 'only-on-failure',
+    // PW_SCREENSHOTS=on grava um screenshot por passo (evidência de QA manual).
+    screenshot: process.env.PW_SCREENSHOTS === 'on' ? 'on' : 'only-on-failure',
     serviceWorkers: 'block',
   },
   webServer: process.env.E2E_BASE_URL ? undefined : {
@@ -38,6 +39,17 @@ export default defineConfig({
       name: 'mobile-chromium',
       testIgnore: ['**/master/**'],
       use: { ...devices['Pixel 5'] },
+    },
+    // ITEM 2 — Safari/iOS: fluxos de login no WebKit real (iPhone 13). Só
+    // specs de autenticação; o resto da suíte continua em Chromium.
+    // Nota (macOS 14 arm64): o Playwright ≥1.62 usa um WebKit "frozen" que não
+    // aceita o setting PushAPIEnabled do core → o projeto falha em newPage nesta
+    // combinação; em CI/Ubuntu (WebKit oficial) roda normal. Evidência local:
+    // runner isolado Playwright 1.58.2 (ver scripts/measurements/item2-webkit.md).
+    {
+      name: 'webkit-iphone',
+      testMatch: ['**/login-safari.spec.ts'],
+      use: { ...devices['iPhone 13'] },
     },
   ],
 });

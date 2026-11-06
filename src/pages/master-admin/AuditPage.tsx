@@ -38,7 +38,7 @@ const AuditLogList: React.FC<{
               <span className="text-xs text-text-muted">em</span>
               <span className="text-xs font-medium">{log.resource}</span>
               {log.barbershopId && (
-                <span className="rounded border border-border bg-bg px-1.5 py-0.5 text-[10px] font-bold text-text-secondary min-w-0 truncate">
+                <span className="rounded border border-border bg-bg px-1.5 py-0.5 text-2xs font-bold text-text-secondary min-w-0 truncate">
                   {shops.find((shop) => shop.id === log.barbershopId)?.name ?? 'Salão'}
                 </span>
               )}
@@ -55,7 +55,7 @@ const AuditLogList: React.FC<{
           >
             Detalhes
           </button>
-          <span className="text-[10px] text-text-muted shrink-0">
+          <span className="text-2xs text-text-muted shrink-0">
             {new Date(log.createdAt).toLocaleString('pt-BR')}
           </span>
         </div>

@@ -54,3 +54,7 @@ visual-regression/**/*-failure-diff.png
 
 # Screenshots de aceite (antes/depois) da prévia — anexados na entrega
 screenshots/appearance/
+# Saída bruta da auditoria responsiva (npm run measure:responsive)
+# .md (relatórios legíveis) versionados; JSON/PNG brutos ficam locais.
+scripts/measurements/**/*.json
+scripts/measurements/**/*.png

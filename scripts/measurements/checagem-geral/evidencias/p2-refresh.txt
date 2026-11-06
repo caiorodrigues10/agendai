@@ -1,0 +1,17 @@
+login -> 200 | cookies: refresh_token, saved_refresh_3e861588-39e0-437a-8426-8320bbdfaa60
+   flags: Max-Age=604800 Path=/api/auth HttpOnly SameSite=Lax
+   flags: Max-Age=604800 Path=/api/auth HttpOnly SameSite=Lax
+cookie de sessao presente: true
+
+== refresh valido (rotacao) ==
+-> 200 {"user":{"id":"3e861588-39e0-437a-8426-8320bbdfaa60","name":"Dono Fixture Perf","email":"perf.owner@agendai.local","role":"owner","barbersho
+rotacionou: true
+
+== reuse de token ja rotacionado (deve 401) ==
+-> 200 {"user":{"id":"3e861588-39e0-437a-8426-8320bbdfaa60","name":"Dono Fixture Perf","email":"perf.owner@agendai.local","role":"owner","barbershopId":"1ac5be50-6ce7-464e-bc38-ab18cf24ae
+
+== rate limit de refresh por sessao (ate 429) ==
+distribuicao: {"200":118,"429":1}
+429 em: 119 | corpo: {"success":false,"message":"Muitas requisições. Tente novamente em alguns instantes.","retryAfter":null,"correlationId":"ed19ef55-4edd-49d5-ac4c-337ed4f0fac8"}
+
+fim

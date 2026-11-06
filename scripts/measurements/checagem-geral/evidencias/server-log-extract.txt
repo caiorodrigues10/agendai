@@ -1,0 +1,18 @@
+ Cron de DailyWeatherLog agendado
+ Cron de cobrança pós-trial agendado
+ Cron de lembretes de agendamento agendado
+ Cron de publicação de posts agendado
+ Deposit expiration cron scheduled (every minute)
+ Email job failed
+ Email reminders scheduler registered (18:00 America/Sao_Paulo)
+ Email worker started
+ Email worker started (on-demand)
+ Email worker stopped (idle)
+ Resend rejeitou envio
+ Route GET:/api/health not found
+ Waitlist expiration cron scheduled (every 5 minutes)
+ WhatsApp worker started
+ WhatsApp worker stopped (idle)
+ [CleanOldLogs] Cron de limpeza de logs (LGPD) agendado
+ [SessionsCleanup] Cron de limpeza de sessões agendado
+ incoming request

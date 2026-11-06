@@ -108,7 +108,7 @@ export const WorkSummaryPage: React.FC = () => {
               onClick={() => navigate(`/master/tickets/${t.id}`)}
               className="w-full text-left flex items-center gap-3 p-3 rounded-lg hover:bg-surface-2 transition-colors"
             >
-              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${PRIORITY_COLORS[t.priority] ?? ''}`}>
+              <span className={`px-2 py-0.5 rounded text-2xs font-bold ${PRIORITY_COLORS[t.priority] ?? ''}`}>
                 {t.priority}
               </span>
               <div className="flex-1 min-w-0">
@@ -133,7 +133,7 @@ export const WorkSummaryPage: React.FC = () => {
               onClick={() => navigate(`/master/tickets/${t.id}`)}
               className="w-full text-left flex items-center gap-3 p-3 rounded-lg hover:bg-surface-2 transition-colors"
             >
-              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${PRIORITY_COLORS[t.priority] ?? ''}`}>
+              <span className={`px-2 py-0.5 rounded text-2xs font-bold ${PRIORITY_COLORS[t.priority] ?? ''}`}>
                 {t.priority}
               </span>
               <div className="flex-1 min-w-0">

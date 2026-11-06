@@ -82,7 +82,7 @@ export const OperationModeSection: React.FC<OperationModeSectionProps> = ({
                 {opt.icon}
               </div>
               <span className="text-sm font-bold">{opt.title}</span>
-              <span className="text-[11px] leading-tight text-text-muted">{opt.description}</span>
+              <span className="text-2xs leading-tight text-text-muted">{opt.description}</span>
             </button>
           );
         })}

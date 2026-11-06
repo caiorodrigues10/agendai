@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/media-has-caption -- miniatura silenciosa; o player completo é aberto no detalhe */
-import { LuPlay as Play, LuExternalLink as ExternalLink } from 'react-icons/lu';
+import { LuPlay as Play, LuExternalLink as ExternalLink, LuMessageCircle as MessageCircle } from 'react-icons/lu';
 import type { FeedPost, ShopSettings, Service } from '../../types';
 import { listSocialLinks } from '../../utils/socialLinks';
 import { formatOabRegistration } from '../../utils/oabRegistration';
@@ -70,8 +70,12 @@ export function ProfileGrid({
               <Play size={16} fill="currentColor" aria-hidden />
             </span>
           )}
-          <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/70 to-transparent px-2 pb-2 pt-5 text-[10px] sm:text-xs text-white">
-            {post.title || 'Publicação'}
+          <span className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-gradient-to-t from-black/70 to-transparent px-2 pb-2 pt-5 text-[10px] sm:text-xs text-white">
+            <span className="truncate">{post.title || 'Publicação'}</span>
+            <span className="flex shrink-0 items-center gap-1">
+              <MessageCircle size={12} aria-hidden />
+              {post.commentsCount ?? 0}
+            </span>
           </span>
         </button>
       ))}

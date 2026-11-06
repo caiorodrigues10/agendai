@@ -1,0 +1,34 @@
+### docs:check
+
+> agendai@0.0.0 docs:check
+> node scripts/check-docs.mjs
+
+docs:check OK (frontend)
+EXIT_DOCS=0
+### test:contract
+
+> agendai@0.0.0 test:contract
+> node --test scripts/check-api-contract.test.mjs
+
+✔ compares registered routes, prefix and method; detects endpoint drift (24.101583ms)
+✔ expands factories, query suffixes, multipart and default GET (4.02225ms)
+✔ skips fetch(url) when url is the enclosing transport parameter (1.9225ms)
+✔ fails closed on unknown URL expressions and dynamic methods (2.10975ms)
+✔ resolves local path helpers as arguments and template spans (1.421084ms)
+✔ expande segmento final dinâmico tipado como union local (2.648792ms)
+✔ sem union declarada o segmento final dinâmico segue caindo como antes (1.047458ms)
+✔ follows nested route delegations and const-string template URLs (5.447167ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 406.972667
+EXIT_CONTRACT=0
+### lint CI
+EXIT_LINT_CI=1
+  0 errors and 2 warnings potentially fixable with the `--fix` option.
+
+ESLint found too many warnings (maximum: 215).

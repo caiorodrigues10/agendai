@@ -37,7 +37,7 @@ interface BarbershopContextValue {
 // funcionarem também fora do provider — com fallback para o default.
 export const BarbershopContext = createContext<BarbershopContextValue | undefined>(undefined);
 
-function isShopStaffRole(role?: string) {
+export function isShopStaffRole(role?: string) {
   const normalized = (role || '').toUpperCase();
   return normalized === 'OWNER' || normalized === 'EMPLOYEE';
 }

@@ -153,7 +153,7 @@ export const ContactPage: React.FC = () => {
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-accent/20 bg-accent/10 text-accent">
                 <Headphones size={24} className="h-5 w-5" />
               </div>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-accent">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/10 px-2.5 py-1 text-2xs font-black uppercase tracking-wider text-accent">
                 <span className="h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_10px_currentColor]" /> Online
               </span>
             </div>
@@ -185,7 +185,7 @@ export const ContactPage: React.FC = () => {
               </p>
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
-                className="mt-3 inline-flex items-center gap-2 text-lg font-bold text-white transition hover:text-accent"
+                className="mt-3 inline-flex min-h-11 items-center gap-2 text-lg font-bold text-white transition hover:text-accent lg:min-h-0"
               >
                 <Mail size={24} className="h-5 w-5 text-accent" />
                 {CONTACT_EMAIL}
@@ -228,7 +228,7 @@ export const ContactPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate('/planos')}
-                className="group mt-4 inline-flex items-center gap-2 text-sm font-black text-white transition hover:text-accent"
+                className="group mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-black text-white transition hover:text-accent lg:min-h-0"
               >
                 Ver planos
                 <ArrowRight size={24} className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -293,7 +293,7 @@ export const ContactPage: React.FC = () => {
                           <TopicIcon className="h-4 w-4" />
                         </span>
                         <span className="block text-sm font-bold">{item.label}</span>
-                        <span className="mt-0.5 block text-[10px] font-medium text-text-muted">
+                        <span className="mt-0.5 block text-2xs font-medium text-text-muted">
                           {item.hint}
                         </span>
                       </button>
@@ -301,7 +301,7 @@ export const ContactPage: React.FC = () => {
                   })}
                 </div>
                 {errors.topic && (
-                  <p className="mt-2 flex items-center gap-1 text-[11px] text-red-400">
+                  <p className="mt-2 flex items-center gap-1 text-2xs text-red-400">
                     <AlertCircle size={10} />
                     {errors.topic.message}
                   </p>
@@ -324,7 +324,7 @@ export const ContactPage: React.FC = () => {
                     {...register('name')}
                   />
                   {errors.name && (
-                    <p className="mt-1.5 flex items-center gap-1 text-[11px] text-red-400">
+                    <p className="mt-1.5 flex items-center gap-1 text-2xs text-red-400">
                       <AlertCircle size={10} />
                       {errors.name.message}
                     </p>
@@ -346,7 +346,7 @@ export const ContactPage: React.FC = () => {
                     {...register('email')}
                   />
                   {errors.email && (
-                    <p className="mt-1.5 flex items-center gap-1 text-[11px] text-red-400">
+                    <p className="mt-1.5 flex items-center gap-1 text-2xs text-red-400">
                       <AlertCircle size={10} />
                       {errors.email.message}
                     </p>
@@ -398,7 +398,7 @@ export const ContactPage: React.FC = () => {
                   />
                 </div>
                 {errors.message && (
-                  <p className="mt-1.5 flex items-center gap-1 text-[11px] text-red-400">
+                  <p className="mt-1.5 flex items-center gap-1 text-2xs text-red-400">
                     <AlertCircle size={10} />
                     {errors.message.message}
                   </p>

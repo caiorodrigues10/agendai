@@ -8,7 +8,7 @@ export const ThemeToggle: React.FC<{ className?: string }> = ({ className = '' }
     <button
       type="button"
       onClick={toggleTheme}
-      className={`p-2 rounded-lg bg-surface border border-border text-text-secondary hover:text-accent hover:border-accent/40 transition-colors ${className}`}
+      className={`p-2 min-h-11 min-w-11 lg:min-h-0 lg:min-w-0 inline-flex items-center justify-center rounded-lg bg-surface border border-border text-text-secondary hover:text-accent hover:border-accent/40 transition-colors ${className}`}
       title={resolvedTheme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
       aria-label="Alternar tema"
     >
