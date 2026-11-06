@@ -66,6 +66,16 @@ const FORMAT_OPTIONS: { id: PostFormat; label: string; hint: string; icon: React
   { id: 'story', label: 'Story', hint: '9:16', icon: <Smartphone size={16} /> },
 ];
 
+/**
+ * Fallback do formato padrão por modelo — espelho de `defaultPostFormat()` do
+ * back (price-split → 4:5, demais → 1:1), usado só antes do catálogo chegar.
+ * Enquanto a lista carrega/erro, vale este valor; depois, o `defaultFormat`
+ * vindo de `GET /api/posts/templates` (fonte única, ver BUSINESS_RULES.md).
+ * A escolha manual no card "Formato" sempre prevalece sobre os dois.
+ */
+const defaultFormatFor = (templateKey: string): PostFormat =>
+  templateKey === 'price-split' ? 'portrait' : 'square';
+
 const MODE_OPTIONS: { id: PostMode; label: string }[] = [
   { id: 'queue', label: 'Fila' },
   { id: 'appointments', label: 'Agenda' },
@@ -192,7 +202,11 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   const [objectiveId, setObjectiveId] = useState<ObjectiveId | null>(draft?.objectiveId ?? null);
   const [templateKey, setTemplateKey] = useState(draft?.templateKey ?? post?.templateKey ?? 'agenda-aberta');
   const [paletteKey, setPaletteKey] = useState(draft?.paletteKey ?? post?.paletteKey ?? 'brand');
-  const [format, setFormat] = useState<PostFormat>(draft?.format ?? post?.format ?? 'square');
+  const [format, setFormat] = useState<PostFormat>(
+    draft?.format ?? post?.format ?? defaultFormatFor(draft?.templateKey ?? post?.templateKey ?? 'agenda-aberta')
+  );
+  /** Formato escolhido à mão no card "Formato" — trava o default automático. */
+  const [formatTouched, setFormatTouched] = useState(Boolean(draft?.format ?? post?.format));
   const [postMode, setPostMode] = useState<PostMode>(draft?.postMode ?? post?.postMode ?? 'both');
   const [type, setType] = useState<PostType>(draft?.type ?? post?.type ?? 'haircut');
   const [title, setTitle] = useState(draft?.title ?? post?.title ?? '');
@@ -445,11 +459,21 @@ export const PostEditor: React.FC<PostEditorProps> = ({
     previewSeqRef.current += 1;
   }, []);
 
+  /** Default do formato: `defaultFormat` do catálogo (fonte única) + fallback local. */
+  const defaultFormatOf = (key: string): PostFormat =>
+    templates.find(t => t.key === key)?.defaultFormat ?? defaultFormatFor(key);
+
+  /** Troca de modelo: aplica o formato padrão só quando o usuário não escolheu. */
+  const applyTemplate = (key: string) => {
+    setTemplateKey(key);
+    if (!formatTouched) setFormat(defaultFormatOf(key));
+  };
+
   const pickObjective = (id: ObjectiveId) => {
     const obj = OBJECTIVES.find(o => o.id === id);
     if (!obj) return;
     setObjectiveId(id);
-    setTemplateKey(obj.templateKey);
+    applyTemplate(obj.templateKey);
     setType(obj.type);
     setTab('content');
   };
@@ -641,7 +665,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   };
 
   const handleSelectTemplate = (key: string) => {
-    setTemplateKey(key);
+    applyTemplate(key);
     setShowTemplatePicker(false);
   };
 
@@ -1120,7 +1144,10 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                       <button
                         key={f.id}
                         type="button"
-                        onClick={() => setFormat(f.id)}
+                        onClick={() => {
+                          setFormat(f.id);
+                          setFormatTouched(true);
+                        }}
                         className={`flex flex-col items-center gap-1.5 rounded-xl border p-3 transition ${
                           format === f.id
                             ? 'border-accent bg-accent/10 text-accent'
@@ -1179,7 +1206,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                                 <button
                                   key={t.key}
                                   type="button"
-                                  onClick={() => setTemplateKey(t.key)}
+                                  onClick={() => handleSelectTemplate(t.key)}
                                   className={`rounded-lg px-2.5 py-1.5 text-2xs font-semibold transition ${
                                     templateKey === t.key
                                       ? 'bg-accent text-accent-fg'

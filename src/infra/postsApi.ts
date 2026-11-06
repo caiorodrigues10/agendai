@@ -74,6 +74,11 @@ export interface PostTemplateDef {
   photoMode: PostPhotoMode;
   /** Chave da imagem ilustrativa padrão (ex.: salon/barber/beauty) quando photoMode = 'optional'. */
   stockImageKey?: string | null;
+  /**
+   * Formato padrão da arte do modelo (fonte única = catálogo do back;
+   * regra e paridade em `docs/agents/BUSINESS_RULES.md`).
+   */
+  defaultFormat?: 'square' | 'portrait' | 'story';
 }
 
 export interface PostPaletteDef {

@@ -75,4 +75,24 @@ describe('validateCoverFile (validação instantânea do uploader)', () => {
     expect(result.ok).toBe(false);
     expect(result.error).toContain('Não foi possível ler a imagem');
   });
+
+  it('alerta capa muito alongada (3000×600) com sugestão de foto horizontal', () => {
+    const warnings = coverImageWarnings(3000, 600).map(w => w.text).join(' ');
+    expect(warnings).toContain('muito alongada');
+    expect(warnings).toContain('16:9');
+    expect(warnings).toContain('1920×1080');
+  });
+
+  it('alerta capa vertical (600×3000) com sugestão de foto deitada', () => {
+    const warnings = coverImageWarnings(600, 3000).map(w => w.text).join(' ');
+    expect(warnings).toContain('vertical');
+    expect(warnings).toContain('horizontal (16:9)');
+    expect(warnings).toContain('foto deitada');
+  });
+
+  it('proporção fora do ideal mas sem extremo (1920×1200) não cai no alerta de alongada', () => {
+    const warnings = coverImageWarnings(1920, 1200).map(w => w.text).join(' ');
+    expect(warnings).not.toContain('muito alongada');
+    expect(warnings).toContain('16:9');
+  });
 });
