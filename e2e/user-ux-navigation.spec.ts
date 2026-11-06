@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { TAB_GROUPS, MOBILE_PRIMARY_TAB_IDS } from '../src/config/tabRegistry';
+import { canAccessTab, TAB_GROUPS, MOBILE_PRIMARY_TAB_IDS } from '../src/config/tabRegistry';
 
 const shopId = '11111111-1111-4111-8111-111111111111';
 const owner = {
@@ -93,7 +93,13 @@ test('todos os menus do proprietário abrem e a navegação continua disponível
     exact: true,
   });
   await expect(nav).toBeVisible({ timeout: 45_000 });
-  for (const item of TAB_GROUPS.flatMap(group => group.tabs)) {
+  // Só as abas que existem para o contexto do fixture: o salão do mock não
+  // declara segmento (vira OTHER) e o dono não tem a feature `caseManagement`,
+  // então a aba "Processos" não existe na navegação.
+  const accessibleTabs = TAB_GROUPS.flatMap(group => group.tabs).filter(tab =>
+    canAccessTab(tab.id, owner.role, { segment: 'OTHER', permissions: [] })
+  );
+  for (const item of accessibleTabs) {
     await test.step(item.label, async () => {
       let container = nav;
       if (mobile && !MOBILE_PRIMARY_TAB_IDS.includes(item.id as never)) {

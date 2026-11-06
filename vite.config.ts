@@ -143,6 +143,9 @@ export default defineConfig(() => {
 						// Páginas públicas carregadas por lazy(): sem elas no precache a
 						// rota cai no ErrorBoundary offline (evidência do P1).
 						'assets/{FeaturesPage,AiPredictivePage,SchedulingPage,AboutPage,ContactPage,PrivacyPolicyPage,TermsPage,ForgotPasswordPage,NotFoundPage,CommercialIntentPage,PricingPersuasionCharts,BarChart,ThemeToggle}-*.js',
+						// Páginas e blocos públicos que as rotas acima importam: sem eles
+						// no precache o import dinâmico falha offline (evidência do P1).
+						'assets/{PublicPostPage,PublicProductPage,PublicReviewPage,PublicNpsPage,PublicAppointmentManagePage,PublicOwnerInvitePage,ResetPasswordPage,QueueStatusCard,SegmentPicker,SeoHead,siteUrl,Tabs,Field,DynamicIcon,workbox-window.prod.es5}-*.js',
 					],
 					runtimeCaching: [
 						{

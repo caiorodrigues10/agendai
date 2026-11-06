@@ -10,6 +10,7 @@ import {
   type TabDef,
   type TabGroup,
 } from '../../config/tabRegistry';
+import { TAB_ICONS } from '../../config/tabIcons';
 import type { OperationMode } from '../../types';
 import type { BusinessSegment } from '../../shared/segments';
 import { useSegmentLabels } from '../../hooks/useSegmentLabels';
@@ -268,6 +269,7 @@ function DesktopNavigationItem({
   active: boolean;
   onNavigate: (tabId: string) => void;
 }) {
+  const TabIcon = TAB_ICONS[tab.icon];
   return (
     <button
       type="button"
@@ -290,7 +292,7 @@ function DesktopNavigationItem({
           active ? 'text-accent' : 'text-text-muted group-hover:text-accent'
         }`}
       >
-        <tab.icon size={19} aria-hidden="true" />
+        <TabIcon size={19} aria-hidden="true" />
       </span>
       <span className="font-display text-sm font-semibold">{tab.label}</span>
     </button>
@@ -306,6 +308,7 @@ function MobileNavigationItem({
   active: boolean;
   onNavigate: (tabId: string) => void;
 }) {
+  const TabIcon = TAB_ICONS[tab.icon];
   return (
     <button
       type="button"
@@ -322,7 +325,7 @@ function MobileNavigationItem({
           active ? 'text-accent' : 'text-text-muted group-hover:text-accent'
         }`}
       >
-        <tab.icon size={20} aria-hidden="true" />
+        <TabIcon size={20} aria-hidden="true" />
       </span>
       <span className="max-w-full truncate leading-tight">{tab.label}</span>
     </button>
@@ -338,6 +341,7 @@ function MoreNavigationItem({
   active: boolean;
   onNavigate: (tabId: string) => void;
 }) {
+  const TabIcon = TAB_ICONS[tab.icon];
   return (
     <button
       type="button"
@@ -354,7 +358,7 @@ function MoreNavigationItem({
           active ? 'text-accent' : 'text-text-muted'
         }`}
       >
-        <tab.icon size={20} aria-hidden="true" />
+        <TabIcon size={20} aria-hidden="true" />
       </span>
       <span className="min-w-0 font-display text-sm font-semibold [overflow-wrap:anywhere]">
         {tab.label}

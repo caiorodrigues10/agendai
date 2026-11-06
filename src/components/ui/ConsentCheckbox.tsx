@@ -76,7 +76,7 @@ export const ConsentCheckbox: React.FC<ConsentCheckboxProps> = ({
               href={helpLink.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-1 inline-flex items-center gap-1 text-2xs text-accent hover:underline"
+              className="mt-1 inline-flex min-h-11 items-center gap-1 text-2xs text-accent hover:underline"
             >
               {helpLink.label}
               <HelpCircle size={10} />

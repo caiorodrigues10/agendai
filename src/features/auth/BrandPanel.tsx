@@ -307,12 +307,12 @@ export const BrandPanel: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
           >
-            <h1 className="font-sans text-3xl xl:text-4xl font-extrabold leading-[1.08] tracking-tight">
+            <h2 className="font-sans text-3xl xl:text-4xl font-extrabold leading-[1.08] tracking-tight">
               Seu salão,{' '}
               <span className="text-transparent bg-clip-text bg-linear-to-r from-accent/80 via-accent to-accent">
                 no controle.
               </span>
-            </h1>
+            </h2>
             <p className="mt-3 text-text-secondary text-sm max-w-md leading-relaxed font-light">
               Fila digital, agenda, financeiro e clientes — tudo em um painel que trabalha por
               você, em tempo real.

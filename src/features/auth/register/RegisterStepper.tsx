@@ -59,7 +59,7 @@ export const RegisterStepper: React.FC<RegisterStepperProps> = ({
                 {complete ? <Check size={14} /> : item.step}
               </div>
               <span
-                className={`text-[10px] font-bold uppercase tracking-wider ${
+                className={`text-xs font-bold uppercase tracking-wider ${
                   active ? 'text-text-primary' : 'text-text-muted'
                 }`}
               >
@@ -89,7 +89,7 @@ export const RegisterStepper: React.FC<RegisterStepperProps> = ({
           );
         })}
       </ol>
-      <p className="mt-2 text-center text-[10px] font-bold uppercase tracking-wider text-text-muted">
+      <p className="mt-2 text-center text-xs font-bold uppercase tracking-wider text-text-muted">
         Etapa {current} de {steps.length}
       </p>
     </nav>

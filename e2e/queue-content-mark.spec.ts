@@ -35,7 +35,7 @@ test('fila pública ?tab=appointments emite mark de conteúdo útil e não tem "
   await page.goto(`/queue/${SHOP_ID}?tab=appointments`);
 
   // Conteúdo real (aba Agenda) visível.
-  await expect(page.getByRole('button', { name: 'Agenda', exact: true })).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Agenda', exact: true })).toBeVisible();
 
   // Sem texto visível "Carregando..." (sr-only é permitido).
   const visibleCarregando = await page.evaluate(() => {
