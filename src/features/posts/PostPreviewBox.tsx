@@ -34,6 +34,16 @@ interface PostPreviewBoxProps {
   className?: string;
 }
 
+function PreviewImageStatus({ stale, error, loading, errorMessage, onRetry }: Pick<PostPreviewBoxProps, 'stale' | 'error' | 'loading' | 'errorMessage' | 'onRetry'>) {
+  return <>
+    {stale && !error && !loading && (
+      <span className="absolute right-2 top-2 rounded-full bg-warning/20 px-2 py-0.5 text-2xs font-bold text-warning">Desatualizada</span>
+    )}
+    {loading && <span role="status" className="absolute bottom-3 left-3 rounded-lg bg-surface px-3 py-2 text-xs font-semibold text-text-primary shadow">Atualizando prévia…</span>}
+    {error && <div role="alert" className="absolute inset-x-2 bottom-2 rounded-xl border border-border bg-surface p-3 text-sm text-text-primary shadow"><p>{errorMessage}</p>{onRetry && <button type="button" onClick={onRetry} className="mt-1 min-h-11 font-semibold text-accent">Tentar prévia novamente</button>}</div>}
+  </>;
+}
+
 export const PostPreviewBox: React.FC<PostPreviewBoxProps> = ({
   format,
   previewUrl,
@@ -72,13 +82,7 @@ export const PostPreviewBox: React.FC<PostPreviewBoxProps> = ({
             alt="Prévia do post"
             className="h-full w-full object-contain"
           />
-          {stale && !error && !loading && (
-            <span className="absolute right-2 top-2 rounded-full bg-warning/20 px-2 py-0.5 text-2xs font-bold text-warning">
-              Desatualizada
-            </span>
-          )}
-          {loading && <span role="status" className="absolute bottom-3 left-3 rounded-lg bg-surface px-3 py-2 text-xs font-semibold text-text-primary shadow">Atualizando prévia…</span>}
-          {error && <div role="alert" className="absolute inset-x-2 bottom-2 rounded-xl border border-border bg-surface p-3 text-sm text-text-primary shadow"><p>{errorMessage}</p>{onRetry && <button type="button" onClick={onRetry} className="mt-1 min-h-11 font-semibold text-accent">Tentar prévia novamente</button>}</div>}
+          <PreviewImageStatus stale={stale} error={error} loading={loading} errorMessage={errorMessage} onRetry={onRetry} />
         </div>
       ) : (
         <div className="flex h-full flex-col items-center justify-center gap-2 p-4 text-center text-text-muted">

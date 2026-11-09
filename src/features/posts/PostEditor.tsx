@@ -234,7 +234,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   // Contexto cru (não o useBarbershop): o editor sobe fora do provider nos
   // testes/Storybook — aqui falta de serviços só esconde o botão de importar.
   const shopContext = useContext(BarbershopContext);
-  const shopServices = shopContext?.services ?? [];
+  const shopServices = useMemo(() => shopContext?.services ?? [], [shopContext?.services]);
   const shopSettings = shopContext?.settings ?? null;
 
   const [legalPost, setLegalPost] = useState<LegalPostPayload>(() => draft?.legalPost ?? post?.designOptions?.legalPost ?? {
@@ -491,7 +491,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
         if (seq === previewSeqRef.current) setPreviewLoading(false);
       }
     }, 500);
-  }, [barbershopId, showToast]);
+  }, [barbershopId]);
 
   useEffect(() => {
     liveRef.current = { templateKey, paletteKey, format, title, ctaText, primaryMediaId, secondaryMediaId, postMode, type, priceSplit: priceSplitPayload, designOptions };

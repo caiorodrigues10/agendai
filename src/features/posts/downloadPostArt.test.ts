@@ -6,7 +6,7 @@ it('baixa a arte hospedada usando blob e mantém a extensão do formato real', a
   vi.useFakeTimers();
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, blob: async () => new Blob(['image'], { type: 'image/jpeg' }) }));
   const create = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:post-art');
-  const revoke = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+  const revoke = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
   const clicked: { href: string; filename: string }[] = [];
   vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function () { clicked.push({ href: this.href, filename: this.download }); });
   await downloadPostArt('https://cdn.example.com/post.jpg', 'post.png');

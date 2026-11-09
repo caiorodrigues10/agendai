@@ -204,6 +204,9 @@ describe('PostEditor — advocacia e recuperação de erros', () => {
     expect(mockedPostsApi.create).toHaveBeenCalledWith(expect.objectContaining({ designOptions: expect.objectContaining({ legalPost: expect.objectContaining(legalPost) }) }));
   });
 
+});
+
+describe('PostEditor — composição e publicação jurídica', () => {
   it('adapta os campos à finalidade do modelo e preserva o conteúdo ao trocar de composição', async () => {
     mockedPostsApi.templates.mockResolvedValue([
       LEGAL_TEMPLATE,
@@ -276,6 +279,9 @@ describe('PostEditor — advocacia e recuperação de erros', () => {
     expect(props.onSaved).not.toHaveBeenCalled();
   });
 
+});
+
+describe('PostEditor — recuperação de erros de publicação e prévia', () => {
   it('reutiliza o rascunho criado quando a primeira tentativa de publicar falha', async () => {
     mockedPostsApi.create.mockResolvedValue({ id: 'created-once' } as never);
     mockedPostsApi.publish.mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce({ id: 'created-once' } as never);

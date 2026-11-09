@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { useFieldArray, useForm, useWatch, type FieldErrors, type UseFormRegister } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Field } from '../../components/ui/Field';
@@ -95,15 +95,15 @@ const MODEL_FIELDS: Record<string, LegalModelFields> = {
 
 export function LegalPostFields({ templateKey, value, onChange, validationAttempt = 0 }: { templateKey: string; value: LegalPostPayload; onChange: (next: LegalPostPayload) => void; validationAttempt?: number }) {
   const labels = MODEL_FIELDS[templateKey] ?? MODEL_FIELDS['advocacia-cartao'];
-  const { register, control, watch, trigger, formState: { errors } } = useForm<LegalPostPayload>({
+  const { register, control, trigger, formState: { errors } } = useForm<LegalPostPayload>({
     defaultValues: { eyebrow: '', summary: '', highlight: '', ...value, contactLayout: value.contactLayout ?? 'complete' }, resolver: zodResolver(legalPostSchemaFor(templateKey)), mode: 'onBlur',
   });
   const { fields, append, remove } = useFieldArray({ control, name: 'areas' });
+  const values = useWatch({ control });
   const blocksError = errors.areas?.root?.message ?? errors.areas?.message;
   useEffect(() => {
-    const subscription = watch(next => onChange(next as LegalPostPayload));
-    return () => subscription.unsubscribe();
-  }, [watch, onChange]);
+    onChange(values as LegalPostPayload);
+  }, [values, onChange]);
   useEffect(() => {
     if (validationAttempt) void trigger(undefined, { shouldFocus: true });
   }, [validationAttempt, trigger]);
@@ -150,9 +150,15 @@ export function LegalPostFields({ templateKey, value, onChange, validationAttemp
           <option value="complete">Completo · todos os dados</option>
         </select>
       </Field>
-      <Field label="Contato na imagem" error={errors.contact?.message}><input id="legal-contact" maxLength={40} {...register('contact')} className={input} placeholder="Telefone ou WhatsApp profissional" /></Field>
-      <Field label="Endereço (opcional)" error={errors.address?.message}><input id="legal-address" maxLength={100} {...register('address')} className={input} /></Field>
-      <Field label="Site ou e-mail (opcional)" error={errors.website?.message}><input id="legal-website" maxLength={80} {...register('website')} className={input} /></Field>
+      <LegalContactFields register={register} errors={errors} input={input} />
     </section>
   );
+}
+
+function LegalContactFields({ register, errors, input }: { register: UseFormRegister<LegalPostPayload>; errors: FieldErrors<LegalPostPayload>; input: string }) {
+  return <>
+    <Field label="Contato na imagem" error={errors.contact?.message}><input id="legal-contact" maxLength={40} {...register('contact')} className={input} placeholder="Telefone ou WhatsApp profissional" /></Field>
+    <Field label="Endereço (opcional)" error={errors.address?.message}><input id="legal-address" maxLength={100} {...register('address')} className={input} /></Field>
+    <Field label="Site ou e-mail (opcional)" error={errors.website?.message}><input id="legal-website" maxLength={80} {...register('website')} className={input} /></Field>
+  </>;
 }
