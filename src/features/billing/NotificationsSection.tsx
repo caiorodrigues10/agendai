@@ -133,7 +133,7 @@ export const NotificationsSection: React.FC = () => {
         <div className="bg-surface border border-border rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-bg text-text-muted uppercase text-[10px] font-bold tracking-widest border-b border-border">
+              <thead className="bg-bg text-text-muted uppercase text-2xs font-bold tracking-widest border-b border-border">
                 <tr>
                   <th className="px-6 py-3.5">Notificação</th>
                   <th className="px-6 py-3.5 hidden md:table-cell">Tipo</th>
@@ -167,7 +167,7 @@ export const NotificationsSection: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 text-right">
                         {n.read ? (
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
+                          <span className="text-2xs font-bold uppercase tracking-widest text-text-muted">
                             Lida
                           </span>
                         ) : (

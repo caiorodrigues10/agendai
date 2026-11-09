@@ -1,0 +1,48 @@
+### typecheck
+
+> agendai@0.0.0 typecheck
+> tsc --noEmit
+
+EXIT_TYPECHECK=0
+### lint
+     |                          ^^^^ Avoid calling setState() directly within an effect
+  45 |
+  46 |   if (loading) {
+  47 |     return (  react-hooks/set-state-in-effect
+  181:35  warning  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-explicit-any
+
+/Users/viniciusvieira/agendai-projeto/frontend/src/tests/setup.ts
+  42:13  warning  Unexpected empty method 'observe'          @typescript-eslint/no-empty-function
+  43:15  warning  Unexpected empty method 'unobserve'        @typescript-eslint/no-empty-function
+  44:16  warning  Unexpected empty method 'disconnect'       @typescript-eslint/no-empty-function
+  49:13  warning  Unexpected empty method 'observe'          @typescript-eslint/no-empty-function
+  50:15  warning  Unexpected empty method 'unobserve'        @typescript-eslint/no-empty-function
+  51:16  warning  Unexpected empty method 'disconnect'       @typescript-eslint/no-empty-function
+  74:16  warning  '_a' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  75:16  warning  '_i' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  76:13  warning  '_e' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  77:19  warning  '_t' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  78:17  warning  '_v' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  79:19  warning  '_wh' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  80:17  warning  '_wt' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  81:20  warning  '_wiv' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  82:15  warning  '_l' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  83:17  warning  '_lid' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  84:13  warning  '_d' is assigned a value but never used    @typescript-eslint/no-unused-vars
+
+/Users/viniciusvieira/agendai-projeto/frontend/src/utils/errorMessage.ts
+  104:8  warning  Function 'getErrorMessage' has a complexity of 56. Maximum allowed is 20  complexity
+
+/Users/viniciusvieira/agendai-projeto/frontend/src/utils/logger.ts
+   6:18  warning  Unexpected console statement. Only these console methods are allowed: warn, error  no-console
+  15:18  warning  Unexpected console statement. Only these console methods are allowed: warn, error  no-console
+  18:18  warning  Unexpected console statement. Only these console methods are allowed: warn, error  no-console
+
+/Users/viniciusvieira/agendai-projeto/frontend/src/utils/schedulingUtils.ts
+   62:27  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  177:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 480 problems (0 errors, 480 warnings)
+  0 errors and 2 warnings potentially fixable with the `--fix` option.
+
+EXIT_LINT=0

@@ -95,7 +95,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
             data-testid="active-shop-notice"
             className="flex min-w-0 flex-1 flex-wrap items-center justify-center gap-1.5"
           >
-            <span className="inline-flex min-w-0 items-center gap-1.5 text-[11px] text-text-secondary">
+            <span className="inline-flex min-w-0 items-center gap-1.5 text-2xs text-text-secondary">
               <Store size={13} aria-hidden="true" className="shrink-0" />
               <span className="truncate">
                 Você está no salão{' '}
@@ -106,12 +106,12 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenLogin, onLogo
               type="button"
               onClick={() => void handleSwitchBack()}
               disabled={switchingBack}
-              className="shrink-0 rounded-lg border border-border px-2 py-1 text-[11px] font-semibold text-text-secondary hover:bg-surface-2 hover:text-text-primary disabled:opacity-50"
+              className="shrink-0 rounded-lg border border-border px-2 py-1 text-2xs font-semibold text-text-secondary hover:bg-surface-2 hover:text-text-primary disabled:opacity-50"
             >
               {switchingBack ? 'Voltando…' : 'Voltar ao salão original'}
             </button>
             {switchBackError && (
-              <span role="alert" className="w-full text-center text-[11px] text-danger">
+              <span role="alert" className="w-full text-center text-2xs text-danger">
                 {switchBackError}
               </span>
             )}

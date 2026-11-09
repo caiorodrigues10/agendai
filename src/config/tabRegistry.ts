@@ -1,37 +1,40 @@
-import type { IconType } from 'react-icons';
-import {
-  LuBuilding2,
-  LuCalendarDays,
-  LuChartColumn,
-  LuCircleHelp,
-  LuContact,
-  LuCreditCard,
-  LuGift,
-  LuFolderOpen,
-  LuImage,
-  LuLayoutDashboard,
-  LuLink,
-  LuListChecks,
-  LuMegaphone,
-  LuRocket,
-  LuScissors,
-  LuSettings,
-  LuShoppingBag,
-  LuStore,
-  LuUsers,
-  LuWallet,
-} from 'react-icons/lu';
 import type { OperationMode } from '../types';
-import type { BusinessSegment, SegmentFeature, SegmentLabelKey } from '../shared/segments';
+import type { BusinessSegment, SegmentFeature, SegmentLabelKey } from '../shared/segments/types';
 import { isTabEnabled } from './segmentGate';
-import { hasSegmentFeature } from '../shared/segments';
+import { hasSegmentFeature } from '../shared/segments/segmentFeatures';
 
 export type TabRole = 'OWNER' | 'EMPLOYEE' | 'MASTER_ADMIN';
+
+/**
+ * Chave do ícone da aba. O componente fica em `config/tabIcons.ts` para não
+ * puxar os 21 ícones de `react-icons/lu` para o chunk principal (gate R7).
+ */
+export type TabIconKey =
+  | 'LuBuilding2'
+  | 'LuCalendarDays'
+  | 'LuChartColumn'
+  | 'LuCircleHelp'
+  | 'LuContact'
+  | 'LuCreditCard'
+  | 'LuGift'
+  | 'LuFolderOpen'
+  | 'LuImage'
+  | 'LuLayoutDashboard'
+  | 'LuLink'
+  | 'LuListChecks'
+  | 'LuMegaphone'
+  | 'LuRocket'
+  | 'LuScissors'
+  | 'LuSettings'
+  | 'LuShoppingBag'
+  | 'LuStore'
+  | 'LuUsers'
+  | 'LuWallet';
 
 export interface TabDef {
   id: string;
   label: string;
-  icon: IconType;
+  icon: TabIconKey;
   /** If empty → visible to all authenticated users */
   roles?: TabRole[];
   /** If empty → visible in all operation modes */
@@ -82,59 +85,59 @@ export const TAB_GROUPS: TabGroup[] = [
     id: 'operacao',
     label: 'Operação',
     tabs: [
-      { id: 'overview', label: 'Hoje', icon: LuLayoutDashboard },
+      { id: 'overview', label: 'Hoje', icon: 'LuLayoutDashboard' },
       {
         id: 'onboarding',
         label: 'Configuração inicial',
-        icon: LuRocket,
+        icon: 'LuRocket',
         roles: ['OWNER', 'MASTER_ADMIN'],
       },
-      { id: 'queue', label: 'Fila', icon: LuListChecks, modes: ['HYBRID', 'QUEUE_ONLY'] },
+      { id: 'queue', label: 'Fila', icon: 'LuListChecks', modes: ['HYBRID', 'QUEUE_ONLY'] },
       {
         id: 'appointments',
         label: 'Agenda',
-        icon: LuCalendarDays,
+        icon: 'LuCalendarDays',
         modes: ['HYBRID', 'APPOINTMENTS_ONLY'],
       },
-      { id: 'clients', label: 'Clientes', icon: LuContact },
+      { id: 'clients', label: 'Clientes', icon: 'LuContact' },
       {
         id: 'cases',
         label: 'Processos',
-        icon: LuFolderOpen,
+        icon: 'LuFolderOpen',
         roles: ['OWNER', 'MASTER_ADMIN', 'EMPLOYEE'],
         segmentFeature: 'caseManagement',
       },
-      { id: 'products', label: 'Produtos', icon: LuShoppingBag },
+      { id: 'products', label: 'Produtos', icon: 'LuShoppingBag' },
     ],
   },
   {
     id: 'gestao',
     label: 'Gestão',
     tabs: [
-      { id: 'services', label: 'Serviços', icon: LuScissors, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'team', label: 'Equipe', icon: LuUsers, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'services', label: 'Serviços', icon: 'LuScissors', roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'team', label: 'Equipe', icon: 'LuUsers', roles: ['OWNER', 'MASTER_ADMIN'] },
       {
         id: 'reports',
         label: 'Relatórios',
-        icon: LuChartColumn,
+        icon: 'LuChartColumn',
         roles: ['OWNER', 'MASTER_ADMIN', 'EMPLOYEE'],
         permissions: ['REPORTS_VIEW'],
       },
       {
         id: 'finance',
         label: 'Financeiro',
-        icon: LuCreditCard,
+        icon: 'LuCreditCard',
         roles: ['OWNER', 'MASTER_ADMIN', 'EMPLOYEE'],
         permissions: ['FINANCE_VIEW', 'FINANCE_MANAGE'],
       },
       {
         id: 'profit',
         label: 'Rentabilidade',
-        icon: LuChartColumn,
+        icon: 'LuChartColumn',
         roles: ['OWNER', 'MASTER_ADMIN', 'EMPLOYEE'],
         permissions: ['REPORTS_VIEW'],
       },
-      { id: 'equipment', label: 'Estoque', icon: LuStore, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'equipment', label: 'Estoque', icon: 'LuStore', roles: ['OWNER', 'MASTER_ADMIN'] },
     ],
   },
   {
@@ -144,17 +147,17 @@ export const TAB_GROUPS: TabGroup[] = [
       {
         id: 'posts',
         label: 'Posts',
-        icon: LuMegaphone,
+        icon: 'LuMegaphone',
         roles: ['OWNER', 'MASTER_ADMIN', 'EMPLOYEE'],
         permissions: ['MARKETING_MANAGE'],
       },
-      { id: 'showcase', label: 'Showcase', icon: LuImage, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'link', label: 'Link Público', icon: LuLink, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'referrals', label: 'Indicações', icon: LuGift, roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'showcase', label: 'Showcase', icon: 'LuImage', roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'link', label: 'Link Público', icon: 'LuLink', roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'referrals', label: 'Indicações', icon: 'LuGift', roles: ['OWNER', 'MASTER_ADMIN'] },
       {
         id: 'organizations',
         label: 'Multiunidades',
-        icon: LuBuilding2,
+        icon: 'LuBuilding2',
         roles: ['OWNER', 'MASTER_ADMIN'],
       },
     ],
@@ -163,10 +166,10 @@ export const TAB_GROUPS: TabGroup[] = [
     id: 'conta',
     label: 'Conta',
     tabs: [
-      { id: 'settings', label: 'Configurações', icon: LuSettings },
-      { id: 'support', label: 'Ajuda', icon: LuCircleHelp },
-      { id: 'subscription', label: 'Plano', icon: LuWallet, roles: ['OWNER', 'MASTER_ADMIN'] },
-      { id: 'profile', label: 'Perfil', icon: LuStore },
+      { id: 'settings', label: 'Configurações', icon: 'LuSettings' },
+      { id: 'support', label: 'Ajuda', icon: 'LuCircleHelp' },
+      { id: 'subscription', label: 'Plano', icon: 'LuWallet', roles: ['OWNER', 'MASTER_ADMIN'] },
+      { id: 'profile', label: 'Perfil', icon: 'LuStore' },
     ],
   },
 ];

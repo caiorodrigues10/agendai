@@ -1,0 +1,671 @@
+{
+  "label": "b-depois-layout",
+  "createdAt": "2026-10-08T03:10:26.962Z",
+  "base": "http://127.0.0.1:4173",
+  "apiMode": "off",
+  "backendUp": true,
+  "routes": [
+    "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+    "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+    "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c"
+  ],
+  "widths": [
+    320,
+    375,
+    390,
+    768,
+    1024,
+    1440
+  ],
+  "runs": 5,
+  "env": {
+    "slow4g": {
+      "latency": 150,
+      "downloadThroughput": 209715.2,
+      "uploadThroughput": 98304
+    },
+    "cpuRate": 4,
+    "minTap": 44,
+    "minFont": 12
+  },
+  "layout": [
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+      "width": 320,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+      "width": 320,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+      "width": 320,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Não foi possível conectar ao servidor. Verifique se a API está no ar e tente de ",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+      "width": 375,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+      "width": 375,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+      "width": 375,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Não foi possível conectar ao servidor. Verifique se a API está no ar e tente de ",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+      "width": 390,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+      "width": 390,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+      "width": 390,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Não foi possível conectar ao servidor. Verifique se a API está no ar e tente de ",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+      "width": 768,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+      "width": 768,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+      "width": 768,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Não foi possível conectar ao servidor. Verifique se a API está no ar e tente de ",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+      "width": 1024,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+      "width": 1024,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+      "width": 1024,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Não foi possível conectar ao servidor. Verifique se a API está no ar e tente de ",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab",
+      "width": 1440,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab?tab=appointments",
+      "width": 1440,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Salão não encontrado",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    },
+    {
+      "route": "/queue/1ac5be50-6ce7-464e-bc38-ab18cf24aeab/produtos/68b80815-d9b5-4f0f-a264-c1a2cc34284c",
+      "width": 1440,
+      "ok": true,
+      "metrics": {
+        "overflowPx": 0,
+        "overflowSources": [],
+        "tap": {
+          "total": 1,
+          "tooSmall": [],
+          "exceptions": {
+            "paragraph": 0,
+            "inlineSentence": 0,
+            "labelControl": 0
+          }
+        },
+        "tiny": {
+          "total": 3,
+          "bad": [],
+          "bySize": {}
+        },
+        "h1": [
+          {
+            "text": "Não foi possível conectar ao servidor. Verifique se a API está no ar e tente de ",
+            "visible": true
+          }
+        ],
+        "images": {
+          "total": 0,
+          "missingDims": 0,
+          "items": []
+        }
+      }
+    }
+  ],
+  "summary": {
+    "rotas": 18,
+    "overflow": {
+      "total": 0,
+      "maxPx": 0,
+      "detalhe": []
+    },
+    "tapUnder44Mobile": {
+      "total": 0,
+      "excecoes": {
+        "paragrafo": 0,
+        "frase": 0,
+        "labelComControle": 0
+      },
+      "detalhe": []
+    },
+    "tinyTextMobile": {
+      "total": 0,
+      "detalhe": []
+    },
+    "h1": [],
+    "imagesWithoutDims": {
+      "total": 0,
+      "detalhe": []
+    }
+  }
+}

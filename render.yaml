@@ -8,6 +8,16 @@ services:
       - key: NODE_VERSION
         value: 22.14.0
     routes:
+      # Compartilhamento de perfil: /s/salon/:id precisa cair na API, que serve o
+      # HTML com as meta tags Open Graph (GET /s/salon/:id, fora do /api).
+      # Mantenha COMENTADA até a URL pública do backend estar confirmada; para
+      # ativar, descomente, preencha a URL e rode os testes de staging em
+      # docs/agents/BUSINESS_RULES.md ("Ativação em staging") antes de produção —
+      # incluem checar o crawler/preview, não só o curl. A regra precisa vir ANTES
+      # do catch-all da SPA, senão o index.html engole a URL.
+      # - type: rewrite
+      #   source: /s/*
+      #   destination: https://<backend-publico>/s/*
       - type: rewrite
         source: /*
         destination: /index.html

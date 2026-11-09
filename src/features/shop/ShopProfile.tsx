@@ -476,7 +476,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
                     )}
                   </span>
                 </span>
-                <span className="mt-1 block truncate text-[10px] text-text-secondary">
+                <span className="mt-1 block truncate text-2xs text-text-secondary">
                   {story.title || 'Story'}
                 </span>
               </button>

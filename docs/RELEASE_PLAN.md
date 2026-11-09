@@ -196,3 +196,15 @@ não tem:
 
 Antes de promover qualquer uma das duas, decidir qual é a linha de base — senão
 o LCP work se perde ou as correções de CI se perdem.
+
+---
+
+## 10. Ordem de deploy sugerida (herdada da `release/frontend`)
+
+1. Backend (`release/backend`, ver plano do outro repositório) primeiro — o frontend consome as rotas novas.
+2. Smoke test do backend (saúde, login, fila, agendamento, webhook).
+3. Deploy do frontend.
+4. Smoke test §8, com prioridade em login/reload, iPhone Safari real e reCAPTCHA de "Esqueci a senha" (Safari/iOS).
+
+O gate de precache (`node scripts/precache-report.mjs`) veio da `release/frontend`
+com o merge — rodá-lo após `npm run build` mantém o tamanho do bundle sob controle.

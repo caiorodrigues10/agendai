@@ -55,13 +55,13 @@ function BackgroundDecor({ reduceMotion }: { reduceMotion: boolean | null }) {
     <>
       <motion.div
         aria-hidden
-        className="absolute -top-28 -left-28 w-[520px] h-[520px] rounded-full blur-[130px] pointer-events-none"
+        className="absolute -top-28 -left-28 w-[560px] h-[560px] rounded-full blur-[130px] pointer-events-none"
         style={{ background: 'rgba(16,185,129,0.18)' }}
         {...drift(22, [0, 60, -25, 0], [0, -35, 40, 0])}
       />
       <motion.div
         aria-hidden
-        className="absolute -bottom-40 -right-24 w-[480px] h-[480px] rounded-full blur-[130px] pointer-events-none"
+        className="absolute -bottom-40 -right-24 w-[520px] h-[520px] rounded-full blur-[130px] pointer-events-none"
         style={{ background: 'color-mix(in srgb, var(--ag-tertiary) 15%, transparent)' }}
         {...drift(26, [0, -50, 35, 0], [0, 40, -25, 0])}
       />
@@ -307,12 +307,12 @@ export const BrandPanel: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
           >
-            <h1 className="font-sans text-3xl xl:text-4xl font-extrabold leading-[1.08] tracking-tight">
+            <h2 className="font-sans text-3xl xl:text-4xl font-extrabold leading-[1.08] tracking-tight">
               Seu salão,{' '}
               <span className="text-transparent bg-clip-text bg-linear-to-r from-accent/80 via-accent to-accent">
                 no controle.
               </span>
-            </h1>
+            </h2>
             <p className="mt-3 text-text-secondary text-sm max-w-md leading-relaxed font-light">
               Fila digital, agenda, financeiro e clientes — tudo em um painel que trabalha por
               você, em tempo real.

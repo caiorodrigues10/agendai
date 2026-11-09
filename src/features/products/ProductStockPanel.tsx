@@ -129,7 +129,7 @@ export const ProductStockPanel: React.FC<Props> = ({ loadError, onNotify, onRelo
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-semibold text-text-primary">{p.name}</span>
-                  <span className="inline-flex rounded-lg border border-border bg-bg px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-text-secondary">
+                  <span className="inline-flex rounded-lg border border-border bg-bg px-2 py-0.5 text-2xs font-bold uppercase tracking-wide text-text-secondary">
                     {PRODUCT_PURPOSE_SHORT[p.type]}
                   </span>
                 </div>

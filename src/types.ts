@@ -10,6 +10,8 @@ export interface Service {
   commissionPercent?: number;
   /** Agendável pelo cliente na agenda pública (padrão true). */
   publicBookable?: boolean;
+  /** A API devolve serviços inativos também; `undefined` conta como ativo. */
+  active?: boolean;
 }
 
 export interface QueueItem {

@@ -135,7 +135,7 @@ export const DashboardPage: React.FC = () => {
                     Relatórios · Barbearia Central
                   </span>
                 </div>
-                <span className="rounded-full bg-accent/15 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-accent-light">
+                <span className="rounded-full bg-accent/15 px-3 py-1 text-2xs font-black uppercase tracking-wider text-accent-light">
                   Pro
                 </span>
               </div>
@@ -172,7 +172,7 @@ export const DashboardPage: React.FC = () => {
                       key={kpi.label}
                       className="rounded-2xl border border-white/8 bg-black/35 px-4 py-4"
                     >
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+                      <p className="text-2xs font-bold uppercase tracking-wider text-neutral-500">
                         {kpi.label}
                       </p>
                       <p
@@ -207,7 +207,7 @@ export const DashboardPage: React.FC = () => {
                             style={{ height: `${bar.h}%` }}
                           />
                         </div>
-                        <span className="text-[10px] font-bold text-neutral-500">{bar.day}</span>
+                        <span className="text-2xs font-bold text-neutral-500">{bar.day}</span>
                       </div>
                     ))}
                   </div>
@@ -331,19 +331,19 @@ export const DashboardPage: React.FC = () => {
 
                 <div className="mt-8 grid gap-3 sm:grid-cols-3">
                   <div className="rounded-2xl border border-accent/25 bg-accent/10 p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-accent-light/80">
+                    <p className="text-2xs font-bold uppercase tracking-wider text-accent-light/80">
                       Entradas
                     </p>
                     <p className="mt-2 text-2xl font-black text-white">R$ 8.4k</p>
                   </div>
                   <div className="rounded-2xl border border-white/8 bg-black/40 p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+                    <p className="text-2xs font-bold uppercase tracking-wider text-neutral-500">
                       Despesas
                     </p>
                     <p className="mt-2 text-2xl font-black text-neutral-200">R$ 2.1k</p>
                   </div>
                   <div className="rounded-2xl border border-amber-300/25 bg-amber-300/8 p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-amber-200/80">
+                    <p className="text-2xs font-bold uppercase tracking-wider text-amber-200/80">
                       Fiado
                     </p>
                     <p className="mt-2 text-2xl font-black text-amber-100">R$ 320</p>
@@ -379,7 +379,7 @@ export const DashboardPage: React.FC = () => {
                   </div>
                 ))}
               </div>
-              <div className="mt-2 flex justify-between text-[10px] font-bold text-neutral-600">
+              <div className="mt-2 flex justify-between text-2xs font-bold text-neutral-600">
                 <span>09h</span>
                 <span>13h</span>
                 <span>18h</span>
@@ -456,7 +456,7 @@ export const DashboardPage: React.FC = () => {
                     >
                       <div>
                         <p className="text-sm font-bold text-white">{row.name}</p>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-amber-200/70">
+                        <p className="text-2xs font-bold uppercase tracking-wider text-amber-200/70">
                           {row.status}
                         </p>
                       </div>
@@ -487,7 +487,7 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           <div className="overflow-hidden rounded-4xl border border-white/10 bg-surface">
-            <div className="grid grid-cols-[1.4fr_0.8fr_0.8fr] border-b border-white/8 px-5 py-4 text-[10px] font-black uppercase tracking-wider text-neutral-500 md:px-8 md:text-xs">
+            <div className="grid grid-cols-[1.4fr_0.8fr_0.8fr] border-b border-white/8 px-5 py-4 text-2xs font-black uppercase tracking-wider text-neutral-500 md:px-8 md:text-xs">
               <span>Recurso</span>
               <span className="text-center">Essencial</span>
               <span className="text-center text-accent-light">Pro</span>

@@ -69,7 +69,7 @@ export const DemandAlertBanner: React.FC<DemandAlertBannerProps> = ({ compact = 
             {formatWeatherDayLabel(tomorrow.date)}: {tomorrow.condition} — {dropPct}% menos clientes
           </p>
           {!compact && (
-            <p className="mt-0.5 text-[11px] text-text-muted truncate">{tomorrow.recommendation}</p>
+            <p className="mt-0.5 text-2xs text-text-muted truncate">{tomorrow.recommendation}</p>
           )}
         </div>
       </div>

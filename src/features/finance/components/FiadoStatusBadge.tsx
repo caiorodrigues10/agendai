@@ -19,7 +19,7 @@ export function FiadoStatusBadge({ status, isOverdue }: FiadoStatusBadgeProps) {
     <StatusBadge
       status={FIADO_STATUS_LABELS[status]}
       tone={TONES[status]}
-      className="inline-flex items-center gap-1 text-[10px] font-bold! uppercase"
+      className="inline-flex items-center gap-1 text-2xs font-bold! uppercase"
     >
       {FIADO_STATUS_LABELS[status]}
       {isOverdue && status !== 'PAID' && status !== 'FORGIVEN' ? (

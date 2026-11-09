@@ -1,0 +1,774 @@
+{
+  "label": "d1-depois",
+  "createdAt": "2026-10-08T07:11:05.044Z",
+  "base": "http://127.0.0.1:4173",
+  "apiMode": "both",
+  "backendUp": true,
+  "routes": [
+    "/login",
+    "/cadastro"
+  ],
+  "widths": [
+    320,
+    375,
+    390,
+    768,
+    1024,
+    1440
+  ],
+  "runs": 5,
+  "env": {
+    "slow4g": {
+      "latency": 150,
+      "downloadThroughput": 209715.2,
+      "uploadThroughput": 98304
+    },
+    "cpuRate": 4,
+    "minTap": 44,
+    "minFont": 12
+  },
+  "perf": [
+    {
+      "route": "/login",
+      "width": 375,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0,
+        "lcp": 2336,
+        "fcp": 1300,
+        "jsBytes": 207140,
+        "jsRequests": 15,
+        "cssBytes": 28347,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 334061,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 2240,
+          "fcp": 1424
+        },
+        {
+          "cls": 0,
+          "lcp": 2352,
+          "fcp": 1292
+        },
+        {
+          "cls": 0,
+          "lcp": 2328,
+          "fcp": 1288
+        },
+        {
+          "cls": 0,
+          "lcp": 2364,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 2336,
+          "fcp": 1300
+        }
+      ]
+    },
+    {
+      "route": "/cadastro",
+      "width": 375,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0,
+        "lcp": 2116,
+        "fcp": 1300,
+        "jsBytes": 207140,
+        "jsRequests": 15,
+        "cssBytes": 28347,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 334061,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 2116,
+          "fcp": 1308
+        },
+        {
+          "cls": 0.0002,
+          "lcp": 2060,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 2136,
+          "fcp": 1308
+        },
+        {
+          "cls": 0,
+          "lcp": 2120,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 2104,
+          "fcp": 1300
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "width": 375,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0,
+        "lcp": 2108,
+        "fcp": 1300,
+        "jsBytes": 207140,
+        "jsRequests": 15,
+        "cssBytes": 28347,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 334061,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 2100,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 2340,
+          "fcp": 1332
+        },
+        {
+          "cls": 0,
+          "lcp": 2108,
+          "fcp": 1296
+        },
+        {
+          "cls": 0,
+          "lcp": 2344,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 2100,
+          "fcp": 1308
+        }
+      ]
+    },
+    {
+      "route": "/cadastro",
+      "width": 375,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0002,
+        "lcp": 2048,
+        "fcp": 1304,
+        "jsBytes": 207140,
+        "jsRequests": 15,
+        "cssBytes": 28347,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 334061,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0002,
+          "lcp": 2016,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 2084,
+          "fcp": 1308
+        },
+        {
+          "cls": 0.0002,
+          "lcp": 2048,
+          "fcp": 1304
+        },
+        {
+          "cls": 0.0002,
+          "lcp": 2044,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0002,
+          "lcp": 2056,
+          "fcp": 1304
+        }
+      ]
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0015,
+        "lcp": 2012,
+        "fcp": 1304,
+        "jsBytes": 230804,
+        "jsRequests": 13,
+        "cssBytes": 28347,
+        "imageBytes": 65829,
+        "imageRequests": 2,
+        "fontBytes": 62856,
+        "totalBytes": 387836,
+        "totalRequests": 17
+      },
+      "runs": [
+        {
+          "cls": 0.0015,
+          "lcp": 2068,
+          "fcp": 1304
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2008,
+          "fcp": 1304
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 1996,
+          "fcp": 1304
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2020,
+          "fcp": 1308
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2012,
+          "fcp": 1304
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0,
+        "lcp": 2172,
+        "fcp": 1300,
+        "jsBytes": 207140,
+        "jsRequests": 15,
+        "cssBytes": 28347,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 334061,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0,
+          "lcp": 2172,
+          "fcp": 1308
+        },
+        {
+          "cls": 0,
+          "lcp": 2180,
+          "fcp": 1296
+        },
+        {
+          "cls": 0.0003,
+          "lcp": 2088,
+          "fcp": 1308
+        },
+        {
+          "cls": 0.0003,
+          "lcp": 2108,
+          "fcp": 1300
+        },
+        {
+          "cls": 0,
+          "lcp": 2176,
+          "fcp": 1292
+        }
+      ]
+    },
+    {
+      "route": "/cadastro",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0005,
+        "lcp": 2100,
+        "fcp": 1300,
+        "jsBytes": 207140,
+        "jsRequests": 15,
+        "cssBytes": 28347,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 334061,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0005,
+          "lcp": 2092,
+          "fcp": 1284
+        },
+        {
+          "cls": 0.0005,
+          "lcp": 2096,
+          "fcp": 1308
+        },
+        {
+          "cls": 0,
+          "lcp": 2184,
+          "fcp": 1284
+        },
+        {
+          "cls": 0,
+          "lcp": 2172,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0005,
+          "lcp": 2100,
+          "fcp": 1304
+        }
+      ]
+    },
+    {
+      "route": "/planos",
+      "width": 1440,
+      "api": "off",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0356,
+        "lcp": 1916,
+        "fcp": 1300,
+        "jsBytes": 289541,
+        "jsRequests": 14,
+        "cssBytes": 28347,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 416462,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0356,
+          "lcp": 1916,
+          "fcp": 1304
+        },
+        {
+          "cls": 0.0356,
+          "lcp": 1912,
+          "fcp": 1296
+        },
+        {
+          "cls": 0.0356,
+          "lcp": 1916,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0356,
+          "lcp": 1916,
+          "fcp": 1300
+        },
+        {
+          "cls": 0.0356,
+          "lcp": 1912,
+          "fcp": 1300
+        }
+      ]
+    },
+    {
+      "route": "/",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0015,
+        "lcp": 1988,
+        "fcp": 1288,
+        "jsBytes": 230804,
+        "jsRequests": 13,
+        "cssBytes": 28347,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 357725,
+        "totalRequests": 16
+      },
+      "runs": [
+        {
+          "cls": 0.0015,
+          "lcp": 1996,
+          "fcp": 1284
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 1972,
+          "fcp": 1288
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 1984,
+          "fcp": 1284
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 1988,
+          "fcp": 1288
+        },
+        {
+          "cls": 0.0015,
+          "lcp": 2064,
+          "fcp": 1288
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0003,
+        "lcp": 2088,
+        "fcp": 1292,
+        "jsBytes": 207140,
+        "jsRequests": 15,
+        "cssBytes": 28347,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 334061,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0003,
+          "lcp": 2108,
+          "fcp": 1308
+        },
+        {
+          "cls": 0.0003,
+          "lcp": 2076,
+          "fcp": 1292
+        },
+        {
+          "cls": 0.0003,
+          "lcp": 2088,
+          "fcp": 1296
+        },
+        {
+          "cls": 0.0003,
+          "lcp": 2096,
+          "fcp": 1280
+        },
+        {
+          "cls": 0.0003,
+          "lcp": 2080,
+          "fcp": 1292
+        }
+      ]
+    },
+    {
+      "route": "/cadastro",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0005,
+        "lcp": 2104,
+        "fcp": 1292,
+        "jsBytes": 207140,
+        "jsRequests": 15,
+        "cssBytes": 28347,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 334061,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0005,
+          "lcp": 2120,
+          "fcp": 1312
+        },
+        {
+          "cls": 0.0005,
+          "lcp": 2104,
+          "fcp": 1292
+        },
+        {
+          "cls": 0,
+          "lcp": 2172,
+          "fcp": 1296
+        },
+        {
+          "cls": 0.0005,
+          "lcp": 2048,
+          "fcp": 1288
+        },
+        {
+          "cls": 0.0005,
+          "lcp": 2068,
+          "fcp": 1280
+        }
+      ]
+    },
+    {
+      "route": "/planos",
+      "width": 1440,
+      "api": "real",
+      "ok": true,
+      "runCount": 5,
+      "okRuns": 5,
+      "metrics": {
+        "cls": 0.0101,
+        "lcp": 1888,
+        "fcp": 1280,
+        "jsBytes": 289541,
+        "jsRequests": 14,
+        "cssBytes": 28347,
+        "imageBytes": 35718,
+        "imageRequests": 1,
+        "fontBytes": 62856,
+        "totalBytes": 418625,
+        "totalRequests": 18
+      },
+      "runs": [
+        {
+          "cls": 0.0101,
+          "lcp": 1888,
+          "fcp": 1276
+        },
+        {
+          "cls": 0.0101,
+          "lcp": 1876,
+          "fcp": 1276
+        },
+        {
+          "cls": 0.0101,
+          "lcp": 1900,
+          "fcp": 1288
+        },
+        {
+          "cls": 0.0101,
+          "lcp": 1892,
+          "fcp": 1288
+        },
+        {
+          "cls": 0.0101,
+          "lcp": 1884,
+          "fcp": 1280
+        }
+      ]
+    }
+  ],
+  "perfSummary": [
+    {
+      "scenario": "off@375",
+      "rotas": 2,
+      "clsMed": 0,
+      "clsMax": 0,
+      "lcpMed": 2336,
+      "lcpMax": 2336,
+      "fcpMed": 1300,
+      "jsMedKB": 202,
+      "jsReqMed": 15,
+      "imgMedKB": 35,
+      "porRota": [
+        {
+          "route": "/login",
+          "cls": 0,
+          "lcp": 2336,
+          "fcp": 1300,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        },
+        {
+          "route": "/cadastro",
+          "cls": 0,
+          "lcp": 2116,
+          "fcp": 1300,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        }
+      ]
+    },
+    {
+      "scenario": "real@375",
+      "rotas": 2,
+      "clsMed": 0.0002,
+      "clsMax": 0.0002,
+      "lcpMed": 2108,
+      "lcpMax": 2108,
+      "fcpMed": 1304,
+      "jsMedKB": 202,
+      "jsReqMed": 15,
+      "imgMedKB": 35,
+      "porRota": [
+        {
+          "route": "/login",
+          "cls": 0,
+          "lcp": 2108,
+          "fcp": 1300,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        },
+        {
+          "route": "/cadastro",
+          "cls": 0.0002,
+          "lcp": 2048,
+          "fcp": 1304,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        }
+      ]
+    },
+    {
+      "scenario": "off@1440",
+      "rotas": 4,
+      "clsMed": 0.0015,
+      "clsMax": 0.0356,
+      "lcpMed": 2100,
+      "lcpMax": 2172,
+      "fcpMed": 1300,
+      "jsMedKB": 225,
+      "jsReqMed": 15,
+      "imgMedKB": 35,
+      "porRota": [
+        {
+          "route": "/",
+          "cls": 0.0015,
+          "lcp": 2012,
+          "fcp": 1304,
+          "jsKB": 225,
+          "jsReq": 13,
+          "imgKB": 64
+        },
+        {
+          "route": "/login",
+          "cls": 0,
+          "lcp": 2172,
+          "fcp": 1300,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        },
+        {
+          "route": "/cadastro",
+          "cls": 0.0005,
+          "lcp": 2100,
+          "fcp": 1300,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        },
+        {
+          "route": "/planos",
+          "cls": 0.0356,
+          "lcp": 1916,
+          "fcp": 1300,
+          "jsKB": 283,
+          "jsReq": 14,
+          "imgKB": 35
+        }
+      ]
+    },
+    {
+      "scenario": "real@1440",
+      "rotas": 4,
+      "clsMed": 0.0015,
+      "clsMax": 0.0101,
+      "lcpMed": 2088,
+      "lcpMax": 2104,
+      "fcpMed": 1292,
+      "jsMedKB": 225,
+      "jsReqMed": 15,
+      "imgMedKB": 35,
+      "porRota": [
+        {
+          "route": "/",
+          "cls": 0.0015,
+          "lcp": 1988,
+          "fcp": 1288,
+          "jsKB": 225,
+          "jsReq": 13,
+          "imgKB": 35
+        },
+        {
+          "route": "/login",
+          "cls": 0.0003,
+          "lcp": 2088,
+          "fcp": 1292,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        },
+        {
+          "route": "/cadastro",
+          "cls": 0.0005,
+          "lcp": 2104,
+          "fcp": 1292,
+          "jsKB": 202,
+          "jsReq": 15,
+          "imgKB": 35
+        },
+        {
+          "route": "/planos",
+          "cls": 0.0101,
+          "lcp": 1888,
+          "fcp": 1280,
+          "jsKB": 283,
+          "jsReq": 14,
+          "imgKB": 35
+        }
+      ]
+    }
+  ]
+}

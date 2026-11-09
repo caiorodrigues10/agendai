@@ -4,6 +4,7 @@ import type {
   ImportSheetInfo,
   ImportSheetTargetChoice,
   ImportTargetType,
+  OcrDestino,
 } from '../../infra/dataImportApi';
 import { hasSegmentFeature } from '../../shared/segments';
 import { useSegmentLabels } from '../../hooks/useSegmentLabels';
@@ -86,24 +87,41 @@ const sheetLabel = (sheetName: string | null): string => sheetName ?? 'CSV';
 /**
  * Etapa 2 — o que importar.
  *
- * Planilha de uma aba só: um tipo. Planilha com várias abas: o dono escolhe
- * o tipo de cada aba; o assistente importa na ordem de dependência entre os
+ * Planilha de uma aba só: um tipo. Planilha com várias abas: o dono escolhe o
+ * tipo de cada aba; o assistente importa na ordem de dependência entre os
  * tipos (serviços antes de clientes, clientes antes de pacotes etc.).
+ *
+ * Quando a origem é uma **imagem** (OCR), o servidor manda a lista de
+ * destinos que a foto pode atender (`destinos`) com o que cada um exige da
+ * foto. A tela mostra só esses destinos e avisa o que a foto precisa
+ * mostrar — o destino e o mapeamento são do dono.
  */
 export const ImportTargetStep: React.FC<{
   busy: boolean;
   fileName?: string;
   sheets?: ImportSheetInfo[];
+  /** Destinos possíveis (só na origem "IMAGEM"). */
+  destinos?: OcrDestino[];
   onChoose: (choices: ImportSheetTargetChoice[]) => Promise<void>;
-}> = ({ busy, fileName, sheets, onChoose }) => {
+}> = ({ busy, fileName, sheets, destinos, onChoose }) => {
   const sheetList = sheets ?? [];
   const multiple = sheetList.length > 1;
   const { rawSegment } = useSegmentLabels();
   const hasCases = hasSegmentFeature(rawSegment, 'caseManagement');
-  const targets = React.useMemo(
-    () => TARGETS.filter((target) => target.id !== 'CASES' && target.id !== 'CASE_FEES' || hasCases),
-    [hasCases]
-  );
+  const targets = React.useMemo(() => {
+    const doSegmento = TARGETS.filter(
+      (target) => target.id !== 'CASES' && target.id !== 'CASE_FEES' || hasCases
+    );
+    if (!destinos?.length) return doSegmento;
+    // A imagem tem a lista de destinos do servidor: ela respeita o segmento
+    // e diz o que a foto precisa mostrar.
+    const permitidos = new Set(destinos.map((destino) => destino.targetType));
+    return doSegmento.filter((target) => permitidos.has(target.id));
+  }, [destinos, hasCases]);
+  const observacao = React.useMemo(() => {
+    const mapa = new Map(destinos?.map((destino) => [destino.targetType, destino]) ?? []);
+    return (targetType: ImportTargetType) => mapa.get(targetType)?.observacao;
+  }, [destinos]);
   const defaultTarget: ImportTargetType = hasCases ? 'CASES' : 'CLIENTS';
 
   // Uma escolha por aba; o padrão é o alvo principal do segmento (ou "sem
@@ -113,7 +131,11 @@ export const ImportTargetStep: React.FC<{
       sheetList.map((sheet) => [sheet.sheetName ?? '', multiple ? ('' as unknown as ImportTargetType) : defaultTarget])
     )
   );
-  const [singleTarget, setSingleTarget] = React.useState<ImportTargetType>(defaultTarget);
+  const [singleTarget, setSingleTarget] = React.useState<ImportTargetType>(() => {
+    const padrao = hasCases ? 'CASES' : 'CLIENTS';
+    // Com a lista de destinos da imagem, o padrão só vale se estiver nela.
+    return targets.some((target) => target.id === padrao) ? padrao : (targets[0]?.id ?? padrao);
+  });
 
   const assign = (sheetKey: string, targetType: ImportTargetType) => {
     setAssignments((current) => ({ ...current, [sheetKey]: targetType }));
@@ -156,25 +178,31 @@ export const ImportTargetStep: React.FC<{
 
       {!multiple ? (
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3" role="radiogroup" aria-label="Tipo de importação">
-          {targets.map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              role="radio"
-              aria-checked={singleTarget === option.id}
-              onClick={() => setSingleTarget(option.id)}
-              className={[
-                'rounded-xl border p-3 text-left transition-colors',
-                singleTarget === option.id
-                  ? 'border-accent bg-accent/5'
-                  : 'border-border bg-surface hover:border-border-strong',
-              ].join(' ')}
-              data-testid={`import-target-card-${option.id}`}
-            >
-              <span className="block text-sm font-bold text-text-primary">{option.title}</span>
-              <span className="mt-1 block text-xs text-text-muted">{option.description}</span>
-            </button>
-          ))}
+          {targets.map((option) => {
+            const nota = observacao(option.id);
+            return (
+              <button
+                key={option.id}
+                type="button"
+                role="radio"
+                aria-checked={singleTarget === option.id}
+                onClick={() => setSingleTarget(option.id)}
+                className={[
+                  'rounded-xl border p-3 text-left transition-colors',
+                  singleTarget === option.id
+                    ? 'border-accent bg-accent/5'
+                    : 'border-border bg-surface hover:border-border-strong',
+                ].join(' ')}
+                data-testid={`import-target-card-${option.id}`}
+              >
+                <span className="block text-sm font-bold text-text-primary">{option.title}</span>
+                <span className="mt-1 block text-xs text-text-muted">{option.description}</span>
+                {nota ? (
+                  <span className="mt-1 block text-xs font-medium text-warning">{nota}</span>
+                ) : null}
+              </button>
+            );
+          })}
         </div>
       ) : (
         <div className="space-y-3" data-testid="import-sheet-assignments">

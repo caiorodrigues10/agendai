@@ -10,6 +10,7 @@ import {
   type TabDef,
   type TabGroup,
 } from '../../config/tabRegistry';
+import { TAB_ICONS } from '../../config/tabIcons';
 import type { OperationMode } from '../../types';
 import type { BusinessSegment } from '../../shared/segments';
 import { useSegmentLabels } from '../../hooks/useSegmentLabels';
@@ -123,15 +124,19 @@ export function StaffNavigation({
           aria-label="Navegação do painel"
           className="sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-2xl border border-border bg-surface p-3 shadow-card"
         >
-          <p className="mb-4 px-2 font-display text-sm font-bold text-text-primary">
-            Áreas do salão
-          </p>
+          <div className="mb-3 border-b border-border px-2 pb-3">
+            <p className="text-2xs font-bold uppercase tracking-[0.24em] text-text-muted">
+              Navegação
+            </p>
+            <p className="mt-1 font-display text-sm font-bold tracking-wide text-text-primary">Áreas do salão</p>
+          </div>
+
           <div className="space-y-4">
             {groups.map(group => (
               <section key={group.id} aria-labelledby={`desktop-nav-${group.id}`}>
                 <p
                   id={`desktop-nav-${group.id}`}
-                  className="mb-1.5 px-2 font-display text-xs font-bold uppercase tracking-[0.14em] text-text-muted"
+                  className="mb-1.5 px-2 font-display text-2xs font-bold uppercase tracking-[0.14em] text-text-muted"
                 >
                   {group.label}
                 </p>
@@ -173,7 +178,7 @@ export function StaffNavigation({
             aria-controls="staff-navigation-more"
             aria-current={moreIsActive ? 'page' : undefined}
             onClick={() => setMoreOpen(open => !open)}
-            className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-xs font-semibold transition-colors ${
+            className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-2xs font-semibold transition-colors ${
               moreIsActive || moreOpen
                 ? 'border-accent/30 bg-selection text-accent'
                 : 'text-text-muted hover:bg-bg hover:text-text-primary'
@@ -205,7 +210,7 @@ export function StaffNavigation({
               <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-border-strong" />
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
-                  <p className="font-display text-xs font-bold uppercase tracking-[0.14em] text-text-muted">
+                  <p className="font-display text-2xs font-bold uppercase tracking-[0.14em] text-text-muted">
                     Navegação
                   </p>
                   <h2
@@ -230,7 +235,7 @@ export function StaffNavigation({
                   <section key={group.id} aria-labelledby={`mobile-nav-${group.id}`}>
                     <p
                       id={`mobile-nav-${group.id}`}
-                      className="mb-2 font-display text-xs font-bold uppercase tracking-[0.14em] text-text-muted"
+                      className="mb-2 font-display text-2xs font-bold uppercase tracking-[0.14em] text-text-muted"
                     >
                       {group.label}
                     </p>
@@ -264,6 +269,7 @@ function DesktopNavigationItem({
   active: boolean;
   onNavigate: (tabId: string) => void;
 }) {
+  const TabIcon = TAB_ICONS[tab.icon];
   return (
     <button
       type="button"
@@ -286,7 +292,7 @@ function DesktopNavigationItem({
           active ? 'text-accent' : 'text-text-muted group-hover:text-accent'
         }`}
       >
-        <tab.icon size={19} aria-hidden="true" />
+        <TabIcon size={19} aria-hidden="true" />
       </span>
       <span className="font-display text-sm font-semibold">{tab.label}</span>
     </button>
@@ -302,12 +308,13 @@ function MobileNavigationItem({
   active: boolean;
   onNavigate: (tabId: string) => void;
 }) {
+  const TabIcon = TAB_ICONS[tab.icon];
   return (
     <button
       type="button"
       onClick={() => onNavigate(tab.id)}
       aria-current={active ? 'page' : undefined}
-      className={`group flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-xs font-semibold transition-colors ${
+      className={`group flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border border-transparent px-1 text-2xs font-semibold transition-colors ${
         active
           ? 'border-accent/30 bg-selection text-accent'
           : 'text-text-muted hover:bg-bg hover:text-text-primary'
@@ -318,7 +325,7 @@ function MobileNavigationItem({
           active ? 'text-accent' : 'text-text-muted group-hover:text-accent'
         }`}
       >
-        <tab.icon size={20} aria-hidden="true" />
+        <TabIcon size={20} aria-hidden="true" />
       </span>
       <span className="max-w-full truncate leading-tight">{tab.label}</span>
     </button>
@@ -334,6 +341,7 @@ function MoreNavigationItem({
   active: boolean;
   onNavigate: (tabId: string) => void;
 }) {
+  const TabIcon = TAB_ICONS[tab.icon];
   return (
     <button
       type="button"
@@ -350,7 +358,7 @@ function MoreNavigationItem({
           active ? 'text-accent' : 'text-text-muted'
         }`}
       >
-        <tab.icon size={20} aria-hidden="true" />
+        <TabIcon size={20} aria-hidden="true" />
       </span>
       <span className="min-w-0 font-display text-sm font-semibold [overflow-wrap:anywhere]">
         {tab.label}

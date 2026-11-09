@@ -1,0 +1,48 @@
+### test:security
+
+> agendai-backend@1.0.0 test:security
+> vitest run --exclude "src/tests/integration/**" src/shared/infra/http/app.security.spec.ts src/modules/payments/useCases/webhookSecurity.spec.ts
+
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.11 /Users/viniciusvieira/agendai-projeto/backend
+
+
+ Test Files  2 passed (2)
+      Tests  7 passed (7)
+   Start at  01:34:56
+   Duration  1.19s (transform 631ms, setup 50ms, import 1.07s, tests 447ms, environment 0ms)
+
+EXIT_SEC=0
+### prisma validate
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+The schema at prisma/schema.prisma is valid 🚀
+EXIT_VALIDATE=0
+### build
+CJS dist/shared/container/providers/HashProvider/mocks/MockHashProvider.js.map                          686.00 B
+CJS dist/shared/container/providers/StorageProvider/mocks/MockStorageProvider.js.map                    3.14 KB
+CJS dist/shared/container/providers/StorageProvider/implementations/FallbackStorageProvider.js.map      6.62 KB
+CJS dist/shared/container/providers/HashProvider/implementations/BcryptHashProvider.js.map              801.00 B
+CJS dist/shared/container/providers/WeatherProvider/implementations/MetNoWeatherProvider.js.map         8.02 KB
+CJS dist/shared/container/providers/DateProvider/implementations/DayjsDateProvider.js.map               1.43 KB
+CJS dist/modules/payments/infra/repositories/mocks/MockPaymentRepository.js.map                         5.20 KB
+CJS dist/shared/container/providers/EmailProvider/implementations/ResendEmailProvider.js.map            41.08 KB
+CJS dist/shared/container/providers/StorageProvider/implementations/GcsStorageProvider.js.map           14.87 KB
+CJS dist/shared/container/providers/WeatherProvider/implementations/CachedWeatherProvider.js.map        27.57 KB
+CJS dist/shared/container/providers/StorageProvider/implementations/CloudinaryStorageProvider.js.map    9.57 KB
+CJS dist/shared/container/providers/WeatherProvider/implementations/OpenMeteoWeatherProvider.js.map     6.58 KB
+CJS dist/shared/infra/http/routes/referrals.routes.js.map                                               293.68 KB
+CJS dist/shared/infra/http/routes/crm.routes.js.map                                                     328.35 KB
+CJS dist/shared/container/providers/WeatherProvider/implementations/ResilientWeatherProvider.js.map     15.87 KB
+CJS dist/modules/services/useCases/listServices/ListServicesUseCase.js.map                              921.00 B
+CJS dist/shared/container/index.js.map                                                                  781.65 KB
+CJS dist/modules/organizations/useCases/getOrganizationDashboard/GetOrganizationDashboardUseCase.js.map 49.10 KB
+CJS dist/shared/infra/http/routes/queue.routes.js.map                                                   574.78 KB
+CJS dist/shared/infra/http/routes/appointments.routes.js.map                                            654.84 KB
+CJS dist/modules/organizations/useCases/switchShop/SwitchShopController.js.map                          44.35 KB
+CJS dist/shared/infra/http/app.js.map                                                                   3.52 MB
+CJS dist/shared/infra/http/routes/api.js.map                                                            3.46 MB
+CJS dist/shared/infra/http/server.js.map                                                                3.93 MB
+CJS ⚡️ Build success in 3087ms
+EXIT_BUILD=0

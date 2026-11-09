@@ -71,6 +71,15 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 - "Desfazer" vale por 30 dias e remove só o que o lote criou e ninguém tocou depois (restaurando o que ele substituiu) — a UI mostra a mensagem do backend ("Nada foi removido: os registros foram alterados depois da importação") sem escondê-la.
 - Só uma importação ativa por salão: se já houver um lote em andamento, a UI retoma esse lote e permite cancelá-lo pelo histórico.
 
+## Importação por imagem (OCR)
+
+- A foto entra pelo mesmo assistente de importação (upload → alvo → colunas → validação → prévia → confirmação). O backend lê o texto localmente (sem rede) e grava a tabela como o CSV do lote; **a imagem não é enviada para fora**.
+- **Destino e mapeamento são do dono:** a foto não tem cabeçalho, então o passo de alvo mostra só os destinos que a foto pode atender (o servidor manda a lista, respeitando o segmento) e diz o que cada um exige da foto; no passo de colunas o dono diz qual coluna é qual campo.
+- **Célula com leitura duvidosa vira "revisar":** o backend marca a célula pela confiança da leitura, a tela mostra o valor lido com a confiança e o motivo, e o dono **corrige o texto** ou **aceita como está**. A correção vai para o servidor (`PATCH /imports/:batchId/review`), que revalida o lote.
+- **Confirmar só é liberado sem pendência:** enquanto houver célula pendente, o botão fica desabilitado e a tela diz quantas faltam — o backend também recusa a confirmação (409 `OCR_REVIEW_PENDING`).
+- O badge da célula mostra o estado com **ícone e texto** ("revisar", "aceito", "corrigido"), porque a cor sozinha não diz o que aconteceu.
+- Erro de importação é **específico**: a tela traduz o `code` do servidor (`OCR_DISABLED`, `OCR_QUEUE_FULL`, `OCR_IMAGE_TOO_LARGE`, `OCR_IMAGE_FORMAT_INVALID`, `OCR_IMAGE_LOW_RESOLUTION`, `OCR_TRAINEDDATA_MISSING`, `OCR_NO_TABLE`, `OCR_REVIEW_PENDING`) em uma mensagem que diz o que fazer; sem código conhecido vale a mensagem do servidor.
+
 ## Notificações
 
 - WhatsApp/e-mail são opcionais: falha de gateway não deve quebrar a UI principal; painéis de health mostram estado.
@@ -102,8 +111,43 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 
 - Tema via CSS vars escopadas no wrapper `[data-ag-shop-theme]`: família canônica `--shop-*` (por variante) + espelho legado `--ag-*`; as utilities do Tailwind resolvem `var(--shop-x, var(--ag-x))` (`styles/tokens.css`). Variantes `light`/`dark` por salão (`darkColors`/`lightColors` no payload; `lightColors` nula é gerada no cliente via `generateVariantColors`, mesmo gerador do back) e `mode` do dono (`AUTO` segue `prefers-color-scheme`; `LIGHT`/`DARK` força). Padrão sem tema salvo = visual dark atual (`PAGE_THEME_DEFAULTS` em `src/shared/pageThemeDefaults.ts`, espelho do backend via `npm run theme:mirror`).
 - Contraste WCAG AA (texto/fundo + muted/fundo + acento/superfície + botão/acento) é **bloqueante** no botão Salvar — em QUALQUER variante, materializada ou gerada — e no back (`pageThemeContrast.ts`); cores são editadas na variante ativa da prévia (toggle Claro|Escuro, travado quando o Modo força a variante); sem token de owner, o painel mostra estado somente-leitura.
-- Capa: aceita QUALQUER medida/proporção — validação instantânea no front só de tipo (JPEG/PNG/WebP; GIF/SVG rejeitados); medida fora do ideal vira aviso suave não-bloqueante. Recorte 16:9 + ponto focal (`coverFocalX/Y`, editor arrastável com setas do teclado) aplicados na entrega pelo helper único `src/shared/coverImage.ts` (`c_fill,ar_16:9,g_auto|g_xy_center,f_auto,q_auto`, srcset sem ampliar além do `coverWidth/Height` do back; OG `w_1200,h_630,f_jpg`); overlay 0–80; envio direto assinado ao Cloudinary com progresso/cancelamento (multipart via backend mantido como fallback).
+- Capa: aceita QUALQUER medida/proporção — validação instantânea no front só de tipo (JPEG/PNG/WebP; GIF/SVG rejeitados); medida fora do ideal vira aviso suave não-bloqueante. Recorte 16:9 + ponto focal (`coverFocalX/Y`, editor arrastável com setas do teclado) aplicados na entrega pelo helper único `src/shared/coverImage.ts` (`c_fill,ar_16:9,g_auto|g_xy_center,f_auto,q_auto`, srcset sem ampliar além do `coverWidth/Height` do back; OG `w_1200,h_630,c_fill,f_jpg,q_auto` também sem ampliar); overlay 0–80; envio direto assinado ao Cloudinary com progresso/cancelamento (multipart via backend mantido como fallback).
 - Anti-FOUC: `PublicHome` aplica o tema o quanto antes carregado (`usePageTheme` com cache por módulo; `clearPageThemeCache()` para testes).
+
+## Biblioteca de fotos e galeria do perfil
+
+- O seletor "Escolher foto" (`PostEditor.tsx`) é minimalista: **sem checkbox, sem filtro "Todas | Galeria" e sem estrela**.
+- Trilho duplo de fotos: o upload no editor entra na **biblioteca do post** (`inGallery: false`); a sub-aba "Galeria do perfil" (`GalleryManager.tsx`) lista e envia só `inGallery: true`, que é o que aparece na aba "Fotos" do perfil público.
+- `postsApi.uploadMedia` envia `inGallery` sempre (default `false`); `listMedia` filtra pela flag e `updateMedia` alterna a foto na galeria. O back recusa com **400** ("Sua galeria já tem 30 fotos. Remova uma foto para enviar outra.") quando a galeria está cheia e o front mostra a mensagem do backend no toast de erro.
+- Excluir a foto apaga o registro no back → ela some da galeria do perfil. O backfill das fotos antigas (limite 30 por salão, mais recentes primeiro) está em `backend/docs/agents/BUSINESS_RULES.md`.
+- Perfil (`ShopProfile.tsx`): aba "Fotos" e contador usam `socialApi.gallery(salonId)` (`useSalonSocial`), que recarrega ao montar a tela; "Galeria de fotos em breve" só aparece com a galeria realmente vazia (fora do estado de carregamento/erro).
+
+## Posts (formato da arte)
+
+- Grade do perfil: célula **4:5** (`aspect-[4/5]` + `bg-surface-2` em `ProfileSections.tsx`), sem cortar arte antiga — `object-cover` **só** no formato 4:5; 1:1 e 9:16 aparecem inteiros (`object-contain`, com as barras da célula nas laterais/base). O detalhe do post mostra a arte inteira (`object-contain` + `max-h-[70vh]` em `PostDetail.tsx`).
+- Formato padrão por modelo (`price-split` → 4:5, demais → 1:1) vem do catálogo **`GET /api/posts/templates`** (`defaultFormat`); o fallback local `defaultFormatFor` em `PostEditor.tsx` só vale antes da lista carregar (ou se a chamada falhar) e precisa ser alterado junto com o back no mesmo PR — regra completa em `backend/docs/agents/BUSINESS_RULES.md`.
+- Escolha manual no card "Formato" trava o default (`formatTouched`): trocar de modelo não sobrescreve a decisão do usuário.
+- OG da capa (`buildCoverOgUrl`): `w_1200,h_630,c_fill` + focal, largura limitada ao original (nunca amplia), **`f_jpg,q_auto`** — PNG a ~900 KB passava do limite de 300 KB aceito para `og:image`; JPEG fica em ~80 KB.
+
+## Compartilhamento público (`/s/salon/:id`)
+
+- O link que o dono compartilha é `${VITE_PUBLIC_SITE_URL}/s/salon/:id` (`buildProfileShareUrl` em `src/features/shop/PostDetail.tsx`). A rota `/queue/:id?tab=profile` continua sendo o destino **interno** do app (é para lá que a página de compartilhamento redireciona), não o link compartilhado.
+- O backend serve `GET /s/salon/:id` **fora do prefixo `/api`**: HTML com `<title>`, canonical e `og:url` lidos da env `PUBLIC_APP_URL` (que deve valer **a mesma origem** de `VITE_PUBLIC_SITE_URL`), tags Open Graph/Twitter e um `meta refresh` + link de fallback. O corpo é mínimo e acessível (`<main>`, `<h1>` "Abrindo o perfil...", link visível, fundo escuro `#0b1220`) — por isso também nenhum `<script>` inline: a CSP de produção do back não tem `unsafe-inline`. Salão inexistente ou inativo → 404 HTML com `noindex`; respostas 200/404 saem com `Cache-Control: public, max-age=300` (404: 60 s), `ETag` e `304` para `If-None-Match`, e `HEAD` devolve os mesmos cabeçalhos sem corpo.
+- `og:image`: com capa usa o recorte Cloudinary 1200×630 JPEG (`f_jpg,q_auto` + focal, largura limitada ao original — mesmo espelho do `buildCoverOgUrl` do front); sem capa aponta para `<PUBLIC_API_URL>/api/barbershops/:id/page-theme/og-image`. A base vem da env do back `PUBLIC_API_URL` (sem ela, **só fora de produção** a origem da requisição é usada; em produção cai para `PUBLIC_APP_URL` e, sem nenhuma, o `og:image` é omitido — a API avisa no boot).
+- **Rewrite obrigatório no host do frontend** — sem ele o catch-all da SPA engole `/s/salon/:id` e o crawler lê o `index.html` sem meta tags. Regras acima do catch-all, **mantidas comentadas até a URL pública do backend ser confirmada**:
+  - Render (`render.yaml`): `- type: rewrite` com `source: /s/*` e `destination: https://<backend>/s/*`.
+  - Netlify/Cloudflare (`public/_redirects`): `/s/*  https://<backend>/s/*  200`.
+- CORS fica restrito ao escopo `/api` (`corsOptions.ts`, registrado em `routes/api.ts`): `/s/salon/:id`, `/health` e `/docs` não emitem cabeçalhos CORS (`app.security.spec.ts` no back cobre os dois lados).
+
+### Ativação em staging (obrigatória antes de produção)
+
+Não descomentar a regra sem confirmar a URL pública do backend **e** rodar estes testes no staging (todos contra o host do front, não do back):
+
+1. `curl -s https://<front>/s/salon/<id> | head -30` → precisa conter `<title>`, `og:url` e `<meta http-equiv="refresh"`. Se vier o `index.html` da SPA (`<div id="root">`), a regra não está ativa ou está **depois** do catch-all.
+2. `curl -sI https://<front>/s/salon/<id>` → `content-type: text/html` + cabeçalhos do back (`etag`, `cache-control: public, max-age=300`); em `id` inexistente → `404` com HTML (não 200 da SPA).
+3. `curl -s https://<front>/s/salon/<id> | grep -o 'property="og:image" content="[^"]*"'` e depois `curl -sI <valor>` → `200` (isso valida também a origem de `/api`/`PUBLIC_API_URL`; sem capa, a URL do back precisa ser alcançável de fora).
+4. Ferramenta de preview (Facebook Sharing Debugger / opengraph.xyz) na URL do staging → título + imagem aparecem.
+5. Só então publicar a URL real em `render.yaml`/`_redirects` e repetir os 4 testes em produção.
 
 ## Pendências documentais
 

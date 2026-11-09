@@ -87,7 +87,9 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
     'team',
     'financial',
     'commissions',
-    ...(isLegal ? (['cases', 'caseFees'] as const) : []),
+    // Processos é opt-in (dado sigiloso): nunca vem marcado por padrão,
+    // nem para LAW_FIRM. Honorários de êxito seguem disponíveis no padrão.
+    ...(isLegal ? (['caseFees'] as const) : []),
   ]);
   const [format, setFormat] = React.useState<ExportFormat>('XLSX');
   const [anonymize, setAnonymize] = React.useState(false);
@@ -95,6 +97,7 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
   const [busy, setBusy] = React.useState(false);
   const [currentJob, setCurrentJob] = React.useState<ExportJob | null>(null);
   const [history, setHistory] = React.useState<ExportJob[]>([]);
+  const [userInteracted, setUserInteracted] = React.useState(false);
 
   const loadHistory = React.useCallback(async () => {
     try {
@@ -129,14 +132,38 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
   }, [currentJob, barbershopId, loadHistory]);
 
   const toggleModule = (key: ExportModuleKey): void => {
+    setUserInteracted(true);
     setModules((current) =>
       current.includes(key) ? current.filter((item) => item !== key) : [...current, key],
     );
   };
 
+  // includeCase não depende de anonymize: Processos pode ser exportado
+  // anonimizado (o backend mascara os campos pessoais da aba).
+  const caseWarning = React.useMemo(() => {
+    if (!userInteracted) return null;
+    if (includeCase && !modules.includes('cases')) {
+      return {
+        message:
+          'Incluir caso/processo requer o módulo Processos selecionado. Marque “Processos” ou desligue “Incluir caso/processo”.',
+        type: 'error' as const,
+      };
+    }
+    if (modules.includes('cases') && !includeCase) {
+      return {
+        message:
+          'O módulo Processos está selecionado, mas “Incluir caso/processo” está desligado — dados internos do processo não serão exportados.',
+        type: 'warning' as const,
+      };
+    }
+    return null;
+  }, [includeCase, modules, userInteracted]);
+
   const applyPreset = (presetName: 'GERENTIAL' | 'BACKUP'): void => {
+    setUserInteracted(true);
     if (presetName === 'GERENTIAL') {
       setModules(['financial', 'commissions', 'services', 'team']);
+      setIncludeCase(false);
     } else {
       setModules([
         'appointments',
@@ -157,10 +184,14 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
         'settings',
         ...(isLegal ? (['cases', 'caseFees'] as const) : []),
       ]);
+      // O backup completo marca Processos, então liga includeCase junto:
+      // sem isso o backend descartaria a aba e o backup sairia sem Processos.
+      setIncludeCase(isLegal);
     }
   };
 
   const handleGenerate = async (): Promise<void> => {
+    if (caseWarning?.type === 'error') return;
     setBusy(true);
     try {
       const job = await dataExportApi.create(barbershopId, {
@@ -169,7 +200,7 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
         dateTo: preset === 'CUSTOM' ? dateTo : undefined,
         modules,
         format,
-        options: { anonymize, includeCase: anonymize ? false : includeCase },
+        options: { anonymize, includeCase },
       });
       setCurrentJob(job);
       onNotify('Exportação enfileirada. Acompanhe o progresso abaixo.', 'success');
@@ -338,7 +369,10 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
             <input
               type="checkbox"
               checked={anonymize}
-              onChange={(event) => setAnonymize(event.target.checked)}
+              onChange={(event) => {
+                setUserInteracted(true);
+                setAnonymize(event.target.checked);
+              }}
               data-testid="export-anonymize"
             />
             Anonimizar dados pessoais (relatório para contador)
@@ -347,20 +381,41 @@ export const DataExportWizard: React.FC<{ barbershopId: string; onNotify: (messa
             <label className="flex items-center gap-2 text-sm text-text-primary">
               <input
                 type="checkbox"
-                checked={includeCase && !anonymize}
-                disabled={anonymize}
-                onChange={(event) => setIncludeCase(event.target.checked)}
+                checked={includeCase}
+                onChange={(event) => {
+                  setUserInteracted(true);
+                  setIncludeCase(event.target.checked);
+                }}
                 data-testid="export-include-case"
               />
               Incluir caso/processo (dados internos do escritório)
             </label>
           )}
+          {isLegal && anonymize ? (
+            <p className="col-span-2 text-xs text-text-secondary" data-testid="export-case-anonymize-hint">
+              Com “Anonimizar dados pessoais” ligado, a aba Processos sai com nome, WhatsApp, número do processo,
+              apelido, parte adversária, título e advogado mascarados. Valores e datas permanecem.
+            </p>
+          ) : null}
         </div>
       </section>
 
+      {caseWarning && (
+        <p
+          className={`mb-3 text-xs rounded-lg border px-3 py-2 ${
+            caseWarning.type === 'error'
+              ? 'border-danger bg-danger/10 text-danger'
+              : 'border-accent bg-accent/10 text-accent'
+          }`}
+          data-testid="export-case-warning"
+        >
+          {caseWarning.message}
+        </p>
+      )}
+
       <Button
         onClick={() => void handleGenerate()}
-        disabled={busy || modules.length === 0}
+        disabled={busy || modules.length === 0 || caseWarning?.type === 'error'}
         data-testid="export-generate"
       >
         {busy ? 'Gerando...' : 'Gerar planilha'}

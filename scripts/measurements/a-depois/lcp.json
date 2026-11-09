@@ -1,0 +1,4770 @@
+{
+  "runsPerRoute": 5,
+  "scenarios": [
+    "off",
+    "real"
+  ],
+  "routes": [
+    "/login"
+  ],
+  "widths": [
+    375,
+    1440
+  ],
+  "execucoes": [
+    {
+      "route": "/login",
+      "width": 375,
+      "api": "off",
+      "runs": [
+        {
+          "route": "/login",
+          "fcp": 1384,
+          "lcpMs": 2400,
+          "lcpSize": 5933,
+          "lcpUrl": "/brand/agendai-logo-dark.webp",
+          "elemento": {
+            "tag": "img",
+            "id": null,
+            "cls": "h-9 w-auto object-contain",
+            "text": "",
+            "rect": {
+              "w": 173,
+              "h": 36
+            },
+            "fs": 2050,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "16px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "img.h-9.w-auto.object-contain",
+              "span.inline-flex.select-none",
+              "button.min-h-11.cursor-pointer.transition-transform",
+              "div.mb-6.flex.w-full",
+              "div.p-5.sm:p-8.flex",
+              "div.relative.w-full.max-w-lg"
+            ],
+            "img": {
+              "src": "/brand/agendai-logo-dark.webp",
+              "currentSrc": "http://127.0.0.1:4173/brand/agendai-logo-dark.webp",
+              "loading": "eager",
+              "fetchPriority": "high",
+              "complete": true,
+              "naturalWidth": 700
+            }
+          },
+          "entradas": [
+            {
+              "t": 1384,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1302,
+              "hidden0": null
+            },
+            {
+              "t": 2136,
+              "size": 5844,
+              "url": null,
+              "texto": "Bem-vindo de volta",
+              "tag": "h1",
+              "fs": 2050,
+              "hidden0": null
+            },
+            {
+              "t": 2400,
+              "size": 5933,
+              "url": "/brand/agendai-logo-dark.webp",
+              "texto": "",
+              "tag": "img",
+              "fs": 2050,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 7,
+            "recursoDelay": 1858,
+            "recursoDownload": 332,
+            "render": 46
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 666,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 3
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 164,
+              "dur": 164,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 193,
+              "fim": 614,
+              "dur": 421,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 193,
+              "fim": 1194,
+              "dur": 1001,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1289,
+              "fim": 1628,
+              "dur": 340,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1290,
+              "fim": 1486,
+              "dur": 196,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1290,
+              "fim": 1501,
+              "dur": 210,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1290,
+              "fim": 1528,
+              "dur": 238,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1290,
+              "fim": 1536,
+              "dur": 246,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1290,
+              "fim": 1758,
+              "dur": 469,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1291,
+              "fim": 1672,
+              "dur": 382,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1291,
+              "fim": 1695,
+              "dur": 405,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1291,
+              "fim": 1717,
+              "dur": 426,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1291,
+              "fim": 1788,
+              "dur": 497,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1291,
+              "fim": 1829,
+              "dur": 538,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1291,
+              "fim": 1945,
+              "dur": 654,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1292,
+              "fim": 1886,
+              "dur": 595,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1301,
+              "fim": 1951,
+              "dur": 649,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1309,
+              "fim": 2086,
+              "dur": 777,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 2022,
+              "fim": 2354,
+              "dur": 332,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1253,
+          "load": 1253,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1309,
+              "fim": 2086,
+              "kb": 61.4
+            }
+          ]
+        },
+        {
+          "route": "/login",
+          "fcp": 1288,
+          "lcpMs": 2360,
+          "lcpSize": 5918,
+          "lcpUrl": "/brand/agendai-logo-dark.webp",
+          "elemento": {
+            "tag": "img",
+            "id": null,
+            "cls": "h-9 w-auto object-contain",
+            "text": "",
+            "rect": {
+              "w": 173,
+              "h": 36
+            },
+            "fs": 1997,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "16px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "img.h-9.w-auto.object-contain",
+              "span.inline-flex.select-none",
+              "button.min-h-11.cursor-pointer.transition-transform",
+              "div.mb-6.flex.w-full",
+              "div.p-5.sm:p-8.flex",
+              "div.relative.w-full.max-w-lg"
+            ],
+            "img": {
+              "src": "/brand/agendai-logo-dark.webp",
+              "currentSrc": "http://127.0.0.1:4173/brand/agendai-logo-dark.webp",
+              "loading": "eager",
+              "fetchPriority": "high",
+              "complete": true,
+              "naturalWidth": 700
+            }
+          },
+          "entradas": [
+            {
+              "t": 1288,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1257,
+              "hidden0": null
+            },
+            {
+              "t": 2056,
+              "size": 5844,
+              "url": null,
+              "texto": "Bem-vindo de volta",
+              "tag": "h1",
+              "fs": 1997,
+              "hidden0": null
+            },
+            {
+              "t": 2360,
+              "size": 5918,
+              "url": "/brand/agendai-logo-dark.webp",
+              "texto": "",
+              "tag": "img",
+              "fs": 1997,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 3,
+            "recursoDelay": 1809,
+            "recursoDownload": 323,
+            "render": 71
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 709,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 3
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 157,
+              "dur": 157,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 170,
+              "fim": 1172,
+              "dur": 1002,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 171,
+              "fim": 588,
+              "dur": 417,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1246,
+              "fim": 1511,
+              "dur": 265,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1246,
+              "fim": 1590,
+              "dur": 344,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1246,
+              "fim": 1710,
+              "dur": 464,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1247,
+              "fim": 1444,
+              "dur": 197,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1247,
+              "fim": 1459,
+              "dur": 212,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1247,
+              "fim": 1489,
+              "dur": 242,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1247,
+              "fim": 1623,
+              "dur": 376,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1247,
+              "fim": 1653,
+              "dur": 405,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1681,
+              "dur": 434,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1752,
+              "dur": 505,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1789,
+              "dur": 541,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1852,
+              "dur": 604,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1911,
+              "dur": 663,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1257,
+              "fim": 1903,
+              "dur": 646,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1260,
+              "fim": 2047,
+              "dur": 787,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1966,
+              "fim": 2289,
+              "dur": 323,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1218,
+          "load": 1219,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1260,
+              "fim": 2047,
+              "kb": 61.4
+            }
+          ]
+        },
+        {
+          "route": "/login",
+          "fcp": 1304,
+          "lcpMs": 2108,
+          "lcpSize": 6649,
+          "lcpUrl": null,
+          "elemento": {
+            "tag": "h1",
+            "id": null,
+            "cls": "mt-5 text-center text-2xl font-black tracking-tight text-text-primary sm:text-3xl",
+            "text": "Bem-vindo de volta",
+            "rect": {
+              "w": 217,
+              "h": 32
+            },
+            "fs": 1995,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "24px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "h1.mt-5.text-center.text-2xl",
+              "div.mb-6.flex.w-full",
+              "div.p-5.sm:p-8.flex",
+              "div.relative.w-full.max-w-lg",
+              "div.relative.flex.items-center",
+              "div.min-h-dvh.bg-bg.grid"
+            ]
+          },
+          "entradas": [
+            {
+              "t": 1304,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1269,
+              "hidden0": null
+            },
+            {
+              "t": 2108,
+              "size": 6649,
+              "url": null,
+              "texto": "Bem-vindo de volta",
+              "tag": "h1",
+              "fs": 1995,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 2,
+            "criacaoElemento": 1830,
+            "render": 113
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 691,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 2
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 165,
+              "dur": 165,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 182,
+              "fim": 600,
+              "dur": 418,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 182,
+              "fim": 1182,
+              "dur": 1000,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1258,
+              "fim": 1594,
+              "dur": 337,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1453,
+              "dur": 194,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1459,
+              "dur": 200,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1496,
+              "dur": 237,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1509,
+              "dur": 250,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1624,
+              "dur": 365,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1716,
+              "dur": 457,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1260,
+              "fim": 1660,
+              "dur": 400,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1260,
+              "fim": 1683,
+              "dur": 422,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1260,
+              "fim": 1762,
+              "dur": 502,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1260,
+              "fim": 1789,
+              "dur": 529,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1260,
+              "fim": 1903,
+              "dur": 642,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1261,
+              "fim": 1853,
+              "dur": 592,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1269,
+              "fim": 1909,
+              "dur": 640,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1273,
+              "fim": 2052,
+              "dur": 779,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1967,
+              "fim": 2298,
+              "dur": 331,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1230,
+          "load": 1230,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1273,
+              "fim": 2052,
+              "kb": 61.4
+            }
+          ]
+        },
+        {
+          "route": "/login",
+          "fcp": 1300,
+          "lcpMs": 2360,
+          "lcpSize": 5927,
+          "lcpUrl": "/brand/agendai-logo-dark.webp",
+          "elemento": {
+            "tag": "img",
+            "id": null,
+            "cls": "h-9 w-auto object-contain",
+            "text": "",
+            "rect": {
+              "w": 173,
+              "h": 36
+            },
+            "fs": 2000,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "16px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "img.h-9.w-auto.object-contain",
+              "span.inline-flex.select-none",
+              "button.min-h-11.cursor-pointer.transition-transform",
+              "div.mb-6.flex.w-full",
+              "div.p-5.sm:p-8.flex",
+              "div.relative.w-full.max-w-lg"
+            ],
+            "img": {
+              "src": "/brand/agendai-logo-dark.webp",
+              "currentSrc": "http://127.0.0.1:4173/brand/agendai-logo-dark.webp",
+              "loading": "eager",
+              "fetchPriority": "high",
+              "complete": true,
+              "naturalWidth": 700
+            }
+          },
+          "entradas": [
+            {
+              "t": 1300,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1267,
+              "hidden0": null
+            },
+            {
+              "t": 2060,
+              "size": 5844,
+              "url": null,
+              "texto": "Bem-vindo de volta",
+              "tag": "h1",
+              "fs": 2000,
+              "hidden0": null
+            },
+            {
+              "t": 2360,
+              "size": 5927,
+              "url": "/brand/agendai-logo-dark.webp",
+              "texto": "",
+              "tag": "img",
+              "fs": 2000,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 2,
+            "recursoDelay": 1801,
+            "recursoDownload": 328,
+            "render": 65
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 700,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 3
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 166,
+              "dur": 166,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 178,
+              "fim": 1181,
+              "dur": 1003,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 179,
+              "fim": 602,
+              "dur": 423,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1256,
+              "fim": 1430,
+              "dur": 174,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1256,
+              "fim": 1508,
+              "dur": 252,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1256,
+              "fim": 1594,
+              "dur": 338,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1256,
+              "fim": 1732,
+              "dur": 476,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1257,
+              "fim": 1466,
+              "dur": 210,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1257,
+              "fim": 1487,
+              "dur": 230,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1257,
+              "fim": 1638,
+              "dur": 381,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1257,
+              "fim": 1662,
+              "dur": 405,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1257,
+              "fim": 1680,
+              "dur": 424,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1258,
+              "fim": 1754,
+              "dur": 496,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1258,
+              "fim": 1802,
+              "dur": 544,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1258,
+              "fim": 1847,
+              "dur": 589,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1258,
+              "fim": 1909,
+              "dur": 651,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1266,
+              "fim": 1919,
+              "dur": 653,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1270,
+              "fim": 2053,
+              "dur": 783,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1967,
+              "fim": 2295,
+              "dur": 328,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1229,
+          "load": 1229,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1270,
+              "fim": 2053,
+              "kb": 61.4
+            }
+          ]
+        },
+        {
+          "route": "/login",
+          "fcp": 1256,
+          "lcpMs": 2056,
+          "lcpSize": 6633,
+          "lcpUrl": null,
+          "elemento": {
+            "tag": "h1",
+            "id": null,
+            "cls": "mt-5 text-center text-2xl font-black tracking-tight text-text-primary sm:text-3xl",
+            "text": "Bem-vindo de volta",
+            "rect": {
+              "w": 217,
+              "h": 32
+            },
+            "fs": 1975,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "24px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "h1.mt-5.text-center.text-2xl",
+              "div.mb-6.flex.w-full",
+              "div.p-5.sm:p-8.flex",
+              "div.relative.w-full.max-w-lg",
+              "div.relative.flex.items-center",
+              "div.min-h-dvh.bg-bg.grid"
+            ]
+          },
+          "entradas": [
+            {
+              "t": 1256,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1233,
+              "hidden0": null
+            },
+            {
+              "t": 2056,
+              "size": 6633,
+              "url": null,
+              "texto": "Bem-vindo de volta",
+              "tag": "h1",
+              "fs": 1975,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 2,
+            "criacaoElemento": 1816,
+            "render": 81
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 719,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 2
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 159,
+              "dur": 159,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 174,
+              "fim": 597,
+              "dur": 423,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 174,
+              "fim": 1173,
+              "dur": 999,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1227,
+              "fim": 1569,
+              "dur": 342,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1228,
+              "fim": 1426,
+              "dur": 198,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1228,
+              "fim": 1445,
+              "dur": 217,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1228,
+              "fim": 1466,
+              "dur": 238,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1228,
+              "fim": 1485,
+              "dur": 257,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1228,
+              "fim": 1618,
+              "dur": 390,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1228,
+              "fim": 1638,
+              "dur": 410,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1228,
+              "fim": 1661,
+              "dur": 433,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1228,
+              "fim": 1689,
+              "dur": 462,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1228,
+              "fim": 1731,
+              "dur": 503,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1228,
+              "fim": 1776,
+              "dur": 548,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1228,
+              "fim": 1826,
+              "dur": 598,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1228,
+              "fim": 1890,
+              "dur": 662,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1233,
+              "fim": 1883,
+              "dur": 650,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1234,
+              "fim": 2025,
+              "dur": 791,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1948,
+              "fim": 2275,
+              "dur": 327,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1221,
+          "load": 1221,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1234,
+              "fim": 2025,
+              "kb": 61.4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "width": 1440,
+      "api": "off",
+      "runs": [
+        {
+          "route": "/login",
+          "fcp": 1296,
+          "lcpMs": 2228,
+          "lcpSize": 28350,
+          "lcpUrl": null,
+          "elemento": {
+            "tag": "p",
+            "id": null,
+            "cls": "font-sans text-4xl xl:text-5xl font-extrabold leading-[1.08] tracking-tight",
+            "text": "Seu salão, no controle.",
+            "rect": {
+              "w": 592,
+              "h": 52
+            },
+            "fs": 1976,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "48px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "p.font-sans.text-4xl.xl:text-5xl",
+              "div",
+              "div.flex-1.flex.flex-col",
+              "div.relative.z-10.flex",
+              "div.relative.hidden.lg:flex",
+              "div.min-h-dvh.bg-bg.grid"
+            ]
+          },
+          "entradas": [
+            {
+              "t": 1296,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1262,
+              "hidden0": null
+            },
+            {
+              "t": 2100,
+              "size": 1635,
+              "url": null,
+              "texto": "Agenda inteligente",
+              "tag": "span",
+              "fs": 1976,
+              "hidden0": null
+            },
+            {
+              "t": 2228,
+              "size": 28350,
+              "url": null,
+              "texto": "Seu salão, no controle.",
+              "tag": "p",
+              "fs": 1976,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 2,
+            "criacaoElemento": 1811,
+            "render": 252
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 680,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 3
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 165,
+              "dur": 165,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 173,
+              "fim": 593,
+              "dur": 420,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 173,
+              "fim": 1174,
+              "dur": 1002,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1588,
+              "dur": 340,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1250,
+              "fim": 1438,
+              "dur": 188,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1250,
+              "fim": 1444,
+              "dur": 194,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1250,
+              "fim": 1481,
+              "dur": 232,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1250,
+              "fim": 1501,
+              "dur": 252,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1250,
+              "fim": 1717,
+              "dur": 467,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1251,
+              "fim": 1610,
+              "dur": 360,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1251,
+              "fim": 1645,
+              "dur": 394,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1251,
+              "fim": 1667,
+              "dur": 416,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1251,
+              "fim": 1754,
+              "dur": 504,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1251,
+              "fim": 1775,
+              "dur": 524,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1251,
+              "fim": 1881,
+              "dur": 630,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1252,
+              "fim": 1837,
+              "dur": 586,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1261,
+              "fim": 1902,
+              "dur": 640,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1266,
+              "fim": 2049,
+              "dur": 783,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1946,
+              "fim": 2267,
+              "dur": 321,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1222,
+          "load": 1222,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1266,
+              "fim": 2049,
+              "kb": 61.4
+            }
+          ]
+        },
+        {
+          "route": "/login",
+          "fcp": 1288,
+          "lcpMs": 2084,
+          "lcpSize": 26824,
+          "lcpUrl": null,
+          "elemento": {
+            "tag": "p",
+            "id": null,
+            "cls": "font-sans text-4xl xl:text-5xl font-extrabold leading-[1.08] tracking-tight",
+            "text": "Seu salão, no controle.",
+            "rect": {
+              "w": 592,
+              "h": 52
+            },
+            "fs": 1985,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "48px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "p.font-sans.text-4xl.xl:text-5xl",
+              "div",
+              "div.flex-1.flex.flex-col",
+              "div.relative.z-10.flex",
+              "div.relative.hidden.lg:flex",
+              "div.min-h-dvh.bg-bg.grid"
+            ]
+          },
+          "entradas": [
+            {
+              "t": 1288,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1250,
+              "hidden0": null
+            },
+            {
+              "t": 2084,
+              "size": 26824,
+              "url": null,
+              "texto": "Seu salão, no controle.",
+              "tag": "p",
+              "fs": 1985,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 2,
+            "criacaoElemento": 1821,
+            "render": 99
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 697,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 2
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 164,
+              "dur": 164,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 172,
+              "fim": 1179,
+              "dur": 1007,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 173,
+              "fim": 593,
+              "dur": 420,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1240,
+              "fim": 1494,
+              "dur": 254,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1240,
+              "fim": 1581,
+              "dur": 341,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1240,
+              "fim": 1717,
+              "dur": 477,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1241,
+              "fim": 1425,
+              "dur": 183,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1241,
+              "fim": 1451,
+              "dur": 210,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1241,
+              "fim": 1480,
+              "dur": 239,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1241,
+              "fim": 1616,
+              "dur": 375,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1241,
+              "fim": 1646,
+              "dur": 404,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1242,
+              "fim": 1666,
+              "dur": 425,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1242,
+              "fim": 1739,
+              "dur": 497,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1242,
+              "fim": 1775,
+              "dur": 533,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1242,
+              "fim": 1895,
+              "dur": 652,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1243,
+              "fim": 1838,
+              "dur": 595,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1250,
+              "fim": 1905,
+              "dur": 655,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1254,
+              "fim": 2038,
+              "dur": 784,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1959,
+              "fim": 2291,
+              "dur": 332,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1211,
+          "load": 1211,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1254,
+              "fim": 2038,
+              "kb": 61.4
+            }
+          ]
+        },
+        {
+          "route": "/login",
+          "fcp": 1288,
+          "lcpMs": 2184,
+          "lcpSize": 28350,
+          "lcpUrl": null,
+          "elemento": {
+            "tag": "p",
+            "id": null,
+            "cls": "font-sans text-4xl xl:text-5xl font-extrabold leading-[1.08] tracking-tight",
+            "text": "Seu salão, no controle.",
+            "rect": {
+              "w": 592,
+              "h": 52
+            },
+            "fs": 1993,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "48px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "p.font-sans.text-4xl.xl:text-5xl",
+              "div",
+              "div.flex-1.flex.flex-col",
+              "div.relative.z-10.flex",
+              "div.relative.hidden.lg:flex",
+              "div.min-h-dvh.bg-bg.grid"
+            ]
+          },
+          "entradas": [
+            {
+              "t": 1288,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1258,
+              "hidden0": null
+            },
+            {
+              "t": 2100,
+              "size": 1635,
+              "url": null,
+              "texto": "Agenda inteligente",
+              "tag": "span",
+              "fs": 1993,
+              "hidden0": null
+            },
+            {
+              "t": 2184,
+              "size": 28350,
+              "url": null,
+              "texto": "Seu salão, no controle.",
+              "tag": "p",
+              "fs": 1993,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 2,
+            "criacaoElemento": 1836,
+            "render": 191
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 705,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 3
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 157,
+              "dur": 157,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 165,
+              "fim": 594,
+              "dur": 429,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 165,
+              "fim": 1173,
+              "dur": 1008,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1445,
+              "dur": 197,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1459,
+              "dur": 210,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1490,
+              "dur": 241,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1502,
+              "dur": 254,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1590,
+              "dur": 342,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1623,
+              "dur": 375,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1719,
+              "dur": 471,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1659,
+              "dur": 411,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1673,
+              "dur": 424,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1746,
+              "dur": 496,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1790,
+              "dur": 540,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1904,
+              "dur": 655,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1250,
+              "fim": 1847,
+              "dur": 597,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1258,
+              "fim": 1909,
+              "dur": 651,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1262,
+              "fim": 2047,
+              "dur": 786,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1961,
+              "fim": 2290,
+              "dur": 329,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1219,
+          "load": 1219,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1262,
+              "fim": 2047,
+              "kb": 61.4
+            }
+          ]
+        },
+        {
+          "route": "/login",
+          "fcp": 1312,
+          "lcpMs": 2180,
+          "lcpSize": 28350,
+          "lcpUrl": null,
+          "elemento": {
+            "tag": "p",
+            "id": null,
+            "cls": "font-sans text-4xl xl:text-5xl font-extrabold leading-[1.08] tracking-tight",
+            "text": "Seu salão, no controle.",
+            "rect": {
+              "w": 592,
+              "h": 52
+            },
+            "fs": 2000,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "48px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "p.font-sans.text-4xl.xl:text-5xl",
+              "div",
+              "div.flex-1.flex.flex-col",
+              "div.relative.z-10.flex",
+              "div.relative.hidden.lg:flex",
+              "div.min-h-dvh.bg-bg.grid"
+            ]
+          },
+          "entradas": [
+            {
+              "t": 1312,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1274,
+              "hidden0": null
+            },
+            {
+              "t": 2096,
+              "size": 1635,
+              "url": null,
+              "texto": "Agenda inteligente",
+              "tag": "span",
+              "fs": 2000,
+              "hidden0": null
+            },
+            {
+              "t": 2180,
+              "size": 28350,
+              "url": null,
+              "texto": "Seu salão, no controle.",
+              "tag": "p",
+              "fs": 2000,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 2,
+            "criacaoElemento": 1836,
+            "render": 180
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 688,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 3
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 164,
+              "dur": 164,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 172,
+              "fim": 602,
+              "dur": 430,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 172,
+              "fim": 1181,
+              "dur": 1009,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1261,
+              "fim": 1516,
+              "dur": 255,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1261,
+              "fim": 1602,
+              "dur": 341,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1261,
+              "fim": 1733,
+              "dur": 472,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1262,
+              "fim": 1453,
+              "dur": 191,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1262,
+              "fim": 1469,
+              "dur": 207,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1262,
+              "fim": 1496,
+              "dur": 234,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1262,
+              "fim": 1637,
+              "dur": 375,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1263,
+              "fim": 1664,
+              "dur": 402,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1263,
+              "fim": 1683,
+              "dur": 420,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1263,
+              "fim": 1769,
+              "dur": 506,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1263,
+              "fim": 1797,
+              "dur": 534,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1263,
+              "fim": 1852,
+              "dur": 589,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1263,
+              "fim": 1911,
+              "dur": 647,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1274,
+              "fim": 1923,
+              "dur": 650,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1277,
+              "fim": 2061,
+              "dur": 783,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1973,
+              "fim": 2306,
+              "dur": 333,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1232,
+          "load": 1232,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1277,
+              "fim": 2061,
+              "kb": 61.4
+            }
+          ]
+        },
+        {
+          "route": "/login",
+          "fcp": 1288,
+          "lcpMs": 2084,
+          "lcpSize": 26824,
+          "lcpUrl": null,
+          "elemento": {
+            "tag": "p",
+            "id": null,
+            "cls": "font-sans text-4xl xl:text-5xl font-extrabold leading-[1.08] tracking-tight",
+            "text": "Seu salão, no controle.",
+            "rect": {
+              "w": 592,
+              "h": 52
+            },
+            "fs": 1985,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "48px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "p.font-sans.text-4xl.xl:text-5xl",
+              "div",
+              "div.flex-1.flex.flex-col",
+              "div.relative.z-10.flex",
+              "div.relative.hidden.lg:flex",
+              "div.min-h-dvh.bg-bg.grid"
+            ]
+          },
+          "entradas": [
+            {
+              "t": 1288,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1257,
+              "hidden0": null
+            },
+            {
+              "t": 2084,
+              "size": 26824,
+              "url": null,
+              "texto": "Seu salão, no controle.",
+              "tag": "p",
+              "fs": 1985,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 2,
+            "criacaoElemento": 1815,
+            "render": 99
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 697,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 2
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 170,
+              "dur": 170,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 172,
+              "fim": 601,
+              "dur": 429,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 172,
+              "fim": 1173,
+              "dur": 1001,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1247,
+              "fim": 1582,
+              "dur": 335,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1431,
+              "dur": 182,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1437,
+              "dur": 189,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1475,
+              "dur": 227,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1495,
+              "dur": 247,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1711,
+              "dur": 464,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1604,
+              "dur": 355,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1645,
+              "dur": 397,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1667,
+              "dur": 418,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1739,
+              "dur": 490,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1250,
+              "fim": 1770,
+              "dur": 520,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1250,
+              "fim": 1832,
+              "dur": 582,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1250,
+              "fim": 1895,
+              "dur": 645,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1257,
+              "fim": 1904,
+              "dur": 646,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1261,
+              "fim": 2040,
+              "dur": 779,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1958,
+              "fim": 2283,
+              "dur": 326,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1220,
+          "load": 1220,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1261,
+              "fim": 2040,
+              "kb": 61.4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "width": 375,
+      "api": "real",
+      "runs": [
+        {
+          "route": "/login",
+          "fcp": 1292,
+          "lcpMs": 2088,
+          "lcpSize": 6636,
+          "lcpUrl": null,
+          "elemento": {
+            "tag": "h1",
+            "id": null,
+            "cls": "mt-5 text-center text-2xl font-black tracking-tight text-text-primary sm:text-3xl",
+            "text": "Bem-vindo de volta",
+            "rect": {
+              "w": 217,
+              "h": 32
+            },
+            "fs": 1990,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "24px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "h1.mt-5.text-center.text-2xl",
+              "div.mb-6.flex.w-full",
+              "div.p-5.sm:p-8.flex",
+              "div.relative.w-full.max-w-lg",
+              "div.relative.flex.items-center",
+              "div.min-h-dvh.bg-bg.grid"
+            ]
+          },
+          "entradas": [
+            {
+              "t": 1292,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1257,
+              "hidden0": null
+            },
+            {
+              "t": 2088,
+              "size": 6636,
+              "url": null,
+              "texto": "Bem-vindo de volta",
+              "tag": "h1",
+              "fs": 1990,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 2,
+            "criacaoElemento": 1832,
+            "render": 98
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 698,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 2
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 158,
+              "dur": 158,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 171,
+              "fim": 595,
+              "dur": 424,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 171,
+              "fim": 1173,
+              "dur": 1002,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1246,
+              "fim": 1490,
+              "dur": 244,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1246,
+              "fim": 1573,
+              "dur": 327,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1246,
+              "fim": 1703,
+              "dur": 457,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1247,
+              "fim": 1423,
+              "dur": 176,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1247,
+              "fim": 1445,
+              "dur": 197,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1247,
+              "fim": 1475,
+              "dur": 228,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1247,
+              "fim": 1618,
+              "dur": 371,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1247,
+              "fim": 1645,
+              "dur": 397,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1668,
+              "dur": 420,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1737,
+              "dur": 490,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1781,
+              "dur": 534,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1839,
+              "dur": 590,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1903,
+              "dur": 655,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1257,
+              "fim": 1887,
+              "dur": 631,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1260,
+              "fim": 2031,
+              "dur": 772,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1963,
+              "fim": 2289,
+              "dur": 326,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1219,
+          "load": 1220,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1260,
+              "fim": 2031,
+              "kb": 61.4
+            }
+          ]
+        },
+        {
+          "route": "/login",
+          "fcp": 1300,
+          "lcpMs": 2104,
+          "lcpSize": 6660,
+          "lcpUrl": null,
+          "elemento": {
+            "tag": "h1",
+            "id": null,
+            "cls": "mt-5 text-center text-2xl font-black tracking-tight text-text-primary sm:text-3xl",
+            "text": "Bem-vindo de volta",
+            "rect": {
+              "w": 217,
+              "h": 32
+            },
+            "fs": 1976,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "24px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "h1.mt-5.text-center.text-2xl",
+              "div.mb-6.flex.w-full",
+              "div.p-5.sm:p-8.flex",
+              "div.relative.w-full.max-w-lg",
+              "div.relative.flex.items-center",
+              "div.min-h-dvh.bg-bg.grid"
+            ]
+          },
+          "entradas": [
+            {
+              "t": 1300,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1268,
+              "hidden0": null
+            },
+            {
+              "t": 2104,
+              "size": 6660,
+              "url": null,
+              "texto": "Bem-vindo de volta",
+              "tag": "h1",
+              "fs": 1976,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 1,
+            "criacaoElemento": 1812,
+            "render": 128
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 676,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 2
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 164,
+              "dur": 164,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 177,
+              "fim": 1182,
+              "dur": 1005,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 178,
+              "fim": 601,
+              "dur": 424,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1256,
+              "fim": 1587,
+              "dur": 331,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1258,
+              "fim": 1431,
+              "dur": 173,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1258,
+              "fim": 1475,
+              "dur": 217,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1258,
+              "fim": 1501,
+              "dur": 244,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1258,
+              "fim": 1718,
+              "dur": 460,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1446,
+              "dur": 187,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1618,
+              "dur": 360,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1646,
+              "dur": 387,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1668,
+              "dur": 410,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1745,
+              "dur": 486,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1781,
+              "dur": 522,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1887,
+              "dur": 628,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1260,
+              "fim": 1832,
+              "dur": 572,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1268,
+              "fim": 1902,
+              "dur": 634,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1272,
+              "fim": 2047,
+              "dur": 775,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1951,
+              "fim": 2281,
+              "dur": 330,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1229,
+          "load": 1229,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1272,
+              "fim": 2047,
+              "kb": 61.4
+            }
+          ]
+        },
+        {
+          "route": "/login",
+          "fcp": 1260,
+          "lcpMs": 2344,
+          "lcpSize": 5925,
+          "lcpUrl": "/brand/agendai-logo-dark.webp",
+          "elemento": {
+            "tag": "img",
+            "id": null,
+            "cls": "h-9 w-auto object-contain",
+            "text": "",
+            "rect": {
+              "w": 174,
+              "h": 36
+            },
+            "fs": 1975,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "16px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "img.h-9.w-auto.object-contain",
+              "span.inline-flex.select-none",
+              "button.min-h-11.cursor-pointer.transition-transform",
+              "div.mb-6.flex.w-full",
+              "div.p-5.sm:p-8.flex",
+              "div.relative.w-full.max-w-lg"
+            ],
+            "img": {
+              "src": "/brand/agendai-logo-dark.webp",
+              "currentSrc": "http://127.0.0.1:4173/brand/agendai-logo-dark.webp",
+              "loading": "eager",
+              "fetchPriority": "high",
+              "complete": true,
+              "naturalWidth": 700
+            }
+          },
+          "entradas": [
+            {
+              "t": 1260,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1239,
+              "hidden0": null
+            },
+            {
+              "t": 2028,
+              "size": 5844,
+              "url": null,
+              "texto": "Bem-vindo de volta",
+              "tag": "h1",
+              "fs": 1975,
+              "hidden0": null
+            },
+            {
+              "t": 2344,
+              "size": 5925,
+              "url": "/brand/agendai-logo-dark.webp",
+              "texto": "",
+              "tag": "img",
+              "fs": 1975,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 1,
+            "recursoDelay": 1783,
+            "recursoDownload": 329,
+            "render": 68
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 715,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 3
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 164,
+              "dur": 164,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 180,
+              "fim": 1187,
+              "dur": 1006,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 181,
+              "fim": 610,
+              "dur": 429,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1233,
+              "fim": 1418,
+              "dur": 184,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1233,
+              "fim": 1460,
+              "dur": 226,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1233,
+              "fim": 1480,
+              "dur": 247,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1233,
+              "fim": 1559,
+              "dur": 326,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1233,
+              "fim": 1680,
+              "dur": 447,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1234,
+              "fim": 1432,
+              "dur": 199,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1234,
+              "fim": 1604,
+              "dur": 371,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1234,
+              "fim": 1631,
+              "dur": 397,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1234,
+              "fim": 1654,
+              "dur": 420,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1234,
+              "fim": 1726,
+              "dur": 492,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1234,
+              "fim": 1767,
+              "dur": 534,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1234,
+              "fim": 1826,
+              "dur": 592,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1234,
+              "fim": 1889,
+              "dur": 656,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1239,
+              "fim": 1867,
+              "dur": 629,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1243,
+              "fim": 2017,
+              "dur": 774,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1947,
+              "fim": 2276,
+              "dur": 329,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1226,
+          "load": 1227,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1243,
+              "fim": 2017,
+              "kb": 61.4
+            }
+          ]
+        },
+        {
+          "route": "/login",
+          "fcp": 1308,
+          "lcpMs": 2360,
+          "lcpSize": 5921,
+          "lcpUrl": "/brand/agendai-logo-dark.webp",
+          "elemento": {
+            "tag": "img",
+            "id": null,
+            "cls": "h-9 w-auto object-contain",
+            "text": "",
+            "rect": {
+              "w": 173,
+              "h": 36
+            },
+            "fs": 2012,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "16px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "img.h-9.w-auto.object-contain",
+              "span.inline-flex.select-none",
+              "button.min-h-11.cursor-pointer.transition-transform",
+              "div.mb-6.flex.w-full",
+              "div.p-5.sm:p-8.flex",
+              "div.relative.w-full.max-w-lg"
+            ],
+            "img": {
+              "src": "/brand/agendai-logo-dark.webp",
+              "currentSrc": "http://127.0.0.1:4173/brand/agendai-logo-dark.webp",
+              "loading": "eager",
+              "fetchPriority": "high",
+              "complete": true,
+              "naturalWidth": 700
+            }
+          },
+          "entradas": [
+            {
+              "t": 1308,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1272,
+              "hidden0": null
+            },
+            {
+              "t": 2060,
+              "size": 5845,
+              "url": null,
+              "texto": "Bem-vindo de volta",
+              "tag": "h1",
+              "fs": 2012,
+              "hidden0": null
+            },
+            {
+              "t": 2360,
+              "size": 5921,
+              "url": "/brand/agendai-logo-dark.webp",
+              "texto": "",
+              "tag": "img",
+              "fs": 2012,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 2,
+            "recursoDelay": 1812,
+            "recursoDownload": 327,
+            "render": 55
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 704,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 3
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 166,
+              "dur": 166,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 181,
+              "fim": 609,
+              "dur": 428,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 181,
+              "fim": 1187,
+              "dur": 1006,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1261,
+              "fim": 1587,
+              "dur": 327,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1261,
+              "fim": 1718,
+              "dur": 457,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1262,
+              "fim": 1438,
+              "dur": 176,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1262,
+              "fim": 1459,
+              "dur": 197,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1262,
+              "fim": 1488,
+              "dur": 226,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1262,
+              "fim": 1509,
+              "dur": 247,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1262,
+              "fim": 1630,
+              "dur": 368,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1263,
+              "fim": 1660,
+              "dur": 397,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1263,
+              "fim": 1681,
+              "dur": 418,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1263,
+              "fim": 1744,
+              "dur": 482,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1263,
+              "fim": 1795,
+              "dur": 532,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1264,
+              "fim": 1852,
+              "dur": 588,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1264,
+              "fim": 1918,
+              "dur": 654,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1271,
+              "fim": 1909,
+              "dur": 638,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1275,
+              "fim": 2046,
+              "dur": 771,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1978,
+              "fim": 2305,
+              "dur": 327,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1232,
+          "load": 1233,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1275,
+              "fim": 2046,
+              "kb": 61.4
+            }
+          ]
+        },
+        {
+          "route": "/login",
+          "fcp": 1312,
+          "lcpMs": 2076,
+          "lcpSize": 6642,
+          "lcpUrl": null,
+          "elemento": {
+            "tag": "h1",
+            "id": null,
+            "cls": "mt-5 text-center text-2xl font-black tracking-tight text-text-primary sm:text-3xl",
+            "text": "Bem-vindo de volta",
+            "rect": {
+              "w": 217,
+              "h": 32
+            },
+            "fs": 1994,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "24px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "h1.mt-5.text-center.text-2xl",
+              "div.mb-6.flex.w-full",
+              "div.p-5.sm:p-8.flex",
+              "div.relative.w-full.max-w-lg",
+              "div.relative.flex.items-center",
+              "div.min-h-dvh.bg-bg.grid"
+            ]
+          },
+          "entradas": [
+            {
+              "t": 1312,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1275,
+              "hidden0": null
+            },
+            {
+              "t": 2076,
+              "size": 6642,
+              "url": null,
+              "texto": "Bem-vindo de volta",
+              "tag": "h1",
+              "fs": 1994,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 2,
+            "criacaoElemento": 1829,
+            "render": 82
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 682,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 2
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 165,
+              "dur": 165,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 180,
+              "fim": 1188,
+              "dur": 1008,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 181,
+              "fim": 609,
+              "dur": 429,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1262,
+              "fim": 1589,
+              "dur": 327,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1263,
+              "fim": 1439,
+              "dur": 175,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1263,
+              "fim": 1501,
+              "dur": 238,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1263,
+              "fim": 1717,
+              "dur": 454,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1264,
+              "fim": 1452,
+              "dur": 189,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1264,
+              "fim": 1487,
+              "dur": 223,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1264,
+              "fim": 1617,
+              "dur": 353,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1264,
+              "fim": 1653,
+              "dur": 389,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1265,
+              "fim": 1675,
+              "dur": 411,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1265,
+              "fim": 1753,
+              "dur": 488,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1265,
+              "fim": 1782,
+              "dur": 517,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1265,
+              "fim": 1845,
+              "dur": 580,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1265,
+              "fim": 1903,
+              "dur": 639,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1275,
+              "fim": 1909,
+              "dur": 635,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1278,
+              "fim": 2046,
+              "dur": 767,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1968,
+              "fim": 2297,
+              "dur": 329,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1234,
+          "load": 1234,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1278,
+              "fim": 2046,
+              "kb": 61.4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "route": "/login",
+      "width": 1440,
+      "api": "real",
+      "runs": [
+        {
+          "route": "/login",
+          "fcp": 1292,
+          "lcpMs": 2092,
+          "lcpSize": 26824,
+          "lcpUrl": null,
+          "elemento": {
+            "tag": "p",
+            "id": null,
+            "cls": "font-sans text-4xl xl:text-5xl font-extrabold leading-[1.08] tracking-tight",
+            "text": "Seu salão, no controle.",
+            "rect": {
+              "w": 592,
+              "h": 52
+            },
+            "fs": 1994,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "48px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "p.font-sans.text-4xl.xl:text-5xl",
+              "div",
+              "div.flex-1.flex.flex-col",
+              "div.relative.z-10.flex",
+              "div.relative.hidden.lg:flex",
+              "div.min-h-dvh.bg-bg.grid"
+            ]
+          },
+          "entradas": [
+            {
+              "t": 1292,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1258,
+              "hidden0": null
+            },
+            {
+              "t": 2092,
+              "size": 26824,
+              "url": null,
+              "texto": "Seu salão, no controle.",
+              "tag": "p",
+              "fs": 1994,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 2,
+            "criacaoElemento": 1829,
+            "render": 98
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 702,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 2
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 165,
+              "dur": 165,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 173,
+              "fim": 594,
+              "dur": 420,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 173,
+              "fim": 1173,
+              "dur": 1000,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1246,
+              "fim": 1575,
+              "dur": 329,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1246,
+              "fim": 1703,
+              "dur": 457,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1247,
+              "fim": 1430,
+              "dur": 182,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1247,
+              "fim": 1488,
+              "dur": 241,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1447,
+              "dur": 200,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1475,
+              "dur": 227,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1617,
+              "dur": 369,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1644,
+              "dur": 397,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1667,
+              "dur": 419,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1740,
+              "dur": 492,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1781,
+              "dur": 532,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1904,
+              "dur": 654,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1250,
+              "fim": 1840,
+              "dur": 591,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1258,
+              "fim": 1895,
+              "dur": 637,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1262,
+              "fim": 2033,
+              "dur": 771,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1964,
+              "fim": 2289,
+              "dur": 325,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1220,
+          "load": 1220,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1262,
+              "fim": 2033,
+              "kb": 61.4
+            }
+          ]
+        },
+        {
+          "route": "/login",
+          "fcp": 1300,
+          "lcpMs": 2184,
+          "lcpSize": 28350,
+          "lcpUrl": null,
+          "elemento": {
+            "tag": "p",
+            "id": null,
+            "cls": "font-sans text-4xl xl:text-5xl font-extrabold leading-[1.08] tracking-tight",
+            "text": "Seu salão, no controle.",
+            "rect": {
+              "w": 592,
+              "h": 52
+            },
+            "fs": 1979,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "48px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "p.font-sans.text-4xl.xl:text-5xl",
+              "div",
+              "div.flex-1.flex.flex-col",
+              "div.relative.z-10.flex",
+              "div.relative.hidden.lg:flex",
+              "div.min-h-dvh.bg-bg.grid"
+            ]
+          },
+          "entradas": [
+            {
+              "t": 1300,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1264,
+              "hidden0": null
+            },
+            {
+              "t": 2092,
+              "size": 1635,
+              "url": null,
+              "texto": "Agenda inteligente",
+              "tag": "span",
+              "fs": 1979,
+              "hidden0": null
+            },
+            {
+              "t": 2184,
+              "size": 28350,
+              "url": null,
+              "texto": "Seu salão, no controle.",
+              "tag": "p",
+              "fs": 1979,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 2,
+            "criacaoElemento": 1814,
+            "render": 205
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 679,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 3
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 165,
+              "dur": 165,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 170,
+              "fim": 595,
+              "dur": 424,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 170,
+              "fim": 1174,
+              "dur": 1004,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1252,
+              "fim": 1573,
+              "dur": 321,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1253,
+              "fim": 1432,
+              "dur": 179,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1253,
+              "fim": 1445,
+              "dur": 192,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1253,
+              "fim": 1473,
+              "dur": 220,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1253,
+              "fim": 1487,
+              "dur": 234,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1253,
+              "fim": 1695,
+              "dur": 442,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1254,
+              "fim": 1617,
+              "dur": 363,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1255,
+              "fim": 1638,
+              "dur": 383,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1255,
+              "fim": 1659,
+              "dur": 404,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1255,
+              "fim": 1732,
+              "dur": 477,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1255,
+              "fim": 1773,
+              "dur": 519,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1255,
+              "fim": 1823,
+              "dur": 569,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1255,
+              "fim": 1882,
+              "dur": 627,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1263,
+              "fim": 1890,
+              "dur": 627,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1267,
+              "fim": 2032,
+              "dur": 764,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1946,
+              "fim": 2274,
+              "dur": 327,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1222,
+          "load": 1222,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1267,
+              "fim": 2032,
+              "kb": 61.4
+            }
+          ]
+        },
+        {
+          "route": "/login",
+          "fcp": 1292,
+          "lcpMs": 2024,
+          "lcpSize": 26824,
+          "lcpUrl": null,
+          "elemento": {
+            "tag": "p",
+            "id": null,
+            "cls": "font-sans text-4xl xl:text-5xl font-extrabold leading-[1.08] tracking-tight",
+            "text": "Seu salão, no controle.",
+            "rect": {
+              "w": 592,
+              "h": 52
+            },
+            "fs": 1942,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "48px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "p.font-sans.text-4xl.xl:text-5xl",
+              "div",
+              "div.flex-1.flex.flex-col",
+              "div.relative.z-10.flex",
+              "div.relative.hidden.lg:flex",
+              "div.min-h-dvh.bg-bg.grid"
+            ]
+          },
+          "entradas": [
+            {
+              "t": 1292,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1261,
+              "hidden0": null
+            },
+            {
+              "t": 2024,
+              "size": 26824,
+              "url": null,
+              "texto": "Seu salão, no controle.",
+              "tag": "p",
+              "fs": 1942,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 2,
+            "criacaoElemento": 1778,
+            "render": 82
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 650,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 2
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 164,
+              "dur": 164,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 172,
+              "fim": 1173,
+              "dur": 1000,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 173,
+              "fim": 593,
+              "dur": 420,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1424,
+              "dur": 176,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1439,
+              "dur": 190,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1465,
+              "dur": 217,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1488,
+              "dur": 240,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1575,
+              "dur": 327,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1609,
+              "dur": 361,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1704,
+              "dur": 456,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1630,
+              "dur": 381,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1661,
+              "dur": 412,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1739,
+              "dur": 489,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1250,
+              "fim": 1775,
+              "dur": 525,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1250,
+              "fim": 1833,
+              "dur": 583,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1250,
+              "fim": 1869,
+              "dur": 619,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1261,
+              "fim": 1888,
+              "dur": 627,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1265,
+              "fim": 2032,
+              "dur": 767,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1929,
+              "fim": 2263,
+              "dur": 334,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1219,
+          "load": 1220,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1265,
+              "fim": 2032,
+              "kb": 61.4
+            }
+          ]
+        },
+        {
+          "route": "/login",
+          "fcp": 1304,
+          "lcpMs": 2108,
+          "lcpSize": 26824,
+          "lcpUrl": null,
+          "elemento": {
+            "tag": "p",
+            "id": null,
+            "cls": "font-sans text-4xl xl:text-5xl font-extrabold leading-[1.08] tracking-tight",
+            "text": "Seu salão, no controle.",
+            "rect": {
+              "w": 592,
+              "h": 52
+            },
+            "fs": 2000,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "48px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "p.font-sans.text-4xl.xl:text-5xl",
+              "div",
+              "div.flex-1.flex.flex-col",
+              "div.relative.z-10.flex",
+              "div.relative.hidden.lg:flex",
+              "div.min-h-dvh.bg-bg.grid"
+            ]
+          },
+          "entradas": [
+            {
+              "t": 1304,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1270,
+              "hidden0": null
+            },
+            {
+              "t": 2108,
+              "size": 26824,
+              "url": null,
+              "texto": "Seu salão, no controle.",
+              "tag": "p",
+              "fs": 2000,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 1,
+            "criacaoElemento": 1834,
+            "render": 108
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 696,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 2
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 166,
+              "dur": 166,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 174,
+              "fim": 1180,
+              "dur": 1005,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 175,
+              "fim": 593,
+              "dur": 419,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1257,
+              "fim": 1590,
+              "dur": 334,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1257,
+              "fim": 1717,
+              "dur": 459,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1258,
+              "fim": 1439,
+              "dur": 182,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1258,
+              "fim": 1461,
+              "dur": 203,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1258,
+              "fim": 1482,
+              "dur": 224,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1258,
+              "fim": 1495,
+              "dur": 238,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1631,
+              "dur": 373,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1654,
+              "dur": 396,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1675,
+              "dur": 417,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1753,
+              "dur": 494,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1797,
+              "dur": 538,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1846,
+              "dur": 587,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1259,
+              "fim": 1903,
+              "dur": 644,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1269,
+              "fim": 1909,
+              "dur": 640,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1273,
+              "fim": 2045,
+              "dur": 772,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1969,
+              "fim": 2296,
+              "dur": 327,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1228,
+          "load": 1228,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1273,
+              "fim": 2045,
+              "kb": 61.4
+            }
+          ]
+        },
+        {
+          "route": "/login",
+          "fcp": 1292,
+          "lcpMs": 2056,
+          "lcpSize": 26824,
+          "lcpUrl": null,
+          "elemento": {
+            "tag": "p",
+            "id": null,
+            "cls": "font-sans text-4xl xl:text-5xl font-extrabold leading-[1.08] tracking-tight",
+            "text": "Seu salão, no controle.",
+            "rect": {
+              "w": 592,
+              "h": 52
+            },
+            "fs": 1955,
+            "hidden0": null,
+            "style": {
+              "opacity": "1",
+              "visibility": "visible",
+              "fontSize": "48px",
+              "fontFamily": "\"DM Sans\""
+            },
+            "chain": [
+              "p.font-sans.text-4xl.xl:text-5xl",
+              "div",
+              "div.flex-1.flex.flex-col",
+              "div.relative.z-10.flex",
+              "div.relative.hidden.lg:flex",
+              "div.min-h-dvh.bg-bg.grid"
+            ]
+          },
+          "entradas": [
+            {
+              "t": 1292,
+              "size": 1513,
+              "url": null,
+              "texto": "Carregando...",
+              "tag": "p",
+              "fs": 1261,
+              "hidden0": null
+            },
+            {
+              "t": 2056,
+              "size": 26824,
+              "url": null,
+              "texto": "Seu salão, no controle.",
+              "tag": "p",
+              "fs": 1955,
+              "hidden0": null
+            }
+          ],
+          "breakdown": {
+            "ttfb": 2,
+            "criacaoElemento": 1791,
+            "render": 101
+          },
+          "jsDeps": {
+            "elementoCriadoAposFCP": true,
+            "delayAposFCP": 663,
+            "nasceuEscondido": null,
+            "dentroDoRootReact": false,
+            "entradasLCP": 2
+          },
+          "critical": [
+            {
+              "recurso": "/login (document)",
+              "tipo": "html",
+              "inicio": 0,
+              "fim": 164,
+              "dur": 164,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/index-xmcxtlRY.css",
+              "tipo": "css (bloqueia pintura)",
+              "inicio": 171,
+              "fim": 594,
+              "dur": 423,
+              "kb": 27.5
+            },
+            {
+              "recurso": "/assets/index-DF0YClbO.js",
+              "tipo": "js",
+              "inicio": 171,
+              "fim": 1172,
+              "dur": 1001,
+              "kb": 144.3
+            },
+            {
+              "recurso": "/assets/documentUtils-vKPiRY5z.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1437,
+              "dur": 189,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/PasswordInput-CL4z2kVB.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1480,
+              "dur": 232,
+              "kb": 1.8
+            },
+            {
+              "recurso": "/assets/schemas-dGJwPKgF.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1494,
+              "dur": 246,
+              "kb": 3.5
+            },
+            {
+              "recurso": "/assets/LoginPage-BdfcZbXy.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1581,
+              "dur": 333,
+              "kb": 12.9
+            },
+            {
+              "recurso": "/assets/index-Fc0GMTy0.js",
+              "tipo": "js",
+              "inicio": 1248,
+              "fim": 1702,
+              "dur": 454,
+              "kb": 23
+            },
+            {
+              "recurso": "/assets/Toast-BZTEvDUF.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1452,
+              "dur": 203,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Avatar-BnQSKhR4.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1625,
+              "dur": 375,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/recaptcha-qJqcbnQr.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1645,
+              "dur": 396,
+              "kb": 0.4
+            },
+            {
+              "recurso": "/assets/plansApi-BkPc5LZ5.js",
+              "tipo": "js",
+              "inicio": 1249,
+              "fim": 1666,
+              "dur": 417,
+              "kb": 0.8
+            },
+            {
+              "recurso": "/assets/subscriptionPaywall-DXyPTYF5.js",
+              "tipo": "js",
+              "inicio": 1250,
+              "fim": 1746,
+              "dur": 496,
+              "kb": 0.9
+            },
+            {
+              "recurso": "/assets/Card-0E-f2xp7.js",
+              "tipo": "js",
+              "inicio": 1250,
+              "fim": 1787,
+              "dur": 538,
+              "kb": 0.5
+            },
+            {
+              "recurso": "/assets/formatters-qI0gGYoN.js",
+              "tipo": "js",
+              "inicio": 1250,
+              "fim": 1837,
+              "dur": 587,
+              "kb": 1.2
+            },
+            {
+              "recurso": "/assets/Combination-BSO3olMY.js",
+              "tipo": "js",
+              "inicio": 1250,
+              "fim": 1902,
+              "dur": 652,
+              "kb": 7.4
+            },
+            {
+              "recurso": "/assets/workbox-window.prod.es5-BBnX5xw4.js",
+              "tipo": "js",
+              "inicio": 1260,
+              "fim": 1887,
+              "dur": 627,
+              "kb": 2.6
+            },
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "tipo": "fonte",
+              "inicio": 1263,
+              "fim": 2040,
+              "dur": 776,
+              "kb": 61.4
+            },
+            {
+              "recurso": "/brand/agendai-logo-dark.webp",
+              "tipo": "imagem",
+              "inicio": 1935,
+              "fim": 2260,
+              "dur": 325,
+              "kb": 34.9
+            }
+          ],
+          "fetches": [],
+          "dcl": 1219,
+          "load": 1220,
+          "fonts": [
+            {
+              "recurso": "/fonts/dm-sans-normal-latin.woff2",
+              "inicio": 1263,
+              "fim": 2040,
+              "kb": 61.4
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

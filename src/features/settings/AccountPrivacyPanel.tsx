@@ -128,19 +128,19 @@ export const AccountPrivacyPanel: React.FC<AccountPrivacyPanelProps> = ({ onNoti
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-0.5">
+            <p className="text-2xs font-bold uppercase tracking-wider text-text-muted mb-0.5">
               Nome
             </p>
             <p className="text-sm text-text-primary">{user?.name || '—'}</p>
           </div>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-0.5">
+            <p className="text-2xs font-bold uppercase tracking-wider text-text-muted mb-0.5">
               E-mail
             </p>
             <p className="text-sm text-text-primary break-all">{user?.email || '—'}</p>
           </div>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-0.5">
+            <p className="text-2xs font-bold uppercase tracking-wider text-text-muted mb-0.5">
               Função
             </p>
             <p className="text-sm text-text-primary">
@@ -148,7 +148,7 @@ export const AccountPrivacyPanel: React.FC<AccountPrivacyPanelProps> = ({ onNoti
             </p>
           </div>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-0.5">
+            <p className="text-2xs font-bold uppercase tracking-wider text-text-muted mb-0.5">
               E-mail verificado
             </p>
             <p className="text-sm text-text-primary">
@@ -160,7 +160,7 @@ export const AccountPrivacyPanel: React.FC<AccountPrivacyPanelProps> = ({ onNoti
                   type="button"
                   onClick={() => void handleResendVerification()}
                   disabled={resending || cooldownSeconds > 0}
-                  className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-accent/10 border border-accent/30 text-accent hover:bg-accent/20 disabled:opacity-50 flex items-center gap-1.5"
+                  className="px-3 py-1.5 text-2xs font-bold rounded-lg bg-accent/10 border border-accent/30 text-accent hover:bg-accent/20 disabled:opacity-50 flex items-center gap-1.5"
                 >
                   {resending ? (
                     <Loader2 size={12} className="animate-spin" />
@@ -175,7 +175,7 @@ export const AccountPrivacyPanel: React.FC<AccountPrivacyPanelProps> = ({ onNoti
                   type="button"
                   onClick={() => void handleRefreshStatus()}
                   disabled={refreshing}
-                  className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-surface-2 border border-border text-text-secondary hover:bg-border-strong disabled:opacity-50 flex items-center gap-1.5"
+                  className="px-3 py-1.5 text-2xs font-bold rounded-lg bg-surface-2 border border-border text-text-secondary hover:bg-border-strong disabled:opacity-50 flex items-center gap-1.5"
                 >
                   {refreshing ? (
                     <Loader2 size={12} className="animate-spin" />

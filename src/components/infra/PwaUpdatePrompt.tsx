@@ -7,6 +7,8 @@ import {
 } from 'react-icons/lu';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 
+const OFFLINE_READY_DISMISS_MS = 10_000;
+
 export const PwaUpdatePrompt: React.FC = () => {
   const [online, setOnline] = useState(() => navigator.onLine);
   const {
@@ -29,6 +31,12 @@ export const PwaUpdatePrompt: React.FC = () => {
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
+
+  useEffect(() => {
+    if (!offlineReady || needRefresh) return;
+    const timer = window.setTimeout(() => setOfflineReady(false), OFFLINE_READY_DISMISS_MS);
+    return () => window.clearTimeout(timer);
+  }, [offlineReady, needRefresh, setOfflineReady]);
 
   const dismiss = () => {
     setOfflineReady(false);

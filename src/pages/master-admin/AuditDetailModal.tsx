@@ -89,7 +89,7 @@ export const AuditDetailModal: React.FC<{ log: AuditLog | null; onClose: () => v
         <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
           {rows.map(([label, value]) => (
             <div key={label}>
-              <dt className="text-text-muted font-bold uppercase tracking-widest text-[10px]">
+              <dt className="text-text-muted font-bold uppercase tracking-widest text-2xs">
                 {label}
               </dt>
               <dd className="text-text-primary font-mono break-all">{value}</dd>
@@ -98,7 +98,7 @@ export const AuditDetailModal: React.FC<{ log: AuditLog | null; onClose: () => v
         </dl>
 
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-1">
+          <p className="text-2xs font-bold uppercase tracking-widest text-text-muted mb-1">
             Detalhes (JSON mascarado)
           </p>
           <pre className="bg-bg border border-border rounded-lg p-3 text-xs text-text-secondary overflow-x-auto whitespace-pre-wrap break-all">

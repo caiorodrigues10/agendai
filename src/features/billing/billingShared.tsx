@@ -92,8 +92,8 @@ export const BillingKpiCard: React.FC<{
       ) : (
         <h3 className={`text-2xl font-black tracking-tighter mb-1 ${toneClass}`}>{value}</h3>
       )}
-      <p className="text-[10px] text-text-muted uppercase tracking-widest font-semibold">{label}</p>
-      {hint && <p className="text-[10px] text-text-muted mt-1">{hint}</p>}
+      <p className="text-2xs text-text-muted uppercase tracking-widest font-semibold">{label}</p>
+      {hint && <p className="text-2xs text-text-muted mt-1">{hint}</p>}
     </div>
   );
 };
@@ -136,7 +136,7 @@ export const PaymentStatusBadge: React.FC<{ status: string }> = ({ status }) => 
   };
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${cfg.className}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-bold uppercase tracking-widest border ${cfg.className}`}
     >
       {cfg.label}
     </span>
@@ -161,7 +161,7 @@ export const SubscriptionStatusBadge: React.FC<{ status: string }> = ({ status }
   };
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest border ${cfg.className}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-bold uppercase tracking-widest border ${cfg.className}`}
     >
       {cfg.label}
     </span>

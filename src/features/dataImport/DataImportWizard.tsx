@@ -61,6 +61,7 @@ export const DataImportWizard: React.FC<{
           busy={wizard.busy}
           fileName={wizard.batch?.fileName}
           sheets={uploadResult?.sheets}
+          destinos={uploadResult?.destinos}
           onChoose={wizard.chooseTargets}
         />
       ) : null}
@@ -70,6 +71,7 @@ export const DataImportWizard: React.FC<{
           views={wizard.target.sheets}
           plans={wizard.sheets}
           busy={wizard.busy}
+          origem={uploadResult?.origem}
           onChangePlan={wizard.updateSheet}
           onContinue={wizard.saveMappingAndValidate}
         />
@@ -86,6 +88,7 @@ export const DataImportWizard: React.FC<{
           sheetLabels={reviewSheetLabels(wizard)}
           onBack={() => wizard.setStep('mapping')}
           onRevalidate={wizard.runValidation}
+          onReviewCell={wizard.reviewCell}
           onConfirm={wizard.confirm}
         />
       ) : null}

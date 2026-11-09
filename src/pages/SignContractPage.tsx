@@ -180,7 +180,7 @@ export const SignContractPage: React.FC = () => {
           <a
             href={contract.fileUrl}
             target="_blank"
-            rel="noreferrer"
+            rel="noreferrer noopener"
             className="inline-flex items-center gap-1 text-sm font-bold text-accent"
           >
             <Download size={14} /> Baixar o documento
@@ -267,7 +267,7 @@ export const SignContractPage: React.FC = () => {
 };
 
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="flex min-h-screen flex-col bg-bg">
+  <div className="flex min-h-dvh flex-col bg-bg">
     <header className="flex items-center justify-between border-b border-border px-4 py-3">
       <Logo />
     </header>

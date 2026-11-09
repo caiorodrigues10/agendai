@@ -78,6 +78,16 @@ const FORMAT_OPTIONS: { id: PostFormat; label: string; hint: string; icon: React
   { id: 'story', label: 'Story', hint: '9:16', icon: <Smartphone size={16} /> },
 ];
 
+/**
+ * Fallback do formato padrão por modelo — espelho de `defaultPostFormat()` do
+ * back (price-split → 4:5, demais → 1:1), usado só antes do catálogo chegar.
+ * Enquanto a lista carrega/erro, vale este valor; depois, o `defaultFormat`
+ * vindo de `GET /api/posts/templates` (fonte única, ver BUSINESS_RULES.md).
+ * A escolha manual no card "Formato" sempre prevalece sobre os dois.
+ */
+const defaultFormatFor = (templateKey: string): PostFormat =>
+  templateKey === 'price-split' ? 'portrait' : 'square';
+
 const MODE_OPTIONS: { id: PostMode; label: string }[] = [
   { id: 'queue', label: 'Fila' },
   { id: 'appointments', label: 'Agenda' },
@@ -202,7 +212,11 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   const [objectiveId, setObjectiveId] = useState<ObjectiveId | null>(draft?.objectiveId ?? null);
   const [templateKey, setTemplateKey] = useState(draft?.templateKey ?? post?.templateKey ?? 'agenda-aberta');
   const [paletteKey, setPaletteKey] = useState(draft?.paletteKey ?? post?.paletteKey ?? 'brand');
-  const [format, setFormat] = useState<PostFormat>(draft?.format ?? post?.format ?? 'square');
+  const [format, setFormat] = useState<PostFormat>(
+    draft?.format ?? post?.format ?? defaultFormatFor(draft?.templateKey ?? post?.templateKey ?? 'agenda-aberta')
+  );
+  /** Formato escolhido à mão no card "Formato" — trava o default automático. */
+  const [formatTouched, setFormatTouched] = useState(Boolean(draft?.format ?? post?.format));
   const [postMode, setPostMode] = useState<PostMode>(draft?.postMode ?? post?.postMode ?? 'both');
   const [type, setType] = useState<PostType>(draft?.type ?? post?.type ?? 'haircut');
   const [title, setTitle] = useState(draft?.title ?? post?.title ?? '');
@@ -501,6 +515,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
       setLegalPost(current => ({ ...current, areas: current.areas.filter(area => area.title.trim() || area.description.trim()) }));
     }
     setTemplateKey(key);
+    if (!formatTouched) setFormat(next?.defaultFormat ?? defaultFormatFor(key));
   };
 
   const pickObjective = (id: ObjectiveId) => {
@@ -935,7 +950,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                 <div>
                   <div className="mb-1 flex items-center justify-between">
                     <label htmlFor="post-content" className="text-xs font-bold text-text-secondary">Legenda</label>
-                    <span className="text-[10px] text-text-muted">{content.length}/{CAPTION_MAX}</span>
+                    <span className="text-2xs text-text-muted">{content.length}/{CAPTION_MAX}</span>
                   </div>
                   <textarea
                     id="post-content"
@@ -1094,17 +1109,17 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                           {media ? (
                             <>
                               <img src={media.url} alt="" className="h-20 w-full rounded object-cover" />
-                              <span className="text-[10px] font-semibold text-accent">Trocar foto</span>
+                              <span className="text-2xs font-semibold text-accent">Trocar foto</span>
                             </>
                           ) : (
                             <>
                               <ImagePlus size={22} className="text-text-muted" aria-hidden />
-                              <span className="text-[10px] text-text-muted">
+                              <span className="text-2xs text-text-muted">
                                 {slot === 'primary' ? 'Foto principal' : 'Foto secundária'}
                               </span>
                               {required
-                                ? <span className="text-[10px] font-bold text-warning">Requerida</span>
-                                : <span className="text-[10px] text-text-muted">Opcional</span>}
+                                ? <span className="text-2xs font-bold text-warning">Requerida</span>
+                                : <span className="text-2xs text-text-muted">Opcional</span>}
                             </>
                           )}
                         </button>
@@ -1154,19 +1169,19 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                   )
                 )}
                 {selectedPhotoMode === 'required' && (
-                  <p className="text-[10px] text-text-muted">
+                  <p className="text-2xs text-text-muted">
                     Este modelo requer {(selectedTemplate?.requiredMedia ?? 1)} foto(s) do estabelecimento.
                   </p>
                 )}
                 {selectedPhotoMode === 'optional' && (
                   selectedTemplate?.stockImageKey ? (
-                    <p className="text-[10px] leading-relaxed text-text-muted">
+                    <p className="text-2xs leading-relaxed text-text-muted">
                       Foto opcional: envie uma imagem do seu salão ou deixe em branco para usarmos uma
                       imagem ilustrativa gerada automaticamente. A imagem ilustrativa é apenas decorativa
                       e <strong>não representa resultados do estabelecimento</strong>.
                     </p>
                   ) : (
-                    <p className="text-[10px] leading-relaxed text-text-muted">
+                    <p className="text-2xs leading-relaxed text-text-muted">
                       Este modelo funciona com tipografia, sem foto. Se preferir, você pode enviar uma
                       imagem do seu salão para compor a arte.
                     </p>
@@ -1199,7 +1214,10 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                       <button
                         key={f.id}
                         type="button"
-                        onClick={() => setFormat(f.id)}
+                        onClick={() => {
+                          setFormat(f.id);
+                          setFormatTouched(true);
+                        }}
                         className={`flex flex-col items-center gap-1.5 rounded-xl border p-3 transition ${
                           format === f.id
                             ? 'border-accent bg-accent/10 text-accent'
@@ -1208,7 +1226,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                       >
                         {f.icon}
                         <span className="text-xs font-bold">{f.label}</span>
-                        <span className="text-[10px] text-text-muted">{f.hint}</span>
+                        <span className="text-2xs text-text-muted">{f.hint}</span>
                       </button>
                     ))}
                   </div>
@@ -1252,14 +1270,14 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                         if (items.length === 0) return null;
                         return (
                           <div key={group.key}>
-                            <p className="mb-1 text-[10px] font-bold uppercase text-text-muted">{group.label}</p>
+                            <p className="mb-1 text-2xs font-bold uppercase text-text-muted">{group.label}</p>
                             <div className="flex flex-wrap gap-1.5">
                               {items.map(t => (
                                 <button
                                   key={t.key}
                                   type="button"
                                   onClick={() => selectTemplate(t.key)}
-                                  className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition ${
+                                  className={`rounded-lg px-2.5 py-1.5 text-2xs font-semibold transition ${
                                     templateKey === t.key
                                       ? 'bg-accent text-accent-fg'
                                       : 'bg-surface text-text-secondary hover:bg-bg'
@@ -1589,8 +1607,8 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                         </div>
                         <button type="button" onClick={() => handleSelectTemplate(t.key)} className="w-full space-y-0.5 p-2.5 text-left">
                           <p className="text-xs font-bold text-text-primary">{t.name}</p>
-                          {t.description && <p className="text-[10px] leading-snug text-text-muted">{t.description}</p>}
-                          <span className="inline-block rounded bg-bg px-1.5 py-0.5 text-[9px] font-bold uppercase text-text-muted">
+                          {t.description && <p className="text-2xs leading-snug text-text-muted">{t.description}</p>}
+                          <span className="inline-block rounded bg-bg px-1.5 py-0.5 text-2xs font-bold uppercase text-text-muted">
                             {photoMode === 'none' ? 'Sem foto' : photoMode === 'required' ? `Requer ${t.requiredMedia} foto(s)` : 'Foto opcional'}
                           </span>
                         </button>

@@ -80,6 +80,11 @@ export interface PostTemplateDef {
   layoutVariant?: number;
   sampleTitle?: string;
   priceMode?: 'single' | 'list';
+  /**
+   * Formato padrão da arte do modelo (fonte única = catálogo do back;
+   * regra e paridade em `docs/agents/BUSINESS_RULES.md`).
+   */
+  defaultFormat?: 'square' | 'portrait' | 'story';
 }
 
 export interface PostPaletteDef {

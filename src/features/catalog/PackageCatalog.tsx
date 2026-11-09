@@ -169,7 +169,7 @@ export const PackageCatalog: React.FC<PackageCatalogProps> = ({ services, canMan
                   <button
                     type="button"
                     onClick={() => toggleActive(pkg)}
-                    className="px-2 py-1 text-[11px] font-bold rounded-md border border-border text-text-secondary hover:text-text-primary"
+                    className="px-2 py-1 text-2xs font-bold rounded-md border border-border text-text-secondary hover:text-text-primary"
                   >
                     {pkg.active ? 'Desativar' : 'Ativar'}
                   </button>

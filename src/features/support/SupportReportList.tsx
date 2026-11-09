@@ -74,13 +74,13 @@ export const SupportReportList: React.FC<SupportReportListProps> = ({
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-mono text-xs text-text-muted">{report.protocol}</span>
               <span
-                className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+                className={`px-2 py-0.5 rounded text-2xs font-medium ${
                   SUPPORT_STATUS_COLORS[report.status] ?? ''
                 }`}
               >
                 {SUPPORT_STATUS_LABELS[report.status] ?? report.status}
               </span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-surface-2 text-text-secondary">
+              <span className="px-2 py-0.5 rounded text-2xs font-bold bg-surface-2 text-text-secondary">
                 {SUPPORT_CATEGORY_LABELS[report.category] ?? report.category}
               </span>
             </div>

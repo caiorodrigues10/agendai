@@ -15,7 +15,6 @@ import type {
   BusinessSegment,
   SegmentAuxiliaryProfile,
   SegmentConfig,
-  SegmentFeature,
   SegmentGroup,
   TargetAudience,
 } from './types';
@@ -172,14 +171,9 @@ export function getAuxiliaryProfile(
 
 /**
  * O segmento tem a feature? (ex.: `caseManagement` — gestão de processos).
+ * Implementação em `./segmentFeatures` (fonte única, espelhada no backend).
  */
-export function hasSegmentFeature(
-  segment: BusinessSegment | null | undefined,
-  feature: SegmentFeature
-): boolean {
-  if (!segment) return false;
-  return getSegmentConfig(segment).features?.includes(feature) === true;
-}
+export { hasSegmentFeature, SEGMENT_FEATURES } from './segmentFeatures';
 
 /**
  * O segmento tem restrição de publicidade? (sem campanha, avaliação pública,

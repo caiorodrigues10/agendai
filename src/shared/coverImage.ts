@@ -22,6 +22,14 @@ export const COVER_SRCSET_WIDTHS = [640, 960, 1280, 1600, 1920] as const;
 /** Teto de segurança quando as dimensões originais são desconhecidas (legado). */
 const FALLBACK_MAX_WIDTH = 1920;
 
+/** Proporção do recorte de capa entregue na página (16:9). */
+const COVER_ASPECT = 16 / 9;
+
+/** Cartão Open Graph: mesma proporção 1200×630 da rota og-image do backend. */
+const OG_WIDTH = 1200;
+const OG_HEIGHT = 630;
+const OG_ASPECT = OG_WIDTH / OG_HEIGHT;
+
 export interface CoverDeliveryOptions {
   /** Largura desejada em px (padrão 1600). */
   width?: number;
@@ -41,18 +49,27 @@ function clampPercent(value: number | null | undefined, fallback = 50): number {
 }
 
 /**
- * Maior largura pedida sem ampliar: min(largura desejada, original,
- * 16:9 contido no original). Sem original conhecido → teto de 1920.
+ * Maior largura pedida sem ampliar para um alvo de proporção `aspect`:
+ * min(largura desejada, original, `aspect` contido no original).
+ * Sem original conhecido → teto de 1920.
  */
-function resolveCap(options: CoverDeliveryOptions): number {
+function resolveCapForAspect(options: CoverDeliveryOptions, aspect: number): number {
   const caps: number[] = [FALLBACK_MAX_WIDTH];
   if (options.originalWidth && options.originalWidth > 0) {
     caps.push(Math.floor(options.originalWidth));
   }
   if (options.originalHeight && options.originalHeight > 0) {
-    caps.push(Math.floor((options.originalHeight * 16) / 9));
+    caps.push(Math.floor(options.originalHeight * aspect));
   }
   return Math.max(1, Math.min(...caps));
+}
+
+/**
+ * Cap do recorte de capa (16:9): min(largura desejada, original,
+ * 16:9 contido no original). Sem original conhecido → teto de 1920.
+ */
+function resolveCap(options: CoverDeliveryOptions): number {
+  return resolveCapForAspect(options, COVER_ASPECT);
 }
 
 /** `g_auto` no centro; focal ajustado → `g_xy_center` em px do original. */
@@ -114,11 +131,23 @@ export function buildCoverSourceUrl(url: string, options: CoverDeliveryOptions =
   return withTransforms(url, `f_auto,q_auto,w_${width}`);
 }
 
-/** URL do cartão Open Graph (1200×630 JPG) com o mesmo focal da página. */
+/**
+ * URL do cartão Open Graph, coerente com a rota
+ * `GET /api/barbershops/:id/page-theme/og-image` do backend (1200×630) e com
+ * `c_fill` + o mesmo focal da página. A largura é limitada pelo original
+ * (`resolveCapForAspect`), então uma origem estreita/alta entrega um recorte
+ * proporcional — nunca amplia.
+ *
+ * PNG saía ~800–900 KB para uma foto de 1200×630 (medido na Cloudinary);
+ * JPEG `q_auto` fica em ~80 KB. Abaixo do limite de 300 KB aceito para og:image.
+ */
 export function buildCoverOgUrl(url: string, options: CoverDeliveryOptions = {}): string {
+  const cap = resolveCapForAspect(options, OG_ASPECT);
+  const width = Math.max(1, Math.min(OG_WIDTH, cap));
+  const height = Math.max(1, Math.round(width / OG_ASPECT));
   return withTransforms(
     url,
-    `w_1200,h_630,c_fill,${focalGravity(options)},f_jpg,q_auto`,
+    `w_${width},h_${height},c_fill,${focalGravity(options)},f_jpg,q_auto`,
   );
 }
 

@@ -1,0 +1,17 @@
+== A) brute force MESMO e-mail (espera 429) ==
+tentativas: 40 | 429 em: nunca 
+distribuicao: {"401":9,"423":31}
+
+== B) e-mails DIFERENTES (rate por IP) ==
+429 em: 19 | corpo: {"success":false,"message":"Muitas requisições. Tente novamente em alguns instantes.","retryAfter":null,"correlationId":"3ef30eea-b02b-4970-b9a5-476d383bdec4"}
+
+== C) enumeration: usuario inexistente vs senha errada ==
+usuario inexistente -> 429 {"success":false,"message":"Muitas requisições. Tente novamente em alguns instantes.","retryAfter":null,"correlationId":"f801fcfb-ba6d-45d4-b6e9-ea4ddf2bbd2d"}
+senha errada (admin)-> 429 {"success":false,"message":"Muitas requisições. Tente novamente em alguns instantes.","retryAfter":null,"correlationId":"1dbccdd0-f309-4761-8bbb-3d189f0622a9"}
+mensagens identicas: true
+
+== D) refresh token rate limit (120/min por sessao) ==
+refresh invalido -> 401 {"message":"Refresh token não fornecido"}
+429 em: 119 | corpo: {"success":false,"message":"Muitas requisições. Tente novamente em alguns instantes.","retryAfter":null,"correlationId":"df7b0fe3-eca4-4341-b455-638937e36959"}
+
+fim; rate-limit limpo: 200

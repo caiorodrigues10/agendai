@@ -87,10 +87,14 @@ export function coverImageWarnings(
   const idealRatio = Math.abs(ratio - 16 / 9) <= 0.02;
   const warnings: CoverImageWarning[] = [];
 
-  if (height > width) {
+  // Muito alongada (> 2.2:1) ou vertical (< 1:1): cortes severos no 16:9.
+  if (ratio > 2.2 || ratio < 1) {
     warnings.push({
       tone: 'info',
-      text: `Imagem vertical (${width}×${height}) — o recorte da capa é horizontal (16:9) e corta o topo e a base. Prefira uma foto deitada.`,
+      text:
+        ratio > 2.2
+          ? `Imagem ${width}×${height} muito alongada (${ratio.toFixed(1)}:1) — o recorte da capa é 16:9. Use uma foto horizontal de ${recommended.width}×${recommended.height}.`
+          : `Imagem vertical (${width}×${height}) — o recorte da capa é horizontal (16:9) e corta o topo e a base. Prefira uma foto deitada de ${recommended.width}×${recommended.height}.`,
     });
   } else if (!idealRatio) {
     warnings.push({

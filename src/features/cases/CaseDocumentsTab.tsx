@@ -123,7 +123,7 @@ export const CaseDocumentsTab: React.FC<DocumentsTabProps> = ({ caseId, document
                 <a
                   href={document.fileUrl}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noreferrer noopener"
                   className="rounded-lg bg-surface-2 px-2 py-1 text-[11px] font-bold text-text-secondary hover:text-accent"
                 >
                   Abrir

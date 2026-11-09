@@ -8,6 +8,7 @@
  * público continua `shared/segments`.
  */
 import type { BusinessSegment, SegmentConfig } from './types';
+import { SEGMENT_FEATURES } from './segmentFeatures';
 
 export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
   BARBERSHOP: {
@@ -573,7 +574,7 @@ export const SEGMENT_CONFIGS: Record<BusinessSegment, SegmentConfig> = {
     },
     targetAudience: { applies: false, suggested: null },
     auxiliaryProfile: 'case',
-    features: ['caseManagement'],
+    features: SEGMENT_FEATURES.LAW_FIRM,
     complianceNote:
       'O sistema organiza agenda, clientes e honorários. Não substitui a análise jurídica: valide com um advogado e com as regras da OAB aplicáveis qualquer conteúdo que você divulgar.',
     advertisingRestricted: true,

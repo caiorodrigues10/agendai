@@ -31,7 +31,7 @@ export function FinanceSummaryCard({
       <div className="absolute -right-2 -top-2 text-border opacity-20">{icon}</div>
       <p className="mb-1 text-xs font-bold uppercase text-text-muted">{label}</p>
       <h3 className={`truncate text-lg font-bold sm:text-xl ${valueClass}`}>{value}</h3>
-      {hint ? <p className="mt-1 text-[10px] text-text-muted">{hint}</p> : null}
+      {hint ? <p className="mt-1 text-2xs text-text-muted">{hint}</p> : null}
     </div>
   );
 }

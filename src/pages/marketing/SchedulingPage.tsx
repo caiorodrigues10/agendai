@@ -355,7 +355,7 @@ export const SchedulingPage: React.FC = () => {
                       {item.step}
                     </span>
                     <span
-                      className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wider ${pill}`}
+                      className={`rounded-full px-3 py-1 text-2xs font-black uppercase tracking-wider ${pill}`}
                     >
                       {item.hint}
                     </span>
@@ -460,7 +460,7 @@ export const SchedulingPage: React.FC = () => {
                         {row.slots.map(slot => (
                           <div
                             key={`${row.pro}-${slot.t}`}
-                            className={`rounded-lg py-2.5 text-center text-[11px] font-black ${
+                            className={`rounded-lg py-2.5 text-center text-2xs font-black ${
                               slot.s === 'selected'
                                 ? 'bg-accent text-black shadow-[0_0_24px_rgba(52,211,153,0.35)]'
                                 : slot.s === 'busy'
@@ -519,7 +519,7 @@ export const SchedulingPage: React.FC = () => {
                       >
                         <div className="flex items-center justify-between gap-2">
                           <span
-                            className={`text-[10px] font-black ${
+                            className={`text-2xs font-black ${
                               step.done ? 'text-cyan-300/70' : 'text-black/50'
                             }`}
                           >
@@ -528,7 +528,7 @@ export const SchedulingPage: React.FC = () => {
                           {step.done ? (
                             <CheckCircle2 size={24} className="h-3.5 w-3.5 text-cyan-300" />
                           ) : (
-                            <span className="text-[10px] font-black uppercase">agora</span>
+                            <span className="text-2xs font-black uppercase">agora</span>
                           )}
                         </div>
                         <p
@@ -573,7 +573,7 @@ export const SchedulingPage: React.FC = () => {
 
                 <div className="mt-8 space-y-3">
                   <div className="ml-0 mr-8 rounded-2xl rounded-tl-md border border-amber-200/20 bg-amber-200/10 px-4 py-3">
-                    <p className="text-[10px] font-black uppercase tracking-wider text-amber-200/70">
+                    <p className="text-2xs font-black uppercase tracking-wider text-amber-200/70">
                       Salão · ontem 20:12
                     </p>
                     <p className="mt-1.5 text-sm font-semibold leading-relaxed text-white">
@@ -581,13 +581,13 @@ export const SchedulingPage: React.FC = () => {
                     </p>
                   </div>
                   <div className="ml-8 mr-0 rounded-2xl rounded-tr-md border border-white/10 bg-white/8 px-4 py-3">
-                    <p className="text-[10px] font-black uppercase tracking-wider text-neutral-500">
+                    <p className="text-2xs font-black uppercase tracking-wider text-neutral-500">
                       Ana · ontem 20:14
                     </p>
                     <p className="mt-1.5 text-sm font-semibold text-white">Confirmado ✅</p>
                   </div>
                   <div className="ml-0 mr-8 rounded-2xl rounded-tl-md border border-amber-200/15 bg-black/30 px-4 py-3">
-                    <p className="text-[10px] font-black uppercase tracking-wider text-amber-200/60">
+                    <p className="text-2xs font-black uppercase tracking-wider text-amber-200/60">
                       Salão · hoje 08:00
                     </p>
                     <p className="mt-1.5 text-sm font-semibold leading-relaxed text-neutral-200">
@@ -622,7 +622,7 @@ export const SchedulingPage: React.FC = () => {
 
                 <div className="relative flex flex-col justify-center gap-0 border-t border-white/8 bg-black/40 p-8 lg:border-l lg:border-t-0 lg:p-9">
                   <div className="rounded-2xl border border-white/10 bg-white/4 px-5 py-4">
-                    <p className="text-[10px] font-black uppercase tracking-wider text-neutral-500">
+                    <p className="text-2xs font-black uppercase tracking-wider text-neutral-500">
                       Agendado
                     </p>
                     <p className="mt-1 text-lg font-bold text-white">Rafa · 11:00</p>
@@ -631,14 +631,14 @@ export const SchedulingPage: React.FC = () => {
 
                   <div className="flex items-center gap-3 py-3 pl-2">
                     <div className="h-10 w-px bg-linear-to-b from-white/20 via-accent/60 to-accent" />
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-accent-light">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-2xs font-black uppercase tracking-wider text-accent-light">
                       <Repeat size={24} className="h-3 w-3" />
                       Check-in
                     </span>
                   </div>
 
                   <div className="rounded-2xl border border-accent/35 bg-accent px-5 py-4 text-black shadow-[0_16px_40px_rgba(52,211,153,0.25)]">
-                    <p className="text-[10px] font-black uppercase tracking-wider text-black/60">
+                    <p className="text-2xs font-black uppercase tracking-wider text-black/60">
                       Na fila · 2ª posição
                     </p>
                     <p className="mt-1 text-lg font-black">Rafa · Barba</p>

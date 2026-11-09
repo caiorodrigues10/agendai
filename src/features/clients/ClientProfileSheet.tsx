@@ -470,7 +470,7 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                   {detail?.name ?? 'Cliente'}
                 </h3>
                 {segmentLabel && (
-                  <span className="rounded-md border border-accent/30 bg-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase text-accent">
+                  <span className="rounded-md border border-accent/30 bg-accent/10 px-2 py-0.5 text-2xs font-bold uppercase text-accent">
                     {segmentLabel}
                   </span>
                 )}
@@ -590,9 +590,7 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                       <div className="rounded-lg border border-border bg-bg p-3">
                         <div className="mb-1 flex items-center gap-1.5 text-text-muted">
                           <RiFileTextLine size={12} />
-                          <span className="text-[11px] font-bold uppercase tracking-wider">
-                            Notas
-                          </span>
+                          <span className="text-2xs font-bold uppercase tracking-wider">Notas</span>
                         </div>
                         <p className="whitespace-pre-wrap text-sm text-text-secondary">
                           {detail.notes}
@@ -645,7 +643,7 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
             {tab === 'pacotes' && detail && (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted">
+                  <p className="text-2xs font-bold uppercase tracking-wider text-text-muted">
                     Vender pacote
                   </p>
                   <SmartSelect
@@ -663,7 +661,7 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                         key={method}
                         type="button"
                         onClick={() => setPaymentMethod(method)}
-                        className={`rounded-lg border py-2 text-[11px] font-bold ${
+                        className={`rounded-lg border py-2 text-2xs font-bold ${
                           paymentMethod === method
                             ? 'border-accent bg-accent/15 text-text-primary'
                             : 'border-border bg-bg text-text-secondary'
@@ -684,7 +682,7 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted">
+                  <p className="text-2xs font-bold uppercase tracking-wider text-text-muted">
                     Pacotes vendidos
                   </p>
                   {(detail.packages ?? []).length === 0 ? (
@@ -694,7 +692,7 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                       <div key={p.id} className="space-y-2 rounded-xl border border-border p-3">
                         <div className="flex items-start justify-between gap-2">
                           <p className="text-sm font-medium text-text-primary">{p.packageName}</p>
-                          <span className="rounded-md border border-border bg-bg px-2 py-0.5 text-[10px] font-bold text-text-secondary">
+                          <span className="rounded-md border border-border bg-bg px-2 py-0.5 text-2xs font-bold text-text-secondary">
                             {PACKAGE_STATUS_LABEL[p.status] ?? p.status}
                           </span>
                         </div>
@@ -743,13 +741,13 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                 {/* Procedure Records */}
                 <div>
                   <div className="mb-2 flex items-center justify-between">
-                    <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">
+                    <p className="flex items-center gap-1.5 text-2xs font-bold uppercase tracking-wider text-text-muted">
                       <Scissors size={12} /> Procedimentos
                     </p>
                     <button
                       type="button"
                       onClick={() => startProcedureForm()}
-                      className="flex items-center gap-1 rounded-lg bg-accent/15 px-2 py-1 text-[11px] font-bold text-accent hover:bg-accent/25"
+                      className="flex items-center gap-1 rounded-lg bg-accent/15 px-2 py-1 text-2xs font-bold text-accent hover:bg-accent/25"
                     >
                       <RiAddLine size={12} /> Novo
                     </button>
@@ -884,11 +882,9 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                               <p className="mt-1 text-xs text-text-muted">{proc.details}</p>
                             )}
                             {proc.serviceName && (
-                              <p className="mt-1 text-[10px] text-text-muted">
-                                Serviço: {proc.serviceName}
-                              </p>
+                              <p className="mt-1 text-2xs text-text-muted">Serviço: {proc.serviceName}</p>
                             )}
-                            <p className="mt-1 flex items-center gap-1 text-[10px] text-text-muted">
+                            <p className="mt-1 flex items-center gap-1 text-2xs text-text-muted">
                               <Clock size={9} />
                               {new Date(proc.occurredAt).toLocaleDateString('pt-BR')}{' '}
                               {new Date(proc.occurredAt).toLocaleTimeString('pt-BR', {
@@ -905,7 +901,7 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
 
                 {/* Appointments */}
                 <div>
-                  <p className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">
+                  <p className="mb-2 flex items-center gap-1.5 text-2xs font-bold uppercase tracking-wider text-text-muted">
                     <RiHistoryLine size={12} /> Agendamentos
                   </p>
                   {sortedAppointments.length === 0 ? (
@@ -926,7 +922,7 @@ export const ClientProfileSheet: React.FC<ClientProfileSheetProps> = ({
                             </p>
                           </div>
                           <span
-                            className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${
+                            className={`rounded-md px-2 py-0.5 text-2xs font-bold ${
                               APPOINTMENT_STATUS_STYLE[a.status] ??
                               'border border-border bg-surface-2 text-text-secondary'
                             }`}
