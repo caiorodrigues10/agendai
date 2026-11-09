@@ -3,7 +3,9 @@ import { useState } from 'react';
 import { PostEditor, type PostEditorProps } from './PostEditor';
 import { PostPreviewBox } from './PostPreviewBox';
 import { TemplateThumbnail } from './TemplateThumbnail';
+import { LegalPostFields } from './LegalPostFields';
 import { postsApi, type PostMedia } from '../../infra/postsApi';
+import { barbershopApi } from '../../infra/barbershopApi';
 import { optimizeImageIfNeeded } from './optimizeImage';
 
 vi.mock('../../infra/postsApi', async importOriginal => {
@@ -33,6 +35,8 @@ vi.mock('./optimizeImage', async importOriginal => {
 
 const mockedPostsApi = vi.mocked(postsApi);
 const mockedOptimize = vi.mocked(optimizeImageIfNeeded);
+
+const LEGAL_TEMPLATE = { key: 'advocacia-cartao', name: 'Cartão institucional', description: 'Áreas e contatos', requiredMedia: 0, formats: ['square', 'portrait', 'story'], previewUrl: '', group: 'advocacia', photoMode: 'none' as const, businessCategory: 'advocacia' as const, sampleTitle: 'Áreas de atuação' };
 
 const TEMPLATES = [
   { key: 'agenda-aberta', name: 'Agenda aberta', description: 'Divulgue horários', requiredMedia: 0, formats: ['square'], previewUrl: '/api/posts/preview?x=1', group: 'agenda', photoMode: 'none' as const },
@@ -72,7 +76,262 @@ beforeEach(() => {
   mockedPostsApi.preview.mockResolvedValue('https://cdn.example.com/preview.png');
 });
 
+describe('PostEditor — advocacia e recuperação de erros', () => {
+  it('inicia enxuto e preserva os contatos ao alternar a apresentação e salvar', async () => {
+    mockedPostsApi.templates.mockResolvedValue([LEGAL_TEMPLATE]);
+    mockedPostsApi.create.mockResolvedValue({ id: 'essential-law' } as never);
+    renderEditor();
+    fireEvent.click(await screen.findByText('Identidade do escritório'));
+    const layout = screen.getByRole('combobox', { name: /Dados de contato na arte/ });
+    expect(layout).toHaveValue('essential');
+    fireEvent.change(screen.getByLabelText('Contato na imagem'), { target: { value: '(51) 00000-0000' } });
+    fireEvent.change(screen.getByLabelText('Endereço (opcional)'), { target: { value: 'Porto Alegre' } });
+    fireEvent.change(screen.getByLabelText('Site ou e-mail (opcional)'), { target: { value: 'exemplo.com.br' } });
+    for (const contactLayout of ['complete', 'essential']) {
+      fireEvent.change(layout, { target: { value: contactLayout } });
+      await waitFor(() => expect(mockedPostsApi.preview).toHaveBeenLastCalledWith('barber1', expect.objectContaining({
+        designOptions: expect.objectContaining({ legalPost: expect.objectContaining({ contactLayout, contact: '(51) 00000-0000', address: 'Porto Alegre', website: 'exemplo.com.br' }) }),
+      })), { timeout: 2000 });
+      expect(screen.getByLabelText('Endereço (opcional)')).toHaveValue('Porto Alegre');
+      expect(screen.getByLabelText('Site ou e-mail (opcional)')).toHaveValue('exemplo.com.br');
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Rascunho' }));
+    await waitFor(() => expect(mockedPostsApi.create).toHaveBeenCalledWith(expect.objectContaining({
+      designOptions: expect.objectContaining({ legalPost: expect.objectContaining({ contactLayout: 'essential', address: 'Porto Alegre', website: 'exemplo.com.br' }) }),
+    })));
+  });
+
+  it('publica uma pauta curta sem exigir blocos que repitam a chamada', async () => {
+    mockedPostsApi.templates.mockResolvedValue([{ ...LEGAL_TEMPLATE, key: 'advocacia-contratos', name: 'Pauta aberta' }]);
+    mockedPostsApi.create.mockResolvedValue({ id: 'short-editorial' } as never);
+    mockedPostsApi.publish.mockResolvedValue({ id: 'short-editorial' } as never);
+    const props = renderEditor();
+    fireEvent.click(await screen.findByText('Pauta aberta'));
+    fireEvent.change(screen.getByLabelText('Nome profissional ou do escritório'), { target: { value: 'Escritório Exemplo' } });
+    fireEvent.change(screen.getByLabelText('Inscrição na OAB'), { target: { value: 'OAB/UF 00000' } });
+    fireEvent.change(screen.getByLabelText(/Texto principal \(opcional\)/), { target: { value: 'Trabalho ou contratos?' } });
+    expect(screen.queryByLabelText('Orientação para participar')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
+    await waitFor(() => expect(props.onSaved).toHaveBeenCalledWith('published'));
+    expect(mockedPostsApi.create).toHaveBeenCalledWith(expect.objectContaining({
+      designOptions: expect.objectContaining({ legalPost: expect.objectContaining({ summary: 'Trabalho ou contratos?', areas: [], contactLayout: 'essential' }) }),
+    }));
+  });
+  it('envia o modelo escolhido à IA e preserva os 500 caracteres do contexto', async () => {
+    const generate = vi.spyOn(barbershopApi, 'generatePostContent').mockResolvedValue({ suggestions: [{ title: 'Confira o contrato', ctaText: 'Separe suas dúvidas' }], source: 'template' });
+    mockedPostsApi.templates.mockResolvedValue([{ ...LEGAL_TEMPLATE, key: 'advocacia-consumidor', name: 'Checklist de contratos', sampleTitle: 'Contrato em mãos?' }]);
+    renderEditor();
+    fireEvent.click(await screen.findByRole('button', { name: /Checklist de contratos/ }));
+    fireEvent.click(screen.getByText('Sugestões por IA'));
+    const extra = 'a'.repeat(500);
+    fireEvent.change(screen.getByPlaceholderText('Contexto extra: tema, localidade e informações confirmadas do escritório'), { target: { value: extra } });
+    fireEvent.click(screen.getByRole('button', { name: 'Gerar sugestões' }));
+    await waitFor(() => expect(generate).toHaveBeenCalledWith(expect.objectContaining({ templateKey: 'advocacia-consumidor', extra, count: 3, postMode: 'appointments' })));
+    expect(await screen.findByText('Confira o contrato')).toBeInTheDocument();
+  });
+
+  it('mostra o erro de blocos obrigatórios ao revisar um modelo sem conteúdo', async () => {
+    render(<LegalPostFields templateKey="advocacia-areas" value={{ professionalName: 'Escritório Exemplo', registration: 'OAB/UF 00000', areas: [] }} onChange={vi.fn()} validationAttempt={1} />);
+    expect(await screen.findByText('Adicione ao menos um bloco de conteúdo.')).toHaveAttribute('role', 'alert');
+    expect(screen.getByRole('button', { name: 'Adicionar área' })).toBeInTheDocument();
+  });
+
+  it('orienta resumir um texto jurídico extenso sem anunciar cortes silenciosos na arte', async () => {
+    mockedPostsApi.templates.mockResolvedValue([LEGAL_TEMPLATE]);
+    renderEditor();
+    fireEvent.click(await screen.findByText('Identidade do escritório'));
+    fireEvent.change(screen.getByLabelText('Chamada na arte'), { target: { value: 'Converse com o escritório para esclarecer uma dúvida sobre contratos' } });
+    expect(await screen.findByText(/Texto extenso: confira o encaixe na prévia/)).toHaveAttribute('role', 'status');
+    expect(screen.queryByText(/é cortado na imagem/)).not.toBeInTheDocument();
+  });
+
+  it('envia quatro blocos e os campos editoriais à prévia, ao armazenamento local e ao rascunho', async () => {
+    mockedPostsApi.templates.mockResolvedValue([LEGAL_TEMPLATE]);
+    mockedPostsApi.create.mockResolvedValue({ id: 'legal-draft' } as never);
+    const props = renderEditor();
+    fireEvent.click(await screen.findByText('Identidade do escritório'));
+    expect(screen.queryByText('Divulgar serviço')).not.toBeInTheDocument();
+    expect(screen.queryByRole('radio', { name: 'Fila' })).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Nome profissional ou do escritório'), { target: { value: 'Escritório Exemplo' } });
+    fireEvent.change(screen.getByLabelText('Inscrição na OAB'), { target: { value: 'OAB/UF 00000' } });
+    fireEvent.change(screen.getByLabelText(/Seção \(opcional\)/), { target: { value: 'Informação jurídica' } });
+    fireEvent.change(screen.getByLabelText(/Texto principal \(opcional\)/), { target: { value: 'Atendimento jurídico com organização e clareza.' } });
+    fireEvent.change(screen.getByLabelText(/Destaque \(opcional\)/), { target: { value: 'Atendimento com horário marcado' } });
+    for (let index = 0; index < 4; index += 1) {
+      if (index > 0) fireEvent.click(screen.getByRole('button', { name: 'Adicionar destaque' }));
+      fireEvent.change(screen.getAllByLabelText('Destaque do escritório')[index], { target: { value: `Destaque ${index + 1}` } });
+      fireEvent.change(screen.getAllByLabelText('Descrição do destaque')[index], { target: { value: `Explicação ${index + 1}` } });
+    }
+    expect(screen.queryByRole('button', { name: 'Adicionar destaque' })).not.toBeInTheDocument();
+    const legalPayload = expect.objectContaining({
+      professionalName: 'Escritório Exemplo', registration: 'OAB/UF 00000',
+      eyebrow: 'Informação jurídica', summary: 'Atendimento jurídico com organização e clareza.', highlight: 'Atendimento com horário marcado',
+      areas: Array.from({ length: 4 }, (_, index) => ({ title: `Destaque ${index + 1}`, description: `Explicação ${index + 1}` })),
+    });
+    const expected = expect.objectContaining({ legalPost: legalPayload });
+    await waitFor(() => expect(mockedPostsApi.preview).toHaveBeenLastCalledWith('barber1', expect.objectContaining({ templateKey: 'advocacia-cartao', designOptions: expected })), { timeout: 2000 });
+    expect(JSON.parse(localStorage.getItem('agendai:post-draft:user1:barber1:new')!)).toEqual(expect.objectContaining({ legalPost: legalPayload }));
+    fireEvent.click(screen.getByRole('button', { name: 'Rascunho' }));
+    await waitFor(() => expect(mockedPostsApi.create).toHaveBeenCalledWith(expect.objectContaining({ designOptions: expected })));
+    expect(props.onSaved).toHaveBeenCalledWith('draft');
+  });
+
+  it('impede publicação jurídica sem inscrição profissional e preserva o rascunho', async () => {
+    mockedPostsApi.templates.mockResolvedValue([LEGAL_TEMPLATE]);
+    const props = renderEditor();
+    fireEvent.click(await screen.findByText('Identidade do escritório'));
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
+    expect(props.showToast).toHaveBeenCalledWith(expect.stringContaining('inscrição na OAB'), 'error');
+    expect(mockedPostsApi.create).not.toHaveBeenCalled();
+    await waitFor(() => expect(screen.getByLabelText(/^Nome profissional ou do escritório/)).toHaveAttribute('aria-invalid', 'true'));
+    expect(screen.getByLabelText(/^Nome profissional ou do escritório/)).toHaveFocus();
+    expect(screen.getByText('Informe a inscrição na OAB.')).toHaveAttribute('role', 'alert');
+  });
+
+  it('restaura um rascunho jurídico antigo e publica sem exigir os novos campos opcionais', async () => {
+    const legalPost = { professionalName: 'Escritório Exemplo', registration: 'OAB/UF 00000', areas: [{ title: 'Direito de família', description: 'Orientação e atendimento.' }] };
+    localStorage.setItem('agendai:post-draft:user1:barber1:new', JSON.stringify({ version: 2, savedAt: Date.now(), objectiveId: 'legal-office', templateKey: 'advocacia-cartao', legalPost }));
+    mockedPostsApi.templates.mockResolvedValue([LEGAL_TEMPLATE]);
+    mockedPostsApi.create.mockResolvedValue({ id: 'restored-law' } as never);
+    mockedPostsApi.publish.mockResolvedValue({ id: 'restored-law' } as never);
+    const props = renderEditor();
+    expect(await screen.findByLabelText('Nome profissional ou do escritório')).toHaveValue('Escritório Exemplo');
+    expect(screen.getByLabelText('Destaque do escritório')).toHaveValue('Direito de família');
+    expect(screen.getByRole('combobox', { name: /Dados de contato na arte/ })).toHaveValue('complete');
+    expect(screen.getByLabelText(/Texto principal \(opcional\)/)).toHaveValue('');
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
+    await waitFor(() => expect(props.onSaved).toHaveBeenCalledWith('published'));
+    expect(mockedPostsApi.create).toHaveBeenCalledWith(expect.objectContaining({ designOptions: expect.objectContaining({ legalPost: expect.objectContaining(legalPost) }) }));
+  });
+
+  it('adapta os campos à finalidade do modelo e preserva o conteúdo ao trocar de composição', async () => {
+    mockedPostsApi.templates.mockResolvedValue([
+      LEGAL_TEMPLATE,
+      { ...LEGAL_TEMPLATE, key: 'advocacia-consumidor', name: 'Checklist de contratos', sampleTitle: 'Contrato em mãos?' },
+      { ...LEGAL_TEMPLATE, key: 'advocacia-trabalhista', name: 'Pergunta e resposta', sampleTitle: 'Vale para o meu caso?' },
+    ]);
+    renderEditor();
+    fireEvent.click(await screen.findByRole('button', { name: /Checklist de contratos/ }));
+    expect(screen.getByLabelText('Título')).toHaveValue('Contrato em mãos?');
+    expect(screen.getByLabelText('Chamada na arte')).toHaveValue('Salve esta lista');
+    fireEvent.change(screen.getByLabelText('Item do checklist'), { target: { value: 'Guarde os comprovantes' } });
+    fireEvent.change(screen.getByLabelText('Orientação do item'), { target: { value: 'Organize recibos e protocolos de atendimento.' } });
+    fireEvent.change(screen.getByLabelText(/Texto principal \(opcional\)/), { target: { value: 'Organize as informações antes de buscar orientação.' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Checklist de contratos' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Selecionar modelo Pergunta e resposta' }));
+    expect(screen.getByLabelText('Título')).toHaveValue('Vale para o meu caso?');
+    expect(screen.getByLabelText('Chamada na arte')).toHaveValue('Salve para consultar');
+    expect(screen.getByLabelText('Orientação de apoio')).toHaveValue('Guarde os comprovantes');
+    expect(screen.getByLabelText('Explicação')).toHaveValue('Organize recibos e protocolos de atendimento.');
+    expect(screen.getByLabelText(/^Resposta à pergunta/)).toHaveValue('Organize as informações antes de buscar orientação.');
+    expect(screen.getByRole('button', { name: 'Adicionar orientação' })).toBeInTheDocument();
+    expect(screen.getByText(/Use o título do post como pergunta e o Texto principal como resposta/)).toBeInTheDocument();
+  });
+
+  it('preserva título e chamada personalizados quando o usuário troca de modelo', async () => {
+    mockedPostsApi.templates.mockResolvedValue([
+      LEGAL_TEMPLATE,
+      { ...LEGAL_TEMPLATE, key: 'advocacia-contratos', name: 'Pauta aberta', sampleTitle: 'Que tema vem depois?' },
+    ]);
+    renderEditor();
+    fireEvent.click(await screen.findByText('Identidade do escritório'));
+    fireEvent.change(screen.getByLabelText('Título'), { target: { value: 'Um assunto da nossa comunidade' } });
+    fireEvent.change(screen.getByLabelText('Chamada na arte'), { target: { value: 'Envie uma pergunta sobre trabalho' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Cartão institucional' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Selecionar modelo Pauta aberta' }));
+    expect(screen.getByLabelText('Título')).toHaveValue('Um assunto da nossa comunidade');
+    expect(screen.getByLabelText('Chamada na arte')).toHaveValue('Envie uma pergunta sobre trabalho');
+    expect(screen.getByRole('button', { name: 'Adicionar orientação de participação' })).toBeInTheDocument();
+  });
+
+  it('exige uma resposta no modelo de pergunta e permite publicá-la sem blocos de apoio', async () => {
+    mockedPostsApi.templates.mockResolvedValue([{ ...LEGAL_TEMPLATE, key: 'advocacia-trabalhista', name: 'Pergunta e resposta', sampleTitle: 'Vale para o meu caso?' }]);
+    mockedPostsApi.create.mockResolvedValue({ id: 'question-law' } as never);
+    mockedPostsApi.publish.mockResolvedValue({ id: 'question-law' } as never);
+    const props = renderEditor();
+    fireEvent.click(await screen.findByRole('button', { name: /Pergunta e resposta/ }));
+    fireEvent.change(screen.getByLabelText('Nome profissional ou do escritório'), { target: { value: 'Escritório Exemplo' } });
+    fireEvent.change(screen.getByLabelText('Inscrição na OAB'), { target: { value: 'OAB/UF 00000' } });
+    expect(screen.queryByLabelText('Orientação de apoio')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
+    expect(mockedPostsApi.create).not.toHaveBeenCalled();
+    expect(await screen.findByText('Escreva a resposta no texto principal ou no destaque.')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(/^Resposta à pergunta/), { target: { value: 'A análise depende dos fatos e dos documentos da sua situação.' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
+    await waitFor(() => expect(props.onSaved).toHaveBeenCalledWith('published'));
+    expect(mockedPostsApi.create).toHaveBeenCalledWith(expect.objectContaining({ designOptions: expect.objectContaining({ legalPost: expect.objectContaining({ areas: [] }) }) }));
+  });
+
+  it('exige a data do comunicado antes de publicar e mantém o conteúdo para corrigir', async () => {
+    mockedPostsApi.templates.mockResolvedValue([{ ...LEGAL_TEMPLATE, key: 'advocacia-comunicado', name: 'Aviso com data', sampleTitle: 'Horário especial' }]);
+    const props = renderEditor();
+    fireEvent.click(await screen.findByRole('button', { name: /Aviso com data/ }));
+    fireEvent.change(screen.getByLabelText('Nome profissional ou do escritório'), { target: { value: 'Escritório Exemplo' } });
+    fireEvent.change(screen.getByLabelText('Inscrição na OAB'), { target: { value: 'OAB/UF 00000' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
+    expect(mockedPostsApi.create).not.toHaveBeenCalled();
+    expect(await screen.findByText('Informe a data ou o período do aviso.')).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Data ou período/)).toHaveFocus();
+    expect(screen.getByLabelText('Nome profissional ou do escritório')).toHaveValue('Escritório Exemplo');
+    expect(props.onSaved).not.toHaveBeenCalled();
+  });
+
+  it('reutiliza o rascunho criado quando a primeira tentativa de publicar falha', async () => {
+    mockedPostsApi.create.mockResolvedValue({ id: 'created-once' } as never);
+    mockedPostsApi.publish.mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce({ id: 'created-once' } as never);
+    const props = await openEditor();
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
+    await waitFor(() => expect(props.showToast).toHaveBeenCalledWith(expect.any(String), 'error'));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Publicar' })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: 'Publicar' }));
+    await waitFor(() => expect(props.onSaved).toHaveBeenCalledWith('published'));
+    expect(mockedPostsApi.create).toHaveBeenCalledTimes(1);
+    expect(mockedPostsApi.update).toHaveBeenCalledWith('created-once', expect.any(Object));
+  });
+
+  it('mostra erro e permite tentar de novo sem perder a prévia anterior', () => {
+    const retry = vi.fn();
+    render(<PostPreviewBox format="square" previewUrl="/previous.png" error onRetry={retry} />);
+    expect(screen.getByAltText('Prévia do post')).toHaveAttribute('src', '/previous.png');
+    fireEvent.click(screen.getByRole('button', { name: 'Tentar prévia novamente' }));
+    expect(retry).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('PostEditor — catálogo de modelos', () => {
+  it('mostra seis objetivos do segmento de nutrição sem opções de corte, desconto ou depoimento', async () => {
+    const compositions = ['Apresentação', 'Serviço em foco', 'Como funciona', 'Atendimento e horários', 'Orientação', 'Prepare sua visita', 'Serviços do espaço', 'Dúvidas e contato', 'Equipe e bastidores', 'Aviso'];
+    mockedPostsApi.templates.mockResolvedValue(compositions.map((name, index) => ({ ...TEMPLATES[0], key: `nutricao-colecao-${index + 1}`, name: `Nutrição · ${name}`, description: `Modelo informativo de ${name.toLowerCase()}.`, businessCategory: 'nutricao', sampleTitle: 'Converse sobre a consulta de nutrição' })));
+    mockedPostsApi.create.mockResolvedValue({ id: 'nutrition-draft' } as never);
+    renderEditor();
+    await screen.findByRole('button', { name: /^Apresentação/ });
+    for (const label of ['Apresentação', 'Serviço em foco', 'Atendimento e horários', 'Dúvidas e contato', 'Equipe e bastidores', 'Aviso']) {
+      expect(screen.getByRole('button', { name: new RegExp(`^${label}`) })).toBeInTheDocument();
+    }
+    expect(screen.queryByText('Divulgar serviço')).not.toBeInTheDocument();
+    expect(screen.queryByText('Mostrar resultado')).not.toBeInTheDocument();
+    expect(screen.queryByText('Compartilhar depoimento')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /^Serviço em foco/ }));
+    expect(screen.queryByText('Serviços e preços', { exact: true })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Rascunho' }));
+    await waitFor(() => expect(mockedPostsApi.create).toHaveBeenCalledWith(expect.objectContaining({ templateKey: 'nutricao-colecao-2', type: 'announcement' })));
+  });
+
+  it('carrega metadados legados na edição de um post antigo sem trocar sua composição', async () => {
+    mockedPostsApi.templates.mockResolvedValue([
+      { ...TEMPLATES[0], key: 'agenda-aberta', requiredMedia: 0 },
+      { ...TEMPLATES[0], key: 'tatuagem-piercing-colecao-1', name: 'Tatuagem e piercing · Apresentação', businessCategory: 'tatuagem-piercing' },
+    ]);
+    mockedPostsApi.update.mockResolvedValue({ id: 'legacy-tattoo' } as never);
+    renderEditor({ post: { id: 'legacy-tattoo', barbershopId: 'barber1', title: 'Converse sobre o seu projeto', content: '', templateKey: 'agenda-aberta', format: 'portrait', postMode: 'appointments', type: 'announcement', status: 'draft', likes: 0, createdAt: Date.now() } as never });
+    await screen.findByLabelText('Título');
+    await waitFor(() => expect(mockedPostsApi.templates).toHaveBeenCalledWith('barber1', { includeLegacy: true }));
+    await waitFor(() => expect(mockedPostsApi.preview).toHaveBeenCalledWith('barber1', expect.objectContaining({ templateKey: 'agenda-aberta' })), { timeout: 3000 });
+    fireEvent.click(screen.getByRole('button', { name: 'Rascunho' }));
+    await waitFor(() => expect(mockedPostsApi.update).toHaveBeenCalledWith('legacy-tattoo', expect.objectContaining({ templateKey: 'agenda-aberta', title: 'Converse sobre o seu projeto' })));
+    expect(mockedPostsApi.create).not.toHaveBeenCalled();
+  });
+
   it('carrega modelos exclusivamente via postsApi.templates e mostra cards no picker', async () => {
     await openEditor();
     fireEvent.click(screen.getByRole('button', { name: /selecionar modelo|agenda aberta/i }));
@@ -91,16 +350,16 @@ describe('PostEditor — catálogo de modelos', () => {
     await screen.findByText('Editorial foto');
 
     fireEvent.click(screen.getByRole('button', { name: 'Sem foto' }));
-    expect(screen.getByText('Agenda aberta')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Selecionar modelo Agenda aberta' })).toBeInTheDocument();
     expect(screen.queryByText('Editorial foto')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Com foto' }));
     expect(screen.getByText('Editorial foto')).toBeInTheDocument();
     expect(screen.getByText('Antes e depois')).toBeInTheDocument();
-    expect(screen.queryByText('Agenda aberta')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Selecionar modelo Agenda aberta' })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Todos' }));
-    expect(screen.getByText('Agenda aberta')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Selecionar modelo Agenda aberta' })).toBeInTheDocument();
   });
 });
 
@@ -109,7 +368,7 @@ describe('PostEditor — photoMode', () => {
     await openEditor(); // objetivo "Divulgar serviço" → servico-destaque? usa agenda-aberta default via draft limpo -> templateKey da objective
     // Seleciona template sem foto
     fireEvent.click(screen.getByRole('button', { name: /selecionar modelo|serviço em destaque|agenda aberta/i }));
-    fireEvent.click(await screen.findByText('Agenda aberta'));
+    fireEvent.click(await screen.findByRole('button', { name: 'Selecionar modelo Agenda aberta' }));
     fireEvent.click(screen.getByRole('button', { name: 'Imagem' }));
     expect(screen.getByText(/não usa foto/i)).toBeInTheDocument();
     expect(screen.queryByText('Foto principal')).not.toBeInTheDocument();
@@ -120,7 +379,7 @@ describe('PostEditor — photoMode', () => {
     fireEvent.click(screen.getByRole('button', { name: /selecionar modelo|serviço em destaque|agenda aberta/i }));
     fireEvent.click(await screen.findByText('Editorial foto'));
     fireEvent.click(screen.getByRole('button', { name: 'Imagem' }));
-    expect(screen.getByText(/não representa resultados do seu salão/i)).toBeInTheDocument();
+    expect(screen.getByText(/não representa resultados do estabelecimento/i)).toBeInTheDocument();
   });
 
   it('optional sem stockImageKey explica tipografia sem foto', async () => {
@@ -335,11 +594,11 @@ describe('TemplateThumbnail', () => {
 });
 
 describe('PostPreviewBox — formato', () => {
-  it('preserva aspect ratio 9:16 via maxWidth proporcional', () => {
+  it('preserva a proporção do Story e limita a prévia à área visível', () => {
     const { container } = render(<PostPreviewBox format="story" previewUrl={null} />);
     const box = container.firstChild as HTMLElement;
     expect(box).toHaveClass('aspect-[9/16]');
-    expect(box.style.maxWidth).toBe('303.75px');
+    expect(box.style.maxWidth).toContain('var(--post-editor-height');
     expect(box.style.maxHeight).toBe('540px');
   });
 
@@ -673,7 +932,7 @@ describe('PostEditor — biblioteca de fotos', () => {
   it('modelo sem foto oferece "Ver modelos com foto" e abre o picker filtrado em Com foto', async () => {
     await openEditor();
     fireEvent.click(screen.getByRole('button', { name: /selecionar modelo|agenda aberta/i }));
-    fireEvent.click(await screen.findByText('Agenda aberta'));
+    fireEvent.click(await screen.findByRole('button', { name: 'Selecionar modelo Agenda aberta' }));
     fireEvent.click(screen.getByRole('button', { name: 'Imagem' }));
     expect(screen.getByText(/não usa foto/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Ver modelos com foto' }));
@@ -736,11 +995,30 @@ describe('PostEditor — biblioteca de fotos', () => {
 });
 
 describe('PostEditor — aviso de caracteres sem glifo no render', () => {
-  it('avisa no editor quando caracteres do título serão ignorados na imagem', async () => {
+  it('preserva título e chamada completos em uma categoria nova e orienta verificar o encaixe', async () => {
+    mockedPostsApi.templates.mockResolvedValue([{ ...TEMPLATES[0], key: 'fisioterapia-colecao-1', name: 'Fisioterapia · Apresentação', businessCategory: 'fisioterapia', formats: ['square', 'portrait', 'story'] }]);
+    renderEditor();
+    fireEvent.click(await screen.findByRole('button', { name: /Apresentação/ }));
+    const title = 'Converse com o profissional sobre os horários de atendimento e o que levar para o primeiro encontro';
+    const cta = 'Fale com a equipe para confirmar os detalhes do seu atendimento';
+    const titleInput = screen.getByLabelText('Título');
+    const ctaInput = screen.getByLabelText('Texto do botão (CTA)');
+    expect(titleInput).toHaveAttribute('maxlength', '200');
+    expect(ctaInput).toHaveAttribute('maxlength', '120');
+    fireEvent.change(titleInput, { target: { value: title } });
+    fireEvent.change(ctaInput, { target: { value: cta } });
+    expect(titleInput).toHaveValue(title);
+    expect(ctaInput).toHaveValue(cta);
+    await waitFor(() => expect(mockedPostsApi.preview).toHaveBeenLastCalledWith('barber1', expect.objectContaining({ templateKey: 'fisioterapia-colecao-1', title, ctaText: cta })), { timeout: 3000 });
+    expect(screen.getByText(/Título: passa de 48 caracteres recomendados/)).toBeInTheDocument();
+    expect(screen.queryByText(/é cortado na imagem|serão ignorados na imagem/)).not.toBeInTheDocument();
+  });
+
+  it('orienta conferir caracteres especiais do título na imagem', async () => {
     await openEditor();
     const titleInput = await screen.findByLabelText('Título');
     fireEvent.change(titleInput, { target: { value: '💈 Corte ✂️' } });
-    const warning = await screen.findByText(/não têm letra na fonte do post/);
+    const warning = await screen.findByText(/Confira os caracteres especiais na prévia/);
     expect(warning).toHaveTextContent('💈 ✂️');
     expect(warning).toHaveAttribute('role', 'status');
     expect(warning).toHaveAttribute('id', 'post-title-render-warning');
@@ -750,10 +1028,10 @@ describe('PostEditor — aviso de caracteres sem glifo no render', () => {
     await openEditor();
     const titleInput = await screen.findByLabelText('Título');
     fireEvent.change(titleInput, { target: { value: 'Corte ✂️' } });
-    await screen.findByText(/não têm letra na fonte do post/);
+    await screen.findByText(/Confira os caracteres especiais na prévia/);
     fireEvent.change(titleInput, { target: { value: 'Corte na tesoura' } });
     await waitFor(() =>
-      expect(screen.queryByText(/não têm letra na fonte do post/)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Confira os caracteres especiais na prévia/)).not.toBeInTheDocument()
     );
   });
 
@@ -761,13 +1039,39 @@ describe('PostEditor — aviso de caracteres sem glifo no render', () => {
     await openEditor();
     const titleInput = await screen.findByLabelText('Título');
     fireEvent.change(titleInput, { target: { value: 'TABELA DE VALORES COMPLETA DOS NOSSOS SERVIÇOS PREMIUM' } });
-    expect(await screen.findByText(/passa de 40 caracteres/)).toBeInTheDocument();
+    expect(await screen.findByText(/passa de 48 caracteres/)).toBeInTheDocument();
   });
 
   it('avisa também no campo de CTA', async () => {
     await openEditor();
     const ctaInput = await screen.findByLabelText('Texto do botão (CTA)');
     fireEvent.change(ctaInput, { target: { value: 'Agendar 📅' } });
-    expect(await screen.findByText(/não têm letra na fonte do post/)).toHaveTextContent('📅');
+    expect(await screen.findByText(/Confira os caracteres especiais na prévia/)).toHaveTextContent('📅');
   });
+});
+
+it('carrega miniatura de uma nova categoria no estabelecimento correto sem criar publicação', async () => {
+  vi.stubGlobal('IntersectionObserver', undefined);
+  try {
+    render(<TemplateThumbnail barbershopId="physio-tenant" templateKey="fisioterapia-colecao-1" format="portrait" paletteKey="clara" alt="Fisioterapia · Apresentação" />);
+    expect(await screen.findByAltText('Fisioterapia · Apresentação')).toHaveAttribute('src', 'https://cdn.example.com/preview.png');
+    expect(mockedPostsApi.preview).toHaveBeenCalledWith('physio-tenant', { templateKey: 'fisioterapia-colecao-1', format: 'portrait', paletteKey: 'clara' });
+    expect(mockedPostsApi.create).not.toHaveBeenCalled();
+    expect(mockedPostsApi.publish).not.toHaveBeenCalled();
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});
+
+
+it('envia o valor digitado na oferta sem depender do preço do cadastro', async () => {
+  mockedPostsApi.templates.mockResolvedValue([{ ...TEMPLATES[0], key: 'servico-destaque', name: 'Serviço em destaque', group: 'ofertas', priceMode: 'single' }]);
+  mockedPostsApi.create.mockResolvedValue({ id: 'offer-draft' } as never);
+  await openEditor();
+  fireEvent.click(screen.getByRole('button', { name: '+ Adicionar serviço' }));
+  fireEvent.change(screen.getByLabelText('Nome do serviço 1'), { target: { value: 'Combo corte e barba' } });
+  fireEvent.change(screen.getByLabelText('Preço do serviço 1'), { target: { value: '59,90' } });
+  await waitFor(() => expect(mockedPostsApi.preview).toHaveBeenLastCalledWith('barber1', expect.objectContaining({ priceSplit: expect.objectContaining({ items: [{ name: 'Combo corte e barba', price: '59,90' }] }) })), { timeout: 2000 });
+  fireEvent.click(screen.getByRole('button', { name: 'Rascunho' }));
+  await waitFor(() => expect(mockedPostsApi.create).toHaveBeenCalledWith(expect.objectContaining({ priceSplit: expect.objectContaining({ items: [{ name: 'Combo corte e barba', price: '59,90' }] }) })));
 });

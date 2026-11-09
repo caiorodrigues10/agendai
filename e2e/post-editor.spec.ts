@@ -3,20 +3,22 @@ import { mkdtempSync, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { POST_TEMPLATES } from '../../backend/src/modules/posts/services/postTemplates';
+const backend = path.resolve(process.env.POST_TEMPLATE_BACKEND || '../agendai-back-end');
+import type { PostTemplateDef } from '../src/infra/postsApi';
+let templates: PostTemplateDef[] = [];
 
 // This harness mounts the real editor without adding a public/dev route to the app.
 // API fixtures contain no production tokens, customer data or network writes.
 let output: string;
 test.skip(process.env.POST_EDITOR_QA !== '1', 'Harness isolado: usar POST_EDITOR_QA=1 com E2E_BASE_URL apontando para Vite dev.');
 test.beforeAll(() => {
-  const backend = path.resolve('../backend');
-  output = mkdtempSync(path.join(tmpdir(), 'agendai-editor-e2e-'));
-  execFileSync(process.execPath, [path.join(backend, 'node_modules/tsx/dist/cli.mjs'), 'scripts/preview-post-editorial.ts', output], { cwd: backend, timeout: 180_000 });
+  output = process.env.POST_EDITOR_ARTIFACTS || mkdtempSync(path.join(tmpdir(), 'agendai-editor-e2e-'));
+  if (!process.env.POST_EDITOR_ARTIFACTS) execFileSync(process.execPath, [path.join(backend, 'node_modules/tsx/dist/cli.mjs'), 'scripts/preview-post-editorial.ts', output], { cwd: backend, timeout: 180_000 });
+  templates = JSON.parse(readFileSync(path.join(output, 'catalog.json'), 'utf8'));
 });
 
 test.beforeEach(async ({ page }) => {
-  page.on('pageerror', error => console.error('EDITOR QA:', error.stack));
+  page.on('pageerror', error => console.error('EDITOR QA:', error.message));
   await page.route('**/qa/post-editor', route => route.fulfill({ contentType: 'text/html', body: `<!doctype html>
     <html class="dark"><head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
     <body><button id="outside">Fora do editor</button><div id="root"></div>
@@ -39,13 +41,13 @@ test.beforeEach(async ({ page }) => {
     </script></body></html>` }));
   await page.route('**/qa-post-art/**', route => {
     const filename = path.basename(new URL(route.request().url()).pathname);
-    if (!/^[a-z-]+-(square|portrait|story)\.png$/.test(filename)) return route.abort();
+    if (!/^[a-z0-9-]+-(square|portrait|story)\.png$/.test(filename)) return route.abort();
     return route.fulfill({ contentType: 'image/png', body: readFileSync(path.join(output, filename)) });
   });
   await page.route('**/api/**', route => {
     const url = new URL(route.request().url());
     const data = url.pathname.endsWith('/templates')
-      ? POST_TEMPLATES.map(t => ({ ...t, formats: ['square', 'portrait', 'story'], previewUrl: '' }))
+      ? templates.filter((template) => template.businessCategory !== 'advocacia')
       : { imageUrl: `/qa-post-art/${url.searchParams.get('templateKey') || 'agenda-aberta'}-${url.searchParams.get('format') || 'square'}.png` };
     return route.fulfill({ json: { success: true, data } });
   });
@@ -58,7 +60,7 @@ test('catálogo real oferece foto opcional e a prévia Story tem dimensões corr
   await page.getByRole('button', { name: 'Com foto', exact: true }).click();
   await page.getByRole('button', { name: 'Selecionar modelo Editorial com foto', exact: true }).click();
   await page.getByRole('button', { name: 'Imagem', exact: true }).click();
-  await expect(page.getByText(/não representa resultados do seu salão/)).toBeVisible();
+  await expect(page.getByText(/não representa resultados do estabelecimento/)).toBeVisible();
   await page.getByRole('button', { name: 'Formato', exact: true }).click();
   await page.getByRole('button', { name: /Story.*9:16/ }).click();
   if (info.project.name === 'mobile-chromium') await page.getByText('Ver prévia do post', { exact: true }).click();

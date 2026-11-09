@@ -1,3 +1,5 @@
+import { downloadPostArt } from './downloadPostArt';
+import { useSegmentLabels } from '../../hooks/useSegmentLabels';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   LuChevronLeft as ChevronLeft,
@@ -47,14 +49,7 @@ const TONE_OPTIONS: { id: NonNullable<PostTone>; label: string }[] = [
 
 // ─── Utilitários ───────────────────────────────────────────────
 
-function downloadPostImage(imageUrl: string, filename: string) {
-  const link = document.createElement('a');
-  link.href = imageUrl;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
+
 
 function statusBadge(status?: FeedPost['status']) {
   switch (status) {
@@ -80,6 +75,7 @@ function formatDate(ts?: number | null) {
 export const PostsManager: React.FC = () => {
   const { barbershopId } = useBarbershopFilters();
   const { user } = useAuth();
+  const { config: segmentConfig } = useSegmentLabels();
   const userId = user?.id ?? 'anon';
 
   const [tab, setTab] = useState<Tab>('published');
@@ -347,6 +343,7 @@ export const PostsManager: React.FC = () => {
                           </p>
                           <PostRowActions
                             post={post}
+                            allowWhatsapp={!segmentConfig.advertisingRestricted}
                             busy={actionInFlight !== null}
                             onEdit={() => setEditingPost(post)}
                             onReuse={() => handleReuse(post)}
@@ -355,7 +352,7 @@ export const PostsManager: React.FC = () => {
                             onWhatsapp={() => void openWhatsappConfirm(post)}
                             onDownload={() =>
                               post.imageUrl &&
-                              downloadPostImage(post.imageUrl, `post-${post.id}.png`)
+                              void downloadPostArt(post.imageUrl, `post-${post.id}.png`).catch(error => showToast(getErrorMessage(error, 'Não foi possível baixar a arte.'), 'error'))
                             }
                           />
                         </div>
@@ -450,6 +447,7 @@ export const PostsManager: React.FC = () => {
 // ─── Ações por linha ───────────────────────────────────────────
 
 interface RowActionsProps {
+  allowWhatsapp: boolean;
   post: FeedPost;
   busy: boolean;
   onEdit: () => void;
@@ -462,6 +460,7 @@ interface RowActionsProps {
 
 const PostRowActions: React.FC<RowActionsProps> = ({
   post,
+  allowWhatsapp,
   busy,
   onEdit,
   onReuse,
@@ -473,7 +472,7 @@ const PostRowActions: React.FC<RowActionsProps> = ({
   if (post.status === 'published') {
     return (
       <div className="flex gap-1 pt-1">
-        <button
+        {allowWhatsapp && <button
           type="button"
           onClick={onWhatsapp}
           disabled={busy}
@@ -481,7 +480,7 @@ const PostRowActions: React.FC<RowActionsProps> = ({
           className="flex-1 min-h-10 rounded-lg border border-border text-xs font-semibold text-text-secondary hover:border-accent/40 hover:text-accent disabled:opacity-40"
         >
           WhatsApp
-        </button>
+        </button>}
         <button
           type="button"
           onClick={onDownload}

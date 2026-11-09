@@ -165,6 +165,19 @@ export interface PriceSplitPayload {
   instagram?: string | null;
 }
 
+export interface LegalPostPayload {
+  professionalName: string;
+  registration: string;
+  areas: { title: string; description: string }[];
+  eyebrow?: string;
+  summary?: string;
+  highlight?: string;
+  contact?: string;
+  address?: string;
+  website?: string;
+  contactLayout?: 'essential' | 'complete';
+}
+
 export interface FeedPost {
   id: string;
   barbershopId?: string;
@@ -192,6 +205,7 @@ export interface FeedPost {
     overlay?: number;
     /** Lista de preços gravada junto ao post (só no modelo price-split). */
     priceSplit?: PriceSplitPayload;
+    legalPost?: LegalPostPayload;
   } | null;
 }
 

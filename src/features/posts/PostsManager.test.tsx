@@ -27,6 +27,9 @@ vi.mock('../../contexts/AuthContext', () => ({
   useAuth: () => ({ user: { id: 'user-1', name: 'Dono', email: 'dono@example.com', role: 'OWNER' } }),
 }));
 
+const advertising = { restricted: false };
+vi.mock('../../hooks/useSegmentLabels', () => ({ useSegmentLabels: () => ({ config: { advertisingRestricted: advertising.restricted } }) }));
+
 const mockedPostsApi = vi.mocked(postsApi);
 
 const PHOTO: PostMedia = {
@@ -47,6 +50,7 @@ function pngFile(name = 'foto.png') {
 }
 
 beforeEach(() => {
+  advertising.restricted = false;
   vi.clearAllMocks();
   mockedPostsApi.list.mockResolvedValue({ data: [], meta: { total: 0, page: 1, limit: 12 } });
   mockedPostsApi.palettes.mockResolvedValue([]);
@@ -151,4 +155,13 @@ describe('PostsManager — seções Publicações / Galeria do perfil', () => {
     );
     expect(await screen.findByText('Foto enviada para a galeria do perfil.')).toBeInTheDocument();
   });
+});
+
+
+it('oculta o envio em massa de posts para escritórios de advocacia', async () => {
+  advertising.restricted = true;
+  mockedPostsApi.list.mockResolvedValue({ data: [{ ...DRAFT_POST, status: 'published', templateKey: 'advocacia-cartao' }], meta: { total: 1, page: 1, limit: 12 } });
+  render(<PostsManager />);
+  await screen.findByRole('button', { name: 'Editar' });
+  expect(screen.queryByRole('button', { name: 'WhatsApp' })).not.toBeInTheDocument();
 });

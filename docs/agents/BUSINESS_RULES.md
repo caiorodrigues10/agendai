@@ -23,6 +23,9 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 - `PostsManager` só tem as sub-abas **Publicados** e **Rascunhos** — não existe sub-aba "Agendados", nem ação de agendar/cancelar agendamento na UI.
 - Salvar rascunho: `postsApi.create({status:'draft'})` (post novo) ou `postsApi.update` (edição); publicar: `postsApi.publish(id)`. Publicação exige modelo carregado + fotos exigidas pelo template + preço (quando o modelo usa lista de preços).
 - Rascunho local (`draftStorage`, `DRAFT_VERSION`) vale só para post **novo** (`storageKey 'new'`) e é limpo ao salvar/publicar.
+- O catálogo de posts recebe `barbershopId` e usa o segmento cadastrado. Cada segmento tem dez modelos próprios. O editor deriva os objetivos dos novos segmentos do catálogo recebido e solicita `includeLegacy=1` ao editar modelos antigos. Advocacia usa objetivos informativos e identificação em `designOptions.legalPost`. A publicação exige nome, inscrição e os campos obrigatórios do modelo. Mensagens em massa ficam ocultas nesse segmento.
+- Modelos com `priceMode: 'single'` editam o serviço e o **valor da oferta do post** (`priceSplit.items[0]`), usados na prévia e na publicação. Não inferir o preço a partir do título nem usar silenciosamente o primeiro serviço do estabelecimento.
+- Falha ao publicar depois de criar o rascunho conserva o ID para a próxima tentativa. Falha de prévia permite tentar novamente sem apagar campos ou substituir a imagem anterior por uma arte incorreta.
 - Rotas legadas de agendamento continuam existindo no backend por compatibilidade, mas nenhum consumidor no frontend as chama.
 
 ## Pacotes / fiado / produtos

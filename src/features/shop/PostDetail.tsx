@@ -174,7 +174,7 @@ export const PostDetail: React.FC<PostDetailProps> = ({ salonId, post, onLike, o
       )}
 
       {(post.postMode || post.ctaText) && <div className="flex gap-2 border-b border-border px-4 py-3">
-        {post.postMode !== 'queue' && <Link to={`/queue/${encodeURIComponent(salonId)}?tab=appointments`} className="flex-1 rounded-xl bg-accent px-3 py-3 text-center text-xs font-bold text-accent-fg">{post.ctaText || 'Agendar'}</Link>}
+        {post.postMode !== 'queue' && <Link to={`/queue/${encodeURIComponent(salonId)}?tab=appointments`} className="flex-1 rounded-xl bg-accent px-3 py-3 text-center text-xs font-bold text-accent-fg">{post.templateKey?.startsWith('advocacia-') ? 'Agendar atendimento' : post.ctaText || 'Agendar'}</Link>}
         {post.postMode !== 'appointments' && <Link to={`/queue/${encodeURIComponent(salonId)}?tab=queue`} className="flex-1 rounded-xl border border-border px-3 py-3 text-center text-xs font-bold text-text-primary">{post.postMode === 'queue' ? post.ctaText || 'Entrar na fila' : 'Entrar na fila'}</Link>}
       </div>}
       {likeError && <div className="px-4 py-3"><SectionError message={likeError} /></div>}

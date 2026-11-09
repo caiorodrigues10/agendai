@@ -80,3 +80,17 @@ describe('postsApi — galeria (inGallery)', () => {
   });
 
 });
+
+describe('postsApi — catálogo por estabelecimento', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it.each([false, true])('solicita metadados legados apenas quando a edição pede includeLegacy=%s', async includeLegacy => {
+    mockedClient.mockResolvedValueOnce({ success: true, data: [] });
+    await postsApi.templates(shop, { includeLegacy });
+    expect(mockedClient).toHaveBeenCalledWith(
+      `/api/posts/templates?barbershopId=${shop}${includeLegacy ? '&includeLegacy=1' : ''}`,
+      'GET', undefined, 'test-token',
+    );
+    expect(mockedFetch).not.toHaveBeenCalled();
+  });
+});

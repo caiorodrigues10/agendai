@@ -28,6 +28,8 @@ interface PostPreviewBoxProps {
   loading?: boolean;
   stale?: boolean;
   error?: boolean;
+  onRetry?: () => void;
+  errorMessage?: string;
   emptyLabel?: string;
   className?: string;
 }
@@ -38,6 +40,8 @@ export const PostPreviewBox: React.FC<PostPreviewBoxProps> = ({
   loading = false,
   stale = false,
   error = false,
+  onRetry,
+  errorMessage = 'Não foi possível atualizar a imagem.',
   emptyLabel = 'Aguardando informações…',
   className = '',
 }) => {
@@ -47,8 +51,9 @@ export const PostPreviewBox: React.FC<PostPreviewBoxProps> = ({
 
   return (
     <div
-      className={`${aspectClass} mx-auto w-full overflow-hidden rounded-2xl border border-border bg-bg ${className}`}
-      style={{ maxWidth: maxW, maxHeight: maxH }}
+      className={`relative ${aspectClass} mx-auto w-full overflow-hidden rounded-2xl border border-border bg-bg ${className}`}
+      style={{ maxWidth: `min(${maxW}px, calc((var(--post-editor-height, 100dvh) - 17rem) * ${maxW / maxH}))`, maxHeight: maxH }}
+      aria-busy={loading}
     >
       {loading && !previewUrl ? (
         <div className="flex h-full items-center justify-center">
@@ -57,7 +62,8 @@ export const PostPreviewBox: React.FC<PostPreviewBoxProps> = ({
       ) : error && !previewUrl ? (
         <div className="flex h-full flex-col items-center justify-center gap-2 p-4 text-center text-text-muted">
           <Megaphone size={28} aria-hidden />
-          <p className="text-xs">Erro ao gerar prévia.</p>
+          <p className="text-xs">{errorMessage}</p>
+          {onRetry && <button type="button" onClick={onRetry} className="min-h-11 rounded-lg border border-border px-3 text-sm font-semibold text-text-primary">Tentar prévia novamente</button>}
         </div>
       ) : previewUrl ? (
         <div className="relative h-full w-full">
@@ -66,11 +72,13 @@ export const PostPreviewBox: React.FC<PostPreviewBoxProps> = ({
             alt="Prévia do post"
             className="h-full w-full object-contain"
           />
-          {stale && (
+          {stale && !error && !loading && (
             <span className="absolute right-2 top-2 rounded-full bg-warning/20 px-2 py-0.5 text-[10px] font-bold text-warning">
               Desatualizada
             </span>
           )}
+          {loading && <span role="status" className="absolute bottom-3 left-3 rounded-lg bg-surface px-3 py-2 text-xs font-semibold text-text-primary shadow">Atualizando prévia…</span>}
+          {error && <div role="alert" className="absolute inset-x-2 bottom-2 rounded-xl border border-border bg-surface p-3 text-sm text-text-primary shadow"><p>{errorMessage}</p>{onRetry && <button type="button" onClick={onRetry} className="mt-1 min-h-11 font-semibold text-accent">Tentar prévia novamente</button>}</div>}
         </div>
       ) : (
         <div className="flex h-full flex-col items-center justify-center gap-2 p-4 text-center text-text-muted">

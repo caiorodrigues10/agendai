@@ -1,3 +1,4 @@
+import { downloadPostArt } from './downloadPostArt';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import FocusLock from 'react-focus-lock';
@@ -18,12 +19,12 @@ import {
 import { postsApi, type PostMedia, type PostPaletteDef, type PostTemplateDef } from '../../infra/postsApi';
 import { barbershopApi, PostAiSuggestion } from '../../infra/barbershopApi';
 import { getErrorMessage } from '../../utils/errorMessage';
-import { FeedPost, PostFormat, PostMode, type PriceSplitPayload } from '../../types';
+import { FeedPost, PostFormat, PostMode, type PriceSplitPayload, type LegalPostPayload } from '../../types';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { PostPreviewBox } from './PostPreviewBox';
 import { TemplateThumbnail } from './TemplateThumbnail';
-import { OBJECTIVES, type PostType, type ObjectiveId } from './objectives';
+import { OBJECTIVES, LEGAL_OBJECTIVES, LEGAL_CTA_BY_TEMPLATE, categoryPostObjectives, type PostType, type ObjectiveId } from './objectives';
 import { readDraft, writeDraft, clearDraft } from './draftStorage';
 import {
   POST_MEDIA_MAX_BYTES,
@@ -33,8 +34,18 @@ import {
   validatePostMediaFile,
 } from './postMediaValidation';
 import { optimizeImageIfNeeded } from './optimizeImage';
+import { LegalPostFields, legalPostSchemaFor } from './LegalPostFields';
+import { isAdvertisingRestricted } from '../../shared/segments';
 import { BarbershopContext } from '../../contexts/BarbershopContext';
-import { renderTextWarning, renderTextWarningMessage } from './renderTextGlyphs';
+import { useVisualViewport } from '../../hooks/useVisualViewport';
+import { renderTextWarning, type RenderTextWarning } from './renderTextGlyphs';
+
+function compositionRenderWarningMessage(warning: RenderTextWarning, fieldLabel: string, recommendedLength: number): string {
+  return [
+    warning.dropped.length ? `Confira os caracteres especiais na prévia: ${warning.dropped.join(' ')}.` : '',
+    warning.truncated ? `${fieldLabel}: passa de ${recommendedLength} caracteres recomendados. Texto extenso: confira o encaixe na prévia. Se não houver espaço para uma leitura confortável, encurte a frase ou escolha Retrato ou Story.` : '',
+  ].filter(Boolean).join(' ');
+}
 
 type PostTone = 'promocional' | 'informativo' | 'divertido' | null;
 type EditorTab = 'content' | 'image' | 'format' | 'identity';
@@ -46,6 +57,7 @@ const GROUP_LABELS: Record<string, string> = {
   equipe: 'Equipe',
   depoimentos: 'Depoimentos',
   editorial: 'Editorial',
+  advocacia: 'Advocacia',
   tipografia: 'Tipografia',
 };
 
@@ -115,14 +127,7 @@ function readStoredPriceSplit(designOptions: FeedPost['designOptions']): PriceSp
   return { ...value, items: value.items ?? [] };
 }
 
-function downloadImage(imageUrl: string, filename: string) {
-  const link = document.createElement('a');
-  link.href = imageUrl;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
+
 
 interface LocalDraftPayload {
   version: number;
@@ -141,6 +146,7 @@ interface LocalDraftPayload {
   /** Opcional: rascunhos antigos não têm e caem no seed de serviços. */
   priceItems?: PriceRow[];
   businessName?: string;
+  legalPost?: LegalPostPayload;
 }
 
 // ─── Props ────────────────────────────────────────────────────
@@ -180,6 +186,10 @@ export const PostEditor: React.FC<PostEditorProps> = ({
 }) => {
   const isEditing = !!post;
   const storageKey = post?.id ?? 'new';
+  const includeLegacyTemplates = Boolean(post?.id && post.templateKey && (
+    post.templateKey.startsWith('beleza-colecao-') ||
+    !post.templateKey.includes('-colecao-') && !post.templateKey.startsWith('advocacia-')
+  ));
 
   // Restaura o rascunho local ANTES do primeiro render dos estados, para que o
   // efeito de persistência nunca sobrescreva o rascunho salvo com valores vazios.
@@ -213,8 +223,19 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   const shopServices = shopContext?.services ?? [];
   const shopSettings = shopContext?.settings ?? null;
 
+  const [legalPost, setLegalPost] = useState<LegalPostPayload>(() => draft?.legalPost ?? post?.designOptions?.legalPost ?? {
+    professionalName: shopSettings?.shopName ?? '', registration: '',
+    areas: [{ title: '', description: '' }], contact: shopSettings?.whatsapp ?? '', address: '', website: '',
+    contactLayout: 'essential',
+  });
+  const savedPostId = useRef(post?.id);
+  const [previewError, setPreviewError] = useState(false);
+  const [previewErrorMessage, setPreviewErrorMessage] = useState('');
+  const [legalValidationAttempt, setLegalValidationAttempt] = useState(0);
   const [templates, setTemplates] = useState<PostTemplateDef[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(true);
+  const [templatesError, setTemplatesError] = useState(false);
+  const [catalogAttempt, setCatalogAttempt] = useState(0);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PostMedia | null>(null);
@@ -253,23 +274,40 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previewSeqRef = useRef(0);
-  const liveRef = useRef<{ templateKey: string; paletteKey: string; format: PostFormat; title: string; ctaText: string; primaryMediaId: string | null; secondaryMediaId: string | null; postMode: PostMode; type: PostType; priceSplit: PriceSplitPayload | undefined }>({
+  const liveRef = useRef<{ templateKey: string; paletteKey: string; format: PostFormat; title: string; ctaText: string; primaryMediaId: string | null; secondaryMediaId: string | null; postMode: PostMode; type: PostType; priceSplit: PriceSplitPayload | undefined; designOptions?: FeedPost['designOptions'] }>({
     templateKey, paletteKey, format, title, ctaText, primaryMediaId, secondaryMediaId, postMode, type, priceSplit: undefined,
   });
 
-  // Catálogo de modelos: postsApi.templates() é a fonte única.
+  // Catálogo de modelos: postsApi.templates(barbershopId) é a fonte única.
   useEffect(() => {
     let cancelled = false;
     setTemplatesLoading(true);
-    postsApi.templates()
+    setTemplatesError(false);
+    const request = includeLegacyTemplates
+      ? postsApi.templates(barbershopId, { includeLegacy: true })
+      : postsApi.templates(barbershopId);
+    request
       .then(list => { if (!cancelled) setTemplates(list); })
-      .catch(() => { if (!cancelled) showToast('Não foi possível carregar os modelos.', 'error'); })
+      .catch(() => { if (!cancelled) setTemplatesError(true); })
       .finally(() => { if (!cancelled) setTemplatesLoading(false); });
     return () => { cancelled = true; };
-  }, [showToast]);
+  }, [barbershopId, catalogAttempt, includeLegacyTemplates]);
 
   const selectedTemplate = useMemo(() => templates.find(t => t.key === templateKey), [templates, templateKey]);
   const selectedPhotoMode = templatePhotoMode(selectedTemplate);
+  const legalAudience = isAdvertisingRestricted(shopSettings?.businessSegment) || templates.some(template => template.businessCategory === 'advocacia') && templates.every(template => template.businessCategory === 'advocacia');
+  const isLegal = legalAudience || selectedTemplate?.businessCategory === 'advocacia';
+  const categoryObjectives = useMemo(() => categoryPostObjectives(templates), [templates]);
+  const objectives = templatesLoading ? [] : legalAudience ? LEGAL_OBJECTIVES : categoryObjectives ?? OBJECTIVES;
+  const modeOptions = isLegal ? MODE_OPTIONS.filter(mode => mode.id === 'appointments') : MODE_OPTIONS;
+  const toneOptions = isLegal ? TONE_OPTIONS.filter(option => option.id === 'informativo') : TONE_OPTIONS;
+  const designOptions = useMemo(() => isLegal ? { ...post?.designOptions, legalPost } : post?.designOptions ?? undefined, [isLegal, legalPost, post?.designOptions]);
+  useEffect(() => {
+    if (templatesLoading || !templates.length) return;
+    if (!templates.some(template => template.key === templateKey)) setTemplateKey(templates[0].key);
+    if (legalAudience) { setPostMode('appointments'); setType('announcement'); setTone('informativo'); }
+    else if (categoryObjectives) setType('announcement');
+  }, [templates, templatesLoading, templateKey, legalAudience, categoryObjectives]);
 
   // Reconciliação: rascunho/post podem guardar um mediaId que já não existe na
   // biblioteca (ex.: foto excluída em outra sessão). Quando a lista está pronta
@@ -301,23 +339,24 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   }, [templates, templateFilter]);
 
   const isPriceSplit = templateKey === 'price-split';
+  const isOffer = selectedTemplate?.priceMode === 'single';
 
   // Seed único: ao escolher o modelo, puxa os serviços do salão (até 8) e o
   // nome do negócio. `priceSeededRef` evita reimportar quando o usuário limpa
   // a lista manualmente.
   const priceSeededRef = useRef(false);
   useEffect(() => {
-    if (!isPriceSplit || priceSeededRef.current) return;
+    if ((!isPriceSplit && !isOffer) || priceSeededRef.current) return;
     priceSeededRef.current = true;
     if (priceItems.length > 0) return;
     const rows = itemsToRows(
       shopServices
         .filter(service => service.name.trim())
-        .slice(0, PRICE_MAX_ITEMS)
+        .slice(0, isOffer ? 1 : PRICE_MAX_ITEMS)
         .map(service => ({ name: service.name, price: service.price ?? null }))
     );
     if (rows.length) setPriceItems(rows);
-  }, [isPriceSplit, priceItems.length, shopServices]);
+  }, [isPriceSplit, isOffer, priceItems.length, shopServices]);
 
   useEffect(() => {
     if (!isPriceSplit || businessName || !shopSettings?.shopName) return;
@@ -326,39 +365,41 @@ export const PostEditor: React.FC<PostEditorProps> = ({
 
   /** Payload enviado na prévia/salvamento (somente no modelo price-split). */
   const priceSplitPayload = useMemo<PriceSplitPayload | undefined>(() => {
-    if (!isPriceSplit) return undefined;
+    if (!isPriceSplit && !isOffer) return undefined;
     const items = priceItems
       .map(row => ({ name: row.name.trim(), price: row.price.trim() ? row.price.trim() : null }))
       .filter(item => item.name);
     return {
-      items,
+      items: isOffer ? items.slice(0, 1) : items,
       businessName: businessName.trim() || undefined,
       whatsapp: shopSettings?.whatsapp || undefined,
     };
-  }, [isPriceSplit, priceItems, businessName, shopSettings]);
+  }, [isPriceSplit, isOffer, priceItems, businessName, shopSettings]);
 
-  // Avisa o usuário quando o render da imagem vai descartar o que ele digitou
-  // (sem glifo na fonte do motor) ou cortar o texto no limite do modelo.
-  const titleWarning = useMemo(() => renderTextWarning(title, TITLE_RENDER_MAX), [title]);
-  const ctaWarning = useMemo(() => renderTextWarning(ctaText, CTA_RENDER_MAX), [ctaText]);
+  // These are length recommendations, not renderer limits. Measured layouts
+  // preserve the text or explain that it does not fit; the preview is authoritative.
+  const titleLimit = isLegal ? 80 : isPriceSplit ? TITLE_RENDER_MAX : 48;
+  const ctaLimit = isLegal || isPriceSplit ? CTA_RENDER_MAX : 32;
+  const titleWarning = useMemo(() => renderTextWarning(title, titleLimit), [title, titleLimit]);
+  const ctaWarning = useMemo(() => renderTextWarning(ctaText, ctaLimit), [ctaText, ctaLimit]);
   const titleWarningMessage = useMemo(
-    () => renderTextWarningMessage(titleWarning, 'Título', TITLE_RENDER_MAX),
-    [titleWarning],
+    () => compositionRenderWarningMessage(titleWarning, 'Título', titleLimit),
+    [titleWarning, titleLimit],
   );
   const ctaWarningMessage = useMemo(
-    () => (ctaWarning.dropped.length || ctaWarning.truncated ? renderTextWarningMessage(ctaWarning, 'CTA', CTA_RENDER_MAX) : ''),
-    [ctaWarning],
+    () => compositionRenderWarningMessage(ctaWarning, 'CTA', ctaLimit),
+    [ctaWarning, ctaLimit],
   );
   const priceItemWarnings = useMemo(
     () =>
       priceItems.map(row =>
-        renderTextWarningMessage(renderTextWarning(row.name, PRICE_ITEM_RENDER_MAX), 'Serviço', PRICE_ITEM_RENDER_MAX)
+        compositionRenderWarningMessage(renderTextWarning(row.name, PRICE_ITEM_RENDER_MAX), 'Serviço', PRICE_ITEM_RENDER_MAX)
       ),
     [priceItems],
   );
   const businessWarningMessage = useMemo(
     () =>
-      renderTextWarningMessage(
+      compositionRenderWarningMessage(
         renderTextWarning(businessName, PRICE_BUSINESS_RENDER_MAX),
         'Nome do negócio',
         PRICE_BUSINESS_RENDER_MAX
@@ -377,9 +418,9 @@ export const PostEditor: React.FC<PostEditorProps> = ({
     }
     writeDraft<LocalDraftPayload>(userId, barbershopId, storageKey, DRAFT_VERSION, {
       objectiveId, templateKey, paletteKey, format, postMode, type, title, ctaText,
-      content, primaryMediaId, secondaryMediaId, priceItems, businessName,
+      content, primaryMediaId, secondaryMediaId, priceItems, businessName, legalPost,
     });
-  }, [isEditing, userId, barbershopId, storageKey, objectiveId, templateKey, paletteKey, format, postMode, type, title, ctaText, content, primaryMediaId, secondaryMediaId, priceItems, businessName]);
+  }, [isEditing, userId, barbershopId, storageKey, objectiveId, templateKey, paletteKey, format, postMode, type, title, ctaText, content, primaryMediaId, secondaryMediaId, priceItems, businessName, legalPost]);
 
   useEffect(() => { persistDraft(); }, [persistDraft]);
 
@@ -391,6 +432,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
       const snap = liveRef.current;
       const seq = ++previewSeqRef.current;
       setPreviewLoading(true);
+      setPreviewError(false);
       try {
         const url = await postsApi.preview(barbershopId, {
           postMode: snap.postMode,
@@ -403,6 +445,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
           primaryMediaId: snap.primaryMediaId,
           secondaryMediaId: snap.secondaryMediaId,
           priceSplit: snap.priceSplit,
+          designOptions: snap.designOptions ?? undefined,
         });
         const cur = liveRef.current;
         // Ignora respostas fora de ordem e qualquer mudança de estado posterior,
@@ -418,15 +461,17 @@ export const PostEditor: React.FC<PostEditorProps> = ({
           cur.secondaryMediaId !== snap.secondaryMediaId ||
           cur.postMode !== snap.postMode ||
           cur.type !== snap.type ||
-          cur.priceSplit !== snap.priceSplit
+          cur.priceSplit !== snap.priceSplit ||
+          cur.designOptions !== snap.designOptions
         ) {
           return;
         }
         setPreviewUrl(url);
         setPreviewStale(false);
-      } catch {
+      } catch (error) {
         if (seq !== previewSeqRef.current) return;
-        showToast('Não foi possível gerar a prévia.', 'error');
+        setPreviewErrorMessage(getErrorMessage(error, 'Não foi possível atualizar a imagem.'));
+        setPreviewError(true);
         setPreviewStale(true);
       } finally {
         if (seq === previewSeqRef.current) setPreviewLoading(false);
@@ -435,9 +480,9 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   }, [barbershopId, showToast]);
 
   useEffect(() => {
-    liveRef.current = { templateKey, paletteKey, format, title, ctaText, primaryMediaId, secondaryMediaId, postMode, type, priceSplit: priceSplitPayload };
+    liveRef.current = { templateKey, paletteKey, format, title, ctaText, primaryMediaId, secondaryMediaId, postMode, type, priceSplit: priceSplitPayload, designOptions };
     triggerPreview();
-  }, [templateKey, paletteKey, format, title, ctaText, primaryMediaId, secondaryMediaId, postMode, type, priceSplitPayload, triggerPreview]);
+  }, [templateKey, paletteKey, format, title, ctaText, primaryMediaId, secondaryMediaId, postMode, type, priceSplitPayload, designOptions, triggerPreview]);
 
   useEffect(() => () => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -445,11 +490,24 @@ export const PostEditor: React.FC<PostEditorProps> = ({
     previewSeqRef.current += 1;
   }, []);
 
+  const selectTemplate = (key: string) => {
+    const next = templates.find(item => item.key === key);
+    // Refresh suggestions when changing purpose; preserve authored text and all professional data.
+    if (next?.sampleTitle && (!title.trim() || title === selectedTemplate?.sampleTitle)) setTitle(next.sampleTitle);
+    if (next?.businessCategory === 'advocacia' && (
+      !ctaText.trim() || ctaText === LEGAL_CTA_BY_TEMPLATE[templateKey] || ctaText === 'Informações e contato'
+    )) setCtaText(LEGAL_CTA_BY_TEMPLATE[key] ?? 'Converse com o escritório');
+    if (['advocacia-trabalhista', 'advocacia-perfil', 'advocacia-comunicado', 'advocacia-contratos'].includes(key)) {
+      setLegalPost(current => ({ ...current, areas: current.areas.filter(area => area.title.trim() || area.description.trim()) }));
+    }
+    setTemplateKey(key);
+  };
+
   const pickObjective = (id: ObjectiveId) => {
-    const obj = OBJECTIVES.find(o => o.id === id);
+    const obj = objectives.find(o => o.id === id);
     if (!obj) return;
     setObjectiveId(id);
-    setTemplateKey(obj.templateKey);
+    selectTemplate(obj.templateKey);
     setType(obj.type);
     setTab('content');
   };
@@ -466,7 +524,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
     const rows = itemsToRows(
       shopServices
         .filter(service => service.name.trim())
-        .slice(0, PRICE_MAX_ITEMS)
+        .slice(0, isOffer ? 1 : PRICE_MAX_ITEMS)
         .map(service => ({ name: service.name, price: service.price ?? null }))
     );
     if (!rows.length) return;
@@ -480,7 +538,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
     setSuggestions([]);
     try {
       const res = await barbershopApi.generatePostContent({
-        barbershopId, type, postMode,
+        barbershopId, type, postMode, templateKey,
         tone: tone || undefined,
         extra: extra.trim() || undefined,
         count: 3,
@@ -574,11 +632,25 @@ export const PostEditor: React.FC<PostEditorProps> = ({
       setTab('content');
       return;
     }
+    const legalValidation = isLegal ? legalPostSchemaFor(templateKey).safeParse(legalPost) : null;
+    if (action !== 'draft' && legalValidation && !legalValidation.success) {
+      showToast('Revise os campos destacados. Nome profissional e inscrição na OAB são obrigatórios; complete os dados do modelo e remova blocos vazios.', 'error');
+      setTab('content');
+      setLegalValidationAttempt(attempt => attempt + 1);
+      return;
+    }
+    const offer = priceSplitPayload?.items[0];
+    const offerPrice = Number(offer?.price?.toString().replace(',', '.'));
+    if (action !== 'draft' && isOffer && (!offer?.name || !offer.price?.toString().trim() || !Number.isFinite(offerPrice) || offerPrice < 0)) {
+      showToast('Informe o serviço e o valor real da oferta antes de publicar.', 'error');
+      setTab('content');
+      return;
+    }
     setSubmitting(true);
     try {
-      let targetId = post?.id;
+      let targetId = savedPostId.current;
 
-      if (isEditing) {
+      if (targetId) {
         // Sem videoUrl no payload: posts antigos com vídeo preservam o campo
         // (o backend só altera videoUrl quando ele é enviado).
         await postsApi.update(targetId!, {
@@ -588,6 +660,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
           postMode, templateKey, format, paletteKey,
           primaryMediaId, secondaryMediaId,
           priceSplit: priceSplitPayload,
+          designOptions,
         });
       } else {
         const created = await postsApi.create({
@@ -598,9 +671,11 @@ export const PostEditor: React.FC<PostEditorProps> = ({
           templateKey, format, paletteKey,
           primaryMediaId, secondaryMediaId,
           priceSplit: priceSplitPayload,
+          designOptions,
           status: 'draft',
         });
         targetId = created.id;
+        savedPostId.current = created.id;
       }
 
       if (action === 'publish') {
@@ -641,7 +716,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
   };
 
   const handleSelectTemplate = (key: string) => {
-    setTemplateKey(key);
+    selectTemplate(key);
     setShowTemplatePicker(false);
   };
 
@@ -657,8 +732,10 @@ export const PostEditor: React.FC<PostEditorProps> = ({
           </div>
           <div className="flex-1 overflow-y-auto p-4">
             <p className="mb-3 text-xs font-bold text-text-secondary">Qual o objetivo do post?</p>
+            {templatesLoading && <p role="status" className="py-4 text-sm text-text-muted">Carregando modelos para o seu negócio…</p>}
+            {templatesError && <div role="alert" className="mb-4 text-sm text-text-secondary">Não foi possível carregar os modelos.<button type="button" onClick={() => setCatalogAttempt(value => value + 1)} className="ml-2 min-h-11 font-semibold text-accent">Tentar carregar modelos novamente</button></div>}
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {OBJECTIVES.map(obj => (
+              {objectives.map(obj => (
                 <button
                   key={obj.id}
                   type="button"
@@ -715,7 +792,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
           <details className="border-b border-border p-4 lg:hidden">
             <summary className="cursor-pointer text-sm font-semibold text-accent">Ver prévia do post</summary>
             <div className="mt-4">
-              <PostPreviewBox format={format} previewUrl={previewUrl} loading={previewLoading} stale={previewStale} />
+              <PostPreviewBox format={format} previewUrl={previewUrl} loading={previewLoading} stale={previewStale} error={previewError} errorMessage={previewErrorMessage} onRetry={triggerPreview} />
             </div>
           </details>
           {/* Tab: Conteúdo */}
@@ -728,10 +805,10 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                   <input
                     id="post-title"
                     type="text"
-                    maxLength={80}
+                    maxLength={isPriceSplit ? 80 : 200}
                     value={title}
                     onChange={e => setTitle(e.target.value)}
-                    placeholder="Ex.: Corte + barba por R$ 45"
+                    placeholder={isLegal ? selectedTemplate?.sampleTitle || "Ex.: Uma orientação para o seu dia a dia" : "Ex.: Corte + barba por R$ 45"}
                     className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm focus:border-accent focus:outline-none"
                     aria-describedby={titleWarningMessage ? 'post-title-render-warning' : undefined}
                   />
@@ -744,14 +821,14 @@ export const PostEditor: React.FC<PostEditorProps> = ({
 
                 {/* CTA */}
                 <div>
-                  <label htmlFor="post-cta" className="mb-1 block text-xs font-bold text-text-secondary">Texto do botão (CTA)</label>
+                  <label htmlFor="post-cta" className="mb-1 block text-xs font-bold text-text-secondary">{isLegal ? 'Chamada na arte' : 'Texto do botão (CTA)'}</label>
                   <input
                     id="post-cta"
                     type="text"
-                    maxLength={40}
+                    maxLength={isPriceSplit ? 40 : 120}
                     value={ctaText}
                     onChange={e => setCtaText(e.target.value)}
-                    placeholder="Ex.: Agendar horário"
+                    placeholder={isLegal ? LEGAL_CTA_BY_TEMPLATE[templateKey] ?? 'Converse com o escritório' : 'Ex.: Agendar horário'}
                     className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm focus:border-accent focus:outline-none"
                     aria-describedby={ctaWarningMessage ? 'post-cta-render-warning' : undefined}
                   />
@@ -762,15 +839,17 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                   )}
                 </div>
 
+                {isLegal && <LegalPostFields key={templateKey} templateKey={templateKey} value={legalPost} onChange={setLegalPost} validationAttempt={legalValidationAttempt} />}
+
                 {/* Lista de preços (modelo price-split) */}
-                {isPriceSplit && (
+                {(isPriceSplit || isOffer) && (
                   <div data-testid="price-split-editor">
                     <div className="mb-1 flex items-center justify-between">
-                      <span className="text-xs font-bold text-text-secondary">Serviços e preços</span>
-                      <span className="text-[10px] text-text-muted">{priceItems.length}/{PRICE_MAX_ITEMS}</span>
+                      <span className="text-xs font-bold text-text-secondary">{isOffer ? 'Oferta do post' : 'Serviços e preços'}</span>
+                      <span className="text-[10px] text-text-muted">{isOffer ? Math.min(priceItems.length, 1) : priceItems.length}/{isOffer ? 1 : PRICE_MAX_ITEMS}</span>
                     </div>
                     <div className="space-y-2">
-                      {priceItems.map((row, index) => (
+                      {(isOffer ? priceItems.slice(0, 1) : priceItems).map((row, index) => (
                         <div key={index} className="rounded-xl border border-border p-2">
                           <div className="flex gap-2">
                             <input
@@ -812,7 +891,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                       ))}
                     </div>
                     <div className="mt-2 flex flex-wrap gap-2">
-                      {priceItems.length < PRICE_MAX_ITEMS && (
+                      {priceItems.length < (isOffer ? 1 : PRICE_MAX_ITEMS) && (
                         <button
                           type="button"
                           onClick={addPriceRow}
@@ -831,7 +910,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                         </button>
                       )}
                     </div>
-                    <div className="mt-3">
+                    {isPriceSplit && <div className="mt-3">
                       <label htmlFor="post-business-name" className="mb-1 block text-xs font-bold text-text-secondary">Nome do negócio</label>
                       <input
                         id="post-business-name"
@@ -848,7 +927,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                           {businessWarningMessage}
                         </p>
                       )}
-                    </div>
+                    </div>}
                   </div>
                 )}
 
@@ -874,7 +953,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                   <div>
                     <span id="post-mode-label" className="mb-1 block text-xs font-bold text-text-secondary">Destino do CTA</span>
                     <div role="radiogroup" aria-labelledby="post-mode-label" className="flex overflow-hidden rounded-xl border border-border">
-                      {MODE_OPTIONS.map(m => (
+                      {modeOptions.map(m => (
                         <button
                           key={m.id}
                           type="button"
@@ -882,12 +961,12 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                           aria-checked={postMode === m.id}
                           tabIndex={postMode === m.id ? 0 : -1}
                           onKeyDown={event => {
-                            const index = MODE_OPTIONS.findIndex(option => option.id === m.id);
+                            const index = modeOptions.findIndex(option => option.id === m.id);
                             const direction = ['ArrowRight', 'ArrowDown'].includes(event.key) ? 1 : ['ArrowLeft', 'ArrowUp'].includes(event.key) ? -1 : 0;
                             if (!direction) return;
                             event.preventDefault();
-                            const next = (index + direction + MODE_OPTIONS.length) % MODE_OPTIONS.length;
-                            setPostMode(MODE_OPTIONS[next].id);
+                            const next = (index + direction + modeOptions.length) % modeOptions.length;
+                            setPostMode(modeOptions[next].id);
                             const radios = event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="radio"]');
                             radios?.[next].focus();
                           }}
@@ -923,7 +1002,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                   </summary>
                   <div className="mt-3 space-y-2">
                     <div className="flex flex-wrap gap-2">
-                      {TONE_OPTIONS.map(t => (
+                      {toneOptions.map(t => (
                         <button key={t.id} type="button"
                           onClick={() => setTone(tone === t.id ? null : t.id)}
                           className={`min-h-9 rounded-lg border px-3 text-xs font-semibold ${
@@ -934,7 +1013,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                       ))}
                     </div>
                     <textarea value={extra} onChange={e => setExtra(e.target.value)} maxLength={500} rows={2}
-                      placeholder="Contexto extra (ex.: promoção só até sexta)"
+                      placeholder={isLegal ? 'Contexto extra: tema, localidade e informações confirmadas do escritório' : 'Contexto extra (ex.: promoção só até sexta)'}
                       className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-xs focus:border-accent focus:outline-none"
                     />
                     <Button variant="secondary" size="sm" onClick={() => void handleGenerate()} disabled={generatingSuggestions}
@@ -969,7 +1048,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                     format={format}
                     previewUrl={previewUrl}
                     loading={previewLoading}
-                    stale={previewStale}
+                    stale={previewStale} error={previewError} errorMessage={previewErrorMessage} onRetry={triggerPreview}
                   />
                 </div>
               </div>
@@ -1076,7 +1155,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                 )}
                 {selectedPhotoMode === 'required' && (
                   <p className="text-[10px] text-text-muted">
-                    Este modelo requer {(selectedTemplate?.requiredMedia ?? 1)} foto(s) do seu salão.
+                    Este modelo requer {(selectedTemplate?.requiredMedia ?? 1)} foto(s) do estabelecimento.
                   </p>
                 )}
                 {selectedPhotoMode === 'optional' && (
@@ -1084,7 +1163,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                     <p className="text-[10px] leading-relaxed text-text-muted">
                       Foto opcional: envie uma imagem do seu salão ou deixe em branco para usarmos uma
                       imagem ilustrativa gerada automaticamente. A imagem ilustrativa é apenas decorativa
-                      e <strong>não representa resultados do seu salão</strong>.
+                      e <strong>não representa resultados do estabelecimento</strong>.
                     </p>
                   ) : (
                     <p className="text-[10px] leading-relaxed text-text-muted">
@@ -1101,7 +1180,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                     format={format}
                     previewUrl={previewUrl}
                     loading={previewLoading}
-                    stale={previewStale}
+                    stale={previewStale} error={previewError} errorMessage={previewErrorMessage} onRetry={triggerPreview}
                   />
                 </div>
               </div>
@@ -1179,7 +1258,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                                 <button
                                   key={t.key}
                                   type="button"
-                                  onClick={() => setTemplateKey(t.key)}
+                                  onClick={() => selectTemplate(t.key)}
                                   className={`rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition ${
                                     templateKey === t.key
                                       ? 'bg-accent text-accent-fg'
@@ -1204,7 +1283,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                     format={format}
                     previewUrl={previewUrl}
                     loading={previewLoading}
-                    stale={previewStale}
+                    stale={previewStale} error={previewError} errorMessage={previewErrorMessage} onRetry={triggerPreview}
                   />
                 </div>
               </div>
@@ -1246,7 +1325,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                 {/* Download */}
                 <Button
                   variant="secondary"
-                  onClick={() => previewUrl && downloadImage(previewUrl, `post-${format}-${Date.now()}.png`)}
+                  onClick={() => previewUrl && void downloadPostArt(previewUrl, `post-${format}-${Date.now()}.png`).catch(error => showToast(getErrorMessage(error, 'Não foi possível baixar a arte.'), 'error'))}
                   disabled={!previewUrl || previewLoading || previewStale}
                   className="w-full gap-2"
                 >
@@ -1260,7 +1339,7 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                     format={format}
                     previewUrl={previewUrl}
                     loading={previewLoading}
-                    stale={previewStale}
+                    stale={previewStale} error={previewError} errorMessage={previewErrorMessage} onRetry={triggerPreview}
                   />
                 </div>
               </div>
@@ -1446,9 +1525,9 @@ export const PostEditor: React.FC<PostEditorProps> = ({
       {showTemplatePicker && (
         <div className="absolute inset-0 z-[110] flex items-end justify-center bg-black/80 sm:items-center sm:p-4">
           <FocusLock returnFocus className="w-full max-w-lg">
-          <div className="w-full max-w-lg rounded-2xl bg-surface border border-border">
+          <div className="w-full max-w-lg max-h-[90dvh] overflow-hidden rounded-2xl bg-surface border border-border">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
-              <h4 className="text-sm font-bold text-text-primary">Escolher modelo</h4>
+              <h4 className="text-sm font-bold text-text-primary">Escolher modelo{legalAudience ? ' · Advocacia' : ''}</h4>
               <button type="button" onClick={() => setShowTemplatePicker(false)} className="rounded-lg p-1 text-text-muted hover:bg-bg" aria-label="Fechar">
                 ✕
               </button>
@@ -1471,11 +1550,13 @@ export const PostEditor: React.FC<PostEditorProps> = ({
                 </button>
               ))}
             </div>
-            <div className="max-h-96 overflow-y-auto p-4">
+            <div className="max-h-[min(60dvh,32rem)] overflow-y-auto p-4">
               {templatesLoading ? (
                 <div className="flex items-center justify-center gap-2 py-10 text-xs text-text-muted">
                   <Loader2 size={14} className="animate-spin" aria-hidden /> Carregando modelos…
                 </div>
+              ) : templatesError ? (
+                <div role="alert" className="py-6 text-center text-sm text-text-secondary">Não foi possível carregar os modelos.<button type="button" onClick={() => setCatalogAttempt(value => value + 1)} className="mt-2 block min-h-11 w-full font-semibold text-accent">Tentar carregar modelos novamente</button></div>
               ) : filteredTemplates.length === 0 ? (
                 <p className="py-8 text-center text-xs text-text-muted">Nenhum modelo neste filtro.</p>
               ) : (
@@ -1528,9 +1609,10 @@ export const PostEditor: React.FC<PostEditorProps> = ({
 };
 
 function EditorDialog({ children }: { children: React.ReactNode }) {
+  const viewport = useVisualViewport();
   return createPortal(
     <FocusLock returnFocus>
-      <div role="dialog" aria-modal="true" aria-label="Editor de publicação" className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 sm:items-center p-0 sm:p-4">
+      <div role="dialog" aria-modal="true" aria-label="Editor de publicação" className="fixed inset-x-0 top-0 z-[100] flex h-dvh items-end justify-center bg-black/70 sm:items-center p-0 sm:p-4" style={viewport ? { top: viewport.top, height: viewport.height, '--post-editor-height': `${viewport.height}px` } as React.CSSProperties : undefined}>
         {children}
       </div>
     </FocusLock>,

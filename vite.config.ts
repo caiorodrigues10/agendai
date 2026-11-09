@@ -6,6 +6,8 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig(() => {
 	return {
+		// Scan the application entry; generated Storybook builds have their own dependencies.
+		optimizeDeps: { entries: ['index.html'], include: ['react-dom/client'] },
 		server: {
 			port: 3003,
 			host: '0.0.0.0',

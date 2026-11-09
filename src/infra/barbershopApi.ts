@@ -104,6 +104,7 @@ interface GeneratePostPayload {
   barbershopId: string;
   type: string;
   postMode: PostMode;
+  templateKey?: string;
   tone?: 'promocional' | 'informativo' | 'divertido';
   extra?: string;
   count?: number;

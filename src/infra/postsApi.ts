@@ -1,7 +1,7 @@
 import { apiClient, apiFetch } from './apiClient';
 import { authStorage } from './authStorage';
 import { COVER_IMAGE_SPEC } from '../shared/imageSpecs';
-import type { FeedPost, PostMode, PriceSplitPayload } from '../types';
+import type { FeedPost, PostMode, PriceSplitPayload, LegalPostPayload } from '../types';
 
 function token() {
   return authStorage.getAccessToken() || '';
@@ -22,6 +22,7 @@ export interface PostDesignOptions {
   focalX?: number;
   focalY?: number;
   overlay?: number;
+  legalPost?: LegalPostPayload;
 }
 
 export interface CreatePostPayload {
@@ -74,6 +75,11 @@ export interface PostTemplateDef {
   photoMode: PostPhotoMode;
   /** Chave da imagem ilustrativa padrão (ex.: salon/barber/beauty) quando photoMode = 'optional'. */
   stockImageKey?: string | null;
+  /** Segment category supplied by the backend catalog, including newly supported segments. */
+  businessCategory?: string;
+  layoutVariant?: number;
+  sampleTitle?: string;
+  priceMode?: 'single' | 'list';
 }
 
 export interface PostPaletteDef {
@@ -142,9 +148,13 @@ export const postsApi = {
     ).then(r => ({ data: unwrap<FeedPost[]>(r), meta: (r as any).meta ?? { total: 0, page: 1, limit: 12 } }));
   },
 
-  templates() {
+  templates(barbershopId?: string, options?: { includeLegacy?: boolean }) {
+    const query = new URLSearchParams();
+    if (barbershopId) query.set('barbershopId', barbershopId);
+    if (options?.includeLegacy) query.set('includeLegacy', '1');
+    const queryString = query.size ? '?' + query.toString() : '';
     return apiClient<{ success: boolean; data: PostTemplateDef[] }>(
-      '/api/posts/templates', 'GET', undefined, token()
+      `/api/posts/templates${queryString}`, 'GET', undefined, token()
     ).then(r => unwrap<PostTemplateDef[]>(r));
   },
 
@@ -166,6 +176,7 @@ export const postsApi = {
     primaryMediaId?: string | null;
     secondaryMediaId?: string | null;
     priceSplit?: PriceSplitPayload;
+    designOptions?: PostDesignOptions;
   }) {
     const params = new URLSearchParams({ barbershopId });
     if (opts.postMode) params.set('postMode', opts.postMode);
@@ -179,6 +190,7 @@ export const postsApi = {
     if (opts.secondaryMediaId) params.set('secondaryMediaId', opts.secondaryMediaId);
     // Objeto viaja como JSON na query (o backend faz preprocess no schema).
     if (opts.priceSplit) params.set('priceSplit', JSON.stringify(opts.priceSplit));
+    if (opts.designOptions) params.set('designOptions', JSON.stringify(opts.designOptions));
     return apiClient<{ success: boolean; data: { imageUrl: string } }>(
       `/api/posts/preview?${params.toString()}`, 'GET', undefined, token()
     ).then(r => unwrap<{ imageUrl: string }>(r).imageUrl);
