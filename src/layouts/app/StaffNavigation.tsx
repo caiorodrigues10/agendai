@@ -124,13 +124,9 @@ export function StaffNavigation({
           aria-label="Navegação do painel"
           className="sticky top-20 max-h-[calc(100dvh-6rem)] overflow-y-auto rounded-2xl border border-border bg-surface p-3 shadow-card"
         >
-          <div className="mb-3 border-b border-border px-2 pb-3">
-            <p className="text-2xs font-bold uppercase tracking-[0.24em] text-text-muted">
-              Navegação
-            </p>
-            <p className="mt-1 font-display text-sm font-bold tracking-wide text-text-primary">Áreas do salão</p>
-          </div>
-
+          <p className="mb-4 px-2 font-display text-sm font-bold text-text-primary">
+            Áreas do salão
+          </p>
           <div className="space-y-4">
             {groups.map(group => (
               <section key={group.id} aria-labelledby={`desktop-nav-${group.id}`}>

@@ -142,7 +142,7 @@ describe('PostDetail — detalhe mostra a arte inteira', () => {
     );
     const img = screen.getByAltText(`Post ${format}`);
     expect(img.className).toContain('object-contain');
-    expect(img.className).toContain('max-h-[70vh]');
+    expect(img.className).toContain('max-h-[70dvh]');
     expect(img.className).not.toContain('object-cover');
   });
 });
