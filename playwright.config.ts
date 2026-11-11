@@ -48,7 +48,7 @@ export default defineConfig({
     // runner isolado Playwright 1.58.2 (ver scripts/measurements/item2-webkit.md).
     {
       name: 'webkit-iphone',
-      testMatch: ['**/login-safari.spec.ts'],
+      testMatch: ['**/login-safari.spec.ts', '**/forgot-reset-password.spec.ts'],
       use: { ...devices['iPhone 13'] },
     },
   ],
