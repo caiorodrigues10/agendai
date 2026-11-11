@@ -50,14 +50,15 @@ describe('ForgotPasswordPage — token reCAPTCHA', () => {
     expect(screen.queryByText(/verifique sua caixa de entrada/i)).not.toBeInTheDocument();
   });
 
-  it('token ok + API falha → tela de sucesso (anti-enumeração preservada)', async () => {
+  it('token ok + API falha → erro visível (não a tela de sucesso)', async () => {
     const { getRecaptchaToken } = await loadPage();
     getRecaptchaToken.mockResolvedValue('tok-ok');
     forgotPassword.mockRejectedValue(new Error('boom'));
 
     await submitEmail();
 
-    expect(await screen.findByText(/verifique sua caixa de entrada/i)).toBeInTheDocument();
+    expect(await screen.findByText(/boom/i)).toBeInTheDocument();
+    expect(screen.queryByText(/verifique sua caixa de entrada/i)).not.toBeInTheDocument();
     expect(forgotPassword).toHaveBeenCalledWith('dono@salao.com', 'tok-ok');
   });
 

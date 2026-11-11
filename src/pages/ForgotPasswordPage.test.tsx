@@ -76,7 +76,7 @@ describe('ForgotPasswordPage (recuperação de senha)', () => {
     expect(screen.queryByText(/senha inválida|não encontrada|erro/i)).not.toBeInTheDocument();
   });
 
-  it('mesmo quando a API falha mostra a mesma tela de sucesso (sem enumeração de contas)', async () => {
+  it('falha de API mostra erro visível em vez da tela de sucesso', async () => {
     forgotPasswordMock.mockRejectedValue(new Error('usuário não encontrado'));
 
     renderWithProviders(<ForgotPasswordPage />, { route: '/esqueci-minha-senha' });
@@ -85,10 +85,9 @@ describe('ForgotPasswordPage (recuperação de senha)', () => {
     fireEvent.click(submitButton());
 
     await waitFor(() => {
-      expect(screen.getByText(/verifique sua caixa de entrada/i)).toBeInTheDocument();
+      expect(screen.getByText(/usuário não encontrado/i)).toBeInTheDocument();
     });
-    expect(screen.getByText('inexistente@example.com')).toBeInTheDocument();
-    expect(screen.queryByText(/usuário não encontrado/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/verifique sua caixa de entrada/i)).not.toBeInTheDocument();
   });
 
   it('"Voltar ao login" leva de volta para /login', async () => {
