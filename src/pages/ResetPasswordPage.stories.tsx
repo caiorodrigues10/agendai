@@ -4,8 +4,8 @@
  * submit (`authApi.resetPassword`), então as stories que não submetem não
  * precisam de MSW.
  *
- * O banner de erro do `handleSubmit` (ResetPasswordPage.tsx:147-152) é o futuro
- * site do `SectionError`.
+ * O banner de erro do `handleSubmit` é renderizado pelo `SectionError` acima
+ * do formulário.
  */
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
@@ -14,8 +14,8 @@ import { expect, fireEvent, waitFor, within } from 'storybook/test';
 import { ResetPasswordPage } from './ResetPasswordPage';
 import { ThemeProvider } from '../contexts/ThemeContext';
 
-/** Token no `?token=` — o form só habilita o submit com `token.length > 10`. */
-const RESET_TOKEN = 'token-valido';
+/** Token no `?token=` — o form só habilita o submit com `token.length >= 32` (Zod do back). */
+const RESET_TOKEN = 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2';
 const NOVA_SENHA = 'SenhaForte123';
 
 /**
@@ -71,7 +71,7 @@ export const Default: Story = {
  * Falha do submit (`POST /api/auth/reset-password` → 500
  * `{ success: false, message: 'Não foi possível redefinir a senha. Tente novamente.' }`):
  * o `catch` do `handleSubmit` mostra a `message` da resposta no banner inline
- * acima do form (ResetPasswordPage.tsx:147-152 — futuro site do `SectionError`).
+ * acima do form (via `SectionError`).
  */
 export const Erro: Story = {
   parameters: {
