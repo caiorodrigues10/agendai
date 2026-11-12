@@ -1,6 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authApi } from '../infra/authApi';
+import { getErrorMessage } from '../utils/errorMessage';
+import { getPendingResetToken } from '../utils/resetTokenUrl';
+import {
+  meetsNewPasswordPolicy,
+  NEW_PASSWORD_RULE_HINT,
+} from '../utils/passwordPolicy';
 import { Logo } from '../components/ui/Logo';
 import { ThemeToggle } from '../components/infra/ThemeToggle';
 import { PasswordInput } from '../components/ui/PasswordInput';
@@ -13,20 +19,24 @@ import {
   LuCircleCheck as CheckCircle,
 } from 'react-icons/lu';
 
-const inputClass = (hasError: boolean) =>
-  `w-full bg-bg border rounded-xl py-3 pl-4 pr-4 text-text-primary text-sm
-   outline-none transition-all placeholder:text-text-muted
-   focus:shadow-[0_0_15px_rgba(16,185,129,0.15)]
-   ${
-     hasError
-       ? 'border-danger/40 text-danger focus:border-danger'
-       : 'border-border focus:border-accent/50 hover:border-border-strong'
-   }`;
-
 export const ResetPasswordPage: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get('token') ?? '';
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Captura uma única vez: no browser real o entry já removeu o ?token= da URL
+  // (o valor fica em memória); nos testes/MemoryRouter ele ainda está na URL.
+  const [token] = useState(
+    () => searchParams.get('token') ?? getPendingResetToken() ?? ''
+  );
+
+  // Remove o ?token= da URL do router logo após montar — em memória o token já
+  // foi capturado acima; a URL limpa evita vazamento em analytics/referer/logs.
+  useEffect(() => {
+    if (!searchParams.get('token')) return;
+    const next = new URLSearchParams(searchParams);
+    next.delete('token');
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -40,7 +50,12 @@ export const ResetPasswordPage: React.FC = () => {
     [newPassword, confirmPassword]
   );
 
-  const isValid = token.length > 10 && newPassword.length >= 6 && passwordsMatch;
+  // O back exige token com mínimo de 32 caracteres (Zod min(32)) e senha nova
+  // com 8+ caracteres, 1 letra e 1 número (política de senha nova).
+  const isValid =
+    token.length >= 32 &&
+    meetsNewPasswordPolicy(newPassword) &&
+    passwordsMatch;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,13 +65,25 @@ export const ResetPasswordPage: React.FC = () => {
     try {
       await authApi.resetPassword(token, newPassword);
       setSuccess(true);
-      setTimeout(() => navigate('/login'), 3000);
-    } catch (err: any) {
-      setError(err?.message || 'Token inválido ou expirado. Solicite um novo link de redefinição.');
+    } catch (err: unknown) {
+      setError(
+        getErrorMessage(
+          err,
+          'Token inválido ou expirado. Solicite um novo link de redefinição.'
+        )
+      );
     } finally {
       setSubmitting(false);
     }
   };
+
+  // Redirect automático após o sucesso — com cleanup para não navegar em dobro
+  // se o usuário clicar em "Ir para o login" antes dos 3s.
+  useEffect(() => {
+    if (!success) return;
+    const timer = setTimeout(() => navigate('/login'), 3000);
+    return () => clearTimeout(timer);
+  }, [success, navigate]);
 
   if (!token) {
     return (
@@ -166,10 +193,11 @@ export const ResetPasswordPage: React.FC = () => {
                   showStrength
                   showPassword={showPassword}
                   onToggleShow={() => setShowPassword(v => !v)}
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder={NEW_PASSWORD_RULE_HINT}
                   value={newPassword}
                   onChange={e => setNewPassword(e.target.value)}
                 />
+                <p className="text-2xs text-text-muted">{NEW_PASSWORD_RULE_HINT}</p>
               </div>
 
               <div className="space-y-1">

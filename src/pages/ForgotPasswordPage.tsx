@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../infra/authApi';
 import { getRecaptchaToken } from '../utils/recaptcha';
+import { getErrorMessage } from '../utils/errorMessage';
 import { Logo } from '../components/ui/Logo';
 import { ThemeToggle } from '../components/infra/ThemeToggle';
 import { SectionError } from '../components/patterns/states/SectionError';
@@ -30,23 +31,22 @@ export const ForgotPasswordPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const trimmedEmail = email.trim();
     if (!isValidEmail) return;
     setSubmitting(true);
     setError(null);
     try {
       const token = await getRecaptchaToken('forgot_password');
-      try {
-        await authApi.forgotPassword(email.trim(), token);
-      } catch {
-        // Anti-enumeração: sucesso mesmo se a API falhar.
-      }
+      await authApi.forgotPassword(trimmedEmail, token);
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error && err.message ? err.message : 'Não foi possível enviar. Tente novamente.');
+      // O back responde 200 genérico para e-mail inexistente (anti-enumeração);
+      // qualquer erro aqui é infra/rate-limit/recaptcha — precisa ficar visível.
+      setError(getErrorMessage(err, 'Não foi possível enviar. Tente novamente.'));
     } finally {
       setSubmitting(false);
     }
@@ -139,7 +139,8 @@ export const ForgotPasswordPage: React.FC = () => {
                     <input
                       id="forgot-password-email"
                       type="email"
-                      className={inputClass(false)}
+                      className={inputClass(Boolean(error))}
+                      aria-invalid={Boolean(error)}
                       placeholder="seu@email.com"
                       autoComplete="email"
                       value={email}

@@ -34,6 +34,7 @@ import {
   normalizePhoneBR,
 } from './utils/documentUtils';
 import { isValidDate, isNotPast, isWithinHorizon, isBusinessHour } from './utils/dateUtils';
+import { newPasswordIssue } from './utils/passwordPolicy';
 
 const whatsappRequired = z
   .string()
@@ -118,11 +119,12 @@ const refineAccountAuth = (
   ctx: z.RefinementCtx
 ) => {
   if (data.authMethod === 'password') {
-    if (!data.password || data.password.length < 6) {
+    const issue = newPasswordIssue(data.password ?? '');
+    if (issue) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['password'],
-        message: 'Senha deve ter no mínimo 6 caracteres',
+        message: issue,
       });
     }
   }

@@ -1,3 +1,5 @@
+import { NEW_PASSWORD_MIN_LENGTH } from './passwordPolicy';
+
 export type PasswordStrengthLevel = 'empty' | 'weak' | 'fair' | 'good' | 'strong';
 
 interface PasswordStrengthResult {
@@ -23,7 +25,7 @@ const LABELS: Record<PasswordStrengthLevel, string> = {
 
 export function getPasswordStrength(password: string): PasswordStrengthResult {
   const checks = {
-    minLength: password.length >= 6,
+    minLength: password.length >= NEW_PASSWORD_MIN_LENGTH,
     hasLetter: /[a-zA-Z]/.test(password),
     hasNumber: /\d/.test(password),
     hasUpper: /[A-Z]/.test(password),

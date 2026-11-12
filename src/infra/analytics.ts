@@ -89,10 +89,26 @@ export function initAnalytics(): void {
   initialized = true;
 }
 
+/**
+ * Remove o parâmetro `token` de um path/URL relativa antes de enviar ao
+ * analytics — defesa em profundidade: o entrypoint já tira o ?token= da URL
+ * antes de qualquer init, mas o page_path nunca deve carregar o valor.
+ */
+function stripTokenParam(path: string): string {
+  if (!path.includes('token=')) return path;
+  const qIndex = path.indexOf('?');
+  if (qIndex === -1) return path;
+  const pathname = path.slice(0, qIndex);
+  const params = new URLSearchParams(path.slice(qIndex + 1));
+  params.delete('token');
+  const query = params.toString();
+  return query ? `${pathname}?${query}` : pathname;
+}
+
 export function trackPageView(path: string, title?: string): void {
   if (!cookieConsentStorage.allowsAnalytics()) return;
   initAnalytics();
-  window.gtag?.('event', 'page_view', { page_path: path, page_title: title });
+  window.gtag?.('event', 'page_view', { page_path: stripTokenParam(path), page_title: title });
   window.fbq?.('track', 'PageView');
 }
 
