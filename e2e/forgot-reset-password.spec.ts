@@ -14,6 +14,21 @@ import { test, expect, type Page, type Route } from '@playwright/test';
 const TOKEN = 'a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90';
 const EMAIL = 'e2e-reset@example.com';
 
+/**
+ * reCAPTCHA v3 stubado (mesma estratégia do e2e/login-safari.spec.ts): o
+ * script real do Google não é determinístico no WebKit do CI e pode estourar o
+ * timeout de 10s do `getRecaptchaToken` — o formulário mostraria o erro de
+ * antiabuso em vez do resultado esperado.
+ */
+const RECAPTCHA_OK_JS =
+  "window.grecaptcha = { execute: async (key, opts) => 'tok-e2e-' + (opts && opts.action) };";
+
+async function stubRecaptcha(page: Page) {
+  await page.route('**/recaptcha/api.js*', route =>
+    route.fulfill({ contentType: 'application/javascript', body: RECAPTCHA_OK_JS }),
+  );
+}
+
 async function mockForgot(route: Route, status: number, body: unknown) {
   await route.fulfill({
     status,
@@ -71,6 +86,7 @@ test.describe('esqueci-senha', () => {
       }),
     );
 
+    await stubRecaptcha(page);
     await page.goto('/esqueci-senha');
     await dismissConsent(page);
     await page.getByLabel(/e-mail/i).fill(EMAIL);
@@ -88,6 +104,7 @@ test.describe('esqueci-senha', () => {
       }),
     );
 
+    await stubRecaptcha(page);
     await page.goto('/esqueci-senha');
     await dismissConsent(page);
     await page.getByLabel(/e-mail/i).fill(EMAIL);
@@ -106,6 +123,7 @@ test.describe('esqueci-senha', () => {
       }),
     );
 
+    await stubRecaptcha(page);
     await page.goto('/esqueci-senha');
     await dismissConsent(page);
     await page.getByLabel(/e-mail/i).fill(EMAIL);
