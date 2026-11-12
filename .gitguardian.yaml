@@ -16,6 +16,11 @@ version: 2
 secret:
   ignored_paths:
     - e2e/forgot-reset-password.spec.ts
+    - e2e/master/usuarios.spec.ts
+    - src/pages/LoginPage.test.tsx
     - src/pages/ResetPasswordPage.test.tsx
     - src/pages/ResetPasswordPage.stories.tsx
+    - src/pages/master-admin/UserFormDialog.test.tsx
+    - src/pages/master-admin/UserFormDialog.stories.tsx
+    - src/schemas.unifiedPasswordPolicy.test.ts
     - src/utils/passwordPolicy.test.ts

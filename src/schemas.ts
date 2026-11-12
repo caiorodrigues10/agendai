@@ -228,15 +228,27 @@ export const ServiceSchema = z.object({
 export type ServiceFormData = z.infer<typeof ServiceSchema>;
 
 // --- Team Member Schema ---
-export const TeamMemberSchema = z.object({
-  name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
-  email: z.string().email('E-mail inválido'),
-  password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
-  cpf: z
-    .string()
-    .transform(v => normalizeDocument(v))
-    .refine(v => isValidCpf(v), { message: 'CPF inválido' }),
-});
+export const TeamMemberSchema = z
+  .object({
+    name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
+    email: z.string().email('E-mail inválido'),
+    password: z.string().min(1, 'Senha obrigatória'),
+    cpf: z
+      .string()
+      .transform(v => normalizeDocument(v))
+      .refine(v => isValidCpf(v), { message: 'CPF inválido' }),
+  })
+  .superRefine((data, ctx) => {
+    // Senha NOVA: política única (8+ caracteres, 1 letra e 1 número).
+    const issue = newPasswordIssue(data.password);
+    if (issue) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: issue,
+        path: ['password'],
+      });
+    }
+  });
 
 export type TeamMemberFormData = z.infer<typeof TeamMemberSchema>;
 
@@ -342,12 +354,17 @@ export const ProfileSettingsSchema = z.object({
   currentPassword: z.string().optional().default(''),
   newPassword: z.string().optional().default(''),
 }).superRefine((data, ctx) => {
-  if (data.newPassword && data.newPassword.length < 6) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'Nova senha deve ter no mínimo 6 caracteres',
-      path: ['newPassword'],
-    });
+  // Senha NOVA: política única (8+ caracteres, 1 letra e 1 número). A senha
+  // ATUAL não passa por ela — conta antiga pode ter senha de 6 caracteres.
+  if (data.newPassword) {
+    const issue = newPasswordIssue(data.newPassword);
+    if (issue) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: issue,
+        path: ['newPassword'],
+      });
+    }
   }
   if (data.newPassword && !data.currentPassword) {
     ctx.addIssue({

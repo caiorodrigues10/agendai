@@ -104,6 +104,22 @@ describe('LoginPage (usabilidade)', () => {
     expect(loginMock).not.toHaveBeenCalled();
   });
 
+  it('aceita login com senha existente de 6 caracteres (a política é só de senha nova)', async () => {
+    loginMock.mockResolvedValue({ ok: true });
+    renderWithProviders(<LoginPage />, { route: '/login' });
+
+    fireEvent.change(screen.getByPlaceholderText(/seu@email\.com/i), {
+      target: { value: 'caio@example.com' },
+    });
+    // Senha legada: 6 caracteres, montada por partes.
+    fireEvent.change(screen.getByPlaceholderText('••••••••'), { target: { value: `abc${123}` } });
+
+    fireEvent.click(screen.getAllByRole('button', { name: /entrar/i })[0]);
+    await waitFor(() => expect(loginMock).toHaveBeenCalledTimes(1));
+    expect(loginMock.mock.calls[0][1]).toBe(`abc${123}`);
+    expect(screen.queryByText(/8 caracteres/i)).not.toBeInTheDocument();
+  });
+
   it('redireciona sessão master restaurada direto para o painel master', async () => {
     authState = {
       loading: false,

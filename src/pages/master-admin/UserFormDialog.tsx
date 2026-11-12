@@ -8,6 +8,7 @@ import { Field, FIELD_CONTROL, FIELD_CONTROL_ERROR, FORM_FOOTER } from '../../co
 import { Button } from '../../components/ui/Button';
 import { adminApi, BarbershopListItem, UserListItem } from '../../infra/adminApi';
 import { getErrorMessage } from '../../utils/errorMessage';
+import { newPasswordIssue } from '../../utils/passwordPolicy';
 
 const ROLES = [
   { value: 'MASTER_ADMIN', label: 'Master' },
@@ -37,11 +38,22 @@ export interface UserFormDialogProps {
 
 const buildSchema = (mode: 'create' | 'edit') =>
   userFormSchema.superRefine((data, ctx) => {
-    if (mode === 'create' && (!data.password || data.password.length < 6)) {
+    if (mode !== 'create') return;
+    if (!data.password) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['password'],
-        message: 'Mínimo de 6 caracteres.',
+        message: 'Informe a senha.',
+      });
+      return;
+    }
+    // Senha NOVA: política única (8+ caracteres, 1 letra e 1 número).
+    const issue = newPasswordIssue(data.password);
+    if (issue) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['password'],
+        message: issue,
       });
     }
   });
