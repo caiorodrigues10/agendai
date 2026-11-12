@@ -1,16 +1,21 @@
 # Configuração do GitGuardian — agendai (front)
 #
-# Motivo: o check "GitGuardian Security Checks" do CI falhou com 6 achados
-# ("Generic High Entropy Secret" e "Generic Password") em arquivos de teste do
+# Motivo: o check "GitGuardian Security Checks" do CI falhou com achados de
+# "Generic High Entropy Secret" e "Generic Password" em arquivos de teste do
 # fluxo de redefinição de senha. Os valores são SINTÉTICOS (tokens hexadecimais
 # de 64 chars, como o sha256 que o back gera, e senhas de fixture) — nenhum
 # deles autentica em serviço algum.
 #
 # Este ignore é POR CAMINHO e cobre apenas arquivos de teste/stories. Nenhuma
 # credencial real deve ser adicionada a esses arquivos.
+#
+# Formato v2 (ver `ggshield config migrate`).
 
-paths-ignore:
-  - "e2e/forgot-reset-password.spec.ts"
-  - "src/pages/ResetPasswordPage.test.tsx"
-  - "src/pages/ResetPasswordPage.stories.tsx"
-  - "src/utils/passwordPolicy.test.ts"
+version: 2
+
+secret:
+  ignored_paths:
+    - e2e/forgot-reset-password.spec.ts
+    - src/pages/ResetPasswordPage.test.tsx
+    - src/pages/ResetPasswordPage.stories.tsx
+    - src/utils/passwordPolicy.test.ts
