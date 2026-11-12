@@ -138,7 +138,7 @@ export const ErroSalvar: Story = {
       target: { value: 'maria@x.com' },
     });
     fireEvent.change(await dialog.findByLabelText(/^Senha/, {}, { timeout: 10000 }), {
-      target: { value: '123456' },
+      target: { value: 'Senha123' },
     });
     await userEvent.click(
       await dialog.findByRole('button', { name: 'Criar usuário' }, { timeout: 10000 })

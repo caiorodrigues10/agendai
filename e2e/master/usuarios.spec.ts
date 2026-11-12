@@ -42,7 +42,11 @@ test('usuários: lista, valida criação e cria + exclui um usuário', async ({ 
   await dialog.getByRole('button', { name: 'Criar usuário' }).click();
   await expect(dialog.getByText('Informe o nome.')).toBeVisible();
   await expect(dialog.getByText('E-mail inválido.')).toBeVisible();
-  await expect(dialog.getByText('Mínimo de 6 caracteres.', { exact: true })).toBeVisible();
+  await expect(
+    dialog.getByText('Senha deve ter no mínimo 8 caracteres, com pelo menos 1 letra e 1 número', {
+      exact: true,
+    }),
+  ).toBeVisible();
 
   // Criação válida.
   const email = `e2e.user.${Date.now()}@agendai.local`;

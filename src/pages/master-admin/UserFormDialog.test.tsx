@@ -70,11 +70,11 @@ describe('UserFormDialog', () => {
     const dialog = await screen.findByRole('dialog');
     fireEvent.change(within(dialog).getByLabelText('Nome'), { target: { value: 'Maria Silva' } });
     fireEvent.change(within(dialog).getByLabelText('E-mail'), { target: { value: 'maria@x.com' } });
-    fireEvent.change(within(dialog).getByLabelText(/^Senha/), { target: { value: '123456' } });
+    fireEvent.change(within(dialog).getByLabelText(/^Senha/), { target: { value: 'Senha123' } });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Criar usuário' }));
     await waitFor(() =>
       expect(createUser).toHaveBeenCalledWith(
-        expect.objectContaining({ name: 'Maria Silva', email: 'maria@x.com', password: '123456' }),
+        expect.objectContaining({ name: 'Maria Silva', email: 'maria@x.com', password: 'Senha123' }),
       ),
     );
     expect(onSaved).toHaveBeenCalled();
@@ -87,7 +87,27 @@ describe('UserFormDialog', () => {
     fireEvent.change(within(dialog).getByLabelText('E-mail'), { target: { value: 'maria@x.com' } });
     fireEvent.change(within(dialog).getByLabelText(/^Senha/), { target: { value: '123' } });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Criar usuário' }));
-    await waitFor(() => expect(within(dialog).getByText('Mínimo de 6 caracteres.')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(
+        within(dialog).getByText('Senha deve ter no mínimo 8 caracteres, com pelo menos 1 letra e 1 número'),
+      ).toBeInTheDocument(),
+    );
+    expect(createUser).not.toHaveBeenCalled();
+    expect(onSaved).not.toHaveBeenCalled();
+  });
+
+  it('recusa senha sem número na criação', async () => {
+    const { onSaved } = setup();
+    const dialog = await screen.findByRole('dialog');
+    fireEvent.change(within(dialog).getByLabelText('Nome'), { target: { value: 'Maria Silva' } });
+    fireEvent.change(within(dialog).getByLabelText('E-mail'), { target: { value: 'maria@x.com' } });
+    fireEvent.change(within(dialog).getByLabelText(/^Senha/), { target: { value: ['abcde', 'fgh'].join('') } });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Criar usuário' }));
+    await waitFor(() =>
+      expect(
+        within(dialog).getByText('Senha deve ter no mínimo 8 caracteres, com pelo menos 1 letra e 1 número'),
+      ).toBeInTheDocument(),
+    );
     expect(createUser).not.toHaveBeenCalled();
     expect(onSaved).not.toHaveBeenCalled();
   });
