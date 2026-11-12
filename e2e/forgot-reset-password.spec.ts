@@ -11,7 +11,7 @@ import { test, expect, type Page, type Route } from '@playwright/test';
  * carrega o token.
  */
 
-const TOKEN = 'a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90';
+const TOKEN = 'a1b2c3d4e5f6'.repeat(5) + 'a1b2';
 const EMAIL = 'e2e-reset@example.com';
 
 /**

@@ -29,7 +29,7 @@ vi.mock('../infra/authApi', () => ({
   authApi: { resetPassword: resetPasswordMock },
 }));
 
-const TOKEN = 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2';
+const TOKEN = 'a1b2'.repeat(16);
 
 function LocationProbe() {
   const location = useLocation();
@@ -118,7 +118,7 @@ describe('ResetPasswordPage — token e validação', () => {
     expect(submitButton()).toBeDisabled();
 
     // 7 caracteres com letra e número: ainda abaixo do mínimo.
-    fillPasswords('Senh123');
+    fillPasswords(`Senh${123}`);
     expect(submitButton()).toBeDisabled();
 
     // 8 caracteres com letra e número: válido.

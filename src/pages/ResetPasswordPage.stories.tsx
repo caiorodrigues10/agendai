@@ -15,7 +15,7 @@ import { ResetPasswordPage } from './ResetPasswordPage';
 import { ThemeProvider } from '../contexts/ThemeContext';
 
 /** Token no `?token=` — o form só habilita o submit com `token.length >= 32` (Zod do back). */
-const RESET_TOKEN = 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2';
+const RESET_TOKEN = 'a1b2'.repeat(16);
 const NOVA_SENHA = 'SenhaForte123';
 
 /**

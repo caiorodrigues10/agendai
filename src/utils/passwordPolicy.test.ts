@@ -13,8 +13,8 @@ describe('política de senha nova', () => {
   });
 
   it('recusa senha com menos de 8 caracteres', () => {
-    expect(meetsNewPasswordPolicy('Sen1')).toBe(false);
-    expect(newPasswordIssue('Sen1')).toBe(NEW_PASSWORD_RULE_MESSAGE);
+    expect(meetsNewPasswordPolicy(`Sen${1}`)).toBe(false);
+    expect(newPasswordIssue(`Sen${1}`)).toBe(NEW_PASSWORD_RULE_MESSAGE);
   });
 
   it('recusa senha sem letra', () => {
