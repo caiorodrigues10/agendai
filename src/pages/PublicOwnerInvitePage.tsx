@@ -6,14 +6,17 @@ import { ThemeToggle } from '../components/infra/ThemeToggle';
 import { PasswordInput } from '../components/ui/PasswordInput';
 import { SectionError } from '../components/patterns/states/SectionError';
 import {
+  meetsNewPasswordPolicy,
+  NEW_PASSWORD_RULE_HINT,
+} from '../utils/passwordPolicy';
+import {
   LuArrowRight as ArrowRight,
   LuKeyRound as KeyRound,
   LuLoaderCircle as Loader2,
   LuCircleCheck as CheckCircle,
 } from 'react-icons/lu';
 
-const STRONG_ENOUGH = (value: string) =>
-  value.length >= 6 && /[a-zA-Z]/.test(value) && /\d/.test(value);
+const STRONG_ENOUGH = (value: string) => meetsNewPasswordPolicy(value);
 
 interface OwnerInviteFormProps {
   token: string;
@@ -75,10 +78,11 @@ const OwnerInviteForm: React.FC<OwnerInviteFormProps> = ({ token, onSuccess }) =
               showStrength
               showPassword={showPassword}
               onToggleShow={() => setShowPassword(v => !v)}
-              placeholder="Mínimo 6 caracteres, letras e números"
+              placeholder={NEW_PASSWORD_RULE_HINT}
               value={newPassword}
               onChange={e => setNewPassword(e.target.value)}
             />
+            <p className="text-2xs text-text-muted">{NEW_PASSWORD_RULE_HINT}</p>
           </div>
 
           <div className="space-y-1">

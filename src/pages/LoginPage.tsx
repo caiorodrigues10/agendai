@@ -59,6 +59,7 @@ import { TrialExpiredPaywallModal } from '../features/subscription';
 import { RegisterStepper, type RegisterStep } from '../features/auth/register/RegisterStepper';
 import { BrandPanel } from '../features/auth/BrandPanel';
 import { getSegmentConfig, shopNounPossessive } from '../shared/segments';
+import { NEW_PASSWORD_RULE_HINT } from '../utils/passwordPolicy';
 import type { StaffMember } from '../types';
 
 /*
@@ -1246,6 +1247,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ mode = 'login' }) => {
                               setRegisterFieldsUnlocked(true);
                             }}
                           />
+                          <p className="text-2xs text-text-muted">{NEW_PASSWORD_RULE_HINT}</p>
                         </div>
                       ) : (
                         <p className="text-2xs text-text-muted bg-bg/60 border border-border rounded-lg px-3 py-2">

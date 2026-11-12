@@ -108,6 +108,24 @@ describe('ResetPasswordPage — token e validação', () => {
     expect(submitButton()).toBeDisabled();
   });
 
+  it('senha com 6 ou 7 caracteres mantém o envio desabilitado (mínimo 8)', () => {
+    renderWithProviders(<ResetPasswordPage />, {
+      route: `/reset-password?token=${TOKEN}`,
+    });
+
+    // 6 caracteres com letra e número: antes bastava, agora não.
+    fillPasswords('Senha12');
+    expect(submitButton()).toBeDisabled();
+
+    // 7 caracteres com letra e número: ainda abaixo do mínimo.
+    fillPasswords('Senh123');
+    expect(submitButton()).toBeDisabled();
+
+    // 8 caracteres com letra e número: válido.
+    fillPasswords('Senha123');
+    expect(submitButton()).toBeEnabled();
+  });
+
   it('senhas diferentes mostram erro e desabilitam o envio', () => {
     renderWithProviders(<ResetPasswordPage />, {
       route: `/reset-password?token=${TOKEN}`,

@@ -90,4 +90,31 @@ describe('PublicOwnerInvitePage', () => {
     ).toBeInTheDocument();
     expect(acceptInvite).not.toHaveBeenCalled();
   });
+
+  it('mantém o submit desativado com senha de 6 ou 7 caracteres (mínimo 8)', () => {
+    renderPage(VALID_TOKEN);
+
+    const submit = screen.getByRole('button', { name: /Definir senha/ });
+
+    // 6 caracteres com letra e número: antes bastava, agora não.
+    fireEvent.change(screen.getByLabelText(/^Nova senha/), { target: { value: 'Senha12' } });
+    fireEvent.change(screen.getByLabelText(/^Confirmar nova senha/), {
+      target: { value: 'Senha12' },
+    });
+    expect(submit).toBeDisabled();
+
+    // 7 caracteres com letra e número: ainda abaixo do mínimo.
+    fireEvent.change(screen.getByLabelText(/^Nova senha/), { target: { value: 'Senh123' } });
+    fireEvent.change(screen.getByLabelText(/^Confirmar nova senha/), {
+      target: { value: 'Senh123' },
+    });
+    expect(submit).toBeDisabled();
+
+    // 8 caracteres com letra e número: válido.
+    fireEvent.change(screen.getByLabelText(/^Nova senha/), { target: { value: 'Senha123' } });
+    fireEvent.change(screen.getByLabelText(/^Confirmar nova senha/), {
+      target: { value: 'Senha123' },
+    });
+    expect(submit).toBeEnabled();
+  });
 });

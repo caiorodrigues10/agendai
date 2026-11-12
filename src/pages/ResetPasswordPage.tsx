@@ -3,6 +3,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authApi } from '../infra/authApi';
 import { getErrorMessage } from '../utils/errorMessage';
 import { getPendingResetToken } from '../utils/resetTokenUrl';
+import {
+  meetsNewPasswordPolicy,
+  NEW_PASSWORD_RULE_HINT,
+} from '../utils/passwordPolicy';
 import { Logo } from '../components/ui/Logo';
 import { ThemeToggle } from '../components/infra/ThemeToggle';
 import { PasswordInput } from '../components/ui/PasswordInput';
@@ -46,8 +50,12 @@ export const ResetPasswordPage: React.FC = () => {
     [newPassword, confirmPassword]
   );
 
-  // O back exige token com mínimo de 32 caracteres (Zod min(32)).
-  const isValid = token.length >= 32 && newPassword.length >= 6 && passwordsMatch;
+  // O back exige token com mínimo de 32 caracteres (Zod min(32)) e senha nova
+  // com 8+ caracteres, 1 letra e 1 número (política de senha nova).
+  const isValid =
+    token.length >= 32 &&
+    meetsNewPasswordPolicy(newPassword) &&
+    passwordsMatch;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -185,10 +193,11 @@ export const ResetPasswordPage: React.FC = () => {
                   showStrength
                   showPassword={showPassword}
                   onToggleShow={() => setShowPassword(v => !v)}
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder={NEW_PASSWORD_RULE_HINT}
                   value={newPassword}
                   onChange={e => setNewPassword(e.target.value)}
                 />
+                <p className="text-2xs text-text-muted">{NEW_PASSWORD_RULE_HINT}</p>
               </div>
 
               <div className="space-y-1">
