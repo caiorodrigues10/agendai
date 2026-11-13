@@ -10,7 +10,15 @@ import { organizationsApi } from '@/infra/organizationsApi';
 import { ApiError } from '@/infra/apiClient';
 
 vi.mock('@/infra/authApi', () => ({
-  authApi: { me: vi.fn(), login: vi.fn(), register: vi.fn(), switchAccount: vi.fn(), forgetAccount: vi.fn() },
+  authApi: {
+    me: vi.fn(),
+    login: vi.fn(),
+    register: vi.fn(),
+    switchAccount: vi.fn(),
+    forgetAccount: vi.fn(),
+    googleLogin: vi.fn(),
+    registerWithGoogle: vi.fn(),
+  },
 }));
 vi.mock('@/infra/organizationsApi', () => ({
   organizationsApi: { switchShop: vi.fn() },
@@ -22,6 +30,7 @@ vi.mock('@/infra/apiClient', async importOriginal => {
 
 const me = vi.mocked(authApi.me);
 const loginApi = vi.mocked(authApi.login);
+const googleLoginApi = vi.mocked(authApi.googleLogin);
 const switchAccountApi = vi.mocked(authApi.switchAccount);
 const switchShopApi = vi.mocked(organizationsApi.switchShop);
 
@@ -76,6 +85,14 @@ function Capture() {
         onClick={() => void auth.loginWithSavedAccount('u2').then(r => setResult(JSON.stringify(r)))}
       >
         usar conta salva
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          void auth.loginWithGoogle('fake-google-id-token').then(r => setResult(JSON.stringify(r)))
+        }
+      >
+        entrar com google
       </button>
     </div>
   );
@@ -207,5 +224,78 @@ describe('AuthContext sessão (manter conectado e contas salvas)', () => {
     expect(authStorage.getAccessToken()).toBe('access-2');
     expect(localStorage.getItem('barber_access_token')).toBeNull();
     expect(sessionStorage.getItem('barber_access_token_session')).toBeNull();
+  });
+});
+
+describe('AuthContext.loginWithGoogle (auditoria)', () => {
+  it('sucesso persiste a sessão com "manter conectado" e devolve ok', async () => {
+    googleLoginApi.mockResolvedValue({ user: ownerUser, accessToken: 'at-google' });
+    await renderBooted();
+
+    await userEvent.click(screen.getByRole('button', { name: 'entrar com google' }));
+
+    await waitFor(() => expect(screen.getByTestId('result')).toHaveTextContent('{"ok":true}'));
+    expect(googleLoginApi).toHaveBeenCalledWith('fake-google-id-token');
+    expect(authStorage.getRememberMe()).toBe(true);
+    expect(authStorage.getUser()?.id).toBe('u1');
+    // S5: o access token vive só em memória; a sessão fica na preferência/user.
+    expect(localStorage.getItem('barber_access_token')).toBeNull();
+    expect(authStorage.getSavedAccounts().map(a => a.id)).toContain('u1');
+  });
+
+  // 404 sem `code` (qualquer outro erro 404 que não seja o do Google): o
+  // branch não dispara e o fallback devolve a mensagem crua do backend.
+  it('404 sem `code` cai no fallback com a mensagem do backend', async () => {
+    googleLoginApi.mockRejectedValue(
+      new ApiError('Conta não encontrada. Cadastre-se normalmente com e-mail e senha.', 404)
+    );
+    await renderBooted();
+
+    await userEvent.click(screen.getByRole('button', { name: 'entrar com google' }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId('result')).toHaveTextContent(
+        '{"ok":false,"message":"Conta não encontrada. Cadastre-se normalmente com e-mail e senha."}'
+      )
+    );
+    // Nenhuma sessão nova é gravada no caminho de erro.
+    expect(authStorage.getRememberMe()).toBe(true); // preferência já gravada no boot
+  });
+
+  // Corrigido (item 2): o backend agora devolve GOOGLE_ACCOUNT_NOT_FOUND em
+  // `code` (back: GoogleLoginUseCase.ts — 4o argumento do AppError; handler
+  // app.ts serializa `code`). O branch do AuthContext dispara e a orientação
+  // em PT-BR chega ao usuário — antes ele via o código cru, porque o valor
+  // vinha em `errors` e o getErrorMessage lia `data.errors` antes da message.
+  it('404 com GOOGLE_ACCOUNT_NOT_FOUND em `code` dispara o branch do AuthContext', async () => {
+    googleLoginApi.mockRejectedValue(
+      new ApiError('Conta não encontrada. Cadastre-se normalmente com e-mail e senha.', 404, 'GOOGLE_ACCOUNT_NOT_FOUND')
+    );
+    await renderBooted();
+
+    await userEvent.click(screen.getByRole('button', { name: 'entrar com google' }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId('result')).toHaveTextContent(
+        '{"ok":false,"message":"Conta não encontrada. Cadastre-se normalmente com e-mail e senha."}'
+      )
+    );
+    // O código nunca aparece na mensagem visível.
+    expect(screen.getByTestId('result').textContent).not.toContain('GOOGLE_ACCOUNT_NOT_FOUND');
+    // Nenhuma sessão nova é gravada no caminho de erro.
+    expect(authStorage.getUser()?.id).toBe('u1'); // sessão do boot, não nova
+  });
+
+  it('401 do Google devolve o texto literal do backend (não vira "sessão expirou")', async () => {
+    googleLoginApi.mockRejectedValue(new ApiError('Token Google inválido ou expirado', 401));
+    await renderBooted();
+
+    await userEvent.click(screen.getByRole('button', { name: 'entrar com google' }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId('result')).toHaveTextContent(
+        '{"ok":false,"message":"Token Google inválido ou expirado"}'
+      )
+    );
   });
 });
