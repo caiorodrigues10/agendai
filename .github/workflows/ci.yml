@@ -50,7 +50,16 @@ jobs:
       # O projeto `webkit-iphone` (e2e/login-safari.spec.ts) precisa do WebKit
       # oficial instalado antes do passo de E2E.
       - run: npx playwright install --with-deps webkit
-      - run: npm run test:e2e
+      # ITEM 4 — o e2e/google-auth.spec.ts NÃO tem test.skip: sem
+      # VITE_GOOGLE_CLIENT_ID o botão Google não renderiza e o teste falha
+      # ruidosamente. O Playwright faz o build no webServer (herda este env),
+      # então a chave precisa estar AQUI, no step que roda o e2e.
+      - name: E2E (chromium)
+        env:
+          # Id fictício do console do Google (o GIS é interceptado pelo spec,
+          # nunca chega ao Google). Mesmo id do step webkit-iphone abaixo.
+          VITE_GOOGLE_CLIENT_ID: 000000000000-e2e-fake.apps.googleusercontent.com
+        run: npm run test:e2e
       # ITEM 2 — o projeto webkit-iphone (login-safari.spec.ts) só roda com
       # VITE_RECAPTCHA_SITE_KEY no build (senão o test.skip dispara e o job
       # ficaria verde sem provar nada). Step dedicado: roda os 3 testes no
