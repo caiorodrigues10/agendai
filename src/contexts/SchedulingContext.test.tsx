@@ -5,6 +5,8 @@ import { MemoryRouter } from 'react-router-dom';
 import { SchedulingProvider, useScheduling } from './SchedulingContext';
 import { schedulingApi } from '@/infra/schedulingApi';
 import { authStorage } from '@/infra/authStorage';
+import { withoutRandomUuid } from '@/tests/stubs/secureContext';
+import { CLIENT_ID_STORAGE_KEY } from '@/utils/clientIdStorage';
 
 vi.mock('@/infra/schedulingApi', () => ({
   schedulingApi: {
@@ -204,5 +206,25 @@ describe('SchedulingContext.refreshAppointments', () => {
     expect(ctx.appointments).toEqual([]);
     expect(ctx.appointmentsError).toBeNull();
     expect(ctx.appointmentsStale).toBe(false);
+  });
+});
+
+/**
+ * Regressão do defeito "app em branco": `useState(readClientId)` roda no boot
+ * do provider. Em `http://` não-loopback o `crypto.randomUUID` não existe e a
+ * exceção derrubava a árvore inteira (tela em branco) — o provider precisa
+ * montar normalmente.
+ */
+describe('SchedulingContext em origem sem contexto seguro', () => {
+  it('monta e resolve sem quebrar quando crypto.randomUUID não existe', async () => {
+    await withoutRandomUuid(async () => {
+      renderProvider();
+      await waitFor(() => expect(ctx.loading).toBe(false));
+    });
+
+    expect(ctx.clientId).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+    );
+    expect(localStorage.getItem(CLIENT_ID_STORAGE_KEY)).toBe(ctx.clientId);
   });
 });

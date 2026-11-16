@@ -146,6 +146,47 @@ Não descomentar a regra sem confirmar a URL pública do backend **e** rodar est
 4. Ferramenta de preview (Facebook Sharing Debugger / opengraph.xyz) na URL do staging → título + imagem aparecem.
 5. Só então publicar a URL real em `render.yaml`/`_redirects` e repetir os 4 testes em produção.
 
+## Contexto seguro (APIs restritas a HTTPS)
+
+O navegador só expõe algumas APIs em **contexto seguro**: origem `https://` ou loopback (`localhost`, `127.0.0.1`, `::1`). Em `http://` não-loopback a propriedade **não existe** (a interface é omitida do objeto), e chamá-la lança `TypeError`.
+
+### Regra
+
+- Nenhum código do app pode depender de API restrita a contexto seguro sem guarda (`typeof x === 'function'` / `?.`) **ou** fallback equivalente.
+- `crypto.getRandomValues` **não** é restrita: é a alternativa sempre disponível para gerar id/aleatoriedade. `crypto.randomUUID()` é restrita.
+- Consequência prática: em `http://` não-loopback, `readClientId` rodava no boot (`useState(readClientId)` no `SchedulingContext`) e derrubava a árvore inteira — **app em branco** (corrigido nesta entrega).
+
+### Corrigido nesta entrega
+
+- `readClientId` (`src/utils/clientIdStorage.ts`): `crypto.randomUUID()` → `TypeError` no boot. Fallback: UUID v4 montado com `crypto.getRandomValues`. Regressão coberta em `src/utils/clientIdStorage.test.ts` e `src/contexts/SchedulingContext.test.tsx`.
+
+### Inventário — registrado, **não corrigido** nesta entrega
+
+| Onde | API | Quando roda | Efeito em `http://` não-loopback |
+|---|---|---|---|
+| `src/pages/CheckoutPage.tsx:122-124` | `crypto.randomUUID()` | **a cada render** do checkout (`useRef` com objeto literal) | `TypeError` → página do checkout quebrada |
+| `src/pages/CheckoutPage.tsx:320` | `crypto.randomUUID()` | ação do usuário (nova tentativa PIX) | `TypeError` |
+| `src/infra/subscriptionsApi.ts:156,164` | `crypto.randomUUID()` | ação do usuário (assinar / cartão de trial) | `TypeError` ao assinar |
+| `src/infra/paymentsApi.ts:87` | `crypto.randomUUID()` | ação do usuário (estorno) | `TypeError` no estorno |
+| `src/infra/notificationsApi.ts:149,197` | `crypto.randomUUID()` | ação do usuário | `TypeError` na requisição |
+| `src/features/team/TeamManager.tsx:67` | `crypto.randomUUID()` | ação do usuário (convidar membro) | `TypeError` ao criar membro |
+| `src/pages/CheckoutPage.tsx:409` | `navigator.clipboard.writeText` | ação do usuário (copiar PIX) | `TypeError` **não tratado** (sem guarda nem `try/catch`) |
+| `src/features/showcase/PublicLinkPanel.tsx:60` | `navigator.clipboard.writeText` | ação do usuário (copiar link) | `TypeError` **não tratado** (o `try/catch` do `handleShare` cobre só o ramo `navigator.share`) |
+
+### Inventário — uso já seguro (guarda presente)
+
+| Onde | API | Guarda |
+|---|---|---|
+| `src/infra/apiClient.ts:112` | `navigator.locks` | `locks?.request` → cai no fallback sem lock |
+| `src/components/infra/ErrorBoundary.tsx:43` | `navigator.clipboard.writeText` | `try/catch` (silencia) |
+| `src/features/referrals/ShareReferralButton.tsx:25,36` | `navigator.clipboard.writeText` | `try/catch` (silencia; perde só o feedback de "copiado") |
+| `src/features/settings/useOwnerBotSection.ts:95` | `navigator.clipboard.writeText` | `?.` |
+| `src/features/settings/SalonWhatsAppConnection.tsx:254` | `navigator.clipboard.writeText` | `?.` |
+| `src/features/referrals/ShareReferralButton.tsx:14,18` | `navigator.share` | `!!navigator.share` |
+| `src/features/showcase/PublicLinkPanel.tsx:65` | `navigator.share` | `if (navigator.share)` |
+
 ## Pendências documentais
 
 Divergências código ↔ regra de produto aprovada devem ser listadas como pendência **sem** alterar comportamento nesta entrega só documental.
+
+- As linhas marcadas como **não corrigido** na seção "Contexto seguro" acima ficam pendentes de correção em PR próprio: hoje só o boot (`readClientId`) quebraria o app em `http://` não-loopback; os demais pontos falham **na ação do usuário** ou **na página do checkout**, e nenhum deles derruba a SPA inteira.
