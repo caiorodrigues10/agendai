@@ -3,7 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import {
   LuBriefcase, LuTicket, LuListTodo, LuUsers, LuBuilding2, LuActivity,
   LuShield, LuCreditCard, LuGift, LuRefreshCcw, LuChevronLeft, LuMenu, LuLogOut,
-  LuLayoutDashboard, LuTarget, LuUserCog, LuMessageCircle, LuLayers
+  LuLayoutDashboard, LuTarget, LuUserCog, LuMessageCircle, LuLayers, LuChartNoAxesCombined
 } from 'react-icons/lu';
 import { useAuth } from '../../contexts/AuthContext';
 import { ThemeToggle } from '../../components/infra/ThemeToggle';
@@ -16,6 +16,7 @@ const NAV_ITEMS: {
   permission: InternalPermission;
 }[] = [
   { to: '/master/overview', icon: LuLayoutDashboard, label: 'Visão geral', permission: INTERNAL_PERMISSIONS.DASHBOARD_READ },
+  { to: '/master/traffic', icon: LuChartNoAxesCombined, label: 'Tráfego', permission: INTERNAL_PERMISSIONS.TRAFFIC_READ },
   { to: '/master/work', icon: LuBriefcase, label: 'Meu trabalho', permission: INTERNAL_PERMISSIONS.DASHBOARD_READ },
   { to: '/master/tickets', icon: LuTicket, label: 'Atendimento', permission: INTERNAL_PERMISSIONS.SUPPORT_MANAGE },
   { to: '/master/tasks', icon: LuListTodo, label: 'Tarefas', permission: INTERNAL_PERMISSIONS.SUPPORT_MANAGE },
@@ -97,7 +98,7 @@ export const AdminLayout: React.FC = () => {
 
           {/* Nav */}
           <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain py-3 px-3 space-y-0.5">
-            {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
+            {navItems.map(({ to, icon: Icon, label }) => (
               <NavLink
                 key={to}
                 to={to}

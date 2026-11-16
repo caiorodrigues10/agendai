@@ -12,6 +12,7 @@ import { useSubscription } from '../contexts/SubscriptionContext';
 import { useAuth } from '../contexts/AuthContext';
 import { MarketingLayout } from '../layouts/marketing/MarketingLayout';
 import { SectionError } from '../components/patterns/states/SectionError';
+import { ErrorBoundary } from '../components/infra/ErrorBoundary';
 import { softwareApplicationLd } from '../marketing/softwareApplicationLd';
 import { getErrorMessage } from '../utils/errorMessage';
 import { trialCampaign } from '../marketing/trialCampaign';
@@ -478,9 +479,14 @@ export const PlansPage: React.FC = () => {
 
         <section className="border-y border-border bg-surface-2 px-6 py-20 md:px-10 md:py-28 xl:px-12">
           <div className="mx-auto max-w-6xl">
-            <React.Suspense fallback={null}>
-              <PricingPersuasionCharts variant="dark" />
-            </React.Suspense>
+            {/* Gráfico opcional: um chunk que falhe (ex.: offline na primeira
+                visita) derruba só esta seção, nunca a página inteira — o
+                banner de erro da API precisa continuar visível. */}
+            <ErrorBoundary variant="section">
+              <React.Suspense fallback={null}>
+                <PricingPersuasionCharts variant="dark" />
+              </React.Suspense>
+            </ErrorBoundary>
           </div>
         </section>
 

@@ -17,4 +17,9 @@ describe('hasInternalPermission', () => {
     // parity com o back: a lista é checada item a item (sem herança manage → read)
     expect(hasInternalPermission([INTERNAL_PERMISSIONS.WHATSAPP_MANAGE], INTERNAL_PERMISSIONS.WHATSAPP_READ)).toBe(false);
   });
+
+  it('espelha internal:traffic:read sem conceder acesso por aproximação', () => {
+    expect(hasInternalPermission([INTERNAL_PERMISSIONS.TRAFFIC_READ], INTERNAL_PERMISSIONS.TRAFFIC_READ)).toBe(true);
+    expect(hasInternalPermission([INTERNAL_PERMISSIONS.DASHBOARD_READ], INTERNAL_PERMISSIONS.TRAFFIC_READ)).toBe(false);
+  });
 });

@@ -106,6 +106,10 @@ test.describe('PWA offline (item P1)', () => {
 
     for (const route of PUBLIC_ROUTES) {
       await page.goto(route, { waitUntil: 'load', timeout: 30_000 });
+      // O shell offline tem que renderizar a própria rota. O estado global de
+      // erro (ErrorBoundary "Erro 500") nunca é resposta aceitável aqui: ele
+      // já mascarou uma rota quebrada por um chunk ausente do precache.
+      await expect(page.getByText('Algo não saiu como esperado')).toHaveCount(0);
       await expect(page.locator('h1').first()).toBeVisible({ timeout: 15_000 });
     }
 

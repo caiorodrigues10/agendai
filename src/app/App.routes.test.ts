@@ -50,6 +50,7 @@ describe('App route table (contrato)', () => {
         "/master",
         "dashboard",
         "overview",
+        "traffic",
         "work",
         "tickets",
         "tickets/new",

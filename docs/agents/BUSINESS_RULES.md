@@ -104,6 +104,13 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 - **Falhas**: entregas e itens de outbox podem ser reenviados com motivo; entrega suprimida, de outro canal ou em estado terminal é recusada pelo backend (409/400).
 - **Filas**: telefone aparece mascarado; reprocessar/limpar exige `WHATSAPP_MANAGE` e motivo.
 
+## Tráfego do site (master)
+
+- A tela `/master/traffic` exige `MASTER_ADMIN` e `internal:traffic:read`; a lista interna vazia mantém o acesso total legado, igual ao backend.
+- O beacon anônimo é opt-in (`VITE_TRAFFIC_BEACON_ENABLED=false` por padrão), só roda em produção e respeita DNT/GPC no cliente. O payload contém somente um padrão literal de rota (`/esqueci-senha`, `/s/:slug`, `/agendamento/:token`) e, quando existe, o host do referrer — nunca slug, token, query ou fragmento.
+- “Visitantes do dia” é o distinto diário do período Dia; nos demais períodos, “Visitantes (soma dos dias)” soma os distintos de cada dia. A mesma pessoa que volta em outro dia conta novamente; a UI não apresenta esse valor como pessoas únicas.
+- O período anterior, as áreas, as origens e o CSV preservam os mesmos filtros ativos da tela.
+
 ## Aparência da página pública (tema)
 
 - Tema via CSS vars escopadas no wrapper `[data-ag-shop-theme]`: família canônica `--shop-*` (por variante) + espelho legado `--ag-*`; as utilities do Tailwind resolvem `var(--shop-x, var(--ag-x))` (`styles/tokens.css`). Variantes `light`/`dark` por salão (`darkColors`/`lightColors` no payload; `lightColors` nula é gerada no cliente via `generateVariantColors`, mesmo gerador do back) e `mode` do dono (`AUTO` segue `prefers-color-scheme`; `LIGHT`/`DARK` força). Padrão sem tema salvo = visual dark atual (`PAGE_THEME_DEFAULTS` em `src/shared/pageThemeDefaults.ts`, espelho do backend via `npm run theme:mirror`).

@@ -14,6 +14,8 @@ interface ImportMetaEnv {
   readonly VITE_PRODUCT_TOUR_VIDEO_URL?: string;
   /** URL opcional do vídeo vertical que ensina a instalar o PWA. */
   readonly VITE_PWA_INSTALL_VIDEO_URL?: string;
+  /** Habilita o beacon privado de tráfego; desabilitado por padrão. */
+  readonly VITE_TRAFFIC_BEACON_ENABLED?: string;
 }
 
 interface ImportMeta {

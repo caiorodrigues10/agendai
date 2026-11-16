@@ -27,7 +27,12 @@ export default defineConfig({
   webServer: process.env.E2E_BASE_URL ? undefined : {
     // `vite preview` serve o `dist/`: sem um build antes, o e2e roda contra um
     // artefato velho (ou o servidor nem sobe quando `dist/` não existe).
-    command: 'npm run build && npm run preview -- --host 127.0.0.1 --port 4173',
+    // `--host 0.0.0.0` é exigido pelo e2e do beacon: a guarda rejeita hosts
+    // loopback, então a página é aberta pelo IP privado da máquina (ver
+    // e2e/traffic-beacon.spec.ts). A flag VITE_TRAFFIC_BEACON_ENABLED NÃO fica
+    // aqui — ela só é injetada no build pelo step `E2E (chromium)` do CI, no
+    // mesmo padrão do VITE_GOOGLE_CLIENT_ID (nunca em .env nem em produção).
+    command: 'npm run build && npm run preview -- --host 0.0.0.0 --port 4173',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
@@ -40,15 +45,19 @@ export default defineConfig({
       testIgnore: ['**/master/**'],
       use: { ...devices['Pixel 5'] },
     },
-    // ITEM 2 — Safari/iOS: fluxos de login no WebKit real (iPhone 13). Só
-    // specs de autenticação; o resto da suíte continua em Chromium.
+    // ITEM 2 — Safari/iOS: fluxos de login e o dashboard de tráfego mockado
+    // no WebKit real (iPhone 13); o restante da suíte continua em Chromium.
     // Nota (macOS 14 arm64): o Playwright ≥1.62 usa um WebKit "frozen" que não
     // aceita o setting PushAPIEnabled do core → o projeto falha em newPage nesta
     // combinação; em CI/Ubuntu (WebKit oficial) roda normal. Evidência local:
     // runner isolado Playwright 1.58.2 (ver scripts/measurements/item2-webkit.md).
     {
       name: 'webkit-iphone',
-      testMatch: ['**/login-safari.spec.ts', '**/forgot-reset-password.spec.ts'],
+      testMatch: [
+        '**/login-safari.spec.ts',
+        '**/forgot-reset-password.spec.ts',
+        '**/traffic-dashboard.spec.ts',
+      ],
       use: { ...devices['iPhone 13'] },
     },
   ],

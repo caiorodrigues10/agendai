@@ -38,6 +38,8 @@ Código existente ≠ comprovadamente funcional em produção. Distinguir:
 | Posts / feed / perfil social | `PostsManager`, `ShopProfile`, `PublicPostPage` | `postsApi`, `barbershopApi`, `socialApi` | `/api/feed`, `/api/posts`, `/api/salons/:salonId/*`; link direto `/saloes/:salonId/posts/:postId`; sem agendamento na UI (rotas legadas `POST /api/posts/:id/schedule*` e `GET /api/posts/scheduled` sem consumo no front) |
 | Indicações | `OwnerReferralsPanel` | `referralsApi` | `/api/referrals` |
 | Master admin | `BillingTab` + páginas de `pages/master-admin/` | `adminApi` | `/api/admin/*` |
+| Tráfego do site (master) | `TrafficOverviewPage` (`/master/traffic`: períodos, áreas, KPIs, série, origens e CSV) | `adminTrafficApi` (`getTrafficReport`, `exportTrafficCsv`) | `/api/admin/traffic`, `/api/admin/traffic/export` |
+| Beacon anônimo de tráfego | `TrafficBeaconListener` (somente padrões literais de rota e host do referrer) | `trafficBeaconApi` (`sendTrafficBeacon`) | `POST /api/ping` |
 | Segmentos (master) | `SegmentsPage` (catálogo versionado), `AccountsPage` (filtro/coluna de segmento), `AccountSegmentCard` (troca com prévia de impacto e ciência de conflitos) | `adminInternalApi` (`getSegments`, `updateAccountSegment`, `getAccounts` com `segment`) | `/api/admin/segments`, `PATCH /api/admin/barbershops/:id/segment` |
 | Financeiro por salão (master) | `RevenueSection` (lista de salões por despesas/fiados), `FinancialDrilldown` (assinatura, faturas, pagamentos, reembolsos, despesas por tipo/categoria, fiados e CSV), `AccountDetailPage` (atalho) | `adminApi` (`getFinancialBarbershops`, `getFinancialBarbershopDetail`, `exportBillingStatementCsv` com `barbershopId`) | `/api/admin/financial/barbershops*`, `/api/admin/billing/statement.csv` |
 | CRM (master) | `CrmBackfillPanel` em modo global (histórico paginado com filtros status/escopo, detalhe da execução e trava de disparo duplicado) | `adminCrmApi.backfillRuns` + `crmApi.backfillAll` | `/api/admin/crm/backfill/runs`, `/api/crm/backfill/all` |
@@ -55,5 +57,6 @@ Código existente ≠ comprovadamente funcional em produção. Distinguir:
 | `VITE_RECAPTCHA_SITE_KEY` | reCAPTCHA v3 |
 | `VITE_PRODUCT_TOUR_VIDEO_URL` | Vídeo de tour (opcional) |
 | `VITE_PWA_INSTALL_VIDEO_URL` | Vídeo PWA (opcional) |
+| `VITE_TRAFFIC_BEACON_ENABLED` | Beacon anônimo de tráfego; opt-in e `false` por padrão |
 
 Fonte: `.env.example`. Não documentar segredos.
