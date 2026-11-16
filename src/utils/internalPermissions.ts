@@ -7,6 +7,7 @@ export const INTERNAL_PERMISSIONS = {
   OPERATIONS_READ: 'internal:operations:read',
   REFERRALS_READ: 'internal:referrals:read',
   AUDIT_READ: 'internal:audit:read',
+  TRAFFIC_READ: 'internal:traffic:read',
   BARBERSHOPS_MANAGE: 'internal:barbershops:manage',
   ACCOUNTS_MANAGE: 'internal:accounts:manage',
   ACCOUNTS_IMPERSONATE: 'internal:accounts:impersonate',

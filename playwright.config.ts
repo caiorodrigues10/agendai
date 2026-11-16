@@ -40,15 +40,19 @@ export default defineConfig({
       testIgnore: ['**/master/**'],
       use: { ...devices['Pixel 5'] },
     },
-    // ITEM 2 — Safari/iOS: fluxos de login no WebKit real (iPhone 13). Só
-    // specs de autenticação; o resto da suíte continua em Chromium.
+    // ITEM 2 — Safari/iOS: fluxos de login e o dashboard de tráfego mockado
+    // no WebKit real (iPhone 13); o restante da suíte continua em Chromium.
     // Nota (macOS 14 arm64): o Playwright ≥1.62 usa um WebKit "frozen" que não
     // aceita o setting PushAPIEnabled do core → o projeto falha em newPage nesta
     // combinação; em CI/Ubuntu (WebKit oficial) roda normal. Evidência local:
     // runner isolado Playwright 1.58.2 (ver scripts/measurements/item2-webkit.md).
     {
       name: 'webkit-iphone',
-      testMatch: ['**/login-safari.spec.ts', '**/forgot-reset-password.spec.ts'],
+      testMatch: [
+        '**/login-safari.spec.ts',
+        '**/forgot-reset-password.spec.ts',
+        '**/traffic-dashboard.spec.ts',
+      ],
       use: { ...devices['iPhone 13'] },
     },
   ],

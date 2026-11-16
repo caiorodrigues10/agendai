@@ -6,6 +6,7 @@ import { TabGuard } from '../components/infra/TabGuard';
 import { AccessBlockedListener } from '../components/infra/AccessBlockedListener';
 import { CookieConsent } from '../components/infra/CookieConsent';
 import { AnalyticsListener } from '../components/infra/AnalyticsListener';
+import { TrafficBeaconListener } from '../components/infra/TrafficBeaconListener';
 import { ScrollToTop } from '../components/infra/ScrollToTop';
 import { ReferralRefCapture } from '../components/infra/ReferralRefCapture';
 import { Loader } from '../components/ui/Loader';
@@ -40,6 +41,7 @@ const PlansPage = lazy(() => import('../pages/PlansPage'));
 const CheckoutPage = lazy(() => import('../pages/CheckoutPage'));
 const AdminLayout = lazy(() => import('../layouts/admin/AdminLayout'));
 const OverviewPage = lazy(() => import('../pages/master-admin/OverviewPage'));
+const TrafficOverviewPage = lazy(() => import('../pages/master-admin/TrafficOverviewPage'));
 const WorkSummaryPage = lazy(() => import('../pages/master-admin/WorkSummaryPage'));
 const TicketsPage = lazy(() => import('../pages/master-admin/TicketsPage'));
 const TicketDetailPage = lazy(() => import('../pages/master-admin/TicketDetailPage'));
@@ -77,6 +79,7 @@ const App: React.FC = () => {
       <AccessBlockedListener />
       <CookieConsent />
       <AnalyticsListener />
+      <TrafficBeaconListener />
       <PwaUpdatePrompt />
       <ErrorBoundary>
         <Suspense fallback={<Loader />}>
@@ -139,6 +142,7 @@ const App: React.FC = () => {
             <Route index element={<Navigate to="/master/overview" replace />} />
             <Route path="dashboard" element={<Navigate to="/master/overview" replace />} />
             <Route path="overview" element={<OverviewPage />} />
+            <Route path="traffic" element={<TrafficOverviewPage />} />
             <Route path="work" element={<WorkSummaryPage />} />
             <Route path="tickets" element={<TicketsPage />} />
             <Route path="tickets/new" element={<TicketsPage />} />

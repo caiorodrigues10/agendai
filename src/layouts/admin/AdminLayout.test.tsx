@@ -3,9 +3,17 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { AdminLayout } from './AdminLayout';
 
+const mockUser = vi.hoisted(() => ({
+  id: 'm-1',
+  name: 'Admin',
+  email: 'admin@admin.com',
+  role: 'MASTER_ADMIN' as const,
+  internalPermissions: undefined as string[] | undefined,
+}));
+
 vi.mock('../../contexts/AuthContext', () => ({
   useAuth: () => ({
-    user: { id: 'm-1', name: 'Admin', email: 'admin@admin.com', role: 'MASTER_ADMIN' },
+    user: mockUser,
     logout: vi.fn(),
   }),
 }));
@@ -22,6 +30,10 @@ const renderLayout = () =>
   );
 
 describe('AdminLayout', () => {
+  beforeEach(() => {
+    mockUser.internalPermissions = undefined;
+  });
+
   it('mantém um único h1: o título da página, não o rótulo do layout', () => {
     renderLayout();
 
@@ -57,5 +69,25 @@ describe('AdminLayout', () => {
     fireEvent.keyDown(document, { key: 'Escape' });
 
     expect(screen.getAllByRole('button', { name: 'Fechar menu' })).toHaveLength(1);
+  });
+
+  it('exibe Tráfego para quem tem internal:traffic:read', () => {
+    mockUser.internalPermissions = ['internal:traffic:read'];
+
+    renderLayout();
+
+    expect(screen.getByRole('link', { name: 'Tráfego' })).toHaveAttribute(
+      'href',
+      '/master/traffic',
+    );
+  });
+
+  it('oculta Tráfego para um perfil interno sem internal:traffic:read', () => {
+    mockUser.internalPermissions = ['internal:dashboard:read'];
+
+    renderLayout();
+
+    expect(screen.queryByRole('link', { name: 'Tráfego' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Visão geral' })).toBeInTheDocument();
   });
 });

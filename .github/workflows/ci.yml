@@ -27,6 +27,10 @@ jobs:
         with:
           repository: caiorodrigues10/agendai-back-end
           path: backend
+          # PR #17 ainda contém o contrato de tráfego usado pela PR2 do front.
+          # O branch é trocado por main depois do merge do backend, sem misturar
+          # os PRs nem publicar o backend diretamente na main.
+          ref: feat/site-traffic-tracking
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
