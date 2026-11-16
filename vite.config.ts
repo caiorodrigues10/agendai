@@ -139,10 +139,10 @@ export default defineConfig(() => {
 						'weather/*.jpg',
 						'assets/index-*.{js,css}',
 						'assets/ScrollTrigger-*.js',
-						'assets/{LandingPage,MarketingLayout,PlansPage,LoginPage,PublicHome,ShopProfile,SmartSelect,Combination,PostDetail,schemas,utils,Toast,ModalShell,ConfirmDialog,StatusBadge,PasswordInput,clientPortalApi,documentUtils,notificationsApi,reputationApi,publicProductsApi,plansApi,recaptcha,reducedMotion,softwareApplicationLd,subscriptionPaywall,trialCampaign,weatherVisuals,formatters,brand,Avatar,Button,Card,chart}-*.js',
+						'assets/{LandingPage,MarketingLayout,PlansPage,LoginPage,PublicHome,ShopProfile,SmartSelect,Combination,PostDetail,schemas,passwordPolicy,utils,Toast,ModalShell,ConfirmDialog,StatusBadge,PasswordInput,clientPortalApi,documentUtils,notificationsApi,reputationApi,publicProductsApi,plansApi,recaptcha,reducedMotion,softwareApplicationLd,subscriptionPaywall,trialCampaign,weatherVisuals,formatters,brand,Avatar,Button,Card,chart}-*.js',
 						// Páginas públicas carregadas por lazy(): sem elas no precache a
 						// rota cai no ErrorBoundary offline (evidência do P1).
-						'assets/{FeaturesPage,AiPredictivePage,SchedulingPage,AboutPage,ContactPage,PrivacyPolicyPage,TermsPage,ForgotPasswordPage,NotFoundPage,CommercialIntentPage,PricingPersuasionCharts,BarChart,ThemeToggle}-*.js',
+						'assets/{FeaturesPage,AiPredictivePage,SchedulingPage,AboutPage,ContactPage,PrivacyPolicyPage,TermsPage,ForgotPasswordPage,NotFoundPage,CommercialIntentPage,PricingPersuasionCharts,BarChart,CartesianChart,ThemeToggle}-*.js',
 						// Páginas e blocos públicos que as rotas acima importam: sem eles
 						// no precache o import dinâmico falha offline (evidência do P1).
 						'assets/{PublicPostPage,PublicProductPage,PublicReviewPage,PublicNpsPage,PublicAppointmentManagePage,PublicOwnerInvitePage,ResetPasswordPage,QueueStatusCard,SegmentPicker,SeoHead,siteUrl,Tabs,Field,DynamicIcon,workbox-window.prod.es5}-*.js',

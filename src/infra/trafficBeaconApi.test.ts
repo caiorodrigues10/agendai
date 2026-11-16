@@ -130,6 +130,21 @@ describe('trafficBeaconApi', () => {
     expect(getTrafficBeaconRoute('/s/')).toBeNull();
     expect(getTrafficBeaconRoute('/s/acme/extra')).toBeNull();
   });
+
+  it('maps the canonical public share URL to the literal pattern without the id', () => {
+    const canonicalId = '0f9d4a1c-6f6f-4d0e-9d1e-2b7a5c8e1f33';
+
+    expect(getTrafficBeaconRoute(`/s/salon/${canonicalId}`)).toBe('/s/:slug');
+    expect(getTrafficBeaconRoute(`/s/salon/${canonicalId}?token=secret#frag`)).toBe('/s/:slug');
+    expect(getTrafficBeaconRoute('/s/salon/acme')).toBe('/s/:slug');
+    expect(getTrafficBeaconRoute('/s/salon/')).toBeNull();
+    // `/s/salon` sem id continua caindo na regra genérica de um segmento
+    // (idêntico a `/s/acme` acima): sem um segmento a mais não há como
+    // distingui-lo de um slug qualquer, e nenhum identificador é enviado.
+    expect(getTrafficBeaconRoute('/s/salon')).toBe('/s/:slug');
+    expect(getTrafficBeaconRoute(`/s/salon/${canonicalId}/extra`)).toBeNull();
+    expect(getTrafficBeaconRoute(`/s/salon/${canonicalId}/../..`)).toBeNull();
+  });
 });
 
 describe('trafficBeaconApi payloads', () => {
@@ -174,6 +189,27 @@ describe('trafficBeaconApi payloads', () => {
 
     expect(policyDuringBeacon).toBe('no-referrer');
     expect(browserDocument.referrerPolicy).toBe(originalPolicy);
+  });
+
+  it('strips the salon id, query and fragment from the canonical share URL', async () => {
+    const canonicalId = '0f9d4a1c-6f6f-4d0e-9d1e-2b7a5c8e1f33';
+    const sendBeacon = makeSendBeacon();
+
+    sendTrafficBeacon({
+      environment: productionEnvironment,
+      pathname: `/s/salon/${canonicalId}?tab=profile&token=secret#anchor`,
+      referrer: '',
+      navigator: { sendBeacon },
+    });
+
+    expect(sendBeacon).toHaveBeenCalledTimes(1);
+    expect(sendBeacon.mock.calls[0][0]).toBe(beaconUrl);
+    const body = sendBeacon.mock.calls[0][1] as Blob;
+    const payload = JSON.parse(await readBlob(body));
+    expect(payload).toEqual({ p: '/s/:slug' });
+    expect(JSON.stringify(payload)).not.toContain(canonicalId);
+    expect(JSON.stringify(payload)).not.toContain('secret');
+    expect(JSON.stringify(payload)).not.toContain('profile');
   });
 
   it('never includes concrete slugs, tokens, queries, or fragments in the payload', async () => {

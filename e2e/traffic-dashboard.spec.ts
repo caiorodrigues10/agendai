@@ -21,6 +21,13 @@ const USER = {
   role: 'MASTER_ADMIN',
 };
 
+const OWNER_USER = {
+  id: 'owner-traffic-e2e',
+  name: 'Dona de Tráfego',
+  email: 'owner.traffic@example.test',
+  role: 'OWNER',
+};
+
 function buildReport(period: string) {
   const granularity =
     period === 'day'
@@ -160,15 +167,25 @@ async function seedMaster(page: Page, access: MasterPermissions): Promise<void> 
   );
 }
 
+async function seedOwner(page: Page): Promise<void> {
+  await page.addInitScript(user => {
+    localStorage.setItem('barber_user', JSON.stringify(user));
+    localStorage.setItem('barber_remember_me', 'true');
+    localStorage.setItem('agendai:cookie-consent-v2', 'essential');
+  }, OWNER_USER);
+}
+
 async function installApiMocks(
   page: Page,
   options: {
     mode?: ReportMode;
+    user?: typeof USER;
     internalPermissions?: string[];
     onTrafficRequest?: (url: URL) => void;
   } = {}
 ): Promise<void> {
   const mode = options.mode ?? 'ok';
+  const user = options.user ?? USER;
   const internalPermissions = options.internalPermissions ?? ['internal:traffic:read'];
 
   await page.route('**/api/**', async (route: Route) => {
@@ -177,7 +194,7 @@ async function installApiMocks(
     if (url.pathname === '/api/auth/refresh') {
       await route.fulfill({
         json: {
-          user: { ...USER, internalPermissions },
+          user: { ...user, internalPermissions },
           accessToken: 'traffic-e2e-token',
         },
       });
@@ -227,9 +244,7 @@ async function openTrafficDashboard(page: Page): Promise<void> {
 }
 
 async function selectPeriod(page: Page, label: string, expectedKey: string): Promise<void> {
-  const periodControl = page
-    .getByRole('tab', { name: label, exact: true })
-    .or(page.getByRole('button', { name: label, exact: true }));
+  const periodControl = page.getByRole('button', { name: label, exact: true });
 
   const responsePromise = page.waitForResponse(response => {
     if (!response.url().includes('/api/admin/traffic?')) return false;
@@ -288,9 +303,7 @@ test('tráfego: área e papel alteram a consulta', async ({ page }) => {
   await installApiMocks(page);
   await openTrafficDashboard(page);
 
-  const areaControl = page
-    .getByRole('tab', { name: /páginas.*salão/i })
-    .or(page.getByRole('button', { name: /páginas.*salão/i }));
+  const areaControl = page.getByRole('button', { name: /páginas.*salão/i });
   const areaResponse = page.waitForResponse(response => {
     if (!response.url().includes('/api/admin/traffic?')) return false;
     return new URL(response.url()).searchParams.get('area') === 'salon_public';
@@ -339,4 +352,56 @@ test('tráfego: usuário sem permissão não consulta a API', async ({ page }) =
 
   await expect(page.getByRole('heading', { name: 'Acesso negado' })).toBeVisible();
   expect(trafficRequests).toHaveLength(0);
+});
+
+// ITEM 4 — usuário que NÃO é MASTER_ADMIN: o guard da rota (/master/* exige
+// MASTER_ADMIN) nega antes de qualquer mount, então o relatório nunca é
+// consultado. A camada interna (TrafficOverviewAccess) tem teste próprio em
+// src/pages/master-admin/TrafficOverviewAccess.test.tsx.
+test('tráfego: usuário OWNER não acessa a tela e não consulta o relatório', async ({ page }) => {
+  const trafficRequests: URL[] = [];
+  await seedOwner(page);
+  await installApiMocks(page, {
+    user: OWNER_USER,
+    onTrafficRequest: url => trafficRequests.push(url),
+  });
+
+  await page.goto('/master/traffic');
+
+  await expect(page).toHaveURL(/\/login/, { timeout: 15_000 });
+  await expect(page.getByRole('heading', { name: 'Tráfego', exact: true })).toHaveCount(0);
+  expect(trafficRequests).toHaveLength(0);
+});
+
+// ITEM 3 — tooltip com texto longo em viewport estreito: o bubble tem
+// max-w-[calc(100vw-2rem)] + quebra de linha, então cabe inteiro na tela.
+test('tráfego: tooltip longo cabe em viewport estreito', async ({ page }) => {
+  await seedMaster(page, 'allowed');
+  await installApiMocks(page);
+  await page.setViewportSize({ width: 375, height: 667 });
+  await openTrafficDashboard(page);
+
+  const trigger = page.getByRole('button', { name: 'Visitantes (soma dos dias)', exact: true });
+  await trigger.focus();
+  const tooltip = page.getByRole('tooltip');
+  await expect(tooltip).toBeVisible();
+  await expect(tooltip).toHaveText(
+    'Como não rastreamos pessoas, a mesma pessoa que volta em outro dia conta de novo'
+  );
+
+  // Dentro dos 375 px da viewport (nem sai pela esquerda nem pela direita).
+  await expect
+    .poll(async () => {
+      const current = await tooltip.boundingBox();
+      if (!current) return null;
+      const fits = current.x >= 0 && current.x + current.width <= 375;
+      return fits ? 'fits' : `overflow: x=${current.x} w=${current.width}`;
+    })
+    .toBe('fits');
+
+  // Sem a largura máxima o texto longo passaria de uma viewport inteira:
+  // caber abaixo dela prova que a quebra de linha está ativa.
+  const box = await tooltip.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box!.width).toBeLessThan(375);
 });

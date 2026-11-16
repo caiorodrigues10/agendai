@@ -211,14 +211,14 @@ describe('TrafficOverviewPage', () => {
     renderPage();
 
     ['Dia', 'Semana', 'Mês', '3 meses', '6 meses', 'Último ano', 'Anos'].forEach(label => {
-      expect(screen.getByRole('tab', { name: label })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: label })).toBeInTheDocument();
     });
     await waitFor(() => expect(adminTrafficApi.getTrafficReport).toHaveBeenCalledTimes(1));
     await waitFor(() => {
       expect(screen.getByTestId('location-search')).toHaveTextContent('period=week');
     });
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Dia' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Dia' }));
     await waitFor(() => {
       expect(adminTrafficApi.getTrafficReport).toHaveBeenLastCalledWith({
         period: 'day',
@@ -241,7 +241,7 @@ describe('TrafficOverviewPage', () => {
       });
     });
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Mês' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Mês' }));
     await waitFor(() => {
       expect(adminTrafficApi.getTrafficReport).toHaveBeenLastCalledWith({
         period: 'month',
@@ -266,7 +266,7 @@ describe('TrafficOverviewPage', () => {
       });
     });
 
-    fireEvent.click(screen.getByRole('tab', { name: '3 meses' }));
+    fireEvent.click(screen.getByRole('button', { name: '3 meses' }));
     await waitFor(() => {
       expect(adminTrafficApi.getTrafficReport).toHaveBeenLastCalledWith({
         period: '3m',
@@ -282,7 +282,7 @@ describe('TrafficOverviewPage', () => {
 
     await waitFor(() => expect(adminTrafficApi.getTrafficReport).toHaveBeenCalledTimes(1));
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Páginas de salão' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Páginas de salão' }));
     await waitFor(() => {
       expect(adminTrafficApi.getTrafficReport).toHaveBeenLastCalledWith({
         period: 'week',
@@ -318,7 +318,7 @@ describe('TrafficOverviewPage', () => {
       })
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Semana' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Semana' }));
     expect(await screen.findByText('Visitantes (soma dos dias)')).toBeInTheDocument();
   });
 

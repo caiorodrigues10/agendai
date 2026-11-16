@@ -150,6 +150,10 @@ export function getTrafficBeaconRoute(pathname: string): TrafficBeaconRoute | nu
 
   const path = pathname.split(/[?#]/, 1)[0];
   if (path === '/esqueci-senha') return '/esqueci-senha';
+  // Canonical public share URL (`/s/salon/:id`, served by the backend share
+  // route). The concrete id is dropped: only the literal family pattern is
+  // returned, so no identifier ever reaches the beacon.
+  if (/^\/s\/salon\/[^/]+$/.test(path)) return '/s/:slug';
   if (/^\/s\/[^/]+$/.test(path)) return '/s/:slug';
   if (/^\/agendamento\/[^/]+$/.test(path)) return '/agendamento/:token';
 

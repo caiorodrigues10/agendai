@@ -40,6 +40,52 @@ const withSize = entries.map(rel => {
   return { url: rel, bytes };
 });
 
+/**
+ * Fechamento transitivo: todo chunk referenciado por um ESTÁTICO import de um
+ * item já precacheado também precisa estar no precache. Sem isto, o Rollup
+ * reagrupa módulos (ex.: um chunk novo de gráfico) e a rota pública passa a
+ * cair no ErrorBoundary offline — exatamente a falha do e2e P1.
+ * Imports dinâmicos (`import("./x.js")`) ficam de fora: eles são lazy e entram
+ * no cache de runtime.
+ */
+function findStaticChunkRefs(file) {
+  const source = fs.readFileSync(file, 'utf8');
+  const refs = new Set();
+  const patterns = file.endsWith('.html')
+    ? [/(?:src|href)="([^"]+\.js)"/g]
+    : [/(?:from|import)\s*["'](?:\.\/)?([^"']+\.js)["']/g];
+  for (const pattern of patterns) {
+    for (const found of source.matchAll(pattern)) refs.add(found[1]);
+  }
+  return refs;
+}
+
+function findPrecacheGaps() {
+  const precached = new Set(entries.map(url => url.replace(/^\//, '')));
+  const missing = new Set();
+
+  const visit = rel => {
+    const normalized = rel.replace(/^\//, '');
+    if (missing.has(normalized) || precached.has(normalized)) return;
+    const file = path.resolve('dist', normalized);
+    if (!fs.existsSync(file)) return; // importado de fora do build (ex.: CDN)
+    missing.add(normalized);
+    // Um chunk só entra no precache depois de existir: se ele também for
+    // referenciado estaticamente por um item precacheado, já teria sido
+    // visitado a partir dele; aqui cobrimos o próprio arquivo ausente.
+    for (const ref of findStaticChunkRefs(file)) visit(ref);
+  };
+
+  for (const url of entries) {
+    if (!/\.(js|html)$/.test(url)) continue;
+    const file = path.resolve('dist', url.replace(/^\//, ''));
+    if (!fs.existsSync(file)) continue;
+    for (const ref of findStaticChunkRefs(file)) visit(ref);
+  }
+
+  return [...missing].sort();
+}
+
 const kindOf = url => {
   if (/\.(js|mjs)$/.test(url)) return 'js';
   if (/\.css$/.test(url)) return 'css';
@@ -61,11 +107,20 @@ for (const item of withSize) {
 const totalBytes = withSize.reduce((sum, item) => sum + item.bytes, 0);
 const biggest = [...withSize].sort((a, b) => b.bytes - a.bytes).slice(0, 15);
 const mb = bytes => `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+const gaps = findPrecacheGaps();
 
 if (asJson) {
   console.log(
     JSON.stringify(
-      { total: totalBytes, count: withSize.length, groups, biggest, limit, ok: limit === null || totalBytes <= limit },
+      {
+        total: totalBytes,
+        count: withSize.length,
+        groups,
+        biggest,
+        limit,
+        gaps,
+        ok: (limit === null || totalBytes <= limit) && gaps.length === 0,
+      },
       null,
       2
     )
@@ -91,6 +146,14 @@ if (asJson) {
         : `ESTOUROU: ${totalBytes} > limite ${limit}`
     );
   }
+  console.log('');
+  console.log(
+    gaps.length === 0
+      ? 'Fechamento do precache OK: nenhum chunk de import estático ficou de fora'
+      : `Fechamento do precache REPROVADO: ${gaps.length} chunk(s) ausente(s)`
+  );
+  for (const gap of gaps) console.log(`  ausente: ${gap}`);
 }
 
+if (gaps.length > 0) process.exit(1);
 if (limit !== null && totalBytes > limit) process.exit(1);
