@@ -23,14 +23,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: agendai
+      # Backend irmão: só a main. O contrato de tráfego (PR #17 do backend)
+      # já está mergeado na main do backend, então este workflow valida o
+      # front contra a main — sem nenhum ref para branch de feature.
       - uses: actions/checkout@v4
         with:
           repository: caiorodrigues10/agendai-back-end
           path: backend
-          # PR #17 ainda contém o contrato de tráfego usado pela PR2 do front.
-          # O branch é trocado por main depois do merge do backend, sem misturar
-          # os PRs nem publicar o backend diretamente na main.
-          ref: feat/site-traffic-tracking
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
