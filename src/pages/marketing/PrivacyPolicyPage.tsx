@@ -37,7 +37,17 @@ const sections = [
     ],
   },
   {
-    title: '4. Finalidade e base legal',
+    title: '4. Contagem anônima de visitas',
+    body: [
+      'Contamos, de forma anônima, quantas pessoas abriram a página pública de cada salão (perfil, fila, agendamento e produtos) e de onde vieram (hostname de quem linkou, como Instagram ou WhatsApp).',
+      'Não usamos cookie, localStorage, fingerprint, IP, user agent ou qualquer identificador persistente do visitante — o visitante não é identificado nem rastreado entre páginas.',
+      'Enviamos apenas o padrão da rota, o identificador público do salão (que já está na URL compartilhada), a forma daquele identificador, se é a primeira visita ou uma troca de aba e, quando presente, o nome da aba aberta. Nada de token, query, fragmento, nome, e-mail ou telefone.',
+      'Visitas feitas pelo próprio dono ou pela equipe já logada naquele salão não são contadas.',
+      'Quem ativa Do Not Track (DNT) ou Global Privacy Control (GPC) no navegador não é contado, e o envio só ocorre em ambiente de produção. Os números são aproximados e servem apenas ao dono do salão ver o interesse na sua página.',
+    ],
+  },
+  {
+    title: '5. Finalidade e base legal',
     body: [
       'Executar o contrato de prestação do serviço (gestão de fila, agenda, equipe e financeiro).',
       'Cumprir obrigações legais (emissão de cobrança, prevenção à fraude em pagamentos).',
@@ -46,7 +56,7 @@ const sections = [
     ],
   },
   {
-    title: '5. Compartilhamento',
+    title: '6. Compartilhamento',
     body: [
       'Dados de cada barbearia são completamente separados (multi-tenant). Não vendemos dados pessoais.',
       'Compartilhamos apenas com processadores necessários ao serviço:',
@@ -59,28 +69,29 @@ const sections = [
     ],
   },
   {
-    title: '6. Segurança',
+    title: '7. Segurança',
     body: [
       'Dados de cada barbearia completamente separados. Autenticação por papéis (Owner, Employee, Master Admin), senhas criptografadas e assinatura validada por CPF.',
       'Conexões seguras (HTTPS). Pagamentos com cartão são tokenizados no navegador e enviados diretamente ao Mercado Pago — nunca passam pelos nossos servidores.',
     ],
   },
   {
-    title: '7. Seus direitos (LGPD)',
+    title: '8. Seus direitos (LGPD)',
     body: [
       'Você pode solicitar confirmação de tratamento, acesso, correção, anonimização, portabilidade, eliminação ou revogação de consentimento.',
       'Para exercer seus direitos, entre em contato pelo e-mail abaixo. Responderemos em prazo razoável conforme a LGPD.',
     ],
   },
   {
-    title: '8. Retenção',
+    title: '9. Retenção',
     body: [
       'Mantemos os dados enquanto a conta estiver ativa ou conforme exigido por lei (obrigações fiscais e contratuais).',
       'Dados de fila e agendamentos são vinculados ao estabelecimento e gerenciados pelo dono do salão.',
+      'A contagem anônima de visitas é agregada; quaisquer sinais temporários usados para deduplicar são descartados em até 24 horas e nunca viram identificador de visitante.',
     ],
   },
   {
-    title: '9. Contato',
+    title: '10. Contato',
     body: [
       `Dúvidas sobre privacidade ou tratamento de dados: ${CONTACT_EMAIL}.`,
       'Seus dados só são usados para as finalidades descritas nesta política.',
@@ -120,7 +131,7 @@ export const PrivacyPolicyPage: React.FC = () => {
               Política de Privacidade
             </h1>
             <p className="mt-4 text-sm font-medium text-neutral-500">
-              Última atualização: agosto de 2026
+              Última atualização: novembro de 2026
             </p>
             <p className="mt-6 text-base leading-relaxed text-neutral-400">
               Transparência sobre como a Agenda Já trata seus dados — alinhado ao que prometemos na

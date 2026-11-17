@@ -18,8 +18,24 @@ export const TrafficBeaconListener: React.FC = () => {
     if (lastPathname.current === pathname) return;
 
     lastPathname.current = pathname;
-    sendTrafficBeacon({ pathname });
-  }, [location.pathname]);
+    // `/queue/:id` é auto-reportada pela própria página
+    // (`useSalonTrafficTabBeacon`), que conhece a aba inicial resolvida — o
+    // listener não emite para essa rota, senão a entrada geraria 2 pings.
+    if (isSelfReportedSalonPage(pathname)) return;
+    // `search` entra apenas para o `tab` allowlistado das páginas de salão
+    // atendidas pelo listener (`/s/salon/:id?tab=…`); a query inteira nunca é
+    // serializada e a deduplicação continua por pathname (StrictMode não duplica).
+    sendTrafficBeacon({ pathname, search: location.search });
+  }, [location.pathname, location.search]);
 
   return null;
 };
+
+/**
+ * Rota da página pública do salão cuja visita é reportada pela página em si
+ * (exatamente 1 ping `kind:'visit'` por carregamento). As demais páginas de
+ * salão (produto, `/s/…`) continuam saindo pelo listener.
+ */
+export function isSelfReportedSalonPage(pathname: string): boolean {
+  return /^\/queue\/[^/]+$/.test(pathname);
+}

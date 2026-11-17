@@ -1,4 +1,6 @@
 import { API_BASE } from './apiClient';
+import { authStorage } from './authStorage';
+import type { PublicTab } from '../shared/publicTabs';
 
 type StaticTrafficBeaconRoute =
   | '/'
@@ -101,12 +103,24 @@ export interface TrafficBeaconSendOptions {
   environment?: TrafficBeaconEnvironmentOptions;
   /** Defaults to window.location.pathname. */
   pathname?: string;
+  /**
+   * Defaults to window.location.search. Only the allowlisted `tab` of a
+   * public salon page is ever read from it; the query is never serialized.
+   */
+  search?: string;
   /** Defaults to document.referrer. */
   referrer?: string;
   /** Injectable navigator, primarily for tests and non-browser callers. */
   navigator?: TrafficBeaconNavigator;
   /** Injectable fetch, primarily for tests. */
   fetch?: typeof fetch;
+  /**
+   * Ids de salão do usuário já autenticado (dono/equipe). Injetável para
+   * testes; por padrão lê `authStorage.getUser()` — só o `barbershopId` da
+   * sessão em storage, sem token na rede e sem storage novo. Correspondência
+   * por organização/slug não é possível no cliente (ver contrato).
+   */
+  ownSalonIds?: readonly string[];
 }
 
 const normalized = (value: string | undefined): string =>
@@ -226,6 +240,222 @@ export function getReferrerHostname(referrer: string | undefined): string | unde
 }
 
 /**
+ * Segundo caminho do beacon: páginas públicas de um salão, com atribuição ao
+ * salão. O id/slug público do salão já está na URL compartilhada, por isso é
+ * enviado; o visitante continua anônimo (nada de cookie, localStorage,
+ * fingerprint, IP, user agent ou identificador persistente).
+ */
+
+/** Padrões de rota das páginas públicas de um salão. */
+export type SalonTrafficBeaconRoute = '/queue/:id' | '/queue/:id/produtos/:productId' | '/s/:slug';
+
+/** Abas da página pública (`src/shared/publicTabs.ts`). */
+export type SalonTrafficTab = PublicTab;
+
+/** Allowlist fixa de abas: qualquer outro valor é descartado (vira ausente). */
+const SALON_TRAFFIC_TABS: readonly SalonTrafficTab[] = ['queue', 'appointments', 'profile'];
+
+/**
+ * `kind` do ping de salão: `visit` = entrada/carregamento da página pública
+ * (exatamente uma vez); `tab` = troca de aba posterior. Sem esta distinção o
+ * backend não separa "primeira visita" de "visualização de aba".
+ */
+export type SalonTrafficBeaconKind = 'visit' | 'tab';
+
+/** Allowlist fixa de `kind`: qualquer outro valor descarta o ping inteiro. */
+const SALON_TRAFFIC_KINDS: readonly SalonTrafficBeaconKind[] = ['visit', 'tab'];
+
+/** Valida um valor cru de `kind` contra a allowlist fixa. */
+export function sanitizeSalonTrafficKind(value: unknown): SalonTrafficBeaconKind | undefined {
+  if (typeof value !== 'string') return undefined;
+  return (SALON_TRAFFIC_KINDS as readonly string[]).includes(value)
+    ? (value as SalonTrafficBeaconKind)
+    : undefined;
+}
+
+/**
+ * Tipo do identificador público em `salon`: `id` = UUID do barbershop,
+ * `slug` = slug público (organização). O frontend conhece a forma do valor
+ * que ele mesmo leu da URL, então informa ao backend em vez de deixá-lo
+ * adivinhar.
+ */
+export type SalonTrafficIdentifierType = 'id' | 'slug';
+
+/** Allowlist fixa de `salonType`. */
+const SALON_TRAFFIC_IDENTIFIER_TYPES: readonly SalonTrafficIdentifierType[] = ['id', 'slug'];
+
+/** UUID canônico (v4) do barbershop — `prisma @default(uuid())`. */
+const SALON_UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Valida um valor cru de `salonType` contra a allowlist fixa. */
+export function sanitizeSalonTrafficIdentifierType(
+  value: unknown
+): SalonTrafficIdentifierType | undefined {
+  if (typeof value !== 'string') return undefined;
+  return (SALON_TRAFFIC_IDENTIFIER_TYPES as readonly string[]).includes(value)
+    ? (value as SalonTrafficIdentifierType)
+    : undefined;
+}
+
+/**
+ * Heurística de forma (a única leitura possível no cliente, sem rede):
+ * UUID → `id`; qualquer outro valor válido (slug `a-z0-9` com hífen) → `slug`.
+ */
+function detectSalonIdentifierType(value: string): SalonTrafficIdentifierType {
+  return SALON_UUID_PATTERN.test(value) ? 'id' : 'slug';
+}
+
+/**
+ * Identificador público do salão: UUID do barbershop (`prisma` `@default(uuid())`)
+ * ou slug público (`a-z0-9` com hífen, máx. 100 — ver `organizationSchema`).
+ * Charset e tamanho limitam o que pode sair; qualquer outro valor não é enviado.
+ */
+export const SALON_IDENTIFIER_MAX_LENGTH = 100;
+const SALON_IDENTIFIER_PATTERN = /^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/;
+
+export function isValidSalonIdentifier(value: unknown): value is string {
+  return (
+    typeof value === 'string' &&
+    value.length > 0 &&
+    value.length <= SALON_IDENTIFIER_MAX_LENGTH &&
+    SALON_IDENTIFIER_PATTERN.test(value)
+  );
+}
+
+/** Valida um valor cru de aba contra a allowlist fixa. */
+export function sanitizeSalonTrafficTab(value: unknown): SalonTrafficTab | undefined {
+  if (typeof value !== 'string') return undefined;
+  return (SALON_TRAFFIC_TABS as readonly string[]).includes(value)
+    ? (value as SalonTrafficTab)
+    : undefined;
+}
+
+/**
+ * Lê somente o parâmetro `tab` da query. Os demais parâmetros (token, e-mail,
+ * utm…) nunca são lidos nem serializados; um valor fora da allowlist vira
+ * ausente.
+ */
+export function getSalonTrafficTab(search: string | undefined): SalonTrafficTab | undefined {
+  if (typeof search !== 'string' || search.length === 0) return undefined;
+  return sanitizeSalonTrafficTab(new URLSearchParams(search).get('tab') ?? undefined);
+}
+
+export interface SalonTrafficBeaconPayload {
+  /** Literal route pattern of the public salon page. */
+  p: SalonTrafficBeaconRoute;
+  /** Public salon id/slug — already present in the shared public URL. */
+  salon: string;
+  /** Forma do identificador acima: UUID do barbershop (`id`) ou slug (`slug`). */
+  salonType: SalonTrafficIdentifierType;
+  /** `visit` = entrada na página; `tab` = troca de aba posterior. Obrigatório. */
+  kind: SalonTrafficBeaconKind;
+  /** Visible tab, only when it comes from the fixed allowlist. */
+  tab?: SalonTrafficTab;
+  /** Only the hostname of document.referrer, when it is a valid URL. */
+  r?: string;
+}
+
+export interface SalonTrafficTarget {
+  p: SalonTrafficBeaconRoute;
+  salon: string;
+  salonType: SalonTrafficIdentifierType;
+}
+
+/**
+ * Maps a pathname to a public salon page. A pathname containing a query string
+ * or fragment is rejected outright. The concrete product id is never part of
+ * the result: only the literal family pattern is returned.
+ */
+export function getSalonTrafficTarget(pathname: string): SalonTrafficTarget | null {
+  if (typeof pathname !== 'string' || pathname.length === 0) return null;
+  if (pathname.includes('?') || pathname.includes('#')) return null;
+
+  // Vitrine de produto: só o padrão literal e o id do salão (nunca o productId).
+  const product = /^\/queue\/([^/]+)\/produtos\/([^/]+)$/.exec(pathname);
+  if (product) {
+    return isValidSalonIdentifier(product[1])
+      ? {
+          p: '/queue/:id/produtos/:productId',
+          salon: product[1],
+          salonType: detectSalonIdentifierType(product[1]),
+        }
+      : null;
+  }
+
+  const shop = /^\/queue\/([^/]+)$/.exec(pathname);
+  if (shop) {
+    return isValidSalonIdentifier(shop[1])
+      ? { p: '/queue/:id', salon: shop[1], salonType: detectSalonIdentifierType(shop[1]) }
+      : null;
+  }
+
+  // Link canônico de compartilhamento (`/s/salon/:id`), servido pelo backend.
+  const canonical = /^\/s\/salon\/([^/]+)$/.exec(pathname);
+  if (canonical) {
+    return isValidSalonIdentifier(canonical[1])
+      ? { p: '/s/:slug', salon: canonical[1], salonType: detectSalonIdentifierType(canonical[1]) }
+      : null;
+  }
+
+  // `/s/salon` sem id não é página de salão (cai no beacon global, sem salão).
+  const share = /^\/s\/([^/]+)$/.exec(pathname);
+  if (share) {
+    if (share[1] === 'salon') return null;
+    return isValidSalonIdentifier(share[1])
+      ? { p: '/s/:slug', salon: share[1], salonType: detectSalonIdentifierType(share[1]) }
+      : null;
+  }
+
+  return null;
+}
+
+export interface SalonTrafficBeaconOptions {
+  /** `location.search` — só o `tab` allowlistado é lido daqui. */
+  search?: string;
+  referrer?: string;
+  /** Tab já conhecida pela página; prevalece sobre a query. */
+  tab?: SalonTrafficTab | null;
+  /**
+   * Obrigatório: allowlist `visit`/`tab`. Um valor ausente ou fora da
+   * allowlist descarta o payload inteiro — um ping sem `kind` é ambíguo e
+   * nunca sai do frontend.
+   */
+  kind: SalonTrafficBeaconKind;
+}
+
+/**
+ * Builds the privacy-safe salon payload. Only the literal pattern, the public
+ * salon id/slug, its type, the event kind, the allowlisted tab and the
+ * referrer hostname can be present.
+ */
+export function createSalonTrafficBeaconPayload(
+  pathname: string,
+  options: SalonTrafficBeaconOptions
+): SalonTrafficBeaconPayload | null {
+  const target = getSalonTrafficTarget(pathname);
+  if (!target) return null;
+
+  const kind = sanitizeSalonTrafficKind(options.kind);
+  if (!kind) return null;
+
+  const tab =
+    options.tab === undefined || options.tab === null
+      ? getSalonTrafficTab(options.search)
+      : sanitizeSalonTrafficTab(options.tab);
+
+  const r = getReferrerHostname(options.referrer);
+  const payload: SalonTrafficBeaconPayload = {
+    p: target.p,
+    salon: target.salon,
+    salonType: target.salonType,
+    kind,
+  };
+  if (tab) payload.tab = tab;
+  if (r) payload.r = r;
+  return payload;
+}
+
+/**
  * Builds the privacy-safe payload. The concrete slug/token is never copied
  * from the URL, and the only optional field is the referrer hostname.
  */
@@ -316,7 +546,7 @@ function sendKeepaliveFallback(
 
 /** Serializes and dispatches an already-built payload (never throws). */
 function dispatchTrafficBeacon(
-  payload: TrafficBeaconPayload,
+  payload: TrafficBeaconPayload | SalonTrafficBeaconPayload,
   options: TrafficBeaconSendOptions
 ): void {
   const url = `${API_BASE}/api/ping`;
@@ -335,7 +565,39 @@ function resolveEnvironment(options: TrafficBeaconSendOptions): TrafficBeaconEnv
 }
 
 /**
+ * Ids de salão da sessão autenticada (dono/equipe). Só o `barbershopId`
+ * já persistido pelo fluxo de auth é lido — nunca token, nunca rede, nunca
+ * storage novo. Em dúvida sobre a pertinência, a resposta é "não é meu":
+ * apenas uma correspondência clara de id suprime o ping.
+ */
+function resolveOwnSalonIds(options: TrafficBeaconSendOptions): readonly string[] {
+  if (Array.isArray(options.ownSalonIds)) return options.ownSalonIds;
+
+  try {
+    const user = authStorage.getUser() as { barbershopId?: unknown } | null;
+    return user && typeof user.barbershopId === 'string' && user.barbershopId.length > 0
+      ? [user.barbershopId]
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Visita do próprio dono/equipe autenticados não é visita de visitante:
+ * suprime o ping de salão apenas em correspondência clara de id. O beacon
+ * global (marketing) não tem `salon` e nunca passa por aqui.
+ */
+function isOwnSalonPing(salon: string, options: TrafficBeaconSendOptions): boolean {
+  return resolveOwnSalonIds(options).some(ownId => ownId === salon);
+}
+
+/**
  * Sends one traffic ping without blocking navigation or awaiting the request.
+ *
+ * Public salon pages (`/queue/:id`, `/queue/:id/produtos/:productId`,
+ * `/s/:slug`) are attributed to the salon through the second payload path;
+ * every other monitored route keeps the original pattern-only payload.
  *
  * sendBeacon is preferred because a text/plain Blob is a simple request and
  * does not trigger a CORS preflight. If it is unavailable or rejects the
@@ -348,8 +610,62 @@ export function sendTrafficBeacon(options: TrafficBeaconSendOptions = {}): void 
   const pathname = options.pathname ?? currentPathname();
   if (!pathname) return;
 
-  const payload = createTrafficBeaconPayload(pathname, options.referrer ?? currentReferrer());
+  const referrer = options.referrer ?? currentReferrer();
+
+  // Páginas públicas de salão entram pela rota de atribuição. Nesta rota a
+  // entrada é sempre uma `visit` (a página pública reporta as `tab`).
+  const salonPayload = createSalonTrafficBeaconPayload(pathname, {
+    search: options.search,
+    referrer,
+    kind: 'visit',
+  });
+  if (salonPayload) {
+    if (isOwnSalonPing(salonPayload.salon, options)) return;
+    dispatchTrafficBeacon(salonPayload, options);
+    return;
+  }
+
+  const payload = createTrafficBeaconPayload(pathname, referrer);
   if (!payload) return;
+
+  dispatchTrafficBeacon(payload, options);
+}
+
+export interface SalonTrafficBeaconSendOptions extends TrafficBeaconSendOptions {
+  /** Tab visible on the public page; overrides the value read from `search`. */
+  tab?: SalonTrafficTab | null;
+  /**
+   * Allowlist `visit`/`tab`. Valor ausente/inválido → nenhum ping (um payload
+   * ambíguo nunca sai). `visit` = entrada na página; `tab` = troca de aba.
+   */
+  kind: SalonTrafficBeaconKind;
+}
+
+/**
+ * Sends one ping for a public salon page, attributed to that salon. Used by
+ * the public page: the first report of a page load is a `visit` (with the
+ * resolved initial tab), later tab changes are `tab` views — never a new
+ * visit, and never with a visitor identifier.
+ *
+ * The build/environment/privacy guards (production only, demo/dev/test/
+ * localhost hosts, DNT, GPC) are exactly the same as the global beacon, and
+ * the ping is also suppressed when the URL is the salon of the authenticated
+ * session (owner/team — a clear id match only).
+ */
+export function sendSalonTrafficBeacon(options: SalonTrafficBeaconSendOptions): void {
+  if (!isTrafficBeaconEnabled(resolveEnvironment(options))) return;
+
+  const pathname = options.pathname ?? currentPathname();
+  if (!pathname) return;
+
+  const payload = createSalonTrafficBeaconPayload(pathname, {
+    search: options.search,
+    referrer: options.referrer ?? currentReferrer(),
+    tab: options.tab,
+    kind: options.kind,
+  });
+  if (!payload) return;
+  if (isOwnSalonPing(payload.salon, options)) return;
 
   dispatchTrafficBeacon(payload, options);
 }

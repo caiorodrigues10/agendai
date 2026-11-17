@@ -260,9 +260,15 @@ describe('trafficBeaconApi payloads', () => {
     expect(sendBeacon.mock.calls[0][0]).toBe(beaconUrl);
     const body = sendBeacon.mock.calls[0][1] as Blob;
     const payload = JSON.parse(await readBlob(body));
-    // Só o padrão literal sai: o id concreto é descartado antes do envio.
-    expect(payload).toEqual({ p: '/s/:slug' });
-    expect(Object.keys(payload).sort()).toEqual(['p']);
+    // O id/slug público do salão é permitido (já está na URL compartilhada);
+    // `salonType`/`kind` dizem ao backend a forma do id e o tipo do evento.
+    expect(payload).toEqual({
+      p: '/s/:slug',
+      salon: canonicalId,
+      salonType: 'id',
+      kind: 'visit',
+    });
+    expect(Object.keys(payload).sort()).toEqual(['kind', 'p', 'salon', 'salonType']);
 
     sendBeacon.mockClear();
     sendTrafficBeacon({

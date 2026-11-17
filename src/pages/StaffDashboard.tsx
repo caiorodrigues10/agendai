@@ -23,6 +23,7 @@ import { TeamManager } from '../features/team';
 import { DemandAlertBanner } from '../features/finance';
 import { OwnerReferralsPanel } from '../features/referrals';
 import { ShowcasePanel, PublicLinkPanel } from '../features/showcase';
+import { SalonTrafficSection, SalonVisitsCard } from '../features/traffic';
 import { PageAppearancePanel } from '../features/appearance';
 import { AppointmentCalendar } from '../features/appointments';
 import { Toast } from '../components/ui/Toast';
@@ -423,6 +424,7 @@ export const StaffDashboard: React.FC = () => {
                   onNavigate={tab => navigate(`/app/${tab}`)}
                 />
               )}
+              {barbershopId && <SalonVisitsCard barbershopId={barbershopId} />}
             <DemandAlertBanner />
             {hasDashboard && isOwnerOrAdmin && <LowStockBanner />}
             {supportsAppointments(operationMode) && (
@@ -745,6 +747,7 @@ export const StaffDashboard: React.FC = () => {
                 barbershopId={barbershopId}
                 operationMode={settings?.operationMode}
               />
+              <SalonTrafficSection barbershopId={barbershopId} />
               <PageAppearancePanel
                 barbershopId={barbershopId}
                 shopName={settings?.shopName}

@@ -23,6 +23,7 @@
 | Estoque (equipment) | + `INVENTORY_MANAGE`/`PRODUCTS_MANAGE` | — | products `assertProductPermission` |
 | Posts | + `MARKETING_MANAGE` | gerar/publicar | `posts.routes.ts` (staffGuard + regras internas) |
 | Showcase / Link / Indicações / Multiunidades | OWNER/MASTER_ADMIN | idem | rotas respectivas (role-only) |
+| Visitas ao salão (`SalonTrafficSection` na aba Link, `SalonVisitsCard` na Hoje) | OWNER/MASTER_ADMIN (papel puro, como a aba Link) | leitura do relatório | `GET /api/barbershops/:id/traffic` (**pendente**, owner-only; `EMPLOYEE` não acessa) |
 | Configurações / Ajuda / Perfil | todo staff | — | — |
 | Plano (subscription) | OWNER/MASTER_ADMIN | — | `plans.routes.ts` |
 | Master Admin (/master/*) | MASTER_ADMIN | — | `verifyInternalAdmin` + `requireInternalPermission` |
@@ -46,4 +47,4 @@
 - Tabs de divulgação secundárias (showcase/link/referrals) seguem papel-only.
 
 ---
-Última revisão: 2026-11-15 (painel master de tráfego).
+Última revisão: 2026-11-17 (visitas ao salão — seção do dono na aba Link).

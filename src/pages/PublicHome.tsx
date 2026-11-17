@@ -18,9 +18,11 @@ import { AppointmentScheduler } from '../features/appointments/AppointmentSchedu
 import { AddCustomerForm } from '../features/clients/AddCustomerForm';
 import { QueueItemCard, QueueStatusCard } from '../features/queue';
 import { useSegmentLabels } from '../hooks/useSegmentLabels';
+import { useSalonTrafficTabBeacon } from '../hooks/useSalonTrafficTabBeacon';
 import { API_BASE } from '../infra/apiClient';
 import { productsApi, PublicSaleProduct } from '../infra/productsApi';
 import { schedulingApi } from '../infra/schedulingApi';
+import { sanitizeSalonTrafficTab } from '../infra/trafficBeaconApi';
 import { buildCoverOgUrl } from '../shared/coverImage';
 import { visiblePublicTabs, type PublicTab } from '../shared/publicTabs';
 
@@ -69,10 +71,20 @@ export const PublicHome: React.FC = () => {
     [services]
   );
   const tabs = React.useMemo(() => visiblePublicTabs(operationMode), [operationMode]);
-  const [activeTab, setActiveTab] = useState<PublicTab>(tabs[0]);
+  // A aba inicial respeita o deep link (`/queue/:id?tab=…`): assim o beacon da
+  // página envia `kind:'visit'` já com a aba resolvida desde o primeiro render.
+  const [activeTab, setActiveTab] = useState<PublicTab>(() => {
+    const fromQuery = sanitizeSalonTrafficTab(searchParams.get('tab'));
+    return fromQuery && tabs.includes(fromQuery) ? fromQuery : tabs[0];
+  });
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'bot' } | null>(null);
   const [publicSlots, setPublicSlots] = useState<string[] | undefined>();
   const [publicProducts, setPublicProducts] = useState<PublicSaleProduct[]>([]);
+
+  // Atribui a visita (exatamente 1 `kind:'visit'` por carregamento) e cada
+  // troca de aba (`kind:'tab'`) ao salão público desta URL. O listener global
+  // não emite para `/queue/:id` — este hook é o único emissor dessa rota.
+  useSalonTrafficTabBeacon({ pathname: `/queue/${id ?? ''}`, tab: activeTab });
 
   const handleDateChange = useCallback(
     (date: string, staffId?: string, serviceId?: string) => {

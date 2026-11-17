@@ -69,11 +69,13 @@ async function resolveAppOrigin(): Promise<string> {
 let appOriginPromise: Promise<string> | undefined;
 const appOrigin = (): Promise<string> => (appOriginPromise ??= resolveAppOrigin());
 
-async function capturePings(page: Page, sink: CapturedPing[]): Promise<void> {
+async function capturePings(page: Page, sink: CapturedPing[], respond?: (url: string) => unknown): Promise<void> {
   await page.route('**/api/**', async (route: Route) => {
     const request = route.request();
-    if (new URL(request.url()).pathname !== '/api/ping') {
-      await route.fulfill({ json: { success: true, data: null } });
+    const url = request.url();
+    if (new URL(url).pathname !== '/api/ping') {
+      const body = respond ? respond(url) : { success: true, data: null };
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
       return;
     }
 
@@ -84,6 +86,26 @@ async function capturePings(page: Page, sink: CapturedPing[]): Promise<void> {
     });
     await route.fulfill({ status: 204 });
   });
+}
+
+/**
+ * Resposta mínima para a página pública do salão renderizar as abas (mesmo
+ * padrão de `e2e/queue-content-mark.spec.ts`): sem ela a página fica no
+ * skeleton e a troca de aba não é clicável.
+ */
+function publicShopResponseBody(url: string): unknown {
+  if (url.includes('/schedule')) return [];
+  if (url.includes('/services')) return [];
+  if (url.includes('/staff')) return [];
+  if (url.includes('/feed')) return [];
+  if (url.includes('/queue/metrics')) {
+    return { success: true, data: { completedCount: 0, peopleWaiting: 0 } };
+  }
+  if (url.includes('/queue')) return { success: true, data: [] };
+  return {
+    success: true,
+    data: { id: CANONICAL_SALON_ID, name: 'Salão E2E', whatsapp: '11999999999', active: true },
+  };
 }
 
 /**
@@ -101,6 +123,9 @@ async function preparePage(
   signals: { doNotTrack?: string | null; globalPrivacyControl?: boolean } = {}
 ): Promise<void> {
   await page.addInitScript(value => {
+    // Consentimento do cookie banner: ambiente do teste, não do beacon.
+    localStorage.setItem('agendai:cookie-consent', 'accepted');
+
     // `Crypto.prototype` já declara `randomUUID` com o tipo do template UUID;
     // o adaptador devolve `string`, então o objeto é tipado como `{ ... }`.
     const proto: { randomUUID?: unknown } = Crypto.prototype;
@@ -134,7 +159,7 @@ async function expectNoPing(page: Page, sink: CapturedPing[]): Promise<void> {
 }
 
 test.describe('beacon privado de tráfego', () => {
-  test('envia POST /api/ping text/plain com o padrão da URL canônica, sem id, query ou fragmento', async ({
+  test('envia POST /api/ping text/plain com o padrão canônico e o id público do salão, sem token ou fragmento', async ({
     page,
   }) => {
     const pings: CapturedPing[] = [];
@@ -153,14 +178,99 @@ test.describe('beacon privado de tráfego', () => {
     expect(url.hash).toBe('');
     expect(ping.contentType).toMatch(/^text\/plain/);
 
-    expect(JSON.parse(ping.body)).toEqual({ p: '/s/:slug' });
-    expect(ping.body).not.toContain(CANONICAL_SALON_ID);
+    // Só campos permitidos: padrão literal, id público do salão (já está na
+    // URL compartilhada), o tipo do identificador, o tipo do evento e a aba
+    // da allowlist. Nunca token, query ou fragmento.
+    const payload = JSON.parse(ping.body);
+    expect(payload).toEqual({
+      p: '/s/:slug',
+      salon: CANONICAL_SALON_ID,
+      salonType: 'id',
+      kind: 'visit',
+      tab: 'profile',
+    });
+    expect(Object.keys(payload).sort()).toEqual(['kind', 'p', 'salon', 'salonType', 'tab']);
     expect(ping.body).not.toContain('secret');
-    expect(ping.body).not.toContain('profile');
+    expect(ping.body).not.toContain('anchor');
 
     // Uma única emissão por navegação (sem duplicar no StrictMode).
     await page.waitForTimeout(500);
     expect(pings).toHaveLength(1);
+  });
+
+  test('atribui /queue/:id ao salão: 1 ping visit por entrada, 1 ping tab por troca de aba', async ({
+    page,
+  }) => {
+    const pings: CapturedPing[] = [];
+    await preparePage(page);
+    await capturePings(page, pings, publicShopResponseBody);
+
+    const origin = await appOrigin();
+
+    // Rota da fila: uma entrada = exatamente 1 ping `visit` (a página reporta
+    // a própria visita; o listener global não emite para /queue/:id).
+    await page.goto(`${origin}/queue/${CANONICAL_SALON_ID}`);
+    await expect.poll(() => pings.length, { timeout: 15_000 }).toBe(1);
+
+    const visitPing = JSON.parse(pings[0].body);
+    expect(visitPing).toEqual({
+      p: '/queue/:id',
+      salon: CANONICAL_SALON_ID,
+      salonType: 'id',
+      kind: 'visit',
+      tab: 'queue',
+    });
+    expect(Object.keys(visitPing).sort()).toEqual(['kind', 'p', 'salon', 'salonType', 'tab']);
+    expect(pings[0].body).not.toContain('token');
+    expect(new URL(pings[0].url).search).toBe('');
+
+    // Troca de aba (sem navegação): 1 ping `tab`, nunca uma nova visita.
+    await page.getByRole('tab', { name: 'Agenda', exact: true }).click();
+    await expect.poll(() => pings.length, { timeout: 10_000 }).toBe(2);
+    const tabPagePing = JSON.parse(pings[1].body);
+    expect(tabPagePing).toEqual({
+      p: '/queue/:id',
+      salon: CANONICAL_SALON_ID,
+      salonType: 'id',
+      kind: 'tab',
+      tab: 'appointments',
+    });
+    await page.waitForTimeout(500);
+    expect(pings).toHaveLength(2);
+
+    // Deep link com aba: um único ping `visit`, com a aba já resolvida.
+    const deepLinkIndex = pings.length;
+    await page.goto(`${origin}/queue/${CANONICAL_SALON_ID}?tab=profile&utm_source=ads`);
+    await expect
+      .poll(() => pings.length, { timeout: 15_000 })
+      .toBe(deepLinkIndex + 1);
+    const deepLinkPing = JSON.parse(pings[deepLinkIndex].body);
+    expect(deepLinkPing).toEqual({
+      p: '/queue/:id',
+      salon: CANONICAL_SALON_ID,
+      salonType: 'id',
+      kind: 'visit',
+      tab: 'profile',
+    });
+    expect(pings[deepLinkIndex].body).not.toContain('utm_source');
+
+    // Vitrine de produto: 1 ping `visit` com o padrão literal + salão —
+    // nunca o productId e sem tab.
+    const productIndex = pings.length;
+    const productId = '98765432-1234-4321-8765-432109876543';
+    await page.goto(`${origin}/queue/${CANONICAL_SALON_ID}/produtos/${productId}`);
+    await expect
+      .poll(() => pings.length, { timeout: 15_000 })
+      .toBe(productIndex + 1);
+    const productPing = JSON.parse(pings[productIndex].body);
+    expect(productPing).toEqual({
+      p: '/queue/:id/produtos/:productId',
+      salon: CANONICAL_SALON_ID,
+      salonType: 'id',
+      kind: 'visit',
+    });
+    expect(pings[productIndex].body).not.toContain(productId);
+    expect(Object.keys(productPing).sort()).toEqual(['kind', 'p', 'salon', 'salonType']);
   });
 
   test('aceita um slug simples e a rota de esqueci-senha, sempre sem valores dinâmicos', async ({
@@ -173,8 +283,12 @@ test.describe('beacon privado de tráfego', () => {
     const origin = await appOrigin();
     await page.goto(`${origin}/s/acme-barbearia`);
     await expect.poll(() => pings.length, { timeout: 10_000 }).toBe(1);
-    expect(JSON.parse(pings[0].body)).toEqual({ p: '/s/:slug' });
-    expect(pings[0].body).not.toContain('acme-barbearia');
+    expect(JSON.parse(pings[0].body)).toEqual({
+      p: '/s/:slug',
+      salon: 'acme-barbearia',
+      salonType: 'slug',
+      kind: 'visit',
+    });
 
     await page.goto(`${origin}/esqueci-senha?token=reset-secret#frag`);
     await expect.poll(() => pings.length, { timeout: 10_000 }).toBe(2);
@@ -218,8 +332,13 @@ test.describe('beacon privado de tráfego', () => {
     await preparePage(page, { doNotTrack: '1' });
     await capturePings(page, pings);
 
-    await page.goto(`${await appOrigin()}/esqueci-senha`);
+    const origin = await appOrigin();
+    await page.goto(`${origin}/esqueci-senha`);
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 15_000 });
+
+    // A atribuição de salão obedece às mesmas guardas do beacon global.
+    await page.goto(`${origin}/queue/${CANONICAL_SALON_ID}?tab=profile`);
+    await page.waitForTimeout(500);
 
     await expectNoPing(page, pings);
   });

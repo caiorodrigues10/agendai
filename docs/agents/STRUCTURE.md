@@ -57,6 +57,7 @@ agendai/
     │   │                          ShareReferralButton — barrels próprios (Etapa 6c)
     │   ├── posts/             ← PostsManager, PostEditor, PostPreviewBox + objectives.ts unificado (Etapa 6d)
     │   ├── showcase/          ← ShowcasePanel, ShowcasePublicPage, PublicLinkPanel (Etapa 6d)
+    │   ├── traffic/           ← SalonTrafficSection ("Visitas ao seu salão", aba Link) + SalonVisitsCard (aba Hoje) (+test)
     │   ├── notifications/     ← OwnerNotificationsPanel, NotificationDeliveriesPanel, NotificationHealthPanel (Etapa 6d)
     │   ├── subscription/      ← OwnerSubscriptionPanel (cancel → ModalShell), TrialExpiredPaywallModal (Etapa 6d)
     │   ├── client-portal/     ← ClientPortalDashboard, ClientPortalLogin (Etapa 6d)
@@ -69,7 +70,7 @@ agendai/
     │   ├── marketing/        ← nav/landing
     │   └── infra/            ← ErrorBoundary, listeners, ThemeToggle, PWA
     ├── contexts/             ← Auth, Subscription, Barbershop, Scheduling, Theme, …
-    ├── hooks/                ← usePermissions
+    ├── hooks/                ← usePermissions, useSalonTrafficTabBeacon
     ├── infra/                ← apiClient + *Api.ts (única camada HTTP)
     ├── pages/                ← rotas (StaffDashboard, Login, PublicHome, master-admin, marketing)
     ├── services/             ← geminiService (heurística local)
@@ -105,6 +106,6 @@ agendai/
 
 ## Wrappers HTTP (`src/infra/`)
 
-`apiClient`, `authApi`, `authStorage`, `barbershopApi`, `schedulingApi`, `clientsApi`, `crmApi`, `packagesApi`, `productsApi`, `financialApi`, `commissionsApi`, `paymentsApi`, `plansApi`, `subscriptionsApi`, `adminApi`, `adminTrafficApi`, `trafficBeaconApi`, `usersApi`, `notificationsApi`, `referralsApi`, `contactApi`, `realtimeWs`, `clientPortalApi`, `catalogApi`, `publicProductsApi`, `dataImportApi`.
+`apiClient`, `authApi`, `authStorage`, `barbershopApi`, `schedulingApi`, `clientsApi`, `crmApi`, `packagesApi`, `productsApi`, `financialApi`, `commissionsApi`, `paymentsApi`, `plansApi`, `subscriptionsApi`, `adminApi`, `adminTrafficApi`, `salonTrafficApi`, `trafficBeaconApi`, `usersApi`, `notificationsApi`, `referralsApi`, `contactApi`, `realtimeWs`, `clientPortalApi`, `catalogApi`, `publicProductsApi`, `dataImportApi`.
 
 **Regra:** novas chamadas HTTP só via `*Api.ts` / `apiClient` — nunca `fetch` solto nas páginas.

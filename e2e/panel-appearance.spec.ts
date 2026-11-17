@@ -80,6 +80,40 @@ function json(data: unknown) {
   return JSON.stringify({ success: true, data });
 }
 
+/** Payload de `GET /api/barbershops/:id/traffic` (contrato do dono). */
+function trafficData(period: string) {
+  return {
+    success: true,
+    data: {
+      period: {
+        key: period,
+        label: period,
+        granularity: 'day',
+        fromDay: '2026-11-10',
+        toDay: '2026-11-16',
+        prevFromDay: '2026-11-03',
+        prevToDay: '2026-11-09',
+        timezone: 'America/Sao_Paulo',
+        dataFrom: null,
+      },
+      generatedAt: '2026-11-16T12:00:00.000Z',
+      beaconEnabled: true,
+      totals: { visits: 42, visitors: 30, visitorsBasis: 'daily_distinct' },
+      prevTotals: { visits: 20, visitors: 12, visitorsBasis: 'daily_distinct' },
+      deltaPct: { visits: 50, visitors: 75 },
+      series: [
+        { bucketStart: '2026-11-15', label: '15/11', visits: 12, visitors: 9, partial: false },
+        { bucketStart: '2026-11-16', label: '16/11', visits: 30, visitors: 21, partial: true },
+      ],
+      sections: [
+        { section: 'profile', visits: 20, visitors: 15 },
+        { section: 'queue', visits: 12, visitors: 8 },
+      ],
+      origins: [{ host: 'www.instagram.com', visits: 14 }],
+    },
+  };
+}
+
 async function mockApi(page: Page, theme: typeof baseTheme) {
   await page.route('**/api/**', async route => {
     const req = route.request();
@@ -116,6 +150,10 @@ async function mockApi(page: Page, theme: typeof baseTheme) {
         welcomeSeen: true,
         dismissed: true,
       });
+    }
+    if (p.includes('/traffic')) {
+      const period = new URL(req.url()).searchParams.get('period') ?? 'week';
+      return fulfill(trafficData(period));
     }
     if (/\/api\/barbershops\/[^/]+$/.test(p)) {
       return fulfill(SHOP);
@@ -339,3 +377,24 @@ for (const vp of VIEWPORTS) {
     await shoot(page, `05-publica-real-${vp.name}`);
   });
 }
+
+test('06 seção "Visitas ao seu salão" na aba Link Público', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openPanel(page, baseTheme);
+
+  const section = page.getByRole('heading', { name: 'Visitas ao seu salão' });
+  await expect(section).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText('Evolução das visitas')).toBeVisible();
+  await expect(page.getByText('Perfil e cortes')).toBeVisible();
+  await expect(page.getByText('www.instagram.com')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Período: 7 dias' })).toHaveAttribute(
+    'aria-pressed',
+    'true'
+  );
+
+  await page.getByRole('button', { name: 'Período: 30 dias' }).click();
+  await expect(page.getByRole('button', { name: 'Período: 30 dias' })).toHaveAttribute(
+    'aria-pressed',
+    'true'
+  );
+});
