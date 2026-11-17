@@ -1,5 +1,6 @@
 /// <reference types="vitest/globals" />
 import { API_BASE } from './apiClient';
+import { COMMERCIAL_PAGES } from '../marketing/commercialPages';
 import {
   createTrafficBeaconPayload,
   getTrafficBeaconRoute,
@@ -118,24 +119,77 @@ describe('trafficBeaconApi', () => {
     }
   });
 
-  it('recognizes only the three allowlisted route shapes', () => {
-    expect(getTrafficBeaconRoute('/esqueci-senha')).toBe('/esqueci-senha');
+  it('recognizes only the allowlisted public marketing route patterns', () => {
+    const staticRoutes = [
+      '/',
+      '/funcionalidades',
+      '/ia-preditiva',
+      '/agendamento',
+      '/dashboard',
+      '/sobre',
+      '/contato',
+      '/privacidade',
+      '/termos',
+      '/esqueci-senha',
+      '/planos',
+      '/software-para-salao-de-beleza',
+      '/sistema-para-salao-de-beleza',
+      '/sistema-para-barbearia',
+      '/app-para-agendamento-de-salao',
+      '/sistema-para-fila-de-barbearia',
+      '/sistema-para-manicure',
+      '/sistema-para-lash-designer',
+      '/crm-para-salao-de-beleza',
+      '/controle-financeiro-para-salao',
+      '/software-para-escritorio-de-advocacia',
+    ] as const;
+
+    for (const route of staticRoutes) {
+      expect(getTrafficBeaconRoute(route)).toBe(route);
+    }
+
     expect(getTrafficBeaconRoute('/s/acme')).toBe('/s/:slug');
     expect(getTrafficBeaconRoute('/agendamento/abc123')).toBe('/agendamento/:token');
-    expect(getTrafficBeaconRoute('/master')).toBeNull();
-    expect(getTrafficBeaconRoute('/app/overview')).toBeNull();
-    expect(getTrafficBeaconRoute('/login')).toBeNull();
-    expect(getTrafficBeaconRoute('/checkout')).toBeNull();
-    expect(getTrafficBeaconRoute('/reset-password')).toBeNull();
-    expect(getTrafficBeaconRoute('/s/')).toBeNull();
-    expect(getTrafficBeaconRoute('/s/acme/extra')).toBeNull();
+
+    for (const pathname of [
+      '/master',
+      '/master/overview',
+      '/app',
+      '/app/overview',
+      '/login',
+      '/cadastro',
+      '/checkout',
+      '/reset-password',
+      '/queue',
+      '/agendamento/gerenciar',
+      '/rota-desconhecida',
+      '/funcionalidades/extra',
+      '/s/',
+      '/s/acme/extra',
+    ]) {
+      expect(getTrafficBeaconRoute(pathname)).toBeNull();
+    }
+  });
+
+  it('keeps every commercial intent route in the allowlist', () => {
+    for (const page of COMMERCIAL_PAGES) {
+      expect(getTrafficBeaconRoute(page.path)).toBe(page.path);
+    }
+  });
+
+  it('rejects monitored route candidates that contain a query string or fragment', () => {
+    expect(getTrafficBeaconRoute('/?utm_source=test')).toBeNull();
+    expect(getTrafficBeaconRoute('/funcionalidades?origem=ads')).toBeNull();
+    expect(getTrafficBeaconRoute('/agendamento/abc123?token=secret')).toBeNull();
+    expect(getTrafficBeaconRoute('/s/acme#fragment')).toBeNull();
+    expect(getTrafficBeaconRoute('/sobre#contato')).toBeNull();
   });
 
   it('maps the canonical public share URL to the literal pattern without the id', () => {
     const canonicalId = '0f9d4a1c-6f6f-4d0e-9d1e-2b7a5c8e1f33';
 
     expect(getTrafficBeaconRoute(`/s/salon/${canonicalId}`)).toBe('/s/:slug');
-    expect(getTrafficBeaconRoute(`/s/salon/${canonicalId}?token=secret#frag`)).toBe('/s/:slug');
+    expect(getTrafficBeaconRoute(`/s/salon/${canonicalId}?token=secret#frag`)).toBeNull();
     expect(getTrafficBeaconRoute('/s/salon/acme')).toBe('/s/:slug');
     expect(getTrafficBeaconRoute('/s/salon/')).toBeNull();
     // `/s/salon` sem id continua caindo na regra genérica de um segmento
@@ -154,7 +208,7 @@ describe('trafficBeaconApi payloads', () => {
 
     sendTrafficBeacon({
       environment: productionEnvironment,
-      pathname: '/s/acme',
+      pathname: '/planos',
       referrer: 'https://referrer.example/path?private=secret#fragment',
       navigator: { sendBeacon },
       fetch: fetchMock,
@@ -166,7 +220,7 @@ describe('trafficBeaconApi payloads', () => {
     expect(body).toBeInstanceOf(Blob);
     expect((body as Blob).type).toBe('text/plain');
     expect(JSON.parse(await readBlob(body as Blob))).toEqual({
-      p: '/s/:slug',
+      p: '/planos',
       r: 'referrer.example',
     });
     expect(fetchMock).not.toHaveBeenCalled();
@@ -183,7 +237,7 @@ describe('trafficBeaconApi payloads', () => {
 
     sendTrafficBeacon({
       environment: productionEnvironment,
-      pathname: '/esqueci-senha?token=private-token',
+      pathname: '/esqueci-senha',
       navigator: { sendBeacon },
     });
 
@@ -191,13 +245,13 @@ describe('trafficBeaconApi payloads', () => {
     expect(browserDocument.referrerPolicy).toBe(originalPolicy);
   });
 
-  it('strips the salon id, query and fragment from the canonical share URL', async () => {
+  it('uses the canonical share pattern with the public salon id and rejects query/fragment paths', async () => {
     const canonicalId = '0f9d4a1c-6f6f-4d0e-9d1e-2b7a5c8e1f33';
     const sendBeacon = makeSendBeacon();
 
     sendTrafficBeacon({
       environment: productionEnvironment,
-      pathname: `/s/salon/${canonicalId}?tab=profile&token=secret#anchor`,
+      pathname: `/s/salon/${canonicalId}`,
       referrer: '',
       navigator: { sendBeacon },
     });
@@ -206,36 +260,28 @@ describe('trafficBeaconApi payloads', () => {
     expect(sendBeacon.mock.calls[0][0]).toBe(beaconUrl);
     const body = sendBeacon.mock.calls[0][1] as Blob;
     const payload = JSON.parse(await readBlob(body));
+    // Só o padrão literal sai: o id concreto é descartado antes do envio.
     expect(payload).toEqual({ p: '/s/:slug' });
-    expect(JSON.stringify(payload)).not.toContain(canonicalId);
-    expect(JSON.stringify(payload)).not.toContain('secret');
-    expect(JSON.stringify(payload)).not.toContain('profile');
+    expect(Object.keys(payload).sort()).toEqual(['p']);
+
+    sendBeacon.mockClear();
+    sendTrafficBeacon({
+      environment: productionEnvironment,
+      pathname: `/s/salon/${canonicalId}?tab=profile&token=secret#anchor`,
+      referrer: '',
+      navigator: { sendBeacon },
+    });
+
+    expect(sendBeacon).not.toHaveBeenCalled();
   });
 
-  it('never includes concrete slugs, tokens, queries, or fragments in the payload', async () => {
+  it('never includes tokens, queries or fragments in any payload', async () => {
     const sendBeacon = makeSendBeacon();
     const fetchMock = makeFetch();
 
     sendTrafficBeacon({
       environment: productionEnvironment,
-      pathname: '/s/private-slug?token=private-token#private-fragment',
-      referrer: '',
-      navigator: { sendBeacon },
-      fetch: fetchMock,
-    });
-
-    const firstBody = sendBeacon.mock.calls[0][1] as Blob;
-    const firstPayload = JSON.parse(await readBlob(firstBody));
-    expect(firstPayload).toEqual({ p: '/s/:slug' });
-    expect(Object.keys(firstPayload)).toEqual(['p']);
-    expect(JSON.stringify(firstPayload)).not.toContain('private-slug');
-    expect(JSON.stringify(firstPayload)).not.toContain('private-token');
-    expect(JSON.stringify(firstPayload)).not.toContain('private-fragment');
-
-    sendBeacon.mockClear();
-    sendTrafficBeacon({
-      environment: productionEnvironment,
-      pathname: '/agendamento/gerenciar?manageToken=manage-secret',
+      pathname: '/agendamento/private-token',
       referrer: '',
       navigator: { sendBeacon },
       fetch: fetchMock,
@@ -245,10 +291,22 @@ describe('trafficBeaconApi payloads', () => {
     const secondPayload = JSON.parse(await readBlob(secondBody));
     expect(secondPayload).toEqual({ p: '/agendamento/:token' });
     expect(Object.keys(secondPayload)).toEqual(['p']);
-    expect(JSON.stringify(secondPayload)).not.toContain('gerenciar');
-    expect(JSON.stringify(secondPayload)).not.toContain('manage-secret');
+    expect(JSON.stringify(secondPayload)).not.toContain('private-token');
+
+    sendBeacon.mockClear();
+    sendTrafficBeacon({
+      environment: productionEnvironment,
+      pathname: '/s/private-slug?token=private-token#private-fragment',
+      referrer: '',
+      navigator: { sendBeacon },
+      fetch: fetchMock,
+    });
+
+    expect(sendBeacon).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
+
 
 describe('trafficBeaconApi transport and exclusions', () => {
   it('falls back to a keepalive text/plain fetch when sendBeacon is false or absent', () => {

@@ -24,7 +24,12 @@ import {
   Tooltip,
   type StatCardProps,
 } from '../../components/patterns';
-import { formatDatePtBr, formatNumber, ROLE_LABELS, VISITOR_TOOLTIP } from './trafficOverviewUtils';
+import {
+  formatDatePtBr,
+  formatNumber,
+  getVisitorBasisTooltip,
+  ROLE_LABELS,
+} from './trafficOverviewUtils';
 
 const trafficChartConfig: ChartConfig = {
   visits: {
@@ -98,6 +103,14 @@ export const TrafficNotices: React.FC<{ data: AdminTrafficData }> = ({ data }) =
         </div>
       )}
 
+      <p className="flex items-start gap-2 px-1 text-xs text-text-muted">
+        <LuInfo className="mt-0.5 shrink-0" size={14} aria-hidden="true" />
+        <span>
+          Não contamos visitantes com a opção de não ser rastreado (DNT ou GPC), acessos fora das
+          páginas monitoradas nem visitas em ambientes que não são de produção.
+        </span>
+      </p>
+
       {(trafficStart || activityStart) && (
         <Card>
           <CardHeader>
@@ -145,7 +158,7 @@ export const TrafficKpis: React.FC<{
         />
         <StatCard
           label={
-            <Tooltip label={VISITOR_TOOLTIP}>
+            <Tooltip label={getVisitorBasisTooltip(totals.visitorsBasis)}>
               <VisitorTooltipLabel label={visitorLabel} />
             </Tooltip>
           }

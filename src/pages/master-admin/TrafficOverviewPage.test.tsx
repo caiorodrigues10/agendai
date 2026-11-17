@@ -3,8 +3,15 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { TrafficOverviewPage } from './TrafficOverviewPage';
-import { adminTrafficApi, type AdminTrafficData } from '../../infra/adminTrafficApi';
+import { adminTrafficApi } from '../../infra/adminTrafficApi';
 import { useAuth } from '../../contexts/AuthContext';
+import {
+  baseData,
+  currentSaoPauloDate,
+  currentSaoPauloMonth,
+  previousCivilDay,
+  previousCivilMonth,
+} from './trafficTestFixtures';
 
 vi.mock('../../contexts/AuthContext', () => ({
   useAuth: vi.fn(),
@@ -21,110 +28,6 @@ vi.mock('../../infra/adminTrafficApi', async importOriginal => {
   };
 });
 
-const currentSaoPauloDate = () => {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'America/Sao_Paulo',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(new Date());
-  const value = (type: Intl.DateTimeFormatPartTypes) =>
-    parts.find(part => part.type === type)?.value ?? '';
-  return `${value('year')}-${value('month')}-${value('day')}`;
-};
-
-const currentSaoPauloMonth = () => currentSaoPauloDate().slice(0, 7);
-
-const previousCivilDay = (dateKey: string) => {
-  const [year, month, day] = dateKey.split('-').map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  date.setUTCDate(date.getUTCDate() - 1);
-  return date.toISOString().slice(0, 10);
-};
-
-const previousCivilMonth = (monthKey: string) => {
-  const [year, month] = monthKey.split('-').map(Number);
-  const date = new Date(Date.UTC(year, month - 1, 1));
-  date.setUTCMonth(date.getUTCMonth() - 1);
-  return date.toISOString().slice(0, 7);
-};
-
-const baseData: AdminTrafficData = {
-  period: {
-    key: 'week',
-    label: 'Semana',
-    granularity: 'day',
-    fromDay: '2026-11-09',
-    toDay: '2026-11-15',
-    prevFromDay: '2026-11-02',
-    prevToDay: '2026-11-08',
-    timezone: 'America/Sao_Paulo',
-    dataFrom: '2026-10-01',
-  },
-  generatedAt: '2026-11-15T12:00:00.000Z',
-  beaconEnabled: true,
-  totals: {
-    visits: 100,
-    visitors: 50,
-    visitorsBasis: 'sum_of_daily_distinct',
-    sessions: 20,
-    loggedInUsers: 10,
-    newShops: 2,
-    newUsers: 4,
-    newUsersRemoved: 1,
-  },
-  prevTotals: null,
-  deltaPct: {
-    visits: 10,
-    visitors: -5,
-    sessions: null,
-    loggedInUsers: 0,
-    newShops: null,
-    newUsers: 25,
-  },
-  series: [
-    {
-      bucketStart: '2026-11-09',
-      label: '09/11',
-      visits: 40,
-      visitors: 20,
-      sessions: 8,
-      newShops: 1,
-      newUsers: 2,
-      newUsersRemoved: 0,
-      partial: false,
-    },
-    {
-      bucketStart: '2026-11-15',
-      label: '15/11',
-      visits: 60,
-      visitors: 30,
-      sessions: null,
-      newShops: 1,
-      newUsers: 2,
-      newUsersRemoved: 1,
-      partial: true,
-    },
-  ],
-  areas: [
-    {
-      area: 'public_site',
-      label: 'Site público',
-      visits: 70,
-      visitors: 35,
-      sessions: 14,
-    },
-  ],
-  origins: [{ host: 'www.google.com.br', visits: 25 }],
-  loss: {
-    counterRegressions: 0,
-    redisUnavailableDrops: 0,
-    notes: [],
-  },
-  userActivity: {
-    firstRecordedAt: '2026-10-02T12:00:00.000Z',
-  },
-};
 
 const authorizedUser = {
   id: 'master-1',
@@ -154,10 +57,16 @@ describe('TrafficOverviewPage', () => {
       user: authorizedUser,
       loading: false,
     } as ReturnType<typeof useAuth>);
-    vi.mocked(adminTrafficApi.getTrafficReport).mockResolvedValue({
+    vi.mocked(adminTrafficApi.getTrafficReport).mockImplementation(async query => ({
       success: true,
-      data: baseData,
-    });
+      data: {
+        ...baseData,
+        totals: {
+          ...baseData.totals,
+          visitorsBasis: query.period === 'day' ? 'daily_distinct' : 'sum_of_daily_distinct',
+        },
+      },
+    }));
     vi.mocked(adminTrafficApi.exportTrafficCsv).mockResolvedValue({
       ok: true,
       blob: async () => new Blob(['bucket,visitas']),
@@ -307,19 +216,23 @@ describe('TrafficOverviewPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('mostra os rótulos exatos de visitantes e o texto explicativo', async () => {
+  it('mostra os rótulos de visitantes e explica a base informada pela API', async () => {
     renderPage('/master/traffic?period=day');
 
     const dayLabel = await screen.findByText('Visitantes do dia');
     fireEvent.focus(dayLabel);
     expect(
-      await screen.findByRole('tooltip', {
-        name: 'Como não rastreamos pessoas, a mesma pessoa que volta em outro dia conta de novo',
-      })
+      await screen.findByRole('tooltip', { name: 'Visitantes distintos no dia.' })
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Semana' }));
-    expect(await screen.findByText('Visitantes (soma dos dias)')).toBeInTheDocument();
+    const weekLabel = await screen.findByText('Visitantes (soma dos dias)');
+    fireEvent.focus(weekLabel);
+    expect(
+      await screen.findByRole('tooltip', {
+        name: 'Soma dos visitantes distintos de cada dia. A mesma pessoa pode ser contada em dias diferentes.',
+      })
+    ).toBeInTheDocument();
   });
 
   it('exibe KPIs e apenas as variações fornecidas pela API', async () => {
@@ -409,6 +322,9 @@ describe('TrafficOverviewPage', () => {
       await screen.findByText('contagem de visitas a partir de 01/10/2026')
     ).toBeInTheDocument();
     expect(screen.getByText('usuários logados a partir de 02/10/2026')).toBeInTheDocument();
+    expect(
+      screen.getByText(/Não contamos visitantes com a opção de não ser rastreado/)
+    ).toBeInTheDocument();
     unmount();
 
     vi.mocked(adminTrafficApi.getTrafficReport).mockResolvedValue({
@@ -423,6 +339,9 @@ describe('TrafficOverviewPage', () => {
     expect(notice).toHaveTextContent('A coleta de tráfego está desativada');
     expect(notice).toHaveTextContent('os dados podem estar ausentes');
     expect(notice).toHaveTextContent('a ausência é esperada');
+    expect(
+      screen.getByText(/Não contamos visitantes com a opção de não ser rastreado/)
+    ).toBeInTheDocument();
   });
 
   it('mostra estado vazio quando a coleta está ativa e não há série', async () => {

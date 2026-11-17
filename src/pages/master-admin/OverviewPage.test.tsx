@@ -3,10 +3,27 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { OverviewPage } from './OverviewPage';
 import { adminInternalApi, AdminOverview } from '../../infra/adminInternalApi';
+import { adminTrafficApi, type AdminTrafficData } from '../../infra/adminTrafficApi';
+import { useAuth } from '../../contexts/AuthContext';
 
 vi.mock('../../infra/adminInternalApi', () => ({
   adminInternalApi: { getOverview: vi.fn(), getProductAdoption: vi.fn() },
 }));
+
+vi.mock('../../contexts/AuthContext', () => ({
+  useAuth: vi.fn(),
+}));
+
+vi.mock('../../infra/adminTrafficApi', async importOriginal => {
+  const actual = await importOriginal<typeof import('../../infra/adminTrafficApi')>();
+  return {
+    ...actual,
+    adminTrafficApi: {
+      getTrafficReport: vi.fn(),
+      exportTrafficCsv: vi.fn(),
+    },
+  };
+});
 
 const overview: AdminOverview = {
   period: {
@@ -112,6 +129,18 @@ const overview: AdminOverview = {
   },
 };
 
+const trafficReport = (
+  visitors: number,
+  visitorsBasis: AdminTrafficData['totals']['visitorsBasis']
+): AdminTrafficData =>
+  ({
+    beaconEnabled: true,
+    totals: {
+      visitors,
+      visitorsBasis,
+    },
+  }) as AdminTrafficData;
+
 function renderPage(initialEntry = '/master/overview') {
   return render(
     <MemoryRouter initialEntries={[initialEntry]}>
@@ -122,6 +151,28 @@ function renderPage(initialEntry = '/master/overview') {
 
 describe('OverviewPage', () => {
   beforeEach(() => {
+    vi.mocked(useAuth).mockReturnValue({
+      user: {
+        id: 'master-1',
+        name: 'Administradora',
+        email: 'admin@agendai.local',
+        role: 'MASTER_ADMIN',
+        internalPermissions: ['internal:traffic:read'],
+      },
+      loading: false,
+    } as ReturnType<typeof useAuth>);
+
+    vi.mocked(adminTrafficApi.getTrafficReport).mockImplementation(
+      async query =>
+        ({
+          success: true,
+          data:
+            query.period === 'day'
+              ? trafficReport(7, 'daily_distinct')
+              : trafficReport(21, 'sum_of_daily_distinct'),
+        }) as Awaited<ReturnType<typeof adminTrafficApi.getTrafficReport>>
+    );
+
     vi.mocked(adminInternalApi.getOverview).mockResolvedValue({
       success: true,
       data: overview,
@@ -163,6 +214,7 @@ describe('OverviewPage', () => {
     expect(screen.getByText('Pro Anual')).toBeInTheDocument();
     expect(screen.queryByText('Nada pendente no momento.')).not.toBeInTheDocument();
     expect(screen.getByText('Cobranças vencidas')).toBeInTheDocument();
+    expect(await screen.findByText('Pessoas que entraram')).toBeInTheDocument();
     expect(await screen.findByText('Adoção de produtos')).toBeInTheDocument();
     expect(adminInternalApi.getProductAdoption).toHaveBeenCalledTimes(1);
   });

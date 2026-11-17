@@ -7,10 +7,10 @@ import {
   type TrafficUserRole,
 } from '../../infra/adminTrafficApi';
 
-export const SAO_PAULO_TIMEZONE = 'America/Sao_Paulo';
+// Legenda da base de visitantes compartilhada com o painel do dono.
+export { VISITOR_BASIS_TOOLTIPS, getVisitorBasisTooltip } from '../../shared/trafficVisitorBasis';
 
-export const VISITOR_TOOLTIP =
-  'Como não rastreamos pessoas, a mesma pessoa que volta em outro dia conta de novo';
+export const SAO_PAULO_TIMEZONE = 'America/Sao_Paulo';
 
 export const PERIOD_LABELS: Record<TrafficPeriod, string> = {
   day: 'Dia',

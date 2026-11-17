@@ -106,9 +106,10 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 
 ## Tráfego do site (master)
 
-- A tela `/master/traffic` exige `MASTER_ADMIN` e `internal:traffic:read`; a lista interna vazia mantém o acesso total legado, igual ao backend.
-- O beacon anônimo é opt-in (`VITE_TRAFFIC_BEACON_ENABLED=false` por padrão), só roda em produção e respeita DNT/GPC no cliente. O payload contém somente um padrão literal de rota (`/esqueci-senha`, `/s/:slug`, `/agendamento/:token`) e, quando existe, o host do referrer — nunca slug, token, query ou fragmento.
-- “Visitantes do dia” é o distinto diário do período Dia; nos demais períodos, “Visitantes (soma dos dias)” soma os distintos de cada dia. A mesma pessoa que volta em outro dia conta novamente; a UI não apresenta esse valor como pessoas únicas.
+- A tela `/master/traffic` exige `MASTER_ADMIN` e `internal:traffic:read`; a lista interna vazia mantém o acesso total legado, igual ao backend. O card “Pessoas que entraram” em `/master/overview` usa a mesma permissão e só monta consultas para `MASTER_ADMIN` autorizado.
+- O beacon anônimo é opt-in (`VITE_TRAFFIC_BEACON_ENABLED=false` por padrão; `render.yaml` habilita a variável no build de produção e exige novo deploy), só roda em produção e respeita DNT/GPC no cliente.
+- O payload contém somente um padrão de rota allowlisted e, quando existe, o host do referrer — nunca token, query ou fragmento. Páginas públicas de marketing/intenção comercial monitoradas: `/`, `/funcionalidades`, `/ia-preditiva`, `/agendamento`, `/dashboard`, `/sobre`, `/contato`, `/privacidade`, `/termos`, `/planos`, `/software-para-salao-de-beleza`, `/sistema-para-salao-de-beleza`, `/sistema-para-barbearia`, `/app-para-agendamento-de-salao`, `/sistema-para-fila-de-barbearia`, `/sistema-para-manicure`, `/sistema-para-lash-designer`, `/crm-para-salao-de-beleza`, `/controle-financeiro-para-salao`, `/software-para-escritorio-de-advocacia`. Também entram `/esqueci-senha`, `/s/:slug` e `/agendamento/:token`, sempre substituídos pelo padrão. Rotas logadas (`/app`, `/master`, `/checkout` etc.) e rotas operacionais fora da lista não são enviadas; query e fragmento nunca fazem parte do payload.
+- `daily_distinct` significa “visitantes distintos no dia”; `sum_of_daily_distinct` significa “soma dos visitantes distintos de cada dia”, em que a mesma pessoa pode ser contada em dias diferentes. A UI usa `totals.visitorsBasis` para explicar cada valor e não apresenta a soma semanal como pessoas únicas.
 - O período anterior, as áreas, as origens e o CSV preservam os mesmos filtros ativos da tela.
 
 ## Aparência da página pública (tema)

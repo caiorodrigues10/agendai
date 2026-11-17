@@ -386,7 +386,7 @@ test('tráfego: tooltip longo cabe em viewport estreito', async ({ page }) => {
   const tooltip = page.getByRole('tooltip');
   await expect(tooltip).toBeVisible();
   await expect(tooltip).toHaveText(
-    'Como não rastreamos pessoas, a mesma pessoa que volta em outro dia conta de novo'
+    'Soma dos visitantes distintos de cada dia. A mesma pessoa pode ser contada em dias diferentes.'
   );
 
   // Dentro dos 375 px da viewport (nem sai pela esquerda nem pela direita).

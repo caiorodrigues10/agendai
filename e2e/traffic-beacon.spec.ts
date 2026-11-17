@@ -183,18 +183,34 @@ test.describe('beacon privado de tráfego', () => {
     expect(new URL(pings[1].url).search).toBe('');
   });
 
-  test('não emite beacon para rotas fora da allowlist', async ({ page }) => {
+  test('emite nas páginas públicas monitoradas e não emite em rotas fora da allowlist', async ({
+    page,
+  }) => {
     const pings: CapturedPing[] = [];
     await preparePage(page);
     await capturePings(page, pings);
 
     const origin = await appOrigin();
-    for (const route of ['/', '/funcionalidades', '/login', '/reset-password']) {
+    for (const route of ['/', '/agendamento', '/app-para-agendamento-de-salao']) {
+      await page.goto(`${origin}${route}`);
+      await expect(page.locator('h1').first()).toBeVisible({ timeout: 15_000 });
+      await expect.poll(() => pings.length, { timeout: 10_000 }).toBeGreaterThan(0);
+    }
+
+    expect(pings.map(ping => JSON.parse(ping.body).p)).toEqual([
+      '/',
+      '/agendamento',
+      '/app-para-agendamento-de-salao',
+    ]);
+
+    const pingCountBeforeExcludedRoutes = pings.length;
+    for (const route of ['/login', '/reset-password', '/master/overview']) {
       await page.goto(`${origin}${route}`);
       await expect(page.locator('h1').first()).toBeVisible({ timeout: 15_000 });
     }
 
-    await expectNoPing(page, pings);
+    await page.waitForTimeout(750);
+    expect(pings).toHaveLength(pingCountBeforeExcludedRoutes);
   });
 
   test('respeita Do Not Track: nenhum beacon com DNT ativo', async ({ page }) => {

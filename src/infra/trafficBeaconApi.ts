@@ -1,6 +1,56 @@
 import { API_BASE } from './apiClient';
 
-export type TrafficBeaconRoute = '/esqueci-senha' | '/s/:slug' | '/agendamento/:token';
+type StaticTrafficBeaconRoute =
+  | '/'
+  | '/funcionalidades'
+  | '/ia-preditiva'
+  | '/agendamento'
+  | '/dashboard'
+  | '/sobre'
+  | '/contato'
+  | '/privacidade'
+  | '/termos'
+  | '/esqueci-senha'
+  | '/planos'
+  | '/software-para-salao-de-beleza'
+  | '/sistema-para-salao-de-beleza'
+  | '/sistema-para-barbearia'
+  | '/app-para-agendamento-de-salao'
+  | '/sistema-para-fila-de-barbearia'
+  | '/sistema-para-manicure'
+  | '/sistema-para-lash-designer'
+  | '/crm-para-salao-de-beleza'
+  | '/controle-financeiro-para-salao'
+  | '/software-para-escritorio-de-advocacia';
+
+export type TrafficBeaconRoute = StaticTrafficBeaconRoute | '/s/:slug' | '/agendamento/:token';
+
+const STATIC_TRAFFIC_BEACON_ROUTES: readonly StaticTrafficBeaconRoute[] = [
+  '/',
+  '/funcionalidades',
+  '/ia-preditiva',
+  '/agendamento',
+  '/dashboard',
+  '/sobre',
+  '/contato',
+  '/privacidade',
+  '/termos',
+  '/esqueci-senha',
+  '/planos',
+  '/software-para-salao-de-beleza',
+  '/sistema-para-salao-de-beleza',
+  '/sistema-para-barbearia',
+  '/app-para-agendamento-de-salao',
+  '/sistema-para-fila-de-barbearia',
+  '/sistema-para-manicure',
+  '/sistema-para-lash-designer',
+  '/crm-para-salao-de-beleza',
+  '/controle-financeiro-para-salao',
+  '/software-para-escritorio-de-advocacia',
+];
+
+const isStaticTrafficBeaconRoute = (path: string): path is StaticTrafficBeaconRoute =>
+  (STATIC_TRAFFIC_BEACON_ROUTES as readonly string[]).includes(path);
 
 export interface TrafficBeaconPayload {
   /** A literal route pattern. Never the concrete slug or token from the URL. */
@@ -141,21 +191,24 @@ export function isTrafficBeaconEnabled(options: TrafficBeaconEnvironmentOptions 
 export const isTrafficBeaconAllowed = isTrafficBeaconEnabled;
 
 /**
- * Maps a concrete pathname to one of the three literal patterns that may be
- * sent. Query strings and fragments are ignored even if a caller supplies a
- * combined path by mistake.
+ * Maps a concrete pathname to one of the allowlisted route patterns that may
+ * be sent. A pathname containing a query string or fragment is rejected
+ * outright, so neither can be mistaken for a monitored route.
  */
 export function getTrafficBeaconRoute(pathname: string): TrafficBeaconRoute | null {
   if (typeof pathname !== 'string' || pathname.length === 0) return null;
+  if (pathname.includes('?') || pathname.includes('#')) return null;
 
-  const path = pathname.split(/[?#]/, 1)[0];
-  if (path === '/esqueci-senha') return '/esqueci-senha';
+  if (isStaticTrafficBeaconRoute(pathname)) return pathname;
   // Canonical public share URL (`/s/salon/:id`, served by the backend share
   // route). The concrete id is dropped: only the literal family pattern is
   // returned, so no identifier ever reaches the beacon.
-  if (/^\/s\/salon\/[^/]+$/.test(path)) return '/s/:slug';
-  if (/^\/s\/[^/]+$/.test(path)) return '/s/:slug';
-  if (/^\/agendamento\/[^/]+$/.test(path)) return '/agendamento/:token';
+  if (/^\/s\/salon\/[^/]+$/.test(pathname)) return '/s/:slug';
+  if (/^\/s\/[^/]+$/.test(pathname)) return '/s/:slug';
+  // `/agendamento/gerenciar` is a public customer flow, not the token route,
+  // and is intentionally outside the monitored marketing pages.
+  if (pathname === '/agendamento/gerenciar') return null;
+  if (/^\/agendamento\/[^/]+$/.test(pathname)) return '/agendamento/:token';
 
   return null;
 }
@@ -261,27 +314,11 @@ function sendKeepaliveFallback(
   }
 }
 
-/**
- * Sends one traffic ping without blocking navigation or awaiting the request.
- *
- * sendBeacon is preferred because a text/plain Blob is a simple request and
- * does not trigger a CORS preflight. If it is unavailable or rejects the
- * payload, a keepalive fetch is used as a best-effort fallback. All failures
- * are intentionally swallowed because telemetry must never affect the user.
- */
-export function sendTrafficBeacon(options: TrafficBeaconSendOptions = {}): void {
-  const environment: TrafficBeaconEnvironmentOptions = {
-    ...getTrafficBeaconEnvironment(),
-    ...(options.environment ?? {}),
-  };
-  if (!isTrafficBeaconEnabled(environment)) return;
-
-  const pathname = options.pathname ?? currentPathname();
-  if (!pathname) return;
-
-  const payload = createTrafficBeaconPayload(pathname, options.referrer ?? currentReferrer());
-  if (!payload) return;
-
+/** Serializes and dispatches an already-built payload (never throws). */
+function dispatchTrafficBeacon(
+  payload: TrafficBeaconPayload,
+  options: TrafficBeaconSendOptions
+): void {
   const url = `${API_BASE}/api/ping`;
   const serializedPayload = JSON.stringify(payload);
   const browserNavigator =
@@ -291,4 +328,28 @@ export function sendTrafficBeacon(options: TrafficBeaconSendOptions = {}): void 
 
   const fetchImpl = options.fetch ?? (typeof fetch === 'undefined' ? undefined : fetch);
   sendKeepaliveFallback(fetchImpl, url, serializedPayload);
+}
+
+function resolveEnvironment(options: TrafficBeaconSendOptions): TrafficBeaconEnvironmentOptions {
+  return { ...getTrafficBeaconEnvironment(), ...(options.environment ?? {}) };
+}
+
+/**
+ * Sends one traffic ping without blocking navigation or awaiting the request.
+ *
+ * sendBeacon is preferred because a text/plain Blob is a simple request and
+ * does not trigger a CORS preflight. If it is unavailable or rejects the
+ * payload, a keepalive fetch is used as a best-effort fallback. All failures
+ * are intentionally swallowed because telemetry must never affect the user.
+ */
+export function sendTrafficBeacon(options: TrafficBeaconSendOptions = {}): void {
+  if (!isTrafficBeaconEnabled(resolveEnvironment(options))) return;
+
+  const pathname = options.pathname ?? currentPathname();
+  if (!pathname) return;
+
+  const payload = createTrafficBeaconPayload(pathname, options.referrer ?? currentReferrer());
+  if (!payload) return;
+
+  dispatchTrafficBeacon(payload, options);
 }
