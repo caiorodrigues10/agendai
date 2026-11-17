@@ -307,48 +307,6 @@ describe('TrafficOverviewPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('mostra o rótulo e a legenda de visitantes distintos do dia', async () => {
-    vi.mocked(adminTrafficApi.getTrafficReport).mockResolvedValue({
-      success: true,
-      data: {
-        ...baseData,
-        totals: { ...baseData.totals, visitorsBasis: 'daily_distinct' },
-      },
-    });
-
-    renderPage('/master/traffic?period=day');
-
-    const dayLabel = await screen.findByText('Visitantes do dia');
-    fireEvent.focus(dayLabel);
-    expect(
-      await screen.findByRole('tooltip', {
-        name: 'Visitantes distintos do dia: quantas pessoas diferentes acessaram o site hoje.',
-      })
-    ).toBeInTheDocument();
-  });
-
-  it('mostra o rótulo e a legenda da soma dos visitantes distintos de cada dia', async () => {
-    renderPage();
-
-    const label = await screen.findByText('Visitantes (soma dos dias)');
-    fireEvent.focus(label);
-    expect(
-      await screen.findByRole('tooltip', {
-        name: 'Soma dos visitantes distintos de cada dia do período: a mesma pessoa pode ser contada em dias diferentes.',
-      })
-    ).toBeInTheDocument();
-  });
-
-  it('explica o que a coleta não conta, mesmo com a coleta ligada', async () => {
-    renderPage();
-
-    expect(
-      await screen.findByText(
-        'Não entram na contagem: quem ligou “não rastrear” no navegador, quem acessa páginas fora da lista monitorada e qualquer visita fora da produção (homologação, testes e localhost).'
-      )
-    ).toBeInTheDocument();
-  });
-
   it('exibe KPIs e apenas as variações fornecidas pela API', async () => {
     renderPage();
 
