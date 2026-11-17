@@ -9,6 +9,7 @@ import {
   type SalonTrafficPeriod,
 } from '../../infra/salonTrafficApi';
 import { useAuth } from '../../contexts/AuthContext';
+import { ApiError } from '../../infra/apiClient';
 
 vi.mock('../../contexts/AuthContext', () => ({
   useAuth: vi.fn(),
@@ -159,6 +160,56 @@ describe('SalonVisitsCard', () => {
     await waitFor(() =>
       expect(vi.mocked(getSalonTraffic).mock.calls.length).toBeGreaterThan(callsAfterFailure)
     );
+  });
+
+  it('mostra aviso de assinatura vencida (402) com link para os planos e sem retry', async () => {
+    vi.mocked(getSalonTraffic).mockRejectedValue(
+      new ApiError('Sem assinatura ativa', 402, 'SUBSCRIPTION_REQUIRED')
+    );
+
+    renderCard();
+
+    expect(
+      await screen.findByText(
+        'Sua assinatura está vencida. Renove o plano para ver as visitas ao seu salão.'
+      )
+    ).toBeInTheDocument();
+    // Nunca a mensagem genérica de falha de carregamento.
+    expect(
+      screen.queryByText('Não foi possível carregar as visitas ao seu salão.')
+    ).not.toBeInTheDocument();
+    // Retry não resolve assinatura vencida.
+    expect(screen.queryByText('Tentar novamente')).not.toBeInTheDocument();
+
+    const link = screen.getByRole('link', { name: /Ver planos e renovar/ });
+    expect(link).toHaveAttribute('href', '/planos');
+  });
+
+  it('mostra aviso de acesso bloqueado (CPF_BLOCKED) sem link de planos e sem retry', async () => {
+    vi.mocked(getSalonTraffic).mockRejectedValue(
+      new ApiError('CPF bloqueado', 403, 'CPF_BLOCKED')
+    );
+
+    renderCard();
+
+    expect(
+      await screen.findByText(
+        'O acesso aos dados do seu salão está bloqueado. Entre em contato com o suporte para liberar o acesso.'
+      )
+    ).toBeInTheDocument();
+    // Não é caso de assinatura: nem a mensagem genérica, nem a de assinatura.
+    expect(
+      screen.queryByText('Não foi possível carregar as visitas ao seu salão.')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        'Sua assinatura está vencida. Renove o plano para ver as visitas ao seu salão.'
+      )
+    ).not.toBeInTheDocument();
+    // Retry não resolve bloqueio de acesso.
+    expect(screen.queryByText('Tentar novamente')).not.toBeInTheDocument();
+    // Renovar o plano não resolve este bloqueio: sem link de renovação.
+    expect(screen.queryByRole('link', { name: /Ver planos e renovar/ })).not.toBeInTheDocument();
   });
 
   it('mostra aviso quando a coleta está desativada', async () => {

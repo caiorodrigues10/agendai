@@ -174,14 +174,17 @@ Nos dois últimos, quando não há atribuição de salão, o frontend envia some
 
 > **Status (backend, 2026-11-17):** implementado em `GET /api/barbershops/:id/traffic`.
 > Guardas: bearer obrigatório (401), apenas `OWNER` do salão da rota ou
-> `MASTER_ADMIN` (403 para `EMPLOYEE` e para dono de outro salão), query com
+> `MASTER_ADMIN` **com `internal:traffic:read`** (403 para `EMPLOYEE`, para dono
+> de outro salão e para admin interno escopado sem a permissão), query com
 > **apenas** `period` (400 para período inválido, ausente ou parâmetro extra).
 > `beaconEnabled` reflete `TRAFFIC_BEACON_ENABLED` no servidor. Atraso
 > típico: os agregados aparecem após a consolidação horária do cron
 > `traffic-consolidation`.
 
 - Método e caminho: `GET /api/barbershops/:id/traffic?period=day|week|month|3m|year`.
-- Autenticado (bearer). **Somente o dono do salão** (`OWNER` do barbershop; `MASTER_ADMIN` pode ler) — 403 para os demais. Funcionário (`EMPLOYEE`) não acessa, mesmo com permissão de relatórios.
+- Autenticado (bearer). **Somente o dono do salão** (`OWNER` do barbershop; `MASTER_ADMIN` pode ler **se** tiver `internal:traffic:read` — mesma guarda de `/master/traffic`; lista interna vazia/`internal:all` mantém o acesso total legado) — 403 para os demais. Funcionário (`EMPLOYEE`) não acessa, mesmo com permissão de relatórios.
+- **402 `SUBSCRIPTION_REQUIRED`**: o relatório é recurso pago — assinatura vencida do salão → 402 (o `MASTER_ADMIN` não é bloqueado por assinatura). O frontend trata esse 402 com mensagem de assinatura vencida + link para `/planos`, **sem** botão de retry.
+- **403 `CPF_BLOCKED`**: o dono está com o CPF bloqueado → o frontend mostra uma mensagem neutra de acesso bloqueado, **sem** link de renovação e **sem** retry (renovar o plano não resolve esse bloqueio).
 - `id` na rota é o salão; a query tem **apenas** `period` (janelas móveis calculadas no servidor, fuso `America/Sao_Paulo`):
   - `day` = hoje; `week` = últimos 7 dias; `month` = últimos 30 dias; `3m` = 90 dias; `year` = 365 dias.
   - Não há âncoras de data/mês no frontend.

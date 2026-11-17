@@ -23,7 +23,7 @@
 | Estoque (equipment) | + `INVENTORY_MANAGE`/`PRODUCTS_MANAGE` | — | products `assertProductPermission` |
 | Posts | + `MARKETING_MANAGE` | gerar/publicar | `posts.routes.ts` (staffGuard + regras internas) |
 | Showcase / Link / Indicações / Multiunidades | OWNER/MASTER_ADMIN | idem | rotas respectivas (role-only) |
-| Visitas ao salão (`SalonTrafficSection` na aba Link, `SalonVisitsCard` na Hoje) | OWNER/MASTER_ADMIN (papel puro, como a aba Link) | leitura do relatório | `GET /api/barbershops/:id/traffic` (**pendente**, owner-only; `EMPLOYEE` não acessa) |
+| Visitas ao salão (`SalonTrafficSection` na aba Link, `SalonVisitsCard` na Hoje) | OWNER (dono do salão da rota) ou MASTER_ADMIN **com `internal:traffic:read`** | leitura do relatório | `GET /api/barbershops/:id/traffic` (implementado; `EMPLOYEE` não acessa; admin interno sem `TRAFFIC_READ` → 403) |
 | Configurações / Ajuda / Perfil | todo staff | — | — |
 | Plano (subscription) | OWNER/MASTER_ADMIN | — | `plans.routes.ts` |
 | Master Admin (/master/*) | MASTER_ADMIN | — | `verifyInternalAdmin` + `requireInternalPermission` |

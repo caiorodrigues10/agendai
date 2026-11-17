@@ -1,9 +1,11 @@
 /// <reference types="vitest/globals" />
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { SalonTrafficSection } from './SalonTrafficSection';
 import { getSalonTraffic, type SalonTrafficData, type SalonTrafficPeriod } from '../../infra/salonTrafficApi';
 import { useAuth } from '../../contexts/AuthContext';
+import { ApiError } from '../../infra/apiClient';
 
 vi.mock('../../contexts/AuthContext', () => ({
   useAuth: vi.fn(),
@@ -94,7 +96,14 @@ const mockGetSalonTraffic = () =>
       >
   );
 
-const renderSection = () => render(<SalonTrafficSection barbershopId="shop-1" />);
+// O Router é necessário para o link "Ver planos e renovar" do estado de
+// assinatura vencida.
+const renderSection = () =>
+  render(
+    <MemoryRouter>
+      <SalonTrafficSection barbershopId="shop-1" />
+    </MemoryRouter>
+  );
 
 describe('SalonTrafficSection', () => {
   beforeEach(() => {
@@ -282,5 +291,74 @@ describe('SalonTrafficSection', () => {
         name: 'Soma dos visitantes distintos de cada dia. A mesma pessoa pode ser contada em dias diferentes.',
       })
     ).toBeVisible();
+  });
+});
+
+/**
+ * Bloqueio de acesso: o relatório é recurso pago e a resposta diz **por quê**
+ * (o `code` do backend). O tratamento difere por causa — assinatura vencida
+ * oferece renovação; bloqueio de CPF, não.
+ */
+describe('SalonTrafficSection — acesso bloqueado', () => {
+  beforeEach(() => {
+    vi.mocked(useAuth).mockReturnValue({
+      user: ownerUser,
+      loading: false,
+    } as ReturnType<typeof useAuth>);
+    mockGetSalonTraffic();
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('mostra aviso de assinatura vencida (402) com link para os planos e sem retry', async () => {
+    vi.mocked(getSalonTraffic).mockRejectedValue(
+      new ApiError('Sem assinatura ativa', 402, 'SUBSCRIPTION_REQUIRED')
+    );
+
+    renderSection();
+
+    expect(
+      await screen.findByText(
+        'Sua assinatura está vencida. Renove o plano para ver as visitas ao seu salão.'
+      )
+    ).toBeInTheDocument();
+    // Nunca a mensagem genérica de falha de carregamento.
+    expect(
+      screen.queryByText('Não foi possível carregar as visitas ao seu salão.')
+    ).not.toBeInTheDocument();
+    // Retry não resolve assinatura vencida.
+    expect(screen.queryByText('Tentar novamente')).not.toBeInTheDocument();
+
+    const link = screen.getByRole('link', { name: /Ver planos e renovar/ });
+    expect(link).toHaveAttribute('href', '/planos');
+  });
+
+  it('mostra aviso de acesso bloqueado (CPF_BLOCKED) sem link de planos e sem retry', async () => {
+    vi.mocked(getSalonTraffic).mockRejectedValue(
+      new ApiError('CPF bloqueado', 403, 'CPF_BLOCKED')
+    );
+
+    renderSection();
+
+    expect(
+      await screen.findByText(
+        'O acesso aos dados do seu salão está bloqueado. Entre em contato com o suporte para liberar o acesso.'
+      )
+    ).toBeInTheDocument();
+    // Não é caso de assinatura: nem a mensagem genérica, nem a de assinatura.
+    expect(
+      screen.queryByText('Não foi possível carregar as visitas ao seu salão.')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        'Sua assinatura está vencida. Renove o plano para ver as visitas ao seu salão.'
+      )
+    ).not.toBeInTheDocument();
+    // Retry não resolve bloqueio de acesso.
+    expect(screen.queryByText('Tentar novamente')).not.toBeInTheDocument();
+    // Renovar o plano não resolve este bloqueio: sem link de renovação.
+    expect(screen.queryByRole('link', { name: /Ver planos e renovar/ })).not.toBeInTheDocument();
   });
 });

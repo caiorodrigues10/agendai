@@ -7,18 +7,22 @@ import {
   Card,
   CardBody,
   CardSkeleton,
-  SectionError,
   SkeletonRegion,
   StatCard,
   Tooltip,
 } from '../../components/patterns';
 import { getVisitorBasisTooltip } from '../../shared/trafficVisitorBasis';
+import {
+  SalonTrafficErrorState,
+  toSalonTrafficError,
+  type SalonTrafficError,
+} from './salonTrafficErrors';
 
 interface SalonVisitorsState {
   requestId: number;
   day: SalonTrafficData | null;
   week: SalonTrafficData | null;
-  error: string | null;
+  error: SalonTrafficError | null;
 }
 
 const VisitorMetric: React.FC<{
@@ -83,13 +87,13 @@ export const SalonVisitsCard: React.FC<SalonVisitsCardProps> = ({ barbershopId }
           error: null,
         });
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (!active) return;
         setState({
           requestId: reloadKey,
           day: null,
           week: null,
-          error: 'Não foi possível carregar as visitas ao seu salão.',
+          error: toSalonTrafficError(error),
         });
       });
 
@@ -117,7 +121,9 @@ export const SalonVisitsCard: React.FC<SalonVisitsCardProps> = ({ barbershopId }
   }
 
   if (error) {
-    return <SectionError message={error} onRetry={retry} />;
+    // Bloqueio de acesso (assinatura vencida, CPF bloqueado, …): retry não
+    // resolve — o caminho é renovar o plano ou falar com o suporte.
+    return <SalonTrafficErrorState error={error} onRetry={retry} />;
   }
 
   if (!day || !week) return null;

@@ -20,12 +20,16 @@ import {
   CardHeader,
   CardTitle,
   CardSkeleton,
-  SectionError,
   SkeletonRegion,
   StatCard,
   Tooltip,
 } from '../../components/patterns';
 import { getVisitorBasisTooltip } from '../../shared/trafficVisitorBasis';
+import {
+  SalonTrafficErrorState,
+  toSalonTrafficError,
+  type SalonTrafficError,
+} from './salonTrafficErrors';
 
 const salonTrafficChartConfig: ChartConfig = {
   visits: {
@@ -62,21 +66,19 @@ const SECTION_LABELS: Record<string, string> = {
   other: 'Outras páginas',
 };
 
-const LOAD_ERROR = 'Não foi possível carregar as visitas ao seu salão.';
-
 const formatCount = (value: number): string => value.toLocaleString('pt-BR');
 
 interface CardsState {
   requestId: number;
   data: Partial<Record<'day' | 'week' | 'month', SalonTrafficData>> | null;
-  error: string | null;
+  error: SalonTrafficError | null;
 }
 
 interface DetailState {
   requestId: number;
   period: SalonTrafficPeriod | null;
   data: SalonTrafficData | null;
-  error: string | null;
+  error: SalonTrafficError | null;
 }
 
 /** Busca os totais de hoje / 7 / 30 dias (re-carrega a cada `requestId`). */
@@ -100,9 +102,11 @@ const useSalonTrafficCards = (
         });
         setState({ requestId, data, error: null });
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (!active) return;
-        setState({ requestId, data: null, error: LOAD_ERROR });
+        // As 3 requisições rodam em paralelo: o Promise.all rejeita uma vez,
+        // então o estado de erro fica consistente (uma única mensagem).
+        setState({ requestId, data: null, error: toSalonTrafficError(error) });
       });
 
     return () => {
@@ -136,9 +140,16 @@ const useSalonTrafficDetail = (
         if (!active) return;
         setState({ requestId, period, data: response.data, error: null });
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (!active) return;
-        setState({ requestId, period, data: null, error: LOAD_ERROR });
+        setState({
+          requestId,
+          // `period` é preservado: o erro pertence ao período pedido (se fosse
+          // `null`, a seção ficaria presa no estado de carregamento).
+          period,
+          data: null,
+          error: toSalonTrafficError(error),
+        });
       });
 
     return () => {
@@ -405,7 +416,7 @@ const CollectionDisabledNotice: React.FC = () => (
 /** Estados possíveis da seção (carregando, erro, coleta desativada ou dados). */
 interface SalonTrafficViewState {
   loading: boolean;
-  error: string | null;
+  error: SalonTrafficError | null;
   disabled: boolean;
   showData: boolean;
 }
@@ -462,7 +473,7 @@ const SalonTrafficView: React.FC<SalonTrafficViewProps> = ({
       </SkeletonRegion>
     )}
 
-    {!loading && error && <SectionError message={error} onRetry={onRetry} />}
+    {!loading && error && <SalonTrafficErrorState error={error} onRetry={onRetry} />}
 
     {showData && detail && cards && (
       <div className="space-y-4">
@@ -503,7 +514,9 @@ export const SalonTrafficSection: React.FC<SalonTrafficSectionProps> = ({ barber
   const cardsLoading = cardsState.requestId !== reloadKey;
   const detailLoading = detailState.requestId !== reloadKey || detailState.period !== period;
   const loading = cardsLoading || detailLoading;
-  const error = cardsLoading ? null : (cardsState.error ?? (detailLoading ? null : detailState.error));
+  // O erro exibido vem dos cards ou do detalhe (nunca dos dois): a mensagem e a
+  // flag de acesso bloqueado acompanham a mesma origem.
+  const error = cardsState.error ? cardsState.error : detailState.error;
   const cards = cardsState.data;
   const detail = detailState.period === period ? detailState.data : null;
   const disabled = !loading && !error && detail?.beaconEnabled === false;
