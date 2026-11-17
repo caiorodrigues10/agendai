@@ -1,6 +1,53 @@
 import { API_BASE } from './apiClient';
 
-export type TrafficBeaconRoute = '/esqueci-senha' | '/s/:slug' | '/agendamento/:token';
+/**
+ * Public pages that may be reported, as **literal** route patterns.
+ *
+ * Privacy rule (non-negotiable): every entry is a static path that exists in
+ * `src/app/App.tsx`. There is no slug, id, token, query or fragment here — a
+ * literal path carries no identifier, so nothing identifying can leak.
+ *
+ * Scope: the landing page, the marketing pages and the commercial-intention
+ * pages (pricing + the "software para …" landing pages). The logged area
+ * (`/app`, `/master`, `/minha-conta`) and the checkout are deliberately out.
+ */
+export const TRAFFIC_BEACON_LITERAL_ROUTES = [
+  // Landing.
+  '/',
+  // Marketing.
+  '/funcionalidades',
+  '/ia-preditiva',
+  '/agendamento',
+  '/dashboard',
+  '/sobre',
+  '/contato',
+  '/privacidade',
+  '/termos',
+  // Comercial.
+  '/planos',
+  '/software-para-salao-de-beleza',
+  '/sistema-para-salao-de-beleza',
+  '/sistema-para-barbearia',
+  '/app-para-agendamento-de-salao',
+  '/sistema-para-fila-de-barbearia',
+  '/sistema-para-manicure',
+  '/sistema-para-lash-designer',
+  '/crm-para-salao-de-beleza',
+  '/controle-financeiro-para-salao',
+  '/software-para-escritorio-de-advocacia',
+  // Recuperação de senha (página pública de entrada).
+  '/esqueci-senha',
+] as const;
+
+/**
+ * Route families: the concrete slug/token is dropped and only the family
+ * pattern is sent, so no identifier ever reaches the beacon.
+ */
+export type TrafficBeaconRouteFamily = '/s/:slug' | '/agendamento/:token';
+
+export type TrafficBeaconRoute =
+  | (typeof TRAFFIC_BEACON_LITERAL_ROUTES)[number]
+  | TrafficBeaconRouteFamily;
 
 export interface TrafficBeaconPayload {
   /** A literal route pattern. Never the concrete slug or token from the URL. */
@@ -140,16 +187,31 @@ export function isTrafficBeaconEnabled(options: TrafficBeaconEnvironmentOptions 
 /** Alias with a decision-oriented name for callers that prefer it. */
 export const isTrafficBeaconAllowed = isTrafficBeaconEnabled;
 
+/** Literal public routes, kept in a Set for an exact-path lookup. */
+const LITERAL_ROUTE_SET = new Set<string>(TRAFFIC_BEACON_LITERAL_ROUTES);
+
 /**
- * Maps a concrete pathname to one of the three literal patterns that may be
- * sent. Query strings and fragments are ignored even if a caller supplies a
- * combined path by mistake.
+ * Maps a concrete pathname to one of the literal patterns that may be sent.
+ *
+ * Only two shapes are allowed:
+ *
+ * 1. **Literal** — the path matches a public page exactly (landing, marketing
+ *    and commercial-intention pages). The literal itself carries no
+ *    identifier, so it is safe to send.
+ * 2. **Family** — the path has a dynamic segment (`/s/:slug`,
+ *    `/agendamento/:token`). The concrete value is dropped and only the
+ *    family pattern is returned.
+ *
+ * Query strings and fragments are ignored even if a caller supplies a
+ * combined path by mistake. The logged area (`/app`, `/master`,
+ * `/minha-conta`), the checkout and any unknown page return `null`: they are
+ * never counted.
  */
 export function getTrafficBeaconRoute(pathname: string): TrafficBeaconRoute | null {
   if (typeof pathname !== 'string' || pathname.length === 0) return null;
 
   const path = pathname.split(/[?#]/, 1)[0];
-  if (path === '/esqueci-senha') return '/esqueci-senha';
+  if (LITERAL_ROUTE_SET.has(path)) return path as TrafficBeaconRoute;
   // Canonical public share URL (`/s/salon/:id`, served by the backend share
   // route). The concrete id is dropped: only the literal family pattern is
   // returned, so no identifier ever reaches the beacon.

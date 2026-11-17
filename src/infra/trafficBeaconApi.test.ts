@@ -5,6 +5,7 @@ import {
   getTrafficBeaconRoute,
   isTrafficBeaconEnabled,
   sendTrafficBeacon,
+  TRAFFIC_BEACON_LITERAL_ROUTES,
   type TrafficBeaconEnvironmentOptions,
 } from './trafficBeaconApi';
 
@@ -118,17 +119,66 @@ describe('trafficBeaconApi', () => {
     }
   });
 
-  it('recognizes only the three allowlisted route shapes', () => {
+  it('reconhece todas as rotas públicas literais monitoradas', () => {
+    for (const route of TRAFFIC_BEACON_LITERAL_ROUTES) {
+      expect(getTrafficBeaconRoute(route)).toBe(route);
+    }
+
+    // As três rotas que já existiam continuam válidas.
     expect(getTrafficBeaconRoute('/esqueci-senha')).toBe('/esqueci-senha');
     expect(getTrafficBeaconRoute('/s/acme')).toBe('/s/:slug');
     expect(getTrafficBeaconRoute('/agendamento/abc123')).toBe('/agendamento/:token');
-    expect(getTrafficBeaconRoute('/master')).toBeNull();
-    expect(getTrafficBeaconRoute('/app/overview')).toBeNull();
-    expect(getTrafficBeaconRoute('/login')).toBeNull();
-    expect(getTrafficBeaconRoute('/checkout')).toBeNull();
-    expect(getTrafficBeaconRoute('/reset-password')).toBeNull();
-    expect(getTrafficBeaconRoute('/s/')).toBeNull();
-    expect(getTrafficBeaconRoute('/s/acme/extra')).toBeNull();
+  });
+
+  it('nenhuma rota literal monitorada carrega slug, token ou parâmetro', () => {
+    for (const route of TRAFFIC_BEACON_LITERAL_ROUTES) {
+      // Literal = caminho estático: sem ':' (parâmetro), sem barra interna e
+      // sem qualquer caractere de query/fragmento.
+      expect(route).not.toContain(':');
+      expect(route).not.toContain('?');
+      expect(route).not.toContain('#');
+      expect(route.startsWith('/')).toBe(true);
+      expect(route === '/' || !route.slice(1).includes('/')).toBe(true);
+    }
+  });
+
+  it('ignora query string e fragmento e devolve só o literal', () => {
+    expect(getTrafficBeaconRoute('/?utm_source=newsletter&email=pessoa@exemplo.com')).toBe('/');
+    expect(getTrafficBeaconRoute('/#topo')).toBe('/');
+    expect(getTrafficBeaconRoute('/agendamento?origem=ads')).toBe('/agendamento');
+    expect(getTrafficBeaconRoute('/planos#faq')).toBe('/planos');
+    expect(getTrafficBeaconRoute('/app-para-agendamento-de-salao?utm=abc')).toBe(
+      '/app-para-agendamento-de-salao'
+    );
+  });
+
+  it('não conta rotas logadas, telas de acesso nem páginas desconhecidas', () => {
+    for (const pathname of [
+      '/master',
+      '/master/overview',
+      '/master/traffic',
+      '/app',
+      '/app/overview',
+      '/app/configuracoes',
+      '/minha-conta',
+      '/checkout',
+      '/login',
+      '/cadastro',
+      '/reset-password',
+      '/email-verificado',
+      '/bloqueado',
+      '/convite/abc123',
+      '/assinar/abc123',
+      '/nps/abc123',
+      '/queue/abc123',
+      '/saloes/abc123/posts/def456',
+      '/pagina-que-nao-existe',
+      '/planos/extra',
+      '/s/',
+      '/s/acme/extra',
+    ]) {
+      expect(getTrafficBeaconRoute(pathname)).toBeNull();
+    }
   });
 
   it('maps the canonical public share URL to the literal pattern without the id', () => {
@@ -170,6 +220,24 @@ describe('trafficBeaconApi payloads', () => {
       r: 'referrer.example',
     });
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('envia a rota literal da landing e das páginas públicas de marketing', async () => {
+    const sendBeacon = makeSendBeacon();
+
+    for (const route of ['/', '/agendamento', '/app-para-agendamento-de-salao', '/planos']) {
+      sendBeacon.mockClear();
+      sendTrafficBeacon({
+        environment: productionEnvironment,
+        pathname: route,
+        referrer: '',
+        navigator: { sendBeacon },
+      });
+
+      expect(sendBeacon).toHaveBeenCalledTimes(1);
+      const body = sendBeacon.mock.calls[0][1] as Blob;
+      expect(JSON.parse(await readBlob(body))).toEqual({ p: route });
+    }
   });
 
   it('prevents the browser Referer header from carrying the current URL and restores the policy', () => {

@@ -307,21 +307,6 @@ describe('TrafficOverviewPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('mostra os rótulos exatos de visitantes e o texto explicativo', async () => {
-    renderPage('/master/traffic?period=day');
-
-    const dayLabel = await screen.findByText('Visitantes do dia');
-    fireEvent.focus(dayLabel);
-    expect(
-      await screen.findByRole('tooltip', {
-        name: 'Como não rastreamos pessoas, a mesma pessoa que volta em outro dia conta de novo',
-      })
-    ).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Semana' }));
-    expect(await screen.findByText('Visitantes (soma dos dias)')).toBeInTheDocument();
-  });
-
   it('exibe KPIs e apenas as variações fornecidas pela API', async () => {
     renderPage();
 

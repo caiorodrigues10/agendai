@@ -105,7 +105,16 @@ const EmptyChart: React.FC = () => (
   <p className="text-sm text-text-muted py-6 text-center">Sem dados no período.</p>
 );
 
-export const OverviewKpis: React.FC<{ data: AdminOverview }> = ({ data }) => {
+/**
+ * Grade de KPIs da visão geral.
+ *
+ * `children` entra como um card extra da mesma grade (ex.: "Pessoas que
+ * entraram"), então o alinhamento com os demais indicadores é o mesmo.
+ */
+export const OverviewKpis: React.FC<{ data: AdminOverview; children?: React.ReactNode }> = ({
+  data,
+  children,
+}) => {
   const { revenue, subscriptions, growth, usage } = data;
 
   return (
@@ -137,6 +146,7 @@ export const OverviewKpis: React.FC<{ data: AdminOverview }> = ({ data }) => {
           icon={<LuCreditCard size={16} />}
           hint={`${int(subscriptions.trialing)} em trial · ${int(subscriptions.pastDue)} em atraso`}
         />
+        {children}
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

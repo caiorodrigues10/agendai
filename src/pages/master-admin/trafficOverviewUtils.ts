@@ -5,12 +5,60 @@ import {
   type TrafficArea,
   type TrafficPeriod,
   type TrafficUserRole,
+  type TrafficVisitorsBasis,
 } from '../../infra/adminTrafficApi';
 
 export const SAO_PAULO_TIMEZONE = 'America/Sao_Paulo';
 
-export const VISITOR_TOOLTIP =
-  'Como não rastreamos pessoas, a mesma pessoa que volta em outro dia conta de novo';
+/**
+ * Legenda de "visitantes" por base de cálculo.
+ *
+ * A base vem da API (`totals.visitorsBasis`): `daily_distinct` são os
+ * visitantes distintos **de um dia**; `sum_of_daily_distinct` é a **soma dos
+ * distintos de cada dia** do período — a mesma pessoa pode ser contada em
+ * dias diferentes. A tela nunca apresenta esse valor como pessoas únicas.
+ */
+export const VISITOR_BASIS_TOOLTIPS: Record<TrafficVisitorsBasis, string> = {
+  daily_distinct: 'Visitantes distintos do dia: quantas pessoas diferentes acessaram o site hoje.',
+  sum_of_daily_distinct:
+    'Soma dos visitantes distintos de cada dia do período: a mesma pessoa pode ser contada em dias diferentes.',
+};
+
+/** Texto neutro para uma base ausente ou desconhecida (nunca mente sobre o número). */
+export const VISITOR_TOOLTIP_FALLBACK =
+  'Visitantes distintos por dia: a mesma pessoa que volta em outro dia conta de novo.';
+
+/** Rótulo do KPI de visitantes conforme a base informada pela API. */
+export const VISITOR_BASIS_LABELS: Record<TrafficVisitorsBasis, string> = {
+  daily_distinct: 'Visitantes do dia',
+  sum_of_daily_distinct: 'Visitantes (soma dos dias)',
+};
+
+/** Legenda curta da base de cálculo (usada quando há mais de um número). */
+export const VISITOR_BASIS_LEGENDS: Record<TrafficVisitorsBasis, string> = {
+  daily_distinct: 'visitantes distintos do dia',
+  sum_of_daily_distinct:
+    'soma dos visitantes distintos de cada dia (a mesma pessoa pode ser contada em dias diferentes)',
+};
+
+export function getVisitorBasisTooltip(basis: TrafficVisitorsBasis | undefined): string {
+  return basis ? VISITOR_BASIS_TOOLTIPS[basis] : VISITOR_TOOLTIP_FALLBACK;
+}
+
+/**
+ * Legenda do card "Pessoas que entraram": o número de hoje e o dos últimos
+ * 7 dias têm bases diferentes (uma por dia, outra a soma dos dias), então a
+ * legenda diz qual base vale para cada número.
+ */
+export function getVisitorBasisLegend(
+  dayBasis: TrafficVisitorsBasis | undefined,
+  weekBasis: TrafficVisitorsBasis | undefined
+): string {
+  const day = dayBasis ? VISITOR_BASIS_LEGENDS[dayBasis] : 'visitantes do dia';
+  const week = weekBasis ? VISITOR_BASIS_LEGENDS[weekBasis] : 'soma dos dias';
+
+  return `Hoje: ${day}. Últimos 7 dias: ${week}.`;
+}
 
 export const PERIOD_LABELS: Record<TrafficPeriod, string> = {
   day: 'Dia',

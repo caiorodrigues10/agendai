@@ -373,6 +373,30 @@ test('tráfego: usuário OWNER não acessa a tela e não consulta o relatório',
   expect(trafficRequests).toHaveLength(0);
 });
 
+// ITEM 5 — a legenda de visitantes acompanha a base que a API informa:
+// `daily_distinct` (distintos do dia) e `sum_of_daily_distinct` (soma dos
+// distintos de cada dia do período).
+test('tráfego: a legenda de visitantes muda conforme a base informada pela API', async ({
+  page,
+}) => {
+  await seedMaster(page, 'allowed');
+  await installApiMocks(page);
+
+  await page.goto('/master/traffic?period=day');
+  await expect(page.getByRole('heading', { name: 'Tráfego', exact: true })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Visitantes do dia', exact: true }).focus();
+  await expect(page.getByRole('tooltip')).toHaveText(
+    'Visitantes distintos do dia: quantas pessoas diferentes acessaram o site hoje.'
+  );
+
+  await openTrafficDashboard(page);
+  await page.getByRole('button', { name: 'Visitantes (soma dos dias)', exact: true }).focus();
+  await expect(page.getByRole('tooltip')).toHaveText(
+    'Soma dos visitantes distintos de cada dia do período: a mesma pessoa pode ser contada em dias diferentes.'
+  );
+});
+
 // ITEM 3 — tooltip com texto longo em viewport estreito: o bubble tem
 // max-w-[calc(100vw-2rem)] + quebra de linha, então cabe inteiro na tela.
 test('tráfego: tooltip longo cabe em viewport estreito', async ({ page }) => {
@@ -386,7 +410,7 @@ test('tráfego: tooltip longo cabe em viewport estreito', async ({ page }) => {
   const tooltip = page.getByRole('tooltip');
   await expect(tooltip).toBeVisible();
   await expect(tooltip).toHaveText(
-    'Como não rastreamos pessoas, a mesma pessoa que volta em outro dia conta de novo'
+    'Soma dos visitantes distintos de cada dia do período: a mesma pessoa pode ser contada em dias diferentes.'
   );
 
   // Dentro dos 375 px da viewport (nem sai pela esquerda nem pela direita).
