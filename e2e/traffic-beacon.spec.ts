@@ -183,13 +183,34 @@ test.describe('beacon privado de tráfego', () => {
     expect(new URL(pings[1].url).search).toBe('');
   });
 
-  test('não emite beacon para rotas fora da allowlist', async ({ page }) => {
+  test('conta as páginas públicas literais do site, sem query nem fragmento', async ({ page }) => {
     const pings: CapturedPing[] = [];
     await preparePage(page);
     await capturePings(page, pings);
 
     const origin = await appOrigin();
-    for (const route of ['/', '/funcionalidades', '/login', '/reset-password']) {
+    const routes = ['/', '/funcionalidades', '/app-para-agendamento-de-salao', '/planos'];
+
+    for (const [index, route] of routes.entries()) {
+      await page.goto(`${origin}${route}?origem=ads#topo`);
+      await expect(page.locator('h1').first()).toBeVisible({ timeout: 15_000 });
+      await expect.poll(() => pings.length, { timeout: 10_000 }).toBe(index + 1);
+
+      const ping = pings[index];
+      expect(JSON.parse(ping.body)).toEqual({ p: route });
+      expect(ping.body).not.toContain('origem=ads');
+      expect(new URL(ping.url).search).toBe('');
+    }
+  });
+
+  test('não emite beacon para rotas fora da lista monitorada', async ({ page }) => {
+    const pings: CapturedPing[] = [];
+    await preparePage(page);
+    await capturePings(page, pings);
+
+    const origin = await appOrigin();
+    // Rotas de acesso e telas que não existem na lista pública: nada é enviado.
+    for (const route of ['/login', '/reset-password']) {
       await page.goto(`${origin}${route}`);
       await expect(page.locator('h1').first()).toBeVisible({ timeout: 15_000 });
     }

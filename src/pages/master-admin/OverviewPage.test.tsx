@@ -3,9 +3,26 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { OverviewPage } from './OverviewPage';
 import { adminInternalApi, AdminOverview } from '../../infra/adminInternalApi';
+import { adminTrafficApi, type AdminTrafficData } from '../../infra/adminTrafficApi';
+import { useAuth } from '../../contexts/AuthContext';
 
 vi.mock('../../infra/adminInternalApi', () => ({
   adminInternalApi: { getOverview: vi.fn(), getProductAdoption: vi.fn() },
+}));
+
+vi.mock('../../infra/adminTrafficApi', async importOriginal => {
+  const actual = await importOriginal<typeof import('../../infra/adminTrafficApi')>();
+  return {
+    ...actual,
+    adminTrafficApi: {
+      getTrafficReport: vi.fn(),
+      exportTrafficCsv: vi.fn(),
+    },
+  };
+});
+
+vi.mock('../../contexts/AuthContext', () => ({
+  useAuth: vi.fn(),
 }));
 
 const overview: AdminOverview = {
@@ -112,6 +129,41 @@ const overview: AdminOverview = {
   },
 };
 
+const trafficReport = (overrides: Partial<AdminTrafficData> = {}): AdminTrafficData =>
+  ({
+    period: {
+      key: 'day',
+      label: 'Dia',
+      granularity: 'hour',
+      fromDay: '2026-10-03',
+      toDay: '2026-10-03',
+      prevFromDay: '2026-10-02',
+      prevToDay: '2026-10-02',
+      timezone: 'America/Sao_Paulo',
+      dataFrom: '2026-09-01',
+    },
+    generatedAt: '2026-10-03T12:00:00.000Z',
+    beaconEnabled: true,
+    totals: {
+      visits: 100,
+      visitors: 42,
+      visitorsBasis: 'daily_distinct',
+      sessions: 20,
+      loggedInUsers: 10,
+      newShops: 2,
+      newUsers: 4,
+      newUsersRemoved: 1,
+    },
+    prevTotals: null,
+    deltaPct: null,
+    series: [],
+    areas: [],
+    origins: [],
+    loss: { counterRegressions: 0, redisUnavailableDrops: 0, notes: [] },
+    userActivity: { firstRecordedAt: '2026-09-02T12:00:00.000Z' },
+    ...overrides,
+  }) as AdminTrafficData;
+
 function renderPage(initialEntry = '/master/overview') {
   return render(
     <MemoryRouter initialEntries={[initialEntry]}>
@@ -122,6 +174,20 @@ function renderPage(initialEntry = '/master/overview') {
 
 describe('OverviewPage', () => {
   beforeEach(() => {
+    vi.mocked(useAuth).mockReturnValue({
+      user: {
+        id: 'master-1',
+        name: 'Master',
+        email: 'master@agendai.local',
+        role: 'MASTER_ADMIN',
+        internalPermissions: ['internal:traffic:read'],
+      },
+      loading: false,
+    } as ReturnType<typeof useAuth>);
+    vi.mocked(adminTrafficApi.getTrafficReport).mockResolvedValue({
+      success: true,
+      data: trafficReport(),
+    });
     vi.mocked(adminInternalApi.getOverview).mockResolvedValue({
       success: true,
       data: overview,
@@ -165,6 +231,40 @@ describe('OverviewPage', () => {
     expect(screen.getByText('Cobranças vencidas')).toBeInTheDocument();
     expect(await screen.findByText('Adoção de produtos')).toBeInTheDocument();
     expect(adminInternalApi.getProductAdoption).toHaveBeenCalledTimes(1);
+  });
+
+  it('mostra o card de pessoas que entraram com os visitantes de hoje e dos últimos 7 dias', async () => {
+    renderPage();
+
+    expect(await screen.findByText('Pessoas que entraram')).toBeInTheDocument();
+    expect(screen.getByText('42')).toBeInTheDocument();
+    expect(screen.getByText('últimos 7 dias: 42')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Ver tráfego' })).toHaveAttribute(
+      'href',
+      '/master/traffic',
+    );
+
+    expect(adminTrafficApi.getTrafficReport).toHaveBeenCalledWith({ period: 'day', area: 'all' });
+    expect(adminTrafficApi.getTrafficReport).toHaveBeenCalledWith({ period: 'week', area: 'all' });
+  });
+
+  it('não mostra o card de pessoas que entraram sem a permissão de tráfego', async () => {
+    vi.mocked(useAuth).mockReturnValue({
+      user: {
+        id: 'master-2',
+        name: 'Master',
+        email: 'master@agendai.local',
+        role: 'MASTER_ADMIN',
+        internalPermissions: ['internal:dashboard:read'],
+      },
+      loading: false,
+    } as ReturnType<typeof useAuth>);
+
+    renderPage();
+
+    expect(await screen.findByText('Visão geral')).toBeInTheDocument();
+    expect(screen.queryByText('Pessoas que entraram')).not.toBeInTheDocument();
+    expect(adminTrafficApi.getTrafficReport).not.toHaveBeenCalled();
   });
 
   it('usa o período da URL e atualiza ao trocar o período', async () => {

@@ -24,7 +24,13 @@ import {
   Tooltip,
   type StatCardProps,
 } from '../../components/patterns';
-import { formatDatePtBr, formatNumber, ROLE_LABELS, VISITOR_TOOLTIP } from './trafficOverviewUtils';
+import {
+  formatDatePtBr,
+  formatNumber,
+  getVisitorBasisTooltip,
+  ROLE_LABELS,
+  VISITOR_BASIS_LABELS,
+} from './trafficOverviewUtils';
 
 const trafficChartConfig: ChartConfig = {
   visits: {
@@ -73,6 +79,15 @@ function partialLabel(granularity: TrafficBucketGranularity): string {
   }
 }
 
+/**
+ * Nota discreta do que a coleta NÃO conta.
+ *
+ * Fica visível mesmo com a coleta ligada: sem isso o master admin lê um
+ * número menor e pensa que o mundo parou de visitar o site.
+ */
+export const TRAFFIC_EXCLUSIONS_NOTE =
+  'Não entram na contagem: quem ligou “não rastrear” no navegador, quem acessa páginas fora da lista monitorada e qualquer visita fora da produção (homologação, testes e localhost).';
+
 export const TrafficNotices: React.FC<{ data: AdminTrafficData }> = ({ data }) => {
   const trafficStart = data.period.dataFrom
     ? `contagem de visitas a partir de ${formatDatePtBr(data.period.dataFrom)}`
@@ -97,6 +112,11 @@ export const TrafficNotices: React.FC<{ data: AdminTrafficData }> = ({ data }) =
           </div>
         </div>
       )}
+
+      <div className="flex items-start gap-2 text-xs text-text-muted">
+        <LuInfo className="mt-0.5 shrink-0" size={14} aria-hidden="true" />
+        <p>{TRAFFIC_EXCLUSIONS_NOTE}</p>
+      </div>
 
       {(trafficStart || activityStart) && (
         <Card>
@@ -129,8 +149,15 @@ export const TrafficKpis: React.FC<{
   period: TrafficPeriod;
   selectedRole: TrafficUserRole | undefined;
 }> = ({ data, period, selectedRole }) => {
-  const visitorLabel = period === 'day' ? 'Visitantes do dia' : 'Visitantes (soma dos dias)';
   const { totals, deltaPct } = data;
+  // A base vem da API: ela diz o que o número significa (distintos do dia
+  // ou soma dos distintos de cada dia). O período só é o fallback quando a
+  // API não informa a base.
+  const visitorLabel = totals.visitorsBasis
+    ? VISITOR_BASIS_LABELS[totals.visitorsBasis]
+    : period === 'day'
+      ? 'Visitantes do dia'
+      : 'Visitantes (soma dos dias)';
 
   return (
     <section aria-labelledby="traffic-kpis-title">
@@ -145,7 +172,7 @@ export const TrafficKpis: React.FC<{
         />
         <StatCard
           label={
-            <Tooltip label={VISITOR_TOOLTIP}>
+            <Tooltip label={getVisitorBasisTooltip(totals.visitorsBasis)}>
               <VisitorTooltipLabel label={visitorLabel} />
             </Tooltip>
           }

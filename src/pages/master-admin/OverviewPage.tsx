@@ -19,6 +19,7 @@ import {
   OverviewPlans,
 } from './OverviewPanels';
 import { OverviewProductAdoption } from './OverviewProductAdoption';
+import { TrafficVisitorsCard } from './TrafficVisitorsCard';
 
 const PERIODS: { key: OverviewPeriod; label: string }[] = [
   { key: 'today', label: 'Hoje' },
@@ -211,7 +212,11 @@ export const OverviewPage: React.FC = () => {
 
       {!hasMovements(data) && <EmptyPeriodNotice />}
 
-      <OverviewKpis data={data} />
+      <OverviewKpis data={data}>
+        {/* Pessoas que entraram: só aparece para quem tem internal:traffic:read. */}
+        <TrafficVisitorsCard />
+      </OverviewKpis>
+
       <OverviewCharts rows={chartRows} />
 
       <div className="grid md:grid-cols-2 gap-4">

@@ -7,6 +7,10 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 22.14.0
+      # Variável de build: o valor é embutido no bundle, então ligar ou desligar
+      # a coleta de tráfego exige um novo deploy do frontend.
+      - key: VITE_TRAFFIC_BEACON_ENABLED
+        value: "true"
     routes:
       # Compartilhamento de perfil: /s/salon/:id precisa cair na API, que serve o
       # HTML com as meta tags Open Graph (GET /s/salon/:id, fora do /api).
