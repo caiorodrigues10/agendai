@@ -1,6 +1,15 @@
 # Contrato do backend para o beacon de tráfego
 
-> Pendência fora do repositório frontend: o backend deve reconhecer os novos padrões de rota em `POST /api/ping` e implementar o relatório de visitas do salão (`GET /api/barbershops/:id/traffic`). Nenhuma alteração de backend foi feita no frontend.
+> **Status (2026-11-17):** contrato **implementado no backend** (branch
+> `feat/traffic-backend`). O backend passou a reconhecer os padrões de rota de
+> salão em `POST /api/ping` e a expor `GET /api/barbershops/:id/traffic` no
+> formato definido abaixo. Detalhes da implementação (armazenamento, retenção,
+> decisões e operação): `backend/docs/TRAFFIC_BEACON_SALON.md`.
+>
+> Pendência fora do repositório frontend: **decisão de produto** sobre o slug de
+> organização multiunidade (ver "Resolução de id e slug") — o backend
+> implementou a opção 1 recomendada, mas a decisão final continua pendente.
+> Nenhuma alteração de backend foi feita no frontend.
 
 ## Requisição
 
@@ -79,7 +88,19 @@ Como o backend deve resolver o slug quando a organização tem várias unidades 
 2. **Ignorar o ping quando o slug for ambíguo** (org com mais de uma unidade): responder sucesso sem gravar. — Mais conservadora, mas perde visitas de slug em orgs multiunidade.
 3. Atribuir a uma unidade específica fixa (ex.: primeira/unidade primária da org). — Simples, mas atribui visitas a uma unidade que o visitante talvez nem tenha aberto; não recomendada sem decisão explícita.
 
-> ⚠️ **Decisão pendente**: enquanto não decidida, a opção recomendada é a **1**. O `salonType:"slug"` já evita que o backend confunda slug com UUID; para `salonType:"id"` a resolução é direta (barbershop).
+> ⚠️ **Decisão pendente (backend, 2026-11-17)**: enquanto não decidida, a opção recomendada é a **1**. O `salonType:"slug"` já evita que o backend confunda slug com UUID; para `salonType:"id"` a resolução é direta (barbershop).
+>
+> **Estado da implementação no backend:** a **opção 1** foi implementada — o ping de
+> slug é atribuído à **organização** (`o:<organizationId>`) e o relatório do
+> salão inclui esse agregado apenas para o **dono da organização** e para o
+> `MASTER_ADMIN` (dono de unidade não enxerga o tráfego de outra unidade). A
+> resolução fica isolada em um único adapter
+> (`backend/src/modules/traffic/infra/prismaSalonAttributionResolver.ts`), para
+> que a troca de decisão não afete contador, consolidação ou relatório.
+>
+> **Dúvida ainda aberta (produto):** se o dono de **cada unidade** deveria ver o
+> agregado da organização. Hoje a leitura é restrita ao dono da organização — a
+> interpretação mais conservadora dentro da opção 1.
 
 ### Validação no backend
 
@@ -150,6 +171,14 @@ Mais os três padrões de página de salão, **com os campos `salon`, `salonType
 Nos dois últimos, quando não há atribuição de salão, o frontend envia somente o texto do padrão. O token concreto nunca chega ao backend.
 
 ## Leitura: relatório de visitas do salão (novo endpoint)
+
+> **Status (backend, 2026-11-17):** implementado em `GET /api/barbershops/:id/traffic`.
+> Guardas: bearer obrigatório (401), apenas `OWNER` do salão da rota ou
+> `MASTER_ADMIN` (403 para `EMPLOYEE` e para dono de outro salão), query com
+> **apenas** `period` (400 para período inválido, ausente ou parâmetro extra).
+> `beaconEnabled` reflete `TRAFFIC_BEACON_ENABLED` no servidor. Atraso
+> típico: os agregados aparecem após a consolidação horária do cron
+> `traffic-consolidation`.
 
 - Método e caminho: `GET /api/barbershops/:id/traffic?period=day|week|month|3m|year`.
 - Autenticado (bearer). **Somente o dono do salão** (`OWNER` do barbershop; `MASTER_ADMIN` pode ler) — 403 para os demais. Funcionário (`EMPLOYEE`) não acessa, mesmo com permissão de relatórios.
