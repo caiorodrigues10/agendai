@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { LuTriangleAlert } from 'react-icons/lu';
 import { FIELD_CONTROL } from '../../components/ui/Field';
 import { isHexColor, normalizeHexColor } from '../../shared/pageThemeContrast';
 
@@ -7,6 +8,8 @@ interface ColorFieldProps {
   value: string;
   onChange: (hex: string) => void;
   disabled?: boolean;
+  /** Aviso discreto que não impede a edição/salvamento. */
+  warning?: string;
 }
 
 /**
@@ -16,7 +19,13 @@ interface ColorFieldProps {
  * `input[type=color]` transparente por cima — o navegador estilo sistema fica
  * por baixo e herda o foco/teclado via `peer-focus-visible`.
  */
-export const ColorField: React.FC<ColorFieldProps> = ({ label, value, onChange, disabled }) => {
+export const ColorField: React.FC<ColorFieldProps> = ({
+  label,
+  value,
+  onChange,
+  disabled,
+  warning,
+}) => {
   const inputId = `color-${label.replace(/\s+/g, '-').toLowerCase()}`;
   const [text, setText] = useState(value);
   const [prevValue, setPrevValue] = useState(value);
@@ -80,6 +89,16 @@ export const ColorField: React.FC<ColorFieldProps> = ({ label, value, onChange, 
           aria-label={`${label} (hex)`}
         />
       </div>
+      {warning && (
+        <p
+          role="status"
+          className="mt-2 flex items-start gap-1.5 text-xs font-medium text-warning"
+          data-testid={`color-warning-${inputId}`}
+        >
+          <LuTriangleAlert size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
+          {warning}
+        </p>
+      )}
     </div>
   );
 };

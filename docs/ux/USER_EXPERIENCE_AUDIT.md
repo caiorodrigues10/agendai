@@ -4,7 +4,7 @@ Revisão: 28/10/2026. Skills utilizadas: `ui-ux-pro-max` e `onboarding`.
 
 ## Resultado implementado
 
-A interface passa a compartilhar cabeçalhos, filtros, abas e diálogos. A navegação usa uma família de ícones, rótulos mais legíveis e menos elementos decorativos repetidos. As abas podem quebrar linha no celular, têm foco de teclado e associação com seus painéis. O tema claro recebeu ajustes de contraste nos tokens de texto, ação e status.
+A interface passa a compartilhar cabeçalhos, filtros, abas e diálogos. A navegação usa uma família de ícones, rótulos mais legíveis e menos elementos decorativos repetidos. As abas podem quebrar linha no celular, têm foco de teclado e associação com seus painéis. Em Configurações, as dez seções usam uma coluna lateral agrupada no desktop e uma faixa de abas rolável em telas menores. O tema claro recebeu ajustes de contraste nos tokens de texto, ação e status.
 
 Os formulários de serviço e as ações da agenda aguardam a resposta antes de fechar; preservam dados e contexto em caso de erro. A área do cliente distingue falha de carregamento, lista vazia e ausência de vínculos, permite tentar novamente e confirma a remoção de um salão. O login por código aceita envio por Enter e identifica os campos para tecnologias assistivas.
 
@@ -35,7 +35,7 @@ Os 21 destinos de `TAB_GROUPS` foram mantidos. Esta tabela descreve o alcance da
 | Link Público         | Navegação e foco compartilhados                                         | Inventário estático                                                                         |
 | Indicações           | Contraste e navegação compartilhados                                    | Storybook OwnerReferralsPanel                                                               |
 | Multiunidades        | Acesso por plano e navegação compartilhados                             | Stories OrganizationsPanel/MultiUnitDashboard                                               |
-| Configurações        | Sete seções com abas, rótulos dos horários e upload acessível           | Inventário estático das seções e componentes                                                |
+| Configurações        | Dez seções agrupadas, navegação lateral/rolável, horários e upload acessível | Testes da navegação e inventário estático das seções e componentes                    |
 | Ajuda                | Navegação e contraste compartilhados                                    | Stories do formulário e detalhe de suporte; inventário do painel                            |
 | Plano                | Navegação, botões e contraste                                           | Stories OwnerSubscriptionPanel/CheckoutPage/PlansPage                                       |
 | Perfil               | Navegação e experiência pública compartilhada                           | Playwright do perfil social, avaliações, vídeos e stories                                   |

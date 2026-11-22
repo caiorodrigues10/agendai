@@ -1,17 +1,18 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import FocusLock from 'react-focus-lock';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   LuCamera as Camera,
   LuShare2 as Share2,
   LuPlus as Plus,
   LuTrash2 as Trash2,
+  LuX as X,
 } from 'react-icons/lu';
 import type { ShopSettings, FeedPost, StaffMember } from '../../types';
 import { barbershopApi } from '../../infra/barbershopApi';
 import { isSupportedImage } from '../../shared/isSupportedImage';
-import { socialApi, type PublicSocialPost } from '../../infra/socialApi';
+import { socialApi, type GalleryPhoto, type PublicSocialPost } from '../../infra/socialApi';
 import { useBarbershop } from '../../contexts/BarbershopContext';
 import { useBarbershopFilters } from '../../contexts/BarbershopFiltersContext';
 import { useSegmentLabels } from '../../hooks/useSegmentLabels';
@@ -25,12 +26,8 @@ import { PostDetail, shareUrl, buildProfileShareUrl } from './PostDetail';
 import { StoryModal } from './StoryModal';
 import { PostTagEditor } from './PostTagEditor';
 import { useSalonSocial } from './useSalonSocial';
-import {
-  ProfileAbout,
-  ProfileEmpty,
-  ProfileGrid,
-  ProfileSkeleton,
-} from './ProfileSections';
+import { ProfileAbout, ProfileEmpty, ProfileGrid, ProfileSkeleton } from './ProfileSections';
+import { buildProfilePublicationItems } from './profilePublications';
 
 interface ShopProfileProps {
   settings: ShopSettings;
@@ -45,20 +42,34 @@ interface ShopProfileProps {
   /** Prévia no painel de aparência: sem fetch de social nem ações destrutivas. */
   previewMode?: boolean;
 }
-const TABS = ['Publicações', 'Fotos', 'Sobre'] as const;
-type ProfileTab = (typeof TABS)[number];
+const PROFILE_TABS = ['Publicações', 'Sobre'] as const;
+type ProfileTab = (typeof PROFILE_TABS)[number];
+type SelectedProfileContent =
+  { kind: 'post'; post: FeedPost } | { kind: 'photo'; photo: GalleryPhoto };
+
+/** `fotos` é um link legado: volta sempre para a área unificada Publicações. */
+function profileTabFromQuery(value: string | null): ProfileTab {
+  const normalized = value?.trim().toLocaleLowerCase('pt-BR');
+  return normalized === 'sobre' ? 'Sobre' : 'Publicações';
+}
+
 const actionClass =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm font-semibold hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent';
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border px-4 text-sm font-semibold text-text-primary hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-focus';
+/** Ação principal: usa o destaque somente quando ele é utilizável no tema. */
+const activeActionClass =
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-accent-active-border px-4 text-sm font-semibold bg-accent-active-bg text-accent-active-fg hover:bg-accent-action-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-focus';
 /** Ícone-only das redes sociais no cabeçalho (toque ≥ 44px, alvo de 44×44). */
 const socialActionClass =
-  'inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-border px-0 text-text-secondary hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent';
+  'inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-border px-0 text-text-secondary hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-focus';
 
 function ProfilePostModal({
-  post,
+  label,
+  closeLabel,
   onClose,
   children,
 }: {
-  post: FeedPost;
+  label: string;
+  closeLabel: string;
   onClose: () => void;
   children: React.ReactNode;
 }) {
@@ -76,19 +87,28 @@ function ProfilePostModal({
   }, [onClose]);
   return createPortal(
     <FocusLock returnFocus>
-      <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/75 p-2 sm:p-5">
+      <div className="fixed inset-0 z-[110] flex items-center justify-center bg-media-overlay/80 p-2 sm:p-5">
         <button
           type="button"
-          aria-label="Fechar publicação"
+          aria-label={`${closeLabel} ao clicar fora`}
+          tabIndex={-1}
           className="absolute inset-0 cursor-default"
           onClick={onClose}
         />
         <div
           role="dialog"
           aria-modal="true"
-          aria-label={post.title || 'Publicação do salão'}
+          aria-label={label}
           className="relative max-h-[94dvh] w-full max-w-xl overflow-y-auto rounded-2xl border border-border bg-surface shadow-2xl"
         >
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={closeLabel}
+            className="absolute right-3 top-3 z-20 inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-border bg-surface/90 text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-focus"
+          >
+            <X size={20} aria-hidden />
+          </button>
           {children}
         </div>
       </div>
@@ -110,6 +130,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
   previewMode = false,
 }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { services, isShopOpen, getTodayScheduleDisplay } = useBarbershop();
   const { barbershopId } = useBarbershopFilters();
   const isPublic = audience === 'public';
@@ -124,16 +145,18 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
   // Vocabulário do segmento (o provider já carregou o salão; o override cobre
   // os testes/story que passam settings explícito sem provider).
   const { labels, config } = useSegmentLabels(settings.businessSegment ?? null);
-  const audienceValue = config.targetAudience.applies ? settings.targetAudience ?? null : null;
+  const audienceValue = config.targetAudience.applies ? (settings.targetAudience ?? null) : null;
   const audienceLabel = AUDIENCE_OPTIONS.find(option => option.value === audienceValue)?.label;
-  const [tab, setTab] = useState<ProfileTab>('Publicações');
+  const [tab, setTab] = useState<ProfileTab>(() =>
+    profileTabFromQuery(searchParams.get('profileTab') ?? searchParams.get('tab'))
+  );
   const [logoUrl, setLogoUrl] = useState(settings.logoUrl);
   const [logoBusy, setLogoBusy] = useState(false);
   const [removeLogo, setRemoveLogo] = useState(false);
   const [deletePost, setDeletePost] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [storyIndex, setStoryIndex] = useState<number | null>(null);
-  const [selected, setSelected] = useState<FeedPost | null>(null);
+  const [selected, setSelected] = useState<SelectedProfileContent | null>(null);
   const [detail, setDetail] = useState<PublicSocialPost | null>(null);
   const [detailError, setDetailError] = useState(false);
   const [detailVersion, setDetailVersion] = useState(0);
@@ -167,15 +190,10 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
     if (onNotify) onNotify(message, type);
     else setToast({ message, type });
   };
-  const publicPosts = useMemo(
-    () =>
-      posts.filter(
-        post => (!post.status || post.status === 'published') && post.format !== 'story'
-      ),
-    [posts]
+  const publicationItems = useMemo(
+    () => buildProfilePublicationItems(posts, social.gallery.data),
+    [posts, social.gallery.data]
   );
-  // Total da galeria pública ("Fotos"): post_media marcadas com inGallery.
-  const photoCount = social.gallery.data.length;
   const [storyNow, setStoryNow] = useState(() => Date.now());
   useEffect(() => {
     const timer = window.setInterval(() => setStoryNow(Date.now()), 60_000);
@@ -197,7 +215,10 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
       ? `https://wa.me/${phone.startsWith('55') && phone.length > 11 ? phone : `55${phone}`}`
       : null;
   // Redes com link válido: só essas viram ícone no cabeçalho e na aba Sobre.
-  const socialEntries = useMemo(() => listSocialLinks(settings.socialLinks), [settings.socialLinks]);
+  const socialEntries = useMemo(
+    () => listSocialLinks(settings.socialLinks),
+    [settings.socialLinks]
+  );
 
   useEffect(() => {
     setLogoUrl(settings.logoUrl);
@@ -207,8 +228,9 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
     setStoryIndex(null);
     setTab('Publicações');
   }, [barbershopId]);
+  const selectedPost = selected?.kind === 'post' ? selected.post : null;
   useEffect(() => {
-    if (!selected || !barbershopId) {
+    if (!selectedPost || !barbershopId) {
       setDetail(null);
       return;
     }
@@ -216,7 +238,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
     setDetail(null);
     setDetailError(false);
     void socialApi
-      .getPost(selected.barbershopId || barbershopId, selected.id)
+      .getPost(selectedPost.barbershopId || barbershopId, selectedPost.id)
       .then(post => {
         if (active) setDetail(post);
       })
@@ -226,7 +248,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
     return () => {
       active = false;
     };
-  }, [selected, barbershopId, detailVersion]);
+  }, [selectedPost, barbershopId, detailVersion]);
 
   const go = (destination: 'queue' | 'appointments') => {
     const handler = destination === 'queue' ? onGoQueue : onGoAppointments;
@@ -294,8 +316,8 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
   return (
     <div className="pb-16 space-y-4" data-testid="salon-social-profile">
       <section className="overflow-hidden rounded-2xl border border-border bg-surface">
-        <div className="p-4 sm:p-6">
-          <div className="flex items-center gap-4 sm:gap-7">
+        <div className="p-4 @min-[640px]:p-6">
+          <div className="flex items-center gap-4 @min-[640px]:gap-7">
             <div
               className={`relative shrink-0 rounded-full p-1 ${stories.length ? 'bg-gradient-to-tr from-accent to-support' : 'bg-border'}`}
             >
@@ -306,7 +328,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
                 }}
                 disabled={!stories.length}
                 aria-label={stories.length ? 'Ver stories do salão' : 'Logo do salão'}
-                className="flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-bg text-xl sm:text-3xl font-bold text-text-primary disabled:opacity-100"
+                className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-bg text-xl font-bold text-text-primary disabled:opacity-100 @min-[640px]:h-28 @min-[640px]:w-28 @min-[640px]:text-3xl"
               >
                 {logoUrl ? (
                   <img
@@ -332,27 +354,21 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <h1 className="break-words text-lg sm:text-2xl font-bold tracking-tight">
+              <h1 className="break-words text-lg font-bold tracking-tight @min-[640px]:text-2xl">
                 {settings.shopName}
               </h1>
-              <p className="mt-0.5 text-xs text-text-muted">
+              <p className="mt-0.5 text-sm text-text-muted">
                 {labels.segmentLabel}
                 {audienceLabel ? ` · ${audienceLabel}` : ''}
               </p>
-              <div className="mt-3 grid w-fit grid-cols-2 gap-x-6 gap-y-1">
-                <div className="min-w-0">
-                  <strong className="block text-base font-semibold">{publicPosts.length}</strong>
-                  <p className="truncate text-[11px] leading-tight text-text-muted">publicações</p>
-                </div>
-                <div className="min-w-0">
-                  <strong className="block text-base font-semibold">{photoCount}</strong>
-                  <p className="truncate text-[11px] leading-tight text-text-muted">fotos</p>
-                </div>
+              <div className="mt-3 min-w-0">
+                <strong className="block text-sm font-semibold">{publicationItems.length}</strong>
+                <p className="truncate text-xs leading-tight text-text-muted">publicações</p>
               </div>
             </div>
           </div>
           <div className="mt-4 space-y-1">
-            <p className="text-xs font-semibold text-text-secondary">
+            <p className="text-sm font-semibold text-text-secondary">
               Beleza, cuidado e experiências
             </p>
             {settings.address && (
@@ -361,7 +377,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
                 {settings.city ? ` · ${settings.city}` : ''}
               </p>
             )}
-            <p className="text-xs text-text-muted">
+            <p className="text-sm text-text-muted">
               <span className={isShopOpen() ? 'text-success font-semibold' : ''}>
                 {isShopOpen() ? 'Aberto agora' : 'Fechado agora'}
               </span>
@@ -370,11 +386,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             {isPublic && settings.operationMode !== 'APPOINTMENTS_ONLY' && (
-              <button
-                type="button"
-                onClick={() => go('queue')}
-                className={`${actionClass} bg-accent text-accent-fg hover:bg-accent-hover`}
-              >
+              <button type="button" onClick={() => go('queue')} className={activeActionClass}>
                 Entrar na fila
               </button>
             )}
@@ -387,7 +399,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
               <button
                 type="button"
                 onClick={() => navigate('/app/posts')}
-                className={`${actionClass} bg-accent text-accent-fg hover:bg-accent-hover`}
+                className={activeActionClass}
               >
                 <Plus size={16} />
                 Criar publicação
@@ -405,7 +417,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
               className={actionClass}
             >
               <Share2 size={16} />
-              <span className="hidden sm:inline">Compartilhar</span>
+              <span className="hidden @min-[640px]:inline">Compartilhar</span>
             </button>
             {socialEntries.map(entry => {
               const Icon = SOCIAL_NETWORK_ICONS[entry.id];
@@ -458,7 +470,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
             ))}
           </div>
         ) : stories.length > 0 ? (
-          <div className="flex gap-4 overflow-x-auto px-4 pb-5 sm:px-6">
+          <div className="flex gap-4 overflow-x-auto px-4 pb-5 @min-[640px]:px-6">
             {stories.map((story, index) => (
               <button
                 type="button"
@@ -498,9 +510,9 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
             ref={tablistRef}
             role="tablist"
             aria-label="Conteúdo do perfil"
-            className="flex snap-x snap-mandatory overflow-x-auto px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-4"
+            className="flex snap-x snap-mandatory overflow-x-auto px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden @min-[640px]:px-4"
           >
-            {TABS.map(item => (
+            {PROFILE_TABS.map(item => (
               <button
                 type="button"
                 role="tab"
@@ -510,7 +522,7 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
                 key={item}
                 data-tab-active={tab === item}
                 onClick={() => setTab(item)}
-                className={`min-h-12 shrink-0 snap-start border-t-2 px-3 text-xs font-semibold ${tab === item ? 'border-accent text-text-primary' : 'border-transparent text-text-muted hover:text-text-primary'}`}
+                className={`min-h-12 shrink-0 snap-start border-t-2 px-3 text-xs font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-focus ${tab === item ? '!border-accent-active-border bg-accent-active-bg text-accent-active-fg' : 'border-transparent text-text-secondary hover:bg-surface-2 hover:text-text-primary'}`}
               >
                 {item}
               </button>
@@ -526,56 +538,49 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
         id="salon-profile-content"
         role="tabpanel"
         aria-labelledby={`salon-tab-${tab}`}
-        className="rounded-2xl border border-border bg-surface p-2 sm:p-4"
+        className="rounded-2xl border border-border bg-surface p-2 @min-[640px]:p-4"
       >
         {tab === 'Publicações' &&
-          (publicPosts.length ? (
-            <ProfileGrid posts={publicPosts} onOpen={setSelected} />
-          ) : (
-            <ProfileEmpty
-              title="O próximo post começa aqui"
-              text={
-                canCompose
-                  ? 'Crie uma publicação para apresentar seu salão aos clientes.'
-                  : 'As fotos e novidades do salão vão aparecer aqui.'
-              }
-            />
-          ))}
-        {tab === 'Fotos' &&
           (social.gallery.loading ? (
-            <div className="grid grid-cols-3 gap-2 p-2 sm:grid-cols-4" aria-busy="true" aria-label="Carregando galeria">
+            <div
+              className="grid grid-cols-3 gap-1 @min-[640px]:gap-2 @min-[768px]:grid-cols-4"
+              aria-busy="true"
+              aria-label="Carregando publicações"
+            >
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="aspect-square animate-pulse rounded-xl bg-bg" />
+                <div key={i} className="aspect-[4/5] animate-pulse rounded-sm bg-bg" />
               ))}
             </div>
           ) : social.gallery.error ? (
-            <ProfileEmpty
-              title="Não foi possível carregar as fotos"
-              text="Tente novamente em instantes."
-            />
-          ) : social.gallery.data.length ? (
-            <div className="grid grid-cols-3 gap-2 p-2 sm:grid-cols-4">
-              {social.gallery.data.map(photo => (
-                <a
-                  key={photo.id}
-                  href={photo.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative block aspect-square overflow-hidden rounded-xl"
-                >
-                  <img
-                    src={photo.url}
-                    alt="Foto do salão"
-                    loading="lazy"
-                    className="h-full w-full object-cover transition group-hover:scale-105"
-                  />
-                </a>
-              ))}
+            <div
+              role="alert"
+              className="flex flex-col items-center gap-3 rounded-xl border border-danger/40 bg-danger/10 px-5 py-10 text-center"
+            >
+              <p className="text-sm font-semibold text-danger">
+                Não foi possível carregar as publicações
+              </p>
+              <button
+                type="button"
+                onClick={social.gallery.reload}
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-4 text-sm font-semibold text-text-primary hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-focus"
+              >
+                Tentar novamente
+              </button>
             </div>
+          ) : publicationItems.length ? (
+            <ProfileGrid
+              items={publicationItems}
+              onOpenPost={post => setSelected({ kind: 'post', post })}
+              onOpenPhoto={photo => setSelected({ kind: 'photo', photo })}
+            />
           ) : (
             <ProfileEmpty
-              title="Galeria de fotos em breve"
-              text="As fotos do espaço vão aparecer aqui."
+              title={canCompose ? 'O próximo post começa aqui' : 'Ainda não há publicações'}
+              text={
+                canCompose
+                  ? 'Crie uma publicação ou envie fotos para apresentar seu salão aos clientes.'
+                  : 'Novidades e fotos do salão vão aparecer aqui.'
+              }
             />
           ))}
         {tab === 'Sobre' && (
@@ -585,14 +590,29 @@ export const ShopProfile: React.FC<ShopProfileProps> = ({
         )}
       </section>
       {selected && (
-        <ProfilePostModal post={selected} onClose={() => setSelected(null)}>
-          {detail ? (
+        <ProfilePostModal
+          label={
+            selected.kind === 'post'
+              ? selected.post.title || 'Publicação do salão'
+              : 'Foto do salão'
+          }
+          closeLabel={selected.kind === 'post' ? 'Fechar publicação' : 'Fechar foto'}
+          onClose={() => setSelected(null)}
+        >
+          {selected.kind === 'photo' ? (
+            <div className="relative p-2" data-testid="profile-photo-lightbox">
+              <img
+                src={selected.photo.url}
+                alt="Foto do salão"
+                className="max-h-[82dvh] w-full rounded-xl object-contain"
+              />
+            </div>
+          ) : detail ? (
             <>
               <PostDetail
                 key={detail.id}
                 salonId={detail.barbershopId || barbershopId || ''}
                 post={detail}
-                onClose={() => setSelected(null)}
                 onLike={async id => {
                   if (detail.barbershopId === barbershopId) await onLikePost(id);
                   else

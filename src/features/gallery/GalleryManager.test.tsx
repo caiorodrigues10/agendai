@@ -56,11 +56,21 @@ describe('GalleryManager — galeria do perfil', () => {
     expect(images[0]).toHaveAttribute('src', PHOTO_B.url);
     expect(images[1]).toHaveAttribute('src', PHOTO_A.url);
     expect(screen.getByText('2 de 30 fotos')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /enviar fotos/i })).toHaveClass('min-h-11');
+    for (const remove of screen.getAllByRole('button', { name: 'Remover foto da galeria' })) {
+      expect(remove).toHaveClass(
+        'min-h-11',
+        'min-w-11',
+        'focus-visible:outline-focus',
+        'motion-reduce:transition-none'
+      );
+    }
   });
 
   it('mostra estado vazio quando ainda não há fotos', async () => {
     render(<GalleryManager />);
     expect(await screen.findByText('Envie a primeira foto do seu salão')).toBeInTheDocument();
+    expect(screen.getAllByText(/aparecem em Publicações no seu perfil/i).length).toBeGreaterThan(0);
     expect(screen.getByText('0 de 30 fotos')).toBeInTheDocument();
     // Um único botão de envio (sem checkbox e sem opções extras).
     expect(screen.getAllByRole('button', { name: /enviar fotos/i })).toHaveLength(1);
@@ -70,7 +80,9 @@ describe('GalleryManager — galeria do perfil', () => {
   it('mostra erro e permite tentar novamente quando a listagem falha', async () => {
     mockedPostsApi.listMedia.mockRejectedValueOnce(new Error('boom'));
     render(<GalleryManager />);
-    expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível carregar a galeria/i);
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      /não foi possível carregar a galeria/i
+    );
     mockedPostsApi.listMedia.mockResolvedValueOnce([PHOTO_A]);
     fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }));
     expect(await screen.findByText('1 de 30 fotos')).toBeInTheDocument();
@@ -82,7 +94,9 @@ describe('GalleryManager — galeria do perfil', () => {
     await screen.findByText('Envie a primeira foto do seu salão');
     fireEvent.change(fileInput(), { target: { files: [pngFile()] } });
     await waitFor(() =>
-      expect(mockedPostsApi.uploadMedia).toHaveBeenCalledWith('shop-1', expect.any(File), { inGallery: true })
+      expect(mockedPostsApi.uploadMedia).toHaveBeenCalledWith('shop-1', expect.any(File), {
+        inGallery: true,
+      })
     );
     expect(await screen.findByAltText('Foto da galeria do perfil')).toBeInTheDocument();
     expect(screen.getByText('Foto enviada para a galeria do perfil.')).toBeInTheDocument();
@@ -95,7 +109,9 @@ describe('GalleryManager — galeria do perfil', () => {
     fireEvent.change(fileInput(), { target: { files: [pngFile('1.png'), pngFile('2.png')] } });
     await waitFor(() => expect(mockedPostsApi.uploadMedia).toHaveBeenCalledTimes(2));
     expect(mockedPostsApi.uploadMedia.mock.calls.map(c => c[0])).toEqual(['shop-1', 'shop-1']);
-    expect(await screen.findByText('2 fotos enviadas para a galeria do perfil.')).toBeInTheDocument();
+    expect(
+      await screen.findByText('2 fotos enviadas para a galeria do perfil.')
+    ).toBeInTheDocument();
   });
 
   it('mostra a mensagem do backend quando a galeria está cheia', async () => {

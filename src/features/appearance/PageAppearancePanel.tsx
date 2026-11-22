@@ -25,6 +25,10 @@ import { PAGE_MODE_OPTIONS, PanelHeader, PresetPicker, SegmentedOptions } from '
 import { THEME_PRESETS, type ThemePreset } from './presets';
 import { usePageTheme } from './usePageTheme';
 import { getErrorMessage } from '../../utils/errorMessage';
+import {
+  hasUsableAccentContrast,
+  isAccentContrastWarning,
+} from './accentContrast';
 
 interface PageAppearancePanelProps {
   barbershopId: string;
@@ -73,6 +77,24 @@ const COLOR_FIELDS = [
 ] as const;
 
 type ColorFieldName = (typeof COLOR_FIELDS)[number][0];
+
+interface PartitionedContrastChecks {
+  failing: ContrastCheck[];
+  accentWarnings: ContrastCheck[];
+}
+
+/**
+ * Separa os erros bloqueantes dos avisos não bloqueantes do destaque. Texto,
+ * texto secundário e botão continuam bloqueando o salvamento; um destaque com
+ * pouco contraste gera apenas aviso porque a página usa o fallback legível.
+ */
+function partitionContrastChecks(checks: ContrastCheck[]): PartitionedContrastChecks {
+  const failed = failingContrastChecks(checks);
+  return {
+    failing: failed.filter(check => !isAccentContrastWarning(check)),
+    accentWarnings: failed.filter(check => isAccentContrastWarning(check)),
+  };
+}
 
 const RADIUS_OPTIONS = [
   { value: 'squared', label: 'Reto' },
@@ -274,6 +296,11 @@ const AppearanceSettingsColumn: React.FC<{
             label={label}
             value={activeColors[field]}
             onChange={value => onColorChange(field, value)}
+            warning={
+              field === 'accentColor' && !hasUsableAccentContrast(activeColors)
+                ? 'Essa cor tem pouco contraste com o fundo'
+                : undefined
+            }
           />
         ))}
       </div>
@@ -317,9 +344,10 @@ const AppearanceSettingsColumn: React.FC<{
  * A variante em edição (activeMode) segue AUTOMATICAMENTE o tema do app; o
  * seletor da prévia é um override opcional ("Auto" = seguindo o app) e o Modo
  * da página (AUTO/LIGHT/DARK) continua sendo a única configuração persistida.
- * Salvar fica BLOQUEADO enquanto QUALQUER variante tiver par reprovado no
- * contraste WCAG AA (mesma validação do back); sugestões em 1 clique corrigem
- * a variante ativa.
+ * Salvar fica BLOQUEADO enquanto qualquer variante tiver texto/texto do botão
+ * reprovado no contraste WCAG AA (mesma validação do back). Destaque com
+ * pouco contraste é apenas aviso; sugestões em 1 clique corrigem a variante
+ * ativa.
  */
 export const PageAppearancePanel: React.FC<PageAppearancePanelProps> = ({
   barbershopId,
@@ -377,14 +405,16 @@ export const PageAppearancePanel: React.FC<PageAppearancePanelProps> = ({
     return draft.darkColors;
   }, [activeMode, draft]);
 
-  const failing = useMemo(
-    () => failingContrastChecks(evaluateThemeContrast(activeColors)),
+  const activeContrast = useMemo(
+    () => partitionContrastChecks(evaluateThemeContrast(activeColors)),
     [activeColors]
   );
-  const failingOther = useMemo(
-    () => failingContrastChecks(evaluateThemeContrast(otherColors)),
+  const otherContrast = useMemo(
+    () => partitionContrastChecks(evaluateThemeContrast(otherColors)),
     [otherColors]
   );
+  const { failing, accentWarnings } = activeContrast;
+  const { failing: failingOther, accentWarnings: otherAccentWarnings } = otherContrast;
   const hasContrastIssues = failing.length > 0 || failingOther.length > 0;
   const dirty = draftKey(draft) !== draftKey(toDraft(savedTheme));
 
@@ -489,7 +519,9 @@ export const PageAppearancePanel: React.FC<PageAppearancePanelProps> = ({
           onAuto={() => setPreviewOverride(null)}
           modeNotice={modeForcedNotice(draft.mode)}
           failing={failing}
+          warnings={accentWarnings}
           otherFailing={failingOther}
+          otherWarnings={otherAccentWarnings}
           dirty={dirty}
           onApplySuggestion={applySuggestion}
         />

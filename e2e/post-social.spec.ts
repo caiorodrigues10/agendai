@@ -78,7 +78,7 @@ test('publicação com vídeo usa player mesmo quando existe uma capa', async ({
   await expect(video).not.toHaveAttribute('autoplay');
 });
 
-test('perfil mostra grade, abas Publicações/Fotos/Sobre, stories e zero requests de tagged', async ({ page }, testInfo) => {
+test('perfil mostra grade unificada, abas Publicações/Sobre, stories e zero requests de tagged', async ({ page }, testInfo) => {
   const taggedRequests: string[] = [];
   page.on('request', req => {
     if (new URL(req.url()).pathname.endsWith('/tagged')) taggedRequests.push(req.url());
@@ -86,11 +86,10 @@ test('perfil mostra grade, abas Publicações/Fotos/Sobre, stories e zero reques
   await page.goto(`/queue/${salonId}?tab=profile`);
   await expect(page.getByRole('heading', { name: 'Studio Aurora' }).first()).toBeVisible({ timeout: 15_000 });
   const tabs = page.getByRole('tablist', { name: 'Conteúdo do perfil' }).getByRole('tab');
-  await expect(tabs).toHaveText(['Publicações', 'Fotos', 'Sobre']);
+  await expect(tabs).toHaveText(['Publicações', 'Sobre']);
+  await expect(page.getByTestId('profile-post-grid').locator('button')).toHaveCount(2);
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
   await page.screenshot({ path: testInfo.outputPath('salon-profile.png'), fullPage: true });
-  await page.getByRole('tab', { name: 'Fotos', exact: true }).click();
-  await expect(page.getByText('Galeria de fotos em breve')).toBeVisible();
   await page.getByRole('button', { name: 'Ver stories do salão' }).click();
   await expect(page.getByRole('dialog', { name: 'Story', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Fechar story', exact: true }).click();

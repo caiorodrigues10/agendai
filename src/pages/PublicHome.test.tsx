@@ -6,7 +6,10 @@ import { PublicHome } from './PublicHome';
 const { mockJoinQueue, mockOperationMode, mockPublicProducts } = vi.hoisted(() => ({
   mockJoinQueue: vi.fn(),
   mockOperationMode: { value: 'HYBRID' as string },
-  mockPublicProducts: vi.fn(),
+  mockPublicProducts: vi.fn().mockResolvedValue({
+    shop: { name: 'Salão Teste', address: null, city: null, whatsapp: '11999999999' },
+    products: [],
+  }),
 }));
 
 vi.mock('../contexts/AuthContext', () => ({
@@ -119,9 +122,9 @@ vi.mock('../features/appearance/usePageTheme', async () => {
   };
 });
 
-function renderPublicHome() {
+function renderPublicHome(initialEntry = '/queue/shop-1') {
   return render(
-    <MemoryRouter initialEntries={['/queue/shop-1']}>
+    <MemoryRouter initialEntries={[initialEntry]}>
       <Routes>
         <Route path="/queue/:id" element={<PublicHome />} />
       </Routes>
@@ -130,10 +133,33 @@ function renderPublicHome() {
 }
 
 describe('PublicHome smoke', () => {
+  beforeEach(() => {
+    mockOperationMode.value = 'HYBRID';
+  });
+
   it('renderiza perfil público da barbearia', () => {
     renderPublicHome();
     expect(screen.getByText(/salão teste/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /adicionar dependente/i })).toBeInTheDocument();
+  });
+
+  it('abre o perfil em Publicações para o link legado ?tab=fotos', () => {
+    renderPublicHome('/queue/shop-1?tab=fotos');
+    const profileTab = screen.getByRole('tab', { name: 'Perfil' });
+    expect(profileTab).toHaveAttribute('aria-selected', 'true');
+    expect(profileTab).toHaveClass(
+      'bg-accent-active-bg',
+      'text-accent-active-fg',
+      '!border-accent-active-border'
+    );
+  });
+
+  it('reconcilia o deep link da fila quando o salão Works somente com agenda', () => {
+    mockOperationMode.value = 'APPOINTMENTS_ONLY';
+    renderPublicHome('/queue/shop-1?tab=queue');
+
+    expect(screen.queryByRole('tab', { name: 'Fila' })).not.toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Agenda' })).toHaveAttribute('aria-selected', 'true');
   });
 
   it('envia dependente como pessoa adicional na fila', async () => {

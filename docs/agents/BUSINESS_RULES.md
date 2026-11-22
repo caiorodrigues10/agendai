@@ -124,21 +124,22 @@ Invariantes confirmadas pelo consumo de API e UI. A fonte de verdade autoritativ
 ## Aparência da página pública (tema)
 
 - Tema via CSS vars escopadas no wrapper `[data-ag-shop-theme]`: família canônica `--shop-*` (por variante) + espelho legado `--ag-*`; as utilities do Tailwind resolvem `var(--shop-x, var(--ag-x))` (`styles/tokens.css`). Variantes `light`/`dark` por salão (`darkColors`/`lightColors` no payload; `lightColors` nula é gerada no cliente via `generateVariantColors`, mesmo gerador do back) e `mode` do dono (`AUTO` segue `prefers-color-scheme`; `LIGHT`/`DARK` força). Padrão sem tema salvo = visual dark atual (`PAGE_THEME_DEFAULTS` em `src/shared/pageThemeDefaults.ts`, espelho do backend via `npm run theme:mirror`).
-- Contraste WCAG AA (texto/fundo + muted/fundo + acento/superfície + botão/acento) é **bloqueante** no botão Salvar — em QUALQUER variante, materializada ou gerada — e no back (`pageThemeContrast.ts`); cores são editadas na variante ativa da prévia (toggle Claro|Escuro, travado quando o Modo força a variante); sem token de owner, o painel mostra estado somente-leitura.
+- Contraste WCAG AA: texto/fundo, texto/cartão, texto secundário e texto do botão são **bloqueantes** no Salvar — em qualquer variante, materializada ou gerada — no front e no back (`pageThemeContrast.ts`). O texto sobre o destaque escolhe entre preto e branco pelo maior contraste, garantindo ≥4.5:1 para qualquer cor hexadecimal válida. A cor de destaque contra fundo/cartão abaixo de 3:1 é apenas um **aviso não bloqueante**: a página pública usa os tokens `--shop-accent-active-*` (destaque + `accent-fg` quando utilizável; cartão + texto primário + indicador quando não), e o foco usa o token `--shop-focus` para continuar visível. O editor permite salvar. As cores são editadas na variante ativa da prévia (toggle Claro|Escuro, travado quando o Modo força a variante); sem token de owner, o painel mostra estado somente-leitura.
+- A prévia responsiva usa **container queries**, não a largura da janela do navegador: a página real se comporta como antes, a tela Mobile tem 390×823 px lógicos e a Desktop 1024×1100 px, ambas com rolagem própria. Assim, tipografia, cabeçalho e grade mudam pelo espaço realmente disponível dentro da moldura.
 - Capa: aceita QUALQUER medida/proporção — validação instantânea no front só de tipo (JPEG/PNG/WebP; GIF/SVG rejeitados); medida fora do ideal vira aviso suave não-bloqueante. Recorte 16:9 + ponto focal (`coverFocalX/Y`, editor arrastável com setas do teclado) aplicados na entrega pelo helper único `src/shared/coverImage.ts` (`c_fill,ar_16:9,g_auto|g_xy_center,f_auto,q_auto`, srcset sem ampliar além do `coverWidth/Height` do back; OG `w_1200,h_630,c_fill,f_jpg,q_auto` também sem ampliar); overlay 0–80; envio direto assinado ao Cloudinary com progresso/cancelamento (multipart via backend mantido como fallback).
 - Anti-FOUC: `PublicHome` aplica o tema o quanto antes carregado (`usePageTheme` com cache por módulo; `clearPageThemeCache()` para testes).
 
 ## Biblioteca de fotos e galeria do perfil
 
 - O seletor "Escolher foto" (`PostEditor.tsx`) é minimalista: **sem checkbox, sem filtro "Todas | Galeria" e sem estrela**.
-- Trilho duplo de fotos: o upload no editor entra na **biblioteca do post** (`inGallery: false`); a sub-aba "Galeria do perfil" (`GalleryManager.tsx`) lista e envia só `inGallery: true`, que é o que aparece na aba "Fotos" do perfil público.
-- `postsApi.uploadMedia` envia `inGallery` sempre (default `false`); `listMedia` filtra pela flag e `updateMedia` alterna a foto na galeria. O back recusa com **400** ("Sua galeria já tem 30 fotos. Remova uma foto para enviar outra.") quando a galeria está cheia e o front mostra a mensagem do backend no toast de erro.
-- Excluir a foto apaga o registro no back → ela some da galeria do perfil. O backfill das fotos antigas (limite 30 por salão, mais recentes primeiro) está em `backend/docs/agents/BUSINESS_RULES.md`.
-- Perfil (`ShopProfile.tsx`): aba "Fotos" e contador usam `socialApi.gallery(salonId)` (`useSalonSocial`), que recarrega ao montar a tela; "Galeria de fotos em breve" só aparece com a galeria realmente vazia (fora do estado de carregamento/erro).
+- O seletor e o editor de posts reutilizam a **biblioteca de mídia**; a sub-aba "Galeria do perfil" (`GalleryManager.tsx`) lista e envia as fotos marcadas com `inGallery: true`. Posts e fotos da galeria aparecem juntos na área **Publicações** do perfil público.
+- `postsApi.uploadMedia` envia `inGallery` no FormData, mas o back grava `inGallery: true` em todo upload (regra única do backend); `listMedia` filtra pela flag e `updateMedia` alterna a foto na galeria. O back recusa com **400** ("Sua galeria já tem 30 fotos. Remova uma foto para enviar outra.") quando a galeria está cheia e o front mostra a mensagem do backend no toast de erro.
+- Excluir a foto apaga o registro no back → ela some da área Publicações do perfil. O backfill das fotos antigas (limite 30 por salão, mais recentes primeiro) está em `backend/docs/agents/BUSINESS_RULES.md`.
+- Perfil (`ShopProfile.tsx`): as abas internas são somente **Publicações | Sobre**. A grade unificada combina `posts` com `socialApi.gallery(salonId)` (`useSalonSocial`), em ordem cronológica decrescente (`publishedAt ?? createdAt` nos posts e `createdAt` nas fotos). O feed público expõe `primaryMediaId`/`secondaryMediaId`; junto com a URL, esses identificadores evitam repetir a mesma mídia. Há um contador único e fotos avulsas usam o mesmo modal/visualizador das publicações. O link legado `?tab=fotos` abre o perfil já em Publicações.
 
 ## Posts (formato da arte)
 
-- Grade do perfil: célula **4:5** (`aspect-[4/5]` + `bg-surface-2` em `ProfileSections.tsx`), sem cortar arte antiga — `object-cover` **só** no formato 4:5; 1:1 e 9:16 aparecem inteiros (`object-contain`, com as barras da célula nas laterais/base). O detalhe do post mostra a arte inteira (`object-contain` + `max-h-[70vh]` em `PostDetail.tsx`).
+- Grade unificada do perfil: usa 3 colunas no mobile e 4 a partir de 768 px, sem depender da largura da janela. Tile **com imagem** mantém célula **4:5** (`aspect-[4/5]` + `bg-surface-2` em `ProfileSections.tsx`), sem cortar arte antiga — `object-cover` **só** no formato 4:5; 1:1 e 9:16 aparecem inteiros (`object-contain`, com as barras da célula nas laterais/base). Fotos avulsas também ocupam células 4:5. Tile **somente textual** é quadrado (`aspect-square`), limita o título e deixa curtidas/comentários no rodapé em linha própria. O detalhe do post mostra a arte inteira (`object-contain` + `max-h-[70vh]` em `PostDetail.tsx`).
 - Formato padrão por modelo (`price-split` → 4:5, demais → 1:1) vem do catálogo **`GET /api/posts/templates`** (`defaultFormat`); o fallback local `defaultFormatFor` em `PostEditor.tsx` só vale antes da lista carregar (ou se a chamada falhar) e precisa ser alterado junto com o back no mesmo PR — regra completa em `backend/docs/agents/BUSINESS_RULES.md`.
 - Escolha manual no card "Formato" trava o default (`formatTouched`): trocar de modelo não sobrescreve a decisão do usuário.
 - OG da capa (`buildCoverOgUrl`): `w_1200,h_630,c_fill` + focal, largura limitada ao original (nunca amplia), **`f_jpg,q_auto`** — PNG a ~900 KB passava do limite de 300 KB aceito para `og:image`; JPEG fica em ~80 KB.
@@ -179,28 +180,28 @@ O navegador só expõe algumas APIs em **contexto seguro**: origem `https://` ou
 
 ### Inventário — registrado, **não corrigido** nesta entrega
 
-| Onde | API | Quando roda | Efeito em `http://` não-loopback |
-|---|---|---|---|
-| `src/pages/CheckoutPage.tsx:122-124` | `crypto.randomUUID()` | **a cada render** do checkout (`useRef` com objeto literal) | `TypeError` → página do checkout quebrada |
-| `src/pages/CheckoutPage.tsx:320` | `crypto.randomUUID()` | ação do usuário (nova tentativa PIX) | `TypeError` |
-| `src/infra/subscriptionsApi.ts:156,164` | `crypto.randomUUID()` | ação do usuário (assinar / cartão de trial) | `TypeError` ao assinar |
-| `src/infra/paymentsApi.ts:87` | `crypto.randomUUID()` | ação do usuário (estorno) | `TypeError` no estorno |
-| `src/infra/notificationsApi.ts:149,197` | `crypto.randomUUID()` | ação do usuário | `TypeError` na requisição |
-| `src/features/team/TeamManager.tsx:67` | `crypto.randomUUID()` | ação do usuário (convidar membro) | `TypeError` ao criar membro |
-| `src/pages/CheckoutPage.tsx:409` | `navigator.clipboard.writeText` | ação do usuário (copiar PIX) | `TypeError` **não tratado** (sem guarda nem `try/catch`) |
-| `src/features/showcase/PublicLinkPanel.tsx:60` | `navigator.clipboard.writeText` | ação do usuário (copiar link) | `TypeError` **não tratado** (o `try/catch` do `handleShare` cobre só o ramo `navigator.share`) |
+| Onde                                           | API                             | Quando roda                                                 | Efeito em `http://` não-loopback                                                               |
+| ---------------------------------------------- | ------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `src/pages/CheckoutPage.tsx:122-124`           | `crypto.randomUUID()`           | **a cada render** do checkout (`useRef` com objeto literal) | `TypeError` → página do checkout quebrada                                                      |
+| `src/pages/CheckoutPage.tsx:320`               | `crypto.randomUUID()`           | ação do usuário (nova tentativa PIX)                        | `TypeError`                                                                                    |
+| `src/infra/subscriptionsApi.ts:156,164`        | `crypto.randomUUID()`           | ação do usuário (assinar / cartão de trial)                 | `TypeError` ao assinar                                                                         |
+| `src/infra/paymentsApi.ts:87`                  | `crypto.randomUUID()`           | ação do usuário (estorno)                                   | `TypeError` no estorno                                                                         |
+| `src/infra/notificationsApi.ts:149,197`        | `crypto.randomUUID()`           | ação do usuário                                             | `TypeError` na requisição                                                                      |
+| `src/features/team/TeamManager.tsx:67`         | `crypto.randomUUID()`           | ação do usuário (convidar membro)                           | `TypeError` ao criar membro                                                                    |
+| `src/pages/CheckoutPage.tsx:409`               | `navigator.clipboard.writeText` | ação do usuário (copiar PIX)                                | `TypeError` **não tratado** (sem guarda nem `try/catch`)                                       |
+| `src/features/showcase/PublicLinkPanel.tsx:60` | `navigator.clipboard.writeText` | ação do usuário (copiar link)                               | `TypeError` **não tratado** (o `try/catch` do `handleShare` cobre só o ramo `navigator.share`) |
 
 ### Inventário — uso já seguro (guarda presente)
 
-| Onde | API | Guarda |
-|---|---|---|
-| `src/infra/apiClient.ts:112` | `navigator.locks` | `locks?.request` → cai no fallback sem lock |
-| `src/components/infra/ErrorBoundary.tsx:43` | `navigator.clipboard.writeText` | `try/catch` (silencia) |
-| `src/features/referrals/ShareReferralButton.tsx:25,36` | `navigator.clipboard.writeText` | `try/catch` (silencia; perde só o feedback de "copiado") |
-| `src/features/settings/useOwnerBotSection.ts:95` | `navigator.clipboard.writeText` | `?.` |
-| `src/features/settings/SalonWhatsAppConnection.tsx:254` | `navigator.clipboard.writeText` | `?.` |
-| `src/features/referrals/ShareReferralButton.tsx:14,18` | `navigator.share` | `!!navigator.share` |
-| `src/features/showcase/PublicLinkPanel.tsx:65` | `navigator.share` | `if (navigator.share)` |
+| Onde                                                    | API                             | Guarda                                                   |
+| ------------------------------------------------------- | ------------------------------- | -------------------------------------------------------- |
+| `src/infra/apiClient.ts:112`                            | `navigator.locks`               | `locks?.request` → cai no fallback sem lock              |
+| `src/components/infra/ErrorBoundary.tsx:43`             | `navigator.clipboard.writeText` | `try/catch` (silencia)                                   |
+| `src/features/referrals/ShareReferralButton.tsx:25,36`  | `navigator.clipboard.writeText` | `try/catch` (silencia; perde só o feedback de "copiado") |
+| `src/features/settings/useOwnerBotSection.ts:95`        | `navigator.clipboard.writeText` | `?.`                                                     |
+| `src/features/settings/SalonWhatsAppConnection.tsx:254` | `navigator.clipboard.writeText` | `?.`                                                     |
+| `src/features/referrals/ShareReferralButton.tsx:14,18`  | `navigator.share`               | `!!navigator.share`                                      |
+| `src/features/showcase/PublicLinkPanel.tsx:65`          | `navigator.share`               | `if (navigator.share)`                                   |
 
 ## Pendências documentais
 

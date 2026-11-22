@@ -98,7 +98,7 @@ export interface PostMedia {
   mimeType: string;
   size: number;
   createdAt: string;
-  /** Marcada para a galeria pública do perfil (aba "Fotos"). */
+  /** Marcada para aparecer na área "Publicações" do perfil público. */
   inGallery: boolean;
 }
 

@@ -14,6 +14,8 @@ export interface TabsProps<T extends string = string> {
   ariaLabel: string;
   className?: string;
   idPrefix?: string;
+  /** Classes do estado ativo; usado pela página pública para o fallback de contraste. */
+  activeClassName?: string;
   /** Active content. When provided, IDs and the accessible panel are managed together. */
   children?: React.ReactNode;
 }
@@ -25,6 +27,7 @@ export function Tabs<T extends string>({
   ariaLabel,
   className = '',
   idPrefix,
+  activeClassName,
   children,
 }: TabsProps<T>) {
   const instanceId = useId();
@@ -94,9 +97,9 @@ export function Tabs<T extends string>({
                   move('last');
                 }
               }}
-              className={`min-h-11 min-w-0 rounded-lg px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-50 ${
+              className={`min-h-11 min-w-0 rounded-lg border-2 border-transparent px-3 py-2 text-sm font-semibold transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-50 ${
                 active
-                  ? 'bg-accent/15 text-accent'
+                  ? (activeClassName ?? 'bg-accent/15 text-accent')
                   : 'text-text-secondary hover:bg-surface-2 hover:text-text-primary'
               }`}
             >

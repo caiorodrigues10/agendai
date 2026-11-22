@@ -34,8 +34,12 @@ interface ThemePreviewProps {
   /** True quando o Modo da página força a variante (toggle bloqueado). */
   variantLocked?: boolean;
   failing: ContrastCheck[];
+  /** Avisos não bloqueantes do destaque na variante ativa. */
+  warnings?: ContrastCheck[];
   /** Pares reprovados na OUTRA variante (bloqueia o Salvar, sem sugestão ativa). */
   otherFailing?: ContrastCheck[];
+  /** Avisos não bloqueantes do destaque na outra variante. */
+  otherWarnings?: ContrastCheck[];
   dirty: boolean;
   onApplySuggestion: (check: ContrastCheck) => void;
 }
@@ -88,7 +92,7 @@ function VariantToggle({
           onClick={() =>
             option.key === 'auto' ? onAuto?.() : onChange(option.key === 'light' ? 'light' : 'dark')
           }
-          className={`rounded-md px-2.5 py-1 text-[11px] font-bold disabled:cursor-not-allowed disabled:opacity-60 ${
+          className={`min-h-11 min-w-11 rounded-md px-2.5 py-1 text-[11px] font-bold disabled:cursor-not-allowed disabled:opacity-60 ${
             activeKey === option.key
               ? 'bg-accent text-accent-fg'
               : 'text-text-muted hover:text-text-primary'
@@ -122,10 +126,8 @@ function DeviceToggle({
           aria-pressed={mode === device}
           data-testid={`preview-device-${device}`}
           onClick={() => onChange(device)}
-          className={`rounded-md px-2.5 py-1 text-[11px] font-bold ${
-            mode === device
-              ? 'bg-accent text-accent-fg'
-              : 'text-text-muted hover:text-text-primary'
+          className={`min-h-11 min-w-11 rounded-md px-2.5 py-1 text-[11px] font-bold ${
+            mode === device ? 'bg-accent text-accent-fg' : 'text-text-muted hover:text-text-primary'
           }`}
         >
           {DEVICE_LABEL[device]}
@@ -159,7 +161,9 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
   modeNotice,
   variantLocked,
   failing,
+  warnings = [],
   otherFailing,
+  otherWarnings = [],
   dirty,
   onApplySuggestion,
 }) => {
@@ -171,22 +175,49 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
   const activeVariant = variant ?? themeCtx?.resolvedTheme ?? 'dark';
   const handleVariantChange = (next: 'light' | 'dark') => onVariantChange?.(next);
   const frameRef = useRef<HTMLDivElement>(null);
+  const fitRef = useRef<HTMLDivElement>(null);
   const layerRef = useRef<HTMLDivElement>(null);
-  const previewSettings = useMemo(() => buildPreviewSettings(settings, shopName), [settings, shopName]);
+  const previewSettings = useMemo(
+    () => buildPreviewSettings(settings, shopName),
+    [settings, shopName]
+  );
 
   // Escala antes do paint (useLayoutEffect) → trocar Mobile/Desktop não pisca.
-  // O frame tem o MESMO aspect-ratio do dispositivo, então a escala é sempre
-  // largura-driven (sem barras pretas nem sobra). ResizeObserver agendado via
-  // rAF (sem loop de re-render: escrevemos só no estilo da camada) e com
-  // cancelamento no unmount.
+  // 1) A moldura é dimensionada para caber na área disponível (wrapper flex-1):
+  //    maior retângulo com o aspect-ratio do dispositivo → a coluna externa não
+  //    precisa de scroll (sem scroll duplo) e nada é cortado.
+  // 2) O frame tem o MESMO aspect-ratio do dispositivo, então a escala é sempre
+  //    largura-driven (sem barras pretas nem sobra). ResizeObserver agendado via
+  //    rAF (sem loop de re-render: escrevemos só no estilo da camada) e com
+  //    cancelamento no unmount.
   useLayoutEffect(() => {
     const frame = frameRef.current;
     const layer = layerRef.current;
+    const fitBox = fitRef.current;
     if (!frame || !layer) return;
     const logical = PREVIEW_DEVICES[mode];
+    const ratio = logical.w / logical.h;
     let rafId = 0;
     const apply = () => {
       rafId = 0;
+      if (fitBox) {
+        // Em lg o wrapper é flex-1 (altura fixa da coluna) → a moldura vira o
+        // maior retângulo com o aspect-ratio do dispositivo que cabe nela
+        // (sem scroll na coluna externa). Abaixo de lg a altura é automática
+        // (a página rola até a moldura) → o CSS (largura) dirige e o eventual
+        // tamanho inline de um resize lg→menor é limpo.
+        const heightBound = getComputedStyle(fitBox).flexGrow !== '0';
+        const availW = fitBox.clientWidth;
+        const availH = fitBox.clientHeight;
+        if (heightBound && availW >= 10 && availH >= 10) {
+          const width = Math.min(availW, availH * ratio);
+          frame.style.width = `${Math.floor(width)}px`;
+          frame.style.height = `${Math.floor(width) / ratio}px`;
+        } else if (!heightBound && (frame.style.width || frame.style.height)) {
+          frame.style.width = '';
+          frame.style.height = '';
+        }
+      }
       const { width } = frame.getBoundingClientRect();
       if (width < 10) {
         layer.style.transform = 'scale(1)';
@@ -206,16 +237,20 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
     if (typeof ResizeObserver === 'undefined') return;
     const observer = new ResizeObserver(schedule);
     observer.observe(frame);
+    if (fitBox) observer.observe(fitBox);
     return () => {
       observer.disconnect();
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, [mode, open]);
 
+  // Abaixo de lg a coluna é auto-altura (a PÁGINA rola até a moldura —
+  // nunca scroll duplo) e em lg a altura é fixa: o wrapper da moldura
+  // ocupa o resto (flex-1) e a moldura é dimensionada para caber.
   return (
     <div
       data-testid="preview-column"
-      className="order-first flex max-h-[calc(100dvh-8rem)] flex-col gap-3 self-start overflow-y-auto lg:order-none lg:sticky lg:top-24 lg:max-h-[calc(100dvh-8rem)]"
+      className="order-first flex flex-col gap-3 self-start lg:order-none lg:sticky lg:top-24 lg:h-[calc(100dvh-8rem)]"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-sm font-bold text-text-primary">Prévia ao vivo</h3>
@@ -244,7 +279,7 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
         aria-expanded={open}
         data-testid="preview-collapse"
         onClick={() => setOpen(value => !value)}
-        className="flex items-center justify-between rounded-xl border border-border px-3 py-2 text-xs font-bold text-text-secondary hover:bg-surface-2 lg:hidden"
+        className="flex min-h-11 items-center justify-between rounded-xl border border-border px-3 py-2 text-xs font-bold text-text-secondary hover:bg-surface-2 lg:hidden"
       >
         {open ? 'Ocultar prévia' : 'Mostrar prévia'}
         <span aria-hidden="true">{open ? '▲' : '▼'}</span>
@@ -252,43 +287,63 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
 
       {open && (
         <div
-          ref={frameRef}
-          data-testid="preview-frame"
-          role="img"
-          aria-label="Prévia da página pública"
-          className="relative mx-auto w-full max-w-[360px] shrink-0 overflow-hidden rounded-2xl border border-border bg-surface-2 shadow-card lg:max-w-none"
-          style={{ aspectRatio: `${PREVIEW_DEVICES[mode].w} / ${PREVIEW_DEVICES[mode].h}` }}
+          ref={fitRef}
+          data-testid="preview-frame-fit"
+          className="mx-auto flex min-h-0 w-full max-w-[360px] items-center justify-center lg:max-w-none lg:flex-1"
         >
           <div
-            ref={layerRef}
-            className="absolute left-0 top-0"
-            style={{ transformOrigin: 'top left' }}
+            ref={frameRef}
+            data-testid="preview-frame"
+            role="img"
+            aria-label="Prévia da página pública"
+            className="relative w-full shrink-0 overflow-hidden rounded-2xl border border-border bg-surface-2 shadow-card"
+            style={{ aspectRatio: `${PREVIEW_DEVICES[mode].w} / ${PREVIEW_DEVICES[mode].h}` }}
           >
-            <MockupDevice
-              mode={mode}
-              slug={slug}
-              screen={
-                <PreviewScreen
-                  mode={mode}
-                  variant={activeVariant}
-                  theme={theme}
-                  settings={previewSettings}
-                  coverBusy={coverBusy}
-                />
-              }
-            />
+            <div
+              ref={layerRef}
+              className="absolute left-0 top-0"
+              style={{ transformOrigin: 'top left' }}
+            >
+              <MockupDevice
+                mode={mode}
+                slug={slug}
+                screen={
+                  <PreviewScreen
+                    mode={mode}
+                    variant={activeVariant}
+                    theme={theme}
+                    settings={previewSettings}
+                    coverBusy={coverBusy}
+                  />
+                }
+              />
+            </div>
           </div>
         </div>
       )}
 
-      <ContrastStatusPanel failing={failing} dirty={dirty} onApplySuggestion={onApplySuggestion} />
+      <ContrastStatusPanel
+        failing={failing}
+        warnings={warnings}
+        dirty={dirty}
+        onApplySuggestion={onApplySuggestion}
+      />
       {(otherFailing?.length ?? 0) > 0 && (
         <p
           className="rounded-xl border border-danger/40 bg-danger/10 p-3 text-[11px] font-bold text-danger"
           data-testid="contrast-other-variant"
         >
-          Variante {activeVariant === 'dark' ? 'clara' : 'escura'}: contraste insuficiente
-          (WCAG AA) — corrija para habilitar o Salvar.
+          Variante {activeVariant === 'dark' ? 'clara' : 'escura'}: contraste insuficiente (WCAG AA)
+          — corrija para habilitar o Salvar.
+        </p>
+      )}
+      {otherWarnings.length > 0 && (
+        <p
+          className="rounded-xl border border-warning/40 bg-warning/10 p-3 text-[11px] font-bold text-warning"
+          data-testid="contrast-other-variant-warning"
+        >
+          Variante {activeVariant === 'dark' ? 'clara' : 'escura'}: a cor de destaque tem pouco
+          contraste. A página usará o fallback legível; o salvamento permanece disponível.
         </p>
       )}
     </div>

@@ -1,5 +1,3 @@
-import { Tabs } from '../../components/patterns';
-
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ShopSettings, DaySchedule } from '../../types';
@@ -26,39 +24,16 @@ import { ShopFloorControls } from '../../features/shop';
 import { Field, FIELD_CONTROL } from '../../components/ui/Field';
 import { EmailPreferencesPanel } from './EmailPreferencesPanel';
 import { EmailHistoryPanel } from './EmailHistoryPanel';
+import { SettingsNav } from './SettingsNav';
+import { type SettingsSection } from './settingsSections';
 import {
   LuSave as Save,
   LuClock as Clock,
   LuCalendarDays as CalendarDays,
   LuUpload as Upload,
-  LuSmartphone as Smartphone,
   LuLoaderCircle as Loader2,
   LuWallet as Wallet,
-  LuUserRound as UserRound,
-  LuStore as Store,
-  LuAtSign as AtSign,
-  LuShieldCheck as ShieldCheck,
-  LuMail as Mail,
-  LuCircleHelp as CircleHelp,
-  LuFileSpreadsheet as FileSpreadsheet,
-  LuDownload as Download,
 } from 'react-icons/lu';
-
-type SettingsSection =
-  'account' | 'shop' | 'social' | 'whatsapp' | 'operation' | 'email' | 'import' | 'export' | 'privacy' | 'help';
-
-const SETTINGS_SECTIONS: { id: SettingsSection; label: string; icon: React.ElementType }[] = [
-  { id: 'account', label: 'Conta', icon: UserRound },
-  { id: 'shop', label: 'Estabelecimento', icon: Store },
-  { id: 'social', label: 'Redes sociais', icon: AtSign },
-  { id: 'whatsapp', label: 'WhatsApp', icon: Smartphone },
-  { id: 'operation', label: 'Funcionamento', icon: Clock },
-  { id: 'email', label: 'E-mail e notificações', icon: Mail },
-  { id: 'import', label: 'Importar dados', icon: FileSpreadsheet },
-  { id: 'export', label: 'Exportar dados', icon: Download },
-  { id: 'privacy', label: 'Privacidade', icon: ShieldCheck },
-  { id: 'help', label: 'Ajuda e suporte', icon: CircleHelp },
-];
 
 interface SettingsManagerProps {
   settings: ShopSettings;
@@ -162,9 +137,8 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <Tabs<SettingsSection>
+      <SettingsNav
         ariaLabel="Seções de configurações"
-        items={SETTINGS_SECTIONS.map(({ id, label }) => ({ id, label }))}
         value={activeSection}
         onChange={setActiveSection}
       >
@@ -408,7 +382,7 @@ export const SettingsManager: React.FC<SettingsManagerProps> = ({
             </div>
           )}
         </div>
-      </Tabs>
+      </SettingsNav>
     </div>
   );
 };

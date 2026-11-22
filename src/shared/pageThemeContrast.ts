@@ -26,7 +26,9 @@ export interface ContrastCheck {
 const HEX_RE = /^#[0-9A-Fa-f]{6}$/;
 
 export const PAGE_THEME_LIGHT_FALLBACK = '#FFFFFF';
-export const PAGE_THEME_DARK_FALLBACK = '#0B0F0E';
+// Preto puro + branco são os extremos de luminância sRGB: escolher o maior
+// contraste entre eles garante >=4.5:1 para qualquer cor hexadecimal válida.
+export const PAGE_THEME_DARK_FALLBACK = '#000000';
 
 export function isHexColor(value: string): boolean {
   return HEX_RE.test(value);

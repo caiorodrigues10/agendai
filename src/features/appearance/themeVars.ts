@@ -1,6 +1,11 @@
 import type { CSSProperties } from 'react';
 import type { PageTheme, PageThemeVariant, RadiusStyle } from '../../infra/pageThemeApi';
-import { deriveButtonFg } from '../../shared/pageThemeContrast';
+import {
+  ACCENT_FOREGROUND_DARK,
+  ACCENT_FOREGROUND_LIGHT,
+  deriveAccentForeground,
+  resolveAccentUiTokens,
+} from './accentContrast';
 
 function hexToRgb(hex: string): [number, number, number] {
   const clean = hex.replace('#', '');
@@ -22,11 +27,6 @@ function mix(hex: string, target: string, amount: number): string {
       .join('')
       .toUpperCase()
   );
-}
-
-function luminanceOf(hex: string): number {
-  const [r, g, b] = hexToRgb(hex);
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
 export type ThemeColorSource = Pick<
@@ -64,7 +64,16 @@ export function pageThemeToCssVars(
   variant: PageThemeVariant
 ): CSSProperties {
   const { accentColor, backgroundColor, surfaceColor, textColor, textMutedColor } = theme;
-  const toward = luminanceOf(accentColor) > 128 ? '#000000' : '#FFFFFF';
+  const accentForeground = deriveAccentForeground(accentColor);
+  const accentUi = resolveAccentUiTokens(theme);
+  // O hover afasta o fundo do texto: um destaque escuro com texto claro fica
+  // mais escuro; um destaque claro com texto escuro fica mais claro. Assim o
+  // foreground escolhido continua com contraste >=4.5:1 também no hover.
+  const hoverTarget =
+    accentForeground === ACCENT_FOREGROUND_LIGHT ? ACCENT_FOREGROUND_DARK : ACCENT_FOREGROUND_LIGHT;
+  // No fallback, o hover afasta o cartão do texto (rumo ao fundo), preservando
+  // a razão >=4.5:1 exigida entre texto e cartão.
+  const fallbackHover = mix(surfaceColor, backgroundColor, 0.08);
   const semantic = SEMANTIC_COLORS[variant];
 
   const values: Record<string, string> = {
@@ -77,22 +86,29 @@ export function pageThemeToCssVars(
     'text-secondary': mix(textColor, textMutedColor, 0.45),
     'text-muted': textMutedColor,
     accent: accentColor,
-    'accent-hover': mix(accentColor, toward, 0.15),
-    'accent-fg': deriveButtonFg(accentColor),
+    'accent-hover': mix(accentColor, hoverTarget, 0.15),
+    'accent-fg': accentForeground,
+    'accent-active-bg': accentUi.background,
+    'accent-active-fg': accentUi.foreground,
+    'accent-active-border': accentUi.border,
+    'accent-action-hover': accentUi.fallback ? fallbackHover : mix(accentColor, hoverTarget, 0.15),
     'action-primary': accentColor,
-    'action-primary-hover': mix(accentColor, toward, 0.15),
-    'action-primary-fg': deriveButtonFg(accentColor),
+    'action-primary-hover': mix(accentColor, hoverTarget, 0.15),
+    'action-primary-fg': accentForeground,
     selection: `color-mix(in srgb, ${accentColor} 14%, transparent)`,
-    focus: accentColor,
+    // O foco precisa continuar visível mesmo quando o destaque tem <3:1.
+    focus: accentUi.fallback ? accentUi.border : accentColor,
     'hover-border': `color-mix(in srgb, ${accentColor} 40%, transparent)`,
     'input-bg': surfaceColor,
     'input-border': mix(backgroundColor, textColor, 0.22),
     brand: accentColor,
-    'brand-hover': mix(accentColor, toward, 0.15),
+    'brand-hover': mix(accentColor, hoverTarget, 0.15),
     danger: semantic.danger,
     'danger-fg': semantic.dangerFg,
     success: semantic.success,
     warning: semantic.warning,
+    'on-media': '#FFFFFF',
+    'media-overlay': '#000000',
   };
 
   const vars: Record<string, string> = {};

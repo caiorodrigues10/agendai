@@ -77,6 +77,19 @@ describe('PageAppearancePanel', () => {
     expect(screen.getByTestId('dirty-warning')).toBeInTheDocument();
   });
 
+  it('avisa sobre destaque com pouco contraste sem bloquear o salvamento', async () => {
+    await renderPanel();
+    setHex('Cor de destaque', '#080808');
+
+    expect(
+      await screen.findByText('Essa cor tem pouco contraste com o fundo')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('contrast-status').textContent).toContain(
+      'o salvamento permanece disponível'
+    );
+    expect(screen.getByTestId('save-theme')).toBeEnabled();
+  });
+
   it('aplica uma paleta pronta ao clicar no preset', async () => {
     await renderPanel();
     fireEvent.click(screen.getByTestId('preset-claro'));

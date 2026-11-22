@@ -21,10 +21,10 @@
  * para o front calcular o recorte sem ampliar. O logo continua estrito
  * (min/max/proporção exata validados com sharp).
  *
- * Sem limite de peso definido pela aplicação: o tamanho é do plano do
- * Cloudinary (rejeição vira erro do próprio Cloudinary). O campo `maxBytes` é
- * apenas legado/informativo — nenhuma validação de peso existe no app; nenhum
- * texto de UI nem doc deve citá-lo como limite.
+ * Peso: validado no back ANTES do decode (`validateAndNormalizeImage` → 413)
+ * — capa ≤5 MB, logo ≤2 MB (`maxBytes` é a fonte única). O multipart global
+ * também limita a 5 MB por arquivo (teto de memória do back; vídeo/mídia de
+ * post sobrescrevem por rota). A UI não precisa citar esse limite.
  *
  * Alterar valores aqui SEM rodar o espelho reprova `theme:check` no front.
  */
@@ -41,7 +41,7 @@ export interface LogoImageSpec {
   maxHeight: number;
   ratio: number;
   ratioTolerance: number;
-  /** Legado: sem enforcement — ver cabeçalho do arquivo. */
+  /** Limite de bytes — enforced ANTES do decode (413). */
   maxBytes: number;
   allowedMimeTypes: Record<string, string>;
   allowedFormats: ('jpeg' | 'png' | 'webp')[];
@@ -60,7 +60,7 @@ export interface CoverImageSpec {
   key: 'cover';
   label: string;
   recommended: { width: number; height: number; aspect: string };
-  /** Legado: sem enforcement — ver cabeçalho do arquivo. */
+  /** Limite de bytes — enforced ANTES do decode (413). */
   maxBytes: number;
   allowedMimeTypes: Record<string, string>;
   allowedFormats: ('jpeg' | 'png' | 'webp')[];

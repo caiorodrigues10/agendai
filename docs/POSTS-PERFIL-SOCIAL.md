@@ -7,7 +7,8 @@
 - Prévia e exportação nos formatos 1:1, 4:5 e 9:16; prévia desatualizada não pode ser baixada. Rascunho local separado por usuário/salão. Uploads bloqueiam o salvamento até terminar.
 - Editor acessível com foco contido, Escape, restauração de rolagem, acesso explícito à prévia e agendamento visíveis no celular.
 - Perfil público inspirado na navegação de perfis sociais: avatar, informações reais, status de funcionamento, atalhos de atendimento, stories de 24 horas e grade.
-- Abas Publicações, Vídeos, Marcados, Avaliações e Sobre. Avaliações continuam vinculadas a atendimentos reais; nota oculta quando o módulo de reputação não libera a média. Não há seguidores/estatísticas inventados.
+- O perfil público mantém somente as abas **Publicações | Sobre**. Publicações e fotos avulsas da galeria aparecem na mesma grade, em ordem cronológica, sem duplicidade e com um contador único; o link legado `?tab=fotos` abre Publicações.
+- Tiles com imagem mantêm a proporção 4:5 e o overlay; tiles somente textuais são quadrados, com título limitado e rodapé em linha própria. A prévia Mobile usa 390×823 px lógicos e container queries, sem depender da largura da janela.
 - Vídeos com player e capa; stories com navegação. Não há autoplay obrigatório nem publicação automática no Instagram.
 - Comentários persistidos, paginação e exclusão pelo autor/responsável; cliente comenta por sessão de telefone verificado via WhatsApp. Salão sem WhatsApp conectado recebe erro explicativo, não confirmação falsa de envio.
 - Marcações entre salões passam pela aprovação do responsável pelo salão marcado.

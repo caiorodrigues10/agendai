@@ -818,15 +818,17 @@ export const StaffDashboard: React.FC = () => {
         {activeTab === 'support' && <SupportPanel />}
 
           {activeTab === 'profile' && settings && (
-            <ShopProfile
-              settings={settings}
-              posts={feed}
-              currentUser={user}
-              audience="staff"
-              onDeletePost={deletePost}
-              onLikePost={likePost}
-              onNotify={showToast}
-            />
+            <div className="@container">
+              <ShopProfile
+                settings={settings}
+                posts={feed}
+                currentUser={user}
+                audience="staff"
+                onDeletePost={deletePost}
+                onLikePost={likePost}
+                onNotify={showToast}
+              />
+            </div>
           )}
           </Suspense>
       </AppLayout>

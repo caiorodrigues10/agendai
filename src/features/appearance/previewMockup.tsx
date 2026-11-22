@@ -14,15 +14,17 @@ import { PREVIEW_POSTS } from './previewData';
 
 /**
  * Dimensões lógicas dos mockups (conteúdo em tamanho real, escalado pelo frame).
- * Mobile: tela 390×823 (9:19) + moldura de celular 6px de cada lado (p-[6px]).
+ * Mobile: tela 390×823 (9:19) + moldura de celular 6px de cada lado
+ * (1px de borda + 5px de padding).
  * Desktop: janela 1024×1100 — largura lógica 1024 = breakpoint lg real da
  * página; altura cobre a primeira dobra completa com a barra de navegador.
  * O frame usa o MESMO aspect-ratio, então a escala é sempre largura-driven
  * (sem barras pretas laterais nem sobra abaixo).
  */
 export const PREVIEW_DEVICES = {
-  mobile: { w: 402, h: 835 },
-  desktop: { w: 1024, h: 1100 },
+  // 402 px inclui a moldura de 6 px; a tela lógica real tem 390×823 px.
+  mobile: { w: 402, h: 835, contentW: 390, contentH: 823 },
+  desktop: { w: 1024, h: 1100, contentW: 1024, contentH: 1100 },
 } as const;
 
 export type PreviewDeviceMode = keyof typeof PREVIEW_DEVICES;
@@ -139,12 +141,14 @@ function PreviewCover({
       style={
         hasImg
           ? { aspectRatio: aspect }
-          : { height: 80, backgroundImage: 'linear-gradient(135deg, var(--shop-accent, var(--ag-accent)), var(--shop-surface, var(--ag-surface)))' }
+          : {
+              height: 80,
+              backgroundImage:
+                'linear-gradient(135deg, var(--shop-accent, var(--ag-accent)), var(--shop-surface, var(--ag-surface)))',
+            }
       }
     >
-      {busy && (
-        <div className="absolute inset-0 animate-pulse bg-surface-2" aria-hidden="true" />
-      )}
+      {busy && <div className="absolute inset-0 animate-pulse bg-surface-2" aria-hidden="true" />}
       {!busy && hasImg && url && (
         <img
           key={url}
@@ -183,19 +187,15 @@ function PreviewCover({
  */
 function StaticPublicTabBar({ operationMode }: { operationMode?: ShopSettings['operationMode'] }) {
   const tabs = visiblePublicTabs(operationMode);
-  const indicator =
-    tabs.length === 3
-      ? 'w-[calc(33.3%-2px)] left-[calc(66.6%+2px)]'
-      : tabs.length === 2
-        ? 'w-[calc(50%-2px)] left-[calc(50%+2px)]'
-        : 'w-[calc(100%-8px)] left-1';
   return (
-    <div className="relative mb-4 flex rounded-xl border border-border bg-surface p-1">
+    <div className="relative mb-4 flex gap-1 rounded-xl border border-border bg-surface p-1">
       {tabs.map(tab => (
         <span
           key={tab}
-          className={`relative z-10 flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-sm font-bold ${
-            tab === 'profile' ? 'text-accent' : 'text-text-muted'
+          className={`relative z-10 flex flex-1 items-center justify-center gap-2 rounded-lg border-2 border-transparent px-3 py-2 text-sm font-bold ${
+            tab === 'profile'
+              ? '!border-accent-active-border bg-accent-active-bg text-accent-active-fg'
+              : 'text-text-secondary'
           }`}
         >
           {tab === 'queue' && (
@@ -215,10 +215,6 @@ function StaticPublicTabBar({ operationMode }: { operationMode?: ShopSettings['o
           )}
         </span>
       ))}
-      <div
-        className={`absolute bottom-1 top-1 rounded-lg bg-selection transition-all duration-300 ${indicator}`}
-        aria-hidden="true"
-      />
     </div>
   );
 }
@@ -255,12 +251,24 @@ export function PreviewScreen({
       data-radius={theme.radiusStyle}
       data-button-style={theme.buttonStyle}
       data-variant={variant}
-      className="absolute inset-0 flex flex-col bg-bg text-text-primary"
+      data-preview-width={PREVIEW_DEVICES[mode].contentW}
+      className="@container absolute inset-0 flex flex-col bg-bg text-text-primary"
       style={{ ...pageThemeToCssVars(theme, variant), ...radiusCssVars(theme.radiusStyle) }}
     >
       {mode === 'mobile' && <PreviewStatusBar />}
+      {/* Rolagem da prévia: a coluna externa nunca rola (em lg a moldura é
+          dimensionada para caber; abaixo de lg a página rola até ela), então
+          esta é a única área rolável e o wheel/trackpad fica nela
+          (overscroll-contain). tabIndex+role: região rolável precisa ser
+          focável para PageDown/End — o conteúdo dentro é inert e não entra
+          na ordem de tabulação. */}
       <div
         data-ag-preview-scroll
+        // Uma região rolável precisa entrar na ordem de tabulação para teclado.
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+        tabIndex={0}
+        role="group"
+        aria-label="Conteúdo da prévia"
         className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
       >
         <div ref={setInert} aria-hidden="true">
@@ -274,7 +282,7 @@ export function PreviewScreen({
             originalWidth={theme.coverWidth}
             originalHeight={theme.coverHeight}
           />
-          <div className="mx-auto max-w-md px-4 pt-2 pb-16 sm:max-w-xl md:max-w-3xl lg:max-w-4xl">
+          <div className="mx-auto max-w-md px-4 pt-2 pb-16 @min-[640px]:max-w-xl @min-[768px]:max-w-3xl @min-[1024px]:max-w-4xl">
             <StaticPublicTabBar operationMode={settings.operationMode} />
             <PreviewProviders>
               <ShopProfile
@@ -316,7 +324,7 @@ export function MockupDevice({
     return (
       <div
         data-testid="device-desktop"
-        className="flex h-full w-full flex-col overflow-hidden rounded-xl border border-border bg-surface-2 shadow-lg ring-1 ring-border"
+        className="flex h-full w-full flex-col overflow-hidden rounded-xl bg-surface-2 shadow-lg ring-1 ring-border"
       >
         <div className="flex h-8 shrink-0 items-center gap-2 border-b border-border px-4">
           <span className="flex gap-1.5" aria-hidden="true">
@@ -336,11 +344,9 @@ export function MockupDevice({
   return (
     <div
       data-testid="device-mobile"
-      className="flex h-full w-full flex-col rounded-[38px] border border-border bg-surface-2 p-[6px] shadow-lg ring-1 ring-border"
+      className="flex h-full w-full flex-col rounded-[38px] border border-border bg-surface-2 p-[5px] shadow-lg ring-1 ring-border"
     >
-      <div className="relative min-h-0 flex-1 overflow-hidden rounded-[32px] bg-bg">
-        {screen}
-      </div>
+      <div className="relative min-h-0 flex-1 overflow-hidden rounded-[32px] bg-bg">{screen}</div>
     </div>
   );
 }

@@ -47,6 +47,23 @@ describe('Tabs', () => {
     expect(screen.getByRole('tab', { name: 'Fila' })).toHaveAttribute('aria-selected', 'false');
   });
 
+  it('permite classes ativas com fallback de contraste do tema público', () => {
+    render(
+      <Tabs
+        ariaLabel="Seções"
+        items={items}
+        value="hoje"
+        onChange={vi.fn()}
+        activeClassName="bg-accent-active-bg text-accent-active-fg"
+      />
+    );
+    expect(screen.getByRole('tab', { name: 'Hoje' })).toHaveClass(
+      'bg-accent-active-bg',
+      'text-accent-active-fg'
+    );
+    expect(screen.getByRole('tab', { name: 'Fila' })).toHaveClass('text-text-secondary');
+  });
+
   it('dispara onChange ao clicar', () => {
     const onChange = renderTabs();
     fireEvent.click(screen.getByRole('tab', { name: 'Fila' }));

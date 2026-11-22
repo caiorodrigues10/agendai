@@ -46,6 +46,9 @@
   --ag-danger-fg: #ffffff;
   --ag-success: #0e642d;
   --ag-warning: #92400e;
+  /* Texto e scrim sobre mídia: a cor fica no token, não no componente. */
+  --ag-on-media: #ffffff;
+  --ag-media-overlay: #000000;
   /* shadcn/recharts — séries alinhadas ao tema */
   --chart-1: #1c7e61;
   --chart-2: #7c3aed;
@@ -91,6 +94,8 @@
   --ag-danger-fg: #0f1110;
   --ag-success: #22c55e;
   --ag-warning: #f59e0b;
+  --ag-on-media: #ffffff;
+  --ag-media-overlay: #000000;
   --chart-1: #2cb58a;
   --chart-2: #a78bfa;
   --chart-3: #22d3ee;
@@ -125,6 +130,12 @@
   --color-accent: var(--shop-accent, var(--ag-accent));
   --color-accent-hover: var(--shop-accent-hover, var(--ag-accent-hover));
   --color-accent-fg: var(--shop-accent-fg, var(--ag-accent-fg));
+  /* Estado ativo: usa o destaque quando ele contrasta; caso contrário,
+     cai no texto/cartão do tema sem esconder a aba selecionada. */
+  --color-accent-active-bg: var(--shop-accent-active-bg, var(--ag-accent));
+  --color-accent-active-fg: var(--shop-accent-active-fg, var(--ag-accent-fg));
+  --color-accent-active-border: var(--shop-accent-active-border, var(--ag-accent));
+  --color-accent-action-hover: var(--shop-accent-action-hover, var(--ag-accent-hover));
   --color-brand: var(--shop-brand, var(--ag-brand));
   --color-brand-hover: var(--shop-brand-hover, var(--ag-brand-hover));
   --color-action-primary: var(--shop-action-primary, var(--ag-action-primary));
@@ -139,6 +150,8 @@
   --color-danger-fg: var(--shop-danger-fg, var(--ag-danger-fg));
   --color-success: var(--shop-success, var(--ag-success));
   --color-warning: var(--shop-warning, var(--ag-warning));
+  --color-on-media: var(--shop-on-media, var(--ag-on-media));
+  --color-media-overlay: var(--shop-media-overlay, var(--ag-media-overlay));
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);

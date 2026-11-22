@@ -162,11 +162,12 @@ export const SegmentedOptions: React.FC<{
 /** Status de contraste WCAG AA (aria-live) + sugestões em 1 clique. Fica ABAIXO da moldura da prévia. */
 export const ContrastStatusPanel: React.FC<{
   failing: ContrastCheck[];
+  warnings?: ContrastCheck[];
   dirty: boolean;
   onApplySuggestion: (check: ContrastCheck) => void;
-}> = ({ failing, dirty, onApplySuggestion }) => (
+}> = ({ failing, warnings = [], dirty, onApplySuggestion }) => (
   <div aria-live="polite" data-testid="contrast-status" className="space-y-2">
-    {failing.length > 0 ? (
+    {failing.length > 0 && (
       <div className="rounded-xl border border-danger/40 bg-danger/10 p-3">
         <p className="mb-2 flex items-center gap-1.5 text-xs font-bold text-danger">
           <LuTriangleAlert size={14} className="shrink-0" aria-hidden="true" />
@@ -193,7 +194,36 @@ export const ContrastStatusPanel: React.FC<{
           ))}
         </ul>
       </div>
-    ) : (
+    )}
+    {warnings.length > 0 && (
+      <div className="rounded-xl border border-warning/40 bg-warning/10 p-3">
+        <p className="mb-2 flex items-center gap-1.5 text-xs font-bold text-warning">
+          <LuTriangleAlert size={14} className="shrink-0" aria-hidden="true" />
+          Aviso de contraste — o salvamento permanece disponível:
+        </p>
+        <ul className="space-y-2">
+          {warnings.map(check => (
+            <li key={check.key} className="text-[11px] text-text-secondary">
+              <span className="font-bold">
+                {check.leftLabel} × {check.rightLabel}:{' '}
+              </span>
+              {check.ratio}:1 (mínimo {check.minRatio}:1)
+              {check.suggestion && (
+                <button
+                  type="button"
+                  onClick={() => onApplySuggestion(check)}
+                  className="ml-1.5 rounded-lg border border-border px-1.5 py-0.5 font-bold text-accent hover:bg-accent/10"
+                  data-testid={`suggestion-${check.key}`}
+                >
+                  Usar {check.suggestion.value}
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+    {failing.length === 0 && warnings.length === 0 && (
       <p className="flex items-center gap-1.5 rounded-xl border border-success/40 bg-success/10 p-3 text-[11px] font-bold text-success">
         <LuCircleCheck size={14} className="shrink-0" aria-hidden="true" />
         Contraste aprovado (WCAG AA).

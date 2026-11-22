@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { ProfileGrid } from './ProfileSections';
 import type { FeedPost } from '../../types';
+import type { ProfilePublicationItem } from './profilePublications';
 
 /** Opção B: célula 4:5 fixa; cover só no 4:5, contain em 1:1 e 9:16. */
 const FIT: Record<FeedPost['format'], string> = {
@@ -43,6 +44,15 @@ const post = (format: FeedPost['format']): FeedPost => ({
   format,
 });
 
+function publicationItems(posts: FeedPost[]): ProfilePublicationItem[] {
+  return posts.map(item => ({
+    kind: 'post',
+    key: `post:${item.id}`,
+    timestamp: item.publishedAt ?? item.createdAt,
+    post: item,
+  }));
+}
+
 const meta = {
   title: 'Loja/ProfileGrid',
   component: ProfileGrid,
@@ -55,7 +65,11 @@ const meta = {
       </div>
     ),
   ],
-  args: { posts: [post('square')], onOpen: () => undefined },
+  args: {
+    items: publicationItems([post('square')]),
+    onOpenPost: () => undefined,
+    onOpenPhoto: () => undefined,
+  },
 } satisfies Meta<typeof ProfileGrid>;
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -71,7 +85,7 @@ async function expectGridCard(canvasElement: HTMLElement, format: FeedPost['form
 
 /** 1:1 — aparece inteira (contain) dentro da célula 4:5. */
 export const Quadrado1x1: Story = {
-  args: { posts: [post('square')] },
+  args: { items: publicationItems([post('square')]) },
   play: async ({ canvasElement }) => {
     await expectGridCard(canvasElement, 'square');
   },
@@ -79,7 +93,7 @@ export const Quadrado1x1: Story = {
 
 /** 4:5 — único formato cortado (cover), sem barras. */
 export const Retrato4x5: Story = {
-  args: { posts: [post('portrait')] },
+  args: { items: publicationItems([post('portrait')]) },
   play: async ({ canvasElement }) => {
     await expectGridCard(canvasElement, 'portrait');
   },
@@ -87,14 +101,16 @@ export const Retrato4x5: Story = {
 
 /** 9:16 — aparece inteiro (contain), barras laterais no fundo da célula. */
 export const Story9x16: Story = {
-  args: { posts: [post('story')] },
+  args: { items: publicationItems([post('story')]) },
   play: async ({ canvasElement }) => {
     await expectGridCard(canvasElement, 'story');
   },
 };
 
 export const ListaMista: Story = {
-  args: { posts: [post('square'), post('portrait'), post('story')] },
+  args: {
+    items: publicationItems([post('square'), post('portrait'), post('story')]),
+  },
   play: async ({ canvasElement }) => {
     const cards = within(canvasElement).getAllByRole('button');
     expect(cards).toHaveLength(3);

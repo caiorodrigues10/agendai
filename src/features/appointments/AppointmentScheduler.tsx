@@ -89,7 +89,12 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
   onDateChangeRef.current = onDateChange;
 
   useEffect(() => {
-    if (date) onDateChangeRef.current?.(date, selectedStaffId !== 'any' ? selectedStaffId : undefined, selectedServiceId || undefined);
+    if (date)
+      onDateChangeRef.current?.(
+        date,
+        selectedStaffId !== 'any' ? selectedStaffId : undefined,
+        selectedServiceId || undefined
+      );
   }, [date, selectedStaffId, selectedServiceId]);
 
   const isDateClosed = useMemo(() => {
@@ -108,7 +113,15 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
     if (availableSlots) return availableSlots;
     const slots = generateTimeSlots(daySchedule.openTime, daySchedule.closeTime);
     return slots.filter(slot => isSlotAvailable(slot, selectedStaffId, occupancy, staff.length));
-  }, [date, isDateClosed, settings.schedule, selectedStaffId, occupancy, staff.length, availableSlots]);
+  }, [
+    date,
+    isDateClosed,
+    settings.schedule,
+    selectedStaffId,
+    occupancy,
+    staff.length,
+    availableSlots,
+  ]);
 
   const dateLabel = date
     ? new Date(date + 'T12:00:00').toLocaleDateString('pt-BR', {
@@ -181,12 +194,24 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
   const openNativeCalendar = () => {
     const evt = getEventDetails();
     if (!evt) return;
-    const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+    const fmt = (d: Date) =>
+      d
+        .toISOString()
+        .replace(/[-:]/g, '')
+        .replace(/\.\d{3}Z$/, 'Z');
     const ics = [
-      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Agenda Já//Appointment//PT-BR',
-      'BEGIN:VEVENT', `UID:${Date.now()}@agendai`, `DTSTART:${fmt(evt.start)}`, `DTEND:${fmt(evt.end)}`,
-      `SUMMARY:${evt.title}`, `DESCRIPTION:${evt.details}`, `LOCATION:${evt.location}`,
-      'END:VEVENT', 'END:VCALENDAR',
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Agenda Já//Appointment//PT-BR',
+      'BEGIN:VEVENT',
+      `UID:${Date.now()}@agendai`,
+      `DTSTART:${fmt(evt.start)}`,
+      `DTEND:${fmt(evt.end)}`,
+      `SUMMARY:${evt.title}`,
+      `DESCRIPTION:${evt.details}`,
+      `LOCATION:${evt.location}`,
+      'END:VEVENT',
+      'END:VCALENDAR',
     ].join('\r\n');
     const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -215,7 +240,10 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
             </p>
             <div className="space-y-2">
               {selectedProducts.map(item => (
-                <div key={item.product.id} className="flex items-center justify-between gap-3 text-sm">
+                <div
+                  key={item.product.id}
+                  className="flex items-center justify-between gap-3 text-sm"
+                >
                   <span className="font-medium text-text-primary">{item.product.name}</span>
                   <span className="shrink-0 text-text-secondary">
                     {item.quantity}x {formatCurrency(item.product.salePrice)}
@@ -578,7 +606,7 @@ export const AppointmentScheduler: React.FC<AppointmentSchedulerProps> = ({
 
           <button
             type="submit"
-            className="w-full py-4 rounded-xl font-bold text-text-primary bg-accent hover:bg-accent-hover shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 mt-8"
+            className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl border border-accent-active-border bg-accent-active-bg py-4 font-bold text-accent-active-fg shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all hover:scale-[1.02] hover:bg-accent-action-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus motion-reduce:transform-none motion-reduce:transition-none"
           >
             <CheckCircle size={20} /> Confirmar Agendamento
           </button>

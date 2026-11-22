@@ -51,6 +51,10 @@ agendai/
     │   │                          OperationModeSection extraídos),
     │   │                          AccountPrivacy, EmailHistory/Preferences, ProfileSettings, ProfileAvatar,
     │   │                          QueueAlertSettings + barrel (Etapa 6c)
+    │   │                          SettingsNav (+ settingsSections.ts com SETTINGS_SECTIONS/GROUPS):
+    │   │                          navegação das 10 seções — coluna lateral agrupada em ≥1280px e faixa
+    │   │                          de abas com snap/rolagem horizontal abaixo disso (o Tabs compartilhado
+    │   │                          permanece intacto e continua em uso nas demais telas)
     │   ├── team/ support/ organizations/ referrals/
     │   │                      ← TeamManager; SupportPanel + support/* (+test); OrganizationsPanel,
     │   │                          MultiUnitDashboard (+test); OwnerReferralsPanel, ReferralTierBadge,

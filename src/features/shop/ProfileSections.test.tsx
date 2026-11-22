@@ -5,6 +5,7 @@ import { ProfileAbout, ProfileGrid, ProfileSkeleton } from './ProfileSections';
 import { PostDetail } from './PostDetail';
 import type { FeedPost, Service, ShopSettings } from '../../types';
 import type { PublicSocialPost } from '../../infra/socialApi';
+import type { ProfilePublicationItem } from './profilePublications';
 
 const FORMATS = ['square', 'portrait', 'story'] as const;
 
@@ -33,6 +34,25 @@ const FIT: Record<FeedPost['format'], string> = {
   portrait: 'object-cover',
   story: 'object-contain',
 };
+
+function publicationItems(posts: FeedPost[]): ProfilePublicationItem[] {
+  return posts.map(post => ({
+    kind: 'post',
+    key: `post:${post.id}`,
+    timestamp: post.publishedAt ?? post.createdAt,
+    post,
+  }));
+}
+
+function renderGrid(posts: FeedPost[]) {
+  return render(
+    <ProfileGrid
+      items={publicationItems(posts)}
+      onOpenPost={vi.fn()}
+      onOpenPhoto={vi.fn()}
+    />
+  );
+}
 
 function settings(patch: Partial<ShopSettings> = {}): ShopSettings {
   return {
@@ -97,9 +117,22 @@ describe('ProfileAbout', () => {
   });
 });
 
-describe('ProfileGrid — grade 4:5 sem cortar arte antiga', () => {
+describe('ProfileGrid — tiles responsivos', () => {
+  it('post só de texto usa tile quadrado, título limitado e rodapé em linha própria', () => {
+    renderGrid([{ ...feedPost('square'), imageUrl: undefined, title: 'Corte + barba Agenda de sexta abriu' }]);
+    const card = screen.getByRole('button');
+    const title = card.querySelector('span.line-clamp-3');
+    const footer = card.querySelector('[data-testid="profile-post-footer"]');
+
+    expect(card.className).toContain('aspect-square');
+    expect(card.className).not.toContain('aspect-[4/5]');
+    expect(title).toHaveClass('break-words', 'hyphens-auto', 'text-sm', 'font-semibold');
+    expect(footer?.className).not.toMatch(/\babsolute\b/);
+    expect(footer?.parentElement).toBe(card);
+  });
+
   it.each(FORMATS)('%s: célula 4:5 com fundo e o fit do formato', format => {
-    render(<ProfileGrid posts={[feedPost(format)]} onOpen={vi.fn()} />);
+    renderGrid([feedPost(format)]);
     const card = screen.getByRole('button');
     expect(card.className).toContain('aspect-[4/5]');
     expect(card.className).toContain('bg-surface-2');
@@ -112,7 +145,7 @@ describe('ProfileGrid — grade 4:5 sem cortar arte antiga', () => {
   });
 
   it('grade mista mantém a célula 4:5 para os 3 formatos', () => {
-    render(<ProfileGrid posts={FORMATS.map(feedPost)} onOpen={vi.fn()} />);
+    renderGrid(FORMATS.map(feedPost));
     const cards = screen.getAllByRole('button');
     expect(cards).toHaveLength(3);
     for (const card of cards) expect(card.className).toContain('aspect-[4/5]');
@@ -122,7 +155,7 @@ describe('ProfileGrid — grade 4:5 sem cortar arte antiga', () => {
 
   it('vídeo também respeita o fit do formato (sem corte em 1:1/9:16)', () => {
     const video: FeedPost = { ...feedPost('story'), imageUrl: undefined, videoUrl: '/clip.mp4' };
-    render(<ProfileGrid posts={[video]} onOpen={vi.fn()} />);
+    renderGrid([video]);
     expect(screen.getByRole('button').querySelector('video')?.className).toContain('object-contain');
   });
 

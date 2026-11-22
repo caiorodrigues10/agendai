@@ -6,7 +6,7 @@ Revisão: 28/10/2026. Escopo: frontend Vite, painel do salão e experiência do 
 
 - Usar `PageHeader` com título, descrição útil e uma ação principal. Evitar repetir o mesmo título com um ícone dentro de cada card.
 - Usar `FilterToolbar` para filtros relacionados; cada campo precisa de um rótulo. Busca sem resultado deve permitir limpar os filtros.
-- Usar `Tabs` para alternar conteúdos na mesma área. Setas, Home e End movem o foco; a aba ativa identifica seu painel. Não adicionar `role="tab"` a links que navegam para outra página.
+- Usar `Tabs` para alternar conteúdos na mesma área. Setas, Home e End movem o foco; a aba ativa identifica seu painel. Não adicionar `role="tab"` a links que navegam para outra página. A navegação das dez seções de Configurações usa `SettingsNav`, que preserva esse contrato acessível com um layout responsivo especializado sem alterar o `Tabs` compartilhado.
 - Manter o conteúdo em `min-w-0`, permitir quebra dos títulos e empilhar ações no celular. Preferir alinhamento à esquerda para listas, dados e formulários; centralização para mensagens curtas de estado.
 - Preservar os nomes e a ordem do registro `TAB_GROUPS`. No celular, até quatro destinos operacionais e o botão Mais; as demais áreas ficam agrupadas na folha Mais opções.
 

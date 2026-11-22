@@ -32,7 +32,10 @@ interface GalleryPhotoGridProps {
 const GalleryPhotoGrid: React.FC<GalleryPhotoGridProps> = ({ photos, disabled, onDelete }) => (
   <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4">
     {photos.map(photo => (
-      <li key={photo.id} className="group relative overflow-hidden rounded-xl border border-border bg-bg">
+      <li
+        key={photo.id}
+        className="group relative overflow-hidden rounded-xl border border-border bg-bg"
+      >
         <img
           src={photo.url}
           alt="Foto da galeria do perfil"
@@ -43,7 +46,7 @@ const GalleryPhotoGrid: React.FC<GalleryPhotoGridProps> = ({ photos, disabled, o
           type="button"
           onClick={() => onDelete(photo)}
           disabled={disabled}
-          className="absolute bottom-1 right-1 rounded-lg bg-black/60 p-1 text-white transition hover:bg-black/80 disabled:opacity-40"
+          className="absolute bottom-1 right-1 inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-media-overlay/80 text-on-media transition hover:bg-media-overlay focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:opacity-40 motion-reduce:transition-none"
           aria-label="Remover foto da galeria"
         >
           <Trash2 size={12} aria-hidden />
@@ -59,15 +62,15 @@ const GalleryEmptyState: React.FC = () => (
     <ImageOff size={28} className="text-text-muted" aria-hidden />
     <p className="text-sm font-bold text-text-primary">Envie a primeira foto do seu salão</p>
     <p className="text-xs text-text-muted">
-      As fotos enviadas aqui aparecem na aba Fotos do seu perfil.
+      As fotos enviadas aqui aparecem em Publicações no seu perfil.
     </p>
   </div>
 );
 
 /**
- * Área exclusiva do dono para subir as fotos da galeria do perfil (aba "Fotos"
- * do perfil público). O editor de posts é independente: as fotos dele vão com
- * `inGallery: false` e nunca aparecem no perfil.
+ * Área exclusiva do dono para subir as fotos da galeria do perfil. As fotos
+ * marcadas com `inGallery: true` aparecem na área "Publicações" do perfil
+ * público; o editor de posts pode reutilizar a mesma biblioteca de mídia.
  */
 export const GalleryManager: React.FC = () => {
   const { barbershopId } = useBarbershopFilters();
@@ -158,7 +161,13 @@ export const GalleryManager: React.FC = () => {
     if (uniqueErrors.length === 1) {
       showToast(uniqueErrors[0], 'error');
     } else if (uniqueErrors.length > 1) {
-      showToast(uniqueErrors.slice(0, 3).map((msg, i) => `${i + 1}) ${msg}`).join(' '), 'error');
+      showToast(
+        uniqueErrors
+          .slice(0, 3)
+          .map((msg, i) => `${i + 1}) ${msg}`)
+          .join(' '),
+        'error'
+      );
     }
   };
 
@@ -182,7 +191,7 @@ export const GalleryManager: React.FC = () => {
       <header className="space-y-1">
         <h2 className="text-lg font-bold text-text-primary">Suas fotos</h2>
         <p className="text-xs text-text-muted">
-          As fotos enviadas aqui aparecem na aba Fotos do seu perfil.
+          As fotos enviadas aqui aparecem em Publicações no seu perfil.
         </p>
       </header>
 
@@ -199,7 +208,8 @@ export const GalleryManager: React.FC = () => {
         >
           {uploading ? (
             <>
-              <Loader2 size={14} className="animate-spin" aria-hidden /> {progress ?? 'Enviando…'}
+              <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden />{' '}
+              {progress ?? 'Enviando…'}
             </>
           ) : (
             <>
@@ -224,14 +234,24 @@ export const GalleryManager: React.FC = () => {
       )}
 
       {loading ? (
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4" role="status" aria-busy="true" aria-label="Carregando fotos">
+        <div
+          className="grid grid-cols-3 gap-3 sm:grid-cols-4"
+          role="status"
+          aria-busy="true"
+          aria-label="Carregando fotos"
+        >
           {Array.from({ length: 8 }).map((_, i) => (
             <Skeleton key={i} variant="rounded" width="100%" height="8rem" />
           ))}
         </div>
       ) : loadError ? (
-        <div role="alert" className="flex flex-col items-center gap-3 rounded-xl border border-danger/40 bg-danger/10 p-6 text-center">
-          <p className="text-sm font-semibold text-danger">Não foi possível carregar a galeria do perfil.</p>
+        <div
+          role="alert"
+          className="flex flex-col items-center gap-3 rounded-xl border border-danger/40 bg-danger/10 p-6 text-center"
+        >
+          <p className="text-sm font-semibold text-danger">
+            Não foi possível carregar a galeria do perfil.
+          </p>
           <Button variant="secondary" size="sm" onClick={handleRetry}>
             Tentar novamente
           </Button>

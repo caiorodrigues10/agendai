@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemePreview } from './ThemePreview';
+import { PREVIEW_DEVICES } from './previewMockup';
 import type { ContrastCheck } from '../../shared/pageThemeContrast';
 
 const theme = {
@@ -27,6 +28,8 @@ function renderPreview(props: Partial<React.ComponentProps<typeof ThemePreview>>
       shopName="Barba Nova"
       failing={failing}
       dirty={false}
+      autoActive
+      onAuto={() => undefined}
       onApplySuggestion={() => undefined}
       {...props}
     />
@@ -43,6 +46,8 @@ describe('ThemePreview', () => {
     const content = screen.getByTestId('theme-preview');
     const inertTarget = content.querySelector('[inert]') ?? content.closest('[inert]');
     expect(inertTarget).not.toBeNull();
+    expect(content).toHaveClass('@container');
+    expect(content).toHaveAttribute('data-preview-width', '390');
     expect(screen.getByText('Barba Nova')).toBeInTheDocument();
   });
 
@@ -69,6 +74,76 @@ describe('ThemePreview', () => {
     expect(screen.queryByTestId('device-mobile')).toBeNull();
     expect(screen.getByText('agendaja.com/queue/seu-salao')).toBeInTheDocument();
     expect(screen.getByTestId('preview-device-desktop')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('renderiza o mobile com 390 px lógicos e rolagem própria', () => {
+    renderPreview();
+
+    expect(PREVIEW_DEVICES.mobile.contentW).toBe(390);
+    expect(PREVIEW_DEVICES.mobile.contentH).toBe(823);
+    const content = screen.getByTestId('theme-preview');
+    expect(content).toHaveAttribute('data-preview-width', '390');
+    // rolagem da prévia: interna, única e contida (a coluna não rola em lg;
+    // abaixo de lg a página rola até a moldura)
+    expect(content.querySelector('[data-ag-preview-scroll]')).toHaveClass(
+      'overflow-y-auto',
+      'overscroll-contain'
+    );
+
+    const heading = screen.getByText('Barba Nova');
+    expect(heading).toHaveClass('text-lg', '@min-[640px]:text-2xl');
+  });
+
+  it('coluna externa não rola e a tela interna é o único rolável', () => {
+    renderPreview();
+
+    const column = screen.getByTestId('preview-column');
+    const tokens = column.className.split(/\s+/);
+    // a coluna nunca tem overflow: abaixo de lg é auto-altura (a página rola
+    // até a moldura) e em lg a moldura é dimensionada para caber na altura fixa
+    expect(tokens.some(t => t.includes('overflow-y-auto'))).toBe(false);
+    expect(tokens).toContain('lg:h-[calc(100dvh-8rem)]');
+
+    // wrapper da moldura: flex-1 em lg (ocupa o espaço restante), min-h-0
+    const fit = screen.getByTestId('preview-frame-fit');
+    expect(fit).toHaveClass('min-h-0', 'lg:flex-1');
+    expect(fit.contains(screen.getByTestId('preview-frame'))).toBe(true);
+
+    // dentro da coluna, apenas a tela interna do mockup tem rolagem por classe
+    const scrollables = Array.from(column.querySelectorAll<HTMLElement>('*')).filter(
+      el =>
+        typeof el.className === 'string' && el.className.split(/\s+/).includes('overflow-y-auto')
+    );
+    expect(scrollables).toHaveLength(1);
+    expect(scrollables[0]).toHaveAttribute('data-ag-preview-scroll');
+  });
+
+  it('mantém o desktop em 1024 px lógicos e legível, com scroll próprio', () => {
+    renderPreview();
+
+    fireEvent.click(screen.getByTestId('preview-device-desktop'));
+    const content = screen.getByTestId('theme-preview');
+    expect(content).toHaveAttribute('data-preview-width', '1024');
+    expect(screen.getByTestId('preview-frame')).toHaveStyle({ aspectRatio: '1024 / 1100' });
+    expect(content.querySelector('[data-ag-preview-scroll]')).toHaveClass('overflow-y-auto');
+    expect(screen.getByText('Barba Nova')).toHaveClass('@min-[640px]:text-2xl');
+  });
+
+  it('mantém os controles da prévia com alvo de toque de 44 px', () => {
+    renderPreview();
+
+    for (const testId of [
+      'preview-variant-auto',
+      'preview-variant-light',
+      'preview-variant-dark',
+      'preview-device-mobile',
+      'preview-device-desktop',
+      'preview-collapse',
+    ]) {
+      expect(screen.getByTestId(testId)).toHaveClass('min-h-11');
+    }
+    expect(screen.getByTestId('preview-device-mobile')).toHaveClass('min-w-11');
+    expect(screen.getByTestId('preview-device-desktop')).toHaveClass('min-w-11');
   });
 
   it('botão de colapso existe abaixo de lg com aria-expanded', () => {
