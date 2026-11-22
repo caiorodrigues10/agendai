@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { ModalShell } from './ModalShell';
 
 describe('ModalShell interaction', () => {
@@ -29,5 +29,56 @@ describe('ModalShell interaction', () => {
     expect(parentClose).toHaveBeenCalledOnce();
     unmount();
     expect(document.body.style.overflow).toBe('');
+  });
+
+  it('mantém o scroll bloqueado durante a saída e libera ao desmontar', () => {
+    const { rerender, unmount } = render(
+      <ModalShell
+        open
+        variant="fullscreen"
+        title="Prévia da página"
+        titleId="preview-fullscreen-title"
+        onClose={() => undefined}
+      />
+    );
+    expect(document.body.style.overflow).toBe('hidden');
+
+    rerender(
+      <ModalShell
+        open={false}
+        variant="fullscreen"
+        title="Prévia da página"
+        titleId="preview-fullscreen-title"
+        onClose={() => undefined}
+      />
+    );
+    expect(document.body.style.overflow).toBe('hidden');
+
+    unmount();
+    expect(document.body.style.overflow).toBe('');
+  });
+
+  it('supports a fullscreen variant and focuses the close button initially', async () => {
+    const onClose = vi.fn();
+    render(
+      <ModalShell
+        open
+        variant="fullscreen"
+        title="Prévia da página"
+        titleId="preview-fullscreen-title"
+        onClose={onClose}
+      />
+    );
+
+    const dialog = screen.getByRole('dialog', { name: 'Prévia da página' });
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
+    expect(dialog).toHaveClass('h-full', 'w-full');
+    expect(dialog.parentElement).toHaveClass('h-[100dvh]', 'w-[100dvw]');
+
+    const close = within(dialog).getByRole('button', { name: 'Fechar' });
+    await waitFor(() => expect(close).toHaveFocus());
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledOnce();
   });
 });

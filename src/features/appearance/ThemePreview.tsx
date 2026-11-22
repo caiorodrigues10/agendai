@@ -1,10 +1,12 @@
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { LuTriangleAlert } from 'react-icons/lu';
+import React, { useMemo, useRef, useState } from 'react';
+import { LuMaximize2, LuTriangleAlert } from 'react-icons/lu';
 import type { ShopSettings } from '../../types';
 import type { ContrastCheck } from '../../shared/pageThemeContrast';
 import { useThemeOptional } from '../../contexts/ThemeContext';
 import { ContrastStatusPanel } from './panelSections';
 import { buildPreviewSettings } from './previewData';
+import { DeviceToggle, VariantToggle } from './previewControls';
+import { PreviewFullscreenModal } from './PreviewFullscreenModal';
 import {
   MockupDevice,
   PREVIEW_DEVICES,
@@ -12,6 +14,7 @@ import {
   type PreviewDeviceMode,
   type PreviewTheme,
 } from './previewMockup';
+import { useFitScale } from './useFitScale';
 
 interface ThemePreviewProps {
   theme: PreviewTheme;
@@ -42,99 +45,6 @@ interface ThemePreviewProps {
   otherWarnings?: ContrastCheck[];
   dirty: boolean;
   onApplySuggestion: (check: ContrastCheck) => void;
-}
-
-const DEVICE_LABEL: Record<PreviewDeviceMode, string> = {
-  mobile: 'Mobile',
-  desktop: 'Desktop',
-};
-
-/** Auto | Claro | Escuro no topo da prévia (Auto = seguindo o tema do app). */
-function VariantToggle({
-  variant,
-  auto,
-  onChange,
-  onAuto,
-  disabled = false,
-}: {
-  variant: 'light' | 'dark';
-  auto?: boolean;
-  onChange: (variant: 'light' | 'dark') => void;
-  onAuto?: () => void;
-  disabled?: boolean;
-}) {
-  const options = [
-    ...(onAuto ? [{ key: 'auto', label: 'Auto' }] : []),
-    { key: 'light', label: 'Claro' },
-    { key: 'dark', label: 'Escuro' },
-  ] as const;
-  const activeKey: string = auto ? 'auto' : variant;
-  return (
-    <div
-      className="flex rounded-lg border border-border bg-surface-2 p-0.5"
-      role="group"
-      aria-label="Tema da prévia"
-      title={
-        disabled
-          ? 'Variante definida pelo Modo da página'
-          : auto
-            ? 'Seguindo o tema do app'
-            : undefined
-      }
-    >
-      {options.map(option => (
-        <button
-          key={option.key}
-          type="button"
-          aria-pressed={activeKey === option.key}
-          data-testid={`preview-variant-${option.key}`}
-          disabled={disabled}
-          onClick={() =>
-            option.key === 'auto' ? onAuto?.() : onChange(option.key === 'light' ? 'light' : 'dark')
-          }
-          className={`min-h-11 min-w-11 rounded-md px-2.5 py-1 text-[11px] font-bold disabled:cursor-not-allowed disabled:opacity-60 ${
-            activeKey === option.key
-              ? 'bg-accent text-accent-fg'
-              : 'text-text-muted hover:text-text-primary'
-          }`}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-/** Toggle Mobile | Desktop no topo da prévia. */
-function DeviceToggle({
-  mode,
-  onChange,
-}: {
-  mode: PreviewDeviceMode;
-  onChange: (mode: PreviewDeviceMode) => void;
-}) {
-  return (
-    <div
-      className="flex rounded-lg border border-border bg-surface-2 p-0.5"
-      role="group"
-      aria-label="Dispositivo da prévia"
-    >
-      {(['mobile', 'desktop'] as const).map(device => (
-        <button
-          key={device}
-          type="button"
-          aria-pressed={mode === device}
-          data-testid={`preview-device-${device}`}
-          onClick={() => onChange(device)}
-          className={`min-h-11 min-w-11 rounded-md px-2.5 py-1 text-[11px] font-bold ${
-            mode === device ? 'bg-accent text-accent-fg' : 'text-text-muted hover:text-text-primary'
-          }`}
-        >
-          {DEVICE_LABEL[device]}
-        </button>
-      ))}
-    </div>
-  );
 }
 
 /**
@@ -169,6 +79,7 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
 }) => {
   const [mode, setMode] = useState<PreviewDeviceMode>('mobile');
   const [open, setOpen] = useState(true);
+  const [fullscreenOpen, setFullscreenOpen] = useState(false);
   // Modo ativo vem TODO do editor (controlado); sem prop (uso isolado/testes)
   // segue o tema do app — nunca estado guardado que deixe de reagir à troca.
   const themeCtx = useThemeOptional();
@@ -182,67 +93,17 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
     [settings, shopName]
   );
 
-  // Escala antes do paint (useLayoutEffect) → trocar Mobile/Desktop não pisca.
-  // 1) A moldura é dimensionada para caber na área disponível (wrapper flex-1):
-  //    maior retângulo com o aspect-ratio do dispositivo → a coluna externa não
-  //    precisa de scroll (sem scroll duplo) e nada é cortado.
-  // 2) O frame tem o MESMO aspect-ratio do dispositivo, então a escala é sempre
-  //    largura-driven (sem barras pretas nem sobra). ResizeObserver agendado via
-  //    rAF (sem loop de re-render: escrevemos só no estilo da camada) e com
-  //    cancelamento no unmount.
-  useLayoutEffect(() => {
-    const frame = frameRef.current;
-    const layer = layerRef.current;
-    const fitBox = fitRef.current;
-    if (!frame || !layer) return;
-    const logical = PREVIEW_DEVICES[mode];
-    const ratio = logical.w / logical.h;
-    let rafId = 0;
-    const apply = () => {
-      rafId = 0;
-      if (fitBox) {
-        // Em lg o wrapper é flex-1 (altura fixa da coluna) → a moldura vira o
-        // maior retângulo com o aspect-ratio do dispositivo que cabe nela
-        // (sem scroll na coluna externa). Abaixo de lg a altura é automática
-        // (a página rola até a moldura) → o CSS (largura) dirige e o eventual
-        // tamanho inline de um resize lg→menor é limpo.
-        const heightBound = getComputedStyle(fitBox).flexGrow !== '0';
-        const availW = fitBox.clientWidth;
-        const availH = fitBox.clientHeight;
-        if (heightBound && availW >= 10 && availH >= 10) {
-          const width = Math.min(availW, availH * ratio);
-          frame.style.width = `${Math.floor(width)}px`;
-          frame.style.height = `${Math.floor(width) / ratio}px`;
-        } else if (!heightBound && (frame.style.width || frame.style.height)) {
-          frame.style.width = '';
-          frame.style.height = '';
-        }
-      }
-      const { width } = frame.getBoundingClientRect();
-      if (width < 10) {
-        layer.style.transform = 'scale(1)';
-        return;
-      }
-      const scale = width / logical.w;
-      layer.style.width = `${logical.w}px`;
-      layer.style.height = `${logical.h}px`;
-      layer.style.transform = `scale(${scale})`;
-      layer.style.left = '0px';
-      layer.style.top = '0px';
-    };
-    const schedule = () => {
-      if (!rafId) rafId = requestAnimationFrame(apply);
-    };
-    apply();
-    if (typeof ResizeObserver === 'undefined') return;
-    const observer = new ResizeObserver(schedule);
-    observer.observe(frame);
-    if (fitBox) observer.observe(fitBox);
-    return () => {
-      observer.disconnect();
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-  }, [mode, open]);
+  // A mesma lógica de escala serve à prévia inline e ao modal. O hook mede a
+  // área, agenda via rAF e escreve apenas no estilo: trocar o dispositivo ou
+  // redimensionar a janela não causa re-render nem pisca.
+  useFitScale(frameRef, PREVIEW_DEVICES[mode], {
+    layerRef,
+    measureRef: fitRef,
+    strategy: 'responsive',
+    enabled: open,
+  });
+
+  const closeFullscreen = () => setFullscreenOpen(false);
 
   // Abaixo de lg a coluna é auto-altura (a PÁGINA rola até a moldura —
   // nunca scroll duplo) e em lg a altura é fixa: o wrapper da moldura
@@ -263,6 +124,17 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
             disabled={variantLocked}
           />
           <DeviceToggle mode={mode} onChange={setMode} />
+          <button
+            type="button"
+            aria-label="Abrir prévia em tela cheia"
+            aria-haspopup="dialog"
+            aria-expanded={fullscreenOpen}
+            data-testid="preview-fullscreen"
+            onClick={() => setFullscreenOpen(true)}
+            className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-2 text-text-secondary transition-colors hover:bg-surface hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+          >
+            <LuMaximize2 size={16} aria-hidden="true" />
+          </button>
           {modeNotice && (
             <p
               className="flex basis-full items-center gap-1.5 rounded-lg border border-warning/40 bg-warning/10 px-2.5 py-1.5 text-[11px] font-bold text-warning"
@@ -346,6 +218,22 @@ export const ThemePreview: React.FC<ThemePreviewProps> = ({
           contraste. A página usará o fallback legível; o salvamento permanece disponível.
         </p>
       )}
+
+      <PreviewFullscreenModal
+        open={fullscreenOpen}
+        onClose={closeFullscreen}
+        theme={theme}
+        settings={previewSettings}
+        slug={slug}
+        coverBusy={coverBusy}
+        variant={activeVariant}
+        onVariantChange={handleVariantChange}
+        autoActive={autoActive}
+        onAuto={onAuto}
+        variantLocked={variantLocked}
+        mode={mode}
+        onModeChange={setMode}
+      />
     </div>
   );
 };

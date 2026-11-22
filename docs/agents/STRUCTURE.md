@@ -30,6 +30,8 @@ agendai/
     │   └── marketing/         ← MarketingLayout (SeoHead + fundo + Nav + Footer; 12 páginas)
     ├── features/
     │   ├── queue/             ← piloto de feature (barrel index.ts; padrão p/ demais áreas)
+    │   ├── appearance/        ← ThemePreview, PreviewFullscreenModal, previewMockup/previewControls,
+    │   │                        useFitScale (prévia inline e tela cheia com escala compartilhada)
     │   ├── clients/           ← AddCustomerForm, ServiceCard, ClientsTab, ClientsManager, ClientProfileSheet
     │   ├── cases/             ← CasesHub, CaseDetail, DeadlinePanel, caseLabels (gestão de processos do escritório)
     │   │                      + CaseContractsTab, CaseTimeEntriesTab, CaseIntimationsTab, CaseBillingTab,
@@ -92,7 +94,7 @@ agendai/
 
 **`components/ui`:** `Avatar`, `chart`, `ConfirmDialog`, `ConsentCheckbox`, `DynamicIcon`, `EmptyState`, `Field`, `Loader`, `Logo`, `PaginationBar`, `PasswordInput`, `SmartSelect`, `StatusBadge`, `ThemedCalendar`, `Toast`.
 
-**`components/patterns`:** `Card` (+Header/Title/Body), `ModalShell` (shell único dos modais), `Tabs`, `Tooltip`, `StatCard`, `DataTableState`/`SectionError` (trio estados), `skeletons/` (base + variantes + composições de domínio).
+**`components/patterns`:** `Card` (+Header/Title/Body), `ModalShell` (shell único dos modais; variants `dialog`/`sheet`/`fullscreen`), `Tabs`, `Tooltip`, `StatCard`, `DataTableState`/`SectionError` (trio estados), `skeletons/` (base + variantes + composições de domínio).
 
 **`components/infra`:** `ThemeToggle`, `PwaInstallCard`, `PwaUpdatePrompt` além dos listeners/boundaries. **`layouts/app`:** `AppLayout`, `Header`, `StaffNavigation`. **`layouts/admin`:** `AdminLayout`. **`layouts/marketing`:** `MarketingLayout` (forwardRef; props `title/description/path/jsonLd`, `wrapperClassName`, slots `background`/`afterFooter`).
 

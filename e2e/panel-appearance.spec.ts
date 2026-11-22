@@ -119,7 +119,11 @@ async function mockApi(page: Page, theme: typeof baseTheme) {
     const req = route.request();
     const p = new URL(req.url()).pathname;
     const fulfill = (payload: unknown) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(payload) });
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(payload),
+      });
 
     if (p.endsWith('/api/auth/refresh')) {
       return fulfill({ accessToken: 'e2e-token', user: USER });
@@ -162,7 +166,11 @@ async function mockApi(page: Page, theme: typeof baseTheme) {
       return fulfill({ success: true, data: { completedCount: 0, peopleWaiting: 0 } });
     }
     if (p.includes('/products')) {
-      return fulfill({ success: true, data: [], meta: { total: 0, page: 1, limit: 1, totalPages: 0 } });
+      return fulfill({
+        success: true,
+        data: [],
+        meta: { total: 0, page: 1, limit: 1, totalPages: 0 },
+      });
     }
     if (p.includes('/reviews')) {
       return fulfill({
@@ -194,22 +202,25 @@ async function mockApi(page: Page, theme: typeof baseTheme) {
 }
 
 async function openPanel(page: Page, theme: typeof baseTheme) {
-  await page.addInitScript(({ shopId }: { shopId: string }) => {
-    localStorage.setItem('agendai:cookie-consent-v2', 'all');
-    localStorage.setItem('barber_remember_me', 'true');
-    localStorage.setItem(
-      'barber_user',
-      JSON.stringify({
-        id: 'u1',
-        name: 'Dono Teste',
-        email: 'dono@e2e.test',
-        role: 'OWNER',
-        barbershopId: shopId,
-        emailVerified: true,
-        active: true,
-      })
-    );
-  }, { shopId: SHOP_ID });
+  await page.addInitScript(
+    ({ shopId }: { shopId: string }) => {
+      localStorage.setItem('agendai:cookie-consent-v2', 'all');
+      localStorage.setItem('barber_remember_me', 'true');
+      localStorage.setItem(
+        'barber_user',
+        JSON.stringify({
+          id: 'u1',
+          name: 'Dono Teste',
+          email: 'dono@e2e.test',
+          role: 'OWNER',
+          barbershopId: shopId,
+          emailVerified: true,
+          active: true,
+        })
+      );
+    },
+    { shopId: SHOP_ID }
+  );
 
   await mockApi(page, theme);
   await page.goto('/app/link', { waitUntil: 'domcontentloaded' });
@@ -217,8 +228,14 @@ async function openPanel(page: Page, theme: typeof baseTheme) {
   // A coluna nasce abaixo da dobra (PublicLinkPanel acima) — rola até ela;
   // em lg a coluna gruda em top-24 e a moldura inteira fica visível.
   // (timeout curto: no código "antes" esses testids ainda não existem)
-  await page.getByTestId('preview-column').scrollIntoViewIfNeeded({ timeout: 1_500 }).catch(() => undefined);
-  await page.getByTestId('preview-frame').scrollIntoViewIfNeeded({ timeout: 1_500 }).catch(() => undefined);
+  await page
+    .getByTestId('preview-column')
+    .scrollIntoViewIfNeeded({ timeout: 1_500 })
+    .catch(() => undefined);
+  await page
+    .getByTestId('preview-frame')
+    .scrollIntoViewIfNeeded({ timeout: 1_500 })
+    .catch(() => undefined);
   await page.evaluate(() => document.fonts.ready.then(() => true));
   await page.waitForTimeout(600);
 }
@@ -240,20 +257,26 @@ async function assertPreviewBasics(
   await expect(content).toBeVisible();
   expect(await page.locator('[data-testid="theme-preview"] [inert]').count()).toBeGreaterThan(0);
 
-  const accent = await content.evaluate(el => getComputedStyle(el).getPropertyValue('--ag-accent').trim());
+  const accent = await content.evaluate(el =>
+    getComputedStyle(el).getPropertyValue('--ag-accent').trim()
+  );
   expect(accent.toUpperCase()).toBe('#2CB58A');
   // regra 5: a moldura fica fora do escopo — herda só o token global do app,
   // nunca as variáveis do rascunho aplicadas dentro do mockup.
-  const frameAccent = await frame.evaluate(el => getComputedStyle(el).getPropertyValue('--ag-accent').trim());
-  const rootAccent = await page.evaluate(
-    () => getComputedStyle(document.documentElement).getPropertyValue('--ag-accent').trim()
+  const frameAccent = await frame.evaluate(el =>
+    getComputedStyle(el).getPropertyValue('--ag-accent').trim()
+  );
+  const rootAccent = await page.evaluate(() =>
+    getComputedStyle(document.documentElement).getPropertyValue('--ag-accent').trim()
   );
   expect(frameAccent.toLowerCase()).toBe(rootAccent.toLowerCase());
-  expect(await frame.getAttribute('style') ?? '').not.toContain('--ag-');
+  expect((await frame.getAttribute('style')) ?? '').not.toContain('--ag-');
 
   // regra 6: coluna sticky em telas grandes
   if (width >= 1024) {
-    const position = await page.getByTestId('preview-column').evaluate(el => getComputedStyle(el).position);
+    const position = await page
+      .getByTestId('preview-column')
+      .evaluate(el => getComputedStyle(el).position);
     expect(position).toBe('sticky');
     const column = await page.getByTestId('preview-column').boundingBox();
     expect(column).not.toBeNull();
@@ -287,7 +310,101 @@ async function assertPreviewBasics(
   });
 }
 
-test.beforeEach(async ({}, testInfo) => {
+/** Valida a geometria real do fullscreen (o jsdom não calcula layout). */
+async function assertFullscreenGeometry(page: Page, width: number, height: number) {
+  const dialog = page.getByRole('dialog', { name: 'Prévia da página' });
+  await expect(dialog).toBeVisible();
+
+  await expect
+    .poll(async () => {
+      const box = await dialog.boundingBox();
+      if (!box) return Number.POSITIVE_INFINITY;
+      return Math.max(
+        Math.abs(box.x),
+        Math.abs(box.y),
+        Math.abs(box.width - width),
+        Math.abs(box.height - height)
+      );
+    })
+    .toBeLessThan(1);
+
+  await expect
+    .poll(async () =>
+      dialog.evaluate(element => {
+        const fit = element.querySelector<HTMLElement>('[data-testid="preview-modal-fit"]');
+        const frame = element.querySelector<HTMLElement>('[data-testid="preview-modal-frame"]');
+        if (!fit || !frame) return Number.POSITIVE_INFINITY;
+        const fitRect = fit.getBoundingClientRect();
+        const frameRect = frame.getBoundingClientRect();
+        return Math.max(
+          fitRect.left - frameRect.left,
+          fitRect.top - frameRect.top,
+          frameRect.right - fitRect.right,
+          frameRect.bottom - fitRect.bottom
+        );
+      })
+    )
+    .toBeLessThanOrEqual(1);
+
+  const metrics = await dialog.evaluate(element => {
+    const getRect = (selector: string) => {
+      const target = element.querySelector<HTMLElement>(selector);
+      if (!target) return null;
+      const rect = target.getBoundingClientRect();
+      return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom };
+    };
+    const scroll = element.querySelector<HTMLElement>('[data-ag-preview-scroll]');
+    const verticalScrollables = Array.from(element.querySelectorAll<HTMLElement>('*'))
+      .filter(child => {
+        const overflowY = getComputedStyle(child).overflowY;
+        return (
+          (overflowY === 'auto' || overflowY === 'scroll') &&
+          child.scrollHeight > child.clientHeight + 1
+        );
+      })
+      .map(child =>
+        child.hasAttribute('data-ag-preview-scroll')
+          ? 'preview-scroll'
+          : (child.getAttribute('data-testid') ?? child.tagName)
+      );
+
+    const dialogRect = element.getBoundingClientRect();
+    return {
+      dialog: {
+        left: dialogRect.left,
+        top: dialogRect.top,
+        right: dialogRect.right,
+        bottom: dialogRect.bottom,
+      },
+      fit: getRect('[data-testid="preview-modal-fit"]'),
+      frame: getRect('[data-testid="preview-modal-frame"]'),
+      layer: getRect('[data-testid="preview-modal-layer"]'),
+      verticalScrollables,
+      scrollMax: scroll ? scroll.scrollHeight - scroll.clientHeight : 0,
+      bodyOverflow: getComputedStyle(document.body).overflow,
+    };
+  });
+
+  expect(metrics.dialog).not.toBeNull();
+  expect(metrics.fit).not.toBeNull();
+  expect(metrics.frame).not.toBeNull();
+  expect(metrics.layer).not.toBeNull();
+  if (metrics.dialog && metrics.fit && metrics.frame && metrics.layer) {
+    expect(metrics.frame.left).toBeGreaterThanOrEqual(metrics.fit.left - 1);
+    expect(metrics.frame.top).toBeGreaterThanOrEqual(metrics.fit.top - 1);
+    expect(metrics.frame.right).toBeLessThanOrEqual(metrics.fit.right + 1);
+    expect(metrics.frame.bottom).toBeLessThanOrEqual(metrics.fit.bottom + 1);
+    expect(metrics.layer.left).toBeGreaterThanOrEqual(metrics.frame.left - 1);
+    expect(metrics.layer.top).toBeGreaterThanOrEqual(metrics.frame.top - 1);
+    expect(metrics.layer.right).toBeLessThanOrEqual(metrics.frame.right + 1);
+    expect(metrics.layer.bottom).toBeLessThanOrEqual(metrics.frame.bottom + 1);
+  }
+  expect(metrics.verticalScrollables).toEqual(['preview-scroll']);
+  expect(metrics.scrollMax).toBeGreaterThan(0);
+  expect(metrics.bodyOverflow).toBe('hidden');
+}
+
+test.beforeEach(async ({ page: _page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop-chromium', 'prévia validada em desktop-chromium');
 });
 
@@ -397,4 +514,57 @@ test('06 seção "Visitas ao seu salão" na aba Link Público', async ({ page })
     'aria-pressed',
     'true'
   );
+});
+
+test('07 prévia em tela cheia respeita a viewport e mantém foco e rolagem internos', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await openPanel(page, baseTheme);
+
+  const trigger = page.getByTestId('preview-fullscreen');
+  // Centraliza o gatilho para que as barras sticky do painel mobile não
+  // interceptem o clique real.
+  // Ativa pelo teclado: evita as barras sticky do painel mobile interceptarem
+  // o ponteiro e valida o caminho acessível do gatilho.
+  await trigger.focus();
+  await page.keyboard.press('Enter');
+
+  const dialog = page.getByRole('dialog', { name: 'Prévia da página' });
+  await expect(dialog).toBeVisible();
+  await expect(page.getByTestId('preview-modal-variant-auto')).toBeAttached();
+  await expect(page.getByTestId('preview-modal-variant-light')).toBeAttached();
+  await expect(page.getByTestId('preview-modal-variant-dark')).toBeAttached();
+  await expect(page.getByTestId('preview-modal-device-mobile')).toBeAttached();
+  await expect(page.getByTestId('preview-modal-device-desktop')).toBeAttached();
+  await expect(dialog.getByRole('button', { name: 'Fechar' })).toBeFocused();
+  await assertFullscreenGeometry(page, 320, 568);
+
+  // O foco não escapa do lock e a única rolagem vertical é o mockup interno.
+  await page.keyboard.press('Tab');
+  expect(await dialog.evaluate(element => element.contains(document.activeElement))).toBe(true);
+  const internalScroll = page
+    .getByTestId('preview-modal-content')
+    .locator('[data-ag-preview-scroll]');
+  await internalScroll.evaluate(element => {
+    element.scrollTop = 80;
+  });
+  expect(await internalScroll.evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+
+  await page.setViewportSize({ width: 844, height: 390 });
+  await assertFullscreenGeometry(page, 844, 390);
+
+  await page.getByTestId('preview-modal-device-desktop').click();
+  await expect(page.getByTestId('preview-device-desktop')).toHaveAttribute('aria-pressed', 'true');
+  await assertFullscreenGeometry(page, 844, 390);
+
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await assertFullscreenGeometry(page, 1920, 1080);
+
+  await page.keyboard.press('Escape');
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe('hidden');
+  expect(await dialog.count()).toBe(1);
+  await expect(dialog).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe('');
 });

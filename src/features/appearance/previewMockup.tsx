@@ -115,6 +115,7 @@ function PreviewCover({
   focalY = 50,
   originalWidth,
   originalHeight,
+  coverTestId = 'preview-cover',
 }: {
   url?: string | null;
   overlay: number;
@@ -124,6 +125,7 @@ function PreviewCover({
   focalY?: number;
   originalWidth?: number | null;
   originalHeight?: number | null;
+  coverTestId?: string;
 }) {
   // Rastreia por URL: trocar a capa reseta skeleton/fallback sem efeito extra.
   const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
@@ -136,7 +138,7 @@ function PreviewCover({
 
   return (
     <div
-      data-testid="preview-cover"
+      data-testid={coverTestId}
       className="relative overflow-hidden"
       style={
         hasImg
@@ -231,6 +233,8 @@ export function PreviewScreen({
   theme,
   settings,
   coverBusy,
+  testIdPrefix = 'theme-preview',
+  coverTestId = 'preview-cover',
 }: {
   mode: PreviewDeviceMode;
   /** Variante de cor da prévia (Claro | Escuro) — mesma semântica da página real. */
@@ -238,6 +242,10 @@ export function PreviewScreen({
   theme: PreviewTheme;
   settings: ShopSettings;
   coverBusy?: boolean;
+  /** Prefixo do testid para o modal não duplicar o preview inline. */
+  testIdPrefix?: string;
+  /** Testid da capa; preserva `preview-cover` na prévia inline. */
+  coverTestId?: string;
 }) {
   const setInert = (el: HTMLDivElement | null) => {
     if (el) el.setAttribute('inert', '');
@@ -245,7 +253,7 @@ export function PreviewScreen({
   const coverAspect = mode === 'desktop' ? COVER_ASPECT.desktop : COVER_ASPECT.mobile;
   return (
     <div
-      data-testid="theme-preview"
+      data-testid={testIdPrefix}
       data-ag-shop-theme
       data-ag-preview-content
       data-radius={theme.radiusStyle}
@@ -281,6 +289,7 @@ export function PreviewScreen({
             focalY={theme.coverFocalY}
             originalWidth={theme.coverWidth}
             originalHeight={theme.coverHeight}
+            coverTestId={coverTestId}
           />
           <div className="mx-auto max-w-md px-4 pt-2 pb-16 @min-[640px]:max-w-xl @min-[768px]:max-w-3xl @min-[1024px]:max-w-4xl">
             <StaticPublicTabBar operationMode={settings.operationMode} />
@@ -314,16 +323,19 @@ export function MockupDevice({
   mode,
   screen,
   slug = 'seu-salao',
+  testIdPrefix = 'device',
 }: {
   mode: PreviewDeviceMode;
   screen: React.ReactNode;
   /** Id real da barbearia → mesma URL da página pública na barra do navegador. */
   slug?: string;
+  /** Prefixo do testid para o modal não duplicar o mockup inline. */
+  testIdPrefix?: string;
 }) {
   if (mode === 'desktop') {
     return (
       <div
-        data-testid="device-desktop"
+        data-testid={`${testIdPrefix}-desktop`}
         className="flex h-full w-full flex-col overflow-hidden rounded-xl bg-surface-2 shadow-lg ring-1 ring-border"
       >
         <div className="flex h-8 shrink-0 items-center gap-2 border-b border-border px-4">
@@ -343,7 +355,7 @@ export function MockupDevice({
   }
   return (
     <div
-      data-testid="device-mobile"
+      data-testid={`${testIdPrefix}-mobile`}
       className="flex h-full w-full flex-col rounded-[38px] border border-border bg-surface-2 p-[5px] shadow-lg ring-1 ring-border"
     >
       <div className="relative min-h-0 flex-1 overflow-hidden rounded-[32px] bg-bg">{screen}</div>

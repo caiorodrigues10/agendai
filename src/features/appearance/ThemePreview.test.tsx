@@ -1,6 +1,6 @@
 /// <reference types="vitest/globals" />
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { ThemePreview } from './ThemePreview';
 import { PREVIEW_DEVICES } from './previewMockup';
 import type { ContrastCheck } from '../../shared/pageThemeContrast';
@@ -21,8 +21,8 @@ const theme = {
 
 const failing: ContrastCheck[] = [];
 
-function renderPreview(props: Partial<React.ComponentProps<typeof ThemePreview>> = {}) {
-  return render(
+function previewElement(props: Partial<React.ComponentProps<typeof ThemePreview>> = {}) {
+  return (
     <ThemePreview
       theme={theme}
       shopName="Barba Nova"
@@ -34,6 +34,10 @@ function renderPreview(props: Partial<React.ComponentProps<typeof ThemePreview>>
       {...props}
     />
   );
+}
+
+function renderPreview(props: Partial<React.ComponentProps<typeof ThemePreview>> = {}) {
+  return render(previewElement(props));
 }
 
 describe('ThemePreview', () => {
@@ -138,12 +142,14 @@ describe('ThemePreview', () => {
       'preview-variant-dark',
       'preview-device-mobile',
       'preview-device-desktop',
+      'preview-fullscreen',
       'preview-collapse',
     ]) {
       expect(screen.getByTestId(testId)).toHaveClass('min-h-11');
     }
     expect(screen.getByTestId('preview-device-mobile')).toHaveClass('min-w-11');
     expect(screen.getByTestId('preview-device-desktop')).toHaveClass('min-w-11');
+    expect(screen.getByTestId('preview-fullscreen')).toHaveClass('min-w-11');
   });
 
   it('botão de colapso existe abaixo de lg com aria-expanded', () => {
@@ -176,5 +182,130 @@ describe('ThemePreview', () => {
     expect(frame.compareDocumentPosition(status) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(status.textContent).toContain('WCAG AA');
     expect(screen.getByTestId('dirty-warning')).toHaveTextContent('Alterações não salvas');
+  });
+});
+
+describe('ThemePreview em tela cheia', () => {
+  it('abre em tela cheia e fecha com Esc e X', async () => {
+    renderPreview();
+    const trigger = screen.getByTestId('preview-fullscreen');
+
+    fireEvent.click(trigger);
+    let dialog = await screen.findByRole('dialog', { name: 'Prévia da página' });
+    const close = within(dialog).getByRole('button', { name: 'Fechar' });
+    await waitFor(() => expect(close).toHaveFocus());
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+
+    fireEvent.click(trigger);
+    dialog = await screen.findByRole('dialog', { name: 'Prévia da página' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Fechar' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+
+  it('abre no modo atual e compartilha a troca Mobile/Desktop com a prévia inline', async () => {
+    renderPreview();
+    fireEvent.click(screen.getByTestId('preview-device-desktop'));
+
+    fireEvent.click(screen.getByTestId('preview-fullscreen'));
+    const dialog = await screen.findByRole('dialog', { name: 'Prévia da página' });
+    expect(within(dialog).getByTestId('preview-modal-mockup-desktop')).toBeInTheDocument();
+    expect(screen.getByTestId('device-desktop')).toBeInTheDocument();
+
+    fireEvent.click(within(dialog).getByTestId('preview-modal-device-mobile'));
+    await waitFor(() =>
+      expect(screen.getByTestId('preview-modal-device-mobile')).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      )
+    );
+    expect(screen.getByTestId('device-mobile')).toBeInTheDocument();
+  });
+
+  it('propaga a troca de variante feita no modal', async () => {
+    const onVariantChange = vi.fn();
+    renderPreview({ onVariantChange });
+    fireEvent.click(screen.getByTestId('preview-fullscreen'));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Prévia da página' });
+    fireEvent.click(within(dialog).getByTestId('preview-modal-variant-light'));
+    expect(onVariantChange).toHaveBeenCalledWith('light');
+  });
+
+  it('mantém o estado Auto compartilhado entre a prévia inline e o modal', async () => {
+    function StatefulPreview() {
+      const [variant, setVariant] = React.useState<'light' | 'dark'>('dark');
+      const [autoActive, setAutoActive] = React.useState(true);
+      return (
+        <ThemePreview
+          theme={theme}
+          shopName="Barba Nova"
+          failing={failing}
+          dirty={false}
+          variant={variant}
+          autoActive={autoActive}
+          onVariantChange={next => {
+            setVariant(next);
+            setAutoActive(false);
+          }}
+          onAuto={() => setAutoActive(true)}
+          onApplySuggestion={() => undefined}
+        />
+      );
+    }
+
+    render(<StatefulPreview />);
+    fireEvent.click(screen.getByTestId('preview-variant-light'));
+    expect(screen.getByTestId('preview-variant-light')).toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.click(screen.getByTestId('preview-fullscreen'));
+    const dialog = await screen.findByRole('dialog', { name: 'Prévia da página' });
+    expect(within(dialog).getByTestId('preview-modal-variant-light')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+
+    fireEvent.click(within(dialog).getByTestId('preview-modal-variant-auto'));
+    expect(screen.getByTestId('preview-variant-auto')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByTestId('preview-modal-variant-auto')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+  });
+
+  it('mantém o toggle de variante bloqueado no modal quando a variante é forçada', async () => {
+    renderPreview({ variantLocked: true });
+    fireEvent.click(screen.getByTestId('preview-fullscreen'));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Prévia da página' });
+    expect(within(dialog).getByTestId('preview-modal-variant-auto')).toBeDisabled();
+    expect(within(dialog).getByTestId('preview-modal-variant-light')).toBeDisabled();
+    expect(within(dialog).getByTestId('preview-modal-variant-dark')).toBeDisabled();
+  });
+
+  it('mantém Auto desabilitado quando não há callback para voltar ao tema do app', async () => {
+    renderPreview({ onAuto: undefined, autoActive: undefined });
+    expect(screen.queryByTestId('preview-variant-auto')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('preview-fullscreen'));
+    const dialog = await screen.findByRole('dialog', { name: 'Prévia da página' });
+    expect(within(dialog).getByTestId('preview-modal-variant-auto')).toBeDisabled();
+  });
+
+  it('usa o mesmo theme e settings da prévia inline', async () => {
+    const { rerender } = renderPreview();
+    fireEvent.click(screen.getByTestId('preview-fullscreen'));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Prévia da página' });
+    expect(within(dialog).getByText('Barba Nova')).toBeInTheDocument();
+    expect(screen.getByTestId('preview-modal-content').style.getPropertyValue('--ag-accent')).toBe(
+      '#2CB58A'
+    );
+
+    rerender(previewElement({ theme: { ...theme, accentColor: '#123456' } }));
+    expect(screen.getByTestId('preview-modal-content').style.getPropertyValue('--ag-accent')).toBe(
+      '#123456'
+    );
   });
 });
