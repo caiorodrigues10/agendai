@@ -13,7 +13,9 @@ vi.mock('../../infra/postsApi', async importOriginal => {
     postsApi: {
       ...actual.postsApi,
       templates: vi.fn(),
+      listDesigns: vi.fn(),
       preview: vi.fn(),
+      previewDesign: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
       publish: vi.fn(),
@@ -69,7 +71,20 @@ beforeEach(() => {
   localStorage.clear();
   vi.clearAllMocks();
   mockedPostsApi.templates.mockResolvedValue(TEMPLATES as any);
+  mockedPostsApi.listDesigns.mockResolvedValue({
+    segment: 'BARBERSHOP',
+    designs: [],
+    etag: '',
+    advertisingRestricted: false,
+    icons: [],
+  });
   mockedPostsApi.preview.mockResolvedValue('https://cdn.example.com/preview.png');
+  mockedPostsApi.previewDesign.mockResolvedValue({
+    imageUrl: 'data:image/jpeg;base64,preview',
+    warnings: [],
+    suggestions: {},
+    width: 540,
+  });
 });
 
 describe('PostEditor — catálogo de modelos', () => {

@@ -1,4 +1,4 @@
-import { apiClient, apiFetch } from './apiClient';
+import { API_BASE, ApiError, apiClient, apiFetch } from './apiClient';
 import { authStorage } from './authStorage';
 import { COVER_IMAGE_SPEC } from '../shared/imageSpecs';
 import type { FeedPost, PostMode, PriceSplitPayload } from '../types';
@@ -18,6 +18,187 @@ export type PostStatus = 'draft' | 'published';
 export type PostFormat = 'square' | 'portrait' | 'story';
 export type PostPhotoMode = 'none' | 'optional' | 'required';
 
+export type DesignFontPair =
+  | 'montserrat-inter'
+  | 'playfair-poppins'
+  | 'bebas-oswald'
+  | 'dmserif-poppins'
+  | 'anton-barlow'
+  | 'playfair-barlow';
+
+export type DesignCommercialBlock =
+  | 'promo'
+  | 'price'
+  | 'services'
+  | 'validity'
+  | 'loyalty'
+  | 'before-after';
+
+const DESIGN_COMMERCIAL_BLOCKS = new Set<DesignCommercialBlock>([
+  'promo',
+  'price',
+  'services',
+  'validity',
+  'loyalty',
+  'before-after',
+]);
+
+export interface DesignEditable {
+  maxChars?: number;
+  minScale?: number;
+  maxScale?: number;
+  canHide?: boolean;
+  canMove?: boolean;
+}
+
+export interface DesignVariant {
+  paletteId: string;
+  fontPair: DesignFontPair;
+  motif: 'none' | 'lines' | 'dots' | 'diagonal' | 'frame' | 'texture';
+  photoTreatment: 'full' | 'cutout' | 'circle' | 'duotone' | 'none';
+  density: 'airy' | 'full';
+}
+
+export interface PostDesign {
+  key: string;
+  version: number;
+  layoutId: string;
+  variant: DesignVariant;
+  slots: Record<string, string>;
+  editable: Record<string, DesignEditable>;
+  vocabulary: Record<string, string>;
+  heroIcon: string;
+  thumbnailUrl: string | null;
+  /** Blocos comerciais suportados pela família, conforme o catálogo do servidor. */
+  commercialBlocks: DesignCommercialBlock[];
+}
+
+/** `data` do catálogo de designs devolvido pelo servidor. */
+export interface DesignCatalogData {
+  segment: string;
+  designs: PostDesign[];
+  etag: string;
+  /** Flag do servidor; o front não infere restrição por segmento. */
+  advertisingRestricted: boolean;
+  /** Biblioteca exata de ícones da pele do segmento. */
+  icons: string[];
+}
+
+export interface DesignCatalog extends DesignCatalogData {
+  /** `true` quando a requisição condicional respondeu 304. */
+  notModified?: boolean;
+}
+
+export interface DesignService {
+  name: string;
+  price?: number | null;
+  icon?: string;
+}
+
+export type DesignPromoKind = 'percent' | 'money' | 'from-to' | 'free' | 'custom';
+
+export interface DesignPromo {
+  kind: DesignPromoKind;
+  percent?: number;
+  amount?: number;
+  from?: number;
+  to?: number;
+  /** Texto literal do dono; o render nunca acrescenta rótulos comerciais. */
+  promoLabel?: string;
+  /** Complemento literal do dono. */
+  promoUnit?: string;
+}
+
+export interface DesignContent {
+  businessName?: string;
+  headline?: string;
+  highlight?: string;
+  tagline?: string;
+  cta?: string;
+  whatsapp?: string | null;
+  instagram?: string | null;
+  address?: string | null;
+  photoUrl?: string | null;
+  logoUrl?: string | null;
+  focal?: { x: number; y: number };
+  services?: DesignService[];
+  promo?: DesignPromo;
+  validUntil?: string;
+}
+
+export interface DesignBackgroundColor {
+  kind: 'color';
+  color: string;
+}
+
+export interface DesignBackgroundGradient {
+  kind: 'gradient';
+  stops: { color: string; at: number }[];
+  angle?: number;
+}
+
+export interface DesignBackgroundPhoto {
+  kind: 'photo';
+  url: string;
+  focal?: { x: number; y: number };
+  overlay?: number;
+}
+
+export type DesignBackground =
+  | DesignBackgroundColor
+  | DesignBackgroundGradient
+  | DesignBackgroundPhoto;
+
+export interface DesignOverrides {
+  colors?: {
+    bg?: string;
+    panel?: string;
+    accent?: string;
+    text?: string;
+  };
+  fontPair?: DesignFontPair;
+  textScale?: number;
+  align?: 'left' | 'center' | 'right';
+  visible?: Record<string, boolean>;
+  background?: DesignBackground;
+  logo?: {
+    src?: string | null;
+    shape?: 'round' | 'square' | 'none';
+  };
+  contacts?: {
+    whatsapp?: string | null;
+    instagram?: string | null;
+    address?: string | null;
+  };
+  qr?: {
+    data: string;
+    enabled?: boolean;
+  };
+  nudge?: Record<string, { dx: number; dy: number; scale: number }>;
+}
+
+export interface DesignPreviewWarning {
+  code?: string;
+  message?: string;
+  [key: string]: unknown;
+}
+
+export interface DesignPreviewResult {
+  imageUrl: string;
+  warnings: DesignPreviewWarning[];
+  suggestions: Record<string, string>;
+  width: number;
+}
+
+export interface PreviewDesignPayload {
+  barbershopId: string;
+  designKey: string;
+  designVersion?: number;
+  format?: PostFormat;
+  overrides?: DesignOverrides;
+  data?: DesignContent;
+}
+
 export interface PostDesignOptions {
   focalX?: number;
   focalY?: number;
@@ -36,6 +217,10 @@ export interface CreatePostPayload {
   designOptions?: PostDesignOptions;
   /** Lista de preços do modelo price-split (também persistida em designOptions). */
   priceSplit?: PriceSplitPayload;
+  designKey?: string;
+  designVersion?: number;
+  designOverrides?: DesignOverrides;
+  designContent?: DesignContent;
   primaryMediaId?: string | null;
   secondaryMediaId?: string | null;
   postMode?: PostMode;
@@ -54,6 +239,10 @@ export type UpdatePostPayload = Partial<{
   secondaryMediaId: string | null;
   designOptions: PostDesignOptions;
   priceSplit: PriceSplitPayload;
+  designKey: string;
+  designVersion: number;
+  designOverrides: DesignOverrides;
+  designContent: DesignContent;
 }>;
 
 export interface PostListResponse {
@@ -107,6 +296,126 @@ export interface PostMedia {
 /** Tamanho máximo por imagem, derivado da spec compartilhada (não duplica o número). */
 const UPLOAD_MAX_MB = Math.round(COVER_IMAGE_SPEC.maxBytes / (1024 * 1024));
 
+/** Cache somente em memória para revalidar o catálogo com If-None-Match. */
+const designCatalogCache = new Map<string, DesignCatalog>();
+
+/** Resolve a URL relativa da miniatura contra a API configurada no front. */
+export function resolveDesignThumbnailUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+  const base = API_BASE.replace(/\/$/, '');
+  return `${base}${url.startsWith('/') ? url : `/${url}`}`;
+}
+
+async function designResponseError(response: Response): Promise<ApiError> {
+  const raw = await response.text().catch(() => '');
+  let message = raw || `HTTP ${response.status}`;
+  let code: string | undefined;
+  let data: unknown = raw;
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    if (typeof parsed.message === 'string') message = parsed.message;
+    if (typeof parsed.code === 'string') code = parsed.code;
+    data = parsed;
+  } catch {
+    /* resposta não-JSON */
+  }
+  return new ApiError(message, response.status, code, data);
+}
+
+function invalidDesignCatalog(): never {
+  throw new ApiError(
+    'O servidor devolveu um catálogo de designs com capacidades comerciais inválidas.',
+    502,
+    'INVALID_DESIGN_CATALOG',
+  );
+}
+
+/**
+ * Valida as capacidades que o backend filtrou. O front não infere restrições
+ * por segmento nem completa uma lista ausente: um contrato incompleto falha
+ * fechado em vez de liberar controles comerciais indevidamente.
+ */
+function assertDesignCatalogCapabilities(data: {
+  designs?: unknown;
+  advertisingRestricted?: unknown;
+}): void {
+  if (
+    typeof data.advertisingRestricted !== 'boolean' ||
+    !Array.isArray(data.designs)
+  ) {
+    invalidDesignCatalog();
+  }
+
+  for (const design of data.designs) {
+    if (!design || typeof design !== 'object') invalidDesignCatalog();
+    const blocks = (design as { commercialBlocks?: unknown }).commercialBlocks;
+    if (!Array.isArray(blocks)) invalidDesignCatalog();
+    if (blocks.some(block => !DESIGN_COMMERCIAL_BLOCKS.has(block as DesignCommercialBlock))) {
+      invalidDesignCatalog();
+    }
+  }
+}
+
+/** GET condicional do catálogo; 304 reaproveita o payload cacheado. */
+async function requestDesignCatalog(
+  barbershopId: string,
+  opts: { etag?: string; signal?: AbortSignal } = {},
+  retriedWithoutEtag = false,
+): Promise<DesignCatalog> {
+  const params = new URLSearchParams({ barbershopId });
+  const cached = designCatalogCache.get(barbershopId);
+  const etag = opts.etag ?? cached?.etag;
+  const response = await apiFetch(
+    `/api/posts/designs?${params.toString()}`,
+    {
+      method: 'GET',
+      headers: etag ? { 'If-None-Match': etag } : undefined,
+      signal: opts.signal,
+    },
+    token(),
+  );
+
+  if (response.status === 304) {
+    if (cached) return { ...cached, notModified: true };
+    // Um 304 sem cache local não pode virar um catálogo vazio: refaz uma
+    // requisição sem If-None-Match para recuperar o payload completo.
+    if (!retriedWithoutEtag) {
+      return requestDesignCatalog(barbershopId, { signal: opts.signal }, true);
+    }
+    throw new ApiError('O servidor respondeu 304 sem um catálogo disponível.', 304);
+  }
+  if (!response.ok) throw await designResponseError(response);
+
+  const body = (await response.json()) as {
+    success?: boolean;
+    data?: {
+      segment?: string;
+      designs?: PostDesign[];
+      etag?: string;
+      advertisingRestricted?: boolean;
+      icons?: string[];
+    };
+  };
+  const data = body.data ?? {};
+  assertDesignCatalogCapabilities(data);
+  const result: DesignCatalog = {
+    segment: data.segment ?? '',
+    designs: (data.designs as PostDesign[]).map(design => ({
+      ...design,
+      slots: design.slots ?? {},
+      editable: design.editable ?? {},
+      vocabulary: design.vocabulary ?? {},
+      thumbnailUrl: resolveDesignThumbnailUrl(design.thumbnailUrl),
+    })),
+    etag: data.etag ?? response.headers.get('etag') ?? '',
+    advertisingRestricted: data.advertisingRestricted as boolean,
+    icons: data.icons ?? [],
+  };
+  designCatalogCache.set(barbershopId, result);
+  return result;
+}
+
 /**
  * Converte a resposta de erro do upload em Error com mensagem amigável:
  * extrai `message`/`error` do corpo JSON quando existe; trata 413/415/429 e
@@ -142,9 +451,13 @@ export const postsApi = {
     if (opts.status) params.set('status', opts.status);
     if (opts.page) params.set('page', String(opts.page));
     if (opts.limit) params.set('limit', String(opts.limit));
-    return apiClient<{ success: boolean; data: FeedPost[]; meta: { total: number; page: number; limit: number } }>(
+    return apiClient<{
+      success: boolean;
+      data: FeedPost[];
+      meta?: { total: number; page: number; limit: number };
+    }>(
       `/api/posts?${params.toString()}`, 'GET', undefined, token()
-    ).then(r => ({ data: unwrap<FeedPost[]>(r), meta: (r as any).meta ?? { total: 0, page: 1, limit: 12 } }));
+    ).then(r => ({ data: unwrap<FeedPost[]>(r), meta: r.meta ?? { total: 0, page: 1, limit: 12 } }));
   },
 
   templates() {
@@ -159,6 +472,32 @@ export const postsApi = {
     ).then(r => unwrap<PostPaletteDef[]>(r));
   },
 
+  /**
+   * Catálogo de designs do segmento, resolvido no servidor. A segunda
+   * chamada usa If-None-Match e reaproveita o payload em memória no 304.
+   */
+  listDesigns(barbershopId: string, opts: { etag?: string; signal?: AbortSignal } = {}) {
+    return requestDesignCatalog(barbershopId, opts);
+  },
+
+  /** Limpa o cache condicional do catálogo (usado ao trocar de salão/teste). */
+  clearDesignCache(barbershopId?: string) {
+    if (barbershopId) designCatalogCache.delete(barbershopId);
+    else designCatalogCache.clear();
+  },
+
+  /** URL absoluta/relativa pronta para <img src> da miniatura estática. */
+  designThumbnailUrl(url: string | null | undefined) {
+    return resolveDesignThumbnailUrl(url);
+  },
+
+  /** Prévia renderizada do design; o signal cancela requests obsoletos. */
+  previewDesign(payload: PreviewDesignPayload, signal?: AbortSignal) {
+    return apiClient<{ success: boolean; data: DesignPreviewResult }>(
+      '/api/posts/designs/preview', 'POST', payload, token(), { signal }
+    ).then(r => unwrap<DesignPreviewResult>(r));
+  },
+
   /** Preview com debounce/cache do lado do componente. */
   preview(barbershopId: string, opts: {
     postMode?: PostMode;
@@ -171,6 +510,7 @@ export const postsApi = {
     primaryMediaId?: string | null;
     secondaryMediaId?: string | null;
     priceSplit?: PriceSplitPayload;
+    signal?: AbortSignal;
   }) {
     const params = new URLSearchParams({ barbershopId });
     if (opts.postMode) params.set('postMode', opts.postMode);
@@ -185,7 +525,7 @@ export const postsApi = {
     // Objeto viaja como JSON na query (o backend faz preprocess no schema).
     if (opts.priceSplit) params.set('priceSplit', JSON.stringify(opts.priceSplit));
     return apiClient<{ success: boolean; data: { imageUrl: string } }>(
-      `/api/posts/preview?${params.toString()}`, 'GET', undefined, token()
+      `/api/posts/preview?${params.toString()}`, 'GET', undefined, token(), { signal: opts.signal }
     ).then(r => unwrap<{ imageUrl: string }>(r).imageUrl);
   },
 

@@ -7,7 +7,7 @@ import { useAuth } from './AuthContext';
 import { logger } from '../utils/logger';
 import type { ShopStatusPayload } from '../infra/barbershopApi';
 
-interface BarbershopContextValue {
+export interface BarbershopContextValue {
   loading: boolean;
   services: Service[];
   updateServiceCategory: (id: string, name: string | null) => void;

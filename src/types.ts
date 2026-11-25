@@ -188,6 +188,10 @@ export interface FeedPost {
   primaryMediaId?: string | null;
   secondaryMediaId?: string | null;
   paletteKey?: string;
+  designKey?: string;
+  designVersion?: number;
+  designOverrides?: import('./infra/postsApi').DesignOverrides;
+  designContent?: import('./infra/postsApi').DesignContent;
   designOptions?: {
     focalX?: number;
     focalY?: number;
