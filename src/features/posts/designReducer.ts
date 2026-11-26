@@ -357,9 +357,13 @@ type DesignGradientBackground = Extract<DesignBackground, { kind: 'gradient' }>;
 type DesignPhotoBackground = Extract<DesignBackground, { kind: 'photo' }>;
 
 function compactGradientBackground(background: DesignGradientBackground): DesignBackground | undefined {
-  const stops = background.stops
-    .filter(stop => HEX_COLOR.test(stop.color) && stop.at >= 0 && stop.at <= 1)
-    .slice(0, 3);
+  const stops = Array.isArray(background.stops)
+    ? background.stops
+      .filter(stop => HEX_COLOR.test(stop.color) && stop.at >= 0 && stop.at <= 1)
+      .slice(0, 3)
+      // Reconstrói cada stop para não carregar chaves de dados hidratados.
+      .map(stop => ({ color: stop.color, at: stop.at }))
+    : [];
   if (stops.length < 2) return undefined;
   const angle = typeof background.angle === 'number' && background.angle >= 0 && background.angle <= 360
     ? background.angle
@@ -373,7 +377,7 @@ function compactPhotoBackground(background: DesignPhotoBackground): DesignBackgr
   const focal = background.focal &&
     background.focal.x >= 0 && background.focal.x <= 1 &&
     background.focal.y >= 0 && background.focal.y <= 1
-    ? background.focal
+    ? { x: background.focal.x, y: background.focal.y }
     : undefined;
   const overlay = typeof background.overlay === 'number' && background.overlay >= 0 && background.overlay <= 80
     ? background.overlay
@@ -389,7 +393,10 @@ function compactPhotoBackground(background: DesignPhotoBackground): DesignBackgr
 function compactBackground(background: DesignBackground | undefined): DesignBackground | undefined {
   if (!background) return undefined;
   if (background.kind === 'color') {
-    return HEX_COLOR.test(background.color) ? background : undefined;
+    // Reconstrói em vez de repassar o estado: um objeto color herdado de
+    // outro tipo (ou de dados hidratados legados) levaria stops/url para o
+    // payload strict do servidor.
+    return HEX_COLOR.test(background.color) ? { kind: 'color', color: background.color } : undefined;
   }
   if (background.kind === 'gradient') return compactGradientBackground(background);
   return compactPhotoBackground(background);

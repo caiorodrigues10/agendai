@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { DesignBackground } from '../../infra/postsApi';
 import {
   compactDesignContent,
   compactDesignOverrides,
@@ -154,5 +155,131 @@ describe('compactDesignOverrides', () => {
       qr: { data: '  ' },
     })).toBeUndefined();
     expect(designOverridesPayload(createDesignState())).toBeUndefined();
+  });
+});
+
+describe('compactDesignOverrides — background (payload por tipo)', () => {
+  // Payloads exatos que BackgroundPanel.selectKind despacha ao trocar o tipo.
+  const colorBg: DesignBackground = { kind: 'color', color: '#000000' };
+  const gradientBg: DesignBackground = {
+    kind: 'gradient',
+    stops: [
+      { color: '#000000', at: 0 },
+      { color: '#FFFFFF', at: 1 },
+    ],
+    angle: 0,
+  };
+  const photoBg: DesignBackground = { kind: 'photo', url: 'https://cdn.agendai.example/fundo.jpg' };
+
+  it('gera exatamente as chaves do tipo selecionado', () => {
+    expect(compactDesignOverrides({ background: colorBg })?.background).toStrictEqual({
+      kind: 'color',
+      color: '#000000',
+    });
+    expect(compactDesignOverrides({ background: gradientBg })?.background).toStrictEqual({
+      kind: 'gradient',
+      stops: [
+        { color: '#000000', at: 0 },
+        { color: '#FFFFFF', at: 1 },
+      ],
+      angle: 0,
+    });
+    expect(compactDesignOverrides({ background: photoBg })?.background).toStrictEqual({
+      kind: 'photo',
+      url: 'https://cdn.agendai.example/fundo.jpg',
+    });
+  });
+
+  it('color não deixa stops/url vazarem para o payload', () => {
+    const payload = compactDesignOverrides({
+      background: {
+        kind: 'color',
+        color: '#112233',
+        stops: [{ color: '#000000', at: 0 }],
+        url: 'https://evil.example/x.jpg',
+      } as unknown as DesignBackground,
+    })?.background;
+
+    expect(payload).toStrictEqual({ kind: 'color', color: '#112233' });
+    expect(payload).not.toHaveProperty('stops');
+    expect(payload).not.toHaveProperty('url');
+  });
+
+  it('gradient não deixa color/url/overlay vazarem para o payload', () => {
+    const payload = compactDesignOverrides({
+      background: {
+        kind: 'gradient',
+        stops: [
+          { color: '#000000', at: 0, url: 'https://evil.example/stop.jpg' },
+          { color: '#FFFFFF', at: 1 },
+        ],
+        color: '#112233',
+        url: 'https://evil.example/x.jpg',
+        overlay: 40,
+      } as unknown as DesignBackground,
+    })?.background;
+
+    expect(payload).toStrictEqual({
+      kind: 'gradient',
+      stops: [
+        { color: '#000000', at: 0 },
+        { color: '#FFFFFF', at: 1 },
+      ],
+    });
+    expect(payload).not.toHaveProperty('color');
+    expect(payload).not.toHaveProperty('url');
+    expect(payload).not.toHaveProperty('overlay');
+    expect(payload && 'stops' in payload ? payload.stops[0] : undefined).not.toHaveProperty('url');
+  });
+
+  it('photo não deixa stops/color vazarem para o payload', () => {
+    const payload = compactDesignOverrides({
+      background: {
+        kind: 'photo',
+        url: 'https://cdn.agendai.example/fundo.jpg',
+        focal: { x: 0.5, y: 0.5, color: '#112233' },
+        stops: [{ color: '#000000', at: 0 }],
+        color: '#112233',
+      } as unknown as DesignBackground,
+    })?.background;
+
+    expect(payload).toStrictEqual({
+      kind: 'photo',
+      url: 'https://cdn.agendai.example/fundo.jpg',
+      focal: { x: 0.5, y: 0.5 },
+    });
+    expect(payload).not.toHaveProperty('stops');
+    expect(payload).not.toHaveProperty('color');
+    expect(payload && 'focal' in payload ? payload.focal : undefined).not.toHaveProperty('color');
+  });
+
+  it('trocar de tipo no mesmo editor não carrega chaves do tipo anterior', () => {
+    // Mesma sequência de dispatch do BackgroundPanel.selectKind.
+    let state = createDesignState();
+    state = designReducer(state, { type: 'set-background', background: gradientBg });
+    state = designReducer(state, { type: 'set-background', background: colorBg });
+    let bg = designOverridesPayload(state)?.background;
+    expect(bg).toStrictEqual({ kind: 'color', color: '#000000' });
+    expect(bg).not.toHaveProperty('stops');
+    expect(bg).not.toHaveProperty('url');
+
+    state = designReducer(state, { type: 'set-background', background: photoBg });
+    bg = designOverridesPayload(state)?.background;
+    expect(bg).toStrictEqual({ kind: 'photo', url: 'https://cdn.agendai.example/fundo.jpg' });
+    expect(bg).not.toHaveProperty('stops');
+    expect(bg).not.toHaveProperty('color');
+
+    state = designReducer(state, { type: 'set-background', background: gradientBg });
+    bg = designOverridesPayload(state)?.background;
+    expect(bg).toStrictEqual({
+      kind: 'gradient',
+      stops: [
+        { color: '#000000', at: 0 },
+        { color: '#FFFFFF', at: 1 },
+      ],
+      angle: 0,
+    });
+    expect(bg).not.toHaveProperty('url');
+    expect(bg).not.toHaveProperty('color');
   });
 });
